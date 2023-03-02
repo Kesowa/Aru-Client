@@ -1,0 +1,17 @@
+import React, { useState } from "react";
+import { Result } from "antd";
+
+function Expiry(props) {
+  return (
+    <>
+      <Result
+        status="403"
+        title="Tenant Expired!"
+        subTitle="Please contact admin@kesowa.com to renew our services!"
+      />
+      ,
+    </>
+  );
+}
+
+export default Expiry;

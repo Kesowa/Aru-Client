@@ -1,0 +1,103 @@
+@import '~antd/lib/style/color/colorPalette.less';
+@import '~antd/dist/antd.less';
+@import '~antd/lib/style/themes/dark.less';
+@import "~antd/dist/antd.dark.less";
+
+
+.ant-carousel .slick-prev,
+.ant-carousel .slick-next {
+  color: #ffffff;
+  font-size: 20px;
+}
+
+.ant-carousel .slick-next {
+    position: absolute;
+    right : 20px;
+    z-index: 1000;
+  }
+  
+  .ant-carousel .slick-prev {
+    position: absolute;
+    left : 20px;
+    z-index: 1000;
+  }
+  
+  .ant-carousel .slick-prev:hover,
+  .ant-carousel .slick-next:hover,
+  .ant-carousel .slick-prev:focus,
+  .ant-carousel .slick-next:focus {
+    color: #cccccc;
+  }
+
+  .add-feed-modal {
+    .add-feed-row {
+      max-height: 500px;
+      overflow-y: scroll;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  
+    .add-feed-row::-webkit-scrollbar {
+      display: none;
+    }
+  
+  }
+
+  .feed-to-add {
+    background-color: #ffffff !important;
+    margin-top: 16px !important;
+    transition: background-color 0.2s ease-in-out !important;
+    * {
+      transition: color 0.2s ease-in-out !important;
+    }
+    &.feed-to-add-selected {
+      background-color: #000000 !important;
+      * {
+        color: white !important;
+      }
+    }
+
+    .feed {
+      position : relative;
+
+      .feed-details {
+        position : relative;
+
+        .feed-location {
+          color : #000000;
+          top : 0;
+          font-size : 13px;
+          font-weight : bold;
+          display: block;
+        }
+
+        .feed-mission-name {
+          color : #758283;
+        }
+
+        .pilot-avatar{
+          position: relative;
+          top : -15px;
+          z-index : 5000;
+          color : #758283;
+          display: flex;
+          justify-content: space-between;
+
+          .feed-started {
+            display: flex;
+            justify-content: flex-end;
+            padding-right : 10px;
+          }
+        }
+      }
+    }
+  }
+
+  .layout-option {
+    display : block;
+    width : 100%;
+    border : 0.1px solid #cccccc;
+    padding : 10px 20px;
+    margin-bottom: 15px;
+    cursor : pointer;
+  }

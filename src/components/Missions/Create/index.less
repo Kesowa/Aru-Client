@@ -1,0 +1,427 @@
+@import "../../shared/global_var.css";
+@darkShadow: var(--shadow-dark);
+@primary: var(--primary-color);
+@accent: var(--accent-color);
+@secondary: var(--secondary-color);
+
+.create-mission-base-title {
+  margin-top: 40px;
+  text-align: center !important;
+  font-size: 2.3rem;
+}
+
+.create-mission-steps-card-holder {
+  width: 40%;
+  max-width: 700px;
+  margin: 60px auto;
+  outline-width: 20px;
+  position: absolute;
+  padding: 10px;
+  border-radius: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+}
+
+.create-mission-extended-card {
+  background-color: #e9e9e9;
+  margin-top: 16px;
+  transition: background-color 0.2s ease-in-out;
+  * {
+    transition: color 0.2s ease-in-out;
+  }
+  &.create-mission-extended-card-selected {
+    background-color: #1890ff;
+    * {
+      color: white;
+    }
+  }
+}
+
+.create-mission-proceed-button {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+.create-mission-container {
+  height: 100vh;
+  position: absolute;
+  top: 0px;
+  left: 0;
+  right: 0;
+  //overflow: scroll;
+}
+
+.stage_one {
+  position: relative;
+  top: 75px;
+}
+
+.stage_two {
+  position: absolute;
+  // left: 50%;
+  //margin-top: 3rem;
+  right: 0;
+  bottom: 0;
+  // transform: translateX(-50%);
+  width: 100%;
+  //
+  padding-bottom: 70px;
+}
+
+#gmap_container {
+  height: 100%;
+  overflow: hidden;
+}
+
+.stage_three {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  padding: 0 20px 70px 20px;
+}
+
+.stage_three_heading {
+  margin-top: 50px;
+  font-size: 1.5rem;
+}
+
+.step_buttons {
+  position: sticky;
+  bottom: 10px;
+}
+
+.mission_creation_form {
+  width: 100%;
+  height: auto;
+  overflow: scroll;
+}
+
+.stage_three_main {
+  width: 1000px;
+  margin: auto;
+  margin-top: 70px;
+}
+
+.deliverables_heading {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  color: #a5a4bf;
+}
+.flight-table-content {
+  width: 1000px;
+  margin: auto;
+}
+
+.deliverables_heading h2 {
+  margin-left: 15px;
+  position: relative;
+  top: 4px;
+  color: #a5a4bf;
+}
+
+.accordian-panel {
+  background-color: #ffffff;
+  //height: 200px;
+}
+
+.mission_creation_accordian {
+  width: 45%;
+  max-width: 280px;
+  padding: 0;
+  position: absolute;
+  right: 8px;
+  //top: 0;
+  bottom: 8px;
+  z-index: 1000;
+  box-shadow: @darkShadow;
+}
+
+.static_map_area_seleted {
+  height: 500px;
+  // width: 500px;
+}
+
+.map_box {
+  padding: 10px;
+  max-width: 500px;
+}
+
+.flight_schedule_table {
+  margin-top: 20px;
+}
+
+.mission_name_input {
+  margin-bottom: 15px;
+  display: flex;
+}
+
+#nested_accordian_content {
+  -ms-overflow-style: none;
+  scrollbar-width: none; /* Firefox */
+}
+
+#nested_accordian_content::-webkit-scrollbar {
+  display: none;
+}
+
+#nested_accordian_content .ant-card-body {
+  padding: 0 !important;
+}
+
+.ant-collapse-content > .ant-collapse-content-box {
+  padding: 8px;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+}
+
+.previous_job_data {
+  border: none;
+  outline: none;
+  box-shadow: none;
+  width: 100%;
+  text-align: left;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.previous_job_data:hover {
+  background: #ffffff !important;
+}
+
+.previous_job_data:focus {
+  background: #ffffff !important;
+}
+
+.locationBox {
+  border: none;
+  outline: none;
+  box-shadow: none;
+  border-bottom: 2px solid #1c8ffc;
+}
+
+.locationBox:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.ant-picker {
+  width: 100%;
+}
+
+.ant-form-item {
+  margin-bottom: 10px;
+}
+
+.data_selected {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 10px;
+  width: 100%;
+
+  img {
+    position: relative;
+    top: 5px;
+  }
+}
+
+.data_selected_inner {
+  margin-left: 20px;
+
+  p {
+    margin-bottom: 5px;
+  }
+}
+
+.data_selcted_2 {
+  margin: 10px 0;
+}
+
+.location_details {
+  display: flex;
+  padding: 0 10px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.location_details h2,
+.location_details p {
+  margin: 0;
+  padding: 0px;
+}
+
+.location_details img {
+  height: 42px;
+}
+
+.location_details img + div {
+  padding-left: 10px;
+}
+
+.mission_creation_buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.mission_creation_buttons .ant-btn {
+  width: 100%;
+  margin: 5px;
+  outline: none;
+  border: none;
+}
+
+.scheduled_dates {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  padding: 0 0 10px 0;
+}
+
+.scheduled_dates input {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.scheduled_dates label {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: #ccc;
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
+.scheduled_dates label span {
+  position: absolute;
+}
+
+.drawing_manager_tools {
+  position: absolute;
+  width: 200px;
+  height: 150px;
+  background: transparent;
+
+  #tl_button {
+    display: flex;
+    border: 0;
+    outline: none;
+    cursor: pointer;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    background-color: #cccccc;
+    padding: 5px 10px;
+    border-radius: 50px;
+
+    &:hover {
+      background-color: #494a4a;
+      color: #ffffff;
+    }
+
+    p {
+      margin-top: 10px;
+      width: 140px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    #btn_img {
+      border-radius: 20px;
+      overflow: hidden;
+      background: #fff;
+      padding: 8px;
+
+      img {
+        width: 25px;
+      }
+    }
+  }
+}
+
+.location_search_container {
+  position: absolute;
+  top: 60px;
+  left: 11px;
+}
+
+.search_marker {
+  position: absolute;
+  left: 8px;
+  top: 9px;
+}
+
+.location_search {
+  max-width: 350px;
+  border: none;
+  outline: none;
+  padding: 8px 20px 8px 40px;
+  box-shadow: @darkShadow;
+  font-size: 1.1rem;
+  border-radius: 8px;
+}
+
+.location_search::placeholder {
+  font-size: 1.1rem;
+}
+.panel-title {
+  color: @primary;
+}
+
+.control-icons-container {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  display: flex;
+  .control-icons {
+    height: 40px;
+    background-color: #fff;
+    flex: 1;
+    padding: 5px;
+    box-sizing: border-box;
+    box-shadow: 2px 2px 8px -2px rgba(0, 0, 0, 0.75);
+    border-radius: 5px;
+  }
+  .control-clear-button {
+    background-color: #fff;
+    height: 40px;
+    padding: 5px;
+    flex: 4;
+    cursor: pointer;
+    transform: scale(0.9);
+    box-sizing: border-box;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.75);
+    border-radius: 5px;
+    &:hover {
+      transform: scale(1);
+    }
+    p {
+      margin-bottom: 0;
+      margin-top: 3px;
+    }
+  }
+}
+
+@media (-webkit-max-device-pixel-ratio: 1.5) {
+  .stage-two-form {
+    .data_selected,
+    .data_selcted_2 {
+      font-size: 12px;
+    }
+    max-height: 700px;
+  }
+}

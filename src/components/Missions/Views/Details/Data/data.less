@@ -1,0 +1,284 @@
+//Video thumbnail Styling
+
+@small: ~"only screen and (min-width: 1366px) and (max-width: 1366px)";
+
+.video-card {
+  //width: 200px;
+  cursor: pointer;
+  transition: 0.2s;
+
+  &:hover {
+    border-color: #3b86ff;
+    cursor: pointer;
+  }
+}
+
+.vid-thumbnail {
+  padding: 8px;
+  //video-card
+
+  //Outcome-card styling
+  .outcome-cardd {
+    // width: 250px;
+    // height: auto;
+    transition: 0.2s;
+
+    &:hover {
+      border-color: #3b86ff;
+      cursor: pointer;
+    }
+
+    .outcome-name {
+      font-size: 14px;
+      display: block;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      @media (max-width: 1366px) {
+        font-size: 12px;
+      }
+    }
+
+    .outcome-createdby {
+      font-size: 14px;
+
+      @media (max-width: 1366px) {
+        font-size: 10px;
+      }
+    }
+
+    .outcome-timestamp {
+      font-size: 14px;
+
+      @media (max-width: 1366px) {
+        font-size: 10px;
+      }
+    }
+  }
+
+  @media (max-width: 1366px) {
+    padding: 4px;
+  }
+}
+
+.edit-mission-container {
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  //margin: -24px;
+  //margin-bottom: -38px;
+}
+
+.edit-flight-form {
+  position: absolute;
+  //top: 0;
+  background: #ffffff;
+  padding: 15px;
+  right: 10px;
+  width: 270px;
+  bottom: 10px;
+}
+
+.flight-id {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.switcher {
+  // display: block;
+  // width : 100px;
+  // position: absolute;
+  // top : -100px;
+  // right : -10px;
+  float: right;
+  margin-left: 12px;
+}
+
+.listview-outcomes {
+  padding: 10px;
+  margin: 4px 0;
+  background-color: white;
+  transition: 0.2s;
+
+  &:hover {
+    background-color: #e9e9f0;
+    cursor: pointer;
+  }
+}
+
+.upload-modal-video {
+  //background-color: aqua;
+  //padding-right: 2rem;
+  //margin-top: 2rem;
+  //margin-bottom: 50px;
+  margin: auto;
+}
+
+.map-data-wrapper {
+  //padding: 1rem;
+  .data-container {
+    width: 100%;
+    //margin: auto;
+
+    .text-container {
+      padding: 1rem;
+      margin: auto;
+
+      .map-button {
+        cursor: pointer;
+        width: 250px;
+        height: 250px;
+
+        @media @small {
+          width: 12rem;
+          height: 12rem;
+        }
+
+        @media (-webkit-min-device-pixel-ratio: 1.5) {
+          width: 10rem;
+          height: 10rem;
+        }
+
+        .overlay-content {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+
+          background-color: #0077ff39;
+          transition: 0.2s;
+
+          .inner-content {
+            margin-top: 25%;
+
+            img {
+              width: 100px;
+
+              // margin-left: 8px;
+              @media @small {
+                width: 64px;
+                margin-left: 12px;
+              }
+
+              @media (-webkit-min-device-pixel-ratio: 1.5) {
+                width: 54px;
+              }
+            }
+
+            .overlay-text {
+              font-size: 26px;
+              margin-left: 24px;
+
+              @media @small {
+                font-size: 20px;
+                margin-left: 24px;
+              }
+
+              @media (-webkit-min-device-pixel-ratio: 1.5) {
+                font-size: 16px;
+                margin-left: 12px;
+              }
+
+              font-weight: 800;
+              color: #ffffff;
+            }
+          }
+
+          &:hover {
+            background-color: #0077ff90;
+          }
+        }
+      }
+    }
+  }
+}
+
+.documents-wrapper {
+  height: 450px;
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.5) {
+  .edit-mission-container {
+    .edit-flight-form {
+      div {
+        font-size: 12px;
+      }
+    }
+
+    .mission_creation_buttons {
+      margin-bottom: -30px;
+      margin-top: -10px;
+    }
+  }
+}
+
+.backdrop {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+
+  .topbar {
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: row-reverse;
+    float: right;
+    width: 100%;
+    padding: 10px;
+
+    .btn-icon {
+      margin: 0 20px;
+      font-size: 20px;
+      color: rgba(255, 255, 255, 0.829);
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+
+  .main {
+    width: 60%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.ant-carousel .slick-prev,
+.ant-carousel .slick-next {
+  color: rgba(255, 255, 255, 0.829);
+  font-size: 50px;
+}
+
+.ant-carousel .slick-prev:hover,
+.ant-carousel .slick-next:hover,
+.ant-carousel .slick-prev:focus,
+.ant-carousel .slick-next:focus {
+  color: rgba(255, 255, 255, 0.829);
+}
+
+.video-div {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 102;
+}
+
+.ant-switch-checked {
+  background-color: #da1c5c;
+}
+.ant-switch-inner {
+  display: flex;
+}

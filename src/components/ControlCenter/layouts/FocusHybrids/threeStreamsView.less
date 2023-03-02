@@ -1,0 +1,112 @@
+.wrapper {
+  margin: 0 auto;
+  width: calc(90% - 10vw);
+  height: calc(100vh - 100px);
+  background: transparent;
+
+  .large-section-row {
+    height: 70%;
+
+    .large-section {
+      height: 100%;
+    }
+
+    .details {
+      height: 100%;
+      padding : 16px;
+      background-color: #242B2E;
+      * {
+        color : #000000;
+      }
+
+      h4 {
+        margin : 1px;
+        letter-spacing: 1px;
+      }
+
+      .field-name, .field-value {
+        font-weight : bold;
+      }
+
+      .field-name {
+        color : #758283;
+      }
+
+      .field-value {
+        color : #ffffff;
+      }
+
+      .pilot-name {
+        font-weight : bold;
+        color : #ffffff;
+      }
+
+      .pilot-phone {
+        font-weight : bold;
+        color: #758283;
+      }
+
+      .uptime, .battery {
+        background : #ffffff;
+        height : 80px;
+        padding : 8px;
+      }
+
+   
+
+      .f {
+
+        .detail-icon {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .flying-details  {
+          display: flex;
+          align-items: center;
+        }
+
+        .small-text, .large-text {
+          margin : 0;
+          padding :0;
+          letter-spacing: 0.5px;
+        }
+
+        .small-text-first {
+          position: relative;
+          top : 4px;
+          font-weight: bold;
+        }
+
+        .small-text-second {
+          position: relative;
+          bottom : 6px;
+          font-weight: bold;
+        }
+
+        .large-text {
+          font-weight: bold;
+        }
+      }
+
+    }
+  }
+
+  .small-section-row {
+    height: 30%;
+
+    .small-section {
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .show-border {
+      border : 3px solid #2827CC;
+      box-sizing: border-box;
+      display: block;
+      width : 100%;
+      height : 100%;
+    }
+  }
+}

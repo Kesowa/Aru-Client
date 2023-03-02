@@ -1,0 +1,962 @@
+import React, { useState, useEffect, useRef } from "react";
+import DeckGL from "@deck.gl/react";
+import { BitmapLayer, GeoJsonLayer, IconLayer } from "@deck.gl/layers";
+import { TileLayer } from "@deck.gl/geo-layers";
+import { HtmlOverlayItem, HtmlOverlay } from "@nebula.gl/overlays";
+import {
+  EditableGeoJsonLayer,
+  DrawPolygonMode,
+  ScaleMode,
+  MeasureDistanceMode,
+  DrawLineStringMode,
+  ViewMode,
+  ModifyMode,
+} from "nebula.gl";
+import { StaticMap } from "react-map-gl";
+import http from "../../../services/httpCall";
+import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
+import { logout } from "../../../actions/authAction";
+import { connect } from "react-redux";
+import {
+  Row,
+  Col,
+  Card,
+  Typography,
+  Avatar,
+  Button,
+  Tooltip,
+  Divider,
+  Tag,
+  Switch,
+  Image,
+  Spin,
+  message,
+  Popover,
+  Space,
+  Dropdown,
+  Menu,
+  Select,
+  AutoComplete,
+  Input,
+  Table,
+  Form,
+  Popconfirm,
+  Badge,
+} from "antd";
+import {
+  FieldTimeOutlined,
+  CalendarOutlined,
+  PlusOutlined,
+  UserOutlined,
+  PhoneOutlined,
+  CameraOutlined,
+  EnvironmentOutlined,
+  SaveOutlined,
+  CloseOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
+import { stat } from "fs";
+import apis from "../../../services/apis";
+import "../index.less";
+import LineIcon from "../../static/line.svg";
+import PolygonIcon from "../../static/polygon.svg";
+import Area from "../../../static/area_icon.svg";
+import Perimeter from "../../../static/perimeter_icon.svg";
+import fs from "fs";
+import { SketchPicker } from "react-color";
+import * as turf from "@turf/turf";
+import { TwitterPicker } from "react-color";
+import Modal from "antd/lib/modal/Modal";
+import { setConstantValue } from "typescript";
+import moment from "moment";
+import getAddressfromLatLong from "../../../services/reverseGeocoding";
+import { STATIC_URL } from "src/constants";
+import { BsFlagFill } from "react-icons/bs";
+import { TbFlag, TbFlagOff } from "react-icons/tb";
+
+const { Title, Text, Link, Paragraph } = Typography;
+const { Option } = Select;
+
+const originData = [
+  {
+    id: "0",
+    key: "Attr 1",
+    value: "",
+  },
+  {
+    id: "1",
+    key: "Attr 2",
+    value: "",
+  },
+  {
+    id: "2",
+    key: "Attr 3",
+    value: "",
+  },
+];
+
+function InfoWindow(props) {
+  const [properties, setProperties] = useState({});
+  const [address, setAddress] = useState("");
+  const [loader, setLoader] = useState(false);
+  const [id, setId] = useState("");
+  const [area, setArea] = React.useState<any>(
+    turf.area(props.feature).toFixed(2)
+  );
+  const [perimeter, setPerimeter] = React.useState<any>(
+    turf.length(props.feature).toFixed(2)
+  );
+  const [areaUnit, setAreaUnit] = useState("sq. m");
+  const [lengthUnit, setLenghtUnit] = useState("km");
+  const [featureProperties, setFeatureProperties] = useState({});
+  const [refresh, setRefresh] = useState(false);
+  const [fileCount, setFileCount] = useState(0);
+  const [imageToShow, setImageToshow] = useState<any>([]);
+  const [imageLoader, setImageLoader] = useState(false);
+  function openImages() {
+    if (props.videoToShow.length === 1) {
+      props.togglePopup(false);
+      props.updateVOD(props.videoToShow[0], 0);
+    } else {
+      props.setImagesDrawer(true);
+      props.togglePopup(false);
+    }
+  }
+
+  //console.log(props.feature);
+
+  function reverseGeocoder(coordinates: any) {
+    setLoader(true);
+    getAddressfromLatLong(coordinates[1], coordinates[0], (err, address) => {
+      if (!err) {
+        setAddress(address);
+      } else {
+        message.error("Location could not be fetched");
+      }
+      setLoader(false);
+    });
+  }
+
+  function areaMeasurementHandeller(unit: any) {
+    switch (unit) {
+      case "sq. km":
+        setArea((turf.area(props.feature) / 1000000).toFixed(2));
+        setAreaUnit("sq. km");
+        break;
+      case "sq. m":
+        setArea(turf.area(props.feature).toFixed(2));
+        setAreaUnit("sq. m");
+        break;
+      case "acres":
+        setArea((turf.area(props.feature) * 0.00025).toFixed(2));
+        setAreaUnit("acres");
+        break;
+      case "hectr":
+        setArea((turf.area(props.feature) * 0.0001).toFixed(2));
+        setAreaUnit("hectr");
+        break;
+      default:
+        setArea(turf.area(props.feature).toFixed(2));
+        setAreaUnit("sq. m");
+    }
+  }
+
+  function lengthMeasurementHandeller(unit: any) {
+    switch (unit) {
+      case "km":
+        setPerimeter(turf.length(props.feature).toFixed(2));
+        setLenghtUnit("km");
+        break;
+      case "m":
+        setPerimeter((turf.length(props.feature) * 1000).toFixed(2));
+        setLenghtUnit("m");
+        break;
+      case "cm":
+        setPerimeter((turf.length(props.feature) * 100000).toFixed(2));
+        setLenghtUnit("cm");
+        break;
+      case "ft":
+        setPerimeter((turf.length(props.feature) * 3280.84).toFixed(2));
+        setLenghtUnit("ft");
+        break;
+      case "inch":
+        setPerimeter((turf.length(props.feature) * 39370.1).toFixed(2));
+        setLenghtUnit("inch");
+        break;
+      default:
+        setPerimeter(turf.length(props.feature).toFixed(2));
+        setLenghtUnit("km");
+    }
+  }
+  useEffect(() => {
+    reverseGeocoder(props.coordinates);
+    const featureData = Object.keys(props.feature.properties).filter(
+      (key: any, i: any) => key !== "Id" && key !== "color"
+    );
+    //props.feature.properties.forEach(p=>)
+    //console.log(featureData);
+  }, []);
+
+  const saveDrawingButton = () => {
+    if (props.canDraw) {
+      return (
+        <React.Fragment>
+          <Row
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              style={{ width: "100%", marginTop: "15px" }}
+              type="primary"
+              onClick={() => {
+                props.setformDrawerVisible(true);
+                props.togglePopup(false);
+                props.setShowForm(true);
+              }}
+            >
+              Save
+            </Button>
+          </Row>
+        </React.Fragment>
+      );
+    } else return <></>;
+  };
+
+  const CancelDrawingButton = () => {
+    return (
+      <Row
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          marginTop: "-5px",
+        }}
+      >
+        <Button
+          style={{
+            width: "100%",
+            marginTop: "15px",
+            background: "#F77775",
+            border: "none",
+            color: "#ffffff",
+          }}
+          onClick={() => {
+            props.cancelDrawing();
+          }}
+        >
+          Cancel
+        </Button>
+      </Row>
+    );
+  };
+
+  const initFlag = () => {
+    if (props.missionLayer === "Alert") {
+      http
+        .get(`${apis.FETCH_ALERT_BY_ID}`, {
+          params: {
+            id: props.feature.properties._id,
+          },
+        })
+        .then((result) => {
+          if (result.data.status) {
+            console.log("Alert data", result.data.data);
+            props.setFlag(result.data.data[0].isFlagged);
+          } else {
+            message.error(result.data.message);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          // AxiosErrorHandler(err, this.props.logout);
+        });
+    } else if (props.missionLayer === "Vector" && props.mode === "PointView") {
+      if (
+        props.allLayers[`1-${props.layerId}`].flaggedFeatures.includes(
+          props.featureIdx
+        )
+      ) {
+        props.setFlag(true);
+      } else {
+        props.setFlag(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    initFlag();
+  }, []);
+
+  function updateLayerFlag() {
+    const body: any = {
+      featureIndex: [props.featureIdx],
+      flag: !props.flag,
+    };
+    http
+      .patch(`${apis.FLAG_FEATURE}/${props.layerId}`, body)
+      .then((res) => {
+        if (res.data.status) {
+          message.success(
+            `Feature ${!body.flag ? "un-flagged" : "flagged"} successfully!`
+          );
+          props.setFlag((prev) => !prev);
+          props.setShouldAttributeTableReload(
+            !props.shouldAttributeTableReload
+          );
+        } else {
+          message.error(res.data.message);
+        }
+      })
+      .catch((err) => {
+        message.error(err);
+        AxiosErrorHandler(err, props.logout);
+      });
+  }
+
+  const updateAlert = () => {
+    const body = {
+      id: props.feature.properties._id,
+      update: { isFlagged: !props.flag },
+    };
+    http
+      .patch(`${apis.UPDATE_ALERT}`, body)
+      .then((res) => {
+        if (res.data.status) {
+          message.success(
+            `Image ${
+              !body.update.isFlagged ? "un-flagged" : "flagged"
+            } successfully!`
+          );
+          props.setFlag((prev) => !prev);
+        } else message.error(res.data.message);
+      })
+      .catch((err) => {
+        console.error(err.message);
+      });
+  };
+
+  const toggleFlag = () => {
+    if (props.missionLayer === "Vector" && props.mode === "PointView") {
+      updateLayerFlag();
+    } else if (props.missionLayer === "Alert") {
+      updateAlert();
+    }
+  };
+
+  function filterProperties(object: any, type: any = "default") {
+    const filtered = {};
+    const layerLocationCardKeys = [
+      "color",
+      "Id",
+      "imagepaths",
+      "icon",
+      "sys_id",
+    ];
+    const missionAlertKeys = [
+      "_id",
+      "color",
+      "icon",
+      "Image",
+      "LocationID",
+      "isFlagged",
+    ];
+    const missionVODKeys = ["videos"];
+    Object.keys(object).filter((key: any) => {
+      if (type === "Alert") {
+        if (key === "isFlagged") {
+          props.setFlag(object[key]);
+        }
+        if (!missionAlertKeys.includes(key)) {
+          filtered[key] = object[key];
+        }
+      } else if (type === "VOD") {
+        if (!missionVODKeys.includes(key)) {
+          filtered[key] = object[key];
+        }
+      } else {
+        if (props.isBaseMap == false) {
+          if (!layerLocationCardKeys.includes(key)) {
+            filtered[key] = object[key];
+          }
+        } else {
+          if (!layerLocationCardKeys.includes(key) && key !== "Nth") {
+            filtered[key] = object[key];
+          }
+        }
+      }
+    });
+    setProperties(filtered);
+  }
+  useEffect(() => {
+    if (props.missionLayer === "VOD" || props.missionLayer === "Alert") {
+      if (props.missionLayer === "Alert") {
+        console.log("Alert", props.feature.properties.isFlagged);
+        setImageToshow([props.feature.properties.Image]);
+        setFileCount(1);
+      } else {
+        props.setVideoToShow(props.feature.properties.videos);
+        setFileCount(props.feature.properties.videos.length);
+      }
+      filterProperties(props.feature.properties, props.missionLayer);
+    } else {
+      filterProperties(props.feature.properties);
+      setFileCount(0);
+      console.log(props.sysId);
+      if (props.layerId !== "new" && !props.isPublic) {
+        let images: any = [];
+        setImageLoader(true);
+        console.log("index", props.sysId, "layerId", props.layerId);
+        http
+          .get(`${apis.FETCH_FEATURE_FILES}`, {
+            params: {
+              layerId: props.layerId,
+              sys_id: props.sysId,
+            },
+          })
+          .then((res) => {
+            if (res.data.status) {
+              images = res.data.data.filter(
+                (i) => i.fileType === "image/jpeg" || i.fileType === "image/png"
+              );
+              const filtered: any = images.filter((i) => i.coverPhoto === true);
+              let toshow: any = [];
+              if (filtered.length > 0) {
+                toshow = filtered;
+              } else {
+                toshow = images;
+              }
+              toshow.sort((a, b) => {
+                return moment(b.createdAt).diff(moment(a.createdAt));
+              });
+              setImageToshow(toshow);
+              //console.log(`1x_${images[0].filePath.split('/')[3]}`, images[0].filePath)
+              setFileCount(res.data.data.length);
+            } else {
+              console.log(res.data.message);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+            AxiosErrorHandler(err, props.logout);
+          })
+          .finally(() => setImageLoader(false));
+      }
+    }
+    return () => {
+      setProperties({});
+    };
+  }, [props.feature]);
+
+  switch (props.mode) {
+    case "PointView":
+      return (
+        <>
+          <div className="infoWindowContent">
+            <div className="attribute-content">
+              {props.show ? (
+                <></>
+              ) : (
+                <>
+                  {imageToShow.length > 0 || props.videoToShow.length > 0 ? (
+                    <Row>
+                      <Col span={15} className="properties">
+                        {Object.keys(properties).map((key: any, i: any) => (
+                          <Row key={i}>
+                            <Col md={10}>
+                              <Text className="key" strong>
+                                {key}
+                              </Text>
+                            </Col>
+                            <Col md={14}>
+                              <span className="value">{properties[key]}</span>
+                            </Col>
+                          </Row>
+                        ))}
+                      </Col>
+                      <Col span={9} className="image-part">
+                        <Spin spinning={imageLoader}>
+                          {props.missionLayer === "Alert" ? (
+                            <Image src={STATIC_URL + imageToShow[0]} />
+                          ) : props.missionLayer === "VOD" ? (
+                            <img
+                              src={STATIC_URL + props.videoToShow[0].thumbnail}
+                              style={{ cursor: "pointer" }}
+                            />
+                          ) : (
+                            <img
+                              src={`${STATIC_URL}/images/geojson/1x_${
+                                imageToShow[0].filePath.split("/")[3]
+                              }`}
+                              onClick={() => openImages()}
+                              style={{ cursor: "pointer" }}
+                            />
+                          )}
+                        </Spin>
+                      </Col>
+                    </Row>
+                  ) : (
+                    <>
+                      {Object.keys(properties).map((key: any, i: any) => (
+                        <Row key={i}>
+                          <Col md={10}>
+                            <Text className="key" strong>
+                              {key}
+                            </Text>
+                          </Col>
+                          <Col md={14}>
+                            <span className="value">{properties[key]}</span>
+                          </Col>
+                        </Row>
+                      ))}
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+            {!props.isPublic && (
+              <div className="address-content">
+                {loader ? (
+                  <div className="spinner">
+                    <Spin />
+                  </div>
+                ) : (
+                  <>
+                    <Paragraph copyable>{address}</Paragraph>
+                    <a
+                      href={`https://www.google.com/maps/?q=${props.coordinates[1]},${props.coordinates[0]}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Show on google maps
+                    </a>
+                  </>
+                )}
+              </div>
+            )}
+            <div className="sub-info">
+              <span className="coordinates">
+                <Text copyable>
+                  <EnvironmentOutlined /> {props.coordinates[1]},{" "}
+                  {props.coordinates[0]}
+                </Text>
+              </span>
+              <span>
+                {!props.isPublic && (
+                  <>
+                    <div style={{ float: "right", marginTop: "4px" }}>
+                      {!props.show && props.missionLayer !== "Alert" && (
+                        <Row>
+                          <Tooltip placement="bottom" title="Open Media">
+                            <Badge
+                              size="small"
+                              count={fileCount}
+                              className="site-badge-count-4"
+                            >
+                              <CameraOutlined
+                                style={{ marginRight: "6px" }}
+                                onClick={() => openImages()}
+                              />
+                            </Badge>
+                          </Tooltip>
+                          {props.missionLayer !== "VOD" && (
+                            <Tooltip
+                              placement="bottom"
+                              title={props.flag ? "Unflag" : "Flag"}
+                            >
+                              <BsFlagFill
+                                style={{
+                                  color: props.flag ? "#da1c5c" : "#000",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => {
+                                  toggleFlag();
+                                }}
+                              />
+                            </Tooltip>
+                          )}
+                        </Row>
+                      )}
+                      {props.missionLayer === "Alert" && (
+                        <>
+                          <Tooltip
+                            placement="right"
+                            title={props.flag ? "Unflag" : "Flag"}
+                          >
+                            <BsFlagFill
+                              style={{
+                                color: props.flag ? "#da1c5c" : "#000",
+                                cursor: "pointer",
+                                fontSize: "16px",
+                              }}
+                              onClick={() => {
+                                toggleFlag();
+                              }}
+                            />
+                          </Tooltip>
+                        </>
+                      )}
+                    </div>
+                  </>
+                )}
+              </span>
+            </div>
+            {props.show && saveDrawingButton()}
+            {props.show && CancelDrawingButton()}
+          </div>
+        </>
+      );
+
+    case "PolygonView":
+      return (
+        <>
+          <div className="infoWindowContent">
+            <div className="attribute-content">
+              {props.show ? (
+                <></>
+              ) : (
+                <>
+                  {imageToShow.length > 0 ? (
+                    <Row>
+                      <Col span={15} className="properties">
+                        {Object.keys(properties).map((key: any, i: any) => (
+                          <Row key={i}>
+                            <Col md={10}>
+                              <Text className="key" strong>
+                                {key}
+                              </Text>
+                            </Col>
+                            <Col md={14}>
+                              <span className="value">{properties[key]}</span>
+                            </Col>
+                          </Row>
+                        ))}
+                      </Col>
+                      <Col span={9} className="image-part">
+                        <Spin spinning={imageLoader}>
+                          <img
+                            src={`${STATIC_URL}/images/geojson/1x_${
+                              imageToShow[0].filePath.split("/")[3]
+                            }`}
+                            onClick={() => openImages()}
+                            style={{ cursor: "pointer" }}
+                          />
+                        </Spin>
+                      </Col>
+                    </Row>
+                  ) : (
+                    <>
+                      {Object.keys(properties).map((key: any, i: any) => (
+                        <Row key={i}>
+                          <Col md={10}>
+                            <Text className="key" strong>
+                              {key}
+                            </Text>
+                          </Col>
+                          <Col md={14}>
+                            <span className="value">{properties[key]}</span>
+                          </Col>
+                        </Row>
+                      ))}
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+            {!props.isPublic && (
+              <div className="address-content">
+                {loader ? (
+                  <div className="spinner">
+                    <Spin />
+                  </div>
+                ) : (
+                  <>
+                    <Paragraph copyable>{address}</Paragraph>
+                    <a
+                      href={`https://www.google.com/maps/?q=${props.coordinates[1]},${props.coordinates[0]}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Show on google maps
+                    </a>
+                  </>
+                )}
+              </div>
+            )}
+            <div className="sub-info">
+              <span className="coordinates">
+                <Text>
+                  <img src={Area} />
+                  &nbsp;&nbsp;{area}&nbsp;&nbsp;
+                  <Select
+                    defaultValue={areaUnit}
+                    size="small"
+                    style={{ width: "70px", fontSize: "12px" }}
+                    onChange={areaMeasurementHandeller}
+                  >
+                    <Option className="option-value" value="sq. m">
+                      sq. m
+                    </Option>
+                    <Option className="option-value" value="sq. km">
+                      sq. km
+                    </Option>
+                    <Option className="option-value" value="acres">
+                      acres
+                    </Option>
+                    <Option className="option-value" value="hectr">
+                      hectr
+                    </Option>
+                  </Select>
+                  &nbsp;&nbsp;&nbsp;&nbsp;
+                </Text>
+                <Text>
+                  <img src={Perimeter} />
+                  &nbsp;&nbsp;{perimeter}&nbsp;&nbsp;
+                  <Select
+                    defaultValue={lengthUnit}
+                    size="small"
+                    style={{ width: "60px", fontSize: "12px" }}
+                    onChange={lengthMeasurementHandeller}
+                  >
+                    <Option className="option-value" value="km">
+                      km
+                    </Option>
+                    <Option className="option-value" value="m">
+                      m
+                    </Option>
+                    <Option className="option-value" value="ft">
+                      ft
+                    </Option>
+                  </Select>
+                </Text>
+                {/* <div
+                  style={{
+                    width: "14px",
+                    height: "14px",
+                    backgroundColor: props.feature.properties.color,
+                    float: "right",
+                    marginTop: "4px",
+                    borderRadius: "2px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {}}
+                /> */}
+              </span>
+              <span>
+                {!props.isPublic && (
+                  <>
+                    {!props.show && (
+                      <div style={{ float: "right", marginTop: "4px" }}>
+                        <Row>
+                          <Tooltip placement="bottom" title="Open Media">
+                            <Badge
+                              size="small"
+                              count={fileCount}
+                              className="site-badge-count-4"
+                            >
+                              <CameraOutlined
+                                style={{ marginRight: "6px" }}
+                                onClick={() => openImages()}
+                              />
+                            </Badge>
+                          </Tooltip>
+                          {props.missionLayer === "Vector" &&
+                            props.mode === "PointView" && (
+                              <Tooltip
+                                placement="bottom"
+                                title={props.flag ? "Unflag" : "Flag"}
+                              >
+                                <BsFlagFill
+                                  style={{
+                                    color: props.flag ? "#da1c5c" : "#000",
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={() => {
+                                    toggleFlag();
+                                  }}
+                                />
+                              </Tooltip>
+                            )}
+                        </Row>
+                      </div>
+                    )}
+                  </>
+                )}
+              </span>
+            </div>
+            {props.show && saveDrawingButton()}
+            {props.show && CancelDrawingButton()}
+          </div>
+        </>
+      );
+    case "LineView":
+      return (
+        <>
+          <div className="infoWindowContent">
+            <div className="attribute-content">
+              {props.show ? (
+                <></>
+              ) : (
+                <>
+                  {imageToShow.length > 0 ? (
+                    <Row>
+                      <Col span={15} className="properties">
+                        {Object.keys(properties).map((key: any, i: any) => (
+                          <Row key={i}>
+                            <Col md={10}>
+                              <Text className="key" strong>
+                                {key}
+                              </Text>
+                            </Col>
+                            <Col md={14}>
+                              <span className="value">{properties[key]}</span>
+                            </Col>
+                          </Row>
+                        ))}
+                      </Col>
+                      <Col span={9} className="image-part">
+                        <Spin spinning={imageLoader}>
+                          <img
+                            src={`${STATIC_URL}/images/geojson/1x_${
+                              imageToShow[0].filePath.split("/")[3]
+                            }`}
+                            onClick={() => openImages()}
+                            style={{ cursor: "pointer" }}
+                          />
+                        </Spin>
+                      </Col>
+                    </Row>
+                  ) : (
+                    <>
+                      {Object.keys(properties).map((key: any, i: any) => (
+                        <Row key={i}>
+                          <Col md={10}>
+                            <Text className="key" strong>
+                              {key}
+                            </Text>
+                          </Col>
+                          <Col md={14}>
+                            <span className="value">{properties[key]}</span>
+                          </Col>
+                        </Row>
+                      ))}
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+            {!props.isPublic && (
+              <div className="address-content">
+                {loader ? (
+                  <div className="spinner">
+                    <Spin />
+                  </div>
+                ) : (
+                  <>
+                    <Paragraph copyable>{address}</Paragraph>
+                    <a
+                      href={`https://www.google.com/maps/?q=${props.coordinates[1]},${props.coordinates[0]}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Show on google maps
+                    </a>
+                  </>
+                )}
+              </div>
+            )}
+            <div className="sub-info">
+              <span className="coordinates">
+                <Text>
+                  <img src={Perimeter} />
+                  &nbsp;&nbsp;{perimeter}&nbsp;&nbsp;
+                  <Select
+                    defaultValue={lengthUnit}
+                    size="small"
+                    style={{ width: "60px", fontSize: "12px" }}
+                    onChange={lengthMeasurementHandeller}
+                  >
+                    <Option className="option-value" value="km">
+                      km
+                    </Option>
+                    <Option className="option-value" value="m">
+                      m
+                    </Option>
+                    <Option className="option-value" value="ft">
+                      ft
+                    </Option>
+                  </Select>
+                </Text>
+                {/* <div
+                  style={{
+                    width: "14px",
+                    height: "14px",
+                    backgroundColor: props.feature.properties.color,
+                    float: "right",
+                    marginTop: "4px",
+                    borderRadius: "2px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {}}
+                /> */}
+              </span>
+              <span>
+                {!props.isPublic && (
+                  <>
+                    {!props.show && (
+                      <div style={{ float: "right", marginTop: "4px" }}>
+                        <Row>
+                          <Tooltip placement="bottom" title="Open Media">
+                            <Badge
+                              size="small"
+                              count={fileCount}
+                              className="site-badge-count-4"
+                            >
+                              <CameraOutlined
+                                style={{ marginRight: "6px" }}
+                                onClick={() => openImages()}
+                              />
+                            </Badge>
+                          </Tooltip>
+                          <Tooltip
+                            placement="bottom"
+                            title={props.flag ? "Unflag" : "Flag"}
+                          >
+                            <BsFlagFill
+                              style={{
+                                color: props.flag ? "#da1c5c" : "#000",
+                                cursor: "pointer",
+                              }}
+                              onClick={() => {
+                                toggleFlag();
+                              }}
+                            />
+                          </Tooltip>
+                        </Row>
+                      </div>
+                    )}
+                  </>
+                )}
+              </span>
+            </div>
+            {props.show && saveDrawingButton()}
+            {props.show && CancelDrawingButton()}
+          </div>
+        </>
+      );
+    default:
+      return <p>unknown</p>;
+  }
+}
+
+const mapStateToProps = (state: any) => ({
+  Auth: state.Auth,
+  Theme: state.Theme,
+});
+
+export default connect(mapStateToProps, { logout })(InfoWindow);

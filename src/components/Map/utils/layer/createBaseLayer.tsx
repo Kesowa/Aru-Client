@@ -1,0 +1,3006 @@
+import React, { useState, useEffect, useRef } from "react";
+import { v4 as uuid } from "uuid";
+import {
+  Modal,
+  Steps,
+  Button,
+  message,
+  Result,
+  Upload,
+  Row,
+  Col,
+  Spin,
+  Form,
+  Alert,
+  Input,
+  TreeSelect,
+  DatePicker,
+  Progress,
+  Switch,
+  Avatar,
+  Card,
+  Typography,
+  Table,
+  Empty,
+  Select,
+  Collapse,
+  Divider,
+} from "antd";
+import apis from "../../../../services/apis";
+import http from "../../../../services/httpCall";
+import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
+import { logout } from "../../../../actions/authAction";
+import { connect } from "react-redux";
+import moment from "moment";
+import {
+  InboxOutlined,
+  UploadOutlined,
+  VideoCameraOutlined,
+  ImportOutlined,
+} from "@ant-design/icons";
+import { SketchPicker } from "react-color";
+import io from "socket.io-client";
+import "../../index.less";
+import AttributeMapping from "../attributeMapping";
+import MarkerIcon from "../../../../static/MarkerIcon.png";
+import TankIcon from "../../../../static/TankIcon.png";
+import ValveIcon from "../../../../static/ValveIcon.png";
+import DotIcon from "../../../../static/DotIcon.png";
+import { components } from "src/handlers/schema";
+const { Step } = Steps;
+const { Dragger } = Upload;
+const { Item } = Form;
+const { Meta } = Card;
+const { Option } = Select;
+const { Text, Title } = Typography;
+const { Panel } = Collapse;
+
+const CreateBaseLayer = (props) => {
+  const [selectedKey, setSelectedKey] = useState<any>();
+  const [isModalVisible1, setIsModalVisible1] = useState(false);
+  const [isModalVisible2, setIsModalVisible2] = useState(false);
+  const [current1, setCurrent1] = useState(0);
+  const [current2, setCurrent2] = useState(0);
+  const [missionOptions, setMissionOptions] = useState<any>([]);
+  const [missionsLoading, setMissionsLoading] = useState(false);
+  const [missionSearchValue, setMissionSearchValue] = useState("");
+  const [layerOptions, setLayerOptions] = useState<any>([]);
+  const [layersLoading, setLayersLoading] = useState(false);
+  const [selectedMissions, setSelectedMissions] = useState<any>([]);
+  const [selectedLayers, setSelectedLayers] = useState<any>([]);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [layerName, setLayerName] = useState("");
+  const [captureDate, setCaptureDate] = useState("");
+  const [layerColor, setLayerColor] = useState("");
+  const [layerType, setLayerType] = useState("");
+  const [layerTypeId, setLayerTypeId] = useState("");
+  const [fileList, setFileList] = useState<any>([]);
+  const [showColorPicker, setShowColorPicker] = useState(true);
+  const [inheritColor, setInheritColor] = useState(false);
+  const [tableData, setTableData] = useState<any>([]);
+  const [primeAttributes, setPrimeAttributes] = useState<any>([]);
+  const [fields, setFields] = useState([]);
+  const [layerPath, setLayerPath] = useState("");
+  const [responseArray, setResponseArray] = useState<any>([]);
+  const [vectorPath, setVectorPath] = useState("");
+  const [metadata, setMetadata] = useState<any>([]);
+  const [showAddMissions, setShowAddMissions] = useState(false);
+  const [layerType1, setLayerType1] = useState("");
+  const [currentLayerId, setCurrentLayerId] = useState("");
+  const [fetchList, setFetch] = useState(false);
+  const [form] = Form.useForm();
+  const [page, setPage] = useState(1);
+  const [uiElement, setUIElement] = useState<any>([]);
+  const [allowApiCall, setApiCall] = useState(true);
+  const [storageModal, setStorageModal] = useState(false);
+  const [selectedAttr, setSelectedAttr] = useState({});
+  const [activeTab, setActiveTab] = useState<any>([]);
+  const [icon, setIcon] = useState<any>("MarkerIcon");
+
+  const iconOptions = [
+    {
+      value: "MarkerIcon",
+      title: "Marker Icon",
+      icon: <img src={MarkerIcon} style={{ width: "10px" }} />,
+    },
+    {
+      value: "TankIcon",
+      title: "Tank Icon",
+      icon: <img src={TankIcon} style={{ width: "10px" }} />,
+    },
+    {
+      value: "ValveIcon",
+      title: "Valve Icon",
+      icon: <img src={ValveIcon} style={{ width: "10px" }} />,
+    },
+    {
+      value: "DotIcon",
+      title: "Dot Icon",
+      icon: <img src={DotIcon} style={{ width: "10px" }} />,
+    },
+  ];
+  useEffect(
+    () => console.log("Prime attributes", primeAttributes),
+    [primeAttributes]
+  );
+
+  useEffect(() => {
+    if (selectedLayers.length > 0) {
+      const layertype = new Set();
+      const layertype1 = new Set();
+      const layertype2 = new Set();
+      selectedLayers.map((item) => {
+        layerOptions.map((layer) => {
+          if (layer._id == item) {
+            layertype.add(layer.type);
+            if (layer.type == "Vector") layertype1.add(layer.vector.type);
+            else layertype2.add(layer.raster.name);
+          }
+        });
+      });
+
+      console.log(layertype, layertype1, layertype2);
+
+      if (layertype.size == 2) {
+        message.warning("Cannot merge a raster and vector!");
+        setApiCall(false);
+      }
+
+      if (layertype1.size > 1) {
+        message.warning(
+          "Cannot merge vector layers of different geometric types! "
+        );
+        setApiCall(false);
+      }
+
+      if (layertype2.size > 1) {
+        message.warning("Cannot merge raster layers of different type!");
+        setApiCall(false);
+      }
+
+      if (layertype.has("Raster")) setLayerType1("Raster");
+      else if (layertype.has("Vector")) setLayerType1("Vector");
+    }
+  }, [selectedLayers]);
+
+  useEffect(() => {
+    //need to check this value and trigger
+    console.log("layerType1", layerType1, allowApiCall);
+  }, [layerType1, allowApiCall]);
+
+  const onScroll = (event) => {
+    const target = event.target;
+    if (
+      !missionsLoading &&
+      target.scrollTop + target.offsetHeight === target.scrollHeight
+    ) {
+      target.scrollTo(0, target.scrollHeight);
+      setPage(page + 1);
+      setFetch(true);
+    }
+  };
+
+  const handleSearch = (e) => {
+    setMissionOptions([]);
+    setMissionSearchValue(e);
+    setFetch(true);
+  };
+
+  // -------Populate mission list----------------
+  useEffect(() => {
+    if (isModalVisible2) {
+      if (fetchList) {
+        if (missionSearchValue) {
+          setPage(1);
+          setMissionsLoading(true);
+          console.log("searching");
+          console.log("page", page);
+          http
+            .get(
+              `${apis.GET_ALL_MISSIONS_FOR_TENANT}?page=${page}&limit=10&filter=Completed&sort=createdAt:descend&searchFilters=name:${missionSearchValue}`
+            )
+            .then((res) => {
+              console.log(res.data.data);
+              const missions: any = [...missionOptions];
+              res.data.data.map((i: any) => {
+                missions.push(i);
+              });
+              console.log(missions);
+              setMissionOptions(missions);
+            })
+            .catch((err) => {
+              console.log(err);
+              AxiosErrorHandler(err, props.logout);
+            })
+            .finally(() => {
+              setMissionsLoading(false);
+              setFetch(false);
+            });
+        } else {
+          setMissionsLoading(true);
+          console.log("not searching");
+          console.log("page", page);
+          http
+            .get(
+              `${apis.GET_ALL_MISSIONS_FOR_TENANT}?page=${page}&limit=10&filter=Completed&sort=createdAt:descend&searchFilters=name:${missionSearchValue}`
+            )
+            .then((res) => {
+              const missions: any = [...missionOptions];
+              res.data.data.map((i: any) => {
+                missions.push(i);
+              });
+              setMissionOptions(missions);
+            })
+            .catch((err) => {
+              console.log(err);
+              AxiosErrorHandler(err, props.logout);
+            })
+            .finally(() => {
+              setMissionsLoading(false);
+              setFetch(false);
+            });
+        }
+      }
+    }
+  }, [isModalVisible2, missionSearchValue, fetchList]);
+
+  useEffect(() => console.log(missionOptions), [missionOptions]);
+
+  useEffect(() => {
+    if (selectedMissions.length > 0) {
+      setLayersLoading(true);
+      http
+        .get(
+          `${apis.GET_ALL_LAYERS_FOR_MISSION}?missionId=${selectedMissions[0]}`
+        )
+        .then((res) => {
+          console.log(res);
+          if (props.isUpdate) {
+            const filtered: any = res.data.data.layers.filter(
+              (i: any) => i.type == props.updateType
+            );
+            setLayerOptions(filtered);
+          } else {
+            setLayerOptions(res.data.data.layers);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          AxiosErrorHandler(err, props.logout);
+        })
+        .finally(() => setLayersLoading(false));
+    }
+  }, [selectedMissions]);
+
+  // FILETYPES TO VALIDATE
+  const fileTypesUpdateVector = ["geojson"];
+  const fileTypeUpdateRaster = ["tif"];
+
+  // FOR UPDATING/CREATING BASE LAYER VIA UPLOAD - BOTH RASTER AND VECTOR
+  const createUpdateBaseLayerUpload = async () => {
+    // FORM VALIDATIONS FIRST
+    if (!fileList.length) {
+      message.error("Please select file to upload");
+      return;
+    }
+
+    if (!props.isUpdate) {
+      if (!layerType || !layerTypeId || !captureDate || !layerName) {
+        message.error("Please fill all the required field");
+        return;
+      }
+    }
+
+    const file = fileList[0];
+    const ext = file.name.split(".").pop();
+
+    // FILE VALIDATIONS
+    if (props.isUpdate) {
+      if (props.updateType == "Vector") {
+        if (!fileTypesUpdateVector.includes(ext)) {
+          message.error("Please select the geojson file");
+          return;
+        }
+      } else {
+        if (!fileTypeUpdateRaster.includes(ext)) {
+          message.error("Please select a tif file");
+          return;
+        }
+      }
+    } else {
+      if (layerType == "Raster") {
+        if (!fileTypeUpdateRaster.includes(ext)) {
+          message.error("Please select a tif file for raster layer!");
+          return;
+        }
+      } else {
+        if (!fileTypesUpdateVector.includes(ext)) {
+          message.error("Please select a tif file for raster layer!");
+          return;
+        }
+      }
+    }
+
+    try {
+      setUploading(true);
+      if (props.isUpdate) {
+        if (props.updateType == "Raster") {
+          // UPDATE RASTER BY FILE UPLOAD
+          console.log("here");
+          const fmData = new FormData();
+          const config = {
+            headers: { "content-type": "multipart/form-data" },
+            onUploadProgress: (event) => {
+              const percent = Math.floor((event.loaded / event.total) * 100);
+              setProgress(percent);
+              if (percent === 100) {
+                setTimeout(() => setProgress(0), 1000);
+              }
+            },
+          };
+          fmData.append("file", fileList[0]);
+          fmData.append("layerId", props.BaseLayerId);
+          const result = await http.patch(
+            `${apis.UPDATE_BASE_RASTER_UPLOAD}/Raster`,
+            fmData,
+            config
+          );
+
+          if (result.data.status) {
+            console.log("update by file", result.data);
+            //message.success("Layer updated successfully!");
+            props.updateLayer(result.data.data, null, null);
+            setCurrent1(1);
+          } else {
+            message.error(result.data.message);
+          }
+        } else {
+          // UPDATE VECTOR BY FILE UPLOAD
+          console.log("inside vector update by upload");
+          const fmData = new FormData();
+          const config = {
+            headers: { "content-type": "multipart/form-data" },
+            onUploadProgress: (event) => {
+              const percent = Math.floor((event.loaded / event.total) * 100);
+              setProgress(percent);
+              if (percent === 100) {
+                setTimeout(() => setProgress(0), 1000);
+              }
+            },
+          };
+          fmData.append("file", fileList[0]);
+          fmData.append("baseLayer", props.BaseLayerId);
+          const result = await http.post(
+            `${apis.UPDATE_BASE_VECTOR_UPLOAD}`,
+            fmData,
+            config
+          );
+          if (result.data.success) {
+            console.log("update by file", result.data);
+            // message.success("Layer updated successfully!");
+            //props.updateLayer(result.data.data, null, null);
+            setPrimeAttributes(
+              result.data.data.primeAttributes.filter(
+                (i: any) => i !== "color" && i !== "icon" && i !== "sys_id"
+              )
+            );
+            setFields(result.data.data.layerAttributes);
+            setLayerPath(result.data.data.filePath);
+            setCurrent1(1);
+          } else {
+            console.log(result.data);
+            message.error(result.data.message);
+          }
+        }
+      } else {
+        // CREATE BASE LAYER BY UPLOAD
+        const fmData = new FormData();
+        const config = {
+          headers: { "content-type": "multipart/form-data" },
+          onUploadProgress: (event) => {
+            const percent = Math.floor((event.loaded / event.total) * 100);
+            setProgress(percent);
+            if (percent === 100) {
+              setTimeout(() => setProgress(0), 1000);
+            }
+          },
+        };
+        fmData.append("file", fileList[0]);
+        fmData.append("captureDate", captureDate);
+        fmData.append("name", layerName);
+        console.log(layerType);
+        fmData.append("type", layerType);
+        console.log(
+          "Before call",
+          fmData.get("name"),
+          fmData.get("type"),
+          fmData.get("captureDate"),
+          fmData.get("file")
+        );
+        fmData.append("icon", icon);
+
+        if (layerType === "Vector") {
+          // CREATE BASE LAYER BY VECTOR UPLOAD
+          fmData.append("color", layerColor);
+          fmData.append(
+            "inHeritOriginalColorFromFile",
+            inheritColor.toString()
+          );
+          fmData.append("vector", layerTypeId);
+          console.log(
+            "Before call",
+            fmData.get("name"),
+            fmData.get("type"),
+            fmData.get("captureDate"),
+            fmData.get("file"),
+            fmData.get("color"),
+            fmData.get("vector")
+          );
+
+          const result = await http.post(
+            `${apis.CREATE_BASELAYER}/Vector`,
+            fmData,
+            config
+          );
+
+          if (result.data.status) {
+            console.log(result.data);
+            message.success("Vector Base Layer Created!");
+            const data: any = [];
+            let c = 0;
+            setVectorPath(result.data.data.layer.layerpath);
+            setCurrentLayerId(result.data.data.layer._id);
+            for (const [key, value] of Object.entries(
+              result.data.data.properties
+            )) {
+              if (key !== "sys_id" && key !== "icon" && key !== "color") {
+                data.push({
+                  attribute: key,
+                  key: ++c,
+                });
+              }
+            }
+            console.log(data);
+            setTableData(data);
+            setCurrent1(1);
+          } else {
+            message.error(result.data.message);
+          }
+        }
+
+        if (layerType === "Raster") {
+          // CREATE BASE LAYER BY RASTER UPLOAD
+          fmData.append("raster", layerTypeId);
+
+          const result = await http.post(
+            `${apis.UPLOAD_RASTER_BASELAYER}/Raster`,
+            fmData,
+            config
+          );
+
+          if (result.data.status) {
+            console.log(result.data);
+            message.success("Raster Base Layer Created!");
+            props.addLayer(result.data.data);
+            setCurrent1(1);
+          } else {
+            message.error(result.data.message);
+          }
+        }
+      }
+    } catch (err) {
+      if (err.response?.status === 403) {
+        setIsModalVisible1(false);
+        if (
+          err.response?.data.message ===
+          "Actual storage exceeded the Limit of Set storage!"
+        ) {
+          setStorageModal(true);
+        } else {
+          message.error(err.response?.data.message);
+          console.log(err.response);
+        }
+      } else console.log(err);
+    } finally {
+      setUploading(false);
+      setFileList([]);
+      setCaptureDate("");
+      setLayerName("");
+      //setLayerType("");
+      setLayerTypeId("");
+      //setCurrentLayerId("");
+      form.resetFields();
+    }
+  };
+
+  const getMetadataForBaseLayer = (layers) => {
+    if (selectedLayers.length > 0) {
+      setUploading(true);
+      console.log(layers);
+      let payload: any = {};
+      if (props.isUpdate) {
+        payload = {
+          layers: layers,
+          baseLayer: props.BaseLayerId,
+        };
+      } else {
+        payload = {
+          layers: layers,
+        };
+      }
+      http
+        .patch<
+          components["schemas"]["GetMetaDataBaseLayerResponse"],
+          components["schemas"]["GetMetaDataUpdateResponse"]
+        >(
+          !props.isUpdate
+            ? `${apis.GET_METADATA}`
+            : `${apis.GET_METADATA_FOR_UPDATE}`,
+          payload
+        )
+        .then((res) => {
+          console.log("--------------------", res);
+          if (res.data.success == false) message.error(res.data.message);
+          else {
+            if (!props.isUpdate) {
+              const attrset: any = [];
+              res.data.data.map((mission) => {
+                mission.layers.map((layer) => {
+                  layer.fields.map((field) => {
+                    let obj: any = {};
+                    switch (field.layerMatches) {
+                      case "Matches With All":
+                        obj = {
+                          key: field.key,
+                          match: "Present in all layers",
+                        };
+                        break;
+                      case "No Other Mathces":
+                        obj = {
+                          key: field.key,
+                          match: "Not present in all layers",
+                        };
+                        break;
+                      default:
+                      // dsfdfdf
+                    }
+                    attrset.push(obj);
+                  });
+                });
+              });
+              console.log("attribute set", attrset);
+              const data: any = [];
+              let c = 0;
+              attrset.map((i: any) => {
+                if (
+                  i.key !== "sys_id" &&
+                  i.key !== "icon" &&
+                  i.key !== "color"
+                ) {
+                  data.push({
+                    attribute: i.key,
+                    key: ++c,
+                    occurs: i.match,
+                  });
+                }
+              });
+              console.log(data);
+              setTableData(data);
+              setMetadata(res.data.data);
+              setCurrent2(1);
+            } else {
+              const attrArray: any = [];
+              console.log("in here...");
+              setMetadata(res.data.data.layerAttr);
+              res.data.data.pAttr.map((value: any, i) => {
+                let obj: any = {};
+                if (
+                  value !== "color" &&
+                  value !== "icon" &&
+                  value !== "sys_id"
+                ) {
+                  obj = {
+                    attribute: value,
+                    key: i,
+                    occurs: "placeholder text here",
+                  };
+                  attrArray.push(obj);
+                }
+              });
+              setPrimeAttributes(attrArray);
+              setCurrent2(1);
+            }
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          AxiosErrorHandler(err, props.logout);
+        })
+        .finally(() => {
+          setUploading(false);
+          setMissionOptions([]);
+          setSelectedLayers([]);
+          //setLayerType1("");
+          setUIElement([]);
+        });
+    } else
+      message.warning("Please choose at least 1 layer in order to proceed!");
+  };
+
+  useEffect(() => console.log("id", currentLayerId), [currentLayerId]);
+
+  const setPrimeAttr = () => {
+    const data: any = [];
+    primeAttributes.map((attr) => {
+      data.push(String(attr["attribute"]));
+    });
+    const body = {
+      path: vectorPath,
+      pattr: data,
+      id: currentLayerId,
+    };
+    console.log("Prime attribute body: ", body);
+    setUploading(true);
+    http
+      .put(`${apis.SET_PRIME_ATTR}`, body)
+      .then((res) => {
+        console.log(res);
+        if (res.data.success) {
+          console.log(res.data);
+          message.success(res.data.message);
+          setCurrent1(2);
+          props.addLayer(res.data.data);
+        } else message.error(res.data.message);
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => setUploading(false));
+  };
+
+  const createVectorBaseByAttr = () => {
+    setUploading(true);
+    let body: any = {};
+    if (props.isUpdate) {
+      body = {
+        baseLayer: props.BaseLayerId,
+        layers: responseArray,
+      };
+      http
+        .patch(`${apis.UPDATE_BASE_VECTOR_IMPORT}`, body)
+        .then((res) => {
+          console.log("import update vector res", res);
+          message.success("Layer was successfully update!");
+          props.updateLayer(res.data.data, null, null);
+        })
+        .catch((err) => {
+          if (err.response?.status === 403) {
+            setIsModalVisible1(false);
+            setIsModalVisible2(false);
+            if (
+              err.response?.data.message ===
+              "Actual storage exceeded the Limit of Set storage!"
+            ) {
+              setStorageModal(true);
+            } else {
+              message.error(err.response?.data.message);
+              console.log(err.response);
+            }
+          } else console.log(err);
+          AxiosErrorHandler(err, props.logout);
+        })
+        .finally(() => {
+          setLayerName("");
+          setCaptureDate("");
+          setSelectedLayers([]);
+          setLayerColor("");
+          setLayerType("");
+          setLayerTypeId("");
+          setShowAddMissions(false);
+          setMissionOptions([]);
+          setUIElement([]);
+          setCurrent2(2);
+          setResponseArray([]);
+          setLayerType1("");
+          setUploading(false);
+          form.resetFields();
+        });
+    } else {
+      body = {
+        name: layerName,
+        vectorTypeId: layerTypeId,
+        color: layerColor,
+        pattr: primeAttributes,
+        layers: responseArray,
+      };
+      http
+        .post(`${apis.CREATE_VECTOR_BASE_BY_ATTR}`, body)
+        .then((res) => {
+          console.log(res);
+          props.addLayer(res.data.data);
+          message.success("Layer was successfully created!");
+        })
+        .catch((err) => {
+          if (err.response?.status === 403) {
+            setIsModalVisible1(false);
+            setIsModalVisible2(false);
+            if (
+              err.response?.data.message ===
+              "Actual storage exceeded the Limit of Set storage!"
+            ) {
+              setStorageModal(true);
+            } else {
+              message.error(err.response?.data.message);
+              console.log(err.response);
+            }
+          } else console.log(err);
+          AxiosErrorHandler(err, props.logout);
+        })
+        .finally(() => {
+          setLayerName("");
+          setCaptureDate("");
+          setSelectedLayers([]);
+          setLayerColor("");
+          setLayerType("");
+          setLayerTypeId("");
+          setShowAddMissions(false);
+          setMissionOptions([]);
+          setUIElement([]);
+          setCurrent2(0);
+          setResponseArray([]);
+          setLayerType1("");
+          setUploading(false);
+          setIsModalVisible2(false);
+          form.resetFields();
+        });
+    }
+  };
+
+  const updateRasterBaseByImporting = () => {
+    setUploading(true);
+    const fmData = new FormData();
+    let payload: any = {};
+    if (props.isUpdate) {
+      // fmData.append("layerId",props.BaseLayerId);
+      // selectedLayers.map((index:any, value:any)=>{
+      //   //console.log(`layers[${value}], ${index}`)
+      //   fmData.append(`layers[${value}]`, index);
+      // })
+      payload = {
+        layerId: props.BaseLayerId,
+        layers: selectedLayers,
+      };
+    }
+    http
+      .patch(`${apis.UPDATE_BASE_RASTER_IMPORT}`, payload)
+      .then((res: any) => {
+        if (res.data.status) {
+          console.log("update by import", res.data.data);
+          //props.addLayer(res.data.data)
+          props.updateLayer(res.data.data, null, null);
+          //message.success("Layer Updated Successfully!")
+        } else {
+          console.log(res.data);
+          message.warning(res.data.message);
+        }
+      })
+      .catch((err) => {
+        if (err.response?.status === 403) {
+          setIsModalVisible1(false);
+          setIsModalVisible2(false);
+          if (
+            err.response?.data.message ===
+            "Actual storage exceeded the Limit of Set storage!"
+          ) {
+            setStorageModal(true);
+          } else {
+            message.error(err.response?.data.message);
+            console.log(err.response);
+          }
+        } else console.log(err);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => {
+        setLayerName("");
+        setCaptureDate("");
+        setSelectedLayers([]);
+        setShowAddMissions(false);
+        setMissionOptions([]);
+        setUIElement([]);
+        setCurrent2(2);
+        setResponseArray([]);
+        //setLayerType1("");
+        setUploading(false);
+        //setIsModalVisible2(false);
+        form.resetFields();
+      });
+  };
+
+  const createRasterBaseByImporting = () => {
+    setUploading(true);
+    const body = {
+      layers: selectedLayers,
+      name: layerName,
+      captureDate: captureDate,
+    };
+    http
+      .post(`${apis.CREATE_RASTER_BASE_BY_IMPORTING}`, body)
+      .then((res) => {
+        if (res.data.status) {
+          console.log(res);
+          props.addLayer(res.data.data);
+          message.success("Layer created successfully!");
+        } else {
+          console.log(res.data);
+          message.warning(res.data.message);
+        }
+      })
+      .catch((err) => {
+        if (err.response?.status === 403) {
+          setIsModalVisible1(false);
+          setIsModalVisible2(false);
+          if (
+            err.response?.data.message ===
+            "Actual storage exceeded the Limit of Set storage!"
+          ) {
+            setStorageModal(true);
+          } else {
+            message.error(err.response?.data.message);
+            console.log(err.response);
+          }
+        } else console.log(err);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => {
+        setLayerName("");
+        setCaptureDate("");
+        setSelectedLayers([]);
+        setShowAddMissions(false);
+        setMissionOptions([]);
+        setUIElement([]);
+        setCurrent2(0);
+        setResponseArray([]);
+        setLayerType1("");
+        setUploading(false);
+        setIsModalVisible2(false);
+        form.resetFields();
+      });
+  };
+
+  // const missionLayer: any = [];
+
+  useEffect(() => {
+    console.log(uiElement);
+  }, [uiElement]);
+
+  const addMore = () => {
+    const array: any = [...uiElement];
+    array.push(uuid());
+    // array.push(
+    //   <Row style={{ backgroundColor: "khaki"}}>
+    //     <Col span={12}>
+    //       <h4><span style={{color: "red"}}>*</span> Choose mission(s) to import data from</h4>
+    //       <Select
+    //         placeholder='Select Mission(s)'
+    //         showSearch
+    //         loading={missionsLoading}
+    //         // options={missionOptions}
+    //         onSearch={handleSearch}
+    //         // optionFilterProp='label'
+    //         showArrow
+    //         allowClear
+    //         onChange={(e) => setSelectedMissions([e])}
+    //         style={{ width: "200px" }}
+    //         onPopupScroll={onScroll}
+    //         onFocus={()=>{
+    //           setPage(1);
+    //           setMissionOptions([]);
+    //           setMissionSearchValue("");
+    //           setFetch(true);
+    //         }}
+    //         notFoundContent={null}
+    //         filterOption={false}
+    //       >
+    //         {missionOptions.map((mission) => (
+    //           <Option key={mission._id} value={mission._id}>
+    //             {mission.name}
+    //           </Option>
+    //         ))}
+    //       </Select>
+    //     </Col>
+    //     <Col span={12}>
+    //       <h4><span style={{color: "red"}}>*</span> Choose layer(s) from mission</h4>
+    //       <Select
+    //         placeholder='Select Layers(s)'
+    //         showSearch
+    //         loading={layersLoading}
+    //         // options={missionOptions}
+    //         // onSearch={(e) => console.log(e)}
+    //         optionFilterProp='label'
+    //         showArrow
+    //         allowClear
+    //         onChange={(e) => {
+    //           console.log(e);
+    //           // getMetadataForBaseLayer(e);
+    //           setSelectedLayers(e);
+    //         }}
+    //         mode='tags'
+    //         style={{ minWidth: "200px", maxWidth: "500px" }}
+    //       >
+    //         {selectedMissions &&
+    //           layerOptions.map((layer) => (
+    //             <Option key={layer._id} value={layer._id}>
+    //               {layer.name}
+    //             </Option>
+    //           ))}
+    //       </Select>
+    //     </Col>
+    //   </Row>
+    // );
+    setUIElement(array);
+  };
+
+  const uploadProps = {
+    name: "file",
+    multiple: false,
+    onRemove: (file) => {
+      setFileList([]);
+    },
+    beforeUpload: (file) => {
+      console.log(file);
+      setFileList([file]);
+      return false;
+    },
+    fileList,
+  };
+
+  const changeLayerType = (value) => {
+    console.log(value);
+    if (value === undefined) {
+      setLayerTypeId("");
+    } else if (value[0] === "1") {
+      setShowColorPicker(true);
+      setLayerType("Vector");
+      setLayerTypeId(value.substring(4, 28));
+    } else if (value[0] === "0") {
+      setShowColorPicker(false);
+      setLayerType("Raster");
+      setLayerTypeId(value.substring(2, 26));
+    }
+  };
+
+  function onChangeInherit(checked) {
+    //console.log(`switch to ${checked}`);
+    if (checked) {
+      setInheritColor(true);
+      setShowColorPicker(false);
+    } else {
+      setInheritColor(false);
+      setShowColorPicker(true);
+    }
+  }
+
+  function renderFooterButtons() {
+    if (isModalVisible1) {
+      if (layerType == "Raster" || props.updateType == "Raster") {
+        switch (current1) {
+          case 0:
+            return (
+              <>
+                {!uploading ? (
+                  <Button
+                    type={"primary"}
+                    onClick={() => createUpdateBaseLayerUpload()}
+                  >
+                    Next
+                  </Button>
+                ) : (
+                  <Button type={"primary"} loading>
+                    Uploading...
+                  </Button>
+                )}
+              </>
+            );
+          case 1:
+            return (
+              <>
+                <Button
+                  onClick={() => {
+                    setIsModalVisible1(false);
+                    setFileList([]);
+                    setCaptureDate("");
+                    setLayerName("");
+                    setLayerType("");
+                    setLayerTypeId("");
+                    setCurrent1(0);
+                  }}
+                >
+                  Close
+                </Button>
+              </>
+            );
+
+          default:
+            return <></>;
+        }
+      } else {
+        switch (current1) {
+          case 0:
+            return (
+              <>
+                {!uploading ? (
+                  <Button
+                    type={"primary"}
+                    onClick={() => createUpdateBaseLayerUpload()}
+                  >
+                    Next
+                  </Button>
+                ) : (
+                  <Button type={"primary"} loading>
+                    Uploading...
+                  </Button>
+                )}
+              </>
+            );
+          case 1:
+            return (
+              <>
+                {!uploading ? (
+                  <Button
+                    type={"primary"}
+                    onClick={() => {
+                      if (props.isUpdate) {
+                        if (responseArray.length > 0) {
+                          updateBaseLayerAfterUploadedFile();
+                        } else
+                          message.warning(
+                            "Please map atleast one field in order to continue!"
+                          );
+                      } else setPrimeAttr();
+                    }}
+                  >
+                    Next
+                  </Button>
+                ) : (
+                  <Button type={"primary"} loading>
+                    {props.isUpdate ? "Updating..." : "Applying..."}
+                  </Button>
+                )}
+              </>
+            );
+          case 2:
+            return (
+              <>
+                <Button
+                  onClick={() => {
+                    setIsModalVisible1(false);
+                    setFileList([]);
+                    setCaptureDate("");
+                    setLayerName("");
+                    setLayerType("");
+                    setLayerTypeId("");
+                    setCurrent1(0);
+                  }}
+                >
+                  Close
+                </Button>
+              </>
+            );
+
+          default:
+            return <></>;
+        }
+      }
+    }
+
+    if (isModalVisible2) {
+      switch (current2) {
+        case 0:
+          return (
+            <>
+              {!uploading ? (
+                <Button
+                  type={"primary"}
+                  onClick={() => {
+                    if (selectedLayers.length > 0) {
+                      if (layerType1 == "Vector") {
+                        if (allowApiCall) {
+                          getMetadataForBaseLayer(selectedLayers);
+                        } else
+                          message.warning(
+                            "Selected layer's types are incompatible. Please clear selection and try again!"
+                          );
+                      } else if (layerType1 == "Raster") {
+                        if (allowApiCall) {
+                          if (props.isUpdate) {
+                            //--base raster update here
+                            updateRasterBaseByImporting();
+                          } else setCurrent2(3);
+                        } else
+                          message.warning(
+                            "Select layer's types are incompatible. Please clear selection and try again!"
+                          );
+                      }
+                    } else
+                      message.warning(
+                        "Please select atleast 1 layer to proceed forward!"
+                      );
+                  }}
+                  disabled={!showAddMissions || !selectedLayers}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button type={"primary"} loading>
+                  Loading...
+                </Button>
+              )}
+            </>
+          );
+        case 1:
+          return (
+            <>
+              {props.isUpdate ? (
+                <>
+                  {!uploading ? (
+                    <Button
+                      type={"primary"}
+                      onClick={() => {
+                        let totalLayers = 0;
+                        metadata.map((mission: any) => {
+                          mission.layers.map((layers: any) => {
+                            ++totalLayers;
+                          });
+                        });
+                        console.log("total layers", totalLayers);
+                        if (responseArray.length == totalLayers) {
+                          createVectorBaseByAttr();
+                        } else
+                          message.warning(
+                            "Please complete this step before proceeding!"
+                          );
+                      }}
+                    >
+                      Update Layer
+                    </Button>
+                  ) : (
+                    <Button type={"primary"} loading>
+                      Updating layer...
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <Button
+                  type={"primary"}
+                  onClick={() => {
+                    if (primeAttributes.length > 0) {
+                      setCurrent2(2);
+                    } else
+                      message.warning(
+                        "Please select at least 1 attribute to proceed!"
+                      );
+                  }}
+                >
+                  Next
+                </Button>
+              )}
+            </>
+          );
+        case 2:
+          return (
+            <>
+              {props.isUpdate ? (
+                <>
+                  {layerType1 == "Raster" ? (
+                    <Button
+                      type={"primary"}
+                      onClick={() => {
+                        setIsModalVisible2(false);
+                        setShowAddMissions(false);
+                        setMissionOptions([]);
+                        setUIElement([]);
+                        setSelectedLayers([]);
+                        setCurrent2(0);
+                        setResponseArray([]);
+                        setLayerType1("");
+                        setCaptureDate("");
+                        setLayerName("");
+                        setLayerType("");
+                        setLayerTypeId("");
+                        form.resetFields();
+                      }}
+                    >
+                      Finish
+                    </Button>
+                  ) : (
+                    <></>
+                  )}
+                </>
+              ) : (
+                <Button
+                  type={"primary"}
+                  onClick={() => {
+                    let totalLayers = 0;
+                    metadata.map((mission: any) => {
+                      mission.layers.map((layers: any) => {
+                        ++totalLayers;
+                      });
+                    });
+                    console.log("total layers", totalLayers);
+                    if (responseArray.length == totalLayers) {
+                      setCurrent2(3);
+                    } else
+                      message.warning(
+                        "Please complete this step before proceeding!"
+                      );
+                  }}
+                >
+                  Next
+                </Button>
+              )}
+            </>
+          );
+        case 3:
+          return (
+            <>
+              {!uploading ? (
+                <Button
+                  type={"primary"}
+                  onClick={() => {
+                    console.log("clicked");
+                    // if(layerName == ""){
+                    //   message.warning("Please enter layer name!")
+                    // } else if(layerType1 == "Vector") {
+                    //   console.log("clicked 1")
+                    //   if(layerTypeId == "") message.warning("Please select a layer type!");
+                    //   if(captureDate == "") message.warning("Please choose a capture date!");
+                    // } else if(captureDate == ""){
+                    //   message.warning("Please choose a capture date!")
+                    // }else{
+                    //   if (layerType1 == "Vector") createVectorBaseByAttr();
+                    //   else if (layerType1 == "Raster")
+                    // }
+
+                    if (layerName == "") {
+                      message.warning("PLease neter layer name");
+                      return;
+                    }
+                    if (layerType1 == "Vector") {
+                      if (layerTypeId == "") {
+                        message.warning("Please select a layer type!");
+                        return;
+                      }
+                    }
+                    // if(layerTypeId == ""){
+                    //   message.warning("Please select a layer type!");
+                    //   return;
+                    // }
+                    if (captureDate == "") {
+                      message.warning("Please choose a capture date!");
+                      return;
+                    }
+                    if (layerType1 == "Vector") {
+                      createVectorBaseByAttr();
+                    } else if (layerType1 == "Raster") {
+                      createRasterBaseByImporting();
+                    }
+                  }}
+                >
+                  Finish
+                </Button>
+              ) : (
+                <Button type={"primary"} loading>
+                  Creating layer...
+                </Button>
+              )}
+            </>
+          );
+      }
+    }
+  }
+
+  const columns = [
+    {
+      title: "Attributes",
+      dataIndex: "attribute",
+    },
+  ];
+
+  const columns2 = [
+    {
+      title: "Attributes",
+      dataIndex: "attribute",
+    },
+    {
+      title: "Occurence In Layers",
+      dataIndex: "occurs",
+      render: (e) => (
+        <>
+          {e == "Present in all layers" ? (
+            <>
+              <span style={{ color: "green", marginRight: "5px" }}>●</span>
+              {e}
+            </>
+          ) : (
+            <>
+              <span style={{ color: "red", marginRight: "5px" }}>●</span>
+              {e}
+            </>
+          )}
+        </>
+      ),
+    },
+  ];
+
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows) => {
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        "selectedRows: ",
+        selectedRows
+      );
+      setPrimeAttributes(selectedRows);
+    },
+  };
+
+  useEffect(
+    () => console.log("Prime attributes", primeAttributes),
+    [primeAttributes]
+  );
+
+  const steps1 = [
+    {
+      title: "Upload Data",
+      content: (
+        <>
+          <Form
+            name="upload2"
+            layout="vertical"
+            style={{ width: "700px", margin: "20px auto" }}
+            form={form}
+          >
+            <Row style={{ paddingLeft: "10px", paddingRight: "5px" }}>
+              <Alert
+                style={{ width: "100%" }}
+                message="Please note!"
+                description={`Make sure that your geojson file has the "color" attribute in each feature, in order to inherit colors`}
+                type="info"
+                banner
+                showIcon
+              />
+            </Row>
+            <Row>
+              <Col span={14} style={{ padding: "10px" }}>
+                <Form.Item label="Name" name="name">
+                  <Input
+                    placeholder="Layer's Name"
+                    onChange={(e) => {
+                      setLayerName(e.target.value);
+                    }}
+                    value={layerName}
+                  />
+                </Form.Item>
+                <Form.Item label="Layer Type" name="type">
+                  <TreeSelect
+                    showSearch
+                    style={{ width: "100%" }}
+                    dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+                    placeholder="Select Layer Type"
+                    allowClear
+                    treeData={props.options}
+                    onChange={changeLayerType}
+                  />
+                </Form.Item>
+                <Row>
+                  <Form.Item label="Capture Date" name="date">
+                    <DatePicker
+                      format={"YYYY/MM/DD HH:mm"}
+                      onChange={(value: any) => {
+                        if (value) {
+                          setCaptureDate(value.toISOString(true));
+                        } else setCaptureDate("");
+                      }}
+                    />
+                  </Form.Item>
+                </Row>
+                <Row>
+                  <Form.Item label="Icon" name="icon">
+                    <TreeSelect
+                      showSearch
+                      style={{ width: "150%" }}
+                      dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+                      placeholder="Select Icon"
+                      placement="bottomLeft"
+                      defaultValue={"MarkerIcon"}
+                      treeData={iconOptions}
+                      onChange={(value) => setIcon(value)}
+                      treeIcon={true}
+                    />
+                  </Form.Item>
+                </Row>
+                <Row>
+                  <Alert
+                    style={{ width: "100%" }}
+                    message={`Only .geojson files support for type "Vector" and .tif for type "Raster"`}
+                    type="info"
+                    showIcon
+                  />
+                  <Form.Item label="Upload File" name="file">
+                    <Upload {...uploadProps}>
+                      <Button icon={<UploadOutlined />}>Select File</Button>
+                    </Upload>
+
+                    {uploading ? (
+                      <Progress strokeLinecap="square" percent={progress} />
+                    ) : null}
+                  </Form.Item>
+                </Row>
+              </Col>
+              <Col span={10} style={{ padding: "5px" }}>
+                {showColorPicker && (
+                  <Row>
+                    <SketchPicker
+                      color={layerColor}
+                      onChangeComplete={(color) => setLayerColor(color.hex)}
+                    />
+                  </Row>
+                )}
+                <Row style={{ paddingLeft: "2rem" }}>
+                  <p>
+                    Inherit color&nbsp;&nbsp;&nbsp;
+                    <Switch onChange={onChangeInherit} />
+                  </p>
+                </Row>
+              </Col>
+            </Row>
+          </Form>
+        </>
+      ),
+    },
+    {
+      title: "Attribute Selection",
+      content: (
+        <>
+          <div
+            style={{
+              height: "500px",
+            }}
+          >
+            <Title level={5} style={{ marginTop: "1rem" }}>
+              <span style={{ color: "red" }}>*</span> Choose attributes to
+              inherit in layer.
+            </Title>
+            <Table
+              rowSelection={{
+                ...rowSelection,
+              }}
+              style={{ height: "200px", width: "100%" }}
+              columns={columns}
+              dataSource={tableData}
+              // size='small'
+              // pagination={{ hideOnSinglePage: true }}
+              scroll={{ y: "400px" }}
+              pagination={false}
+              // pagination={{ hideOnSinglePage: true }}
+            />
+          </div>
+        </>
+      ),
+    },
+    {
+      title: "Layer Created!",
+      content: (
+        <>
+          <div
+            style={{
+              marginTop: "100px",
+            }}
+          >
+            <Result
+              status="success"
+              title="Successfully created layer!"
+              subTitle="You can now view the layer in the map."
+            />
+          </div>
+        </>
+      ),
+    },
+  ];
+
+  // steps for update vector by upload
+
+  const steps1Update = [
+    {
+      title: "Upload Data",
+      content: (
+        <>
+          <Row>
+            <div
+              style={{
+                width: "500px",
+                padding: "1rem",
+                margin: "auto",
+              }}
+            >
+              <Dragger {...uploadProps}>
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <p className="ant-upload-text">Upload a vector file</p>
+                <p className="ant-upload-hint">
+                  only .geojson files are supported
+                </p>
+              </Dragger>
+
+              {uploading ? (
+                <Progress strokeLinecap="square" percent={progress} />
+              ) : null}
+            </div>
+          </Row>
+        </>
+      ),
+    },
+    {
+      title: "Attribute Mapping",
+      content: (
+        <>
+          <Title level={4} style={{ marginTop: "8px" }}>
+            Map attributes to existing
+          </Title>
+          <Text>
+            Select the attributes of you existing layer, to map against
+            attributes from the file. Remaining un-mapped attribute information
+            will not be lost as it will be still stored in your layer.
+          </Text>
+          <div style={{ padding: "20px" }} key={uuid()}>
+            <Row>
+              <Col span={12}>
+                <Title level={5}>Attribute name</Title>
+              </Col>
+              <Col span={12}>
+                <Title level={5}>Map to field</Title>
+              </Col>
+            </Row>
+            <div style={{ height: "400px", overflow: "auto" }}>
+              {/* -ROW------------------- */}
+              {fields.map((f: any) => {
+                if (
+                  f.attr !== "sys_id" &&
+                  f.attr !== "icon" &&
+                  f.attr !== "color"
+                ) {
+                  return (
+                    <>
+                      <Row style={{ padding: "5px" }} key={uuid()}>
+                        <Col span={12}>
+                          <Text>{f.attr}</Text>
+                          <br />
+                          <Text type="secondary">Sample: {f.value}</Text>
+                        </Col>
+                        <Col span={12}>
+                          <Select
+                            key={`${f.attr}-${uuid()}`}
+                            style={{ width: "200px" }}
+                            // onChange={(e)=>{
+                            //   handleAttributeMapping(e, fields, layers)
+                            // }}
+                            defaultValue={
+                              selectedAttr[f.attr] ? selectedAttr[f.attr] : null
+                            }
+                            onSelect={(e) =>
+                              handleAttributeMapping2(e, f, null)
+                            }
+                            placeholder="Map the attribute selected"
+                          >
+                            {primeAttributes.map((item, index) => (
+                              <Option key={`${uuid()}-${item}`} value={item}>
+                                {item}
+                              </Option>
+                            ))}
+                          </Select>
+                        </Col>
+                      </Row>
+                      <Divider />
+                    </>
+                  );
+                }
+              })}
+            </div>
+          </div>
+        </>
+      ),
+    },
+    {
+      title: "Layer Updated!",
+      content: (
+        <>
+          <div
+            style={{
+              marginTop: "100px",
+            }}
+          >
+            <Result
+              status="success"
+              title="Successfully updated layer!"
+              subTitle="You can now view the layer in the map."
+            />
+          </div>
+        </>
+      ),
+    },
+  ];
+
+  // -------For raster -------------------------------
+  const steps1Raster = [
+    {
+      title: "Upload Data",
+      content: (
+        <>
+          <Form
+            name="upload2"
+            layout="vertical"
+            style={{ width: "700px", margin: "20px auto" }}
+            form={form}
+          >
+            <Col span={24}>
+              <Row>
+                <Form.Item label="Name" name="name" style={{ width: "100%" }}>
+                  <Input
+                    placeholder="Layer's Name"
+                    onChange={(e) => {
+                      setLayerName(e.target.value);
+                    }}
+                    value={layerName}
+                  />
+                </Form.Item>
+              </Row>
+
+              <Row>
+                <Form.Item
+                  label="Layer Type"
+                  name="type"
+                  style={{ width: "100%" }}
+                >
+                  <TreeSelect
+                    showSearch
+                    style={{ width: "100%" }}
+                    dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+                    placeholder="Select Layer Type"
+                    allowClear
+                    treeData={props.options}
+                    onChange={changeLayerType}
+                  />
+                </Form.Item>
+              </Row>
+
+              <Row>
+                <Form.Item
+                  label="Capture Date"
+                  name="date"
+                  style={{ width: "100%" }}
+                >
+                  <DatePicker
+                    format={"YYYY/MM/DD HH:mm"}
+                    onChange={(value: any) => {
+                      if (value) {
+                        setCaptureDate(value.toISOString(true));
+                      } else setCaptureDate("");
+                    }}
+                  />
+                </Form.Item>
+              </Row>
+              <Row>
+                <Form.Item label="Icon" name="icon">
+                  <TreeSelect
+                    showSearch
+                    style={{ width: "150%" }}
+                    dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+                    placeholder="Select Icon"
+                    placement="bottomLeft"
+                    defaultValue={"MarkerIcon"}
+                    treeData={iconOptions}
+                    onChange={(value) => setIcon(value)}
+                    treeIcon={true}
+                  />
+                </Form.Item>
+              </Row>
+              <Row>
+                <Alert
+                  style={{ width: "100%" }}
+                  message={`Only .tif for type "Raster"`}
+                  type="info"
+                  showIcon
+                />
+                <Form.Item label="Upload File" name="file">
+                  <Upload {...uploadProps}>
+                    <Button icon={<UploadOutlined />}>Select File</Button>
+                  </Upload>
+
+                  {uploading ? (
+                    <Progress strokeLinecap="square" percent={progress} />
+                  ) : null}
+                </Form.Item>
+              </Row>
+            </Col>
+          </Form>
+        </>
+      ),
+    },
+    {
+      title: "Layer Created!",
+      content: (
+        <>
+          <div
+            style={{
+              marginTop: "100px",
+            }}
+          >
+            <Result
+              status="success"
+              title="Successfully created layer!"
+              subTitle="You can now view the layer in the map."
+            />
+          </div>
+        </>
+      ),
+    },
+  ];
+
+  // -------For raster -------------------------------
+  const steps1RasterUpdate = [
+    {
+      title: "Upload Data",
+      content: (
+        <>
+          <Form
+            name="upload2"
+            layout="vertical"
+            style={{ width: "700px", margin: "20px auto" }}
+            form={form}
+          >
+            <Col span={24}>
+              <Row>
+                <Alert
+                  style={{ width: "100%" }}
+                  message="Update layer by uploading a raster file!"
+                  description={`Only .tif for type "Raster"`}
+                  type="info"
+                  showIcon
+                />
+                <div
+                  style={{
+                    width: "500px",
+                    height: "300px",
+                    margin: "auto",
+                    //backgroundColor: "whitesmoke",
+                    padding: "2rem",
+                  }}
+                >
+                  <Form.Item
+                    name="file"
+                    style={{
+                      margin: "auto",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Upload {...uploadProps}>
+                      <Button icon={<UploadOutlined />}>Select File</Button>
+                    </Upload>
+
+                    {uploading ? (
+                      <Progress strokeLinecap="square" percent={progress} />
+                    ) : null}
+                  </Form.Item>
+                </div>
+              </Row>
+            </Col>
+          </Form>
+        </>
+      ),
+    },
+    {
+      title: "Layer Updated!",
+      content: (
+        <>
+          <div
+            style={{
+              marginTop: "100px",
+            }}
+          >
+            <Result
+              status="success"
+              title="Successfully updated layer!"
+              subTitle="You can now view the layer in the map."
+            />
+          </div>
+        </>
+      ),
+    },
+  ];
+
+  useEffect(() => console.log(selectedLayers), [selectedLayers]);
+  useEffect(
+    () => console.log("response array", responseArray),
+    [responseArray]
+  );
+  useEffect(() => console.log("onSelect: ", selectedAttr), [selectedAttr]);
+
+  // UPDATE BASE LAYER AFTER UPLOADED FILE
+  function updateBaseLayerAfterUploadedFile() {
+    setUploading(true);
+    console.log("insdie function", responseArray[0]);
+    const payload: any = {
+      baseLayer: props.BaseLayerId,
+      attrMapping: responseArray[0],
+      filePath: layerPath,
+    };
+    http
+      .patch(`${apis.UPDATE_BASE_VECTOR_AFTER_UPLOAD}`, payload)
+      .then((res: any) => {
+        if (res.data.success) {
+          console.log(res.data);
+          //message.success("Layer was successfully updated!");
+          props.updateLayer(res.data.data, null, null);
+        } else {
+          console.log(res.data);
+          message.warning(res.data.message);
+        }
+      })
+      .catch((err: any) => {
+        console.log(err);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => {
+        setCurrent1(2);
+        setResponseArray([]);
+        setSelectedAttr({});
+        setFileList([]);
+        setUploading(false);
+        setPrimeAttributes([]);
+        setLayerPath("");
+      });
+  }
+
+  function handleAttributeMapping2(e: any, fields: any, layers: any) {
+    const temp = {
+      ...selectedAttr,
+    };
+
+    temp[`${fields.attr}`] = e;
+    setSelectedAttr(temp);
+
+    const obj: any = { ...responseArray[0] };
+    const array: any = [];
+    console.log("testtt", responseArray, e, fields, layerPath);
+    obj[`${e}`] = fields.attr;
+    console.log(obj);
+    array.push(obj);
+    setResponseArray(array);
+  }
+
+  function handleAttributeMapping(e: any, fields: any, layers: any) {
+    console.log(e);
+    console.log(fields);
+    console.log(layers);
+    const temp = {
+      ...selectedAttr,
+    };
+
+    if (temp[layers._id]) {
+      temp[layers._id][`${fields.key}`] = e;
+    } else {
+      temp[layers._id] = {};
+      temp[layers._id][`${fields.key}`] = e;
+    }
+
+    setSelectedAttr(temp);
+
+    let ooi: any = [];
+    const finalArray: any = [...responseArray];
+    if (responseArray.length > 0) {
+      ooi = responseArray.filter((i) => i.layerId == layers._id);
+      if (ooi.length > 0) {
+        //console.log("test",ooi)
+        ooi[0].attrMapping[`${e}`] = fields.key;
+        // console.log(ooi);
+        const arraywoObj: any = responseArray.filter(
+          (i) => i.layerId !== layers._id
+        );
+        //console.log("array",arraywoObj);
+        arraywoObj.push(ooi[0]);
+        setResponseArray(arraywoObj);
+      } else {
+        const obj: any = {
+          layerId: layers._id,
+          attrMapping: {},
+        };
+        obj.attrMapping[`${e}`] = fields.key;
+        finalArray.push(obj);
+        setResponseArray(finalArray);
+      }
+    } else {
+      const obj: any = {
+        layerId: layers._id,
+        attrMapping: {},
+      };
+      obj.attrMapping[`${e}`] = fields.key;
+      finalArray.push(obj);
+      setResponseArray(finalArray);
+    }
+  }
+
+  const steps2 = [
+    {
+      title: "Import Data",
+      content: (
+        <>
+          {!showAddMissions ? (
+            <div
+              style={{
+                width: "500px",
+                margin: "100px auto",
+                border: "1px solid #d9d9d9",
+                padding: "1rem",
+                borderRadius: "4px",
+              }}
+            >
+              <Empty description="Add new mission to select layers from which to import data" />
+              <Button
+                type="default"
+                onClick={() => setShowAddMissions(true)}
+                style={{ position: "relative", left: "40%", marginTop: "20px" }}
+              >
+                Add Mission
+              </Button>
+            </div>
+          ) : (
+            <div style={{ margin: "10px auto", height: "100%" }}>
+              <div
+                className="vertical-center"
+                style={{
+                  //backgroundColor: "indigo",
+                  height: "500px",
+                  overflow: "auto",
+                }}
+              >
+                <Row>
+                  <Col span={12}>
+                    <h4>
+                      <span style={{ color: "red" }}>*</span> Choose mission to
+                      import data from
+                    </h4>
+                    <Select
+                      placeholder="Select Mission(s)"
+                      showSearch
+                      loading={missionsLoading}
+                      // options={missionOptions}
+                      onSearch={handleSearch}
+                      // optionFilterProp='label'
+                      showArrow
+                      allowClear
+                      onChange={(e) => setSelectedMissions([e])}
+                      style={{ width: "200px" }}
+                      onPopupScroll={onScroll}
+                      onFocus={() => {
+                        setPage(1);
+                        setMissionOptions([]);
+                        setMissionSearchValue("");
+                        setFetch(true);
+                      }}
+                      notFoundContent={null}
+                      filterOption={false}
+                    >
+                      {missionOptions.map((mission) => (
+                        <Option key={mission._id} value={mission._id}>
+                          {mission.name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Col>
+                  <Col span={12}>
+                    <h4>
+                      <span style={{ color: "red" }}>*</span> Choose layer(s)
+                      from mission
+                    </h4>
+                    <Select
+                      placeholder="Select Layers(s)"
+                      showSearch
+                      loading={layersLoading}
+                      // options={missionOptions}
+                      // onSearch={(e) => console.log(e)}
+                      optionFilterProp="label"
+                      showArrow
+                      allowClear={false}
+                      onDeselect={(e) => {
+                        console.log(e);
+                        const filtered: any = selectedLayers.filter(
+                          (i) => i !== e && i !== undefined
+                        );
+                        setSelectedLayers(filtered);
+                        setApiCall(true);
+                      }}
+                      onChange={(e) => {
+                        const value: any = e;
+                        const array: any = [...selectedLayers];
+                        if (value.length > 1) {
+                          console.log(array.includes(value.at(-1)));
+                          array.push(value.at(-1));
+                        } else {
+                          console.log(array.includes(value[0]));
+                          array.push(value[0]);
+                        }
+                        setSelectedLayers(array);
+                      }}
+                      mode="tags"
+                      style={{ minWidth: "200px", maxWidth: "500px" }}
+                    >
+                      {selectedMissions &&
+                        layerOptions.map((layer) => (
+                          <Option key={layer._id} value={layer._id}>
+                            {layer.name}
+                          </Option>
+                        ))}
+                    </Select>
+                  </Col>
+                </Row>
+                {uiElement.map((id: any) => {
+                  return (
+                    <Row style={{ marginTop: "12px" }}>
+                      <Col span={12}>
+                        <h4>
+                          <span style={{ color: "red" }}>*</span> Choose mission
+                          to import data from
+                        </h4>
+                        <Select
+                          placeholder="Select Mission(s)"
+                          showSearch
+                          loading={missionsLoading}
+                          // options={missionOptions}
+                          onSearch={handleSearch}
+                          // optionFilterProp='label'
+                          showArrow
+                          allowClear
+                          onChange={(e) => setSelectedMissions([e])}
+                          style={{ width: "200px" }}
+                          onPopupScroll={onScroll}
+                          onFocus={() => {
+                            setPage(1);
+                            setMissionOptions([]);
+                            setMissionSearchValue("");
+                            setFetch(true);
+                          }}
+                          notFoundContent={null}
+                          filterOption={false}
+                        >
+                          {missionOptions.map((mission) => (
+                            <Option key={mission._id} value={mission._id}>
+                              {mission.name}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Col>
+                      <Col span={12}>
+                        <h4>
+                          <span style={{ color: "red" }}>*</span> Choose
+                          layer(s) from mission
+                        </h4>
+                        <Select
+                          placeholder="Select Layers(s)"
+                          showSearch
+                          loading={layersLoading}
+                          // options={missionOptions}
+                          // onSearch={(e) => console.log(e)}
+                          optionFilterProp="label"
+                          showArrow
+                          allowClear={false}
+                          onDeselect={(e) => {
+                            console.log(e);
+                            const filtered: any = selectedLayers.filter(
+                              (i) => i !== e && i !== undefined
+                            );
+                            setSelectedLayers(filtered);
+                            setApiCall(true);
+                          }}
+                          onChange={(e) => {
+                            const value: any = e;
+                            const array: any = [...selectedLayers];
+                            if (value.length > 1) {
+                              console.log(array.includes(value.at(-1)));
+                              array.push(value.at(-1));
+                            } else {
+                              console.log(array.includes(value[0]));
+                              array.push(value[0]);
+                            }
+                            setSelectedLayers(array);
+                          }}
+                          mode="tags"
+                          style={{ minWidth: "200px", maxWidth: "500px" }}
+                        >
+                          {selectedMissions &&
+                            layerOptions.map((layer) => (
+                              <Option key={layer._id} value={layer._id}>
+                                {layer.name}
+                              </Option>
+                            ))}
+                        </Select>
+                      </Col>
+                    </Row>
+                  );
+                })}
+
+                <Button
+                  type="primary"
+                  style={{ marginTop: "10px" }}
+                  onClick={() => addMore()}
+                >
+                  Add more missions
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
+      ),
+    },
+    {
+      title: "Attribute Selection",
+      content: (
+        <>
+          {/* <Title style={{ marginTop: "12px" }} level={5}>
+            *Choose attributes to inherit in layer.
+          </Title> */}
+          <Title level={4} style={{ marginTop: "8px" }}>
+            Select Attributes to inherit in layer
+          </Title>
+          <Text>
+            Select the attributes that you want as to be the base attribute
+            structure of your layer.
+          </Text>
+
+          <Table
+            rowSelection={{
+              ...rowSelection,
+            }}
+            columns={columns2}
+            dataSource={tableData}
+            style={{ height: "400px", width: "100%", margin: "10px auto" }}
+            // size='small'
+            scroll={{ y: "390px" }}
+            pagination={false}
+            // pagination={{ hideOnSinglePage: true }}
+          />
+        </>
+      ),
+    },
+    {
+      title: "Attribute Mapping",
+      content: (
+        <>
+          <Title level={4} style={{ marginTop: "8px" }}>
+            Map attributes to existing
+          </Title>
+          <Text>
+            Select the attributes imported from your missions, to map against
+            existing attributes of the layer. Remaining un-mapped attribute
+            information will not be lost as it will be still stored in your
+            layer.
+          </Text>
+
+          {/* <AttributeMapping
+            metadata = {metadata}
+            primeAttributes = {primeAttributes}
+            responseArray = {responseArray}
+            setResponseArray = {setResponseArray}
+          /> */}
+          <Collapse
+            defaultActiveKey={activeTab}
+            onChange={(e) => setActiveTab(e)}
+            style={{
+              width: "100%",
+              overflow: "auto",
+              maxHeight: "400px",
+              marginTop: "12px",
+            }}
+            //accordion
+          >
+            {metadata.map((missions: any) => {
+              return (
+                <>
+                  {missions.layers.map((layers: any, i) => {
+                    return (
+                      <Panel
+                        header={`${layers.name} (${missions.missionName})`}
+                        key={i}
+                      >
+                        <div style={{ padding: "20px" }} key={uuid()}>
+                          <Row>
+                            <Col span={12}>
+                              <Title level={5}>Attribute name</Title>
+                            </Col>
+                            <Col span={12}>
+                              <Title level={5}>Map to field</Title>
+                            </Col>
+                          </Row>
+                          {/* -ROW------------------- */}
+                          {layers.fields.map((fields: any) => {
+                            if (
+                              fields.key !== "sys_id" &&
+                              fields.key !== "icon" &&
+                              fields.key !== "color"
+                            ) {
+                              return (
+                                <>
+                                  <Row style={{ padding: "5px" }} key={uuid()}>
+                                    <Col span={12}>
+                                      <Text>{fields.key}</Text>
+                                      <br />
+                                      <Text type="secondary">
+                                        Sample: {fields.value}
+                                      </Text>
+                                    </Col>
+                                    <Col span={12}>
+                                      <Select
+                                        key={`${fields.key}-${uuid()}`}
+                                        style={{ width: "200px" }}
+                                        defaultValue={
+                                          selectedAttr[layers._id]
+                                            ? selectedAttr[layers._id][
+                                                fields.key
+                                              ]
+                                              ? selectedAttr[layers._id][
+                                                  fields.key
+                                                ]
+                                              : null
+                                            : null
+                                        }
+                                        // onChange={(e)=>{
+                                        //   handleAttributeMapping(e, fields, layers)
+                                        // }}
+                                        onSelect={(e) =>
+                                          handleAttributeMapping(
+                                            e,
+                                            fields,
+                                            layers
+                                          )
+                                        }
+                                        placeholder="Map the attribute selected"
+                                      >
+                                        {primeAttributes.map((item, index) => (
+                                          <Option
+                                            key={`${uuid()}-${item.key}`}
+                                            value={item.attribute}
+                                          >
+                                            {item.attribute}
+                                          </Option>
+                                        ))}
+                                      </Select>
+                                    </Col>
+                                  </Row>
+                                  <Divider />
+                                </>
+                              );
+                            }
+                          })}
+                        </div>
+                      </Panel>
+                    );
+                  })}
+                </>
+              );
+            })}
+          </Collapse>
+        </>
+      ),
+    },
+    {
+      title: "Layer Details",
+      content: (
+        <>
+          <Form
+            layout="vertical"
+            style={{ height: "390px", marginTop: "10px" }}
+            form={form}
+          >
+            <Row>
+              <Col span={14} style={{ padding: "10px" }}>
+                <Item label="Name" name="name">
+                  <Input
+                    placeholder="Layer's Name"
+                    onChange={(e) => {
+                      setLayerName(e.target.value);
+                    }}
+                  />
+                </Item>
+                {layerType1 == "Vector" && (
+                  <Item label="Layer Type" name="layertype">
+                    <TreeSelect
+                      showSearch
+                      style={{ width: "100%" }}
+                      dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+                      placeholder="Select Layer Type"
+                      allowClear
+                      treeData={props.options[1].children[2].children}
+                      onChange={changeLayerType}
+                    />
+                  </Item>
+                )}
+                <Item label="Capture Date" name="date">
+                  <DatePicker
+                    format={"YYYY/MM/DD HH:mm"}
+                    onChange={(value: any) => {
+                      if (value) {
+                        setCaptureDate(value.toISOString(true));
+                      } else setCaptureDate("");
+                    }}
+                  />
+                </Item>
+              </Col>
+              <Col span={10} style={{ padding: "5px" }}>
+                <Row>
+                  {layerType1 == "Vector" && (
+                    <SketchPicker
+                      color={layerColor}
+                      onChangeComplete={(color) => setLayerColor(color.hex)}
+                    />
+                  )}
+                </Row>
+              </Col>
+            </Row>
+          </Form>
+        </>
+      ),
+    },
+  ];
+
+  // For updating layers
+  const steps2Update = [
+    {
+      title: "Import Data",
+      content: (
+        <>
+          {!showAddMissions ? (
+            <div
+              style={{
+                width: "500px",
+                margin: "100px auto",
+                border: "1px solid #d9d9d9",
+                padding: "1rem",
+                borderRadius: "4px",
+              }}
+            >
+              <Empty description="Add new mission to select layers from which to import data" />
+              <Button
+                type="default"
+                onClick={() => setShowAddMissions(true)}
+                style={{ position: "relative", left: "40%", marginTop: "20px" }}
+              >
+                Add Mission
+              </Button>
+            </div>
+          ) : (
+            <div style={{ margin: "10px auto", height: "100%" }}>
+              <div
+                className="vertical-center"
+                style={{
+                  //backgroundColor: "indigo",
+                  height: "500px",
+                  overflow: "auto",
+                }}
+              >
+                <Row>
+                  <Col span={12}>
+                    <h4>
+                      <span style={{ color: "red" }}>*</span> Choose mission to
+                      import data from
+                    </h4>
+                    <Select
+                      placeholder="Select Mission(s)"
+                      showSearch
+                      loading={missionsLoading}
+                      // options={missionOptions}
+                      onSearch={handleSearch}
+                      // optionFilterProp='label'
+                      showArrow
+                      allowClear
+                      onChange={(e) => setSelectedMissions([e])}
+                      style={{ width: "200px" }}
+                      onPopupScroll={onScroll}
+                      onFocus={() => {
+                        setPage(1);
+                        setMissionOptions([]);
+                        setMissionSearchValue("");
+                        setFetch(true);
+                      }}
+                      notFoundContent={null}
+                      filterOption={false}
+                    >
+                      {missionOptions.map((mission) => (
+                        <Option key={mission._id} value={mission._id}>
+                          {mission.name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Col>
+                  <Col span={12}>
+                    <h4>
+                      <span style={{ color: "red" }}>*</span> Choose layer(s)
+                      from mission
+                    </h4>
+                    <Select
+                      placeholder="Select Layers(s)"
+                      showSearch
+                      loading={layersLoading}
+                      // options={missionOptions}
+                      // onSearch={(e) => console.log(e)}
+                      optionFilterProp="label"
+                      showArrow
+                      allowClear={false}
+                      onDeselect={(e) => {
+                        console.log(e);
+                        const filtered: any = selectedLayers.filter(
+                          (i) => i !== e && i !== undefined
+                        );
+                        setSelectedLayers(filtered);
+                        setApiCall(true);
+                      }}
+                      onChange={(e) => {
+                        const value: any = e;
+                        const array: any = [...selectedLayers];
+                        if (value.length > 1) {
+                          console.log(array.includes(value.at(-1)));
+                          array.push(value.at(-1));
+                        } else {
+                          console.log(array.includes(value[0]));
+                          array.push(value[0]);
+                        }
+                        setSelectedLayers(array);
+                      }}
+                      mode="tags"
+                      style={{ minWidth: "200px", maxWidth: "500px" }}
+                    >
+                      {selectedMissions &&
+                        layerOptions.map((layer) => (
+                          <Option key={layer._id} value={layer._id}>
+                            {layer.name}
+                          </Option>
+                        ))}
+                    </Select>
+                  </Col>
+                </Row>
+                {uiElement.map((id: any) => {
+                  return (
+                    <Row style={{ marginTop: "12px" }}>
+                      <Col span={12}>
+                        <h4>
+                          <span style={{ color: "red" }}>*</span> Choose mission
+                          to import data from
+                        </h4>
+                        <Select
+                          placeholder="Select Mission(s)"
+                          showSearch
+                          loading={missionsLoading}
+                          // options={missionOptions}
+                          onSearch={handleSearch}
+                          // optionFilterProp='label'
+                          showArrow
+                          allowClear
+                          onChange={(e) => setSelectedMissions([e])}
+                          style={{ width: "200px" }}
+                          onPopupScroll={onScroll}
+                          onFocus={() => {
+                            setPage(1);
+                            setMissionOptions([]);
+                            setMissionSearchValue("");
+                            setFetch(true);
+                          }}
+                          notFoundContent={null}
+                          filterOption={false}
+                        >
+                          {missionOptions.map((mission) => (
+                            <Option key={mission._id} value={mission._id}>
+                              {mission.name}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Col>
+                      <Col span={12}>
+                        <h4>
+                          <span style={{ color: "red" }}>*</span> Choose
+                          layer(s) from mission
+                        </h4>
+                        <Select
+                          placeholder="Select Layers(s)"
+                          showSearch
+                          loading={layersLoading}
+                          // options={missionOptions}
+                          // onSearch={(e) => console.log(e)}
+                          optionFilterProp="label"
+                          showArrow
+                          allowClear={false}
+                          onDeselect={(e) => {
+                            console.log(e);
+                            const filtered: any = selectedLayers.filter(
+                              (i) => i !== e && i !== undefined
+                            );
+                            setSelectedLayers(filtered);
+                            setApiCall(true);
+                          }}
+                          onChange={(e) => {
+                            const value: any = e;
+                            const array: any = [...selectedLayers];
+                            if (value.length > 1) {
+                              console.log(array.includes(value.at(-1)));
+                              array.push(value.at(-1));
+                            } else {
+                              console.log(array.includes(value[0]));
+                              array.push(value[0]);
+                            }
+                            setSelectedLayers(array);
+                          }}
+                          mode="tags"
+                          style={{ minWidth: "200px", maxWidth: "500px" }}
+                        >
+                          {selectedMissions &&
+                            layerOptions.map((layer) => (
+                              <Option key={layer._id} value={layer._id}>
+                                {layer.name}
+                              </Option>
+                            ))}
+                        </Select>
+                      </Col>
+                    </Row>
+                  );
+                })}
+
+                <Button
+                  type="primary"
+                  style={{ marginTop: "10px" }}
+                  onClick={() => addMore()}
+                >
+                  Add more missions
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
+      ),
+    },
+    {
+      title: "Attribute Mapping",
+      content: (
+        <>
+          <Title level={4} style={{ marginTop: "8px" }}>
+            Map attributes to existing
+          </Title>
+          <Text>
+            Select the attributes imported from your missions, to map against
+            existing attributes of the layer. Remaining un-mapped attribute
+            information will not be lost as it will be still stored in your
+            layer.
+          </Text>
+          {/* <AttributeMapping
+            metadata = {metadata}
+            primeAttributes = {primeAttributes}
+            responseArray = {responseArray}
+            setResponseArray = {setResponseArray}
+          /> */}
+          <Collapse
+            defaultActiveKey={activeTab}
+            onChange={(e) => setActiveTab(e)}
+            style={{
+              width: "100%",
+              overflow: "auto",
+              maxHeight: "400px",
+              marginTop: "12px",
+            }}
+            //accordion
+          >
+            {metadata.map((missions: any) => {
+              return (
+                <>
+                  {missions.layers.map((layers: any, i) => {
+                    return (
+                      <Panel
+                        header={`${layers.name} (${missions.missionName})`}
+                        key={i}
+                      >
+                        <div style={{ padding: "20px" }} key={uuid()}>
+                          <Row>
+                            <Col span={12}>
+                              <Title level={5}>Attribute name</Title>
+                            </Col>
+                            <Col span={12}>
+                              <Title level={5}>Map to field</Title>
+                            </Col>
+                          </Row>
+                          {/* -ROW------------------- */}
+                          {layers.fields.map((fields: any) => {
+                            if (
+                              fields.key !== "sys_id" &&
+                              fields.key !== "icon" &&
+                              fields.key !== "color"
+                            ) {
+                              return (
+                                <>
+                                  <Row style={{ padding: "5px" }} key={uuid()}>
+                                    <Col span={12}>
+                                      <Text>{fields.key}</Text>
+                                      <br />
+                                      <Text type="secondary">
+                                        Sample: {fields.value}
+                                      </Text>
+                                    </Col>
+                                    <Col span={12}>
+                                      <Select
+                                        key={`${fields.key}-${uuid()}`}
+                                        style={{ width: "200px" }}
+                                        defaultValue={
+                                          selectedAttr[layers._id]
+                                            ? selectedAttr[layers._id][
+                                                fields.key
+                                              ]
+                                              ? selectedAttr[layers._id][
+                                                  fields.key
+                                                ]
+                                              : null
+                                            : null
+                                        }
+                                        // onChange={(e)=>{
+                                        //   handleAttributeMapping(e, fields, layers)
+                                        // }}
+                                        onSelect={(e) =>
+                                          handleAttributeMapping(
+                                            e,
+                                            fields,
+                                            layers
+                                          )
+                                        }
+                                        placeholder="Map the attribute selected"
+                                      >
+                                        {primeAttributes.map((item, index) => (
+                                          <Option
+                                            key={`${uuid()}-${item.key}`}
+                                            value={item.attribute}
+                                          >
+                                            {item.attribute}
+                                          </Option>
+                                        ))}
+                                      </Select>
+                                    </Col>
+                                  </Row>
+                                  <Divider />
+                                </>
+                              );
+                            }
+                          })}
+                        </div>
+                      </Panel>
+                    );
+                  })}
+                </>
+              );
+            })}
+          </Collapse>
+        </>
+      ),
+    },
+    {
+      title: "Layer Updated!",
+      content: (
+        <>
+          <div
+            style={{
+              marginTop: "100px",
+            }}
+          >
+            <Result
+              status="success"
+              title="Successfully Updated Layer!"
+              subTitle="You can now view the layer in the map."
+            />
+          </div>
+        </>
+      ),
+    },
+  ];
+
+  useEffect(
+    () => console.log(layerName, captureDate, layerType, layerTypeId, fileList),
+    [layerName, captureDate, layerType, layerTypeId, fileList]
+  );
+
+  return (
+    <div>
+      <Modal
+        title={props.isUpdate ? "Update layer" : "Create layer"}
+        visible={props.isModalVisible}
+        onCancel={() => {
+          props.setShow(false);
+          setSelectedKey(0);
+        }}
+        okText="Next"
+        width={600}
+        onOk={() => {
+          props.setShow(false);
+          if (selectedKey == 1) setIsModalVisible1(true);
+          else if (selectedKey == 2) setIsModalVisible2(true);
+          else if (selectedKey == 3) props.openPic2Mapv2(true);
+          setSelectedKey(0);
+        }}
+        okButtonProps={{ disabled: !selectedKey }}
+      >
+        <Row
+          align="middle"
+          justify="center"
+          style={{ width: "450px", margin: "0 auto" }}
+        >
+          <Col>
+            <Card
+              key="1"
+              onClick={() => setSelectedKey(1)}
+              className={`create-mission-extended-card ${
+                selectedKey == 1 ? "create-mission-extended-card-selected" : ""
+              }`}
+              hoverable
+            >
+              <Meta
+                avatar={
+                  <Avatar
+                    size={50}
+                    icon={<UploadOutlined />}
+                    style={{
+                      backgroundColor: "transparent",
+                      color: "black",
+                    }}
+                  />
+                }
+                title={"Upload From File"}
+                description={
+                  props.isUpdate
+                    ? "Update layer by uploading a vector file from your system"
+                    : "Create a new layer by uploading a vector file from your system"
+                }
+              />
+            </Card>
+            <Card
+              key="2"
+              onClick={() => {
+                setSelectedKey(2);
+                setMissionOptions([]);
+              }}
+              className={`create-mission-extended-card ${
+                selectedKey == 2 ? "create-mission-extended-card-selected" : ""
+              }`}
+              hoverable
+            >
+              <Meta
+                avatar={
+                  <Avatar
+                    size={50}
+                    icon={<ImportOutlined />}
+                    style={{
+                      backgroundColor: "transparent",
+                      color: "black",
+                    }}
+                  />
+                }
+                title={"Import From Missions"}
+                description={
+                  props.isUpdate
+                    ? "Update layer by importing existing data from missions"
+                    : "Create a new layer by importing existing data from missions"
+                }
+              />
+            </Card>
+            {props.isUpdate ? (
+              <></>
+            ) : (
+              <Card
+                key="3"
+                onClick={() => setSelectedKey(3)}
+                className={`create-mission-extended-card ${
+                  selectedKey == 3
+                    ? "create-mission-extended-card-selected"
+                    : ""
+                }`}
+                hoverable
+              >
+                <Meta
+                  avatar={
+                    <Avatar
+                      size={50}
+                      icon={<ImportOutlined />}
+                      style={{
+                        backgroundColor: "transparent",
+                        color: "black",
+                      }}
+                    />
+                  }
+                  title={"Upload Images"}
+                  description="Create a new layer by uploading geolocated images"
+                />
+              </Card>
+            )}
+          </Col>
+        </Row>
+      </Modal>
+
+      <Modal
+        title={props.isUpdate ? "Update Layer" : "Create Layer"}
+        visible={isModalVisible1}
+        onCancel={() => {
+          if (!uploading) {
+            setIsModalVisible1(false);
+            setFileList([]);
+            setCaptureDate("");
+            setLayerName("");
+            setLayerType("");
+            setLayerTypeId("");
+            setCurrent1(0);
+            setSelectedAttr({});
+            form.resetFields();
+          } else
+            message.warning("Cannot close window during an ongoing process!");
+        }}
+        footer={renderFooterButtons()}
+        bodyStyle={{
+          padding: "1rem",
+          width: "800px",
+          margin: "auto",
+          //height: "580px",
+        }}
+        width={900}
+        centered={true}
+      >
+        {props.isUpdate ? (
+          <>
+            {props.updateType == "Raster" ? (
+              <>
+                <Steps current={current1}>
+                  {steps1RasterUpdate.map((item) => (
+                    <Step key={item.title} title={item.title} />
+                  ))}
+                </Steps>
+                <div className="steps-content">
+                  {steps1RasterUpdate[current1].content}
+                </div>
+              </>
+            ) : (
+              <>
+                <Steps current={current1}>
+                  {steps1Update.map((item) => (
+                    <Step key={item.title} title={item.title} />
+                  ))}
+                </Steps>
+                <div className="steps-content">
+                  {steps1Update[current1].content}
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            {layerType == "Raster" ? (
+              <>
+                <Steps current={current1}>
+                  {steps1Raster.map((item) => (
+                    <Step key={item.title} title={item.title} />
+                  ))}
+                </Steps>
+                <div className="steps-content">
+                  {steps1Raster[current1].content}
+                </div>
+              </>
+            ) : (
+              <>
+                <Steps current={current1}>
+                  {steps1.map((item) => (
+                    <Step key={item.title} title={item.title} />
+                  ))}
+                </Steps>
+                <div className="steps-content">{steps1[current1].content}</div>
+              </>
+            )}
+          </>
+        )}
+      </Modal>
+
+      <Modal
+        title={props.isUpdate ? "Update layer" : "Create layer"}
+        visible={isModalVisible2}
+        onCancel={() => {
+          if (!uploading) {
+            setIsModalVisible2(false);
+            setShowAddMissions(false);
+            setMissionOptions([]);
+            setUIElement([]);
+            setSelectedLayers([]);
+            setCurrent2(0);
+            setResponseArray([]);
+            setLayerType1("");
+            setCaptureDate("");
+            setLayerName("");
+            setLayerType("");
+            setLayerTypeId("");
+            setSelectedAttr({});
+            form.resetFields();
+          } else message.warning("Cannot close window during ongoing process!");
+        }}
+        footer={renderFooterButtons()}
+        bodyStyle={{
+          padding: "1rem",
+          width: "1100px",
+          margin: "auto",
+          height: "600px",
+        }}
+        width={1150}
+        centered={true}
+      >
+        <Steps current={current2}>
+          {props.isUpdate ? (
+            <>
+              {steps2Update.map((item) => (
+                <Step key={item.title} title={item.title} />
+              ))}
+            </>
+          ) : (
+            <>
+              {steps2.map((item) => (
+                <Step key={item.title} title={item.title} />
+              ))}
+            </>
+          )}
+        </Steps>
+        {props.isUpdate ? (
+          <div className="steps-content">{steps2Update[current2].content}</div>
+        ) : (
+          <div className="steps-content">{steps2[current2].content}</div>
+        )}
+
+        {/* <div className='steps-action'>
+          {current2 < steps2.length - 1 && (
+            <Button type='primary' onClick={() => setCurrent2(current2 + 1)}>
+              Next
+            </Button>
+          )}
+          {current2 === steps2.length - 1 && (
+            <Button
+              type='primary'
+              onClick={() => message.success("Processing complete!")}
+            >
+              Done
+            </Button>
+          )}
+          {current2 > 0 && (
+            <Button
+              style={{ margin: "0 8px" }}
+              onClick={() => setCurrent2(current2 - 1)}
+            >
+              Previous
+            </Button>
+          )}
+        </div> */}
+      </Modal>
+      <Modal
+        title="Storage Exceeded!"
+        visible={storageModal}
+        onOk={() => setStorageModal(false)}
+        onCancel={() => setStorageModal(false)}
+      >
+        <Result
+          status="403"
+          title="Oops! It seems you have run out of storage!"
+          subTitle="Please contact admin@kesowa.com to renew our services! to see you storage details, head over to My Account > Package."
+        />
+      </Modal>
+    </div>
+  );
+};
+
+const mapStateToProps = (state: any) => ({
+  Auth: state.Auth,
+  Theme: state.Theme,
+});
+
+export default connect(mapStateToProps, { logout })(CreateBaseLayer);

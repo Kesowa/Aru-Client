@@ -1,0 +1,9 @@
+<svg id="Component_266_1" data-name="Component 266 – 1" xmlns="http://www.w3.org/2000/svg" width="152" height="93" viewBox="0 0 152 93">
+  <rect id="Rectangle_1558" data-name="Rectangle 1558" width="152" height="93" fill="#e9e9f0"/>
+  <rect id="Rectangle_1559" data-name="Rectangle 1559" width="68" height="39" transform="translate(6 6)" fill="#a5a4bf"/>
+  <rect id="Rectangle_1560" data-name="Rectangle 1560" width="68" height="81" transform="translate(78 6)" fill="#a5a4bf"/>
+  <rect id="Rectangle_1561" data-name="Rectangle 1561" width="68" height="39" transform="translate(6 48)" fill="#a5a4bf"/>
+  <g id="map-marker-alt-solid" transform="translate(104 35)">
+    <path id="map-marker-alt-solid-2" data-name="map-marker-alt-solid" d="M7.178,20.9C1.124,12.126,0,11.226,0,8A8,8,0,0,1,16,8c0,3.226-1.124,4.126-7.178,12.9a1,1,0,0,1-1.644,0ZM8,11.333A3.333,3.333,0,1,0,4.667,8,3.333,3.333,0,0,0,8,11.333Z" fill="#e9e9f0"/>
+  </g>
+</svg>

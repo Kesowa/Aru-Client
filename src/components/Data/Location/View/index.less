@@ -1,0 +1,247 @@
+.location_card_header {
+  height: 120px;
+  background: #5f5e75;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+
+  * {
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .location_card_header_sec_one {
+    .location_card_header_sec_one_heading {
+      display: flex;
+      align-items: center;
+      width: 100px;
+      justify-content: space-between;
+    }
+  }
+
+  .location_card_header_sec_two {
+    width: 200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+// .location_card_data {
+//     height : calc(100vh - 220px)
+// }
+
+.location_card_data {
+  height: calc(100vh - 83px);
+  //margin-left: -24px;
+  //margin-right: -24px;
+}
+
+.mission_tab {
+  height: 48vh;
+  box-sizing: border-box;
+  //border-bottom: 1px solid gray;
+  overflow-y: auto;
+  // &::-webkit-scrollbar {
+  //   display: none;
+  // }
+  .mission_tab_mission_content {
+    border-bottom: 1px solid #cccccc;
+  }
+  .mission_tab_mission_content:hover {
+    background-color: #5f5e753d;
+    cursor: pointer;
+  }
+  .mission_tab_mission_content-selected {
+    border-bottom: 1px solid #42a8fc;
+    cursor: pointer;
+    .mission-name {
+      color: #42a8fc;
+    }
+  }
+}
+// .mission_tab {
+//     height : calc(100vh - 600px);
+//     overflow : scroll;
+//     * {
+//         margin : 0;
+//     }
+//     &::-webkit-scrollbar {
+//         display: none;
+//     }
+
+//     .mission_tab_mission_content {
+//         display : grid;
+//         grid-template-columns: 1fr 8fr;
+//         justify-content: center;
+//         align-items: center;
+//         margin-top : 10px;
+//         padding-bottom: 10px;
+//         border-bottom: 1px solid #cccccc;;
+//         cursor: pointer;
+//         .mission_tab_mission_content_inner {
+//             h4 {
+//                 width : 100%;
+//                 display : flex;
+//                 justify-content: space-between;
+//             }
+//         }
+//     }
+
+//     .mission_tab_mission_content-selected {
+
+//         padding-bottom: 10px;
+//         border-bottom: 1px solid #42A8FC;
+//         cursor: pointer;
+//     }
+// }
+
+.mission_details {
+  padding-top: 15px;
+  * {
+    margin: 0;
+    padding: 0;
+  }
+  .flight_details,
+  .outcomes_details
+   {
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .user_details {
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .outcomes_details {
+    .il {
+      display: grid;
+      grid-template-columns: 1fr 3fr;
+    }
+  }
+
+  .user_details {
+    .user {
+      display: flex;
+      align-items: center;
+
+      div {
+        margin-left: 15px;
+      }
+    }
+  }
+}
+
+.mission-loading {
+  height: 400px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.selected_mission_details {
+  display: flex;
+  height: 300px;
+  justify-content: center;
+  align-items: center;
+}
+
+.checkbox_container {
+  width: 120px;
+  height: 40px;
+  position: absolute;
+  top: 10px;
+  left: 190px;
+  background-color: #ffffff;
+  box-shadow: 2px 3px 7px 0px rgba(0, 0, 0, 0.75);
+
+  .checkbox_inner {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 100%;
+
+    span {
+      font-weight: bold;
+      font-size: 17px;
+    }
+  }
+
+  .check {
+    position: absolute;
+    top: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+
+.select_dates {
+  width: auto;
+  padding: 10px;
+  height: 40px;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  background-color: #ffffff;
+  font-weight: bold;
+  font-size: 17px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 2px 3px 7px 0px rgba(0, 0, 0, 0.75);
+}
+
+
+.alert_loading {
+  position: absolute;
+  top : 0;
+  left : 0;
+  bottom : 0;
+  right : 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .loader {
+    height : 100px;
+    width : 200px;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.5) { 
+  .mission_details {
+    .user_details {
+      margin-top: 15px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .user-button{
+    padding:20px;
+  }
+  // .mission_tab{
+  //   height: 40vh;
+  // }
+  // .mission_details > .user_details > .user {
+  //   .name{
+  //     font-size: 14px;
+  //     margin-left: -3px;
+  //   }
+  //   .assigned {
+  //     font-size: 12px;
+  //     margin-left: -3px;
+  //   }
+  // }
+}

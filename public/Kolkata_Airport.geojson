@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "Kolkata_Airport",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 0, "Zone": "Kolkata Airport", "color" : "#4DD637", "source": "DJI GeoZones"}, "geometry": { "type": "MultiPolygon", "coordinates": [ [ [ [ 88.4408200493, 22.6332118549 ], [ 88.4458113149, 22.6807531528 ], [ 88.45309246, 22.6801022649 ], [ 88.4534711457, 22.6800684127 ], [ 88.44847988, 22.6325268776 ], [ 88.4481011944, 22.6325607415 ], [ 88.4408200493, 22.6332118549 ] ] ] ] } }
+]
+}

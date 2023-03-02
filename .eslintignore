@@ -1,0 +1,8 @@
+node_modules
+build
+assets
+dist
+jest.config.jest
+mongo-init.js
+openAPI
+tmp

@@ -1,0 +1,21 @@
+<svg id="RadiusTool" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24" fill="#3B86FF">
+  <defs>
+    <clipPath id="clip-path">
+      <path id="Path_3894" data-name="Path 3894" d="M840-4666.475l-.525-.525L837-4664.525,834.525-4667l-.525.525,2.475,2.475L834-4661.525l.525.525,2.475-2.475,2.475,2.475.525-.525L837.525-4664Z" transform="translate(-834 4667)" fill="#43425d" clip-rule="evenodd"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <path id="Path_3893" data-name="Path 3893" d="M321-4576.4H647.4V-4688H321Z" transform="translate(-321 4688)" fill="#43425d"/>
+    </clipPath>
+  </defs>
+  <g id="Ellipse_415" data-name="Ellipse 415" fill="none" stroke="#43425d" stroke-width="1.3" stroke-dasharray="2 1">
+    <circle cx="12" cy="12" r="12" stroke="none"/>
+    <circle cx="12" cy="12" r="11.35" fill="none"/>
+  </g>
+  <g id="Icon_-_Close_20" data-name="Icon - Close / 20" transform="translate(7.857 12) rotate(-45)">
+    <g id="Group_3840" data-name="Group 3840" clip-path="url(#clip-path)">
+      <g id="Group_3839" data-name="Group 3839" transform="translate(-307.8 -12.6)" clip-path="url(#clip-path-2)">
+        <path id="Path_3892" data-name="Path 3892" d="M829-4672h12v12H829Z" transform="translate(-524.2 4681.6)" fill="#43425d"/>
+      </g>
+    </g>
+  </g>
+</svg>

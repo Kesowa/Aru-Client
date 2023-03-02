@@ -1,0 +1,168 @@
+import React, { useState } from "react";
+import apis from "../../services/apis";
+import http from "../../services/httpCall";
+import { loading } from "../../actions/loadingAction";
+import { connect } from "react-redux";
+import { useHistory, useLocation } from "react-router-dom";
+import { AxiosErrorHandler } from "../../services/httpErrorHandle";
+import { Typography, Form, Input, Button, message, Alert } from "antd";
+import { MailOutlined, LockOutlined } from "@ant-design/icons";
+import { login, setUserDetails, logout } from "../../actions/authAction";
+import "./index.less";
+import AryaLogo from "../../static/kesowa-logo.svg";
+import KesowaLogo from "../../static/kiv_logo_new.png";
+import { clientOptions } from "../../static/sideBarOptions";
+import { Link } from "react-router-dom";
+import { INSTANCE, Instance } from "src/constants";
+import { components } from "src/handlers/schema";
+import Logo from "../shared/Logo";
+import "../shared/login-bg.less";
+
+function Login(props: any) {
+  const [errMessage, setErrMessage] = useState("");
+  const location = useLocation();
+  const history = useHistory();
+  console.log("location", location);
+  const { from } = location.state || { from: { pathname: "/" } };
+  const onFinish = (values: any) => {
+    //console.log(`getting ${values} from the form`);
+    props.loading(true);
+    http
+      .post<components["schemas"]["LoginAuthResponse"]>(apis.LOGIN, values)
+      .then((result) => {
+        console.log(result.data);
+        if (result.data.status) {
+          //login
+          localStorage.setItem("Token", result.data.token);
+          localStorage.setItem("UserId", result.data.data._id);
+
+          let sidebarOptions: any = null;
+          if (result.data.data.userType === "tenant-staff") {
+            let permissions: any = [];
+
+            result.data.data.customPermissions.forEach((p) => {
+              const filteredPermissions = p.permissions.filter(
+                (d) => d.isFrontendRoute === true
+              );
+              //console.log(filteredPermissions);
+              const k = filteredPermissions.map((e) => {
+                //console.log(e);
+                return {
+                  type: "menu",
+                  link: e.frontendRoute.trim(),
+                  icon: e.sideNavOptionIcon.trim(),
+                  text: e.sideNavOptionLabel,
+                };
+              });
+              permissions = [...k, ...permissions];
+            });
+            sidebarOptions = permissions;
+          } else if (result.data.data.userType === "tenant-client") {
+            sidebarOptions = [...clientOptions];
+          }
+          result.data.data.sidebarOptions = sidebarOptions;
+
+          props.login(
+            result.data.token,
+            result.data.data._id,
+            result.data.data
+          );
+          props.setUserDetails(result.data.data);
+          history.replace(from);
+        } else {
+          // message.error(result.data.message);
+          setErrMessage(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        setErrMessage(err?.response?.data?.message);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => {
+        props.loading(false);
+      });
+  };
+
+  return (
+    <div className="login-container login-page login-bg">
+      <div className="login-section-wrapper">
+        {errMessage && (
+          <Alert
+            style={{ marginBottom: "15px" }}
+            message={errMessage}
+            type="error"
+            closeText="Close Now"
+            onClose={() => setTimeout(() => setErrMessage(""), 500)}
+          />
+        )}
+        <Typography.Title level={1}>Aru</Typography.Title>
+        {/* <img src={AryaLogo} className="brand-logo" alt="brand-logo" /> */}
+        <Logo className="brand-logo" alt="kiv-logo" />
+        <Form name="login-form" className="login-form" onFinish={onFinish}>
+          <Form.Item
+            name="email"
+            hasFeedback={true}
+            rules={[
+              {
+                required: true,
+                message: "Please input your E-mail!",
+              },
+              {
+                type: "email",
+                message: "The input is not valid E-mail!",
+              },
+            ]}
+          >
+            <Input
+              prefix={<MailOutlined className="site-form-item-icon" />}
+              placeholder="email id"
+            />
+          </Form.Item>
+          <Form.Item
+            name="password"
+            hasFeedback={true}
+            rules={[{ required: true, message: "Please input your Password!" }]}
+          >
+            <Input.Password
+              prefix={<LockOutlined className="site-form-item-icon" />}
+              type="password"
+              placeholder="Password"
+            />
+          </Form.Item>
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="login-form-button"
+            >
+              Log in
+            </Button>
+          </Form.Item>
+          <Form.Item>
+            <Link to="/sign-up">
+              <Button type="default" className="login-form-button">
+                Sign up
+              </Button>
+            </Link>
+          </Form.Item>
+        </Form>
+
+        <div className="forgot-pas">
+          <Link to="/forgot-password">Forgot Password</Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const mapStateToProps = (state: any) => ({
+  Auth: state.Auth,
+});
+
+export default connect(mapStateToProps, {
+  loading,
+  login,
+  setUserDetails,
+  logout,
+})(Login);

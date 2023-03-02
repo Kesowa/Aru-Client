@@ -1,0 +1,173 @@
+@import "../../../shared/global_var.css";
+@darkShadow: var(--shadow-dark);
+@primary: var(--primary-color);
+@accent: var(--accent-color);
+@secondary: var(--secondary-color);
+//initial resolutions
+//@mq-768p: "max-width: 768px";
+
+.mission-list-wrapper {
+  padding: 24px;
+}
+
+.mission-view-wrapper {
+  padding: 24px;
+}
+.page {
+  background-color: #e9e9f0;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.mission-details {
+  width: 100%;
+  box-shadow: 1px 1px 3px #d1d1d1;
+  margin-bottom: 8px;
+}
+
+.pilot-profile-badge {
+  float: left;
+  display: flex;
+  .pilot-name {
+    float: right;
+    margin-left: 12px;
+    .designation {
+      margin-bottom: -2px;
+    }
+  }
+  .pilot-assign-btn {
+    margin-left: 12px;
+  }
+}
+.data-card {
+  width: 100%;
+  min-height: 300px;
+  box-shadow: 1px 1px 3px #d1d1d1;
+  margin-bottom: 8px;
+}
+.share-btn {
+  float: right;
+  margin-top: 8px;
+  margin-left: 18px;
+}
+
+.customer-card {
+  width: 100%;
+  box-shadow: 1px 1px 3px #d1d1d1;
+  margin-bottom: 8px;
+  margin-left: 8px;
+}
+
+.status-card {
+  width: 100%;
+  box-shadow: 1px 1px 3px #d1d1d1;
+  margin-bottom: 8px;
+  margin-left: 8px;
+  font-size: 0.8rem;
+}
+
+.flight-card {
+  width: 100%;
+  box-shadow: 1px 1px 3px #d1d1d1;
+  margin-bottom: 8px;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.flight-list-div {
+  display: flex;
+  flex-direction: row;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: 0.1s;
+  box-sizing: border-box;
+  // justify-content: space-between;
+  .flight-list-item {
+    padding: 5px;
+  }
+  .flight-list-item-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  &:hover {
+    background-color: @accent;
+    color: #ffff;
+    .flight-name {
+      color: #ffff;
+    }
+    .flight-timestamp {
+      color: #ffff;
+    }
+    .flight-duration {
+      color: #ffff;
+    }
+  }
+}
+
+.pilot {
+  margin: 10px 0;
+  padding: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.pilot-selected {
+  background: #1b98f5;
+  * {
+    color: #ffffff;
+  }
+}
+
+.missionViewBtn {
+  font-size: 14px;
+}
+
+.missionViewDelBtn {
+  font-size: 14px;
+}
+.tableMissionName {
+  font-size: 34px;
+  display: block;
+  // width: 210px;
+  width: fit-content;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  @media (-webkit-min-device-pixel-ratio: 1.5) {
+    width: 200px;
+    // width: fit-content;
+  }
+}
+
+.mission-id {
+  font-size: 14px;
+  display: block;
+  // width: 200px;
+  width: fit-content;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  @media (-webkit-min-device-pixel-ratio: 1.5) {
+    width: 100px;
+    // width: fit-content;
+  }
+}
+
+// refers to 150% scaling
+@media (-webkit-min-device-pixel-ratio: 1.5) {
+  .missionViewBtn {
+    font-size: 12px;
+    height: 14px;
+    width: 12px;
+  }
+  .missionViewDelBtn {
+    font-size: 12px;
+  }
+  .tableMissionName {
+    font-size: 24px;
+  }
+  // .vod-timestamp {
+  //   font-size: 10px;
+  // }
+}

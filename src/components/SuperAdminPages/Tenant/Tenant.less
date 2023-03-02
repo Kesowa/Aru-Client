@@ -1,0 +1,84 @@
+.tenant-add-wrapper {
+  padding: 24px;
+
+  .tenant-add-form {
+    .basic-info {
+
+      .avatar-uploader {
+        align-items: flex-end;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .avatar-uploader>.ant-upload {
+        width: 200px;
+        height: 200px;
+      }
+
+      .uploaded-avatar {
+        width: 200px;
+      }
+    }
+  }
+}
+
+.tenant-details-wrapper {
+  .tenant-details-inner {
+    .basic-info {
+      .tenant-image-wrapper {
+        text-align: center;
+
+        .tenant-image {
+          width: 100%;
+          max-width: 200px;
+          border-radius: 50%;
+        }
+      }
+
+      .tenant-description-texts {
+        .ant-typography {
+          margin: 0;
+        }
+      }
+
+      .tenant-deadline-wrapper {
+        text-align: center;
+
+        .tenant-deadline {
+          width: 200px;
+          height: 200px;
+          padding: 16px;
+          border-radius: 50%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .activated {
+          border: 20px solid rgb(160, 158, 158);
+        }
+
+        .deactivated {
+          border: 20px solid #f5222d;
+        }
+      }
+    }
+  }
+}
+
+.edit-tenant {
+  padding: 24px;
+
+  .basic-info {
+    margin-top: 15px;
+
+    .avatar-uploader>.ant-upload {
+      width: 150px;
+      height: 150px;
+    }
+
+    .uploaded-avatar {
+      width: 150px;
+    }
+  }
+}
