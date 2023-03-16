@@ -1,22 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useParams, useHistory } from "react-router-dom";
-import {
-  PageHeader,
-  Button,
-  Tabs,
-  Row,
-  Col,
-  message,
-  Typography,
-  Spin,
-} from "antd";
-import { PlusCircleOutlined } from "@ant-design/icons";
+import { useParams, useHistory } from "react-router-dom";
+import { Tabs, Row, Col, message, Typography } from "antd";
 import { loading } from "../../../../actions/loadingAction";
 import "./index.less";
 import io from "socket.io-client";
 import About from "./tabContents/about";
 import Outcomes from "./tabContents/outcomes";
-import ReactPlayer from "react-player";
 import { connect } from "react-redux";
 import VideoPlayer from "../../../shared/VideoPlayer";
 import DroneMap from "../../../shared/DroneMap";
@@ -25,12 +14,7 @@ import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import NoMap from "../../../../static/no-map.svg";
-import NoFeed from "../../../static/no-feed.svg";
 import streamEnd from "../../../../static/streamended.svg";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSun, faArrowDown } from "@fortawesome/free-solid-svg-icons";
-import Codes from "../../../../static/weatherCodes";
-import convertDegreeToDirection from "../../../../services/convertDegreeToDirection";
 import Weather from "../../../shared/Weather";
 import { LIVE_URL, API_URL } from "src/constants";
 

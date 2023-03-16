@@ -21,10 +21,12 @@ import {
   Result,
   Carousel,
   Badge,
+  Space,
 } from "antd";
 import {
   InboxOutlined,
   FileImageOutlined,
+  DownOutlined,
   ExclamationCircleOutlined,
   FileTextOutlined,
   DownloadOutlined,
@@ -39,9 +41,6 @@ import "../index.less";
 import apis from "../../../services/apis";
 import Dragger from "antd/lib/upload/Dragger";
 import moment from "moment";
-import { hexGrid } from "@turf/turf";
-import { borderBottomLeftRadius } from "html2canvas/dist/types/css/property-descriptors/border-radius";
-import LazyImage from "react-lazy-blur-image";
 import { PUBLIC_URL, STATIC_URL } from "src/constants";
 import VideoPlayer from "src/components/shared/VideoPlayer";
 import { BsFlagFill } from "react-icons/bs";
@@ -50,12 +49,14 @@ const { TabPane } = Tabs;
 
 function Media(props) {
   const [files, populateFiles] = useState<any>([]);
-  const [defaultFileList, setDefaultFileList] = useState([]);
+  const [defaultFileList, setDefaultFileList] = useState<any>([]);
   const [progress, setProgress] = useState(0);
   const socket: any = useRef();
+  const [multiDelete, setMultiDelete] = useState(false);
+  const [checkedList, setCheckedList] = useState<any>([]);
   const [loader, setLoader] = useState(true);
   const [refresh, setRefresh] = useState(false);
-  const [coverPhoto, setCoverPhoto] = useState([]);
+  const [coverPhoto, setCoverPhoto] = useState<any>([]);
   const [coverLoaded, setCoverLoaded] = useState(false);
   const [storageModal, setStorageModal] = useState(false);
   //-------------Handle Drawer Close------------------------
@@ -83,7 +84,54 @@ function Media(props) {
         return false;
     }
   }
-
+  const actionMenu = (
+    <Menu onClick={(e) => handleAction(e)}>
+      <Menu.Item key={0}>Toggle Selection</Menu.Item>
+      <Menu.Item key={1} disabled={checkedList.length > 0 ? false : true}>
+        Clear Selection
+      </Menu.Item>
+      <Menu.Item key={2} disabled={files?.length > 0 ? false : true}>
+        Select all files
+      </Menu.Item>
+      <Menu.Item key={3} disabled={checkedList.length > 0 ? false : true}>
+        Delete files
+      </Menu.Item>
+    </Menu>
+  );
+  const handleAction = (e) => {
+    if (e.key == 0) {
+      setMultiDelete(!multiDelete);
+      setCheckedList([]);
+    } else if (e.key == 1) {
+      setCheckedList([]);
+    } else if (e.key == 2) {
+      if (!multiDelete) {
+        setMultiDelete(true);
+        setCheckedList(
+          props.data.map((item: any) => {
+            return item._id;
+          })
+        );
+      } else {
+        setCheckedList(
+          files.map((item: any) => {
+            return item._id;
+          })
+        );
+      }
+    } else if (e.key == 3) {
+      Modal.confirm({
+        title: `Delete multiple images?`,
+        icon: <ExclamationCircleOutlined />,
+        content: "Are you sure you want to delete these images ?",
+        okText: "Yes",
+        cancelText: "No",
+        onOk: () => {
+          deleteMultipleFile(checkedList);
+        },
+      });
+    }
+  };
   const updateVODAttr = (body, action = null) => {
     console.log("updateVODAttr", body, action);
     message.success(body);
@@ -309,6 +357,35 @@ function Media(props) {
       });
   }
 
+  function deleteMultipleFile(ids: any) {
+    http
+      .delete(`${apis.DELETE_FEATURE_FILES}`, {
+        data: {
+          layerFileIds: ids,
+        },
+      })
+      .then((res) => {
+        if (res.data.status) {
+          //console.log("FIle detelted",res.data)
+          message.success("Files Deleted!");
+          const filteredArray = files.filter(function (obj) {
+            return !ids.include(obj._id);
+          });
+          populateFiles(filteredArray);
+          setCheckedList([]);
+        } else {
+          message.error(res.data.message);
+        }
+      })
+      .catch((err) => {
+        message.error(err);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => {
+        setRefresh(true);
+      });
+  }
+
   //console.log("data from props:",props.visible, props.layerId, props.featureIndex, props.properties);
   const renderVideo = () => {
     console.log("videoToShow", props.videoToShow);
@@ -423,60 +500,30 @@ function Media(props) {
     return (
       <>
         {media.length < 1 ? <Empty style={{ margin: "auto" }} /> : <></>}
-        <Image.PreviewGroup>
-          {media.map((item: any) => {
-            return (
-              <Col span={8} md={8} key={`1.1.${item._id}`}>
-                <Dropdown
-                  overlay={
-                    <Menu>
-                      <Menu.Item
-                        key={`1.${item._id}`}
-                        onClick={() =>
-                          window.open(`${PUBLIC_URL}${item.filePath}`)
-                        }
-                      >
-                        <DownloadOutlined /> Download
-                      </Menu.Item>
-                      {props.canDelete ? (
-                        <Menu.Item
-                          key={`2.${item._id}`}
-                          onClick={() => {
-                            Modal.confirm({
-                              title: "Delete Image?",
-                              icon: <ExclamationCircleOutlined />,
-                              content:
-                                "Are you sure you want to delete this Image?",
-                              okText: "Yes",
-                              cancelText: "No",
-                              onOk: () => {
-                                deleteFile(item._id);
-                              },
-                            });
-                          }}
-                        >
-                          <DeleteOutlined /> Delete
-                        </Menu.Item>
-                      ) : (
-                        <></>
-                      )}
-                      {props.canSetCoverPhoto ? (
-                        <Menu.Item
-                          key={`3.${item._id}`}
-                          onClick={() => addCover(item._id, props.layerId)}
-                        >
-                          <FileImageOutlined /> Set Cover Photo
-                        </Menu.Item>
-                      ) : (
-                        <></>
-                      )}
-                    </Menu>
-                  }
-                  trigger={["contextMenu"]}
+        {multiDelete ? (
+          <>
+            {media.map((item: any) => {
+              return (
+                <Col
+                  span={8}
+                  md={8}
+                  key={`1.1.${item._id}`}
+                  style={{
+                    cursor: "pointer",
+                    padding: "8px",
+                  }}
                 >
                   <Image
                     key={`${item._id}`}
-                    style={{ padding: "8px" }}
+                    style={
+                      checkedList.includes(item._id)
+                        ? {
+                            border: "2px solid #3b86ff",
+                          }
+                        : {
+                            padding: "2px",
+                          }
+                    }
                     width={"100%"}
                     height={180}
                     src={
@@ -484,19 +531,103 @@ function Media(props) {
                       "/images/geojson/1x_" +
                       item.filePath.split("/")[3]
                     }
-                    preview={{
-                      src:
-                        STATIC_URL +
-                        "/images/geojson/2x_" +
-                        item.filePath.split("/")[3],
-                    }}
+                    preview={false}
                     fallback="data:image/png;base64,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"
-                  />
-                </Dropdown>
-              </Col>
-            );
-          })}
-        </Image.PreviewGroup>
+                    onClick={() => {
+                      if (checkedList.includes(item._id)) {
+                        const filtered: any = checkedList.filter(
+                          (i: any) => i !== item._id
+                        );
+                        setCheckedList(filtered);
+                      } else {
+                        setCheckedList([...checkedList, item._id]);
+                      }
+                    }}
+                  ></Image>
+                </Col>
+              );
+            })}
+          </>
+        ) : (
+          <Image.PreviewGroup>
+            {media.map((item: any) => {
+              return (
+                <Col
+                  span={8}
+                  md={8}
+                  key={`1.1.${item._id}`}
+                  style={{ padding: "8px" }}
+                >
+                  <Dropdown
+                    overlay={
+                      <Menu>
+                        <Menu.Item
+                          key={`1.${item._id}`}
+                          onClick={() =>
+                            window.open(`${PUBLIC_URL}${item.filePath}`)
+                          }
+                        >
+                          <DownloadOutlined /> Download
+                        </Menu.Item>
+                        {props.canDelete ? (
+                          <Menu.Item
+                            key={`2.${item._id}`}
+                            onClick={() => {
+                              Modal.confirm({
+                                title: "Delete Image?",
+                                icon: <ExclamationCircleOutlined />,
+                                content:
+                                  "Are you sure you want to delete this Image?",
+                                okText: "Yes",
+                                cancelText: "No",
+                                onOk: () => {
+                                  deleteFile(item._id);
+                                },
+                              });
+                            }}
+                          >
+                            <DeleteOutlined /> Delete
+                          </Menu.Item>
+                        ) : (
+                          <></>
+                        )}
+                        {props.canSetCoverPhoto ? (
+                          <Menu.Item
+                            key={`4.${item._id}`}
+                            onClick={() => addCover(item._id, props.layerId)}
+                          >
+                            <FileImageOutlined /> Set Cover Photo
+                          </Menu.Item>
+                        ) : (
+                          <></>
+                        )}
+                      </Menu>
+                    }
+                    trigger={["contextMenu"]}
+                  >
+                    <Image
+                      key={`${item._id}`}
+                      width={"100%"}
+                      height={180}
+                      src={
+                        STATIC_URL +
+                        "/images/geojson/1x_" +
+                        item.filePath.split("/")[3]
+                      }
+                      preview={{
+                        src:
+                          STATIC_URL +
+                          "/images/geojson/2x_" +
+                          item.filePath.split("/")[3],
+                      }}
+                      fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/HnAAAHlklEQVR4Ae3dP3PTWBSGcbGzM6GCKqlIBRV0dHRJFarQ0eUT8LH4BnRU0NHR0UEFVdIlFRV7TzRksomPY8uykTk/zewQfKw/9znv4yvJynLv4uLiV2dBoDiBf4qP3/ARuCRABEFAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghgg0Aj8i0JO4OzsrPv69Wv+hi2qPHr0qNvf39+iI97soRIh4f3z58/u7du3SXX7Xt7Z2enevHmzfQe+oSN2apSAPj09TSrb+XKI/f379+08+A0cNRE2ANkupk+ACNPvkSPcAAEibACyXUyfABGm3yNHuAECRNgAZLuYPgEirKlHu7u7XdyytGwHAd8jjNyng4OD7vnz51dbPT8/7z58+NB9+/bt6jU/TI+AGWHEnrx48eJ/EsSmHzx40L18+fLyzxF3ZVMjEyDCiEDjMYZZS5wiPXnyZFbJaxMhQIQRGzHvWR7XCyOCXsOmiDAi1HmPMMQjDpbpEiDCiL358eNHurW/5SnWdIBbXiDCiA38/Pnzrce2YyZ4//59F3ePLNMl4PbpiL2J0L979+7yDtHDhw8vtzzvdGnEXdvUigSIsCLAWavHp/+qM0BcXMd/q25n1vF57TYBp0a3mUzilePj4+7k5KSLb6gt6ydAhPUzXnoPR0dHl79WGTNCfBnn1uvSCJdegQhLI1vvCk+fPu2ePXt2tZOYEV6/fn31dz+shwAR1sP1cqvLntbEN9MxA9xcYjsxS1jWR4AIa2Ibzx0tc44fYX/16lV6NDFLXH+YL32jwiACRBiEbf5KcXoTIsQSpzXx4N28Ja4BQoK7rgXiydbHjx/P25TaQAJEGAguWy0+2Q8PD6/Ki4R8EVl+bzBOnZY95fq9rj9zAkTI2SxdidBHqG9+skdw43borCXO/ZcJdraPWdv22uIEiLA4q7nvvCug8WTqzQveOH26fodo7g6uFe/a17W3+nFBAkRYENRdb1vkkz1CH9cPsVy/jrhr27PqMYvENYNlHAIesRiBYwRy0V+8iXP8+/fvX11Mr7L7ECueb/r48eMqm7FuI2BGWDEG8cm+7G3NEOfmdcTQw4h9/55lhm7DekRYKQPZF2ArbXTAyu4kDYB2YxUzwg0gi/41ztHnfQG26HbGel/crVrm7tNY+/1btkOEAZ2M05r4FB7r9GbAIdxaZYrHdOsgJ/wCEQY0J74TmOKnbxxT9n3FgGGWWsVdowHtjt9Nnvf7yQM2aZU/TIAIAxrw6dOnAWtZZcoEnBpNuTuObWMEiLAx1HY0ZQJEmHJ3HNvGCBBhY6jtaMoEiJB0Z29vL6ls58vxPcO8/zfrdo5qvKO+d3Fx8Wu8zf1dW4p/cPzLly/dtv9Ts/EbcvGAHhHyfBIhZ6NSiIBTo0LNNtScABFyNiqFCBChULMNNSdAhJyNSiECRCjUbEPNCRAhZ6NSiAARCjXbUHMCRMjZqBQiQIRCzTbUnAARcjYqhQgQoVCzDTUnQIScjUohAkQo1GxDzQkQIWejUogAEQo121BzAkTI2agUIkCEQs021JwAEXI2KoUIEKFQsw01J0CEnI1KIQJEKNRsQ80JECFno1KIABEKNdtQcwJEyNmoFCJAhELNNtScABFyNiqFCBChULMNNSdAhJyNSiECRCjUbEPNCRAhZ6NSiAARCjXbUHMCRMjZqBQiQIRCzTbUnAARcjYqhQgQoVCzDTUnQIScjUohAkQo1GxDzQkQIWejUogAEQo121BzAkTI2agUIkCEQs021JwAEXI2KoUIEKFQsw01J0CEnI1KIQJEKNRsQ80JECFno1KIABEKNdtQcwJEyNmoFCJAhELNNtScABFyNiqFCBChULMNNSdAhJyNSiECRCjUbEPNCRAhZ6NSiAARCjXbUHMCRMjZqBQiQIRCzTbUnAARcjYqhQgQoVCzDTUnQIScjUohAkQo1GxDzQkQIWejUogAEQo121BzAkTI2agUIkCEQs021JwAEXI2KoUIEKFQsw01J0CEnI1KIQJEKNRsQ80JECFno1KIABEKNdtQcwJEyNmoFCJAhELNNtScABFyNiqFCBChULMNNSdAhJyNSiEC/wGgKKC4YMA4TAAAAABJRU5ErkJggg=="
+                    />
+                  </Dropdown>
+                </Col>
+              );
+            })}
+          </Image.PreviewGroup>
+        )}
       </>
     );
   }
@@ -638,7 +769,7 @@ function Media(props) {
             <CloseOutlined
               onClick={() => {
                 props.setShowCarousel(false);
-                if (props.videoToShow.length > 1) {
+                if (props.videoToShow.length > 0) {
                   props.setVisibility(true);
                 }
               }}
@@ -687,6 +818,9 @@ function Media(props) {
                         onClick={() => {
                           props.updateVOD(i, idx);
                         }}
+                        onError={(e: any) =>
+                          (e.target.src = `/icons/fallback.png`)
+                        }
                       />
                     )}
                   </div>
@@ -858,6 +992,9 @@ function Media(props) {
                             }
                       }
                       onLoad={() => setCoverLoaded(true)}
+                      onError={(e: any) =>
+                        (e.target.src = `/icons/fallback.png`)
+                      }
                     />
                   )}
                 </div>
@@ -871,6 +1008,18 @@ function Media(props) {
                 size="large"
                 centered
                 style={{ width: "100%" }}
+                tabBarExtraContent={{
+                  right: (
+                    <Dropdown overlay={actionMenu} trigger={["click"]}>
+                      <a onClick={(e) => e.preventDefault()}>
+                        <Space>
+                          Actions
+                          <DownOutlined />
+                        </Space>
+                      </a>
+                    </Dropdown>
+                  ),
+                }}
               >
                 <TabPane
                   tab={

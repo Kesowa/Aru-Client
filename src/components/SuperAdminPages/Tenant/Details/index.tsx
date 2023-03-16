@@ -13,7 +13,6 @@ import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { Link } from "react-router-dom";
-import moment from "moment";
 import { useParams } from "react-router-dom";
 import BasicInfo from "./BasicInfo";
 import RootUser from "./RootUser";

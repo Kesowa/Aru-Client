@@ -1,34 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
-import {
-  PlusCircleOutlined,
-  SearchOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
-import {
-  List,
-  Typography,
-  PageHeader,
-  Row,
-  Col,
-  message,
-  Select,
-  Form,
-  Input,
-  Upload,
-  Button,
-  DatePicker,
-  Collapse,
-} from "antd";
+import { PlusCircleOutlined } from "@ant-design/icons";
+import { PageHeader, Row, Col, message, Form, Input, Button } from "antd";
 import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { beforeUpload } from "../../../../services/imageupload";
-import ImgCrop from "antd-img-crop";
 import { Link } from "react-router-dom";
 import "../Client.less";
 import Unauthorized from "../../../shared/Error/Unauthorized";
@@ -36,7 +15,6 @@ import FourOhOne from "../../../shared/Error/FourOhOne";
 import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
-import moment from "moment";
 
 function ChangePassword(props: any) {
   const [form] = Form.useForm();

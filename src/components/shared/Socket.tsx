@@ -1,8 +1,7 @@
-import React, { Component, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
 import io from "socket.io-client";
-import apis from "../../services/apis";
 import {
   Button,
   notification,

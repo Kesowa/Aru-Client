@@ -1,6 +1,5 @@
 import io from "socket.io-client";
 import { API_URL } from "src/constants";
-import apis from "./apis";
 
 const connectSocket = (streamKey: string) => {
   const socket = io(

@@ -20,7 +20,6 @@ import {
   SearchOutlined,
   DeleteOutlined,
   EyeOutlined,
-  PlusCircleOutlined,
   SolutionOutlined,
 } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";

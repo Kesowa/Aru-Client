@@ -1,9 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Form, Input, Upload, Row, Col, message, Button, Divider } from "antd";
-import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
-import http from "../../../services/httpCall";
-import apis from "../../../services/apis";
-import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
+import React, { useState } from "react";
+import { Form, Input } from "antd";
 import { connect } from "react-redux";
 import { loading } from "../../../actions/loadingAction";
 import { logout } from "../../../actions/authAction";

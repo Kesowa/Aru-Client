@@ -1,9 +1,7 @@
 import { ErrorBoundary } from "react-error-boundary";
-import { Layout, Row, Col, Modal, Button, Typography, Result } from "antd";
-import { useLocation, Switch, Route, useHistory } from "react-router-dom";
+import { Button, Typography, Result } from "antd";
+import { Switch, Route } from "react-router-dom";
 
-import { logout } from "../../../actions/authAction";
-import SideBar from "../SideBar";
 import CreateTenant from "../../SuperAdminPages/Tenant/Create";
 import ListAllTanents from "../../SuperAdminPages/Tenant/List";
 import TenantDetails from "../../SuperAdminPages/Tenant/Details";

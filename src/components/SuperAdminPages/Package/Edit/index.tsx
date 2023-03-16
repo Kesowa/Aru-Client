@@ -23,7 +23,7 @@ import { beforeUpload } from "../../../../services/imageupload";
 import ImgCrop from "antd-img-crop";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { STATIC_URL } from "src/constants";
 
 function EditPackage(props: any) {

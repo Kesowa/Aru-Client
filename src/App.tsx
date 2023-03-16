@@ -1,13 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Loader from "./components/shared/Loader";
 import { connect } from "react-redux";
-import {
-  BrowserRouter,
-  Switch,
-  Route,
-  Redirect,
-  useHistory,
-} from "react-router-dom";
+import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
 import LoginWrapper from "./components/shared/Wrappers/LoginWrapper";
 import PrivateRoute from "./components/shared/Wrappers/PrivateWrapper";
 import Login from "./components/Login";

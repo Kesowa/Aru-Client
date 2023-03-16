@@ -173,6 +173,7 @@ const apis = {
   EXPORT_FEATURES: "/apis/v1/layer/get-feature-csv-by-layerIndex",
   FETCH_FEATURE_FILES: "/apis/v1/layer/get-files-by-layerId-fIndex",
   DELETE_FEATURE_FILE: "/apis/v1/layer/delete-file-geojson",
+  DELETE_FEATURE_FILES: "/apis/v1/layer/delete-multipleLayerFiles",
   EDIT_FEATURE: "/apis/v1/layer/edit-geojson",
   SET_COVER_PHOTO: "/apis/v1/layer/set-cover-photo-by-layerFiles-Id",
   CREATE_GROUP_LAYER: "/apis/v1/layergroup/create",

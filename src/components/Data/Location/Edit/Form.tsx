@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
-import {
-  Form,
-  Input,
-  Button,
-  Select,
-  DatePicker,
-  TimePicker,
-  message,
-} from "antd";
+import { Form, Input, Button, Select, message } from "antd";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
 import {
@@ -19,7 +11,6 @@ import {
 import { showDrawing } from "../../../../actions/gmapActions";
 import { loading } from "../../../../actions/loadingAction";
 import { connect } from "react-redux";
-import moment from "moment";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";

@@ -2,8 +2,6 @@ import { Avatar, Drawer, Skeleton, Typography } from "antd";
 import React, { useEffect, useState } from "react";
 import "./index.less";
 import { UserOutlined, QuestionCircleOutlined } from "@ant-design/icons";
-import apis from "../../../services/apis";
-import CoverBg from "../Login/login-page-bg.jpg";
 import Link from "antd/lib/typography/Link";
 import { STATIC_URL, VERSION } from "src/constants";
 

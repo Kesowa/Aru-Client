@@ -1,23 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
-  Row,
-  Col,
-  Card,
-  Typography,
-  Avatar,
-  Button,
-  Tooltip,
-  Divider,
-  Tag,
-} from "antd";
-import {
-  FieldTimeOutlined,
-  CalendarOutlined,
-  UserOutlined,
-  PhoneOutlined,
-} from "@ant-design/icons";
-import { stat } from "fs";
-import apis from "../../../../../services/apis";
+import { Row, Col, Typography, Avatar, Tooltip, Divider, Tag } from "antd";
+import { CalendarOutlined, UserOutlined } from "@ant-design/icons";
 import { STATIC_URL } from "src/constants";
 
 const { Title, Text, Link } = Typography;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import {
   PageHeader,
@@ -10,11 +10,7 @@ import {
   Button,
   Checkbox,
 } from "antd";
-import {
-  UnorderedListOutlined,
-  PlusOutlined,
-  LoadingOutlined,
-} from "@ant-design/icons";
+import { UnorderedListOutlined } from "@ant-design/icons";
 import "../Permission.less";
 import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";

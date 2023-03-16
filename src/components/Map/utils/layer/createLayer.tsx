@@ -12,25 +12,17 @@ import {
   Spin,
   Typography,
   Form,
-  Alert,
   Input,
   TreeSelect,
-  DatePicker,
   Progress,
-  Switch,
 } from "antd";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { connect } from "react-redux";
-import {
-  InboxOutlined,
-  UploadOutlined,
-  CloseCircleOutlined,
-} from "@ant-design/icons";
+import { InboxOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
-import io from "socket.io-client";
 
 const { Step } = Steps;
 const { Dragger } = Upload;

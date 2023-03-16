@@ -1,27 +1,13 @@
-import React, { Component, createRef } from "react";
-import s_m from "../../../Icons/start_measurement.svg";
-import l_a from "../../../Icons/location_add.svg";
+import React, { Component } from "react";
 import { connect } from "react-redux";
 import { message } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import GeoFence from "../../static/GeoFence.svg";
 import RadiusTool from "../../static/RadiusTool.svg";
-import { Tooltip, Button, Modal } from "antd";
+import { Tooltip } from "antd";
 
-import {
-  InboxOutlined,
-  ExclamationCircleOutlined,
-  DownloadOutlined,
-  DeleteOutlined,
-  UploadOutlined,
-  AppstoreOutlined,
-  BarsOutlined,
-  DownOutlined,
-  SortAscendingOutlined,
-  SortDescendingOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { UploadOutlined } from "@ant-design/icons";
 
 import {
   setCircleMeasurements,

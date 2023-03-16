@@ -5,9 +5,6 @@ import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { connect } from "react-redux";
-import DeckGL, { FlyToInterpolator } from "deck.gl";
-import io from "socket.io-client";
-import UploadGIF from "../../../static/upload-amico.svg";
 import {
   Image,
   Row,
@@ -17,13 +14,7 @@ import {
   message,
   Dropdown,
   Menu,
-  Select,
-  Drawer,
-  Empty,
-  Tabs,
-  List,
   Modal,
-  Switch,
   Button,
   Steps,
   Result,
@@ -32,24 +23,14 @@ import {
 } from "antd";
 import {
   InboxOutlined,
-  FileImageOutlined,
-  ExclamationCircleOutlined,
-  FileTextOutlined,
-  DownloadOutlined,
-  DeleteOutlined,
-  SettingOutlined,
   EnvironmentOutlined,
   DownOutlined,
-  UploadOutlined,
 } from "@ant-design/icons";
 //import "./baseMap.less";
 import apis from "../../../../services/apis";
-import moment from "moment";
 //import "../Map/locateBtn.less";
-import { layer } from "@fortawesome/fontawesome-svg-core";
 import Dragger from "antd/lib/upload/Dragger";
 import SubMenu from "antd/lib/menu/SubMenu";
-import { getIsFileSelected } from "chonky";
 import { API_URL, STATIC_URL } from "src/constants";
 //import { setModelsToState } from "../../actions/modelAction";
 

@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from "react";
-import {
-  Form,
-  Input,
-  Button,
-  Select,
-  DatePicker,
-  TimePicker,
-  message,
-  Card,
-  Typography,
-} from "antd";
+import { Button, Card, Typography } from "antd";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
-import moment from "moment";
 import { InfoCircleFilled } from "@ant-design/icons";
 import { Collapse } from "antd";
 import { connect } from "react-redux";

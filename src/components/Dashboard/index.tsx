@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
-import { Layout, Row, Col, Modal, Button, Typography, Result } from "antd";
-import { useLocation, Switch, Route, useHistory } from "react-router-dom";
+import { Layout, Row, Col, Typography } from "antd";
+import { useHistory } from "react-router-dom";
 
 import { logout } from "../../actions/authAction";
 import SideBar from "./SideBar";
 import "./index.less";
 import ProfileDrawer from "./Profile";
-import { CloseCircleOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import TermsAndCondition from "./utils/TnC";
 import FallbackComponent from "./utils/Fallback";
 

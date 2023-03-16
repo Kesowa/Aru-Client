@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-import { PUBLIC_URL } from "src/constants";
+import React, { useEffect } from "react";
 import "./scale.less";
 
 const ShowColorscale = (props) => {

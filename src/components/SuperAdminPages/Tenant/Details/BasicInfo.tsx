@@ -1,6 +1,5 @@
 import React from "react";
 import { Row, Col, Typography } from "antd";
-import apis from "../../../../services/apis";
 import tenantPlaceholder from "../../../../static/tenant-placeholder.svg";
 import Skeleton from "react-loading-skeleton";
 import { STATIC_URL } from "src/constants";

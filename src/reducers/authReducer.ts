@@ -1,8 +1,4 @@
-import {
-  superAdminOptions,
-  tenantRootOptions,
-  clientOptions,
-} from "../static/sideBarOptions";
+import { superAdminOptions, tenantRootOptions } from "../static/sideBarOptions";
 const initialState = {
   isLoggedIn: false,
   token: null,

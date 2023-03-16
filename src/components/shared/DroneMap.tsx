@@ -1,11 +1,9 @@
-import React, { Component, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import connectSocket from "../../services/socketConnect";
 import DeckGL, { FlyToInterpolator } from "deck.gl";
-import { LineLayer, IconLayer, PathLayer } from "@deck.gl/layers";
+import { IconLayer, PathLayer } from "@deck.gl/layers";
 import { StaticMap } from "react-map-gl";
-import * as turf from "@turf/turf";
-import apis from "../../services/apis";
 import { MAPBOX_API_KEY } from "src/constants";
 import NavIcon from "../../static/nav_icon.png";
 function DroneMap(props: any) {

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { default as Shimmer } from "react-loading-skeleton";
 import { reverseGeocoder as geocoder } from "../../../../../services/MapBoxGeocoder";
 import ExifReader from "exifreader";
@@ -8,28 +7,18 @@ import {
   Col,
   Card,
   Typography,
-  Spin,
-  Image,
   Modal,
-  Tooltip,
   Button,
-  Avatar,
   notification,
   Tag,
-  Cascader,
-  TreeSelect,
   Select,
   Input,
-  Divider,
   Pagination,
   Empty,
-  Statistic,
   Skeleton,
   message,
-  Alert,
   Dropdown,
   Menu,
-  Space,
   Checkbox,
   Badge,
 } from "antd";
@@ -37,21 +26,12 @@ import {
   ExclamationOutlined,
   CalendarOutlined,
   UserOutlined,
-  AppstoreOutlined,
-  BarsOutlined,
-  ShareAltOutlined,
   DownloadOutlined,
-  GoogleOutlined,
   UploadOutlined,
   InboxOutlined,
   FlagOutlined,
-  EditOutlined,
-  EllipsisOutlined,
   DeleteOutlined,
-  SortAscendingOutlined,
-  SortDescendingOutlined,
   ExclamationCircleOutlined,
-  DownOutlined,
 } from "@ant-design/icons";
 import { BsFlagFill } from "react-icons/bs";
 import Dragger from "antd/lib/upload/Dragger";
@@ -61,11 +41,8 @@ import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import { logout } from "../../../../../actions/authAction";
 import { connect } from "react-redux";
 import moment from "moment";
-import * as htmlToImage from "html-to-image";
-import download from "downloadjs";
 import "./data.less";
 import OutcomeModal from "./OutcomeModal";
-import { triangleGrid } from "@turf/turf";
 import { API_URL, STATIC_URL } from "src/constants";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";

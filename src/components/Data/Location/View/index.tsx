@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Row,
   Col,
@@ -8,18 +8,11 @@ import {
   Collapse,
   message,
   Spin,
-  Divider,
   PageHeader,
   Typography,
 } from "antd";
 import "./index.less";
-import {
-  ShareAltOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  ClockCircleOutlined,
-  ApartmentOutlined,
-} from "@ant-design/icons";
+import { ClockCircleOutlined } from "@ant-design/icons";
 import LocationCardMap from "./Map";
 import mi from "../../../../assets/missionIcon.svg";
 import mib from "../../../../assets/missionIcon_blue.svg";

@@ -1,12 +1,10 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from "react";
 import { v4 as uuid } from "uuid";
-import MapIcons from "../../static/google-map-icon-transparent-28.jpg";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
 import { DataFilterExtension } from "@deck.gl/extensions";
 import download from "downloadjs";
-import dayjs from "dayjs";
 import {
   Row,
   Col,
@@ -15,10 +13,8 @@ import {
   Typography,
   Avatar,
   Badge,
-  Table,
   Button,
   Tooltip,
-  Divider,
   Tag,
   Switch,
   Spin,
@@ -35,12 +31,10 @@ import {
   DatePicker,
   Select,
   Checkbox,
-  Popconfirm,
   Progress,
   Popover,
   Alert,
   Result,
-  Radio,
   notification,
 } from "antd";
 import {
@@ -57,8 +51,6 @@ import {
   ExportOutlined,
   FlagOutlined,
   FilterOutlined,
-  CloseOutlined,
-  ArrowsAltOutlined,
   NodeIndexOutlined,
   SwitcherOutlined,
   SortAscendingOutlined,
@@ -69,13 +61,9 @@ import {
   SyncOutlined,
   PlusOutlined,
   CheckCircleOutlined,
-  CloseCircleOutlined,
-  FolderAddOutlined,
   FolderOutlined,
   ArrowLeftOutlined,
-  VideoCameraOutlined,
   EyeOutlined,
-  CalendarFilled,
 } from "@ant-design/icons";
 import { TbFlag, TbFlagOff } from "react-icons/tb";
 import MarkerIcon from "../../static/MarkerIcon.png";
@@ -84,7 +72,7 @@ import ValveIcon from "../../static/ValveIcon.png";
 import DotIcon from "../../static/DotIcon.png";
 import VODIcon from "../../static/VODIcon.svg";
 import AlertIcon from "../../static/AlertIcon.svg";
-import { TwitterPicker, SketchPicker } from "react-color";
+import { SketchPicker } from "react-color";
 import "./index.less";
 import LineIcon from "../../static/line.svg";
 import PolygonIcon from "../../static/polygon.svg";
@@ -119,17 +107,11 @@ import { loading } from "../../actions/loadingAction";
 import moment from "moment";
 import { useHistory, useParams } from "react-router-dom";
 import VectorForm from "./utils/VectorForm";
-import { layer } from "@fortawesome/fontawesome-svg-core";
 import Media from "./utils/Media";
 import LayerDocs from "./utils/layer/layerDocs";
 import CreateLayer from "./utils/layer/createLayer";
 import CreateBaseLayer from "./utils/layer/createBaseLayer";
-import da from "date-fns/esm/locale/da/index";
 import io from "socket.io-client";
-import { isTemplateSpan } from "typescript";
-import { useCallback } from "react";
-import { addYears, lastDayOfQuarter } from "date-fns/esm";
-import { faWindowRestore } from "@fortawesome/free-solid-svg-icons";
 import {
   COG_URL,
   MAPBOX_API_KEY,
@@ -140,7 +122,6 @@ import {
 } from "src/constants";
 import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
-import { BsFlagFill } from "react-icons/bs";
 // import { JSONLoader } from "@loaders.gl/json";
 // import { LASLoader } from "@loaders.gl/las";
 // import { load } from "@loaders.gl/core";
@@ -1311,9 +1292,7 @@ function BaseMap(props) {
 
   useEffect(() => {
     if (srtVideoPath && showFlightPath) {
-      fetchJSON(
-        STATIC_URL + (srtVideoPath as string).replace(/.\w+$/, ".geojson")
-      )
+      fetchJSON(STATIC_URL + srtVideoPath.replace(/.\w+$/, ".geojson"))
         .then((data) => {
           const flightTelemetry: any = data.features;
           const pathObject: any = flightTelemetry.pop();
@@ -1457,7 +1436,7 @@ function BaseMap(props) {
   };
 
   useEffect(() => {
-    if (viewMedia && videoToShow.length > 1) {
+    if (viewMedia && videoToShow.length > 0) {
       updateVODs();
     }
   }, [viewMedia]);
@@ -1567,6 +1546,28 @@ function BaseMap(props) {
       ],
     },
   ];
+  const injectSysId = (layerId) => {
+    message.loading("Generating sysIds...");
+    http
+      .patch(`${apis.GEN_SYSID_LAYER}`, null, {
+        params: {
+          layerId,
+        },
+      })
+      .then((res) => {
+        if (res.data.status) {
+          message.success(res.data.message);
+          setRefreshLayer(!refreshLayer);
+          setShouldAttributeTableReload(!shouldAttributeTableReload);
+        } else {
+          message.error(res.data.message);
+        }
+      })
+      .catch((err) => {
+        message.error(err);
+        AxiosErrorHandler(err, props.logout);
+      });
+  };
   const toggleLayerFlag = (layerId, flag) => {
     const payload: any = {
       flag: flag,
@@ -3312,6 +3313,26 @@ function BaseMap(props) {
                       </>
                     ) : (
                       <></>
+                    )}
+                    {layer.type === "Vector" && (
+                      <Menu.Item
+                        key="3-1"
+                        onClick={() => {
+                          Modal.confirm({
+                            title: "Generate sysId?",
+                            icon: <ExclamationCircleOutlined />,
+                            content:
+                              "Are you sure you want to generate new sysIds for this layer?",
+                            okText: "Yes",
+                            cancelText: "No",
+                            onOk: () => {
+                              injectSysId(layer._id);
+                            },
+                          });
+                        }}
+                      >
+                        Generate SysId
+                      </Menu.Item>
                     )}
                     {layer.type === "Vector" && (
                       <SubMenu title="Toggle Flag" key="3">
@@ -6098,7 +6119,6 @@ function BaseMap(props) {
                       canDraw={perms.canCreateVectorLayer}
                       isBaseMap={props.isBaseMaps}
                       isPublic={false}
-                      updateVOD={updateVOD}
                     />
                   </>
                 }

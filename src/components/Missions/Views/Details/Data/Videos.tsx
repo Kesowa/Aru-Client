@@ -6,56 +6,36 @@ import {
   Col,
   Card,
   Typography,
-  notification,
-  Image,
   message,
   Modal,
-  Spin,
   Empty,
   Tooltip,
   Menu,
   Dropdown,
-  Divider,
   Button,
   Alert,
   Result,
   Carousel,
-  Form,
   Input,
   Skeleton,
-  Space,
   Checkbox,
   Select,
-  Switch,
   Badge,
 } from "antd";
 import {
-  FieldTimeOutlined,
   ExclamationCircleOutlined,
   DeleteOutlined,
   FlagOutlined,
-  ExclamationOutlined,
-  EllipsisOutlined,
-  ArrowLeftOutlined,
-  ArrowRightOutlined,
   InboxOutlined,
   UploadOutlined,
-  CalendarOutlined,
   UserOutlined,
   VideoCameraOutlined,
-  PlayCircleOutlined,
   DownloadOutlined,
   CloseOutlined,
   LeftOutlined,
   RightOutlined,
   EditOutlined,
-  AppstoreOutlined,
-  BarsOutlined,
-  DownOutlined,
-  SortAscendingOutlined,
-  SortDescendingOutlined,
 } from "@ant-design/icons";
-import { TbFlag, TbFlagOff } from "react-icons/tb";
 import { BsFlagFill } from "react-icons/bs";
 import "./data.less";
 import apis from "../../../../../services/apis";
@@ -63,18 +43,13 @@ import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import { logout } from "../../../../../actions/authAction";
 import moment from "moment";
-import getVideoDurationInSeconds from "get-video-duration";
 import VideoPlayer from "../../../../shared/VideoPlayer";
 import Dragger from "antd/lib/upload/Dragger";
 import { connect } from "react-redux";
-import ReactPlayer from "react-player";
-import InfiniteScroll from "react-infinite-scroll-component";
-import { Title } from "chart.js";
 import { API_URL, STATIC_URL } from "src/constants";
 import { io } from "socket.io-client";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
-import { current } from "immer";
 declare let require: any;
 
 //import { Replay } from "vimond-replay";
@@ -472,6 +447,27 @@ function Videos(VideoProps) {
       if (flagFilter !== undefined) {
         query["isFlagged"] = flagFilter;
       }
+      const getSortKey = () => {
+        switch (sortType) {
+          case "timeStamp":
+            return "createdAt";
+          case "name":
+            return "videoName";
+          case "size":
+            return "fileSize";
+          default:
+            return "createdAt";
+        }
+      };
+      const sortKey = getSortKey();
+      if (isAscending) {
+        query["sort"] = sortKey + ":asc";
+      }
+      if (!isAscending) {
+        query["sort"] = sortKey + ":desc";
+      }
+
+      console.log("sort", isAscending, sortType);
       if (refresh) {
         setRefresh(false);
       }

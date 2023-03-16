@@ -1,41 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import {
   Row,
-  Col,
   Card,
   Typography,
-  Spin,
-  Image,
   Modal,
-  Tooltip,
   Button,
   Avatar,
-  notification,
-  Tag,
-  Cascader,
   Select,
   Input,
-  Divider,
-  Pagination,
   Empty,
-  Statistic,
-  Radio,
   message,
   Popconfirm,
   Checkbox,
 } from "antd";
-import { PlusOutlined, SwapOutlined, CloseOutlined } from "@ant-design/icons";
+import { PlusOutlined, CloseOutlined } from "@ant-design/icons";
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import { logout } from "../../../../../actions/authAction";
 import { connect } from "react-redux";
-import moment from "moment";
-import * as htmlToImage from "html-to-image";
-import download from "downloadjs";
 import "./data.less";
-import OutcomeModal from "./OutcomeModal";
 import { STATIC_URL } from "src/constants";
 
 const { Search } = Input;

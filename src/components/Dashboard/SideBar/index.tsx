@@ -6,7 +6,6 @@ import {
   Menu,
   Popconfirm,
   Row,
-  Tag,
   Tooltip,
   Typography,
 } from "antd";
@@ -14,12 +13,10 @@ import { Link, useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import decideIcon from "../../../services/decideIcon";
 import { MenuOutlined, UserOutlined, LogoutOutlined } from "@ant-design/icons";
-import AryaLogo from "../../static/kesowa-logo.svg";
 import { logout } from "../../../actions/authAction";
 import { STATIC_URL } from "src/constants";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import "./index.less";
-import KesowaLogo from "../../static/kiv_logo_new.png";
 import Logo from "../../shared/Logo";
 const { Sider } = Layout;
 

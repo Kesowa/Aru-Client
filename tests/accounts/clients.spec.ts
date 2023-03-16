@@ -1,0 +1,53 @@
+import { faker } from "@faker-js/faker";
+import { expect, test } from "@playwright/test";
+
+test("create and delete client", async ({ page }) => {
+  page.goto("http://localhost:3000");
+  await expect(page).toHaveURL(/.*dashboard/);
+
+  // create client
+  const userName = faker.name.fullName();
+  const userEmail = faker.internet.email(undefined, undefined, "kesowa.com", {
+    allowSpecialCharacters: false,
+  });
+  const userPhone = faker.phone.number();
+  page.on("filechooser", (fileChooser) => {
+    fileChooser.setFiles(["tests/assets/image.png"]);
+  });
+  await page.getByRole("menuitem", { name: "shop Client" }).click();
+  await page.getByRole("link", { name: "plus-circle Create Client" }).click();
+  await page.getByPlaceholder("Client's name").click();
+  await page.getByPlaceholder("Client's name").fill(userName);
+  await page.getByLabel("User Group").click();
+  await page.getByText("Client Access").first().click();
+  await page.getByPlaceholder("Phone Number").click();
+  await page.getByPlaceholder("Phone Number").fill(userPhone);
+  await page.getByPlaceholder("Email Id").click();
+  await page.getByPlaceholder("Email Id").fill(userEmail);
+  await page.getByPlaceholder("Country").click();
+  await page.getByPlaceholder("Country").fill(faker.address.country());
+  await page.getByPlaceholder("City").click();
+  await page.getByPlaceholder("City").fill(faker.address.city());
+  await page.getByPlaceholder("Select date").click();
+  await page.getByText("Today").click();
+  await page.getByRole("button", { name: "plus Upload" }).click();
+  await page.getByRole("button", { name: "OK" }).click();
+  await page.getByRole("button", { name: "Create" }).click();
+  await page
+    .getByText("Client created! Check email to change password")
+    .click();
+  const clientCreateAlert = page.getByText(
+    "Client created! Check email to change password"
+  );
+  expect(clientCreateAlert).toBeDefined();
+
+  // delete client
+  await page.getByRole("link", { name: "unordered-list Client List" }).click();
+  await page
+    .getByRole("row", { name: `${userName} ${userEmail} ${userPhone}` })
+    .getByRole("button", { name: "delete" })
+    .click();
+  await page.getByRole("button", { name: "Yes" }).click();
+  const clientDeleteAlert = page.getByText("client deleted successfully!");
+  expect(clientDeleteAlert).toBeDefined();
+});

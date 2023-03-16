@@ -1,5 +1,5 @@
-import React, { createRef, useState, useEffect } from "react";
-import { Row, Col, Empty } from "antd";
+import React, { useState, useEffect } from "react";
+import { Row, Col } from "antd";
 
 import { SortableContainer, SortableElement } from "react-sortable-hoc";
 import arrayMove from "array-move";

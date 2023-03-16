@@ -1,6 +1,5 @@
-import React, { Component, createRef } from "react";
+import React, { Component } from "react";
 import s_m from "../../../../Icons/start_measurement.svg";
-import l_a from "../../../../Icons/location_add.svg";
 import { connect } from "react-redux";
 import { message } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

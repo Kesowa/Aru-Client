@@ -18,19 +18,14 @@ import {
   Card,
   Divider,
   Space,
-  Tag,
   Skeleton,
   Steps,
   Result,
 } from "antd";
-import { MailOutlined, LockOutlined, CheckOutlined } from "@ant-design/icons";
+import { LockOutlined, CheckOutlined } from "@ant-design/icons";
 import { login, setUserDetails, logout } from "../../actions/authAction";
 import "./index.less";
-import KesowaLogo from "../../static/kiv_logo_new.png";
-import { clientOptions } from "../../static/sideBarOptions";
 import { Link, useHistory } from "react-router-dom";
-import ReCAPTCHA from "react-google-recaptcha";
-import { isPropertyAccessChain } from "typescript";
 import Logo from "../shared/Logo";
 
 const { Meta } = Card;
