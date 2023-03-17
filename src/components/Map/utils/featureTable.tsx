@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import DeckGL, { FlyToInterpolator } from "deck.gl";
+import { FlyToInterpolator } from "deck.gl";
 import {
   Typography,
   Table,
@@ -29,7 +29,6 @@ import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { logout } from "../../../actions/authAction";
 import { connect } from "react-redux";
-import { setConstantValue } from "typescript";
 import * as turf from "@turf/turf";
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   editing: boolean;

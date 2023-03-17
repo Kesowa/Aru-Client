@@ -4,7 +4,7 @@ import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { connect } from "react-redux";
 import { default as Shimmer } from "react-loading-skeleton";
-import DeckGL, { FlyToInterpolator } from "deck.gl";
+import { FlyToInterpolator } from "deck.gl";
 import {
   Image,
   Row,
@@ -23,7 +23,6 @@ import {
   Switch,
   Button,
   Steps,
-  Result,
   Divider,
   Skeleton,
   Alert,
@@ -47,8 +46,6 @@ import "../../index.less";
 import apis from "../../../../services/apis";
 import moment from "moment";
 import "../locateBtn.less";
-import { layer } from "@fortawesome/fontawesome-svg-core";
-import { setModelsToState } from "../../../../actions/modelAction";
 import PictoMap from "../pic2map";
 import SubMenu from "antd/lib/menu/SubMenu";
 import Link from "antd/lib/typography/Link";

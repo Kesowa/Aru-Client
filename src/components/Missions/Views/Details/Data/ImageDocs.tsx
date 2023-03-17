@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef } from "react";
 import {
   Alert,
   message,
@@ -13,25 +13,13 @@ import {
   Typography,
   Empty,
   Result,
-  Divider,
-  Space,
   Checkbox,
   Select,
   Badge,
 } from "antd";
 import "./data.less";
 import "./checkbox.less";
-import {
-  setChonkyDefaults,
-  FileArray,
-  FullFileBrowser,
-  ChonkyActions,
-  FileActionHandler,
-  FileData,
-  ChonkyFileActionData,
-  FileHelper,
-} from "chonky";
-import { ChonkyIconFA } from "chonky-icon-fontawesome";
+
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
@@ -44,27 +32,16 @@ import {
   DeleteOutlined,
   UploadOutlined,
   FlagOutlined,
-  AppstoreOutlined,
-  BarsOutlined,
-  DownOutlined,
-  SortAscendingOutlined,
-  SortDescendingOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import Dragger from "antd/lib/upload/Dragger";
 import { useEffect } from "react";
 import io from "socket.io-client";
 import moment from "moment";
-import { url } from "inspector";
-import checkIcon from "../../../static/check.svg";
-import checkedIcon from "../../../static/checked.svg";
-import { API_URL, PUBLIC_URL, STATIC_URL } from "src/constants";
+import { API_URL, STATIC_URL } from "src/constants";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import { BsFlagFill } from "react-icons/bs";
-import ReactDom from "react-dom";
-import { position } from "html2canvas/dist/types/css/property-descriptors/position";
-import { TbFlag, TbFlagOff } from "react-icons/tb";
 const { Option } = Select;
 let plainOptions = new Array<any>();
 function ImageDocs(props) {

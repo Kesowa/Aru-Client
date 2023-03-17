@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import { connect } from "react-redux";
 import { Button } from "antd";
-import apis from "../../services/apis";
-import DeckGL from "@deck.gl/react";
 import { API_URL } from "src/constants";
 
 function MavlinkTest(props) {

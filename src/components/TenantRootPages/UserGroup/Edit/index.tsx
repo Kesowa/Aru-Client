@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PlusOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import { UnorderedListOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
 import { Link, useHistory, useParams } from "react-router-dom";
 import {
@@ -10,9 +10,7 @@ import {
   Transfer,
   Form,
   Input,
-  Upload,
   Button,
-  Table,
 } from "antd";
 import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";

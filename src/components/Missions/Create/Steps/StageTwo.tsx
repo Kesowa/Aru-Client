@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Button, Card, Typography } from "antd";
+import React, { useState, useEffect } from "react";
+import { Card, Typography } from "antd";
 import { InfoCircleFilled } from "@ant-design/icons";
 import { Collapse } from "antd";
-import s_m from "../../../Icons/start_measurement.svg";
 import StageTwoForm from "./StageTwoForm";
 import FlightEditing from "../CreateFlight";
 import { connect } from "react-redux";
@@ -10,7 +9,6 @@ import Weather from "../../../shared/Weather";
 import Codes from "../../../../static/weatherCodes";
 import convertDegreeToDirection from "../../../../services/convertDegreeToDirection";
 import http from "../../../../services/httpCall";
-import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 const { Panel } = Collapse;
 const { Title } = Typography;

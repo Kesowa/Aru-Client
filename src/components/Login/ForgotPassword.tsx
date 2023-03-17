@@ -4,13 +4,11 @@ import http from "../../services/httpCall";
 import { loading } from "../../actions/loadingAction";
 import { connect } from "react-redux";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
-import { Typography, Form, Input, Button, message, Alert } from "antd";
-import { MailOutlined, LockOutlined } from "@ant-design/icons";
+import { Typography, Form, Input, Button, Alert } from "antd";
+import { MailOutlined } from "@ant-design/icons";
 import { login, setUserDetails, logout } from "../../actions/authAction";
 import "./index.less";
 import AryaLogo from "../../static/kesowa-logo.svg";
-import { clientOptions } from "../../static/sideBarOptions";
-import { Link } from "react-router-dom";
 import { components } from "src/handlers/schema";
 import "../shared/login-bg.less";
 

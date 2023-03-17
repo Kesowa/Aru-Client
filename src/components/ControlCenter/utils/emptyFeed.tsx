@@ -1,4 +1,4 @@
-import React, { createRef, useState } from "react";
+import React from "react";
 
 import "./videoBox.less";
 

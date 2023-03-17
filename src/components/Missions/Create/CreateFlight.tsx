@@ -19,8 +19,6 @@ import {
 import { showDrawing } from "../../../actions/gmapActions";
 import { connect } from "react-redux";
 import moment from "moment";
-import apis from "../../../services/apis";
-import http from "../../../services/httpCall";
 
 const { Option } = Select;
 // const { RangePicker } = DatePicker;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Row, Col, Typography } from "antd";
 import "./index.less";
 import unAuthorizedPic from "../../../static/unauthorized-access.svg";

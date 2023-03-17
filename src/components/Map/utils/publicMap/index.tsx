@@ -1,11 +1,9 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from "react";
 import { v4 as uuid } from "uuid";
-import MapIcons from "../../static/google-map-icon-transparent-28.jpg";
 import KesowaNewLogo from "../../../../static/kesowa-black.png";
 import InfoWindowContent from "../infoWindow";
 import { DataFilterExtension } from "@deck.gl/extensions";
-import download from "downloadjs";
 import * as turf from "@turf/turf";
 import {
   Row,
@@ -13,14 +11,8 @@ import {
   Card,
   Tabs,
   Typography,
-  Avatar,
-  Badge,
-  Table,
   Button,
   Tooltip,
-  Divider,
-  Tag,
-  Switch,
   Spin,
   message,
   Tree,
@@ -28,54 +20,24 @@ import {
   Dropdown,
   Modal,
   Upload,
-  Form,
   Input,
-  Cascader,
-  TreeSelect,
-  DatePicker,
   Select,
   Space,
-  Checkbox,
-  Popconfirm,
-  Progress,
   Popover,
-  Alert,
-  Result,
-  Radio,
-  notification,
 } from "antd";
 import {
-  UploadOutlined,
   DoubleRightOutlined,
-  FileAddOutlined,
   FileImageOutlined,
   DoubleLeftOutlined,
   BranchesOutlined,
   EnvironmentOutlined,
   GatewayOutlined,
-  LeftOutlined,
-  RightOutlined,
-  CloseOutlined,
-  ArrowsAltOutlined,
-  SwitcherOutlined,
   SortAscendingOutlined,
   SortDescendingOutlined,
   ExclamationCircleOutlined,
-  DownOutlined,
-  UpOutlined,
-  SyncOutlined,
-  PlusOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  FolderAddOutlined,
   FolderOutlined,
-  ArrowLeftOutlined,
-  VideoCameraOutlined,
 } from "@ant-design/icons";
-import { TwitterPicker, SketchPicker } from "react-color";
 import "../../index.less";
-import LineIcon from "../../static/line.svg";
-import PolygonIcon from "../../static/polygon.svg";
 import DeckGL from "@deck.gl/react";
 import { FlyToInterpolator } from "deck.gl";
 import {
@@ -96,11 +58,7 @@ import {
   DrawPointMode,
   GeoJsonEditMode,
 } from "nebula.gl";
-import {
-  StaticMap,
-  WebMercatorViewport,
-  LinearInterpolator,
-} from "react-map-gl";
+import { StaticMap } from "react-map-gl";
 //import MapAttributes from "./mapAttributes";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
@@ -110,17 +68,10 @@ import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";
 import moment from "moment";
 import { useHistory, useParams } from "react-router-dom";
-import { layer } from "@fortawesome/fontawesome-svg-core";
 //import Images from "./Images";
 //import LayerDocs from "./layerDocs";
 //import CreateLayer from "./createLayer";
 //import CreateBaseLayer from "./createBaseLayer";
-import da from "date-fns/esm/locale/da/index";
-import io from "socket.io-client";
-import { isTemplateSpan } from "typescript";
-import { useCallback } from "react";
-import { addYears } from "date-fns/esm";
-import { faWindowRestore } from "@fortawesome/free-solid-svg-icons";
 import {
   COG_URL,
   MAPBOX_API_KEY,

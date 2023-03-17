@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { RightOutlined, LeftOutlined } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSun, faArrowDown } from "@fortawesome/free-solid-svg-icons";
+import { faSun } from "@fortawesome/free-solid-svg-icons";
 import { Row, Col, Spin, Typography } from "antd";
 import "./index.less";
 import convertDegreeToDirection from "../../../services/convertDegreeToDirection";

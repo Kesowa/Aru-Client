@@ -1,15 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useParams, useHistory, useLocation } from "react-router-dom";
+import { useParams, useHistory, useLocation } from "react-router-dom";
 import { connect } from "react-redux";
 import EmptyGraphics from "../../../../static/Alone-rafiki.svg";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
-import { createBrowserHistory } from "history";
 
 import {
   PageHeader,
   Tag,
   Button,
-  Statistic,
   Descriptions,
   Row,
   Col,
@@ -17,45 +15,31 @@ import {
   Avatar,
   Typography,
   Tabs,
-  Switch,
-  Radio,
   Tooltip,
   Modal,
   message,
   Form,
   Checkbox,
   Input,
-  DatePicker,
-  TimePicker,
-  Table,
-  Popconfirm,
   Timeline,
   Dropdown,
   Menu,
   Badge,
   notification,
-  Space,
   Empty,
 } from "antd";
 
 import {
   UserOutlined,
   ShareAltOutlined,
-  CloseOutlined,
-  DeleteOutlined,
-  SwapOutlined,
   LinkOutlined,
-  PlusOutlined,
   MailOutlined,
   DownOutlined,
   EditOutlined,
-  ClockCircleOutlined,
   ExceptionOutlined,
   VideoCameraOutlined,
   CheckCircleOutlined,
   RadiusUpleftOutlined,
-  CalendarOutlined,
-  FieldTimeOutlined,
   UserAddOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
@@ -69,20 +53,15 @@ import moment from "moment";
 import { loading } from "../../../../actions/loadingAction";
 import TextArea from "antd/lib/input/TextArea";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMapMarkedAlt } from "@fortawesome/free-solid-svg-icons";
-import missionReducer from "../../../../reducers/missionReducer";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { EditMission } from "../../../../actions/missionActions";
 import { clearMissionCreationState } from "../../../../actions/missionCreation";
-import { setUserDetails } from "../../../../actions/authAction";
 import io from "socket.io-client";
 import ImageDoc from "./Data/ImageDocs";
 import ManageClients from "./Data/ManageClient";
-import { coordAll } from "@turf/turf";
-import { TypeFlags } from "typescript";
 import { API_URL, STATIC_URL } from "src/constants";
 
 const { Paragraph } = Typography;

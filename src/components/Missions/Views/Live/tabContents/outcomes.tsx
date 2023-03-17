@@ -1,21 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 // import { Link } from "react-router-dom";
-import { StaticGoogleMap, Marker, Path } from "react-static-google-map";
 import {
   Row,
   Col,
-  Card,
   Typography,
   Avatar,
   Button,
   Tooltip,
   Divider,
-  Tag,
   Checkbox,
   Modal,
   Image,
   notification,
-  Space,
   Spin,
   Input,
   Cascader,
@@ -23,13 +19,8 @@ import {
   Pagination,
 } from "antd";
 import {
-  FieldTimeOutlined,
-  CalendarOutlined,
   UserOutlined,
-  PhoneOutlined,
   ShareAltOutlined,
-  LinkOutlined,
-  MailOutlined,
   DownloadOutlined,
   GoogleOutlined,
   SortAscendingOutlined,
@@ -46,7 +37,6 @@ import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import { logout } from "../../../../../actions/authAction";
 import Alone from "../../../../../static/Alone-rafiki.svg";
 import moment from "moment";
-import userEvent from "@testing-library/user-event";
 import io from "socket.io-client";
 import { components } from "src/handlers/schema";
 const { Title, Text, Link } = Typography;

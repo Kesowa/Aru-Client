@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { PUBLIC_URL } from "src/constants";
 import connectSocket from "../../../../services/socketConnect";
 
 type mapProps = {

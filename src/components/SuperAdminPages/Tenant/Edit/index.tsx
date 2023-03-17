@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import {
   PageHeader,
-  Steps,
   Button,
   Upload,
   message,
@@ -15,14 +14,11 @@ import {
 } from "antd";
 import {
   UnorderedListOutlined,
-  SolutionOutlined,
-  ShoppingCartOutlined,
-  CreditCardOutlined,
   PlusOutlined,
   LoadingOutlined,
 } from "@ant-design/icons";
 import "../Tenant.less";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import ImgCrop from "antd-img-crop";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";

@@ -14,7 +14,6 @@ import {
   FileArray,
   FullFileBrowser,
   ChonkyActions,
-  FileActionHandler,
   FileData,
   ChonkyFileActionData,
   FileHelper,

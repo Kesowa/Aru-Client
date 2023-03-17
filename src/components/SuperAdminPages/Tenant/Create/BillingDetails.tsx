@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Form, Input, Row, Col, Button } from "antd";
 
 export default function BillingDetails(props: any) {

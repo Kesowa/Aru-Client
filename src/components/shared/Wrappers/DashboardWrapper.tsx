@@ -9,8 +9,6 @@ import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { message } from "antd";
 import { clientOptions } from "../../../static/sideBarOptions";
-import { useHistory } from "react-router-dom";
-import { PUBLIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
 import Register from "../../SignUp";
 

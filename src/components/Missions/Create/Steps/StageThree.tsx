@@ -12,17 +12,12 @@ import {
   message,
   Tag,
   Select,
-  Form,
   Modal,
   Typography,
   Popconfirm,
   Result,
 } from "antd";
-import {
-  ArrowLeftOutlined,
-  EditOutlined,
-  ExclamationCircleOutlined,
-} from "@ant-design/icons";
+import { EditOutlined } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChartBar,
@@ -44,9 +39,6 @@ import {
   setCircleMeasurements,
   setGeolocation,
 } from "../../../../actions/missionCreation";
-import CountExceed from "../../TenantRootPages/restrictions/restrictions";
-import Expired from "../../TenantRootPages/restrictions/expiry";
-import Weather from "../../weather/weather";
 
 const { TextArea } = Input;
 const { Option } = Select;

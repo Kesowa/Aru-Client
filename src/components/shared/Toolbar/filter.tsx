@@ -122,6 +122,12 @@ const FilterToolbar = (props) => {
           onChange={props.handleSortChange}
         >
           <Option value="timeStamp">Timestamp</Option>
+          {props.type === "Video" && (
+            <>
+              <Option value="name">Name</Option>
+              <Option value="size">Size</Option>
+            </>
+          )}
           {/* <Option value='inference'>Inference</Option> */}
         </Select>
       </div>

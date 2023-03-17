@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Typography, Spin, Form, Input, Select } from "antd";
 import ReactJson from "react-json-view";
 import "../index.less";
@@ -8,7 +8,7 @@ import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { logout } from "../../../actions/authAction";
 import { connect } from "react-redux";
 import FeatureTable from "./featureTable";
-import { COG_URL, PUBLIC_URL, TITILER_STATIC } from "src/constants";
+import { COG_URL, TITILER_STATIC } from "src/constants";
 
 const { Text } = Typography;
 const { Option } = Select;

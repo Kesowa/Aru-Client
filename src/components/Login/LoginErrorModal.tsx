@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
 import { loading } from "../../actions/loadingAction";
 import { connect } from "react-redux";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
-import { Typography, Form, Input, Button, message, Alert } from "antd";
+import { Typography, Form, Input, Button, Alert } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
 import { login, setUserDetails, logout } from "../../actions/authAction";
 import "./index.less";
-import AryaLogo from "../../static/kesowa-logo.svg";
 import KesowaLogo from "../../static/kiv_logo_new.png";
 import { clientOptions } from "../../static/sideBarOptions";
 import { Link } from "react-router-dom";

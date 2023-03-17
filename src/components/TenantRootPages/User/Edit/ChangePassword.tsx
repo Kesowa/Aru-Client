@@ -1,12 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
-import {
-  PlusCircleOutlined,
-  SearchOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
+import { PlusCircleOutlined } from "@ant-design/icons";
 import { PageHeader, Row, Col, message, Form, Input, Button } from "antd";
 import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";

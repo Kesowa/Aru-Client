@@ -754,11 +754,15 @@ function VideoPlayer(props: any) {
           100,
           -150,
           150,
-          flightTeleSrt[x] ? flightTeleSrt[x].properties.SPEED_VERTICAL * 3.6 : undefined
+          flightTeleSrt[x]
+            ? flightTeleSrt[x].properties.SPEED_VERTICAL * 3.6
+            : undefined
         )
       );
       setV_speed(
-        flightTeleSrt[x] ? flightTeleSrt[x].properties.SPEED_VERTICAL * 3.6 : undefined
+        flightTeleSrt[x]
+          ? flightTeleSrt[x].properties.SPEED_VERTICAL * 3.6
+          : undefined
       );
       setDPosition({
         lat: flightTeleSrt[x]?.geometry.coordinates[1],

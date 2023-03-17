@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import LocationMap from "../Map";
 import "../../index.less";
-import { Button, Card, Typography, Collapse } from "antd";
+import { Card, Typography, Collapse } from "antd";
 import { InfoCircleFilled } from "@ant-design/icons";
 import LocationEditForm from "./Form";
 

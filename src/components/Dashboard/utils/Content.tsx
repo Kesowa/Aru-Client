@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import {
-  Layout,
   Row,
   Col,
   Typography,
@@ -11,18 +10,12 @@ import {
   Statistic,
   Spin,
   Modal,
-  Progress,
   Result,
   Skeleton,
 } from "antd";
-import { useLocation, Switch, Route, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./../index.less";
-import MissionIcon from "../../static/target.svg";
-import MissionListIcon from "../../static/Missions.svg";
-import Users from "../../static/users.svg";
-import User from "../../static/user.svg";
-import Data from "../../static/data.svg";
-import { ArrowUpOutlined, ImportOutlined } from "@ant-design/icons";
+import { ImportOutlined } from "@ant-design/icons";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";

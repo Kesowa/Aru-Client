@@ -1,4 +1,4 @@
-import React, { createRef, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Button, Avatar, Typography, Tag } from "antd";
 import { DeleteOutlined, SwapOutlined, UserOutlined } from "@ant-design/icons";
@@ -7,7 +7,7 @@ import GridMap from "./GridMap";
 import classNames from "classnames";
 
 import "../../utils/videoBox.less";
-import { LIVE_URL, API_URL, STATIC_URL } from "src/constants";
+import { LIVE_URL, STATIC_URL } from "src/constants";
 
 const { Title, Text } = Typography;
 const GridVideoBox = (props: any) => {

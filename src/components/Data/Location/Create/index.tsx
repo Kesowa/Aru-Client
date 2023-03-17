@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import LocationMap from "../Map";
 import "../../index.less";
-import { Button, Card, Typography, Collapse } from "antd";
+import { Card, Typography, Collapse } from "antd";
 import { InfoCircleFilled } from "@ant-design/icons";
-import s_m from "../../../Icons/start_measurement.svg";
 import LocationCreateForm from "./Form";
 
 function CreateLocation(props) {

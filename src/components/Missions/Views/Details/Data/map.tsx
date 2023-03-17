@@ -6,21 +6,13 @@ import {
   Button,
   message,
   List,
-  Modal,
   Spin,
   notification,
 } from "antd";
 import "./data.less";
-import MapIcon from "../../../static/dronemap.svg";
 import goToMap from "../../../../../assets/go-to-map.svg";
 import { useHistory } from "react-router-dom";
-import {
-  setChonkyDefaults,
-  FileArray,
-  FullFileBrowser,
-  ChonkyActions,
-  FileActionHandler,
-} from "chonky";
+import { setChonkyDefaults } from "chonky";
 import { loading } from "../../../../../actions/loadingAction";
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import moment from "moment";

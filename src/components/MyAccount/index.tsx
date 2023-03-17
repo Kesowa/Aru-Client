@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
-import { PageHeader, Row, Col, message, Tabs } from "antd";
+import { PageHeader, Tabs } from "antd";
 import { loading } from "../../actions/loadingAction";
 import { logout } from "../../actions/authAction";
 import http from "../../services/httpCall";
 import apis from "../../services/apis";
 import TenantInfo from "./utils/TenantInfo";
-import PhoneNumberChanger from "./utils/PhoneNumberChanger";
-import EmailChanger from "./utils/EmailChanger";
 import OrganisationPackageDetails from "./utils/OrganisationPackageDetails";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import "./index.less";

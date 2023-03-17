@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { v4 as uuid } from "uuid";
 import {
   Modal,
@@ -9,7 +9,6 @@ import {
   Upload,
   Row,
   Col,
-  Spin,
   Form,
   Alert,
   Input,
@@ -31,17 +30,13 @@ import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { connect } from "react-redux";
-import moment from "moment";
 import {
   InboxOutlined,
   UploadOutlined,
-  VideoCameraOutlined,
   ImportOutlined,
 } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
-import io from "socket.io-client";
 import "../../index.less";
-import AttributeMapping from "../attributeMapping";
 import MarkerIcon from "../../../../static/MarkerIcon.png";
 import TankIcon from "../../../../static/TankIcon.png";
 import ValveIcon from "../../../../static/ValveIcon.png";

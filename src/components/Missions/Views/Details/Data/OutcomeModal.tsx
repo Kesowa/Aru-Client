@@ -1,44 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import {
   Row,
   Col,
-  Card,
   Typography,
-  Spin,
   Image,
   Modal,
   Tooltip,
   Button,
   Avatar,
-  notification,
-  Tag,
-  Cascader,
   Select,
   Input,
-  Divider,
-  Pagination,
-  Empty,
-  Statistic,
 } from "antd";
 import {
-  ExclamationOutlined,
-  CalendarOutlined,
   UserOutlined,
-  AppstoreOutlined,
-  BarsOutlined,
   ShareAltOutlined,
   DownloadOutlined,
   GoogleOutlined,
-  SortAscendingOutlined,
-  SortDescendingOutlined,
   LoadingOutlined,
 } from "@ant-design/icons";
-import apis from "../../../../../services/apis";
-import http from "../../../../../services/httpCall";
-import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { logout } from "../../../../../actions/authAction";
-import { connect } from "react-redux";
 import moment from "moment";
 import * as htmlToImage from "html-to-image";
 import "./data.less";

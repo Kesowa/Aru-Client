@@ -1,4 +1,4 @@
-import React, { createRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { loading } from "../../actions/loadingAction";
@@ -33,14 +33,12 @@ import "./index.less";
 import GridView from "./layouts/GridView";
 import MapHybrids from "./layouts/MapHybrids"; //TwoStreamWithMap
 import FocusHybrids from "./layouts/FocusHybrids"; //ThreeStreamsView
-import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import http from "../../services/httpCall";
 import apis from "../../services/apis";
-import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { logout } from "../../actions/authAction";
 import moment from "moment";
 import Video from "./utils/thumbnailVideo";
-import { PUBLIC_URL, API_URL, STATIC_URL } from "src/constants";
+import { STATIC_URL } from "src/constants";
 
 const { Content, Footer, Header, Sider } = Layout;
 const { Meta } = Card;

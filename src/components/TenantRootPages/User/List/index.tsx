@@ -4,15 +4,12 @@ import { useHistory } from "react-router-dom";
 import {
   PlusCircleOutlined,
   SearchOutlined,
-  EyeOutlined,
   EditOutlined,
   DeleteOutlined,
   LockOutlined,
 } from "@ant-design/icons";
 import {
   PageHeader,
-  Row,
-  Col,
   message,
   Tabs,
   Input,

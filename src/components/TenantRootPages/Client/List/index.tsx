@@ -10,8 +10,6 @@ import {
 } from "@ant-design/icons";
 import {
   PageHeader,
-  Row,
-  Col,
   message,
   Tabs,
   Input,
@@ -20,7 +18,6 @@ import {
   Table,
   Typography,
   Popconfirm,
-  Form,
 } from "antd";
 import { loading } from "../../../../actions/loadingAction";
 import { setClientToEdit } from "../../../../actions/cliantActions";
@@ -37,8 +34,6 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
-import { useForm } from "antd/lib/form/Form";
-import Modal from "antd/lib/modal/Modal";
 const { TabPane } = Tabs;
 const { Title } = Typography;
 function UserListPage(props: any) {

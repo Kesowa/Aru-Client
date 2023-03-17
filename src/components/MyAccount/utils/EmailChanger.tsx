@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Input, Row, Col, message, Button, Divider } from "antd";
+import { Form, Input, Row, Col, message, Button } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";

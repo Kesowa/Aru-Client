@@ -1,5 +1,5 @@
 import { message } from "antd";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import apis from "../../../services/apis";
 import http from "../../../services/httpCall";
 

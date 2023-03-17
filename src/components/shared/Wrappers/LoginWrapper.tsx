@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { Route, Redirect, useLocation } from "react-router-dom";
+import { Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 
 interface IProps {

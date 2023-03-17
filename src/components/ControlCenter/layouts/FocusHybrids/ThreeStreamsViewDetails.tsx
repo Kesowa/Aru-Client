@@ -1,4 +1,4 @@
-import React, { createRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Avatar, message } from "antd";
 import "./threeStreamsView.less";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

@@ -1,18 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import DeckGL from "@deck.gl/react";
-import { BitmapLayer, GeoJsonLayer, IconLayer } from "@deck.gl/layers";
-import { TileLayer } from "@deck.gl/geo-layers";
-import { HtmlOverlayItem, HtmlOverlay } from "@nebula.gl/overlays";
-import {
-  EditableGeoJsonLayer,
-  DrawPolygonMode,
-  ScaleMode,
-  MeasureDistanceMode,
-  DrawLineStringMode,
-  ViewMode,
-  ModifyMode,
-} from "nebula.gl";
-import { StaticMap } from "react-map-gl";
+import React, { useState, useEffect } from "react";
+
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { logout } from "../../../actions/authAction";
@@ -20,60 +7,25 @@ import { connect } from "react-redux";
 import {
   Row,
   Col,
-  Card,
   Typography,
-  Avatar,
   Button,
   Tooltip,
-  Divider,
-  Tag,
-  Switch,
   Image,
   Spin,
   message,
-  Popover,
-  Space,
-  Dropdown,
-  Menu,
   Select,
-  AutoComplete,
-  Input,
-  Table,
-  Form,
-  Popconfirm,
   Badge,
 } from "antd";
-import {
-  FieldTimeOutlined,
-  CalendarOutlined,
-  PlusOutlined,
-  UserOutlined,
-  PhoneOutlined,
-  CameraOutlined,
-  EnvironmentOutlined,
-  SaveOutlined,
-  CloseOutlined,
-  EditOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
-import { stat } from "fs";
+import { CameraOutlined, EnvironmentOutlined } from "@ant-design/icons";
 import apis from "../../../services/apis";
 import "../index.less";
-import LineIcon from "../../static/line.svg";
-import PolygonIcon from "../../static/polygon.svg";
 import Area from "../../../static/area_icon.svg";
 import Perimeter from "../../../static/perimeter_icon.svg";
-import fs from "fs";
-import { SketchPicker } from "react-color";
 import * as turf from "@turf/turf";
-import { TwitterPicker } from "react-color";
-import Modal from "antd/lib/modal/Modal";
-import { setConstantValue } from "typescript";
 import moment from "moment";
 import getAddressfromLatLong from "../../../services/reverseGeocoding";
 import { STATIC_URL } from "src/constants";
 import { BsFlagFill } from "react-icons/bs";
-import { TbFlag, TbFlagOff } from "react-icons/tb";
 
 const { Title, Text, Link, Paragraph } = Typography;
 const { Option } = Select;
@@ -115,13 +67,8 @@ function InfoWindow(props) {
   const [imageToShow, setImageToshow] = useState<any>([]);
   const [imageLoader, setImageLoader] = useState(false);
   function openImages() {
-    if (props.videoToShow.length === 1) {
-      props.togglePopup(false);
-      props.updateVOD(props.videoToShow[0], 0);
-    } else {
-      props.setImagesDrawer(true);
-      props.togglePopup(false);
-    }
+    props.setImagesDrawer(true);
+    props.togglePopup(false);
   }
 
   //console.log(props.feature);
