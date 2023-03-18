@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import { useState, Suspense, lazy } from "react";
 import { connect } from "react-redux";
-import { Layout, Row, Col, Typography } from "antd";
+import { Layout, Row, Col, Typography, Space, Spin } from "antd";
 import { useHistory } from "react-router-dom";
 
 import { logout } from "../../actions/authAction";
-import SideBar from "./SideBar";
+/* import SideBar from "./SideBar"; */
 import "./index.less";
-import ProfileDrawer from "./Profile";
+/* import ProfileDrawer from "./Profile"; */
 import TermsAndCondition from "./utils/TnC";
-import FallbackComponent from "./utils/Fallback";
+/* import FallbackComponent from "./utils/Fallback"; */
+import SideBar from "./SideBar";
+const ProfileDrawer = lazy(() => import("./Profile"));
+const FallbackComponent = lazy(() => import("./utils/Fallback"));
 
 function Dashboard(props: any) {
   const [sideBarCollapsed, setSideBarCollapsed] = useState(false);
@@ -45,15 +48,25 @@ function Dashboard(props: any) {
         >
           <Layout.Content className="dasboard-content-wrapper">
             <div className="dashboard-content-inner">
-              <ProfileDrawer
-                visible={showProfile}
-                userDetails={props.Auth}
-                showProfile={setShowProfile}
-              />
-              <FallbackComponent
-                {...props}
-                setSideBarCollapsed={setSideBarCollapsed}
-              />
+              <Suspense
+                fallback={
+                  <div className="example">
+                    <Space size="middle">
+                      <Spin size="large" />
+                    </Space>
+                  </div>
+                }
+              >
+                <ProfileDrawer
+                  visible={showProfile}
+                  userDetails={props.Auth}
+                  showProfile={setShowProfile}
+                />
+                <FallbackComponent
+                  {...props}
+                  setSideBarCollapsed={setSideBarCollapsed}
+                />
+              </Suspense>
             </div>
           </Layout.Content>
         </Col>

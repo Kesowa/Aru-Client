@@ -1,8 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { test, expect } from "@playwright/test";
 
-
-
 test("create mission", async ({ page }) => {
   page.goto("http://localhost:3000");
   await expect(page).toHaveURL(/.*dashboard/);
@@ -70,5 +68,4 @@ test("create mission", async ({ page }) => {
   );
   expect(missionDeleteAlert).toBeDefined();
   expect(await page.getByText(missionName, { exact: true }).count()).toBe(0);
-
 });
