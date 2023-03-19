@@ -1,8 +1,9 @@
-import { defineConfig } from "vite";
+import { defineConfig, PluginOption } from "vite";
 import reactRefresh from "@vitejs/plugin-react";
 import svgrPlugin from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";
+import { visualizer } from "rollup-plugin-visualizer";
 //import preact from '@preact/preset-vite'
 
 // https://vitejs.dev/config/
@@ -43,5 +44,6 @@ export default defineConfig({
         // ...svgr options (https://react-svgr.com/docs/options/)
       },
     }),
+    visualizer() as PluginOption,
   ],
 });
