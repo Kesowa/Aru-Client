@@ -1,17 +1,24 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import Loader from "./components/shared/Loader";
 import { connect } from "react-redux";
 import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
-import LoginWrapper from "./components/shared/Wrappers/LoginWrapper";
-import PrivateRoute from "./components/shared/Wrappers/PrivateWrapper";
+import { Space, Spin } from "antd";
+import "./index.less";
+import { login } from "./actions/authAction";
 import Login from "./components/Login";
-import Register from "./components/SignUp";
-import ForgotPassword from "./components/Login/ForgotPassword";
-import DashboardWrapper from "./components/shared/Wrappers/DashboardWrapper";
+import LoginWrapper from "./components/shared/Wrappers/LoginWrapper";
 import Gmap from "./components/shared/Gmap";
 import Socket from "./components/shared/Socket";
-import { login } from "./actions/authAction";
-import PublicMap from "./components/Map/utils/publicMap";
+
+const ForgotPassword = lazy(() => import("./components/Login/ForgotPassword"));
+const Register = lazy(() => import("./components/SignUp"));
+const DashboardWrapper = lazy(
+  () => import("./components/shared/Wrappers/DashboardWrapper")
+);
+const PrivateRoute = lazy(
+  () => import("./components/shared/Wrappers/PrivateWrapper")
+);
+const PublicMap = lazy(() => import("./components/Map/utils/publicMap"));
 
 const App = (props: any) => {
   //auth check if token exist
@@ -43,7 +50,17 @@ const App = (props: any) => {
               <Redirect to={{ pathname: "/dashboard" }} />
             </Route>
             <Route exact path="/map/:id">
-              <PublicMap isBaseMap={true} />
+              <Suspense
+                fallback={
+                  <div className="example">
+                    <Space size="middle">
+                      <Spin size="large" />
+                    </Space>
+                  </div>
+                }
+              >
+                <PublicMap isBaseMap={true} />
+              </Suspense>
             </Route>
             <Route exact path="/forgot-password">
               <ForgotPassword />
@@ -54,9 +71,19 @@ const App = (props: any) => {
             <LoginWrapper exact={true} path="/sign-up">
               <Register />
             </LoginWrapper>
-            <PrivateRoute path="/dashboard">
-              <DashboardWrapper />
-            </PrivateRoute>
+            <Suspense
+              fallback={
+                <div className="example">
+                  <Space size="middle">
+                    <Spin size="large" />
+                  </Space>
+                </div>
+              }
+            >
+              <PrivateRoute path="/dashboard">
+                <DashboardWrapper />
+              </PrivateRoute>
+            </Suspense>
             <Route>
               <Redirect to="/" />
             </Route>
