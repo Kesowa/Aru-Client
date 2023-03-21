@@ -179,7 +179,7 @@ function MissionView(props) {
 
   const fetchMissionTypes = async () => {
     const result = await http.get(
-      `${apis.BASE_SERVER_URL}${apis.GET_ALL_MISSION_TYPES}`
+      apis.GET_ALL_MISSION_TYPES
     );
     if (result.data.status) {
       setMissionTypes(result.data.data);
