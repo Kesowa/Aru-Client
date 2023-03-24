@@ -1314,9 +1314,7 @@ function BaseMap(props) {
 
   useEffect(() => {
     if (srtVideoPath && showFlightPath) {
-      fetchJSON(
-        STATIC_URL + (srtVideoPath as string).replace(/.\w+$/, ".geojson")
-      )
+      fetchJSON(STATIC_URL + srtVideoPath.replace(/.\w+$/, ".geojson"))
         .then((data) => {
           const flightTelemetry: any = data.features;
           const pathObject: any = flightTelemetry.pop();
