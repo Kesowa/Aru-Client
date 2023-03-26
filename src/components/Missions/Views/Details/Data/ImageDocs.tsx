@@ -16,6 +16,7 @@ import {
   Checkbox,
   Select,
   Badge,
+  Pagination,
 } from "antd";
 import "./data.less";
 import "./checkbox.less";
@@ -66,6 +67,10 @@ function ImageDocs(props) {
   const { Text, Title } = Typography;
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+
   useEffect(() => {
     if (images.length < 1) {
       setActivateSelection(false);
@@ -292,35 +297,28 @@ function ImageDocs(props) {
     setLoader(true);
     const query = {
       missionId: props.missionId,
+      page,
+      limit,
     };
     const flagFilter = getFlaggedFilter();
     if (flagFilter !== undefined) {
       query["isFlagged"] = flagFilter;
     }
+    if (sortType === "timeStamp") {
+      if (isAscending) {
+        query["sortBy"] = `createdAt:asce`;
+      } else {
+        query["sortBy"] = `createdAt:desc`;
+      }
+    }
     http
-      .get(`${apis.GET_DOCUMENTS}`, {
+      .get(`${apis.GET_IMAGES}`, {
         params: query,
       })
       .then((res: any) => {
         if (res.data.status) {
-          console.log(res.data.data.documents);
-          const filtered: any = res.data.data.documents.filter(
-            (item: any) => item.folderName === "photos"
-          );
-          console.log("filtered", filtered);
-          if (sortType === "timeStamp") {
-            if (isAscending) {
-              filtered.sort((a, b) => {
-                return moment(b.createdAt).diff(moment(a.createdAt));
-              });
-            } else {
-              filtered.sort((a, b) => {
-                return moment(a.createdAt).diff(moment(b.createdAt));
-              });
-            }
-          } else {
-          }
-          setImages(filtered);
+          setTotalCount(res.data.data.total);
+          setImages(res.data.data.documents);
         } else {
           message.error(res.data.message);
         }
@@ -444,7 +442,7 @@ function ImageDocs(props) {
         });
       }
     }
-  }, [props.missionDetails.missionId]);
+  }, [props.missionDetails.missionId, page, limit]);
 
   //----------render upload button----------------------
 
@@ -573,7 +571,7 @@ function ImageDocs(props) {
   useEffect(() => {
     setRefreshState(!refreshState);
     fetchDocuments();
-  }, [isAscending, flaggedFilter, unflaggedFilter]);
+  }, [isAscending, flaggedFilter, unflaggedFilter, page, limit]);
 
   // This is a list view
   return (
@@ -600,6 +598,7 @@ function ImageDocs(props) {
         activateSelection={activateSelection}
         setData={setImages}
         data={images}
+        totalCount={totalCount}
         setFlag={setFlag}
         flag={flag}
         uploadBtn={renderUploadBtn}
@@ -931,6 +930,22 @@ function ImageDocs(props) {
                   )}
                 </>
               )}
+              <Pagination
+                defaultCurrent={page}
+                defaultPageSize={limit}
+                onShowSizeChange={(currPage, limit) => {
+                  setPage(currPage);
+                  setLimit(limit);
+                }}
+                current={page}
+                onChange={(currPage, limit) => {
+                  setPage(currPage);
+                  setLimit(limit);
+                }}
+                total={totalCount}
+                hideOnSinglePage={true}
+                showSizeChanger={true}
+              />
             </>
           )}
         </div>

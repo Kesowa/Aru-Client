@@ -219,6 +219,7 @@ const apis = {
   DELETE_DOCUMENT: "/apis/v1/document/delete",
   DELETE_DOCUMENT_MULTIPLE: "/apis/v1/document/delete-multiple",
   GET_DOCUMENTS: "/apis/v1/document/getbymissionId",
+  GET_IMAGES: "/apis/v1/document/getImagesByMissionId",
   BULK_DOWNLOAD: "/apis/v1/document/zipbyId",
   UPDATE_DOC: "/apis/v1/document/update-doc-by-ID",
   UPDATE_MULTI_DOC: "/apis/v1/document/update-multi-docs-by-ID",

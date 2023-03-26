@@ -138,7 +138,7 @@ function Outcomes(outcomeProps) {
           setOutcomeData(outcomes);
         } else setOutcomeData([]);
         // setOutcomeDataCopy(res.data.data);
-        setTotal(res.data.data.length);
+        setTotal(res.data.total);
         setAllOutcomes(res.data.data);
         console.log("Alerts: ", res.data.data);
       })
@@ -868,6 +868,7 @@ function Outcomes(outcomeProps) {
         activateSelection={activateSelection}
         setData={setOutcomeData}
         data={outcomeData}
+        totalCount={total}
         uploadBtn={renderUploadButton}
         delete={deleteMultupleOutcome}
         setFlag={setFlag}
@@ -1206,10 +1207,12 @@ function Outcomes(outcomeProps) {
         </Row>
       )}
       <Pagination
+        defaultCurrent={page}
+        defaultPageSize={limit}
         onShowSizeChange={setPageLimit}
         current={page}
         onChange={setPaginationPage}
-        total={outcomeProps.count}
+        total={total}
         hideOnSinglePage={true}
         showSizeChanger={true}
       />
