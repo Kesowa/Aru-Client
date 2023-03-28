@@ -71,7 +71,7 @@ function AssetView(props) {
   };
 
   return (
-    <div>
+    <div style={{ padding: "24px" }}>
       {/* <Title level={2}>{data.assetName}</Title> */}
       <PageHeader onBack={() => window.history.back()} title={data.assetName} />
       <Row style={{ padding: "25px" }}>

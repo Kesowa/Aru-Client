@@ -146,7 +146,7 @@ function MissionList(props) {
   }
 
   return (
-    <div className="mission-list-wrapper">
+    <div className="mission-list-wrapper" style={{padding:24}}>
       <PageHeader
         onBack={() => window.history.back()}
         title="Request a Mission!"
