@@ -21,6 +21,7 @@ import {
   Checkbox,
   Select,
   Badge,
+  Pagination,
 } from "antd";
 import {
   ExclamationCircleOutlined,
@@ -84,7 +85,9 @@ function Videos(VideoProps) {
   const [Video, setVideo] = useState([]);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [storageModal, setStorageModal] = useState(false);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(4);
+  const [totalCount, setTotalCount] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isUploading, setUploading] = useState(false);
   const [uploadModall, setUploadModal] = useState(false);
@@ -438,82 +441,55 @@ function Videos(VideoProps) {
       return !unflaggedFilter;
     } else return undefined;
   };
-  useEffect(() => {
-    if (VideoProps.missionID !== 0) {
-      const query = {
-        missionID: VideoProps.missionDetails.missionId,
-      };
-      const flagFilter = getFlaggedFilter();
-      if (flagFilter !== undefined) {
-        query["isFlagged"] = flagFilter;
-      }
-      const getSortKey = () => {
-        switch (sortType) {
-          case "timeStamp":
-            return "createdAt";
-          case "name":
-            return "videoName";
-          case "size":
-            return "fileSize";
-          default:
-            return "createdAt";
-        }
-      };
-      const sortKey = getSortKey();
-      if (isAscending) {
-        query["sort"] = sortKey + ":asc";
-      }
-      if (!isAscending) {
-        query["sort"] = sortKey + ":desc";
-      }
-
-      console.log("sort", isAscending, sortType);
-      if (refresh) {
-        setRefresh(false);
-      }
-
-      setLoader(true);
-      http
-        .get(`${apis.FETCH_VIDEOS_BY_MISSION_ID}`, {
-          params: query,
-        })
-        .then((res) => {
-          setVodData(res.data.data);
-          setVideoDetails({
-            link: res.data.data[0].videoPath,
-            missionDetails: res.data.data[0].missionDetails,
-            isSRT: res.data.data[0].isSRT,
-          });
-          setLoader(false);
-        })
-        .catch((err) => {
-          console.log(err.response.status);
-          if (err.response.status == 404) {
-            setLoader(false);
-            setVodData([]);
-          } else if (err.response.status == 500) {
-            AxiosErrorHandler(err, VideoProps.logout);
-          } else {
-            message.error("API Call failed! " + err);
-          }
-        });
+  const getSortKey = () => {
+    switch (sortType) {
+      case "timeStamp":
+        return "createdAt";
+      case "name":
+        return "videoName";
+      case "size":
+        return "fileSize";
+      default:
+        return "createdAt";
     }
-  }, [VideoProps, refresh, flaggedFilter, unflaggedFilter]);
-
-  const updateVODs = () => {
+  };
+  const fetchVODByMission = () => {
     const query = {
       missionID: VideoProps.missionDetails.missionId,
+      page,
+      limit,
     };
+    const flagFilter = getFlaggedFilter();
+    if (flagFilter !== undefined) {
+      query["isFlagged"] = flagFilter;
+    }
+    const sortKey = getSortKey();
+    if (isAscending) {
+      query["sort"] = sortKey + ":asc";
+    }
+    if (!isAscending) {
+      query["sort"] = sortKey + ":desc";
+    }
+
+    console.log("sort", isAscending, sortType);
+    if (refresh) {
+      setRefresh(false);
+    }
+
+    setLoader(true);
     http
       .get(`${apis.FETCH_VIDEOS_BY_MISSION_ID}`, {
         params: query,
       })
       .then((res) => {
         setVodData(res.data.data);
+        setTotalCount(res.data.total);
+        setLoader(false);
       })
       .catch((err) => {
         console.log(err.response.status);
         if (err.response.status == 404) {
+          setLoader(false);
           setVodData([]);
         } else if (err.response.status == 500) {
           AxiosErrorHandler(err, VideoProps.logout);
@@ -522,39 +498,43 @@ function Videos(VideoProps) {
         }
       });
   };
-  const updateVOD = (data, idx) => {
-    setSelectedVideo(idx);
-    console.log("updateVOD", data, idx);
-    const query = {
-      missionID: VideoProps.missionDetails.missionId,
-    };
-    http
-      .get(`${apis.FETCH_VIDEOS_BY_MISSION_ID}`, {
-        params: query,
-      })
-      .then((res) => {
+
+  useEffect(() => {
+    if (VideoProps.missionID !== 0) {
+      fetchVODByMission();
+      if (VodData.length) {
         setVideoDetails({
-          link: res.data.data[idx].videoPath,
-          missionDetails: res.data.data[idx],
-          isSRT: res.data.data[idx].isSRT,
+          link: VodData[0].videoPath,
+          missionDetails: VodData[0].missionDetails,
+          isSRT: VodData[0].isSRT,
         });
-        setShowCarousel(true);
-      })
-      .catch((err) => {
-        console.log(err.response.status);
-        if (err.response.status == 404) {
-          setVideoDetails({
-            link: data.videoPath,
-            missionDetails: data,
-            isSRT: data.isSRT,
-          });
-          setShowCarousel(true);
-        } else if (err.response.status == 500) {
-          AxiosErrorHandler(err, VideoProps.logout);
-        } else {
-          message.error("API Call failed! " + err);
-        }
+      }
+    }
+  }, [VideoProps, refresh, flaggedFilter, unflaggedFilter]);
+
+  useEffect(() => {
+    fetchVODByMission();
+  }, [page, limit]);
+
+  const updateSelectedVOD = (data, idx: number) => {
+    setSelectedVideo(idx);
+    fetchVODByMission(); // re-fetch
+
+    // set current vod details
+    if (idx < VodData.length && VodData[idx].videoPath && VodData[idx].isSRT) {
+      setVideoDetails({
+        link: VodData[idx].videoPath,
+        missionDetails: VodData[idx],
+        isSRT: VodData[idx].isSRT,
       });
+    } else {
+      setVideoDetails({
+        link: data.videoPath,
+        missionDetails: data,
+        isSRT: data.isSRT,
+      });
+    }
+    setShowCarousel(true);
   };
 
   //----------------------Delete video-----------------------------------
@@ -764,11 +744,6 @@ function Videos(VideoProps) {
   //   }
   // }, [videoDetails.link]);
 
-  function fetchMore() {
-    const newpage = page;
-    setPage(newpage + 1);
-    return;
-  }
   useEffect(() => {
     if (!(activateSelection && checkedList.length > 0)) {
       setFlag(false);
@@ -786,37 +761,6 @@ function Videos(VideoProps) {
       setFlag(false);
     }
   }, [activateSelection, checkedList, VodData]);
-
-  useEffect(() => {
-    console.log("Page: ", page);
-    if (page > 0) {
-      http
-        .get(`${apis.FETCH_VIDEOS_BY_MISSION_ID}`, {
-          params: {
-            missionID: VideoProps.missionDetails.missionId,
-            page: page,
-          },
-        })
-        .then((res) => {
-          const array: any = [...VodData];
-          res.data.data.map((i: any) => {
-            array.push(i);
-          });
-          setVodData(array);
-          // setVideoDetails({
-          //   link: res.data.data[0].videoPath,
-          //   missionDetails: res.data.data[0].missionDetails,
-          //   isSRT: res.data.data[0].isSRT
-          // });
-          console.log(res.data.data);
-          //setLoader(false);
-        })
-        .catch((err) => {
-          //message.error("ERROR" + err + "Could not fetch streams");
-          setHasMore(false);
-        });
-    }
-  }, [page]);
 
   useEffect(() => {
     console.log("width", window.screen.width);
@@ -856,7 +800,7 @@ function Videos(VideoProps) {
                         <div className="topbar">
                           <CloseOutlined
                             onClick={() => {
-                              updateVODs();
+                              fetchVODByMission();
                               setShowCarousel(false);
                             }}
                             className="btn-icon"
@@ -879,7 +823,7 @@ function Videos(VideoProps) {
                         <div className="main" tabIndex={1}>
                           <Carousel
                             beforeChange={(oldIndex, newIndex) => {
-                              updateVOD(data[newIndex], newIndex);
+                              updateSelectedVOD(data[newIndex], newIndex);
                             }}
                             dots={false}
                             arrows
@@ -904,7 +848,7 @@ function Videos(VideoProps) {
                                       }}
                                       src={STATIC_URL + i.thumbnail}
                                       onClick={() => {
-                                        updateVOD(i, idx);
+                                        updateSelectedVOD(i, idx);
                                       }}
                                     />
                                   )}
@@ -1026,7 +970,7 @@ function Videos(VideoProps) {
                                       src={STATIC_URL + dataa.thumbnail}
                                       className="card-img-size"
                                       onClick={() => {
-                                        updateVOD(dataa, idx);
+                                        updateSelectedVOD(dataa, idx);
                                       }}
                                       onError={(e: any) =>
                                         (e.target.src = `/icons/fallback.png`)
@@ -1171,7 +1115,7 @@ function Videos(VideoProps) {
                                           src={STATIC_URL + dataa.thumbnail}
                                           // className='card-img-size'
                                           onClick={() => {
-                                            updateVOD(dataa, idx);
+                                            updateSelectedVOD(dataa, idx);
                                           }}
                                           onError={(e: any) =>
                                             (e.target.src = `/icons/fallback.png`)
@@ -1227,7 +1171,7 @@ function Videos(VideoProps) {
                     <div className="topbar">
                       <CloseOutlined
                         onClick={() => {
-                          updateVODs();
+                          fetchVODByMission();
                           setShowCarousel(false);
                         }}
                         className="btn-icon"
@@ -1250,7 +1194,7 @@ function Videos(VideoProps) {
                     <div className="main" tabIndex={1}>
                       <Carousel
                         beforeChange={(oldIndex, newIndex) => {
-                          updateVOD(data[newIndex], newIndex);
+                          updateSelectedVOD(data[newIndex], newIndex);
                         }}
                         dots={false}
                         arrows
@@ -1275,7 +1219,7 @@ function Videos(VideoProps) {
                                   }}
                                   src={STATIC_URL + i.thumbnail}
                                   onClick={() => {
-                                    updateVOD(i, idx);
+                                    updateSelectedVOD(i, idx);
                                   }}
                                 />
                               )}
@@ -1404,7 +1348,7 @@ function Videos(VideoProps) {
                             src={STATIC_URL + dataa.thumbnail}
                             onClick={() => {
                               if (!activateSelection) {
-                                updateVOD(dataa, idx);
+                                updateSelectedVOD(dataa, idx);
                               }
                             }}
                             onError={(e: any) =>
@@ -1453,6 +1397,22 @@ function Videos(VideoProps) {
                 ))}
               </>
             )}
+            <Pagination
+              defaultCurrent={page}
+              defaultPageSize={limit}
+              onShowSizeChange={(currPage, limit) => {
+                setPage(currPage);
+                setLimit(limit);
+              }}
+              current={page}
+              onChange={(currPage, limit) => {
+                setPage(currPage);
+                setLimit(limit);
+              }}
+              total={totalCount}
+              hideOnSinglePage={true}
+              showSizeChanger={true}
+            />
           </>
         )}
       </div>
@@ -1582,6 +1542,7 @@ function Videos(VideoProps) {
         activateSelection={activateSelection}
         setData={setVodData}
         data={VodData}
+        totalCount={totalCount}
         setFlag={setFlag}
         flag={flag}
         uploadBtn={renderUploadBtn}
