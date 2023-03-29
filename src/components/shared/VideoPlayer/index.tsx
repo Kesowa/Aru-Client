@@ -707,9 +707,7 @@ function VideoPlayer(props: any) {
           ];
 
           setBounds(reGetBounds);
-          setMapCenter(
-            turf.centroid(flightpath.features[0].geometry)
-          );
+          setMapCenter(turf.centroid(flightpath.features[0].geometry));
         })
         .catch((err) => {
           console.log("could not fetch geojson", err);
