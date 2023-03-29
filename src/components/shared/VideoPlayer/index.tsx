@@ -83,6 +83,7 @@ import * as turf from "@turf/turf";
 import { da } from "date-fns/locale";
 import { LIVE_URL } from "src/constants";
 import { components } from "src/handlers/schema";
+import { FlightPath } from "src/types/FlightPath";
 
 const { Text, Link } = Typography;
 const { SubMenu, Item } = Menu;
@@ -663,21 +664,17 @@ function VideoPlayer(props: any) {
     if (!isLive) {
       //console.log(props.url.split('.')[0]);
       let data = fetchJSON((props.url as string).replace(/.\w+$/, ".geojson"))
-        .then((data) => {
-          let flightTelemetry: any = JSON.parse(data).features;
-          let pathObject: any = flightTelemetry.pop();
+        .then((d) => {
+          let data = d as FlightPath;
           //console.log("the obejct", pathObject)
-          let points: any = [];
-          pathObject.geometry.coordinates.map((i: any) => {
-            let values: any = [];
-            values.push(i[0]);
-            values.push(i[1]);
-            //console.log(values);
-            points.push(values);
+          let flightTelemetry = data.features;
+          let points: [number, number, number][] = [];
+          data.features.map((feat) => {
+            points.push(feat.geometry.coordinates);
           });
 
           //console.log("filtered pints", points);
-          let flightpath: any = {
+          let flightpath = {
             type: "FeatureCollection",
             crs: {
               type: "name",
@@ -711,11 +708,11 @@ function VideoPlayer(props: any) {
 
           setBounds(reGetBounds);
           setMapCenter(
-            turf.centroid(flightpath.features[0]).geometry.coordinates
+            turf.centroid(flightpath.features[0].geometry)
           );
         })
         .catch((err) => {
-          console.log("could not fetch geojson");
+          console.log("could not fetch geojson", err);
         });
     }
   }, [props.url, isLive]);
