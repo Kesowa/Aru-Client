@@ -409,7 +409,7 @@ function Media(props) {
                           <a
                             href={
                               STATIC_URL +
-                              item.videoPath.toString().replace("index.m3u8", "video.flv")
+                              item.videoPath.toString().replace(".m3u8", ".flv")
                             }
                             // target='_blank'
                             download
@@ -779,7 +779,7 @@ function Media(props) {
               <a
                 href={
                   STATIC_URL +
-                  props.videoDetails.link.toString().replace("index.m3u8", "video.flv")
+                  props.videoDetails.link.toString().replace(".m3u8", ".flv")
                 }
                 // target='_blank'
                 download
