@@ -81,6 +81,7 @@ function Outcomes(props) {
   const [flag, setFlag] = useState(false);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
+  const [thumbnail, setThumbnail] = useState("");
   const [addr4Image, setAddr4Image] = useState("");
   const [progress, setProgress] = useState(0); //this can be used for a different progress component
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -210,10 +211,46 @@ function Outcomes(props) {
     setPage(currPage);
     setLimit(limit);
   };
-
-  const OutcomeCompononent = (dataa: any, ind: any) => {
-    const outcome = dataa;
-
+  const thumbnailComponent = (outcome) => {
+    return (
+      <Badge
+        style={{
+          backgroundColor: "#f5222d",
+          padding: "5px",
+          borderRadius: "5px",
+        }}
+        offset={[-15, 15]}
+        count={
+          outcome.isFlagged ? (
+            <BsFlagFill
+              style={{
+                color: "#fff",
+                fontSize: "24px",
+              }}
+            />
+          ) : (
+            0
+          )
+        }
+      >
+        <img
+          style={{
+            width: "100%",
+            height: "auto",
+            minHeight: "200px",
+            borderRadius: "10px",
+            border: "1px solid black",
+          }}
+          src={STATIC_URL + outcome.thumb}
+          onError={(e: any) => {
+            e.target.onerror = null;
+            e.target.src = "/icons/fallback.png";
+          }}
+        />
+      </Badge>
+    );
+  };
+  const OutcomeCompononent = (outcome: any, ind: any) => {
     return (
       <>
         {listView ? (
@@ -221,7 +258,7 @@ function Outcomes(props) {
             className="listview-outcomes"
             align="middle"
             style={
-              activateSelection && checkedList.includes(dataa._id)
+              activateSelection && checkedList.includes(outcome._id)
                 ? {
                     border: "4px solid #3b86ff",
                     cursor: "pointer",
@@ -232,13 +269,13 @@ function Outcomes(props) {
             onClick={
               () => {
                 if (activateSelection) {
-                  if (checkedList.includes(dataa._id)) {
+                  if (checkedList.includes(outcome._id)) {
                     const filtered: any = checkedList.filter(
-                      (i: any) => i !== dataa._id
+                      (i: any) => i !== outcome._id
                     );
                     setCheckedList(filtered);
                   } else {
-                    setCheckedList([...checkedList, dataa._id]);
+                    setCheckedList([...checkedList, outcome._id]);
                   }
                 } else {
                   setShowOutcomeModal(true);
@@ -246,25 +283,25 @@ function Outcomes(props) {
                 }
               }
               // showModal(
-              //   dataa._id,
-              //   dataa.missionId._id,
-              //   dataa.flightId._id,
-              //   dataa.createdBy.name,
-              //   dataa.createdBy.avatar,
-              //   dataa.createdAt,
-              //   API_URL + dataa.image,
-              //   dataa.location,
-              //   dataa.locationName
-              //     ? dataa.locationName
+              //   outcome._id,
+              //   outcome.missionId._id,
+              //   outcome.flightId._id,
+              //   outcome.createdBy.name,
+              //   outcome.createdBy.avatar,
+              //   outcome.createdAt,
+              //   API_URL + outcome.image,
+              //   outcome.location,
+              //   outcome.locationName
+              //     ? outcome.locationName
               //     : "Default Location",
-              //   dataa.pcount,
+              //   outcome.pcount,
               // )
             }
           >
             <Col md={4} style={{ padding: "10px" }}>
               <img
                 style={{ width: "100%", height: "auto" }}
-                src={STATIC_URL + dataa.thumb}
+                src={STATIC_URL + outcome.thumb}
                 onError={(e: any) => {
                   e.target.onerror = null;
                   e.target.src = "/icons/fallback.png";
@@ -275,36 +312,36 @@ function Outcomes(props) {
               <div className="info-part">
                 <Row>
                   <Title level={5}>
-                    {dataa.locationName
-                      ? truncateText(dataa.locationName)
+                    {outcome.locationName
+                      ? truncateText(outcome.locationName)
                       : "Default Location"}
                   </Title>
                 </Row>
                 <Row>
                   <Col md={20}>
                     <Text type="secondary">
-                      {dataa.location
-                        ? dataa.location.lat == "0"
+                      {outcome.location
+                        ? outcome.location.lat == "0"
                           ? ""
-                          : `${dataa.location.lat}, ${dataa.location.long}`
+                          : `${outcome.location.lat}, ${outcome.location.long}`
                         : ""}
                     </Text>
                   </Col>
                   <Col md={4}>
                     <Text type="secondary" className="inference">
-                      Inference: {dataa.pcount}
+                      Inference: {outcome.pcount}
                     </Text>
                   </Col>
                 </Row>
                 <Row>
                   <Col md={20}>
                     <Text type="secondary">
-                      <UserOutlined /> {dataa.createdBy.name}
+                      <UserOutlined /> {outcome.createdBy.name}
                     </Text>
                   </Col>
                   <Col md={4}>
                     <Text type="secondary" className="relative-time">
-                      <em>{moment(dataa.createdAt).fromNow()}</em>
+                      <em>{moment(outcome.createdAt).fromNow()}</em>
                     </Text>
                   </Col>
                 </Row>
@@ -342,13 +379,13 @@ function Outcomes(props) {
                   className="outcome-cardd"
                   onClick={() => {
                     if (activateSelection) {
-                      if (checkedList.includes(dataa._id)) {
+                      if (checkedList.includes(outcome._id)) {
                         const filtered: any = checkedList.filter(
-                          (i: any) => i !== dataa._id
+                          (i: any) => i !== outcome._id
                         );
                         setCheckedList(filtered);
                       } else {
-                        setCheckedList([...checkedList, dataa._id]);
+                        setCheckedList([...checkedList, outcome._id]);
                       }
                     } else {
                       setShowOutcomeModal(true);
@@ -356,7 +393,7 @@ function Outcomes(props) {
                     }
                   }}
                   style={
-                    checkedList.includes(dataa._id)
+                    checkedList.includes(outcome._id)
                       ? {
                           border: "4px solid #3b86ff",
                           cursor: "pointer",
@@ -907,86 +944,181 @@ function Outcomes(props) {
                 <>
                   {listView ? (
                     <React.Fragment>
-                      {outcomeData.map((dataa, ind) => (
-                        <Row
-                          className="listview-outcomes"
-                          align="middle"
-                          style={{ padding: "10px" }}
-                          onClick={
-                            () => {
-                              setShowOutcomeModal(true);
-                              setModalIndex(ind);
-                            }
-
-                            // showModal(
-                            //   dataa._id,
-                            //   dataa.missionId._id,
-                            //   dataa.flightId._id,
-                            //   dataa.createdBy.name,
-                            //   dataa.createdBy.avatar,
-                            //   dataa.createdAt,
-                            //   API_URL + dataa.image,
-                            //   dataa.location,
-                            //   dataa.locationName
-                            //     ? dataa.locationName
-                            //     : "Default Location",
-                            //   dataa.pcount,
-                            // )
+                      {outcomeData.map((outcome, ind) => (
+                        <Dropdown
+                          trigger={["contextMenu"]}
+                          overlay={
+                            <Menu>
+                              <Menu.Item key="1">
+                                <span
+                                  onClick={() =>
+                                    downloadImage(STATIC_URL + outcome.thumb)
+                                  }
+                                >
+                                  <DownloadOutlined /> Download{" "}
+                                </span>
+                              </Menu.Item>
+                              <Menu.Item
+                                key="2"
+                                onClick={() => {
+                                  setThumbnail(thumbnailComponent(outcome));
+                                  props.thread(true, {
+                                    docType: "alert",
+                                    docId: outcome._id,
+                                  });
+                                }}
+                              >
+                                <MessageOutlined /> Open Thread{" "}
+                              </Menu.Item>
+                              <Menu.Item
+                                key="3"
+                                onClick={() => {
+                                  toggleFlag(outcome);
+                                }}
+                              >
+                                {!outcome.isFlagged ? (
+                                  <>
+                                    <FlagOutlined /> Flag
+                                  </>
+                                ) : (
+                                  <>
+                                    <FlagOutlined /> Unflag
+                                  </>
+                                )}
+                              </Menu.Item>
+                              <Menu.Item key="4">
+                                <span
+                                  onClick={() => {
+                                    Modal.confirm({
+                                      title: "Delete outcome?",
+                                      icon: <ExclamationCircleOutlined />,
+                                      content:
+                                        "Are you sure you want to delete this outcome?",
+                                      okText: "Yes",
+                                      cancelText: "No",
+                                      onOk: () => {
+                                        deleteOutcome(outcome);
+                                      },
+                                    });
+                                  }}
+                                >
+                                  <DeleteOutlined /> Delete
+                                </span>
+                              </Menu.Item>
+                            </Menu>
                           }
                         >
-                          <Col md={4} style={{ padding: "10px" }}>
-                            <img
-                              style={{ width: "100%", height: "auto" }}
-                              src={STATIC_URL + dataa.thumb}
-                              onError={(e: any) => {
-                                e.target.onerror = null;
-                                e.target.src = "/icons/fallback.png";
-                              }}
-                            />
-                          </Col>
-                          <Col md={19}>
-                            <div className="info-part">
-                              <Row>
-                                <Title level={5}>
-                                  {dataa.locationName
-                                    ? truncateText(dataa.locationName)
-                                    : "Default Location"}
-                                </Title>
-                              </Row>
-                              <Row>
-                                <Col md={20}>
-                                  <Text type="secondary">
-                                    {dataa.location
-                                      ? dataa.location.lat == "0"
-                                        ? ""
-                                        : `${dataa.location.lat}, ${dataa.location.long}`
-                                      : ""}
-                                  </Text>
-                                </Col>
-                                <Col md={4}>
-                                  <Text type="secondary" className="inference">
-                                    Inference: {dataa.pcount}
-                                  </Text>
-                                </Col>
-                              </Row>
-                              <Row>
-                                <Col md={20}>
-                                  <Text type="secondary">
-                                    <UserOutlined /> {dataa.createdBy.name}
-                                  </Text>
-                                </Col>
-                                <Col md={4}>
-                                  <Text
-                                    type="secondary"
-                                    className="relative-time"
-                                  >
-                                    <em>{moment(dataa.createdAt).fromNow()}</em>
-                                  </Text>
-                                </Col>
-                              </Row>
-                            </div>
-                          </Col>
-                        </Row>
+                          <Row
+                            className="listview-outcomes"
+                            align="middle"
+                            style={{ padding: "10px" }}
+                            onClick={
+                              () => {
+                                setShowOutcomeModal(true);
+                                setModalIndex(ind);
+                              }
+
+                              // showModal(
+                              //   outcome._id,
+                              //   outcome.missionId._id,
+                              //   outcome.flightId._id,
+                              //   outcome.createdBy.name,
+                              //   outcome.createdBy.avatar,
+                              //   outcome.createdAt,
+                              //   API_URL + outcome.image,
+                              //   outcome.location,
+                              //   outcome.locationName
+                              //     ? outcome.locationName
+                              //     : "Default Location",
+                              //   outcome.pcount,
+                              // )
+                            }
+                          >
+                            <Col md={8} style={{ padding: "10px" }}>
+                              <Badge
+                                style={{
+                                  backgroundColor: "#f5222d",
+                                  padding: "5px",
+                                  borderRadius: "5px",
+                                }}
+                                offset={[-15, 15]}
+                                count={
+                                  outcome.isFlagged ? (
+                                    <BsFlagFill
+                                      style={{
+                                        color: "#fff",
+                                        fontSize: "24px",
+                                      }}
+                                    />
+                                  ) : (
+                                    0
+                                  )
+                                }
+                              >
+                                <img
+                                  style={{
+                                    width: "100%",
+                                    height: "auto",
+                                    minWidth: "120px",
+                                  }}
+                                  src={STATIC_URL + outcome.thumb}
+                                  onError={(e: any) => {
+                                    e.target.onerror = null;
+                                    e.target.src = "/icons/fallback.png";
+                                  }}
+                                />
+                              </Badge>
+                            </Col>
+
+                            <Col md={16}>
+                              <div className="info-part">
+                                <Row>
+                                  <Title level={5}>
+                                    {outcome.locationName
+                                      ? truncateText(outcome.locationName)
+                                      : "Default Location"}
+                                  </Title>
+                                </Row>
+                                <Row>
+                                  <Col md={20}>
+                                    <Text type="secondary">
+                                      {outcome.location
+                                        ? outcome.location.lat == "0"
+                                          ? ""
+                                          : `${outcome.location.lat}, ${outcome.location.long}`
+                                        : ""}
+                                    </Text>
+                                  </Col>
+                                  <Col md={4}>
+                                    <Text
+                                      type="secondary"
+                                      className="inference"
+                                    >
+                                      Inference: {outcome.pcount}
+                                    </Text>
+                                  </Col>
+                                </Row>
+                                <Row>
+                                  <Col md={20}>
+                                    <Text type="secondary">
+                                      <UserOutlined /> {outcome.createdBy.name}
+                                    </Text>
+                                  </Col>
+                                  <Col md={4}>
+                                    <Text
+                                      type="secondary"
+                                      className="relative-time"
+                                    >
+                                      <em>
+                                        {moment(outcome.createdAt).fromNow()}
+                                      </em>
+                                    </Text>
+                                  </Col>
+                                </Row>
+                              </div>
+                            </Col>
+                          </Row>
+                        </Dropdown>
                       ))}
                     </React.Fragment>
                   ) : (
@@ -1020,8 +1152,7 @@ function Outcomes(props) {
                                   <Menu.Item
                                     key="2"
                                     onClick={() => {
-                                      setShowOutcomeModal(true);
-                                      setModalIndex(ind);
+                                      setThumbnail(thumbnailComponent(outcome));
                                       props.thread(true, {
                                         docType: "alert",
                                         docId: outcome._id,
@@ -1173,7 +1304,7 @@ function Outcomes(props) {
               <Empty style={{ margin: "auto" }} />
             </>
           ) : null}
-          <Thread />
+          <Thread thumbnail={thumbnail}/>
           <OutcomeModal
             visible={showOutcomeModal}
             closeModal={setShowOutcomeModal}

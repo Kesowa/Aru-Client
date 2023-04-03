@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
 import ReactDom from "react-dom";
-import { Input, Comment, Avatar, Drawer, Form, Button, message } from "antd";
+import {
+  Input,
+  Comment,
+  Avatar,
+  Drawer,
+  Form,
+  Button,
+  message,
+  Row,
+} from "antd";
 import apis from "src/services/apis";
 import http from "src/services/httpCall";
 import { STATIC_URL } from "src/constants";
@@ -104,19 +113,31 @@ const Thread = (props) => {
         open={props.open}
         style={{ position: "absolute", zIndex: 9999 }}
       >
+        <Row
+          style={{
+            marginBottom: "10px",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          {props.thumbnail}
+        </Row>
+
         {comments.map((comment) => {
           return (
-            <Comment
-              author={<a>{comment.authorName}</a>}
-              avatar={
-                <Avatar
-                  icon={<UserOutlined />}
-                  src={`${STATIC_URL}/${comment.avatar}`}
-                  alt={comment.authorName}
-                />
-              }
-              content={<p>{`${comment.content}`}</p>}
-            ></Comment>
+            <>
+              <Comment
+                author={<a>{comment.authorName}</a>}
+                avatar={
+                  <Avatar
+                    icon={<UserOutlined />}
+                    src={`${STATIC_URL}/${comment.avatar}`}
+                    alt={comment.authorName}
+                  />
+                }
+                content={<p>{`${comment.content}`}</p>}
+              ></Comment>
+            </>
           );
         })}
         <Comment

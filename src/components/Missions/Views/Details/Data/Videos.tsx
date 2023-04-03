@@ -81,6 +81,7 @@ function Videos(props) {
   const [showCarousel, setShowCarousel] = useState(false);
   const [videoDetails, setVideoDetails] = useState<any>({});
   const [editVideoName, setEditVideoName] = useState<any>({});
+  const [thumbnail, setThumbnail] = useState("");
   const [gridCount, setGridCount] = useState(0);
   const [videoNameLoader, setVideoNameLoader] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(0);
@@ -520,6 +521,45 @@ function Videos(props) {
     fetchVODByMission();
   }, [page, limit]);
 
+  const vodThumbnail = (data: any, idx: any) => {
+    let vodDetails = {};
+    if (idx < VodData.length && VodData[idx].videoPath && VodData[idx].isSRT) {
+      vodDetails = {
+        link: VodData[idx].videoPath,
+        missionDetails: VodData[idx],
+        isSRT: VodData[idx].isSRT,
+      };
+    } else {
+      vodDetails = {
+        link: data.videoPath,
+        missionDetails: data,
+        isSRT: data.isSRT,
+      };
+    }
+
+    return (
+      <div
+        style={{
+          height: "150px", //video player
+          width: "100%",
+          margin: "auto",
+          backgroundColor: "black",
+        }}
+      >
+        <VideoPlayer // NEED TO PASS MISSION DETAILS AND LIVE TAG CHECK
+          url={STATIC_URL + vodDetails.link}
+          mission={vodDetails.missionDetails}
+          alertBtnStatus=""
+          theatreModeStatus="none"
+          liveTagStatus="none"
+          liveTelemetry={false}
+          showHUD={false}
+          updateVOD={updateVODAttr}
+          threadThumb={true}
+        />
+      </div>
+    );
+  };
   const updateSelectedVOD = (data, idx: number) => {
     setSelectedVideo(data._id);
     fetchVODByMission(); // re-fetch
@@ -558,9 +598,7 @@ function Videos(props) {
         )
         .then((res) => {
           message.success("Video deleted succesfully!");
-          props.setCount(
-            props.totalVOD - (Array.isArray(id) ? id.length : 1)
-          );
+          props.setCount(props.totalVOD - (Array.isArray(id) ? id.length : 1));
           setRefresh(true);
         })
         .catch((err) => {
@@ -653,14 +691,12 @@ function Videos(props) {
     ) {
       let permissions: any = [];
       //console.log(props.missionDetails.currentUserDetails);
-      props.missionDetails.currentUserDetails.customPermissions.forEach(
-        (p) => {
-          const filteredPermissions = p.permissions.filter(
-            (d) => d.name === "vod_delete"
-          );
-          permissions = [...filteredPermissions, ...permissions];
-        }
-      );
+      props.missionDetails.currentUserDetails.customPermissions.forEach((p) => {
+        const filteredPermissions = p.permissions.filter(
+          (d) => d.name === "vod_delete"
+        );
+        permissions = [...filteredPermissions, ...permissions];
+      });
       if (permissions.length > 0) {
         return (
           <Menu.Item key="4">
@@ -802,7 +838,6 @@ function Videos(props) {
                     {showCarousel && (
                       <div className="backdrop">
                         <div className="topbar">
-                          <Thread />
                           <CloseOutlined
                             onClick={() => {
                               fetchVODByMission();
@@ -927,7 +962,7 @@ function Videos(props) {
                                   <Menu.Item
                                     key="2"
                                     onClick={() => {
-                                      updateSelectedVOD(dataa, idx);
+                                      setThumbnail(vodThumbnail(dataa, idx));
                                       props.thread(true, {
                                         docType: "vod",
                                         docId: dataa._id,
@@ -1063,7 +1098,7 @@ function Videos(props) {
                                   <Menu.Item
                                     key="2"
                                     onClick={() => {
-                                      updateSelectedVOD(dataa, idx);
+                                      setThumbnail(vodThumbnail(dataa, idx));
                                       props.thread(true, {
                                         docType: "vod",
                                         docId: dataa._id,
@@ -1200,7 +1235,6 @@ function Videos(props) {
                 {showCarousel && (
                   <div className="backdrop">
                     <div className="topbar">
-                      <Thread />
                       <CloseOutlined
                         onClick={() => {
                           fetchVODByMission();
@@ -1304,6 +1338,18 @@ function Videos(props) {
                               <DownloadOutlined /> Download{" "}
                             </a>
                           </span>
+                        </Menu.Item>
+                        <Menu.Item
+                          key="2"
+                          onClick={() => {
+                            setThumbnail(vodThumbnail(dataa, idx));
+                            props.thread(true, {
+                              docType: "vod",
+                              docId: dataa._id,
+                            });
+                          }}
+                        >
+                          <MessageOutlined /> Open Thread{" "}
                         </Menu.Item>
                         {renderDeleteBtn(dataa._id)}
                         <Menu.Item>
@@ -1552,6 +1598,7 @@ function Videos(props) {
           }
         />
       </Modal>
+      <Thread thumbnail={thumbnail} />
       <FilterToolbar
         type="Video"
         loader={loader}

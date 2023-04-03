@@ -17,6 +17,8 @@ import {
   FileData,
   ChonkyFileActionData,
   FileHelper,
+  defineFileAction,
+  ChonkyIconProps,
 } from "chonky";
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import apis from "../../../../../services/apis";
@@ -24,15 +26,19 @@ import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import { logout } from "../../../../../actions/authAction";
 import { connect } from "react-redux";
-import { InboxOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import {
+  InboxOutlined,
+  ExclamationCircleOutlined,
+  MessageOutlined,
+} from "@ant-design/icons";
 import Dragger from "antd/lib/upload/Dragger";
 import { useEffect } from "react";
 import io from "socket.io-client";
 import { useMemo } from "react";
 import download from "downloadjs";
 import { API_URL, STATIC_URL } from "src/constants";
-
-setChonkyDefaults({ iconComponent: ChonkyIconFA });
+import { thread } from "../../../../../actions/threadAction";
+import Thread from "src/components/shared/Thread";
 
 function Documents(props) {
   const [defaultFileList, setDefaultFileList] = useState([]);
@@ -42,7 +48,26 @@ function Documents(props) {
   const [loader, setLoader] = useState(false);
   const [myFileActions, setMyFileActions] = useState([]);
   const [storageModal, setStorageModal] = useState(false);
-
+  const OpenThread = defineFileAction({
+    id: "open_thread",
+    button: {
+      name: "Open Thread",
+      toolbar: false,
+      contextMenu: true,
+      icon: "thread",
+    },
+  } as const);
+  const customChonkyIcon: { [iconName: string]: any } = {
+    thread: <MessageOutlined />,
+  };
+  const CustomChonkyIcon: React.FC<ChonkyIconProps> = React.memo((props) => {
+    const customIcon = customChonkyIcon[props.icon];
+    if (customIcon) {
+      return <span>{customIcon}</span>;
+    }
+    return <ChonkyIconFA {...props} />;
+  });
+  setChonkyDefaults({ iconComponent: CustomChonkyIcon });
   //----------------Set Perms----------------------------
   useEffect(() => {
     if (
@@ -56,6 +81,7 @@ function Documents(props) {
         ChonkyActions.EnableGridView,
         ChonkyActions.ClearSelection,
         ChonkyActions.DownloadFiles,
+        OpenThread,
         ChonkyActions.SelectAllFiles,
         ChonkyActions.SortFilesBySize,
         ChonkyActions.SortFilesByDate,
@@ -92,6 +118,7 @@ function Documents(props) {
         ChonkyActions.EnableGridView,
         ChonkyActions.ClearSelection,
         ChonkyActions.DownloadFiles,
+        OpenThread,
         ChonkyActions.SelectAllFiles,
         ChonkyActions.SortFilesBySize,
         ChonkyActions.SortFilesByDate,
@@ -231,6 +258,12 @@ function Documents(props) {
     return useCallback(
       (data: ChonkyFileActionData) => {
         switch (data.id) {
+          case OpenThread.id:
+            props.thread(true, {
+              docType: "document",
+              docId: data.state.selectedFiles[0].id,
+            });
+            break;
           //-----Changing DIR state--------------------------------------------------
           case ChonkyActions.OpenFiles.id:
             const { targetFile, files } = data.payload;
@@ -818,6 +851,7 @@ function Documents(props) {
   return (
     <>
       <Spin spinning={loader}>
+        <Thread />
         <div className="documents-wrapper">
           <FullFileBrowser
             files={files}
@@ -849,4 +883,4 @@ const mapStateToProps = (state: any) => ({
   Theme: state.Theme,
 });
 
-export default connect(mapStateToProps, { logout })(Documents);
+export default connect(mapStateToProps, { logout, thread })(Documents);
