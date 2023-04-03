@@ -732,13 +732,13 @@ function Videos(VideoProps) {
   //     console.log(
   //       UrlExists(
   //         STATIC_URL +
-  //           videoDetails.link.toString().replace(".m3u8", ".flv")
+  //           videoDetails.link.toString().replace("index.m3u8", "video.flv")
   //       )
   //     );
   //     console.log(
   //       UrlExists(
   //         STATIC_URL +
-  //           videoDetails.link.toString().replace(".m3u8", ".mp43")
+  //           videoDetails.link.toString().replace("index.m3u8", "video.mp43")
   //       )
   //     );
   //   }
@@ -811,7 +811,7 @@ function Videos(VideoProps) {
                                 STATIC_URL +
                                 videoDetails.link
                                   .toString()
-                                  .replace(".m3u8", ".flv")
+                                  .replace("index.m3u8", "video.flv")
                               }
                               // target='_blank'
                               download
@@ -908,7 +908,7 @@ function Videos(VideoProps) {
                                           STATIC_URL +
                                           dataa.videoPath
                                             .toString()
-                                            .replace(".m3u8", ".flv")
+                                            .replace("index.m3u8", "video.flv")
                                         }
                                         // target='_blank'
                                         download
@@ -1032,7 +1032,7 @@ function Videos(VideoProps) {
                                           STATIC_URL +
                                           dataa.videoPath
                                             .toString()
-                                            .replace(".m3u8", ".flv")
+                                            .replace("index.m3u8", "video.flv")
                                         }
                                         // target='_blank'
                                         download
@@ -1182,7 +1182,7 @@ function Videos(VideoProps) {
                             STATIC_URL +
                             videoDetails.link
                               .toString()
-                              .replace(".m3u8", ".flv")
+                              .replace("index.m3u8", "video.flv")
                           }
                           // target='_blank'
                           download
@@ -1264,7 +1264,7 @@ function Videos(VideoProps) {
                                 STATIC_URL +
                                 dataa.videoPath
                                   .toString()
-                                  .replace(".m3u8", ".flv")
+                                  .replace("index.m3u8", "video.flv")
                               }
                               // target='_blank'
                               download
