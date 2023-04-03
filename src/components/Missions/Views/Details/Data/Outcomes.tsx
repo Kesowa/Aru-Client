@@ -29,6 +29,7 @@ import {
   DownloadOutlined,
   UploadOutlined,
   InboxOutlined,
+  MessageOutlined,
   FlagOutlined,
   DeleteOutlined,
   ExclamationCircleOutlined,
@@ -46,6 +47,8 @@ import OutcomeModal from "./OutcomeModal";
 import { API_URL, STATIC_URL } from "src/constants";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
+import { thread } from "../../../../../actions/threadAction";
+import Thread from "../../../../shared/Thread";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -57,7 +60,7 @@ type OutcomeProps = {
   missionDetails: any;
   userType: any;
 };
-function Outcomes(outcomeProps) {
+function Outcomes(props) {
   const [outcomeData, setOutcomeData] = useState<any>(null);
   // const [outcomeDataCopy, setOutcomeDataCopy] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -88,7 +91,7 @@ function Outcomes(outcomeProps) {
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
 
-  // console.log(outcomeProps.missionDetails);
+  // console.log(props.missionDetails);
   // console.log(outcomeData);
   const getFlaggedFilter = () => {
     if (flaggedFilter) {
@@ -117,7 +120,7 @@ function Outcomes(outcomeProps) {
     else sortOrder = "desc";
     const query = {
       sortBy: `${sortBy}:${sortOrder}`,
-      id: outcomeProps.id,
+      id: props.id,
       page,
       limit,
       alertType,
@@ -144,7 +147,7 @@ function Outcomes(outcomeProps) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, outcomeProps.logout);
+        AxiosErrorHandler(err, props.logout);
       })
       .finally(() => {
         setLoading(false);
@@ -593,7 +596,7 @@ function Outcomes(outcomeProps) {
     } else
       return {
         status: false,
-        address: outcomeProps.missionDetails.location,
+        address: props.missionDetails.location,
       };
   }
 
@@ -609,16 +612,13 @@ function Outcomes(outcomeProps) {
           console.log(res);
           fData.append("image", options.file);
           fData.append("locationName", res.address);
-          fData.append("missionId", outcomeProps.missionDetails.missionId);
-          fData.append(
-            "locationId",
-            outcomeProps.missionDetails.locationId._id
-          );
+          fData.append("missionId", props.missionDetails.missionId);
+          fData.append("locationId", props.missionDetails.locationId._id);
           fData.append("pcount", "0");
           fData.append("type", "Manual");
           fData.append("note", "Alert uploaded from browser!");
           fData.append("onSite", "false");
-          fData.append("flightId", outcomeProps.missionDetails.flightId);
+          fData.append("flightId", props.missionDetails.flightId);
           const config = {
             headers: {
               "content-type": "multipart/form-data;",
@@ -659,7 +659,7 @@ function Outcomes(outcomeProps) {
                 ) {
                   setIsModalVisible2(true);
                   window.setTimeout(function () {
-                    AxiosErrorHandler(err, outcomeProps.logout); //needs to be connected with redux
+                    AxiosErrorHandler(err, props.logout); //needs to be connected with redux
                   }, 5000);
                 } else if (
                   err.response?.data.message ===
@@ -686,16 +686,13 @@ function Outcomes(outcomeProps) {
           console.log(res);
           fData.append("image", options.file);
           fData.append("locationName", res.address);
-          fData.append("missionId", outcomeProps.missionDetails.missionId);
-          fData.append(
-            "locationId",
-            outcomeProps.missionDetails.locationId._id
-          );
+          fData.append("missionId", props.missionDetails.missionId);
+          fData.append("locationId", props.missionDetails.locationId._id);
           fData.append("pcount", "0");
           fData.append("type", "Manual");
           fData.append("note", "Alert uploaded from browser!");
           fData.append("onSite", "false");
-          fData.append("flightId", outcomeProps.missionDetails.flightId);
+          fData.append("flightId", props.missionDetails.flightId);
           const config = {
             headers: {
               "content-type": "multipart/form-data;",
@@ -736,7 +733,7 @@ function Outcomes(outcomeProps) {
                 ) {
                   setIsModalVisible2(true);
                   window.setTimeout(function () {
-                    AxiosErrorHandler(err, outcomeProps.logout); //needs to be connected with redux
+                    AxiosErrorHandler(err, props.logout); //needs to be connected with redux
                   }, 5000);
                 } else if (
                   err.response?.data.message ===
@@ -767,11 +764,11 @@ function Outcomes(outcomeProps) {
   // Render upload alert button based on user permissions
   function renderUploadButton() {
     if (
-      outcomeProps.userType === "tenant-staff" ||
-      outcomeProps.userType === "tenant-client"
+      props.userType === "tenant-staff" ||
+      props.userType === "tenant-client"
     ) {
       let permissions: any = [];
-      outcomeProps.userDetails.customPermissions.forEach((p) => {
+      props.userDetails.customPermissions.forEach((p) => {
         const filteredPermissions = p.permissions.filter(
           (d) => d.name === "alert_create"
         );
@@ -1023,6 +1020,19 @@ function Outcomes(outcomeProps) {
                                   <Menu.Item
                                     key="2"
                                     onClick={() => {
+                                      setShowOutcomeModal(true);
+                                      setModalIndex(ind);
+                                      props.thread(true, {
+                                        docType: "alert",
+                                        docId: outcome._id,
+                                      });
+                                    }}
+                                  >
+                                    <MessageOutlined /> Open Thread{" "}
+                                  </Menu.Item>
+                                  <Menu.Item
+                                    key="3"
+                                    onClick={() => {
                                       toggleFlag(outcome);
                                     }}
                                   >
@@ -1036,7 +1046,7 @@ function Outcomes(outcomeProps) {
                                       </>
                                     )}
                                   </Menu.Item>
-                                  <Menu.Item key="3">
+                                  <Menu.Item key="4">
                                     <span
                                       onClick={() => {
                                         Modal.confirm({
@@ -1163,12 +1173,13 @@ function Outcomes(outcomeProps) {
               <Empty style={{ margin: "auto" }} />
             </>
           ) : null}
+          <Thread />
           <OutcomeModal
             visible={showOutcomeModal}
             closeModal={setShowOutcomeModal}
             index={modalIndex}
             data={outcomeData}
-            missionId={outcomeProps.id}
+            missionId={props.id}
             openNotification={openNotification}
           />
         </>
@@ -1225,4 +1236,4 @@ const mapStateToProps = (state: any) => ({
   Theme: state.Theme,
 });
 
-export default connect(mapStateToProps, { logout })(Outcomes);
+export default connect(mapStateToProps, { logout, thread })(Outcomes);

@@ -32,6 +32,7 @@ import {
   UserOutlined,
   VideoCameraOutlined,
   DownloadOutlined,
+  MessageOutlined,
   CloseOutlined,
   LeftOutlined,
   RightOutlined,
@@ -51,22 +52,25 @@ import { API_URL, STATIC_URL } from "src/constants";
 import { io } from "socket.io-client";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
+import { thread } from "../../../../../actions/threadAction";
+import Thread from "../../../../shared/Thread";
 declare let require: any;
 
 //import { Replay } from "vimond-replay";
 //import "vimond-replay/index.css";
 
-type VideoProps = {
+type props = {
   missionDetails: any;
   userType: any;
   userDetails: any;
   logout: any;
+  thread: any;
 };
 const { next, prev } = Carousel;
 const { Text } = Typography;
 const { Option } = Select;
 const plainOptions = new Array<any>();
-function Videos(VideoProps) {
+function Videos(props) {
   const [VodData, setVodData] = useState([]);
   const [loader, setLoader] = useState(true);
   const [defaultFileList, setDefaultFileList] = useState([]);
@@ -277,14 +281,14 @@ function Videos(VideoProps) {
     action: `${apis.UPLOAD_VOD}`,
     customRequest: (options: any) => {
       console.log("here");
-      // console.log(VideoProps.missionDetails.locationId);
+      // console.log(props.missionDetails.locationId);
       setUploading(true);
       const fData = new FormData();
       fData.append("video", options.file);
-      fData.append("missionID", VideoProps.missionDetails.missionId);
-      fData.append("flightID", VideoProps.missionDetails.flightId);
-      if (VideoProps.missionDetails.locationId?._id) {
-        fData.append("locationID", VideoProps.missionDetails.locationId?._id);
+      fData.append("missionID", props.missionDetails.missionId);
+      fData.append("flightID", props.missionDetails.flightId);
+      if (props.missionDetails.locationId?._id) {
+        fData.append("locationID", props.missionDetails.locationId?._id);
       }
 
       const config = {
@@ -302,7 +306,7 @@ function Videos(VideoProps) {
       };
 
       switch (
-        VideoProps.missionDetails.userType //upload priviledge checks
+        props.missionDetails.userType //upload priviledge checks
       ) {
         case "tenant-root": //when user is a tenant root
           console.log(options.file.name.split(".")[1]);
@@ -319,7 +323,7 @@ function Videos(VideoProps) {
                   "File " + options.file.name + " uploaded successfully"
                 );
 
-                VideoProps.setCount(VideoProps.totalVOD + 1);
+                props.setCount(props.totalVOD + 1);
               })
               .catch((err) => {
                 if (err.response.status === 403) {
@@ -329,7 +333,7 @@ function Videos(VideoProps) {
                   ) {
                     setIsModalVisible2(true);
                     window.setTimeout(function () {
-                      AxiosErrorHandler(err, VideoProps.logout); //needs to be connected with redux
+                      AxiosErrorHandler(err, props.logout); //needs to be connected with redux
                     }, 5000);
                   } else if (
                     err.response?.data.message ===
@@ -373,7 +377,7 @@ function Videos(VideoProps) {
                   "File " + options.file.name + " uploaded successfully"
                 );
 
-                VideoProps.setCount(VideoProps.totalVOD + 1);
+                props.setCount(props.totalVOD + 1);
               })
               .catch((err) => {
                 if (err.response.status === 403) {
@@ -383,7 +387,7 @@ function Videos(VideoProps) {
                   ) {
                     setIsModalVisible2(true);
                     window.setTimeout(function () {
-                      AxiosErrorHandler(err, VideoProps.logout); //needs to be connected with redux
+                      AxiosErrorHandler(err, props.logout); //needs to be connected with redux
                     }, 5000);
                   } else if (
                     err.response?.data.message ===
@@ -416,9 +420,9 @@ function Videos(VideoProps) {
   };
 
   useEffect(() => {
-    if (VideoProps?.missionDetails?.missionId) {
+    if (props?.missionDetails?.missionId) {
       socket.current = io(
-        `${API_URL}/stream/mission-specific?missionID=${VideoProps.missionDetails.missionId}`
+        `${API_URL}/stream/mission-specific?missionID=${props.missionDetails.missionId}`
       );
 
       socket.current.on("PROCESS_VIDEO_FINISHED", (data) => {
@@ -455,7 +459,7 @@ function Videos(VideoProps) {
   };
   const fetchVODByMission = () => {
     const query = {
-      missionID: VideoProps.missionDetails.missionId,
+      missionID: props.missionDetails.missionId,
       page,
       limit,
     };
@@ -492,7 +496,7 @@ function Videos(VideoProps) {
           setLoader(false);
           setVodData([]);
         } else if (err.response.status == 500) {
-          AxiosErrorHandler(err, VideoProps.logout);
+          AxiosErrorHandler(err, props.logout);
         } else {
           message.error("API Call failed! " + err);
         }
@@ -500,7 +504,7 @@ function Videos(VideoProps) {
   };
 
   useEffect(() => {
-    if (VideoProps.missionID !== 0) {
+    if (props.missionID !== 0) {
       fetchVODByMission();
       if (VodData.length) {
         setVideoDetails({
@@ -510,14 +514,14 @@ function Videos(VideoProps) {
         });
       }
     }
-  }, [VideoProps, refresh, flaggedFilter, unflaggedFilter]);
+  }, [props, refresh, flaggedFilter, unflaggedFilter]);
 
   useEffect(() => {
     fetchVODByMission();
   }, [page, limit]);
 
   const updateSelectedVOD = (data, idx: number) => {
-    setSelectedVideo(idx);
+    setSelectedVideo(data._id);
     fetchVODByMission(); // re-fetch
 
     // set current vod details
@@ -554,8 +558,8 @@ function Videos(VideoProps) {
         )
         .then((res) => {
           message.success("Video deleted succesfully!");
-          VideoProps.setCount(
-            VideoProps.totalVOD - (Array.isArray(id) ? id.length : 1)
+          props.setCount(
+            props.totalVOD - (Array.isArray(id) ? id.length : 1)
           );
           setRefresh(true);
         })
@@ -644,12 +648,12 @@ function Videos(VideoProps) {
   //-------------------------render delete vod button based on permission--------------
   function renderDeleteBtn(id: any) {
     if (
-      VideoProps.missionDetails.userType === "tenant-staff" ||
-      VideoProps.missionDetails.userType === "tenant-client"
+      props.missionDetails.userType === "tenant-staff" ||
+      props.missionDetails.userType === "tenant-client"
     ) {
       let permissions: any = [];
-      //console.log(VideoProps.missionDetails.currentUserDetails);
-      VideoProps.missionDetails.currentUserDetails.customPermissions.forEach(
+      //console.log(props.missionDetails.currentUserDetails);
+      props.missionDetails.currentUserDetails.customPermissions.forEach(
         (p) => {
           const filteredPermissions = p.permissions.filter(
             (d) => d.name === "vod_delete"
@@ -659,7 +663,7 @@ function Videos(VideoProps) {
       );
       if (permissions.length > 0) {
         return (
-          <Menu.Item key="2">
+          <Menu.Item key="4">
             <span
               onClick={() => {
                 Modal.confirm({
@@ -681,7 +685,7 @@ function Videos(VideoProps) {
       }
     } else {
       return (
-        <Menu.Item key="2">
+        <Menu.Item key="4">
           <span
             onClick={() => {
               Modal.confirm({
@@ -798,6 +802,7 @@ function Videos(VideoProps) {
                     {showCarousel && (
                       <div className="backdrop">
                         <div className="topbar">
+                          <Thread />
                           <CloseOutlined
                             onClick={() => {
                               fetchVODByMission();
@@ -857,26 +862,28 @@ function Videos(VideoProps) {
                             })}
                           </Carousel>
                           {videoDetails.link && (
-                            <div
-                              style={{
-                                height: "400px", //video player
-                                width: "712px",
-                                margin: "auto",
-                                backgroundColor: "black",
-                              }}
-                              className="video-div"
-                            >
-                              <VideoPlayer // NEED TO PASS MISSION DETAILS AND LIVE TAG CHECK
-                                url={STATIC_URL + videoDetails.link}
-                                mission={videoDetails.missionDetails}
-                                alertBtnStatus=""
-                                theatreModeStatus="none"
-                                liveTagStatus="none"
-                                liveTelemetry={false}
-                                showHUD={videoDetails.isSRT}
-                                updateVOD={updateVODAttr}
-                              />
-                            </div>
+                            <>
+                              <div
+                                style={{
+                                  height: "400px", //video player
+                                  width: "712px",
+                                  margin: "auto",
+                                  backgroundColor: "black",
+                                }}
+                                className="video-div"
+                              >
+                                <VideoPlayer // NEED TO PASS MISSION DETAILS AND LIVE TAG CHECK
+                                  url={STATIC_URL + videoDetails.link}
+                                  mission={videoDetails.missionDetails}
+                                  alertBtnStatus=""
+                                  theatreModeStatus="none"
+                                  liveTagStatus="none"
+                                  liveTelemetry={false}
+                                  showHUD={videoDetails.isSRT}
+                                  updateVOD={updateVODAttr}
+                                />
+                              </div>
+                            </>
                           )}
                         </div>
                       </div>
@@ -918,6 +925,18 @@ function Videos(VideoProps) {
                                     </span>
                                   </Menu.Item>
                                   <Menu.Item
+                                    key="2"
+                                    onClick={() => {
+                                      updateSelectedVOD(dataa, idx);
+                                      props.thread(true, {
+                                        docType: "vod",
+                                        docId: dataa._id,
+                                      });
+                                    }}
+                                  >
+                                    <MessageOutlined /> Open Thread{" "}
+                                  </Menu.Item>
+                                  <Menu.Item
                                     key="3"
                                     onClick={() => {
                                       toggleFlag(dataa);
@@ -934,7 +953,7 @@ function Videos(VideoProps) {
                                     )}
                                   </Menu.Item>
                                   {renderDeleteBtn(dataa._id)}
-                                  <Menu.Item key="4">
+                                  <Menu.Item key="5">
                                     <span
                                       onClick={() => {
                                         setEditVideoName({
@@ -1042,6 +1061,18 @@ function Videos(VideoProps) {
                                     </span>
                                   </Menu.Item>
                                   <Menu.Item
+                                    key="2"
+                                    onClick={() => {
+                                      updateSelectedVOD(dataa, idx);
+                                      props.thread(true, {
+                                        docType: "vod",
+                                        docId: dataa._id,
+                                      });
+                                    }}
+                                  >
+                                    <MessageOutlined /> Open Thread{" "}
+                                  </Menu.Item>
+                                  <Menu.Item
                                     key="3"
                                     onClick={() => {
                                       toggleFlag(dataa);
@@ -1059,7 +1090,7 @@ function Videos(VideoProps) {
                                     )}
                                   </Menu.Item>
                                   {renderDeleteBtn(dataa._id)}
-                                  <Menu.Item key="4">
+                                  <Menu.Item key="5">
                                     <span
                                       onClick={() => {
                                         setEditVideoName({
@@ -1169,6 +1200,7 @@ function Videos(VideoProps) {
                 {showCarousel && (
                   <div className="backdrop">
                     <div className="topbar">
+                      <Thread />
                       <CloseOutlined
                         onClick={() => {
                           fetchVODByMission();
@@ -1201,53 +1233,53 @@ function Videos(VideoProps) {
                         nextArrow={<RightOutlined />}
                         prevArrow={<LeftOutlined />}
                       >
-                        {data.map((i, idx) => {
-                          return (
-                            <div
-                              style={{
-                                height: "500px",
-                                textAlign: "center",
-                                background: "black",
-                              }}
-                            >
-                              {!videoDetails.link && (
-                                <img
-                                  style={{
-                                    height: "400px",
-                                    width: "auto",
-                                    margin: "auto",
-                                  }}
-                                  src={STATIC_URL + i.thumbnail}
-                                  onClick={() => {
-                                    updateSelectedVOD(i, idx);
-                                  }}
-                                />
-                              )}
-                            </div>
-                          );
-                        })}
+                        {data.map((i, idx) => (
+                          <div
+                            style={{
+                              height: "500px",
+                              textAlign: "center",
+                              background: "black",
+                            }}
+                          >
+                            {!videoDetails.link && (
+                              <img
+                                style={{
+                                  height: "400px",
+                                  width: "auto",
+                                  margin: "auto",
+                                }}
+                                src={STATIC_URL + i.thumbnail}
+                                onClick={() => {
+                                  updateSelectedVOD(i, idx);
+                                }}
+                              />
+                            )}
+                          </div>
+                        ))}
                       </Carousel>
                       {videoDetails.link && (
-                        <div
-                          style={{
-                            height: "400px", //video player
-                            width: "712px",
-                            margin: "auto",
-                            backgroundColor: "black",
-                          }}
-                          className="video-div"
-                        >
-                          <VideoPlayer // NEED TO PASS MISSION DETAILS AND LIVE TAG CHECK
-                            url={STATIC_URL + videoDetails.link}
-                            mission={videoDetails.missionDetails}
-                            alertBtnStatus=""
-                            theatreModeStatus="none"
-                            liveTagStatus="none"
-                            liveTelemetry={false}
-                            showHUD={videoDetails.isSRT}
-                            updateVOD={updateVODAttr}
-                          />
-                        </div>
+                        <>
+                          <div
+                            style={{
+                              height: "400px", //video player
+                              width: "712px",
+                              margin: "auto",
+                              backgroundColor: "black",
+                            }}
+                            className="video-div"
+                          >
+                            <VideoPlayer // NEED TO PASS MISSION DETAILS AND LIVE TAG CHECK
+                              url={STATIC_URL + videoDetails.link}
+                              mission={videoDetails.missionDetails}
+                              alertBtnStatus=""
+                              theatreModeStatus="none"
+                              liveTagStatus="none"
+                              liveTelemetry={false}
+                              showHUD={videoDetails.isSRT}
+                              updateVOD={updateVODAttr}
+                            />
+                          </div>
+                        </>
                       )}
                     </div>
                   </div>
@@ -1423,11 +1455,11 @@ function Videos(VideoProps) {
 
   function renderUploadBtn() {
     if (
-      VideoProps.userType === "tenant-staff" ||
-      VideoProps.userType === "tenant-client"
+      props.userType === "tenant-staff" ||
+      props.userType === "tenant-client"
     ) {
       let permissions: any = [];
-      VideoProps.userDetails.customPermissions.forEach((p) => {
+      props.userDetails.customPermissions.forEach((p) => {
         const filteredPermissions = p.permissions.filter(
           (d) => d.name === "vod_create"
         );
@@ -1644,4 +1676,4 @@ const mapStateToProps = (state: any) => ({
   Theme: state.theme,
 });
 
-export default connect(mapStateToProps, { logout })(Videos);
+export default connect(mapStateToProps, { logout, thread })(Videos);
