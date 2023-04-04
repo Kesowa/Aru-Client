@@ -90,7 +90,7 @@ function DashboardWrapper(props: any) {
       fetchUserDetails();
       fetchPaymentDetails();
     }
-  }, [props.Auth.isLoggedIn, hasPaid]);
+  }, [props.Auth.isLoggedIn, isFetched]);
 
   return (
     <ThemeSwitcherProvider themeMap={themeMap} defaultTheme="light">
