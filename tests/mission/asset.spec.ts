@@ -1,8 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { faker } from "@faker-js/faker";
+import { CLIENT_URL } from "tests/constants";
 
 test("create and delete asset", async ({ page }) => {
-  await page.goto("http://localhost:3000");
+  await page.goto(CLIENT_URL);
   await expect(page).toHaveURL(/.*dashboard/);
 
   // create asset
