@@ -44,9 +44,11 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: "setup", testMatch: /.*\.setup\.ts/, use: {
-        ...devices["Desktop Firefox"]
-      }
+      name: "setup",
+      testMatch: /.*\.setup\.ts/,
+      use: {
+        ...devices["Desktop Firefox"],
+      },
     },
     // {
     //   name: 'chromium',
