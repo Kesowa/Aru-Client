@@ -6865,7 +6865,7 @@ function BaseMap(props) {
             <div>
               {/* -------------Export Option---------------------------- */}
               <Dropdown
-                overlay={{
+                menu={{
                   items: actionMenuItems,
                   onClick: actionMenuOnClick,
                 }}
@@ -6879,7 +6879,7 @@ function BaseMap(props) {
                 </Button>
               </Dropdown>
               <Dropdown
-                overlay={{
+                menu={{
                   items: filterItems,
                   selectable: true,
                   className: "filter-item",
