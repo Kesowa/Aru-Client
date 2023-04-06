@@ -53,7 +53,7 @@ import { io } from "socket.io-client";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
-import Thread from "../../../../shared/Thread";
+import Thread from "../../../../shared/Thread/Thread";
 declare let require: any;
 
 //import { Replay } from "vimond-replay";
@@ -538,26 +538,48 @@ function Videos(props) {
     }
 
     return (
-      <div
+      <Badge
         style={{
-          height: "150px", //video player
-          width: "100%",
-          margin: "auto",
-          backgroundColor: "black",
+          backgroundColor: "#f5222d",
+          padding: "5px",
+          borderRadius: "5px",
+          zIndex: 9999,
         }}
+        offset={[-15, 15]}
+        count={
+          data.isFlagged ? (
+            <BsFlagFill
+              style={{
+                color: "#fff",
+                fontSize: "24px",
+              }}
+            />
+          ) : (
+            0
+          )
+        }
       >
-        <VideoPlayer // NEED TO PASS MISSION DETAILS AND LIVE TAG CHECK
-          url={STATIC_URL + vodDetails.link}
-          mission={vodDetails.missionDetails}
-          alertBtnStatus=""
-          theatreModeStatus="none"
-          liveTagStatus="none"
-          liveTelemetry={false}
-          showHUD={false}
-          updateVOD={updateVODAttr}
-          threadThumb={true}
-        />
-      </div>
+        <div
+          style={{
+            height: "150px", //video player
+            width: "100%",
+            margin: "auto",
+            backgroundColor: "black",
+          }}
+        >
+          <VideoPlayer // NEED TO PASS MISSION DETAILS AND LIVE TAG CHECK
+            url={STATIC_URL + vodDetails.link}
+            mission={vodDetails.missionDetails}
+            alertBtnStatus=""
+            theatreModeStatus="none"
+            liveTagStatus="none"
+            liveTelemetry={false}
+            showHUD={false}
+            updateVOD={updateVODAttr}
+            threadThumb={true}
+          />
+        </div>
+      </Badge>
     );
   };
   const updateSelectedVOD = (data, idx: number) => {

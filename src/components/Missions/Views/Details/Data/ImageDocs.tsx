@@ -45,7 +45,7 @@ import ActionToolbar from "src/components/shared/Toolbar/action";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import { BsFlagFill } from "react-icons/bs";
 import { thread } from "../../../../../actions/threadAction";
-import Thread from "src/components/shared/Thread";
+import Thread from "src/components/shared/Thread/Thread";
 
 const { Option } = Select;
 let plainOptions = new Array<any>();

@@ -48,7 +48,7 @@ import { API_URL, STATIC_URL } from "src/constants";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
-import Thread from "../../../../shared/Thread";
+import Thread from "../../../../shared/Thread/Thread";
 
 const { Search } = Input;
 const { Option } = Select;
