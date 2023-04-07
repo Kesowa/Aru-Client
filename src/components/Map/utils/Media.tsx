@@ -46,7 +46,6 @@ import { PUBLIC_URL, STATIC_URL } from "src/constants";
 import VideoPlayer from "src/components/shared/VideoPlayer";
 import { BsFlagFill } from "react-icons/bs";
 import { thread } from "../../../actions/threadAction";
-import Thread from "../../shared/Thread";
 
 const { TabPane } = Tabs;
 
