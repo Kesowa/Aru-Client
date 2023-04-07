@@ -53,7 +53,7 @@ import { io } from "socket.io-client";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
-import Thread from "../../../../shared/Thread/Thread";
+import Thread from "../../../../shared/Thread";
 declare let require: any;
 
 //import { Replay } from "vimond-replay";
@@ -1620,7 +1620,7 @@ function Videos(props) {
           }
         />
       </Modal>
-      <Thread thumbnail={thumbnail} />
+      <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
       <FilterToolbar
         type="Video"
         loader={loader}

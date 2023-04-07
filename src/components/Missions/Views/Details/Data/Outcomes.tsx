@@ -48,7 +48,7 @@ import { API_URL, STATIC_URL } from "src/constants";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
-import Thread from "../../../../shared/Thread/Thread";
+import Thread from "../../../../shared/Thread";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -238,8 +238,6 @@ function Outcomes(props) {
             width: "100%",
             height: "auto",
             minHeight: "200px",
-            borderRadius: "10px",
-            border: "1px solid black",
           }}
           src={STATIC_URL + outcome.thumb}
           onError={(e: any) => {
@@ -1304,7 +1302,7 @@ function Outcomes(props) {
               <Empty style={{ margin: "auto" }} />
             </>
           ) : null}
-          <Thread thumbnail={thumbnail}/>
+          <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
           <OutcomeModal
             visible={showOutcomeModal}
             closeModal={setShowOutcomeModal}

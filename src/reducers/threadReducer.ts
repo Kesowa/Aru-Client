@@ -11,6 +11,7 @@ export default (state = initialState, action: any) => {
       if (action.open) {
         thread = { ...thread, ...action.doc };
       }
+      console.log('Thread state changed...', thread)
       return thread;
     default:
       return state;

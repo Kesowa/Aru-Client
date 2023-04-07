@@ -111,6 +111,7 @@ import LayerDocs from "./utils/layer/layerDocs";
 import CreateLayer from "./utils/layer/createLayer";
 import CreateBaseLayer from "./utils/layer/createBaseLayer";
 import io from "socket.io-client";
+import Thread from "../shared/Thread";
 import {
   COG_URL,
   MAPBOX_API_KEY,
@@ -155,6 +156,7 @@ function BaseMap(props) {
   const [pointMarkerColour, setPointMarkerColour] = useState("#000");
   const [missionData, setMissionData] = useState({});
   const [loader, setLoader] = useState(props.isBaseMap ? false : true);
+  const [thumbnail, setThumbnail] = useState("");
   const [geoJsonVOD, setGeoJsonVOD] = useState({});
   const [geoJsonAlert, setGeoJsonAlert] = useState({});
   const [srtVideoPath, setSrtVideoPath] = useState("");
@@ -1166,6 +1168,7 @@ function BaseMap(props) {
                 },
               })
               .then((result) => {
+                console.log("geoJsonAlert", result);
                 setGeoJsonAlert(result.data);
               })
               .catch((err) => {
@@ -5981,6 +5984,7 @@ function BaseMap(props) {
 
   return (
     <div className="map_wrapper" onKeyDown={handleKeyDown}>
+      <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
       <Modal
         title="Maximum Limit reached!"
         open={LimitModal}
@@ -6101,6 +6105,7 @@ function BaseMap(props) {
                       canDraw={perms.canCreateVectorLayer}
                       isBaseMap={props.isBaseMaps}
                       isPublic={false}
+                      setThumbnail={setThumbnail}
                     />
                   </>
                 }
@@ -7057,6 +7062,7 @@ function BaseMap(props) {
         updateVODs={updateVODs}
         setShowFlightPath={setShowFlightPath}
         setSrtVideoPath={setSrtVideoPath}
+        setThumbnail={setThumbnail}
       />
       <LayerDocs
         setVisibility={setViewDocs}

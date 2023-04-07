@@ -160,6 +160,9 @@ const Thread = (props) => {
     }
   }, [props.open, refresh]);
   const onClose = () => {
+    if (props.setThumbnail) {
+      props.setThumbnail("");
+    }
     props.thread(false);
   };
 

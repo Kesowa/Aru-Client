@@ -38,7 +38,7 @@ import { useMemo } from "react";
 import download from "downloadjs";
 import { API_URL, STATIC_URL } from "src/constants";
 import { thread } from "../../../../../actions/threadAction";
-import Thread from "src/components/shared/Thread/Thread";
+import Thread from "src/components/shared/Thread";
 
 function Documents(props) {
   const [defaultFileList, setDefaultFileList] = useState([]);

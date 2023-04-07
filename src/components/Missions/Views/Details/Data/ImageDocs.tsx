@@ -45,7 +45,7 @@ import ActionToolbar from "src/components/shared/Toolbar/action";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import { BsFlagFill } from "react-icons/bs";
 import { thread } from "../../../../../actions/threadAction";
-import Thread from "src/components/shared/Thread/Thread";
+import Thread from "src/components/shared/Thread";
 
 const { Option } = Select;
 let plainOptions = new Array<any>();
@@ -617,7 +617,7 @@ function ImageDocs(props) {
   // This is a list view
   return (
     <>
-      <Thread thumbnail={thumbnail} />
+      <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
       <FilterToolbar
         type="Image"
         loader={loader}
@@ -711,8 +711,6 @@ function ImageDocs(props) {
                                                 width: "100%",
                                                 height: "auto",
                                                 minHeight: "200px",
-                                                borderRadius: "10px",
-                                                border: "1px solid black",
                                               })
                                             );
                                             props.thread(true, {
@@ -927,8 +925,6 @@ function ImageDocs(props) {
                                             width: "100%",
                                             height: "auto",
                                             minHeight: "200px",
-                                            borderRadius: "10px",
-                                            border: "1px solid black",
                                           })
                                         );
                                         props.thread(true, {
