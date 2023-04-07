@@ -1673,7 +1673,7 @@ function VideoPlayer(props: any) {
             </Col>
 
             <Col span={24}>
-              <Row justify="space-between">
+            {!props.threadThumb &&<Row justify="space-between">
                 <Col span={17}>
                   <Row>
                     <span
@@ -1951,7 +1951,7 @@ function VideoPlayer(props: any) {
                     </Col>
                   </Row>
                 </Col>
-              </Row>
+              </Row>}
             </Col>
           </Row>
 

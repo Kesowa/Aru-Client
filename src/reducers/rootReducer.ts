@@ -13,6 +13,7 @@ import Client from "./clientReducer";
 import User from "./userReducer";
 import Package from "./packageReducer";
 import Tenant from "./tenantReducer";
+import Thread from "./threadReducer";
 
 export default combineReducers({
   Loader,
@@ -29,4 +30,5 @@ export default combineReducers({
   User,
   Package,
   Tenant,
+  Thread,
 });
