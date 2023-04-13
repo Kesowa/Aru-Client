@@ -1,8 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { CLIENT_URL } from "tests/constants";
 
 test("create and delete client", async ({ page }) => {
-  page.goto("http://localhost:3000");
+  await page.goto(CLIENT_URL);
   await expect(page).toHaveURL(/.*dashboard/);
 
   // create client

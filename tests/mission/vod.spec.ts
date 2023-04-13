@@ -1,4 +1,5 @@
 import { test, expect, FileChooser } from "@playwright/test";
+import { CLIENT_URL } from "tests/constants";
 
 const filename = "video.mp4";
 
@@ -6,7 +7,7 @@ test("vod tests", async ({ page }) => {
   // Upload VOD
 
   // navigating to mission videos page of "Mapping mission sample" mission
-  page.goto("http://localhost:3000");
+  await page.goto(CLIENT_URL);
   await expect(page).toHaveURL(/.*dashboard/);
   await page
     .getByRole("main")
