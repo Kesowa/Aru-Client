@@ -6,12 +6,10 @@ import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { loading } from "../../../../actions/loadingAction";
 import { connect } from "react-redux";
-import { useHistory } from "react-router-dom";
 import { STATIC_URL } from "src/constants";
 
 function ChoosePackage(props: any) {
   const [packages, setPackages] = useState([undefined, undefined, undefined]);
-  const history = useHistory();
 
   const fetchActivePackages = () => {
     http
@@ -30,30 +28,6 @@ function ChoosePackage(props: any) {
       });
   };
 
-  const ActivatePackage = (packageId: string) => {
-    console.log(packageId, props.tenantData._id);
-    props.loading(true);
-    http
-      .post(apis.ADD_INITIAL_PACKAGE_BY_ADMIN, {
-        tenantId: props.tenantData._id,
-        packageId,
-      })
-      .then((result) => {
-        if (result.data.status) {
-          history.push(`/dashboard/tenant/details/${props.tenantData._id}`);
-        } else {
-          message.error(result.data.message);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        AxiosErrorHandler(err, props.logout);
-      })
-      .finally(() => {
-        props.loading(false);
-      });
-  };
-
   useEffect(() => {
     fetchActivePackages();
   }, []);
@@ -63,9 +37,19 @@ function ChoosePackage(props: any) {
       <Row gutter={[16, 16]}>
         {packages.map((ele, i) => (
           <Col key={i} span="6">
-            <PackageCard ActivatePackage={ActivatePackage} package={ele} />
+            <PackageCard
+              finalSubmitTenantCreation={props.finalSubmitTenantCreation}
+              package={ele}
+            />
           </Col>
         ))}
+      </Row>
+      <Row justify="end" gutter={16}>
+        <Col>
+          <Button type="primary" onClick={() => props.setFormState(1)}>
+            Previous
+          </Button>
+        </Col>
       </Row>
       {/* <Row gutter={16} justify="end">
                 <Col>
@@ -97,7 +81,7 @@ const PackageCard = (props: any) => {
       actions={[
         <Button
           key="1"
-          onClick={() => props.ActivatePackage(props.package._id)}
+          onClick={() => props.finalSubmitTenantCreation(props.package._id)}
           disabled={!props.package}
           style={{ width: "90%" }}
           type="primary"
