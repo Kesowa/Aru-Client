@@ -488,7 +488,7 @@ function Videos(VideoProps) {
       })
       .catch((err) => {
         console.log(err.response.status);
-        console.log("FETCH_VIDEOS_BY_MISSION_ID Api runs")
+        console.log("FETCH_VIDEOS_BY_MISSION_ID Api runs");
         if (err.response.status == 404) {
           setLoader(false);
           setVodData([]);

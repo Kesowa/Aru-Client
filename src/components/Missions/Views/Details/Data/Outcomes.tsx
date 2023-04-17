@@ -127,7 +127,7 @@ function Outcomes(outcomeProps) {
       query["isFlagged"] = flagFilter;
     }
     console.log(query);
-    
+
     //DUPE
     http
       .get(`${apis.GET_ALERT_BY_MISSION_ID_PAGINATION}`, {
