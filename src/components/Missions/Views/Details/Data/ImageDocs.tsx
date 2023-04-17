@@ -311,6 +311,8 @@ function ImageDocs(props) {
         query["sortBy"] = `createdAt:desc`;
       }
     }
+    
+    //DUPE
     http
       .get(`${apis.GET_IMAGES}`, {
         params: query,

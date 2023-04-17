@@ -548,6 +548,7 @@ function Documents(props) {
   }
 
   //------------------Get Docs------------------------------------------
+  //DUPE after uploading the document the api fetch the data multiple time same while deleting the document
   function getDocs() {
     setLoader(true);
     http
