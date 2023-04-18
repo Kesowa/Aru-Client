@@ -62,6 +62,19 @@ const App = (props: any) => {
                 <PublicMap isBaseMap={true} />
               </Suspense>
             </Route>
+            <Route exact path="/map/:tenantId/:missionId">
+              <Suspense
+                fallback={
+                  <div className="example">
+                    <Space size="middle">
+                      <Spin size="large" />
+                    </Space>
+                  </div>
+                }
+              >
+                <PublicMap isMissionMap={true} isBaseMap={true} />
+              </Suspense>
+            </Route>
             <Route exact path="/forgot-password">
               <ForgotPassword />
             </Route>

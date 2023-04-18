@@ -293,7 +293,8 @@ function PublicMap(props) {
   const [vectorProps, setVectorProps] = useState<any>([]);
   const [data, setData] = useState();
   const [editingKey, setEditingKey] = useState("");
-  const [missioName, setMissioName] = useState("");
+  const [tenantName, setTenantName] = useState("");
+  const [mission, setMission] = useState("");
   const [layerType, setLayerType] = useState("");
   const [layerTypeId, setLayerTypeId] = useState("");
   const [captureDate, setCaptureDate] = useState("");
@@ -393,7 +394,7 @@ function PublicMap(props) {
 
   const [scaleVisible, setScaleVisible] = useState(false);
 
-  const { id } = useParams<any>(); // fetch id from url
+  const { id, tenantId, missionId } = useParams<any>(); // fetch id from url
 
   // ----------------------------------------- disable default right click event of browser ----------------------------------------------------------
   useEffect(() => {
@@ -1104,19 +1105,27 @@ function PublicMap(props) {
 
   useEffect(() => {
     props.loading(true);
-    getAllLayers(id);
+    getAllLayers();
   }, []);
 
   //---------------Fetch all layers in mission----------------------------------------
 
-  const getAllLayers = async (id) => {
-    console.log("I am inside getAllLayers", id);
+  const getAllLayers = async () => {
     try {
-      const result: any = await http.get(`${apis.FETCH_PUBLIC_LAYERS}`, {
-        params: {
-          mapRef: id,
-        },
-      });
+      let result: any;
+      if (props.isMissionMap) {
+        result = await http.get(
+          `${apis.GET_PUBLIC_LAYER_BY_MISSION_ID}/${tenantId}/${missionId}`
+        );
+        setMission(result.data.mission);
+      } else {
+        result = await http.get(`${apis.FETCH_PUBLIC_LAYERS}`, {
+          params: {
+            mapRef: id,
+          },
+        });
+      }
+      console.log("I am inside getAllLayers", result);
       if (result.data.status) {
         const selectedLayerObject = result.data.data.find(
           (layer) => layer.name == selectedLayer
@@ -1130,7 +1139,7 @@ function PublicMap(props) {
           setCheckedKeys([key]);
         }
         console.log("Base map result", result.data);
-        setMissioName(result.data.data[0].tenantId.name);
+        setTenantName(result.data.data[0].tenantId.name);
         setTotalLayers(0);
         setlayerz(result.data.data);
         segrigateLayers(result.data.data);
@@ -1346,7 +1355,7 @@ function PublicMap(props) {
     //console.log(td);
     const data: any = [
       {
-        title: "City Data",
+        title: `${props.isMissionMap ? "Mission" : "City"} Data`,
         key: "1",
         children: [],
       },
@@ -2415,15 +2424,19 @@ function PublicMap(props) {
         <div className="map-sidebar">
           <div className="header-content">
             <Row>
-              <Col md={16}>
+              <Col md={20}>
                 <Space direction="vertical">
                   <Title level={4} style={{ marginBottom: "0px" }}>
                     Map
                   </Title>
-                  <Text type="secondary">{missioName ? missioName : ""}</Text>
+                  <Text type="secondary">{tenantName ? tenantName : ""}</Text>
+                  {props.isMissionMap && (<div style={{border: '1px black solid', padding: '2px 4px', borderRadius: '5px', display:'flex', flexDirection: 'column'}}>
+                  <Title level={5} style={{ marginBottom: "0px", textDecoration: 'underline' }}>Mission</Title>
+                  <Text type="primary">Name: <Text type="secondary">{mission&&mission.name?mission.name:""}</Text></Text>
+                  <Text type="primary">ID: <Text type="secondary" copyable>{mission&&mission._id?mission._id:""}</Text></Text></div>)}
                 </Space>
               </Col>
-              <Col md={8}>
+              <Col md={4}>
                 <div
                   style={{
                     display: "inline-block",
