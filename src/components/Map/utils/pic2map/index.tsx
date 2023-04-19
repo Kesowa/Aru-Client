@@ -32,6 +32,7 @@ import apis from "../../../../services/apis";
 import Dragger from "antd/lib/upload/Dragger";
 import SubMenu from "antd/lib/menu/SubMenu";
 import { API_URL, STATIC_URL } from "src/constants";
+import io from "socket.io-client";
 //import { setModelsToState } from "../../actions/modelAction";
 
 const { Step } = Steps;
@@ -195,16 +196,16 @@ function Pictomap(props) {
 
   // //--------testing socket-----------------
 
-  // useEffect(() => {
-  //   if (!socket.current) {
-  //     socket.current = io(
-  //       `${API_URL}/stream/mission-specific?missionID=${props.missionId}`
-  //     );
-  //     socket.current.on("pic-to-map", (dataa) => {
-  //       console.log("socket testing!  ", dataa);
-  //     });
-  //   }
-  // }, [props.missionId]);
+  useEffect(() => {
+    if (!socket.current) {
+      socket.current = io(
+        `${API_URL}/stream/mission-specific?missionID=${props.missionId}`
+      );
+      socket.current.on("pic-to-map", (dataa) => {
+        console.log("socket testing!  ", dataa);
+      });
+    }
+  }, [props.missionId]);
 
   //---Set layer features list for combo box---------------------
   useEffect(() => {
