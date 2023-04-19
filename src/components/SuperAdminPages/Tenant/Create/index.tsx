@@ -16,11 +16,12 @@ import { logout } from "../../../../actions/authAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 function CreateTenant(props: any) {
   const [formState, setFormState] = useState(0);
   const [tenantData, setTenantData] = useState({});
+  const history = useHistory();
 
   const goToNextFromBasic = (data: any) => {
     setTenantData({
@@ -31,10 +32,18 @@ function CreateTenant(props: any) {
   };
 
   const goToNextfromBilling = (data: any) => {
+    setTenantData({
+      ...tenantData,
+      ...data,
+    });
+    setFormState(2);
+  };
+
+  const finalSubmitTenantCreation = (packageId: string) => {
     props.loading(true);
     const body = {
       ...tenantData,
-      ...data,
+      activePackage: packageId,
     };
     setTenantData(body);
     //call api
@@ -47,7 +56,7 @@ function CreateTenant(props: any) {
             ...tenantData,
             _id: result.data.tenantId,
           });
-          setFormState(2);
+          history.push(`/dashboard/tenant/details/${result.data.tenantId}`);
         } else {
           message.error(result.data.message);
         }
@@ -102,7 +111,13 @@ function CreateTenant(props: any) {
             goToNextfromBilling={goToNextfromBilling}
           />
         ) : null}
-        {formState === 2 ? <ChoosePackage tenantData={tenantData} /> : null}
+        {formState === 2 ? (
+          <ChoosePackage
+            tenantData={tenantData}
+            setFormState={setFormState}
+            finalSubmitTenantCreation={finalSubmitTenantCreation}
+          />
+        ) : null}
       </div>
     </div>
   );

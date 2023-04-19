@@ -105,7 +105,9 @@ const ActionToolbar = (props) => {
       <Text type="secondary">
         {props.activateSelection
           ? `${props.checkedList.length} Selected`
-          : `Total ${props.data?.length} ${props.type}s`}
+          : `Total ${
+              props.totalCount ? props.totalCount : props.data?.length
+            } ${props.type}s`}
       </Text>
       <div className="upload-btn">
         <Tooltip

@@ -16,6 +16,7 @@ import {
   Checkbox,
   Select,
   Badge,
+  Pagination,
 } from "antd";
 import "./data.less";
 import "./checkbox.less";
@@ -33,6 +34,7 @@ import {
   UploadOutlined,
   FlagOutlined,
   UserOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
 import Dragger from "antd/lib/upload/Dragger";
 import { useEffect } from "react";
@@ -42,6 +44,9 @@ import { API_URL, STATIC_URL } from "src/constants";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import { BsFlagFill } from "react-icons/bs";
+import { thread } from "../../../../../actions/threadAction";
+import Thread from "src/components/shared/Thread";
+
 const { Option } = Select;
 let plainOptions = new Array<any>();
 function ImageDocs(props) {
@@ -61,11 +66,14 @@ function ImageDocs(props) {
   const [isFlagged, setIsFlagged] = useState(false);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
-  const [visible, setVisible] = useState(false);
+  const [thumbnail, setThumbnail] = useState("");
   const CheckboxGroup = Checkbox.Group;
   const { Text, Title } = Typography;
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
   useEffect(() => {
     if (images.length < 1) {
       setActivateSelection(false);
@@ -292,35 +300,28 @@ function ImageDocs(props) {
     setLoader(true);
     const query = {
       missionId: props.missionId,
+      page,
+      limit,
     };
     const flagFilter = getFlaggedFilter();
     if (flagFilter !== undefined) {
       query["isFlagged"] = flagFilter;
     }
+    if (sortType === "timeStamp") {
+      if (isAscending) {
+        query["sortBy"] = `createdAt:asce`;
+      } else {
+        query["sortBy"] = `createdAt:desc`;
+      }
+    }
     http
-      .get(`${apis.GET_DOCUMENTS}`, {
+      .get(`${apis.GET_IMAGES}`, {
         params: query,
       })
       .then((res: any) => {
         if (res.data.status) {
-          console.log(res.data.data.documents);
-          const filtered: any = res.data.data.documents.filter(
-            (item: any) => item.folderName === "photos"
-          );
-          console.log("filtered", filtered);
-          if (sortType === "timeStamp") {
-            if (isAscending) {
-              filtered.sort((a, b) => {
-                return moment(b.createdAt).diff(moment(a.createdAt));
-              });
-            } else {
-              filtered.sort((a, b) => {
-                return moment(a.createdAt).diff(moment(b.createdAt));
-              });
-            }
-          } else {
-          }
-          setImages(filtered);
+          setTotalCount(res.data.data.total);
+          setImages(res.data.data.documents);
         } else {
           message.error(res.data.message);
         }
@@ -331,7 +332,45 @@ function ImageDocs(props) {
       })
       .finally(() => setLoader(false));
   }
-
+  const ImageComponent = (item: any, preview: boolean, imgStyle: any) => {
+    return (
+      <Badge
+        style={{
+          backgroundColor: "#f5222d",
+          padding: "5px",
+          borderRadius: "5px",
+        }}
+        offset={[-25, 25]}
+        count={
+          item.isFlagged ? (
+            <BsFlagFill
+              style={{
+                color: "#fff",
+                fontSize: "24px",
+              }}
+            />
+          ) : (
+            0
+          )
+        }
+      >
+        <Image
+          key={`${item._id}`}
+          style={imgStyle}
+          src={STATIC_URL + "/documents/1x_" + item.filePath.split("/")[2]}
+          preview={
+            !preview
+              ? false
+              : {
+                  src:
+                    STATIC_URL + "/documents/2x_" + item.filePath.split("/")[2],
+                }
+          }
+          fallback="data:image/png;base64,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"
+        ></Image>
+      </Badge>
+    );
+  };
   //------------------Fetch DOcuments------------------------------------
   function fetchDocuments() {
     if (refreshState) {
@@ -444,7 +483,7 @@ function ImageDocs(props) {
         });
       }
     }
-  }, [props.missionDetails.missionId]);
+  }, [props.missionDetails.missionId, page, limit]);
 
   //----------render upload button----------------------
 
@@ -497,7 +536,7 @@ function ImageDocs(props) {
       if (permissions.length > 0) {
         return (
           <Menu.Item
-            key={`2.${item._id}`}
+            key="4"
             onClick={() => {
               Modal.confirm({
                 title: "Delete Image?",
@@ -518,7 +557,7 @@ function ImageDocs(props) {
     } else {
       return (
         <Menu.Item
-          key={`2.${item._id}`}
+          key="4"
           onClick={() => {
             Modal.confirm({
               title: "Delete Image?",
@@ -573,11 +612,12 @@ function ImageDocs(props) {
   useEffect(() => {
     setRefreshState(!refreshState);
     fetchDocuments();
-  }, [isAscending, flaggedFilter, unflaggedFilter]);
+  }, [isAscending, flaggedFilter, unflaggedFilter, page, limit]);
 
   // This is a list view
   return (
     <>
+      <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
       <FilterToolbar
         type="Image"
         loader={loader}
@@ -600,6 +640,7 @@ function ImageDocs(props) {
         activateSelection={activateSelection}
         setData={setImages}
         data={images}
+        totalCount={totalCount}
         setFlag={setFlag}
         flag={flag}
         uploadBtn={renderUploadBtn}
@@ -642,101 +683,113 @@ function ImageDocs(props) {
                       <Image.PreviewGroup>
                         {images.map((item: any) => {
                           return (
-                            <Row
-                              className="listview-outcomes"
-                              align="middle"
-                              style={{ padding: "10px" }}
-                            >
-                              <Col md={8} style={{ padding: "10px" }}>
-                                <Badge
-                                  style={{
-                                    backgroundColor: "#f5222d",
-                                    padding: "5px",
-                                    borderRadius: "5px",
-                                  }}
-                                  offset={[-25, 25]}
-                                  count={
-                                    item.isFlagged ? (
-                                      <BsFlagFill
-                                        style={{
-                                          color: "#fff",
-                                          fontSize: "24px",
-                                        }}
-                                      />
-                                    ) : (
-                                      0
-                                    )
-                                  }
-                                >
-                                  <Image
-                                    key={`${item._id}`}
-                                    style={{
-                                      padding: "8px",
-                                      width: "100%",
-                                      height: "auto",
-                                    }}
-                                    width={310}
-                                    height={175}
-                                    src={
-                                      STATIC_URL +
-                                      "/documents/1x_" +
-                                      item.filePath.split("/")[2]
+                            <>
+                              <Row
+                                className="listview-outcomes"
+                                align="middle"
+                                style={{ padding: "10px" }}
+                              >
+                                <Col md={8} style={{ padding: "10px" }}>
+                                  <Dropdown
+                                    overlay={
+                                      <Menu>
+                                        <Menu.Item
+                                          key="1"
+                                          onClick={() =>
+                                            window.open(
+                                              `${STATIC_URL}${item.filePath}`
+                                            )
+                                          }
+                                        >
+                                          <DownloadOutlined /> Download
+                                        </Menu.Item>
+                                        <Menu.Item
+                                          key="2"
+                                          onClick={() => {
+                                            setThumbnail(
+                                              ImageComponent(item, false, {
+                                                width: "100%",
+                                                height: "auto",
+                                                minHeight: "200px",
+                                              })
+                                            );
+                                            props.thread(true, {
+                                              docType: "document",
+                                              docId: item._id,
+                                            });
+                                          }}
+                                        >
+                                          <MessageOutlined /> Open Thread{" "}
+                                        </Menu.Item>
+                                        <Menu.Item
+                                          key="3"
+                                          onClick={() => {
+                                            toggleFlag(item);
+                                          }}
+                                        >
+                                          {!item.isFlagged ? (
+                                            <>
+                                              <FlagOutlined /> Flag
+                                            </>
+                                          ) : (
+                                            <>
+                                              <FlagOutlined /> Unflag
+                                            </>
+                                          )}
+                                        </Menu.Item>
+                                        {renderDeleteBtn(item)}
+                                      </Menu>
                                     }
-                                    preview={{
-                                      visible,
-                                      src:
-                                        STATIC_URL +
-                                        "/documents/2x_" +
-                                        item.filePath.split("/")[2],
-                                      onVisibleChange: (value) => {
-                                        setVisible(value);
-                                      },
-                                      mask: <Button />,
-                                    }}
-                                    fallback="data:image/png;base64,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"
-                                  ></Image>
-                                </Badge>
-                              </Col>
-                              <Col md={16}>
-                                <div className="info-part">
-                                  <Row>
-                                    <Title level={5}>{item.name}</Title>
-                                  </Row>
-                                  <Row>
-                                    <Col md={20}>
-                                      <Text type="secondary">
-                                        Size : {item.fileSize} mb
-                                      </Text>
-                                    </Col>
-                                    <Col md={4}>
-                                      <Text
-                                        type="secondary"
-                                        className="inference"
-                                      >
-                                        Inference: {item.__v}
-                                      </Text>
-                                    </Col>
-                                  </Row>
-                                  <Row>
-                                    <Col md={20}>
-                                      <Text type="secondary">
-                                        <UserOutlined /> {item.createdBy.name}
-                                      </Text>
-                                    </Col>
-                                    <Col md={4}>
-                                      <Text
-                                        type="secondary"
-                                        className="relative-time"
-                                      >
-                                        <em>
-                                          {moment(item.createdAt).fromNow()}
-                                        </em>
-                                      </Text>
-                                    </Col>
-                                  </Row>
-                                </div>
-                              </Col>
-                            </Row>
+                                    trigger={["contextMenu"]}
+                                  >
+                                    {ImageComponent(item, true, {
+                                      padding: "8px",
+                                      width: "270px",
+                                      height: "150px",
+                                    })}
+                                  </Dropdown>
+                                </Col>
+                                <Col md={16}>
+                                  <div className="info-part">
+                                    <Row>
+                                      <Title level={5}>{item.name}</Title>
+                                    </Row>
+                                    <Row>
+                                      <Col md={20}>
+                                        <Text type="secondary">
+                                          Size : {item.fileSize} mb
+                                        </Text>
+                                      </Col>
+                                      <Col md={4}>
+                                        <Text
+                                          type="secondary"
+                                          className="inference"
+                                        >
+                                          Inference: {item.__v}
+                                        </Text>
+                                      </Col>
+                                    </Row>
+                                    <Row>
+                                      <Col md={20}>
+                                        <Text type="secondary">
+                                          <UserOutlined /> {item.createdBy.name}
+                                        </Text>
+                                      </Col>
+                                      <Col md={4}>
+                                        <Text
+                                          type="secondary"
+                                          className="relative-time"
+                                        >
+                                          <em>
+                                            {moment(item.createdAt).fromNow()}
+                                          </em>
+                                        </Text>
+                                      </Col>
+                                    </Row>
+                                  </div>
+                                </Col>
+                              </Row>
+                            </>
                           );
                         })}
                       </Image.PreviewGroup>
@@ -850,80 +903,66 @@ function ImageDocs(props) {
                       <Image.PreviewGroup>
                         {images.map((item: any) => {
                           return (
-                            <Dropdown
-                              overlay={
-                                <Menu>
-                                  <Menu.Item
-                                    key={`1.${item._id}`}
-                                    onClick={() =>
-                                      window.open(
-                                        `${STATIC_URL}${item.filePath}`
-                                      )
-                                    }
-                                  >
-                                    <DownloadOutlined /> Download
-                                  </Menu.Item>
-                                  <Menu.Item
-                                    key={`3.${item._id}`}
-                                    onClick={() => {
-                                      toggleFlag(item);
-                                    }}
-                                  >
-                                    {!item.isFlagged ? (
-                                      <>
-                                        <FlagOutlined /> Flag
-                                      </>
-                                    ) : (
-                                      <>
-                                        <FlagOutlined /> Unflag
-                                      </>
-                                    )}
-                                  </Menu.Item>
-                                  {renderDeleteBtn(item)}
-                                </Menu>
-                              }
-                              trigger={["contextMenu"]}
-                            >
-                              <Badge
-                                style={{
-                                  backgroundColor: "#f5222d",
-                                  padding: "5px",
-                                  borderRadius: "5px",
-                                }}
-                                offset={[-25, 25]}
-                                count={
-                                  item.isFlagged ? (
-                                    <BsFlagFill
-                                      style={{
-                                        color: "#fff",
-                                        fontSize: "24px",
+                            <>
+                              <Dropdown
+                                overlay={
+                                  <Menu>
+                                    <Menu.Item
+                                      key="1"
+                                      onClick={() =>
+                                        window.open(
+                                          `${STATIC_URL}${item.filePath}`
+                                        )
+                                      }
+                                    >
+                                      <DownloadOutlined /> Download
+                                    </Menu.Item>
+                                    <Menu.Item
+                                      key="2"
+                                      onClick={() => {
+                                        setThumbnail(
+                                          ImageComponent(item, false, {
+                                            width: "100%",
+                                            height: "auto",
+                                            minHeight: "200px",
+                                          })
+                                        );
+                                        props.thread(true, {
+                                          docType: "document",
+                                          docId: item._id,
+                                        });
                                       }}
-                                    />
-                                  ) : (
-                                    0
-                                  )
+                                    >
+                                      <MessageOutlined /> Open Thread{" "}
+                                    </Menu.Item>
+                                    <Menu.Item
+                                      key="3"
+                                      onClick={() => {
+                                        toggleFlag(item);
+                                      }}
+                                    >
+                                      {!item.isFlagged ? (
+                                        <>
+                                          <FlagOutlined /> Flag
+                                        </>
+                                      ) : (
+                                        <>
+                                          <FlagOutlined /> Unflag
+                                        </>
+                                      )}
+                                    </Menu.Item>
+                                    {renderDeleteBtn(item)}
+                                  </Menu>
                                 }
+                                trigger={["contextMenu"]}
                               >
-                                <Image
-                                  key={`${item._id}`}
-                                  style={{ padding: "8px" }}
-                                  width={267}
-                                  height={150}
-                                  src={
-                                    STATIC_URL +
-                                    "/documents/1x_" +
-                                    item.filePath.split("/")[2]
-                                  }
-                                  preview={{
-                                    src:
-                                      STATIC_URL +
-                                      "/documents/2x_" +
-                                      item.filePath.split("/")[2],
-                                  }}
-                                  fallback="data:image/png;base64,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"
-                                ></Image>
-                              </Badge>
-                            </Dropdown>
+                                {ImageComponent(item, true, {
+                                  padding: "8px",
+                                  width: "270px",
+                                  height: "150px",
+                                })}
+                              </Dropdown>
+                            </>
                           );
                         })}
                       </Image.PreviewGroup>
@@ -931,6 +970,22 @@ function ImageDocs(props) {
                   )}
                 </>
               )}
+              <Pagination
+                defaultCurrent={page}
+                defaultPageSize={limit}
+                onShowSizeChange={(currPage, limit) => {
+                  setPage(currPage);
+                  setLimit(limit);
+                }}
+                current={page}
+                onChange={(currPage, limit) => {
+                  setPage(currPage);
+                  setLimit(limit);
+                }}
+                total={totalCount}
+                hideOnSinglePage={true}
+                showSizeChanger={true}
+              />
             </>
           )}
         </div>
@@ -956,4 +1011,4 @@ const mapStateToProps = (state: any) => ({
   Theme: state.Theme,
 });
 
-export default connect(mapStateToProps, { logout })(ImageDocs);
+export default connect(mapStateToProps, { logout, thread })(ImageDocs);

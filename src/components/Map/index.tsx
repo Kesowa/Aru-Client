@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect, useRef } from "react";
 import { v4 as uuid } from "uuid";
 import InfoWindowContent from "./utils/infoWindow";
@@ -112,6 +111,7 @@ import LayerDocs from "./utils/layer/layerDocs";
 import CreateLayer from "./utils/layer/createLayer";
 import CreateBaseLayer from "./utils/layer/createBaseLayer";
 import io from "socket.io-client";
+import Thread from "../shared/Thread";
 import {
   COG_URL,
   MAPBOX_API_KEY,
@@ -154,6 +154,9 @@ function BaseMap(props) {
   const [refreshLayer, setRefreshLayer] = useState(false);
   const [isMinimise, setMinimise] = useState(false);
   const [pointMarkerColour, setPointMarkerColour] = useState("#000");
+  const [missionData, setMissionData] = useState({});
+  const [loader, setLoader] = useState(props.isBaseMap ? false : true);
+  const [thumbnail, setThumbnail] = useState("");
   const [geoJsonVOD, setGeoJsonVOD] = useState({});
   const [geoJsonAlert, setGeoJsonAlert] = useState({});
   const [srtVideoPath, setSrtVideoPath] = useState("");
@@ -205,7 +208,6 @@ function BaseMap(props) {
         "Please check the layer's review section to finalise the images.",
     });
   };
-
   //----------UseEffectBlock to assign permissions--------------
   useEffect(() => {
     if (
@@ -629,7 +631,6 @@ function BaseMap(props) {
   const [coordinates, setCoordinates] = useState([]);
   const [sideBarState, setSideBarState] = useState(true);
   const [sideBarIcon, setSideBarIcon] = useState(<DoubleRightOutlined />);
-  const [loader, setLoader] = useState(false);
   const [attributeTable, SetAttributeTable] = useState([]);
   const [mapMode, setMapMode] = useState("mapbox://styles/mapbox/streets-v8");
   const [isModalVisible, setIsModalVisible] = useState(false); // upload layer
@@ -989,6 +990,29 @@ function BaseMap(props) {
     if (arr2.length !== selectedVectorProps.length)
       setSelectedVectorProps(arr2);
   };
+  useEffect(() => {
+    const missionData = async () => {
+      const mission = await http.get(`${apis.GET_MISSION_BY_ID}${id}`);
+      console.log(
+        "basemap",
+        props.isBaseMap,
+        mission.data,
+        moment(mission.data.data.createdAt)
+      );
+      if (mission.data.status) {
+        setMissionData(mission.data.data);
+        setDateRange([
+          moment(mission.data.data.createdAt, "YYYY-MM-DD HH:mm").format(),
+          dateRange[1],
+        ]);
+      }
+      setLoader(false);
+    };
+    if (!props.isBaseMap) {
+      setLoader(true);
+      missionData();
+    }
+  }, []);
 
   useEffect(() => {
     filterLayers(time);
@@ -1144,6 +1168,7 @@ function BaseMap(props) {
                 },
               })
               .then((result) => {
+                console.log("geoJsonAlert", result);
                 setGeoJsonAlert(result.data);
               })
               .catch((err) => {
@@ -1546,28 +1571,6 @@ function BaseMap(props) {
       ],
     },
   ];
-  const injectSysId = (layerId) => {
-    message.loading("Generating sysIds...");
-    http
-      .patch(`${apis.GEN_SYSID_LAYER}`, null, {
-        params: {
-          layerId,
-        },
-      })
-      .then((res) => {
-        if (res.data.status) {
-          message.success(res.data.message);
-          setRefreshLayer(!refreshLayer);
-          setShouldAttributeTableReload(!shouldAttributeTableReload);
-        } else {
-          message.error(res.data.message);
-        }
-      })
-      .catch((err) => {
-        message.error(err);
-        AxiosErrorHandler(err, props.logout);
-      });
-  };
   const toggleLayerFlag = (layerId, flag) => {
     const payload: any = {
       flag: flag,
@@ -3241,8 +3244,6 @@ function BaseMap(props) {
           groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
           layer: layer,
         };
-
-        break;
       case "vector":
         return {
           title: (
@@ -3313,26 +3314,6 @@ function BaseMap(props) {
                       </>
                     ) : (
                       <></>
-                    )}
-                    {layer.type === "Vector" && (
-                      <Menu.Item
-                        key="3-1"
-                        onClick={() => {
-                          Modal.confirm({
-                            title: "Generate sysId?",
-                            icon: <ExclamationCircleOutlined />,
-                            content:
-                              "Are you sure you want to generate new sysIds for this layer?",
-                            okText: "Yes",
-                            cancelText: "No",
-                            onOk: () => {
-                              injectSysId(layer._id);
-                            },
-                          });
-                        }}
-                      >
-                        Generate SysId
-                      </Menu.Item>
                     )}
                     {layer.type === "Vector" && (
                       <SubMenu title="Toggle Flag" key="3">
@@ -4080,11 +4061,15 @@ function BaseMap(props) {
   };
 
   // ++++++++++++++++++++++++++++++++
-
   const renderRangePicker = () => {
+    const disabledDate = (current) => {
+      return current && current > moment(dateRange[1]);
+    };
     return (
       <DatePicker.RangePicker
         defaultValue={[moment(dateRange[0]), moment(dateRange[1])]}
+        disabledDate={disabledDate}
+        disabled={[props.isBaseMap ? false : true, false]}
         format="DD-MM-YYYY"
         onChange={onRangeChange}
       />
@@ -4128,7 +4113,7 @@ function BaseMap(props) {
 
   useEffect(() => {
     refreshLayers();
-  }, [treeStructure, checkedKeys, panes]);
+  }, [treeStructure, checkedKeys, panes, dateRange]);
 
   const refreshLayers = () => {
     const td: any = [...treeStructure];
@@ -5999,6 +5984,7 @@ function BaseMap(props) {
 
   return (
     <div className="map_wrapper" onKeyDown={handleKeyDown}>
+      <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
       <Modal
         title="Maximum Limit reached!"
         open={LimitModal}
@@ -6119,6 +6105,7 @@ function BaseMap(props) {
                       canDraw={perms.canCreateVectorLayer}
                       isBaseMap={props.isBaseMaps}
                       isPublic={false}
+                      setThumbnail={setThumbnail}
                     />
                   </>
                 }
@@ -6883,7 +6870,7 @@ function BaseMap(props) {
             <div>
               {/* -------------Export Option---------------------------- */}
               <Dropdown
-                overlay={{
+                menu={{
                   items: actionMenuItems,
                   onClick: actionMenuOnClick,
                 }}
@@ -6897,7 +6884,7 @@ function BaseMap(props) {
                 </Button>
               </Dropdown>
               <Dropdown
-                overlay={{
+                menu={{
                   items: filterItems,
                   selectable: true,
                   className: "filter-item",
@@ -7075,6 +7062,7 @@ function BaseMap(props) {
         updateVODs={updateVODs}
         setShowFlightPath={setShowFlightPath}
         setSrtVideoPath={setSrtVideoPath}
+        setThumbnail={setThumbnail}
       />
       <LayerDocs
         setVisibility={setViewDocs}

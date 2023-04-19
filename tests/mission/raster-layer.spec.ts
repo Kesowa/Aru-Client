@@ -1,12 +1,13 @@
 import { faker } from "@faker-js/faker";
 import { test, expect, FileChooser } from "@playwright/test";
+import { CLIENT_URL } from "tests/constants";
 
 const layername = faker.address.streetAddress();
 
 test("raster layer tests", async ({ page }) => {
   // Layer Creation
 
-  page.goto("http://localhost:3000");
+  await page.goto(CLIENT_URL);
   await expect(page).toHaveURL(/.*dashboard/);
   await page
     .getByRole("main")

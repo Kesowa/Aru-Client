@@ -83,6 +83,7 @@ import * as turf from "@turf/turf";
 import { da } from "date-fns/locale";
 import { LIVE_URL } from "src/constants";
 import { components } from "src/handlers/schema";
+import { FlightPath } from "src/types/FlightPath";
 
 const { Text, Link } = Typography;
 const { SubMenu, Item } = Menu;
@@ -663,21 +664,17 @@ function VideoPlayer(props: any) {
     if (!isLive) {
       //console.log(props.url.split('.')[0]);
       let data = fetchJSON((props.url as string).replace(/.\w+$/, ".geojson"))
-        .then((data) => {
-          let flightTelemetry: any = JSON.parse(data).features;
-          let pathObject: any = flightTelemetry.pop();
+        .then((d) => {
+          let data = d as FlightPath;
           //console.log("the obejct", pathObject)
-          let points: any = [];
-          pathObject.geometry.coordinates.map((i: any) => {
-            let values: any = [];
-            values.push(i[0]);
-            values.push(i[1]);
-            //console.log(values);
-            points.push(values);
+          let flightTelemetry = data.features;
+          let points: [number, number, number][] = [];
+          data.features.map((feat) => {
+            points.push(feat.geometry.coordinates);
           });
 
           //console.log("filtered pints", points);
-          let flightpath: any = {
+          let flightpath = {
             type: "FeatureCollection",
             crs: {
               type: "name",
@@ -710,12 +707,10 @@ function VideoPlayer(props: any) {
           ];
 
           setBounds(reGetBounds);
-          setMapCenter(
-            turf.centroid(flightpath.features[0]).geometry.coordinates
-          );
+          setMapCenter(turf.centroid(flightpath.features[0].geometry));
         })
         .catch((err) => {
-          console.log("could not fetch geojson");
+          console.log("could not fetch geojson", err);
         });
     }
   }, [props.url, isLive]);
@@ -1678,285 +1673,287 @@ function VideoPlayer(props: any) {
             </Col>
 
             <Col span={24}>
-              <Row justify="space-between">
-                <Col span={17}>
-                  <Row>
-                    <span
-                      onClick={fastbackward}
-                      className="material-icons video-control-icons"
-                      style={{
-                        fontSize: "24px",
-                        display: isLive ? "none" : "inline",
-                      }}
-                    >
-                      replay_10
-                    </span>
-                    {/* <FontAwesomeIcon
+              {!props.threadThumb && (
+                <Row justify="space-between">
+                  <Col span={17}>
+                    <Row>
+                      <span
+                        onClick={fastbackward}
+                        className="material-icons video-control-icons"
+                        style={{
+                          fontSize: "24px",
+                          display: isLive ? "none" : "inline",
+                        }}
+                      >
+                        replay_10
+                      </span>
+                      {/* <FontAwesomeIcon
                           
                           icon={faFastBackward}
                           className='video-control-icons'
                           style={{ display: isLive ? "none" : "inline" }}
                         /> */}
-                    {playing ? (
-                      <Tooltip title="Pause">
-                        <FontAwesomeIcon
-                          onClick={handlePlayPause}
-                          icon={faPause}
-                          className="video-control-icons"
-                        />
-                      </Tooltip>
-                    ) : (
-                      <Tooltip title="Play">
-                        <FontAwesomeIcon
-                          onClick={handlePlayPause}
-                          icon={faPlay}
-                          className="video-control-icons"
-                        />
-                      </Tooltip>
-                    )}
-                    {/* <FontAwesomeIcon
+                      {playing ? (
+                        <Tooltip title="Pause">
+                          <FontAwesomeIcon
+                            onClick={handlePlayPause}
+                            icon={faPause}
+                            className="video-control-icons"
+                          />
+                        </Tooltip>
+                      ) : (
+                        <Tooltip title="Play">
+                          <FontAwesomeIcon
+                            onClick={handlePlayPause}
+                            icon={faPlay}
+                            className="video-control-icons"
+                          />
+                        </Tooltip>
+                      )}
+                      {/* <FontAwesomeIcon
                     onClick={fastforward}
                     icon={faFastForward}
                     className='video-control-icons'
                     style={{ display: isLive ? "none" : "inline" }}
                   /> */}
-                    <span
-                      onClick={fastforward}
-                      className="material-icons video-control-icons"
-                      style={{
-                        fontSize: "24px",
-                        display: isLive ? "none" : "inline",
-                      }}
-                    >
-                      forward_10
-                    </span>
-                    {!isLive ? (
-                      <>
-                        <Tooltip title="Add Bookmark">
-                          <BsBookmarkPlusFill
-                            onClick={addBookmark}
-                            className="video-control-icons"
-                          />
-                        </Tooltip>
-                        <Tooltip title="Remove Bookmark">
-                          <BsBookmarkDashFill
-                            onClick={removeBookmark}
-                            className="video-control-icons"
-                          />
-                        </Tooltip>
-                        <Tooltip title="Flag">
-                          <BsFlagFill
-                            onClick={() => {
-                              toggleFlag(props.mission);
-                            }}
-                            color={`${isFlagged ? "red" : "white"}`}
-                            className="video-control-icons"
-                          />
-                        </Tooltip>
-                      </>
-                    ) : (
-                      ""
-                    )}
-                    {!isLive && (
-                      <div
+                      <span
+                        onClick={fastforward}
+                        className="material-icons video-control-icons"
                         style={{
-                          marginRight: "10px",
-                          marginLeft: "10px",
-                          color: "rgba(255, 255, 255, 0.897)",
+                          fontSize: "24px",
+                          display: isLive ? "none" : "inline",
                         }}
                       >
-                        {elapsedTime} / {format(duration)}
-                      </div>
-                    )}
-                    {muted ? (
-                      <Tooltip title="Unmute">
-                        <FontAwesomeIcon
-                          onClick={handleMute}
-                          icon={faVolumeMute}
-                          className="bottom-icons"
+                        forward_10
+                      </span>
+                      {!isLive ? (
+                        <>
+                          <Tooltip title="Add Bookmark">
+                            <BsBookmarkPlusFill
+                              onClick={addBookmark}
+                              className="video-control-icons"
+                            />
+                          </Tooltip>
+                          <Tooltip title="Remove Bookmark">
+                            <BsBookmarkDashFill
+                              onClick={removeBookmark}
+                              className="video-control-icons"
+                            />
+                          </Tooltip>
+                          <Tooltip title="Flag">
+                            <BsFlagFill
+                              onClick={() => {
+                                toggleFlag(props.mission);
+                              }}
+                              color={`${isFlagged ? "red" : "white"}`}
+                              className="video-control-icons"
+                            />
+                          </Tooltip>
+                        </>
+                      ) : (
+                        ""
+                      )}
+                      {!isLive && (
+                        <div
                           style={{
                             marginRight: "10px",
                             marginLeft: "10px",
+                            color: "rgba(255, 255, 255, 0.897)",
                           }}
-                        />
-                      </Tooltip>
-                    ) : (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexFlow: "row",
-                          marginRight: "10px",
-                          marginLeft: "10px",
-                          marginTop: "-8px",
-                        }}
-                        onMouseOver={() => setVolumeBar(true)}
-                        onMouseLeave={() => setVolumeBar(false)}
-                      >
-                        <Tooltip title="Mute">
+                        >
+                          {elapsedTime} / {format(duration)}
+                        </div>
+                      )}
+                      {muted ? (
+                        <Tooltip title="Unmute">
                           <FontAwesomeIcon
                             onClick={handleMute}
-                            icon={faVolumeUp}
+                            icon={faVolumeMute}
                             className="bottom-icons"
+                            style={{
+                              marginRight: "10px",
+                              marginLeft: "10px",
+                            }}
                           />
                         </Tooltip>
-
-                        <Slider
-                          defaultValue={50}
-                          min={0}
-                          max={100}
-                          onChange={(value) => setVolume(value / 100)}
+                      ) : (
+                        <div
                           style={{
-                            width: "80px",
-                            visibility: volumeBar ? "visible" : "hidden",
+                            display: "flex",
+                            flexFlow: "row",
+                            marginRight: "10px",
+                            marginLeft: "10px",
+                            marginTop: "-8px",
                           }}
-                        />
-                      </div>
-                    )}
-                  </Row>
-                </Col>
-                <Col span={2}>
-                  {!isLive ? (
-                    <></>
-                  ) : (
-                    <Row>
-                      <Col span={12}>
-                        <Tag color="#cd201f" style={{ marginLeft: "-5px" }}>
-                          LIVE
-                        </Tag>
-                      </Col>
-                    </Row>
-                  )}
-                </Col>
-                <Col span={5}>
-                  <Row>
-                    <Col flex={1}>
-                      <div
-                        style={{
-                          padding: 1,
-                          height: "10px",
-                          background: "transparent",
-                          position: "absolute",
-                          marginRight: "4px",
-                        }}
-                        id="area22"
-                      >
-                        <Dropdown
-                          overlay={settingsMenu}
-                          trigger={["click"]}
-                          overlayStyle={{
-                            position: "relative",
-                            zIndex: 110,
-                          }}
-                          getPopupContainer={() =>
-                            document.getElementById("area22") as HTMLElement
-                          }
+                          onMouseOver={() => setVolumeBar(true)}
+                          onMouseLeave={() => setVolumeBar(false)}
                         >
-                          <FontAwesomeIcon
-                            icon={faCog}
-                            className="bottom-icons"
-                          />
-                        </Dropdown>
-                      </div>
-                    </Col>
+                          <Tooltip title="Mute">
+                            <FontAwesomeIcon
+                              onClick={handleMute}
+                              icon={faVolumeUp}
+                              className="bottom-icons"
+                            />
+                          </Tooltip>
 
-                    <Col flex={1} style={{ marginLeft: "10px" }}>
-                      <Tooltip title="Take Snapshot(s)">
-                        <FontAwesomeIcon
-                          onClick={() => {
-                            handleSnapShot();
-                            console.log(dPosition.lat, dPosition.long);
-                            if (
-                              dPosition.lat !== undefined &&
-                              dPosition.long !== undefined
-                            ) {
+                          <Slider
+                            defaultValue={50}
+                            min={0}
+                            max={100}
+                            onChange={(value) => setVolume(value / 100)}
+                            style={{
+                              width: "80px",
+                              visibility: volumeBar ? "visible" : "hidden",
+                            }}
+                          />
+                        </div>
+                      )}
+                    </Row>
+                  </Col>
+                  <Col span={2}>
+                    {!isLive ? (
+                      <></>
+                    ) : (
+                      <Row>
+                        <Col span={12}>
+                          <Tag color="#cd201f" style={{ marginLeft: "-5px" }}>
+                            LIVE
+                          </Tag>
+                        </Col>
+                      </Row>
+                    )}
+                  </Col>
+                  <Col span={5}>
+                    <Row>
+                      <Col flex={1}>
+                        <div
+                          style={{
+                            padding: 1,
+                            height: "10px",
+                            background: "transparent",
+                            position: "absolute",
+                            marginRight: "4px",
+                          }}
+                          id="area22"
+                        >
+                          <Dropdown
+                            overlay={settingsMenu}
+                            trigger={["click"]}
+                            overlayStyle={{
+                              position: "relative",
+                              zIndex: 110,
+                            }}
+                            getPopupContainer={() =>
+                              document.getElementById("area22") as HTMLElement
+                            }
+                          >
+                            <FontAwesomeIcon
+                              icon={faCog}
+                              className="bottom-icons"
+                            />
+                          </Dropdown>
+                        </div>
+                      </Col>
+
+                      <Col flex={1} style={{ marginLeft: "10px" }}>
+                        <Tooltip title="Take Snapshot(s)">
+                          <FontAwesomeIcon
+                            onClick={() => {
+                              handleSnapShot();
+                              console.log(dPosition.lat, dPosition.long);
                               if (
-                                dPosition.lat !== null &&
-                                dPosition.long !== null
+                                dPosition.lat !== undefined &&
+                                dPosition.long !== undefined
                               ) {
-                                setCaptLat(dPosition.lat);
-                                setCaptLong(dPosition.long);
-                                let address: any = geocoder([
-                                  dPosition.long,
-                                  dPosition.lat,
-                                ]).then((res: any) => setCaptAddress(res));
-                                setIsModalVisible(true);
+                                if (
+                                  dPosition.lat !== null &&
+                                  dPosition.long !== null
+                                ) {
+                                  setCaptLat(dPosition.lat);
+                                  setCaptLong(dPosition.long);
+                                  let address: any = geocoder([
+                                    dPosition.long,
+                                    dPosition.lat,
+                                  ]).then((res: any) => setCaptAddress(res));
+                                  setIsModalVisible(true);
+                                } else {
+                                  console.log(props.mission);
+                                  setCaptLat(dPosition.lat);
+                                  setCaptLong(dPosition.long);
+                                  setCaptAddress(
+                                    props.mission.flightID.geoLocation
+                                  );
+                                  setIsModalVisible(true);
+                                }
                               } else {
                                 console.log(props.mission);
                                 setCaptLat(dPosition.lat);
                                 setCaptLong(dPosition.long);
                                 setCaptAddress(
-                                  props.mission.flightID.geoLocation
+                                  // The same VideoPlayer component is used to play videos in three different files
+                                  // LiveViewBase, Mission/DataViews/Videos and LocationCard/Videos
+                                  // But the structure of data sent in props is different for different components
+                                  props.mission?.flight?.geoLocation
+                                    ? props.mission.flight.geoLocation // for LiveViewBase component
+                                    : props.flightID?.geoLocation
+                                    ? props.flightID.geoLocation // for Mission/DataViews/Videos component
+                                    : "" // not matched with any structure, keep blank
+                                  // NOTE: LocationCard/Videos is currently not sending any geoLocation address anywhere in props
                                 );
                                 setIsModalVisible(true);
                               }
-                            } else {
-                              console.log(props.mission);
-                              setCaptLat(dPosition.lat);
-                              setCaptLong(dPosition.long);
-                              setCaptAddress(
-                                // The same VideoPlayer component is used to play videos in three different files
-                                // LiveViewBase, Mission/DataViews/Videos and LocationCard/Videos
-                                // But the structure of data sent in props is different for different components
-                                props.mission?.flight?.geoLocation
-                                  ? props.mission.flight.geoLocation // for LiveViewBase component
-                                  : props.flightID?.geoLocation
-                                  ? props.flightID.geoLocation // for Mission/DataViews/Videos component
-                                  : "" // not matched with any structure, keep blank
-                                // NOTE: LocationCard/Videos is currently not sending any geoLocation address anywhere in props
-                              );
-                              setIsModalVisible(true);
-                            }
-                          }}
-                          icon={faCamera}
-                          className="bottom-icons"
-                        />
-                      </Tooltip>
-                    </Col>
-                    {isLive || props.showHUD ? (
-                      <Col flex={1}>
-                        <Tooltip title="Switch Viewing Mode">
-                          <SwapOutlined
-                            onClick={handlepip}
+                            }}
+                            icon={faCamera}
                             className="bottom-icons"
                           />
                         </Tooltip>
                       </Col>
-                    ) : (
-                      <></>
-                    )}
-                    {theatreModeStatus == "none" ? (
-                      <></>
-                    ) : (
-                      <Col flex={1}>
-                        <FontAwesomeIcon
-                          onClick={() => {
-                            if (isFullScreen) {
-                              toggleFullScreen();
-                              if (!theater) {
+                      {isLive || props.showHUD ? (
+                        <Col flex={1}>
+                          <Tooltip title="Switch Viewing Mode">
+                            <SwapOutlined
+                              onClick={handlepip}
+                              className="bottom-icons"
+                            />
+                          </Tooltip>
+                        </Col>
+                      ) : (
+                        <></>
+                      )}
+                      {theatreModeStatus == "none" ? (
+                        <></>
+                      ) : (
+                        <Col flex={1}>
+                          <FontAwesomeIcon
+                            onClick={() => {
+                              if (isFullScreen) {
+                                toggleFullScreen();
+                                if (!theater) {
+                                  handleTheater();
+                                }
+                              } else {
                                 handleTheater();
                               }
-                            } else {
-                              handleTheater();
-                            }
-                          }}
-                          icon={faTv}
-                          className="bottom-icons"
-                        />
-                      </Col>
-                    )}
+                            }}
+                            icon={faTv}
+                            className="bottom-icons"
+                          />
+                        </Col>
+                      )}
 
-                    <Col flex={1}>
-                      <Tooltip title="Toggle FullScreen">
-                        <FontAwesomeIcon
-                          onClick={toggleFullScreen}
-                          icon={faExpand}
-                          className="bottom-icons"
-                        />
-                      </Tooltip>
-                    </Col>
-                  </Row>
-                </Col>
-              </Row>
+                      <Col flex={1}>
+                        <Tooltip title="Toggle FullScreen">
+                          <FontAwesomeIcon
+                            onClick={toggleFullScreen}
+                            icon={faExpand}
+                            className="bottom-icons"
+                          />
+                        </Tooltip>
+                      </Col>
+                    </Row>
+                  </Col>
+                </Row>
+              )}
             </Col>
           </Row>
 

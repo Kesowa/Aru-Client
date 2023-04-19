@@ -36,6 +36,7 @@ import {
   LeftOutlined,
   RightOutlined,
   FlagOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
 import "../index.less";
 import apis from "../../../services/apis";
@@ -44,6 +45,7 @@ import moment from "moment";
 import { PUBLIC_URL, STATIC_URL } from "src/constants";
 import VideoPlayer from "src/components/shared/VideoPlayer";
 import { BsFlagFill } from "react-icons/bs";
+import { thread } from "../../../actions/threadAction";
 
 const { TabPane } = Tabs;
 
@@ -385,7 +387,72 @@ function Media(props) {
         setRefresh(true);
       });
   }
-
+  const vodThumbnail = (data: any, idx: any) => {
+    console.log("vodThumbnail", data);
+    let vodDetails = {};
+    if (
+      idx < props.videoToShow.length &&
+      props.videoToShow[idx].videoPath &&
+      props.videoToShow[idx].isSRT
+    ) {
+      vodDetails = {
+        link: props.videoToShow[idx].videoPath,
+        missionDetails: props.videoToShow[idx],
+        isSRT: props.videoToShow[idx].isSRT,
+      };
+    } else {
+      vodDetails = {
+        link: data.videoPath,
+        missionDetails: data,
+        isSRT: data.isSRT,
+      };
+    }
+    console.log("vodThumbnail", vodDetails);
+    return (
+      <Badge
+        style={{
+          backgroundColor: "#f5222d",
+          padding: "5px",
+          borderRadius: "5px",
+          zIndex: 9999,
+        }}
+        offset={[-15, 15]}
+        count={
+          data.isFlagged ? (
+            <BsFlagFill
+              style={{
+                color: "#fff",
+                fontSize: "24px",
+              }}
+            />
+          ) : (
+            0
+          )
+        }
+      >
+        <div
+          style={{
+            height: "150px", //video player
+            width: "100%",
+            margin: "auto",
+            backgroundColor: "black",
+          }}
+        >
+          <VideoPlayer // NEED TO PASS MISSION DETAILS AND LIVE TAG CHECK
+            url={STATIC_URL + vodDetails.link}
+            mission={vodDetails.missionDetails}
+            alertBtnStatus=""
+            theatreModeStatus="none"
+            liveTagStatus="none"
+            liveTelemetry={false}
+            showHUD={false}
+            updateVOD={updateVODAttr}
+            threadThumb={true}
+          />
+        </div>
+      </Badge>
+    );
+  };
   //console.log("data from props:",props.visible, props.layerId, props.featureIndex, props.properties);
   const renderVideo = () => {
     console.log("videoToShow", props.videoToShow);
@@ -434,9 +501,21 @@ function Media(props) {
                           </>
                         )}
                       </Menu.Item>
+                      <Menu.Item
+                        key="3"
+                        onClick={() => {
+                          props.setThumbnail(vodThumbnail(item, idx));
+                          props.thread(true, {
+                            docType: "vod",
+                            docId: item._id,
+                          });
+                        }}
+                      >
+                        <MessageOutlined /> Open Thread{" "}
+                      </Menu.Item>
                       {item.isSRT ? (
                         <Menu.Item
-                          key="3"
+                          key="4"
                           onClick={() => {
                             showFlightPath(item);
                           }}
@@ -1091,4 +1170,4 @@ const mapStateToProps = (state: any) => ({
   Theme: state.Theme,
 });
 
-export default connect(mapStateToProps, { logout })(Media);
+export default connect(mapStateToProps, { logout, thread })(Media);

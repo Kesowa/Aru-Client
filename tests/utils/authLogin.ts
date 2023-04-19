@@ -1,7 +1,8 @@
 import { expect, type Page } from "@playwright/test";
+import { CLIENT_URL } from "tests/constants";
 
 export const loginTenantRoot = async (page: Page) => {
-  await page.goto("http://localhost:3000");
+  await page.goto(CLIENT_URL);
   await expect(page).toHaveURL(/.*login/);
 
   await page
