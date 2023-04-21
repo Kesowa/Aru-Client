@@ -54,13 +54,17 @@ function DataLocation(props) {
           for (const location of result.data.data) {
             const obj: any = new Object();
             obj.name = location.properties.name;
-            if(location.geometry.type == "Point"){
-              obj.geofence = [{lat:location.geometry.coordinates.lat,long:location.geometry.coordinates.lng}]
-            }
-            else{
+            if (location.geometry.type == "Point") {
+              obj.geofence = [
+                {
+                  lat: location.geometry.coordinates.lat,
+                  long: location.geometry.coordinates.lng,
+                },
+              ];
+            } else {
               obj.geofence = location.geometry.coordinates[0].map((coord) => {
                 return { lat: coord[1], long: coord[0] };
-              }); 
+              });
             }
             /* */
             obj.missionCount = location.missionCount;
