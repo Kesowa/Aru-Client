@@ -1,5 +1,6 @@
-import React, { Component } from "react";
+import React, { Component, createRef } from "react";
 import s_m from "../../../../Icons/start_measurement.svg";
+import '../../../Missions/Create/index.less'
 import { connect } from "react-redux";
 import { message } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -58,7 +59,7 @@ class LocationMap extends Component<mapProps, mapState> {
   searchAutoComplete: any = null;
 
   componentDidMount() {
-    const loc = { lat: 43.642567, lng: -79.387054 };
+    let loc = { lat: 43.642567, lng: -79.387054 };
     this.googleMap = this.createGoogleMap(loc);
 
     if (!this.props.isEditing) {
@@ -98,7 +99,7 @@ class LocationMap extends Component<mapProps, mapState> {
 
     if (this.props.isEditing) {
       //console.log(this.props.missionData);
-      const obj = this.createMeasurements(
+      let obj = this.createMeasurements(
         this.props.missionData.flights[0].geoFence
       );
       if (obj) {
@@ -107,7 +108,7 @@ class LocationMap extends Component<mapProps, mapState> {
     }
 
     if (this.props.location.isEditing) {
-      const obj: any = new Object();
+      let obj: any = new Object();
       obj.polygon = {
         points: this.props.location.location.geofence.map((point) => {
           return {
@@ -118,7 +119,7 @@ class LocationMap extends Component<mapProps, mapState> {
         length: this.props.location.location.geofence.length,
       };
 
-      const measurement = this.createMeasurements(obj);
+      let measurement = this.createMeasurements(obj);
 
       if (measurement) {
         this.oldShape = measurement;
@@ -170,8 +171,8 @@ class LocationMap extends Component<mapProps, mapState> {
       console.log(
         window.navigator.geolocation.getCurrentPosition((position) => {
           console.log(position);
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
+          let lat = position.coords.latitude;
+          let lng = position.coords.longitude;
           this.googleMap.panTo({ lat, lng });
         })
       );
@@ -198,7 +199,7 @@ class LocationMap extends Component<mapProps, mapState> {
 
   setSearchBarEvent = () => {
     this.searchAutoComplete.addListener("place_changed", () => {
-      const place = this.searchAutoComplete.getPlace();
+      let place = this.searchAutoComplete.getPlace();
       if (!place.geometry) {
         return;
       } else {
@@ -211,12 +212,12 @@ class LocationMap extends Component<mapProps, mapState> {
   };
 
   findPolygonCenter = (points) => {
-    const bounds = new window.google.maps.LatLngBounds();
+    let bounds = new window.google.maps.LatLngBounds();
 
-    const polygonCoords: google.maps.LatLng[] = [];
+    var polygonCoords: google.maps.LatLng[] = [];
 
-    for (const x of points) {
-      const llbound = new window.google.maps.LatLng(x.lat, x.lng);
+    for (let x of points) {
+      let llbound = new window.google.maps.LatLng(x.lat, x.lng);
       polygonCoords.push(llbound);
     }
     let i;
@@ -224,14 +225,14 @@ class LocationMap extends Component<mapProps, mapState> {
       bounds.extend(polygonCoords[i]);
     }
 
-    const centerOfPolygon = bounds.getCenter();
+    let centerOfPolygon = bounds.getCenter();
 
     return [centerOfPolygon.lat(), centerOfPolygon.lng()];
   };
 
   // Function to execute when drawing is complete
   overlayComplete = () => {
-    const self: any = this;
+    let self: any = this;
     const {
       setAreaSelected,
       areaSelected,
@@ -241,7 +242,7 @@ class LocationMap extends Component<mapProps, mapState> {
 
     this.drawingManager.addListener("overlaycomplete", (e) => {
       setAreaSelected(areaSelected ? areaSelected : !areaSelected);
-      const shape = e.overlay;
+      let shape = e.overlay;
       this.oldShape = shape;
 
       this.drawingManager.setDrawingMode(null);
@@ -253,7 +254,7 @@ class LocationMap extends Component<mapProps, mapState> {
         self.setPolygonChangeEvent(shape);
 
         // Polygon data
-        const pathPoints = shape
+        let pathPoints = shape
           .getPath()
           .getArray()
           .map((data) => {
@@ -263,7 +264,7 @@ class LocationMap extends Component<mapProps, mapState> {
             };
           });
 
-        const center = self.findPolygonCenter(pathPoints);
+        let center = self.findPolygonCenter(pathPoints);
 
         getAddressfromLatLong(center[0], center[1], (err, address) => {
           if (!err) {
@@ -273,11 +274,11 @@ class LocationMap extends Component<mapProps, mapState> {
           }
         });
 
-        const area = window.google.maps.geometry.spherical.computeArea(
+        let area = window.google.maps.geometry.spherical.computeArea(
           shape.getPath()
         );
 
-        const length = window.google.maps.geometry.spherical.computeLength(
+        let length = window.google.maps.geometry.spherical.computeLength(
           shape.getPath()
         );
         // Set Polygon data to State
@@ -306,7 +307,7 @@ class LocationMap extends Component<mapProps, mapState> {
       polygon.getPath(),
       "set_at",
       function (this: any) {
-        const pathPoints = polygon
+        let pathPoints = polygon
           .getPath()
           .getArray()
           .map((data) => {
@@ -316,7 +317,7 @@ class LocationMap extends Component<mapProps, mapState> {
             };
           });
 
-        const center = self.findPolygonCenter(pathPoints);
+        let center = self.findPolygonCenter(pathPoints);
 
         getAddressfromLatLong(center[0], center[1], (err, address) => {
           if (!err) {
@@ -325,11 +326,11 @@ class LocationMap extends Component<mapProps, mapState> {
             message.error("Location could not be fetched");
           }
         });
-        const area = window.google.maps.geometry.spherical.computeArea(
+        let area = window.google.maps.geometry.spherical.computeArea(
           polygon.getPath()
         );
 
-        const length = window.google.maps.geometry.spherical.computeLength(
+        let length = window.google.maps.geometry.spherical.computeLength(
           polygon.getPath()
         );
 
@@ -346,7 +347,7 @@ class LocationMap extends Component<mapProps, mapState> {
       polygon.getPath(),
       "insert_at",
       function (this: any) {
-        const pathPoints = polygon
+        let pathPoints = polygon
           .getPath()
           .getArray()
           .map((data) => {
@@ -356,7 +357,7 @@ class LocationMap extends Component<mapProps, mapState> {
             };
           });
 
-        const center = self.findPolygonCenter(pathPoints);
+        let center = self.findPolygonCenter(pathPoints);
 
         getAddressfromLatLong(center[0], center[1], (err, address) => {
           if (!err) {
@@ -366,11 +367,11 @@ class LocationMap extends Component<mapProps, mapState> {
           }
         });
 
-        const area = window.google.maps.geometry.spherical.computeArea(
+        let area = window.google.maps.geometry.spherical.computeArea(
           polygon.getPath()
         );
 
-        const length = window.google.maps.geometry.spherical.computeLength(
+        let length = window.google.maps.geometry.spherical.computeLength(
           polygon.getPath()
         );
         // Set Polygon data to State
@@ -388,7 +389,7 @@ class LocationMap extends Component<mapProps, mapState> {
     if (geofence.polygon && geofence.polygon.length) {
       const { points } = geofence.polygon;
 
-      const geoPoints = points.map((point) => {
+      let geoPoints = points.map((point) => {
         return {
           lat: point.lat,
           lng: point.lng,
@@ -398,7 +399,7 @@ class LocationMap extends Component<mapProps, mapState> {
       obj = new window.google.maps.Polygon({
         paths: geoPoints,
       });
-      const center = this.findPolygonCenter(geoPoints);
+      let center = this.findPolygonCenter(geoPoints);
       this.googleMap.setCenter({ lat: center[0], lng: center[1] });
       this.setPolygonChangeEvent(obj);
     }
