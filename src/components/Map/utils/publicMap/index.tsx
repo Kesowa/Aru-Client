@@ -78,6 +78,11 @@ import {
   STATIC_URL,
   TITILER_STATIC,
 } from "src/constants";
+import FourOhOne from "src/components/shared/Error/FourOhOne";
+import InternalServerError from "src/components/shared/Error/InternalServerError";
+import ServiceUnvailable from "src/components/shared/Error/ServiceUnavailable";
+import GatewayTimeout from "src/components/shared/Error/GatewayTimeout";
+import FourOFour from "src/components/shared/Error/FourOFour";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -109,6 +114,7 @@ function PublicMap(props) {
   const socket: any = useRef();
   const [showBorder, setShowBorder] = useState(false);
   const [osmState, setOsmState] = useState(false);
+  const [errorState, setErrorState] = useState("");
   const [defaultLocation, setDefaultLocation] = useState({
     lat: 22.571194159512256,
     lng: 88.49175358524279,
@@ -293,7 +299,8 @@ function PublicMap(props) {
   const [vectorProps, setVectorProps] = useState<any>([]);
   const [data, setData] = useState();
   const [editingKey, setEditingKey] = useState("");
-  const [missioName, setMissioName] = useState("");
+  const [tenantName, setTenantName] = useState("");
+  const [mission, setMission] = useState("");
   const [layerType, setLayerType] = useState("");
   const [layerTypeId, setLayerTypeId] = useState("");
   const [captureDate, setCaptureDate] = useState("");
@@ -393,7 +400,7 @@ function PublicMap(props) {
 
   const [scaleVisible, setScaleVisible] = useState(false);
 
-  const { id } = useParams<any>(); // fetch id from url
+  const { id, tenantId, missionId } = useParams<any>(); // fetch id from url
 
   // ----------------------------------------- disable default right click event of browser ----------------------------------------------------------
   useEffect(() => {
@@ -1104,19 +1111,27 @@ function PublicMap(props) {
 
   useEffect(() => {
     props.loading(true);
-    getAllLayers(id);
+    getAllLayers();
   }, []);
 
   //---------------Fetch all layers in mission----------------------------------------
 
-  const getAllLayers = async (id) => {
-    console.log("I am inside getAllLayers", id);
+  const getAllLayers = async () => {
     try {
-      const result: any = await http.get(`${apis.FETCH_PUBLIC_LAYERS}`, {
-        params: {
-          mapRef: id,
-        },
-      });
+      let result: any;
+      if (props.isMissionMap) {
+        result = await http.get(
+          `${apis.GET_PUBLIC_LAYER_BY_MISSION_ID}/${tenantId}/${missionId}`
+        );
+        setMission(result.data.mission);
+      } else {
+        result = await http.get(`${apis.FETCH_PUBLIC_LAYERS}`, {
+          params: {
+            mapRef: id,
+          },
+        });
+      }
+      console.log("I am inside getAllLayers", result);
       if (result.data.status) {
         const selectedLayerObject = result.data.data.find(
           (layer) => layer.name == selectedLayer
@@ -1130,7 +1145,7 @@ function PublicMap(props) {
           setCheckedKeys([key]);
         }
         console.log("Base map result", result.data);
-        setMissioName(result.data.data[0].tenantId.name);
+        setTenantName(result.data.data[0].tenantId.name);
         setTotalLayers(0);
         setlayerz(result.data.data);
         segrigateLayers(result.data.data);
@@ -1139,8 +1154,9 @@ function PublicMap(props) {
       }
     } catch (error) {
       console.log(error);
+      setErrorState(error.response.status);
       props.loading(false);
-      AxiosErrorHandler(err, props.logout);
+      AxiosErrorHandler(error, props.logout);
     } finally {
       props.loading(false);
     }
@@ -1346,7 +1362,7 @@ function PublicMap(props) {
     //console.log(td);
     const data: any = [
       {
-        title: "City Data",
+        title: `${props.isMissionMap ? "Mission" : "City"} Data`,
         key: "1",
         children: [],
       },
@@ -2215,296 +2231,319 @@ function PublicMap(props) {
   }, [searchValue]);
 
   // MAP RENDER
-  return (
-    <div className="map_wrapper">
-      {layerLoading && (
-        <div className="overlay">
-          <Spin size="large" tip="Loading..." style={{ color: "#ffffff" }} />
-        </div>
-      )}
-      <DeckGL
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-        layers={
-          isDrawing
-            ? osmState
-              ? [osm, visibleLayers, drawPolygonTool]
-              : [visibleLayers, drawPolygonTool]
-            : osmState
-            ? [osm, visibleLayers]
-            : [visibleLayers]
-        }
-        style={{ height: "100vh", width: "100%" }}
-        onClick={(info, event) => {
-          setShowDrawingTools(false);
-          if (event.rightButton) {
-            if (!info.layer) {
-              setMode({
-                mode: ViewMode,
-              });
-              setToolSelected("");
-              setShowDrawingTools(false);
-              settoolCoordinates([
-                event.offsetCenter.x,
-                event.offsetCenter.y - 50,
-              ]);
-              setShowDrawingTools(true);
-              drawingMenuRef.current.click();
-            }
-          } else {
+  const renderMap = () => {
+    switch (errorState) {
+      case 401:
+        return <FourOhOne />;
+      case 404:
+        return <FourOFour />;
+      case 500:
+        return <InternalServerError />;
+      case 503:
+        return <ServiceUnvailable />;
+      case 504:
+        return <GatewayTimeout />;
+      default:
+    return (<div className="map_wrapper">
+    {layerLoading && (
+      <div className="overlay">
+        <Spin size="large" tip="Loading..." style={{ color: "#ffffff" }} />
+      </div>
+    )}
+    <DeckGL
+      initialViewState={INITIAL_VIEW_STATE}
+      controller={true}
+      layers={
+        isDrawing
+          ? osmState
+            ? [osm, visibleLayers, drawPolygonTool]
+            : [visibleLayers, drawPolygonTool]
+          : osmState
+          ? [osm, visibleLayers]
+          : [visibleLayers]
+      }
+      style={{ height: "100vh", width: "100%" }}
+      onClick={(info, event) => {
+        setShowDrawingTools(false);
+        if (event.rightButton) {
+          if (!info.layer) {
+            setMode({
+              mode: ViewMode,
+            });
+            setToolSelected("");
             setShowDrawingTools(false);
+            settoolCoordinates([
+              event.offsetCenter.x,
+              event.offsetCenter.y - 50,
+            ]);
+            setShowDrawingTools(true);
+            drawingMenuRef.current.click();
           }
-        }}
-        //getTooltip={({object}) => object && (object.properties.Block_Nm)}
-      >
-        {osmState ? (
-          <>
-            <div style={COPYRIGHT_LICENSE_STYLE}>
-              {"© "}
-              <a
-                style={LINK_STYLE}
-                href="http://www.openstreetmap.org/copyright"
-                target="blank"
-              >
-                OpenStreetMap contributors
-              </a>
-            </div>
-          </>
-        ) : (
-          <StaticMap mapboxApiAccessToken={MAPBOX_API_KEY} mapStyle={mapMode} />
-        )}
-
-        {showPopup && (
-          <HtmlOverlay>
-            <HtmlOverlayItem coordinates={coordinates}>
-              <Popover
-                content={
-                  <>
-                    <InfoWindowContent
-                      mode={infoWindowMode}
-                      coordinates={coordinates}
-                      token={MAPBOX_API_KEY}
-                      feature={featureData}
-                      featureIndex={sysId}
-                      setformDrawerVisible={setformDrawerVisible}
-                      setImagesDrawer={setViewImages}
-                      show={saveButtonShow}
-                      setShowForm={setShowForm}
-                      cancelDrawing={cancelDrawing}
-                      togglePopup={togglePopup}
-                      layerId={featureLayer}
-                      canDraw={null}
-                      isPublic={true}
-                      isBaseMap={props.isBaseMaps}
-                    />
-                  </>
-                }
-                title={
-                  <>
-                    <Title level={5} style={{ float: "left" }}>
-                      {layerName}
-                    </Title>
-                    <a
-                      style={{
-                        float: "right",
-                      }}
-                      onClick={() => handleClose(false)}
-                    >
-                      X
-                    </a>
-                  </>
-                }
-                trigger="click"
-                visible={showPopup}
-                style={{ position: "relative" }}
-                onVisibleChange={() => handleClose(false)}
-              />
-            </HtmlOverlayItem>
-          </HtmlOverlay>
-        )}
-      </DeckGL>
-
-      {/* {showDrawingTools && ( */}
-      {/* <div
-        className='drawing-tools'
-        style={{
-          top: toolCoordinates[1] + "px",
-          left: toolCoordinates[0] + "px",
-        }}
-      >
-        <Dropdown
-          overlay={() => (
-            <Menu>
-              <Menu.Item
-                key='0'
-                onClick={() => startDrawing("DrawLine", "Line")}
-              >
-                Line Tool
-              </Menu.Item>
-              <Menu.Item
-                key='1'
-                onClick={() => startDrawing("DrawPolygon", "Polygon")}
-              >
-                Polygon Tool
-              </Menu.Item>
-              <Menu.Item
-                key='2'
-                onClick={() => startDrawing("DrawPoint", "Marker")}
-              >
-                Marker Tool
-              </Menu.Item>
-            </Menu>
-          )}
-          // ref={drawingMenuRef}
-          placement='bottomCenter'
-          trigger={["click"]}
-        >
-          <Button
-            style={{ visibility: "hidden" }}
-            ref={drawingMenuRef}
-          ></Button>
-        </Dropdown>
-      </div> */}
-      {/* )} */}
-
-      <div className="map-header-toolbar">
-        <Row>
-          <Col md={12} xs={9}>
-            <div className="map-selector">
-              <Select
-                defaultValue="streets"
-                style={{ width: "auto" }}
-                onChange={handleMapMode}
-              >
-                <Option value="streets">Street Maps</Option>
-                <Option value="osm">Open Street Maps</Option>
-                <Option value="satellite">Satellite</Option>
-                <Option value="light">Light mode</Option>
-                <Option value="dark">Dark mode</Option>
-              </Select>
-            </div>
-          </Col>
-          <Col md={12} xs={15}>
-            <Search
-              addonBefore="Premises ID"
-              placeholder="search"
-              allowClear
-              style={{
-                position: "absolute",
-                width: "auto",
-                right: "8px",
-                top: "8px",
-              }}
-              loading={searching}
-              onSearch={(e) => {
-                console.log(e);
-                setSearchValue(e);
-              }}
-            />
-          </Col>
-        </Row>
-      </div>
-      <div
-        className="collapser-button"
-        onClick={() => sideBarHandeller()}
-        style={{ right: sideBarState === false ? "10px" : "354px" }}
-      >
-        <span className="icon">{sideBarIcon}</span>
-      </div>
-      {sideBarState && (
-        <div className="map-sidebar">
-          <div className="header-content">
-            <Row>
-              <Col md={16}>
-                <Space direction="vertical">
-                  <Title level={4} style={{ marginBottom: "0px" }}>
-                    Map
-                  </Title>
-                  <Text type="secondary">{missioName ? missioName : ""}</Text>
-                </Space>
-              </Col>
-              <Col md={8}>
-                <div
-                  style={{
-                    display: "inline-block",
-                    width: "100%",
-                    marginTop: "10px",
-                  }}
-                >
-                  {sortType && (
-                    <div style={{ float: "right" }}>
-                      <SortAscendingOutlined
-                        onClick={() => changeSortArrange(true)}
-                        style={{
-                          color: isAscending ? "#1890ff" : "#000",
-                          fontSize: "1.2rem",
-                          marginTop: "0.5rem",
-                          marginBottom: "0.5rem",
-                          //marginRight: "0.4rem",
-                        }}
-                      />
-                      <SortDescendingOutlined
-                        onClick={() => changeSortArrange(false)}
-                        style={{
-                          color: !isAscending ? "#1890ff" : "#000",
-                          fontSize: "1.2rem",
-                          marginTop: "0.5rem",
-                          marginBottom: "0.5rem",
-                        }}
-                      />
-                    </div>
-                  )}
-                  <Dropdown overlay={menu1} trigger={["click"]}>
-                    <Button style={{ float: "right" }} type="link">
-                      Sort
-                    </Button>
-                  </Dropdown>
-                </div>
-              </Col>
-            </Row>
+        } else {
+          setShowDrawingTools(false);
+        }
+      }}
+      //getTooltip={({object}) => object && (object.properties.Block_Nm)}
+    >
+      {osmState ? (
+        <>
+          <div style={COPYRIGHT_LICENSE_STYLE}>
+            {"© "}
+            <a
+              style={LINK_STYLE}
+              href="http://www.openstreetmap.org/copyright"
+              target="blank"
+            >
+              OpenStreetMap contributors
+            </a>
           </div>
-          <div className="body-content">
-            <Tree
-              virtual={false}
-              //height={250}
-              showIcon
-              checkable
-              onExpand={onExpand}
-              expandedKeys={expandedKeys}
-              autoExpandParent={autoExpandParent}
-              onCheck={onCheck}
-              checkedKeys={checkedKeys}
-              onSelect={onSelect}
-              selectedKeys={selectedKeys}
-              treeData={treeDataa}
-              onDrop={onDrop}
-              draggable={(node: any) => {
-                if (node.key === "1" || node.key === "2") return false;
-                return true;
-              }}
-              blockNode
-            />
-          </div>
-
-          {/* <Button onClick={() => setIsModalVisible4(true)}>new</Button> */}
-        </div>
+        </>
+      ) : (
+        <StaticMap mapboxApiAccessToken={MAPBOX_API_KEY} mapStyle={mapMode} />
       )}
-      <img
-        src={KesowaNewLogo}
-        style={{
-          position: "absolute",
-          bottom: "8px",
-          left: "0",
-          right: "0",
-          width: "80px",
-          height: "auto",
-          margin: "auto",
-          cursor: "pointer",
-        }}
-        alt="Kesowa Infinite Ventures Pvt Ltd"
-      />
+
+      {showPopup && (
+        <HtmlOverlay>
+          <HtmlOverlayItem coordinates={coordinates}>
+            <Popover
+              content={
+                <>
+                  <InfoWindowContent
+                    mode={infoWindowMode}
+                    coordinates={coordinates}
+                    token={MAPBOX_API_KEY}
+                    feature={featureData}
+                    featureIndex={sysId}
+                    setformDrawerVisible={setformDrawerVisible}
+                    setImagesDrawer={setViewImages}
+                    show={saveButtonShow}
+                    setShowForm={setShowForm}
+                    cancelDrawing={cancelDrawing}
+                    togglePopup={togglePopup}
+                    layerId={featureLayer}
+                    canDraw={null}
+                    isPublic={true}
+                    isBaseMap={props.isBaseMaps}
+                  />
+                </>
+              }
+              title={
+                <>
+                  <Title level={5} style={{ float: "left" }}>
+                    {layerName}
+                  </Title>
+                  <a
+                    style={{
+                      float: "right",
+                    }}
+                    onClick={() => handleClose(false)}
+                  >
+                    X
+                  </a>
+                </>
+              }
+              trigger="click"
+              visible={showPopup}
+              style={{ position: "relative" }}
+              onVisibleChange={() => handleClose(false)}
+            />
+          </HtmlOverlayItem>
+        </HtmlOverlay>
+      )}
+    </DeckGL>
+
+    {/* {showDrawingTools && ( */}
+    {/* <div
+      className='drawing-tools'
+      style={{
+        top: toolCoordinates[1] + "px",
+        left: toolCoordinates[0] + "px",
+      }}
+    >
+      <Dropdown
+        overlay={() => (
+          <Menu>
+            <Menu.Item
+              key='0'
+              onClick={() => startDrawing("DrawLine", "Line")}
+            >
+              Line Tool
+            </Menu.Item>
+            <Menu.Item
+              key='1'
+              onClick={() => startDrawing("DrawPolygon", "Polygon")}
+            >
+              Polygon Tool
+            </Menu.Item>
+            <Menu.Item
+              key='2'
+              onClick={() => startDrawing("DrawPoint", "Marker")}
+            >
+              Marker Tool
+            </Menu.Item>
+          </Menu>
+        )}
+        // ref={drawingMenuRef}
+        placement='bottomCenter'
+        trigger={["click"]}
+      >
+        <Button
+          style={{ visibility: "hidden" }}
+          ref={drawingMenuRef}
+        ></Button>
+      </Dropdown>
+    </div> */}
+    {/* )} */}
+
+    <div className="map-header-toolbar">
+      <Row>
+        <Col md={12} xs={9}>
+          <div className="map-selector">
+            <Select
+              defaultValue="streets"
+              style={{ width: "auto" }}
+              onChange={handleMapMode}
+            >
+              <Option value="streets">Street Maps</Option>
+              <Option value="osm">Open Street Maps</Option>
+              <Option value="satellite">Satellite</Option>
+              <Option value="light">Light mode</Option>
+              <Option value="dark">Dark mode</Option>
+            </Select>
+          </div>
+        </Col>
+        <Col md={12} xs={15}>
+          <Search
+            addonBefore="Premises ID"
+            placeholder="search"
+            allowClear
+            style={{
+              position: "absolute",
+              width: "auto",
+              right: "8px",
+              top: "8px",
+            }}
+            loading={searching}
+            onSearch={(e) => {
+              console.log(e);
+              setSearchValue(e);
+            }}
+          />
+        </Col>
+      </Row>
     </div>
-  );
+    <div
+      className="collapser-button"
+      onClick={() => sideBarHandeller()}
+      style={{ right: sideBarState === false ? "10px" : "354px" }}
+    >
+      <span className="icon">{sideBarIcon}</span>
+    </div>
+    {sideBarState && (
+      <div className="map-sidebar">
+        <div className="header-content">
+          <Row>
+            <Col md={20}>
+              <Space direction="vertical">
+                <Title level={4} style={{ marginBottom: "0px" }}>
+                  Map
+                </Title>
+                <Text type="secondary">{tenantName ? tenantName : ""}</Text>
+                {props.isMissionMap && (<div style={{border: '1px black solid', padding: '2px 4px', borderRadius: '5px', display:'flex', flexDirection: 'column'}}>
+                <Title level={5} style={{ marginBottom: "0px", textDecoration: 'underline' }}>Mission</Title>
+                <Text type="primary">Name: <Text type="secondary">{mission&&mission.name?mission.name:""}</Text></Text>
+                <Text type="primary">ID: <Text type="secondary" copyable>{mission&&mission._id?mission._id:""}</Text></Text></div>)}
+              </Space>
+            </Col>
+            <Col md={4}>
+              <div
+                style={{
+                  display: "inline-block",
+                  width: "100%",
+                  marginTop: "10px",
+                }}
+              >
+                {sortType && (
+                  <div style={{ float: "right" }}>
+                    <SortAscendingOutlined
+                      onClick={() => changeSortArrange(true)}
+                      style={{
+                        color: isAscending ? "#1890ff" : "#000",
+                        fontSize: "1.2rem",
+                        marginTop: "0.5rem",
+                        marginBottom: "0.5rem",
+                        //marginRight: "0.4rem",
+                      }}
+                    />
+                    <SortDescendingOutlined
+                      onClick={() => changeSortArrange(false)}
+                      style={{
+                        color: !isAscending ? "#1890ff" : "#000",
+                        fontSize: "1.2rem",
+                        marginTop: "0.5rem",
+                        marginBottom: "0.5rem",
+                      }}
+                    />
+                  </div>
+                )}
+                <Dropdown overlay={menu1} trigger={["click"]}>
+                  <Button style={{ float: "right" }} type="link">
+                    Sort
+                  </Button>
+                </Dropdown>
+              </div>
+            </Col>
+          </Row>
+        </div>
+        <div className="body-content">
+          <Tree
+            virtual={false}
+            //height={250}
+            showIcon
+            checkable
+            onExpand={onExpand}
+            expandedKeys={expandedKeys}
+            autoExpandParent={autoExpandParent}
+            onCheck={onCheck}
+            checkedKeys={checkedKeys}
+            onSelect={onSelect}
+            selectedKeys={selectedKeys}
+            treeData={treeDataa}
+            onDrop={onDrop}
+            draggable={(node: any) => {
+              if (node.key === "1" || node.key === "2") return false;
+              return true;
+            }}
+            blockNode
+          />
+        </div>
+
+        {/* <Button onClick={() => setIsModalVisible4(true)}>new</Button> */}
+      </div>
+    )}
+    <img
+      src={KesowaNewLogo}
+      style={{
+        position: "absolute",
+        bottom: "8px",
+        left: "0",
+        right: "0",
+        width: "80px",
+        height: "auto",
+        margin: "auto",
+        cursor: "pointer",
+      }}
+      alt="Kesowa Infinite Ventures Pvt Ltd"
+    />
+  </div>)
+  }
+}
+return (
+  <>
+  {renderMap()}
+  </>
+);
+  
 }
 
 const mapStateToProps = (state) => {
