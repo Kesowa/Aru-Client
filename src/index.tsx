@@ -7,8 +7,8 @@ import store from "./store";
 import { ENV, Mode } from "./constants";
 import App from "./App";
 if (ENV == Mode.Prod) {
-  console.log = () => { };
-  console.error = () => { };
+  console.log = () => {};
+  console.error = () => {};
 }
 
 ReactDOM.render(
