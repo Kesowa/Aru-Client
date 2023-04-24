@@ -1472,10 +1472,18 @@ function MissionView(props) {
                   <p style={{ marginTop: "8px" }}>
                     {MissionDeliverables(MissionDetails.deliverables)}
                   </p>
-                  {MissionDetails.isPublic && (<>
-                  <Text type="secondary" style={{ marginTop: "8px" }}>Public Map URL:  <a><Paragraph copyable>{`${PUBLIC_URL}/map/${MissionDetails.missionTenantId}/${MissionDetails.missionId}`}</Paragraph></a></Text>
-                  <p></p>
-                  </>
+                  {MissionDetails.isPublic && (
+                    <>
+                      <Text type="secondary" style={{ marginTop: "8px" }}>
+                        Public Map URL:{" "}
+                        <a>
+                          <Paragraph
+                            copyable
+                          >{`${PUBLIC_URL}/map/${MissionDetails.missionTenantId}/${MissionDetails.missionId}`}</Paragraph>
+                        </a>
+                      </Text>
+                      <p></p>
+                    </>
                   )}
                 </Card>
               </Row>
@@ -1660,11 +1668,15 @@ function MissionView(props) {
                 />
               </Form.Item>
               <Form.Item label="Public" name="isPublic">
-              <Checkbox checked={missionEditFormData.isPublic} onChange={(e) => {
+                <Checkbox
+                  checked={missionEditFormData.isPublic}
+                  onChange={(e) => {
                     setMissionEditFormData({
                       ...missionEditFormData,
                       isPublic: e.target.checked,
-                    });}}/>
+                    });
+                  }}
+                />
               </Form.Item>
               <Form.Item label="Mission Type:" name="missionname">
                 <Dropdown overlay={menu} placement="bottomLeft">
