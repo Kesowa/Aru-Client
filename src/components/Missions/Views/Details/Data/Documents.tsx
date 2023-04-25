@@ -39,6 +39,7 @@ import download from "downloadjs";
 import { API_URL, STATIC_URL } from "src/constants";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
+import axios from "axios";
 
 function Documents(props) {
   const [defaultFileList, setDefaultFileList] = useState([]);
@@ -434,6 +435,8 @@ function Documents(props) {
     multiple: true,
     action: `${API_URL}${apis.UPLOAD_DOCUMENT}`,
     customRequest: (options: any) => {
+      const cancelToken = axios.CancelToken;
+      const source = cancelToken.source();
       if (validateFile(options.file)) {
         const fData = new FormData();
         //console.log("file in question: ", options.file)
@@ -469,6 +472,7 @@ function Documents(props) {
             }
             options.onProgress({ percent: (event.loaded / event.total) * 100 });
           },
+          cancelToken: source.token,
         };
 
         switch (
@@ -485,7 +489,10 @@ function Documents(props) {
                 );
               })
               .catch((err) => {
-                if (err.response?.status === 403) {
+                if (axios.isCancel(err)) {
+                  console.log("Upload Cancelled");
+                  return;
+                } else if (err.response?.status === 403) {
                   if (
                     err.response?.data.message ===
                     "Actual storage exceeded the Limit of Set storage!"
@@ -516,7 +523,10 @@ function Documents(props) {
                 );
               })
               .catch((err) => {
-                if (err.response?.status === 403) {
+                if (axios.isCancel(err)) {
+                  console.log("Upload Cancelled");
+                  return;
+                } else if (err.response?.status === 403) {
                   if (
                     err.response?.data.message ===
                     "Actual storage exceeded the Limit of Set storage!"
@@ -541,6 +551,12 @@ function Documents(props) {
       } else {
         options.onError("File not Supported!");
       }
+      return {
+        abort() {
+          console.log("Aborting file upload");
+          source.cancel("User cancelled file upload");
+        },
+      };
     },
   };
 
