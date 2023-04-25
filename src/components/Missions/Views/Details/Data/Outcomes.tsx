@@ -49,6 +49,7 @@ import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
+import axios from "axios";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -641,6 +642,8 @@ function Outcomes(props) {
     action: `${API_URL}${apis.UPLOAD_ALERT}`,
     customRequest: (options: any) => {
       setUploading(true);
+      const cancelToken = axios.CancelToken;
+      const source = cancelToken.source();
       const fData = new FormData();
       const proceed = extractExif(options.file).then((res: any) => {
         if (res.status) {
@@ -668,6 +671,7 @@ function Outcomes(props) {
                 percent: (event.loaded / event.total) * 100,
               });
             },
+            cancelToken: source.token,
           };
           http
             .post(options.action, fData, config)
@@ -686,7 +690,10 @@ function Outcomes(props) {
               }
             })
             .catch((err) => {
-              if (err?.response?.status === 403) {
+              if (axios.isCancel(err)) {
+                console.log("Upload Cancelled");
+                return;
+              } else if (err?.response?.status === 403) {
                 console.log(err.response);
                 if (
                   err.response.data.message ===
@@ -742,6 +749,7 @@ function Outcomes(props) {
                 percent: (event.loaded / event.total) * 100,
               });
             },
+            cancelToken: source.token,
           };
           http
             .post(options.action, fData, config)
@@ -760,7 +768,10 @@ function Outcomes(props) {
               }
             })
             .catch((err) => {
-              if (err?.response?.status === 403) {
+              if (axios.isCancel(err)) {
+                console.log("Upload Cancelled");
+                return;
+              } else if (err?.response?.status === 403) {
                 console.log(err.response);
                 if (
                   err.response.data.message ===
@@ -793,6 +804,13 @@ function Outcomes(props) {
             });
         }
       });
+      return {
+        abort() {
+          console.log("Aborting outcome upload");
+          source.cancel("User cancelled upload");
+          setUploading(false);
+        },
+      };
     },
   };
 
