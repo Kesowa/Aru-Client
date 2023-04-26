@@ -75,6 +75,7 @@ import { useHistory, useParams } from "react-router-dom";
 import {
   COG_URL,
   MAPBOX_API_KEY,
+  PUBLIC_URL,
   STATIC_URL,
   TITILER_STATIC,
 } from "src/constants";
@@ -888,7 +889,7 @@ function PublicMap(props) {
                 // iconAtlas: TankIcon,
                 //iconMapping: ICON_MAPPING,
                 getIcon: (d) => ({
-                  url: `${STATIC_URL}/icons/${d.properties.icon}.png`,
+                  url: `${PUBLIC_URL}/icons/${d.properties.icon}.png`,
                   width: 100,
                   height: 129,
                   anchorY: 125,
