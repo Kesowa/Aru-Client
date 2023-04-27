@@ -269,8 +269,8 @@ const CreateBaseLayer = (props) => {
   }, [selectedMissions]);
 
   // FILETYPES TO VALIDATE
-  const fileTypesUpdateVector = ["geojson"];
-  const fileTypeUpdateRaster = ["tif"];
+  const fileTypesUpdateVector = ["geojson", "kml", "shp", "zip"];
+  const fileTypeUpdateRaster = ["tif", "dem"];
 
   // FOR UPDATING/CREATING BASE LAYER VIA UPLOAD - BOTH RASTER AND VECTOR
   const createUpdateBaseLayerUpload = async () => {

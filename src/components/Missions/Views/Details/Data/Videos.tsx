@@ -54,6 +54,7 @@ import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
+import axios from "axios";
 declare let require: any;
 
 //import { Replay } from "vimond-replay";
@@ -286,6 +287,8 @@ function Videos(props) {
     multiple: true,
     action: `${apis.UPLOAD_VOD}`,
     customRequest: (options: any) => {
+      const cancelToken = axios.CancelToken;
+      const source = cancelToken.source();
       console.log("here");
       // console.log(props.missionDetails.locationId);
       setUploading(true);
@@ -309,6 +312,7 @@ function Videos(props) {
           }
           options.onProgress({ percent: (event.loaded / event.total) * 100 });
         },
+        cancelToken: source.token,
       };
 
       switch (
@@ -332,7 +336,10 @@ function Videos(props) {
                 props.setCount(props.totalVOD + 1);
               })
               .catch((err) => {
-                if (err.response.status === 403) {
+                if (axios.isCancel(err)) {
+                  console.log("Upload Cancelled");
+                  return;
+                } else if (err.response.status === 403) {
                   if (
                     err.response.data.message ===
                     "Package has expired! Please renew!"
@@ -386,7 +393,10 @@ function Videos(props) {
                 props.setCount(props.totalVOD + 1);
               })
               .catch((err) => {
-                if (err.response.status === 403) {
+                if (axios.isCancel(err)) {
+                  console.log("Upload Cancelled");
+                  return;
+                } else if (err.response.status === 403) {
                   if (
                     err.response.data.message ===
                     "Package has expired! Please renew!"
@@ -422,6 +432,13 @@ function Videos(props) {
         default:
           message.warning("You are not permitted to perform this action!");
       }
+      return {
+        abort() {
+          console.log("Aborting video upload");
+          source.cancel("User cancelled upload");
+          setUploading(false);
+        },
+      };
     },
   };
 

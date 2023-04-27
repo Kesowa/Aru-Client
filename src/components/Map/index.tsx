@@ -4530,7 +4530,7 @@ function BaseMap(props) {
 
   // ++++++++++++++++++++++++++++++++++++++ Create Layer ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  const fileTypes = ["geojson", "tif", "kml"];
+  const fileTypes = ["geojson", "tif", "kml", "shp", "zip"];
 
   const createLayer = async () => {
     if (!fileList.length) {

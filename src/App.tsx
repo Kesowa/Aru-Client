@@ -9,12 +9,10 @@ import Login from "./components/Login";
 import LoginWrapper from "./components/shared/Wrappers/LoginWrapper";
 import Gmap from "./components/shared/Gmap";
 import Socket from "./components/shared/Socket";
+import DashboardWrapper from "./components/shared/Wrappers/DashboardWrapper";
 
 const ForgotPassword = lazy(() => import("./components/Login/ForgotPassword"));
 const Register = lazy(() => import("./components/SignUp"));
-const DashboardWrapper = lazy(
-  () => import("./components/shared/Wrappers/DashboardWrapper")
-);
 const PrivateRoute = lazy(
   () => import("./components/shared/Wrappers/PrivateWrapper")
 );
