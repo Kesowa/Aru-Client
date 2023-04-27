@@ -30,4 +30,4 @@ export type ILayer = {
   isFlagged: boolean;
   createdAt: ISODate; // index
   updatedAt: ISODate;
-}
+};
