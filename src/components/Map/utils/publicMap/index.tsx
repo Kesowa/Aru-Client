@@ -84,6 +84,9 @@ import InternalServerError from "src/components/shared/Error/InternalServerError
 import ServiceUnvailable from "src/components/shared/Error/ServiceUnavailable";
 import GatewayTimeout from "src/components/shared/Error/GatewayTimeout";
 import FourOFour from "src/components/shared/Error/FourOFour";
+import { AxiosResponse } from "axios";
+import {IMission} from "src/types/mission";
+import {ILayer} from "src/types/layer";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -301,7 +304,7 @@ function PublicMap(props) {
   const [data, setData] = useState();
   const [editingKey, setEditingKey] = useState("");
   const [tenantName, setTenantName] = useState("");
-  const [mission, setMission] = useState("");
+  const [mission, setMission] = useState<IMission>("");
   const [layerType, setLayerType] = useState("");
   const [layerTypeId, setLayerTypeId] = useState("");
   const [captureDate, setCaptureDate] = useState("");
@@ -317,7 +320,7 @@ function PublicMap(props) {
   const [viewImages, setViewImages] = useState(false);
   const [selectedLayerInfo, setSelectedLayerInfo] = useState({});
   const [viewDocs, setViewDocs] = useState(false);
-  const [vectorLayers, setvectorLayers] = useState<any>([]);
+  const [vectorLayers, setvectorLayers] = useState<(ILayer & {type: "Vector"})[]>([]);
   const [saveButtonShow, setSaveButtonShow] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [toolSelected, setToolSelected] = useState("");
@@ -345,7 +348,7 @@ function PublicMap(props) {
   const [picToMapData, setPicToMapData] = useState([]);
   const [pic2Mapv2Status, setPic2Mapv2Status] = useState(false);
   const [pic2Mapv2Data, setPic2Mapv2Data] = useState<any>({});
-  const [layerz, setlayerz] = useState<any>([]);
+  const [layerz, setlayerz] = useState<ILayer[]>([]);
   const [activeGroupButton, setActiveGroupButton] = useState(true);
   const [isLayerDocs, setIsLayerDocs] = useState(false);
   const [isUpdate, setUpdate] = useState(false);
@@ -442,7 +445,7 @@ function PublicMap(props) {
   }, [sortType, isAscending]);
 
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
-  const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
+  const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
   const [colorMap, SetColorMap] = useState("plasma");
@@ -1119,7 +1122,12 @@ function PublicMap(props) {
 
   const getAllLayers = async () => {
     try {
-      let result: any;
+      let result: AxiosResponse<{
+        status: boolean,
+        message: string,
+        mission: IMission,
+        data: ILayer[]
+      }>;
       if (props.isMissionMap) {
         result = await http.get(
           `${apis.GET_PUBLIC_LAYER_BY_MISSION_ID}/${tenantId}/${missionId}`
@@ -1134,7 +1142,7 @@ function PublicMap(props) {
       }
       console.log("I am inside getAllLayers", result);
       if (result.data.status) {
-        const selectedLayerObject = result.data.data.find(
+        const selectedLayerObject: ILayer = result.data.data.find(
           (layer) => layer.name == selectedLayer
         );
         if (selectedLayerObject) {
@@ -1346,7 +1354,15 @@ function PublicMap(props) {
     },
   ];
 
-  const [treeDataa, setTreeDataa] = useState<any>(treeData);
+  const [treeDataa, setTreeDataa] = useState<(
+    {
+      title: "Vector", key: "1", children: (ILayer & {type: "Vector"})[]
+    } 
+    | 
+    {
+      title: "Raster", key: "2", children: (ILayer & {type: "Raster"})[]
+    }
+  )>(treeData);
   const [treeStructure, setTreeStructure] = useState(treeData);
   const [allLayerGroups, setAllLayerGroups] = useState({});
   //----------------------Segrigate layers-------------------------------------------------------
@@ -1407,10 +1423,11 @@ function PublicMap(props) {
     setTreeDataa(data);
   };
 
-  const segrigateLayers = (layers) => {
+  const segrigateLayers = (layers: ILayer[]) => {
     //console.log("segrate layer");
-    let data: any = [...treeDataa];
-    let allLayers: any = {};
+    let data = [...treeDataa];
+    console.log("TREE DATA COPY", data);
+    let allLayers = {};
     if (
       sortType ||
       timeEnabled ||
@@ -1424,6 +1441,7 @@ function PublicMap(props) {
           key: "1",
           children: [],
         },
+        data[1]
       ];
     }
     if (!sortType) {
@@ -1436,7 +1454,6 @@ function PublicMap(props) {
     const vectors = layers.filter((layer) => layer.type === "Vector");
 
     setvectorLayers(vectors);
-
     const rasterGroups = {};
     const allGroups = {};
 
