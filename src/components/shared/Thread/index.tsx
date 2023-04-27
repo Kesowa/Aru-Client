@@ -271,6 +271,9 @@ const Thread = (props) => {
         onClose={onClose}
         open={props.open}
         zIndex={9999}
+        bodyStyle={{
+          overflow: "hidden",
+        }}
       >
         <Row
           style={{
@@ -281,51 +284,52 @@ const Thread = (props) => {
         >
           {props.thumbnail}
         </Row>
-
-        {comments.map((comment, idx) => {
-          return (
-            <>
-              {action === "edit" && commentId === comment._id ? (
-                <Comment
-                  avatar={
-                    <Avatar
-                      icon={<UserOutlined />}
-                      src={`${STATIC_URL}${props.userDetails.avatar}`}
-                      alt={props.userDetails.name}
-                    />
-                  }
-                  content={
-                    <Editor
-                      onChange={editHandleChange}
-                      onSubmit={editHandleSubmit}
-                      submitting={editSubmitting}
-                      value={editCommentValue}
-                      type="Edit"
-                      action={action}
-                      setAction={setAction}
-                    />
-                  }
-                />
-              ) : (
-                <Comment
-                  actions={
-                    props.userDetails.name === comment.authorName &&
-                    getActions(comment, idx)
-                  }
-                  author={<a>{comment.authorName}</a>}
-                  avatar={
-                    <Avatar
-                      icon={<UserOutlined />}
-                      src={`${STATIC_URL}/${comment.avatar}`}
-                      alt={comment.authorName}
-                    />
-                  }
-                  content={<p>{`${comment.content}`}</p>}
-                />
-              )}
-            </>
-          );
-        })}
+        <div className="comments-section">
+          {comments.map((comment, idx) => {
+            return (
+              <>
+                {action === "edit" && commentId === comment._id ? (
+                  <Comment
+                    avatar={
+                      <Avatar
+                        icon={<UserOutlined />}
+                        src={`${STATIC_URL}${props.userDetails.avatar}`}
+                        alt={props.userDetails.name}
+                      />
+                    }
+                    content={
+                      <Editor
+                        onChange={editHandleChange}
+                        onSubmit={editHandleSubmit}
+                        submitting={editSubmitting}
+                        value={editCommentValue}
+                        type="Edit"
+                        action={action}
+                        setAction={setAction}
+                      />
+                    }
+                  />
+                ) : (
+                  <Comment
+                    actions={
+                      props.userDetails.name === comment.authorName &&
+                      getActions(comment, idx)
+                    }
+                    author={<a>{comment.authorName}</a>}
+                    avatar={
+                      <Avatar
+                        icon={<UserOutlined />}
+                        src={`${STATIC_URL}/${comment.avatar}`}
+                        alt={comment.authorName}
+                      />
+                    }
+                    content={<p>{`${comment.content}`}</p>}
+                  />
+                )}
+              </>
+            );
+          })}
+        </div>
         <Comment
           avatar={
             <Avatar
