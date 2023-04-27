@@ -17,4 +17,4 @@ export type IMission = {
   updatedAt: ISODate;
   size: number;
   isPublic: boolean;
-}
+};
