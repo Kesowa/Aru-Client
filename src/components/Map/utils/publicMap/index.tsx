@@ -85,8 +85,8 @@ import ServiceUnvailable from "src/components/shared/Error/ServiceUnavailable";
 import GatewayTimeout from "src/components/shared/Error/GatewayTimeout";
 import FourOFour from "src/components/shared/Error/FourOFour";
 import { AxiosResponse } from "axios";
-import {IMission} from "src/types/mission";
-import {ILayer} from "src/types/layer";
+import { IMission } from "src/types/mission";
+import { ILayer } from "src/types/layer";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -320,7 +320,9 @@ function PublicMap(props) {
   const [viewImages, setViewImages] = useState(false);
   const [selectedLayerInfo, setSelectedLayerInfo] = useState({});
   const [viewDocs, setViewDocs] = useState(false);
-  const [vectorLayers, setvectorLayers] = useState<(ILayer & {type: "Vector"})[]>([]);
+  const [vectorLayers, setvectorLayers] = useState<
+    (ILayer & { type: "Vector" })[]
+  >([]);
   const [saveButtonShow, setSaveButtonShow] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [toolSelected, setToolSelected] = useState("");
@@ -1123,10 +1125,10 @@ function PublicMap(props) {
   const getAllLayers = async () => {
     try {
       let result: AxiosResponse<{
-        status: boolean,
-        message: string,
-        mission: IMission,
-        data: ILayer[]
+        status: boolean;
+        message: string;
+        mission: IMission;
+        data: ILayer[];
       }>;
       if (props.isMissionMap) {
         result = await http.get(
@@ -1354,15 +1356,18 @@ function PublicMap(props) {
     },
   ];
 
-  const [treeDataa, setTreeDataa] = useState<(
-    {
-      title: "Vector", key: "1", children: (ILayer & {type: "Vector"})[]
-    } 
-    | 
-    {
-      title: "Raster", key: "2", children: (ILayer & {type: "Raster"})[]
-    }
-  )>(treeData);
+  const [treeDataa, setTreeDataa] = useState<
+    | {
+        title: "Vector";
+        key: "1";
+        children: (ILayer & { type: "Vector" })[];
+      }
+    | {
+        title: "Raster";
+        key: "2";
+        children: (ILayer & { type: "Raster" })[];
+      }
+  >(treeData);
   const [treeStructure, setTreeStructure] = useState(treeData);
   const [allLayerGroups, setAllLayerGroups] = useState({});
   //----------------------Segrigate layers-------------------------------------------------------
@@ -1441,7 +1446,7 @@ function PublicMap(props) {
           key: "1",
           children: [],
         },
-        data[1]
+        data[1],
       ];
     }
     if (!sortType) {
