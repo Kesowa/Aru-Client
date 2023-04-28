@@ -68,6 +68,10 @@ import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";
 import moment from "moment";
 import { useHistory, useParams } from "react-router-dom";
+import MarkerIcon from "../../../../static/MarkerIcon.png";
+import TankIcon from "../../../../static/TankIcon.png";
+import ValveIcon from "../../../../static/ValveIcon.png";
+import DotIcon from "../../../../static/DotIcon.png";
 //import Images from "./Images";
 //import LayerDocs from "./layerDocs";
 //import CreateLayer from "./createLayer";
@@ -584,6 +588,7 @@ function PublicMap(props) {
 
   //geojson to json
   async function parseGeoJson(file: any) {
+    console.log(file)
     const GeoJson: any = await fetch(file);
     const data = await GeoJson.json();
     const features = data.features;
@@ -741,7 +746,7 @@ function PublicMap(props) {
           );
         }
       } else if (element.split("-")[0] === "1" && element !== "1") {
-        console.log("vector");
+        console.log("vector",allLayers[element]);
         switch (allLayers[element]?.type) {
           case "MultiLineString":
             vlayers.push(
@@ -893,13 +898,33 @@ function PublicMap(props) {
                 pickable: true,
                 // iconAtlas: TankIcon,
                 //iconMapping: ICON_MAPPING,
-                getIcon: (d) => ({
-                  url: `${PUBLIC_URL}/icons/${d.properties.icon}.png`,
-                  width: 100,
-                  height: 129,
-                  anchorY: 125,
-                  mask: true,
-                }),
+                getIcon: (d) => {
+                  const iconSelector = (iconType) => {
+                    let icon = "";
+                    switch (iconType) {
+                      case "MarkerIcon":
+                        icon = MarkerIcon;
+                        break;
+                      case "TankIcon":
+                        icon = TankIcon;
+                        break;
+                      case "DotIcon":
+                        icon = DotIcon;
+                        break;
+                      case "ValveIcon":
+                        icon = ValveIcon;
+                        break;
+                    }
+                    return icon;
+                  };
+                  return {
+                    url: `${iconSelector(d.properties.icon)}`,
+                    width: 100,
+                    height: 129,
+                    anchorY: 125,
+                    mask: true,
+                  };
+                },
                 onDataLoad: () => {
                   setLayerLoading(false);
                 },
@@ -1582,7 +1607,7 @@ function PublicMap(props) {
         groupType: 2,
       });
     }
-
+    
     setAllLayerGroups(allGroups);
     setAllLayers(allLayers);
     setTreeStructure(data);
@@ -1797,7 +1822,6 @@ function PublicMap(props) {
       while (data[1].children.length && data[1].children[0].group) {
         data[1].children.push(data[1].children.shift());
       }
-
       setAllLayers(layers);
       setTreeStructure(data);
 
