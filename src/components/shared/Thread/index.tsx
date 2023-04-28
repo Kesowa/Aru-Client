@@ -28,9 +28,9 @@ import { thread } from "../../../actions/threadAction";
 import { connect } from "react-redux";
 import "./index.less";
 const { TextArea } = Input;
-message.config({
-  getContainer: () => document.getElementById("thread")!,
-});
+// message.config({
+//   getContainer: () => document.getElementById("thread")!,
+// });
 const CREATE_THREAD = async (docType: any, docID: any) => {
   return await http.post(`${apis.THREAD}/${docType}/${docID}`);
 };
