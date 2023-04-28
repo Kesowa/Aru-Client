@@ -79,7 +79,6 @@ import DotIcon from "../../../../static/DotIcon.png";
 import {
   COG_URL,
   MAPBOX_API_KEY,
-  PUBLIC_URL,
   STATIC_URL,
   TITILER_STATIC,
 } from "src/constants";
@@ -588,7 +587,7 @@ function PublicMap(props) {
 
   //geojson to json
   async function parseGeoJson(file: any) {
-    console.log(file)
+    console.log(file);
     const GeoJson: any = await fetch(file);
     const data = await GeoJson.json();
     const features = data.features;
@@ -746,7 +745,7 @@ function PublicMap(props) {
           );
         }
       } else if (element.split("-")[0] === "1" && element !== "1") {
-        console.log("vector",allLayers[element]);
+        console.log("vector", allLayers[element]);
         switch (allLayers[element]?.type) {
           case "MultiLineString":
             vlayers.push(
@@ -1607,7 +1606,7 @@ function PublicMap(props) {
         groupType: 2,
       });
     }
-    
+
     setAllLayerGroups(allGroups);
     setAllLayers(allLayers);
     setTreeStructure(data);
