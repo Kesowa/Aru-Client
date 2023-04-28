@@ -26,6 +26,7 @@ import {
 import { logout } from "../../../actions/authAction";
 import { thread } from "../../../actions/threadAction";
 import { connect } from "react-redux";
+import moment from "moment-timezone";
 import "./index.less";
 const { TextArea } = Input;
 message.config({
@@ -316,6 +317,15 @@ const Thread = (props) => {
                       getActions(comment, idx)
                     }
                     author={<a>{comment.authorName}</a>}
+                    datetime={
+                      <span style={{ display: "flex" }}>
+                        {moment(comment.updatedAt).format("DD/MM/YYYY")}
+                        {Date.parse(comment.updatedAt) >
+                          Date.parse(comment.createdAt) && (
+                          <p>&nbsp;&nbsp;[ edited ]</p>
+                        )}
+                      </span>
+                    }
                     avatar={
                       <Avatar
                         icon={<UserOutlined />}
