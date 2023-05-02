@@ -28,6 +28,5 @@ export interface FlightPath {
       SPEED_THREED: number;
       DISTANCE: number;
     };
-  }[]
-  ;
+  }[];
 }
