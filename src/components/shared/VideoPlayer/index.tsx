@@ -666,13 +666,13 @@ function VideoPlayer(props: any) {
       fetchJSON((props.url as string).replace(/.\w+$/, ".geojson"))
         .then((d) => {
           let data = d as FlightPath;
-          data.features.pop(); // Remove linestring at the very end
+          const lineString = data.features.pop(); // Remove linestring at the very end
           //console.log("the obejct", pathObject)
           let flightTelemetry = data.features;
-          let points: [number, number, number][] = [];
-          data.features.map((feat) => {
-            points.push(feat.geometry.coordinates);
-          });
+          // let points: [number, number, number][] = [];
+          // data.features.map((feat) => {
+          //   points.push(feat.geometry.coordinates);
+          // });
 
           //console.log("filtered pints", points);
           let flightpath = {
@@ -684,14 +684,7 @@ function VideoPlayer(props: any) {
               },
             },
             features: [
-              {
-                type: "Feature",
-                properties: {},
-                geometry: {
-                  type: "LineString",
-                  coordinates: points,
-                },
-              },
+              lineString
             ],
           };
           // //flightpath.push(flightTelemetry.at(-1));
@@ -708,7 +701,7 @@ function VideoPlayer(props: any) {
           ];
 
           setBounds(reGetBounds);
-          setMapCenter(turf.centroid(flightpath.features[0].geometry));
+          setMapCenter(turf.centroid(lineString!.geometry));
         })
         .catch((err) => {
           console.log("could not fetch geojson", err);
