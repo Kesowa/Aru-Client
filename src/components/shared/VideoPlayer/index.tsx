@@ -683,9 +683,7 @@ function VideoPlayer(props: any) {
                 name: "urn:ogc:def:crs:OGC:1.3:CRS84",
               },
             },
-            features: [
-              lineString
-            ],
+            features: [lineString],
           };
           // //flightpath.push(flightTelemetry.at(-1));
           // console.log("FLight features", flightTelemetry, "FLightpath", flightpath.features[0]);
