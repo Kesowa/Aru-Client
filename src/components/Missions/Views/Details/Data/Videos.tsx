@@ -275,6 +275,11 @@ function Videos(props) {
       return false;
     }
   }
+  useEffect(() => {
+    if (!props.Thread.open) {
+      setRefresh(true);
+    }
+  }, [props.Thread.open]);
   //--------------- Upload Props -------------------------
 
   const UploadProps = {
@@ -1192,7 +1197,7 @@ function Videos(props) {
                                     padding: "5px",
                                     borderRadius: "5px",
                                   }}
-                                  offset={[-15, 15]}
+                                  offset={[-25, 25]}
                                   count={
                                     dataa.isFlagged ? (
                                       <BsFlagFill
@@ -1206,59 +1211,74 @@ function Videos(props) {
                                     )
                                   }
                                 >
-                                  <Card
-                                    key={`1-${dataa._id}`}
-                                    className="outcome-cardd"
-                                    cover={
-                                      <>
-                                        <img
-                                          style={{
-                                            aspectRatio: "16/9",
-                                            objectFit: "cover",
-                                            objectPosition: "0 0",
-                                          }}
-                                          src={STATIC_URL + dataa.thumbnail}
-                                          // className='card-img-size'
-                                          onClick={() => {
-                                            updateSelectedVOD(dataa, idx);
-                                          }}
-                                          onError={(e: any) =>
-                                            (e.target.src = `/icons/fallback.png`)
-                                          }
-                                        />
-                                      </>
+                                  <Badge
+                                    style={{
+                                      backgroundColor: "#3b86ff",
+                                      boxShadow: "0 0 3px 1px black",
+                                      zIndex: 10,
+                                    }}
+                                    offset={[-5, 5]}
+                                    count={
+                                      dataa.isThreadExist
+                                        ? dataa.commentCount
+                                        : 0
                                     }
+                                    overflowCount={9}
                                   >
-                                    <Row style={{ marginTop: "-12px" }}>
-                                      <Col>
-                                        <Tooltip
-                                          placement="bottom"
-                                          title={
-                                            dataa.videoName
-                                              ? dataa.videoName
-                                              : dataa.flightID.name
-                                          }
-                                        >
-                                          <Text
-                                            strong
-                                            ellipsis
-                                            style={{ width: 130 }}
-                                          >
-                                            <VideoCameraOutlined /> &nbsp;{" "}
-                                            {dataa.videoName
-                                              ? dataa.videoName
-                                              : dataa.flightID.name}
-                                          </Text>
-                                        </Tooltip>
-                                      </Col>
-                                    </Row>
-                                    <Text
-                                      type="secondary"
-                                      style={{ fontSize: "12px" }}
+                                    <Card
+                                      key={`1-${dataa._id}`}
+                                      className="outcome-cardd"
+                                      cover={
+                                        <>
+                                          <img
+                                            style={{
+                                              aspectRatio: "16/9",
+                                              objectFit: "cover",
+                                              objectPosition: "0 0",
+                                            }}
+                                            src={STATIC_URL + dataa.thumbnail}
+                                            // className='card-img-size'
+                                            onClick={() => {
+                                              updateSelectedVOD(dataa, idx);
+                                            }}
+                                            onError={(e: any) =>
+                                              (e.target.src = `/icons/fallback.png`)
+                                            }
+                                          />
+                                        </>
+                                      }
                                     >
-                                      {moment(dataa.createdAt).format("llll")}
-                                    </Text>
-                                  </Card>
+                                      <Row style={{ marginTop: "-12px" }}>
+                                        <Col>
+                                          <Tooltip
+                                            placement="bottom"
+                                            title={
+                                              dataa.videoName
+                                                ? dataa.videoName
+                                                : dataa.flightID.name
+                                            }
+                                          >
+                                            <Text
+                                              strong
+                                              ellipsis
+                                              style={{ width: 130 }}
+                                            >
+                                              <VideoCameraOutlined /> &nbsp;{" "}
+                                              {dataa.videoName
+                                                ? dataa.videoName
+                                                : dataa.flightID.name}
+                                            </Text>
+                                          </Tooltip>
+                                        </Col>
+                                      </Row>
+                                      <Text
+                                        type="secondary"
+                                        style={{ fontSize: "12px" }}
+                                      >
+                                        {moment(dataa.createdAt).format("llll")}
+                                      </Text>
+                                    </Card>
+                                  </Badge>
                                 </Badge>
                               </div>
                             </Dropdown>
@@ -1454,24 +1474,35 @@ function Videos(props) {
                             )
                           }
                         >
-                          <img
+                          <Badge
                             style={{
-                              padding: "8px",
-                              width: "100%",
-                              height: "auto",
+                              backgroundColor: "#3b86ff",
+                              boxShadow: "0 0 3px 1px black",
+                              zIndex: 10,
                             }}
-                            width={310}
-                            height={175}
-                            src={STATIC_URL + dataa.thumbnail}
-                            onClick={() => {
-                              if (!activateSelection) {
-                                updateSelectedVOD(dataa, idx);
+                            offset={[-5, 5]}
+                            count={dataa.isThreadExist ? dataa.commentCount : 0}
+                            overflowCount={9}
+                          >
+                            <img
+                              style={{
+                                padding: "8px",
+                                width: "100%",
+                                height: "auto",
+                              }}
+                              width={310}
+                              height={175}
+                              src={STATIC_URL + dataa.thumbnail}
+                              onClick={() => {
+                                if (!activateSelection) {
+                                  updateSelectedVOD(dataa, idx);
+                                }
+                              }}
+                              onError={(e: any) =>
+                                (e.target.src = `/icons/fallback.png`)
                               }
-                            }}
-                            onError={(e: any) =>
-                              (e.target.src = `/icons/fallback.png`)
-                            }
-                          />
+                            />
+                          </Badge>
                         </Badge>
                       </Col>
                       <Col md={16}>
@@ -1760,6 +1791,7 @@ function Videos(props) {
 
 const mapStateToProps = (state: any) => ({
   Theme: state.theme,
+  Thread: state.Thread,
 });
 
 export default connect(mapStateToProps, { logout, thread })(Videos);
