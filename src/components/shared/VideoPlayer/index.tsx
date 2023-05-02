@@ -663,9 +663,10 @@ function VideoPlayer(props: any) {
   useEffect(() => {
     if (!isLive) {
       //console.log(props.url.split('.')[0]);
-      let data = fetchJSON((props.url as string).replace(/.\w+$/, ".geojson"))
+      fetchJSON((props.url as string).replace(/.\w+$/, ".geojson"))
         .then((d) => {
           let data = d as FlightPath;
+          data.features.pop(); // Remove linestring at the very end
           //console.log("the obejct", pathObject)
           let flightTelemetry = data.features;
           let points: [number, number, number][] = [];
