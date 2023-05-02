@@ -141,33 +141,14 @@ function PublicMap(props) {
 
   // ---- setting map location -----------------
   useEffect(() => {
-    if (navigator.geolocation) {
-      if (navigator.permissions !== undefined) {
-        navigator.permissions
-          .query({ name: "geolocation" })
-          .then(function (result: any) {
-            if (result.state === "granted") {
-              navigator.geolocation.getCurrentPosition(function (pos: any) {
-                const crd = pos.coords;
-                // console.log("Your current position is:");
-                // console.log(`Latitude : ${crd.latitude}`);
-                // console.log(`Longitude: ${crd.longitude}`);
-                // console.log(`More or less ${crd.accuracy} meters.`);
-                setViewport({
-                  longitude: crd.longitude,
-                  latitude: crd.latitude,
-                  zoom: 13,
-                  pitch: 0,
-                  minZoom: 0,
-                  maxZoom: 22,
-                  bearing: 0,
-                  transitionDuration: 1000,
-                  transitionInterpolator: new FlyToInterpolator(),
-                });
-              });
-            } else if (result.state === "prompt") {
-              navigator.geolocation.getCurrentPosition(
-                function (pos: any) {
+    if (!props.isMissionMap) {
+      if (navigator.geolocation) {
+        if (navigator.permissions !== undefined) {
+          navigator.permissions
+            .query({ name: "geolocation" })
+            .then(function (result: any) {
+              if (result.state === "granted") {
+                navigator.geolocation.getCurrentPosition(function (pos: any) {
                   const crd = pos.coords;
                   // console.log("Your current position is:");
                   // console.log(`Latitude : ${crd.latitude}`);
@@ -184,30 +165,51 @@ function PublicMap(props) {
                     transitionDuration: 1000,
                     transitionInterpolator: new FlyToInterpolator(),
                   });
-                },
-                function (err) {
-                  console.log(`Location fetch error: \n ${err}`);
-                },
-                {
-                  enableHighAccuracy: true,
-                  timeout: 5000,
-                  maximumAge: 0,
-                }
-              );
-            } else if (result.state === "denied") {
-              message.warning(
-                "Please allow location access from your browser for best experience of ARU!"
-              );
-            }
-            result.onChange = function () {
-              console.log(result.state);
-            };
-          });
+                });
+              } else if (result.state === "prompt") {
+                navigator.geolocation.getCurrentPosition(
+                  function (pos: any) {
+                    const crd = pos.coords;
+                    // console.log("Your current position is:");
+                    // console.log(`Latitude : ${crd.latitude}`);
+                    // console.log(`Longitude: ${crd.longitude}`);
+                    // console.log(`More or less ${crd.accuracy} meters.`);
+                    setViewport({
+                      longitude: crd.longitude,
+                      latitude: crd.latitude,
+                      zoom: 13,
+                      pitch: 0,
+                      minZoom: 0,
+                      maxZoom: 22,
+                      bearing: 0,
+                      transitionDuration: 1000,
+                      transitionInterpolator: new FlyToInterpolator(),
+                    });
+                  },
+                  function (err) {
+                    console.log(`Location fetch error: \n ${err}`);
+                  },
+                  {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0,
+                  }
+                );
+              } else if (result.state === "denied") {
+                message.warning(
+                  "Please allow location access from your browser for best experience of ARU!"
+                );
+              }
+              result.onChange = function () {
+                console.log(result.state);
+              };
+            });
+        } else {
+          console.log("sample");
+        }
       } else {
-        console.log("sample");
+        console.log("Sorry navigator not available!");
       }
-    } else {
-      console.log("Sorry navigator not available!");
     }
   }, []);
 
@@ -1178,6 +1180,19 @@ function PublicMap(props) {
               : `2-${selectedLayerObject._id}`;
           console.log("Selecte layer is", key);
           setCheckedKeys([key]);
+        }
+        if (props.isMissionMap) {
+          setViewport({
+            latitude: result.data.centerPoints.lat,
+            longitude: result.data.centerPoints.lng,
+            zoom: 13,
+            pitch: 0,
+            minZoom: 0,
+            maxZoom: 22,
+            bearing: 0,
+            transitionDuration: 1000,
+            transitionInterpolator: new FlyToInterpolator(),
+          });
         }
         console.log("Base map result", result.data);
         setTenantName(result.data.data[0].tenantId.name);
@@ -2174,7 +2189,6 @@ function PublicMap(props) {
   const [showDrawingTools, setShowDrawingTools] = useState(false);
   const [toolCoordinates, settoolCoordinates] = useState([0, 0]);
   const drawingMenuRef: any = useRef<HTMLElement>();
-
   //---------------Handle map modes-------------------------------
   function handleMapMode(value) {
     if (value === "osm") {
@@ -2247,7 +2261,6 @@ function PublicMap(props) {
             //   transitionDuration: 1500,
             // };
             // setViewport(viewportWebMercator);
-
             const centerPoint = turf.centroid(res.data.data[0]);
             setViewport({
               longitude: centerPoint.geometry.coordinates[0],
