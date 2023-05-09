@@ -566,7 +566,7 @@ function FeatureTable(props) {
       //console.log(turf.point(turf.center(features).geometry.coordinates));
       centerPoint = turf.center(features);
       centerPoint = centerPoint.geometry.coordinates;
-    }else if(type === "LineString"){
+    } else if (type === "LineString") {
       const features = turf.lineString([...coordinates]);
       centerPoint = turf.center(features);
       centerPoint = centerPoint.geometry.coordinates;
