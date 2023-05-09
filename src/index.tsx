@@ -1,12 +1,11 @@
-import React, { Suspense, lazy } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
 import "./index.less";
 import * as serviceWorker from "./serviceWorker";
 import { Provider } from "react-redux";
 import store from "./store";
 import { ENV, Mode } from "./constants";
-import { Space, Spin } from "antd";
-const App = lazy(() => import("./App"));
+import App from "./App";
 if (ENV == Mode.Prod) {
   console.log = () => {};
   console.error = () => {};
@@ -15,17 +14,7 @@ if (ENV == Mode.Prod) {
 ReactDOM.render(
   <React.Fragment>
     <Provider store={store}>
-      <Suspense
-        fallback={
-          <div className="example">
-            <Space size="middle">
-              <Spin size="large" />
-            </Space>
-          </div>
-        }
-      >
-        <App />
-      </Suspense>
+      <App />
     </Provider>
   </React.Fragment>,
   document.getElementById("root")

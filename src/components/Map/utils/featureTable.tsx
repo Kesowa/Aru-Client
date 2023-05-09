@@ -566,6 +566,10 @@ function FeatureTable(props) {
       //console.log(turf.point(turf.center(features).geometry.coordinates));
       centerPoint = turf.center(features);
       centerPoint = centerPoint.geometry.coordinates;
+    } else if (type === "LineString") {
+      const features = turf.lineString([...coordinates]);
+      centerPoint = turf.center(features);
+      centerPoint = centerPoint.geometry.coordinates;
     } else {
       if (coordinates[0] > 100 || coordinates[1] > 100) {
         isMercator = true;

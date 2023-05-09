@@ -62,7 +62,7 @@ import { clearMissionCreationState } from "../../../../actions/missionCreation";
 import io from "socket.io-client";
 import ImageDoc from "./Data/ImageDocs";
 import ManageClients from "./Data/ManageClient";
-import { API_URL, STATIC_URL } from "src/constants";
+import { API_URL, PUBLIC_URL, STATIC_URL } from "src/constants";
 
 const { Paragraph } = Typography;
 function MissionView(props) {
@@ -273,6 +273,7 @@ function MissionView(props) {
         currentUserDetails: props.userDetails,
         refresh: vodRefresh,
         missionType: mission.missionType ? mission.missionType.name : "",
+        isPublic: mission.isPublic,
         clients: [],
       };
 
@@ -356,6 +357,7 @@ function MissionView(props) {
       deliverables: missionEditFormData.deliverables
         ? missionEditFormData.deliverables
         : [],
+      isPublic: missionEditFormData.isPublic,
     };
     console.log("Body : " + JSON.stringify(body));
     http
@@ -370,6 +372,7 @@ function MissionView(props) {
             instructions: body.description,
             type: body.type,
             deliverables: body.deliverables,
+            isPublic: body.isPublic,
           });
           setMissionEditFormData({});
           message.success("Mission Edited Successfully");
@@ -907,6 +910,7 @@ function MissionView(props) {
               })._id,
               instructions: MissionDetails.instructions,
               deliverables: MissionDetails.deliverables,
+              isPublic: MissionDetails.isPublic,
             });
           }}
           key="3"
@@ -1468,6 +1472,19 @@ function MissionView(props) {
                   <p style={{ marginTop: "8px" }}>
                     {MissionDeliverables(MissionDetails.deliverables)}
                   </p>
+                  {MissionDetails.isPublic && (
+                    <>
+                      <Text type="secondary" style={{ marginTop: "8px" }}>
+                        Public Map URL:{" "}
+                        <a>
+                          <Paragraph
+                            copyable
+                          >{`${PUBLIC_URL}/map/${MissionDetails.missionTenantId}/${MissionDetails.missionId}`}</Paragraph>
+                        </a>
+                      </Text>
+                      <p></p>
+                    </>
+                  )}
                 </Card>
               </Row>
 
@@ -1646,6 +1663,17 @@ function MissionView(props) {
                     setMissionEditFormData({
                       ...missionEditFormData,
                       instructions: e.target.value,
+                    });
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Public" name="isPublic">
+                <Checkbox
+                  checked={missionEditFormData.isPublic}
+                  onChange={(e) => {
+                    setMissionEditFormData({
+                      ...missionEditFormData,
+                      isPublic: e.target.checked,
                     });
                   }}
                 />

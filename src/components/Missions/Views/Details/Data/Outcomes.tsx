@@ -49,6 +49,7 @@ import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
+import axios from "axios";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -168,6 +169,11 @@ function Outcomes(props) {
     unflaggedFilter,
   ]);
 
+  useEffect(() => {
+    if (!props.Thread.open) {
+      setRefresh(true);
+    }
+  }, [props.Thread.open]);
   // useEffect(() => {
   //   if (!loading) {
   //     handleSortChange(sortType);
@@ -373,77 +379,87 @@ function Outcomes(props) {
                   )
                 }
               >
-                <Card
-                  className="outcome-cardd"
-                  onClick={() => {
-                    if (activateSelection) {
-                      if (checkedList.includes(outcome._id)) {
-                        const filtered: any = checkedList.filter(
-                          (i: any) => i !== outcome._id
-                        );
-                        setCheckedList(filtered);
-                      } else {
-                        setCheckedList([...checkedList, outcome._id]);
-                      }
-                    } else {
-                      setShowOutcomeModal(true);
-                      setModalIndex(ind);
-                    }
+                <Badge
+                  style={{
+                    backgroundColor: "#3b86ff",
+                    boxShadow: "0 0 3px 1px black",
                   }}
-                  style={
-                    checkedList.includes(outcome._id)
-                      ? {
-                          border: "4px solid #3b86ff",
-                          cursor: "pointer",
-                        }
-                      : {
-                          cursor: "pointer",
-                        }
-                  }
-                  cover={
-                    <img
-                      style={{
-                        aspectRatio: "16/9",
-                        objectFit: "fill",
-                        objectPosition: "0 0",
-                      }}
-                      src={STATIC_URL + outcome.thumb}
-                      onError={(e: any) => {
-                        e.target.onerror = null;
-                        e.target.src = "/icons/fallback.png";
-                      }}
-                    />
-                  }
+                  offset={[-5, 5]}
+                  count={outcome.isThreadExist ? outcome.commentCount : 0}
+                  overflowCount={9}
                 >
-                  <Row style={{ marginTop: "-12px" }}>
-                    <Col span={18}>
-                      <Text strong className="outcome-name">
-                        {outcome.locationName}
-                      </Text>
-                    </Col>
-                    <Col span={6}>
-                      <Text type="secondary">
-                        <ExclamationOutlined /> {outcome.pcount}
-                      </Text>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col span={18}>
-                      <Row style={{ marginTop: "8px" }}>
-                        <Text type="secondary" className="outcome-createdby">
-                          <UserOutlined /> {outcome.createdBy.name}
+                  <Card
+                    className="outcome-cardd"
+                    onClick={() => {
+                      if (activateSelection) {
+                        if (checkedList.includes(outcome._id)) {
+                          const filtered: any = checkedList.filter(
+                            (i: any) => i !== outcome._id
+                          );
+                          setCheckedList(filtered);
+                        } else {
+                          setCheckedList([...checkedList, outcome._id]);
+                        }
+                      } else {
+                        setShowOutcomeModal(true);
+                        setModalIndex(ind);
+                      }
+                    }}
+                    style={
+                      checkedList.includes(outcome._id)
+                        ? {
+                            border: "4px solid #3b86ff",
+                            cursor: "pointer",
+                          }
+                        : {
+                            cursor: "pointer",
+                          }
+                    }
+                    cover={
+                      <img
+                        style={{
+                          aspectRatio: "16/9",
+                          objectFit: "fill",
+                          objectPosition: "0 0",
+                        }}
+                        src={STATIC_URL + outcome.thumb}
+                        onError={(e: any) => {
+                          e.target.onerror = null;
+                          e.target.src = "/icons/fallback.png";
+                        }}
+                      />
+                    }
+                  >
+                    <Row style={{ marginTop: "-12px" }}>
+                      <Col span={18}>
+                        <Text strong className="outcome-name">
+                          {outcome.locationName}
                         </Text>
-                      </Row>
-                      <Row>
-                        <Text type="secondary" className="outcome-timestamp">
-                          <CalendarOutlined />{" "}
-                          {moment(outcome.createdAt).format("llll")}
+                      </Col>
+                      <Col span={6}>
+                        <Text type="secondary">
+                          <ExclamationOutlined /> {outcome.pcount}
                         </Text>
-                      </Row>
-                    </Col>
-                    <Col span={6}></Col>
-                  </Row>
-                </Card>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col span={18}>
+                        <Row style={{ marginTop: "8px" }}>
+                          <Text type="secondary" className="outcome-createdby">
+                            <UserOutlined /> {outcome.createdBy.name}
+                          </Text>
+                        </Row>
+                        <Row>
+                          <Text type="secondary" className="outcome-timestamp">
+                            <CalendarOutlined />{" "}
+                            {moment(outcome.createdAt).format("llll")}
+                          </Text>
+                        </Row>
+                      </Col>
+                      <Col span={6}></Col>
+                    </Row>
+                  </Card>
+                </Badge>
               </Badge>
             </div>
           </Col>
@@ -641,6 +657,8 @@ function Outcomes(props) {
     action: `${API_URL}${apis.UPLOAD_ALERT}`,
     customRequest: (options: any) => {
       setUploading(true);
+      const cancelToken = axios.CancelToken;
+      const source = cancelToken.source();
       const fData = new FormData();
       const proceed = extractExif(options.file).then((res: any) => {
         if (res.status) {
@@ -668,6 +686,7 @@ function Outcomes(props) {
                 percent: (event.loaded / event.total) * 100,
               });
             },
+            cancelToken: source.token,
           };
           http
             .post(options.action, fData, config)
@@ -686,7 +705,10 @@ function Outcomes(props) {
               }
             })
             .catch((err) => {
-              if (err?.response?.status === 403) {
+              if (axios.isCancel(err)) {
+                console.log("Upload Cancelled");
+                return;
+              } else if (err?.response?.status === 403) {
                 console.log(err.response);
                 if (
                   err.response.data.message ===
@@ -742,6 +764,7 @@ function Outcomes(props) {
                 percent: (event.loaded / event.total) * 100,
               });
             },
+            cancelToken: source.token,
           };
           http
             .post(options.action, fData, config)
@@ -760,7 +783,10 @@ function Outcomes(props) {
               }
             })
             .catch((err) => {
-              if (err?.response?.status === 403) {
+              if (axios.isCancel(err)) {
+                console.log("Upload Cancelled");
+                return;
+              } else if (err?.response?.status === 403) {
                 console.log(err.response);
                 if (
                   err.response.data.message ===
@@ -793,6 +819,13 @@ function Outcomes(props) {
             });
         }
       });
+      return {
+        abort() {
+          console.log("Aborting outcome upload");
+          source.cancel("User cancelled upload");
+          setUploading(false);
+        },
+      };
     },
   };
 
@@ -1010,36 +1043,19 @@ function Outcomes(props) {
                             className="listview-outcomes"
                             align="middle"
                             style={{ padding: "10px" }}
-                            onClick={
-                              () => {
-                                setShowOutcomeModal(true);
-                                setModalIndex(ind);
-                              }
-
-                              // showModal(
-                              //   outcome._id,
-                              //   outcome.missionId._id,
-                              //   outcome.flightId._id,
-                              //   outcome.createdBy.name,
-                              //   outcome.createdBy.avatar,
-                              //   outcome.createdAt,
-                              //   API_URL + outcome.image,
-                              //   outcome.location,
-                              //   outcome.locationName
-                              //     ? outcome.locationName
-                              //     : "Default Location",
-                              //   outcome.pcount,
-                              // )
-                            }
+                            onClick={() => {
+                              setShowOutcomeModal(true);
+                              setModalIndex(ind);
+                            }}
                           >
-                            <Col md={8} style={{ padding: "10px" }}>
+                            <Col md={4} style={{ padding: "10px" }}>
                               <Badge
                                 style={{
                                   backgroundColor: "#f5222d",
                                   padding: "5px",
                                   borderRadius: "5px",
                                 }}
-                                offset={[-15, 15]}
+                                offset={[-20, 20]}
                                 count={
                                   outcome.isFlagged ? (
                                     <BsFlagFill
@@ -1053,18 +1069,31 @@ function Outcomes(props) {
                                   )
                                 }
                               >
-                                <img
+                                <Badge
                                   style={{
-                                    width: "100%",
-                                    height: "auto",
-                                    minWidth: "120px",
+                                    backgroundColor: "#3b86ff",
+                                    boxShadow: "0 0 3px 1px black",
+                                    zIndex: 10,
                                   }}
-                                  src={STATIC_URL + outcome.thumb}
-                                  onError={(e: any) => {
-                                    e.target.onerror = null;
-                                    e.target.src = "/icons/fallback.png";
-                                  }}
-                                />
+                                  count={
+                                    outcome.isThreadExist
+                                      ? outcome.commentCount
+                                      : 0
+                                  }
+                                  overflowCount={9}
+                                >
+                                  <img
+                                    style={{
+                                      width: "100%",
+                                      height: "auto",
+                                    }}
+                                    src={STATIC_URL + outcome.thumb}
+                                    onError={(e: any) => {
+                                      e.target.onerror = null;
+                                      e.target.src = "/icons/fallback.png";
+                                    }}
+                                  />
+                                </Badge>
                               </Badge>
                             </Col>
 
@@ -1208,7 +1237,7 @@ function Outcomes(props) {
                                     padding: "5px",
                                     borderRadius: "5px",
                                   }}
-                                  offset={[-15, 15]}
+                                  offset={[-25, 25]}
                                   count={
                                     outcome.isFlagged ? (
                                       <BsFlagFill
@@ -1222,67 +1251,82 @@ function Outcomes(props) {
                                     )
                                   }
                                 >
-                                  <Card
-                                    className="outcome-cardd"
-                                    cover={
-                                      <img
-                                        style={{
-                                          aspectRatio: "16/9",
-                                          objectFit: "fill",
-                                          objectPosition: "0 0",
-                                        }}
-                                        className="card-img-size"
-                                        onClick={() => {
-                                          setShowOutcomeModal(true);
-                                          setModalIndex(ind);
-                                        }}
-                                        src={STATIC_URL + outcome.thumb}
-                                        onError={(e: any) => {
-                                          e.target.onerror = null;
-                                          e.target.src = "/icons/fallback.png";
-                                        }}
-                                      />
+                                  <Badge
+                                    style={{
+                                      backgroundColor: "#3b86ff",
+                                      boxShadow: "0 0 3px 1px black",
+                                    }}
+                                    offset={[-5, 5]}
+                                    count={
+                                      outcome.isThreadExist
+                                        ? outcome.commentCount
+                                        : 0
                                     }
+                                    overflowCount={9}
                                   >
-                                    <Row style={{ marginTop: "-12px" }}>
-                                      <Col span={18}>
-                                        <Text strong className="outcome-name">
-                                          {outcome.locationName}
-                                        </Text>
-                                      </Col>
-                                      <Col span={6}>
-                                        <Text type="secondary">
-                                          <ExclamationOutlined />{" "}
-                                          {outcome.pcount}
-                                        </Text>
-                                      </Col>
-                                    </Row>
-                                    <Row>
-                                      <Col span={18}>
-                                        <Row style={{ marginTop: "8px" }}>
-                                          <Text
-                                            type="secondary"
-                                            className="outcome-createdby"
-                                          >
-                                            <UserOutlined />{" "}
-                                            {outcome.createdBy.name}
+                                    <Card
+                                      className="outcome-cardd"
+                                      cover={
+                                        <img
+                                          style={{
+                                            aspectRatio: "16/9",
+                                            objectFit: "fill",
+                                            objectPosition: "0 0",
+                                          }}
+                                          className="card-img-size"
+                                          onClick={() => {
+                                            setShowOutcomeModal(true);
+                                            setModalIndex(ind);
+                                          }}
+                                          src={STATIC_URL + outcome.thumb}
+                                          onError={(e: any) => {
+                                            e.target.onerror = null;
+                                            e.target.src =
+                                              "/icons/fallback.png";
+                                          }}
+                                        />
+                                      }
+                                    >
+                                      <Row style={{ marginTop: "-12px" }}>
+                                        <Col span={18}>
+                                          <Text strong className="outcome-name">
+                                            {outcome.locationName}
                                           </Text>
-                                        </Row>
-                                        <Row>
-                                          <Text
-                                            type="secondary"
-                                            className="outcome-timestamp"
-                                          >
-                                            <CalendarOutlined />{" "}
-                                            {moment(outcome.createdAt).format(
-                                              "llll"
-                                            )}
+                                        </Col>
+                                        <Col span={6}>
+                                          <Text type="secondary">
+                                            <ExclamationOutlined />{" "}
+                                            {outcome.pcount}
                                           </Text>
-                                        </Row>
-                                      </Col>
-                                      <Col span={6}></Col>
-                                    </Row>
-                                  </Card>
+                                        </Col>
+                                      </Row>
+                                      <Row>
+                                        <Col span={18}>
+                                          <Row style={{ marginTop: "8px" }}>
+                                            <Text
+                                              type="secondary"
+                                              className="outcome-createdby"
+                                            >
+                                              <UserOutlined />{" "}
+                                              {outcome.createdBy.name}
+                                            </Text>
+                                          </Row>
+                                          <Row>
+                                            <Text
+                                              type="secondary"
+                                              className="outcome-timestamp"
+                                            >
+                                              <CalendarOutlined />{" "}
+                                              {moment(outcome.createdAt).format(
+                                                "llll"
+                                              )}
+                                            </Text>
+                                          </Row>
+                                        </Col>
+                                        <Col span={6}></Col>
+                                      </Row>
+                                    </Card>
+                                  </Badge>
                                 </Badge>
                               </div>
                             </Dropdown>
@@ -1363,6 +1407,7 @@ function Outcomes(props) {
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
   Theme: state.Theme,
+  Thread: state.Thread,
 });
 
 export default connect(mapStateToProps, { logout, thread })(Outcomes);

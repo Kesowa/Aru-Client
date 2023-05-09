@@ -186,6 +186,7 @@ const apis = {
   FETCH_UNCHECKED_FILES: "/apis/v1/layer/fetch-to-be-reviwed-files",
   CONFIRM_REVIEW_IMAGES: "/apis/v1/layer/images-review",
   DOWNLOAD_ALL_LAYER_FOR_MISSION: "/apis/v1/layer/all-layers-for-mission",
+  GET_PUBLIC_LAYER_BY_MISSION_ID: "/apis/v1/layer/layers-by-missionId",
   FLAG_FEATURE: "/apis/v1/layer/flag-feature",
   FLAG_LAYER: "/apis/v1/layer/flag-layer",
 

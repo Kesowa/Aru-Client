@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import s_m from "../../../../Icons/start_measurement.svg";
+import "../../../Missions/Create/index.less";
 import { connect } from "react-redux";
 import { message } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
