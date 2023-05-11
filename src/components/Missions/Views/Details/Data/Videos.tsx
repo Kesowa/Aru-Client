@@ -599,6 +599,7 @@ function Videos(props) {
             showHUD={false}
             updateVOD={updateVODAttr}
             threadThumb={true}
+            open={showCarousel}
           />
         </div>
       </Badge>
