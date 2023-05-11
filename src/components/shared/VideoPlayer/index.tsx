@@ -40,7 +40,7 @@ import {
   DownloadOutlined,
   GoogleOutlined,
   SwapOutlined,
-  CheckOutlined
+  CheckOutlined,
 } from "@ant-design/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -95,9 +95,9 @@ import {
   Tooltip as ChartToolTip,
   Filler,
   Legend,
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
-import { faker } from '@faker-js/faker';
+} from "chart.js";
+import { Line } from "react-chartjs-2";
+import { faker } from "@faker-js/faker";
 import { io } from "socket.io-client";
 ChartJS.register(
   CategoryScale,
@@ -109,7 +109,7 @@ ChartJS.register(
   Filler,
   Legend
 );
-ChartJS.defaults.elements.point.pointStyle = false
+ChartJS.defaults.elements.point.pointStyle = false;
 const { Text, Link } = Typography;
 const { SubMenu, Item } = Menu;
 
@@ -168,7 +168,7 @@ const b64toBlob = (b64Data, contentType) => {
 
 function VideoPlayer(props: any) {
   const [isAiTaskCompleted, setIsAiTaskCompleted] = useState(false);
-  const [aiTaskData, setAiTaskData] = useState({Keys:[], Values:[]});
+  const [aiTaskData, setAiTaskData] = useState({ Keys: [], Values: [] });
   const [aiGraphData, setAiGraphData] = useState({});
   const [aiGraphGenerated, setAiGraphGenerated] = useState(false);
   const [aiTask, setAiTask] = useState("");
@@ -266,7 +266,7 @@ function VideoPlayer(props: any) {
     liveTagStatus,
     map,
   } = props; //add prop for alert button #2
-  
+
   const resolutionURLs = {
     auto: `${LIVE_URL}/live/${streamKey}.m3u8`,
     fullDefinition: `${LIVE_URL}/live/${streamKey}_480p1128kbs/index.m3u8`, //480p
@@ -353,20 +353,20 @@ function VideoPlayer(props: any) {
       x: {
         display: false,
         ticks: {
-          padding: 0
-        }
-     },
-     y: {
+          padding: 0,
+        },
+      },
+      y: {
         display: false,
         ticks: {
-          padding: 0
-        }
-     }
+          padding: 0,
+        },
+      },
     },
     maintainAspectRatio: false,
   };
   const aiTaskDisplay = () => {
-    switch(aiTask){
+    switch (aiTask) {
       case "violence":
         return "Violence";
       case "non-violence":
@@ -374,36 +374,35 @@ function VideoPlayer(props: any) {
       default:
         return;
     }
-  }
+  };
   const generateDurationLabel = () => {
-    const length = aiTaskData.Values.length
-    console.log('AIML length', length,duration, duration/length)
-    if (length){
-      const durationSteps = duration/length
-      let steps = durationSteps
-      console.log('AIML durationSteps', durationSteps, steps)
-      let label: number[] = []
-      label.push(0)
-      for (var i = 0; i < length-1; i++){
-        label.push(`${Math.round((steps/100) * 100) / 100} s`)
-        steps+=durationSteps
+    const length = aiTaskData.Values.length;
+    console.log("AIML length", length, duration, duration / length);
+    if (length) {
+      const durationSteps = duration / length;
+      let steps = durationSteps;
+      console.log("AIML durationSteps", durationSteps, steps);
+      let label: number[] = [];
+      label.push(0);
+      for (var i = 0; i < length - 1; i++) {
+        label.push(`${Math.round((steps / 100) * 100) / 100} s`);
+        steps += durationSteps;
       }
-      console.log('AIML label', label)
-      return label
+      console.log("AIML label", label);
+      return label;
     } else {
-      return []
+      return [];
     }
-    
-  }
+  };
   const generateGraphData = (task: any) => {
     const index = aiTaskData.Keys.indexOf(task);
-    console.log('AIML graphData', task, aiTaskData)
-    if (aiTaskData.Values.length>0){
-      const graphData = aiTaskData.Values.map((value)=>{
-        return value[index]
-      })
-      const labels = generateDurationLabel()
-      const taskLabel = aiTaskDisplay()
+    console.log("AIML graphData", task, aiTaskData);
+    if (aiTaskData.Values.length > 0) {
+      const graphData = aiTaskData.Values.map((value) => {
+        return value[index];
+      });
+      const labels = generateDurationLabel();
+      const taskLabel = aiTaskDisplay();
       const data = {
         labels,
         datasets: [
@@ -411,92 +410,94 @@ function VideoPlayer(props: any) {
             fill: true,
             label: taskLabel,
             data: graphData,
-            borderColor: 'rgba(255, 255, 255, 0.5)',
-            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            borderColor: "rgba(255, 255, 255, 0.5)",
+            backgroundColor: "rgba(255, 255, 255, 0.5)",
           },
         ],
       };
-      setAiGraphGenerated(true)
-      setAiGraphData(data)
+      setAiGraphGenerated(true);
+      setAiGraphData(data);
     }
-    
-  }
-  
+  };
+
   const startInferenceVODViolence = async () => {
     const taskStatusResponse = await http
-      .post(`${apis.INFER_VOD_VIOLENCE.replace(":vodId",props.mission._id)}`).catch(err=>{
-        console.log('AIML: Error', err)
-      })
-      if (taskStatusResponse.status){
-        console.log('AIML: Task status -', taskStatusResponse.data.message)
-        const message = taskStatusResponse.data.message;
-        if (message.includes('started')){
-          setAiTaskStatus('started');
-        } else if (message.includes('restarted')){
-          setAiTaskStatus('restarted');
-        }
-        if (message === 'task completed' ){
-          setIsAiTaskCompleted(true);
-        }
-      } else {
-        console.log('AIML: Error')
+      .post(`${apis.INFER_VOD_VIOLENCE.replace(":vodId", props.mission._id)}`)
+      .catch((err) => {
+        console.log("AIML: Error", err);
+      });
+    if (taskStatusResponse.status) {
+      console.log("AIML: Task status -", taskStatusResponse.data.message);
+      const message = taskStatusResponse.data.message;
+      if (message.includes("started")) {
+        setAiTaskStatus("started");
+      } else if (message.includes("restarted")) {
+        setAiTaskStatus("restarted");
       }
-      
-  }
+      if (message === "task completed") {
+        setIsAiTaskCompleted(true);
+      }
+    } else {
+      console.log("AIML: Error");
+    }
+  };
   const fetchAITasks = async () => {
     const tasks = await http
-        .get(`${apis.FETCH_AI_TASK}/vod/${props.mission._id}`).catch(err=>{
-          console.log('AIML', err)
-        })
-        console.log('AIML tasks.data', tasks.data)
-        if (tasks.data?.status){
-          const vodTask = tasks.data.data.filter((task)=> task.doc === props.mission._id)
-          if (vodTask.length!==0||vodTask[0].data!=="null"){
-            fetchJSON(STATIC_URL + '/'+ vodTask[0].data).then((d)=>{
-              console.log('AIML data', d)
-              setAiTaskData(d)
-            })
-          }
-          
-          console.log('AIML', vodTask[0].data)
-        }
-  }
-  const socketFetchTaskStatus = (tenantID: any) =>{
-    console.log('AIML socket: ', aiSocket, aiSocket.current)
+      .get(`${apis.FETCH_AI_TASK}/vod/${props.mission._id}`)
+      .catch((err) => {
+        console.log("AIML", err);
+      });
+    console.log("AIML tasks.data", tasks.data);
+    if (tasks.data?.status) {
+      const vodTask = tasks.data.data.filter(
+        (task) => task.doc === props.mission._id
+      );
+      if (vodTask.length !== 0 || vodTask[0].data !== "null") {
+        fetchJSON(STATIC_URL + "/" + vodTask[0].data).then((d) => {
+          console.log("AIML data", d);
+          setAiTaskData(d);
+        });
+      }
+
+      console.log("AIML", vodTask[0].data);
+    }
+  };
+  const socketFetchTaskStatus = (tenantID: any) => {
+    console.log("AIML socket: ", aiSocket, aiSocket.current);
     if (!aiSocket.current) {
       aiSocket.current = io(
         `${API_URL}/stream/notification?tenantID=${tenantID}`
       );
-      
-      aiSocket.current.on("AI_TASK", ({status}) => {
-        console.log('AIML AI_TASK: ', status)
+
+      aiSocket.current.on("AI_TASK", ({ status }) => {
+        console.log("AIML AI_TASK: ", status);
         setAiTaskStatus(status);
       });
     }
-  }
-  useEffect(()=>{
-    console.log('AIML AI_TASK_STATUS: ', aiTaskStatus)
-    if (aiTaskStatus === 'started' || aiTaskStatus === 'restarted'){
-      message.loading(`Violence inference task ${aiTaskStatus}!`)
-    } else if (aiTaskStatus === 'completed') {
-      fetchAITasks()
-      message.success(`Violence inference task ${aiTaskStatus}!`)
+  };
+  useEffect(() => {
+    console.log("AIML AI_TASK_STATUS: ", aiTaskStatus);
+    if (aiTaskStatus === "started" || aiTaskStatus === "restarted") {
+      message.loading(`Violence inference task ${aiTaskStatus}!`);
+    } else if (aiTaskStatus === "completed") {
+      fetchAITasks();
+      message.success(`Violence inference task ${aiTaskStatus}!`);
     }
-  },[aiTaskStatus])
-  useEffect (()=>{
-    if (!props.open){
+  }, [aiTaskStatus]);
+  useEffect(() => {
+    if (!props.open) {
       setIsAiTaskCompleted(false);
-      setAiTask("")
+      setAiTask("");
       setAiTaskStatus("");
     }
-  },[props.open])
+  }, [props.open]);
 
-  useEffect(()=>{
-    if (aiTask){
-      console.log('AIML aiTask: ', aiTask)
-      startInferenceVODViolence()
-      if (isAiTaskCompleted){
-        fetchAITasks()
+  useEffect(() => {
+    if (aiTask) {
+      console.log("AIML aiTask: ", aiTask);
+      startInferenceVODViolence();
+      if (isAiTaskCompleted) {
+        fetchAITasks();
       } else {
         if (
           props.UserDetails.userType === "tenant-root" ||
@@ -504,29 +505,29 @@ function VideoPlayer(props: any) {
         ) {
           if (props.UserDetails.tenantId._id) {
             console.log("tenantID>_id");
-            socketFetchTaskStatus(props.UserDetails.tenantId._id)
+            socketFetchTaskStatus(props.UserDetails.tenantId._id);
           } else if (props.UserDetails.tenantId) {
             console.log("tenantID");
-            socketFetchTaskStatus(props.UserDetails.tenantId)
+            socketFetchTaskStatus(props.UserDetails.tenantId);
           }
         }
       }
     }
-  },[props.UserDetails, props.mission, isAiTaskCompleted, aiTask])
-  useEffect(()=>{
-    if (aiTask){
-      generateGraphData(aiTask)
+  }, [props.UserDetails, props.mission, isAiTaskCompleted, aiTask]);
+  useEffect(() => {
+    if (aiTask) {
+      generateGraphData(aiTask);
     } else {
-      setAiGraphGenerated(false)
+      setAiGraphGenerated(false);
     }
-  },[aiTask, aiTaskData])
-  useEffect(()=>{
-    if (aiGraphGenerated){
+  }, [aiTask, aiTaskData]);
+  useEffect(() => {
+    if (aiGraphGenerated) {
       setShowHUDcontrols(false);
     } else {
       setShowHUDcontrols(true);
     }
-  },[aiGraphGenerated])
+  }, [aiGraphGenerated]);
   const toggleFullScreen = () => {
     if (
       screenfull.isEnabled &&
@@ -928,16 +929,16 @@ function VideoPlayer(props: any) {
   useEffect(() => {
     if (played && !isLive) {
       var x = Math.floor(played * flightTeleSrt.length);
-      if (flightTeleSrt[x]?.properties.DISTANCE){
-      console.log("Distance: ", flightTeleSrt[x]?.properties.DISTANCE);
-      console.log("H.SPEED: ", flightTeleSrt[x]?.properties.SPEED_TWOD);
-      console.log("V.SPEED: ", flightTeleSrt[x]?.properties.SPEED_VERTICAL);
-      console.log(
-        "position: ",
-        flightTeleSrt[x]?.geometry.coordinates[1],
-        flightTeleSrt[x]?.geometry.coordinates[0]
-      );
-      console.log("Altitude: ", flightTeleSrt[x]?.geometry.coordinates[2]);
+      if (flightTeleSrt[x]?.properties.DISTANCE) {
+        console.log("Distance: ", flightTeleSrt[x]?.properties.DISTANCE);
+        console.log("H.SPEED: ", flightTeleSrt[x]?.properties.SPEED_TWOD);
+        console.log("V.SPEED: ", flightTeleSrt[x]?.properties.SPEED_VERTICAL);
+        console.log(
+          "position: ",
+          flightTeleSrt[x]?.geometry.coordinates[1],
+          flightTeleSrt[x]?.geometry.coordinates[0]
+        );
+        console.log("Altitude: ", flightTeleSrt[x]?.geometry.coordinates[2]);
       }
       setDistance(flightTeleSrt[x]?.properties.DISTANCE);
       setH_speed(flightTeleSrt[x]?.properties.SPEED_TWOD);
@@ -1075,51 +1076,67 @@ function VideoPlayer(props: any) {
         </SubMenu>
       ) : (
         <>
-        <SubMenu
-          title={
-            <>
-              <span>Playback Speed </span>
-              <span style={{ float: "right" }}>{playbackSpeed}x</span>
-            </>
-          }
-        >
-          <Item onClick={() => setPlaybackSpeed(5)}>5x</Item>
-          <Item onClick={() => setPlaybackSpeed(2)}>2x</Item>
-          <Item onClick={() => setPlaybackSpeed(1.5)}>1.5x</Item>
-          <Item onClick={() => setPlaybackSpeed(1)}>1x</Item>
-        </SubMenu>
-        <SubMenu
-        title={
-          <>
-            <span>AI Graph </span>
-            <span style={{ float: "right" }}>{aiTaskDisplay()}</span>
-          </>
-        }
-      >
-        <div style={{display: 'flex', alignItems: 'center', width: '140px'}}>
-          <Item className="bg-transparent"
-          onClick={() => {
-            if (aiTask==="violence"){
-              setAiTask("")
-            } else {
-              setAiTask("violence")
+          <SubMenu
+            title={
+              <>
+                <span>Playback Speed </span>
+                <span style={{ float: "right" }}>{playbackSpeed}x</span>
+              </>
             }
-            }}>Violence</Item>
-            {aiTask==="violence"&&<CheckOutlined style={{color: "white"}}/>}
-          </div>
-        <div style={{width: '140px', display: 'flex', alignItems: 'center'}}>
-        <Item className="bg-transparent"
-        onClick={() => {
-          if (aiTask==="non-violence"){
-            setAiTask("")
-          } else {
-            setAiTask("non-violence")
-          }
-          }}>Non-Violence</Item>
-          {aiTask==="non-violence"&&<CheckOutlined style={{color: "white"}}/>}
-          </div>
-      </SubMenu>
-      </>
+          >
+            <Item onClick={() => setPlaybackSpeed(5)}>5x</Item>
+            <Item onClick={() => setPlaybackSpeed(2)}>2x</Item>
+            <Item onClick={() => setPlaybackSpeed(1.5)}>1.5x</Item>
+            <Item onClick={() => setPlaybackSpeed(1)}>1x</Item>
+          </SubMenu>
+          <SubMenu
+            title={
+              <>
+                <span>AI Graph </span>
+                <span style={{ float: "right" }}>{aiTaskDisplay()}</span>
+              </>
+            }
+          >
+            <div
+              style={{ display: "flex", alignItems: "center", width: "140px" }}
+            >
+              <Item
+                className="bg-transparent"
+                onClick={() => {
+                  if (aiTask === "violence") {
+                    setAiTask("");
+                  } else {
+                    setAiTask("violence");
+                  }
+                }}
+              >
+                Violence
+              </Item>
+              {aiTask === "violence" && (
+                <CheckOutlined style={{ color: "white" }} />
+              )}
+            </div>
+            <div
+              style={{ width: "140px", display: "flex", alignItems: "center" }}
+            >
+              <Item
+                className="bg-transparent"
+                onClick={() => {
+                  if (aiTask === "non-violence") {
+                    setAiTask("");
+                  } else {
+                    setAiTask("non-violence");
+                  }
+                }}
+              >
+                Non-Violence
+              </Item>
+              {aiTask === "non-violence" && (
+                <CheckOutlined style={{ color: "white" }} />
+              )}
+            </div>
+          </SubMenu>
+        </>
       )}
       {props.showHUD ? (
         <SubMenu
@@ -1874,7 +1891,7 @@ function VideoPlayer(props: any) {
             </Col>
           </Row>
 
-          <Row justify="center" style={{ marginTop: '100px'}}>
+          <Row justify="center" style={{ marginTop: "100px" }}>
             <Col span={4}>
               {playing ? (
                 <FontAwesomeIcon
@@ -1892,7 +1909,6 @@ function VideoPlayer(props: any) {
             </Col>
           </Row>
           <Row justify="space-between" style={{ padding: "16px" }}>
-            
             {(isFullScreen || theater) && !isAlertEnabled && streamKey ? (
               <Col span={5} offset={19}>
                 <div className="custom-div" onDoubleClick={handlepip}>
@@ -1901,26 +1917,31 @@ function VideoPlayer(props: any) {
               </Col>
             ) : null}
             <Col span={24}>
-              
               {isLive ? (
                 // <Slider min={0} max={100} value={100} />
                 <div className="live-slider"></div>
               ) : (
                 <>
-              <div style={{ height: "100px", width: '100%' }}>
-                {aiGraphGenerated&&<Line options={options} data={aiGraphData} />}
-              </div>
-                
-                <Slider
-                  min={0}
-                  max={100}
-                  value={played * 100}
-                  marks={bookmark}
-                  onChange={handleSeekChange}
-                  onAfterChange={handleSeekMouseUp}
-                  tooltip={{ formatter: handleToolbarSeek }}
-                  style={{bottom: '5px', padding: '0px', margin: '0px 6px 10px'}}
-                />
+                  <div style={{ height: "100px", width: "100%" }}>
+                    {aiGraphGenerated && (
+                      <Line options={options} data={aiGraphData} />
+                    )}
+                  </div>
+
+                  <Slider
+                    min={0}
+                    max={100}
+                    value={played * 100}
+                    marks={bookmark}
+                    onChange={handleSeekChange}
+                    onAfterChange={handleSeekMouseUp}
+                    tooltip={{ formatter: handleToolbarSeek }}
+                    style={{
+                      bottom: "5px",
+                      padding: "0px",
+                      margin: "0px 6px 10px",
+                    }}
+                  />
                 </>
               )}
             </Col>
@@ -2247,7 +2268,12 @@ function VideoPlayer(props: any) {
           ) : (
             <></>
           )}
-          {!pip && !isLive && !isFullScreen && props.showHUD && showMap && showHUDcontrols ? (
+          {!pip &&
+          !isLive &&
+          !isFullScreen &&
+          props.showHUD &&
+          showMap &&
+          showHUDcontrols ? (
             <div className="map-box" style={{ bottom: `${bottomMapHeight}px` }}>
               <div id="swap" className="swap" onClick={handlepip}>
                 <div className="Rectangle_1924">
