@@ -59,7 +59,7 @@ function DashboardContent(props: any) {
       BASE_STREAM_URL: LIVE_URL,
       COG_SERVER_URL: COG_URL,
       RTMP_URL: RTMP_URL,
-      API_URL:API_URL
+      API_URL: API_URL,
     };
     QRCode.toDataURL(JSON.stringify(data), function (err, url) {
       setqrCode(url);
