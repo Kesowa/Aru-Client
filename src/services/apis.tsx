@@ -246,6 +246,10 @@ const apis = {
 
   //Threads
   THREAD: "/apis/v1/thread",
+
+  //AIML
+  INFER_VOD_VIOLENCE: "apis/v1/aiml/vod/:vodId/violence/infer",
+  FETCH_AI_TASK: "apis/v1/aiml", //  /:docModel/:docId?infer=
 };
 
 export default apis;
