@@ -122,7 +122,12 @@ const openNotification = (placement) => {
     placement,
   });
 };
-
+const openVODNotification = (title, description, type) => {
+  notification[type]({
+    message: title,
+    description: description,
+  });
+};
 const format = (seconds) => {
   if (isNaN(seconds)) {
     return "00:00";
@@ -474,14 +479,14 @@ function VideoPlayer(props: any) {
         setAiTaskStatus(status);
       });
     }
-  };
-  useEffect(() => {
-    console.log("AIML AI_TASK_STATUS: ", aiTaskStatus);
-    if (aiTaskStatus === "started" || aiTaskStatus === "restarted") {
-      message.loading(`Violence inference task ${aiTaskStatus}!`);
-    } else if (aiTaskStatus === "completed") {
-      fetchAITasks();
-      message.success(`Violence inference task ${aiTaskStatus}!`);
+  }
+  useEffect(()=>{
+    console.log('AIML AI_TASK_STATUS: ', aiTaskStatus)
+    if (aiTaskStatus === 'started' || aiTaskStatus === 'restarted'){
+      openVODNotification(`Video Processing!`,`AI has ${aiTaskStatus} processing video: ${props.mission._id}`,'info')
+    } else if (aiTaskStatus === 'completed') {
+      fetchAITasks()
+      openVODNotification(`Finished Processing!`,`AI has ${aiTaskStatus} processing video: ${props.mission._id}`,'success')
     }
   }, [aiTaskStatus]);
   useEffect(() => {
@@ -1891,7 +1896,7 @@ function VideoPlayer(props: any) {
             </Col>
           </Row>
 
-          <Row justify="center" style={{ marginTop: "100px" }}>
+          <Row justify="center" style={!props.threadThumb?{ marginTop: '100px'}:{}}>
             <Col span={4}>
               {playing ? (
                 <FontAwesomeIcon
@@ -1922,26 +1927,20 @@ function VideoPlayer(props: any) {
                 <div className="live-slider"></div>
               ) : (
                 <>
-                  <div style={{ height: "100px", width: "100%" }}>
-                    {aiGraphGenerated && (
-                      <Line options={options} data={aiGraphData} />
-                    )}
-                  </div>
-
-                  <Slider
-                    min={0}
-                    max={100}
-                    value={played * 100}
-                    marks={bookmark}
-                    onChange={handleSeekChange}
-                    onAfterChange={handleSeekMouseUp}
-                    tooltip={{ formatter: handleToolbarSeek }}
-                    style={{
-                      bottom: "5px",
-                      padding: "0px",
-                      margin: "0px 6px 10px",
-                    }}
-                  />
+              {!props.threadThumb&&<div style={{ height: "100px", width: '100%' }}>
+                {aiGraphGenerated&&<Line options={options} data={aiGraphData} />}
+              </div>}
+                
+                <Slider
+                  min={0}
+                  max={100}
+                  value={played * 100}
+                  marks={bookmark}
+                  onChange={handleSeekChange}
+                  onAfterChange={handleSeekMouseUp}
+                  tooltip={{ formatter: handleToolbarSeek }}
+                  style={!props.threadThumb?{bottom: '5px', padding: '0px', margin: '0px 6px 10px'}:{}}
+                />
                 </>
               )}
             </Col>
