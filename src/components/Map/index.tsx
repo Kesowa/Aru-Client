@@ -1124,6 +1124,7 @@ function BaseMap(props) {
   const [featureLayerPath, setFeatureLayerPath] = useState("");
   const [windowTitle, setWindowTitle] = useState("");
   const [selectedLayerLabel, setSelectedLayerLabel] = useState("");
+  const [selectedLayerPopupLabel, setSelectedLayerPopupLabel] = useState("");
   const [activeID, setActiveID] = useState("");
   const [selectedIndexes, setSelectedIndexes] = useState<React.Key[]>([]);
   const [showSelectedIndexes, setshowSelectedIndexes] = useState([]);
@@ -2049,12 +2050,21 @@ function BaseMap(props) {
                         ? allLayers[element]?.layerLabel
                         : "No label selected"
                     );
+                    setSelectedLayerPopupLabel(
+                      allLayers[element]?.layerPopupLabel
+                        ? allLayers[element]?.layerPopupLabel
+                        : "No label selected"
+                    );
                   } else {
                     setSelectedLayerId(element.split("-")[1]);
                     setColorChangeFeatureData(data);
                     setShowColorChangeForm(true);
                   }
                 },
+                onHover: (data, e) => {
+                  setLayerName(allLayers[element]?.name);
+                  setSelectedLayerPopupLabel(allLayers[element]?.layerPopupLabel);
+                }
               })
             );
             break;
@@ -2136,11 +2146,20 @@ function BaseMap(props) {
                         ? allLayers[element]?.layerLabel
                         : "No label selected"
                     );
+                    setSelectedLayerPopupLabel(
+                      allLayers[element]?.layerPopupLabel
+                        ? allLayers[element]?.layerPopupLabel
+                        : "No label selected"
+                    );
                   } else {
                     setSelectedLayerId(element.split("-")[1]);
                     setColorChangeFeatureData(data);
                     setShowColorChangeForm(true);
                   }
+                },
+                onHover: (data, e) => {
+                  setLayerName(allLayers[element]?.name);
+                  setSelectedLayerPopupLabel(allLayers[element]?.layerPopupLabel);
                 },
                 extensions: [new DataFilterExtension({ filterSize: 1 })],
                 getFilterValue: (f, i) => {
@@ -2239,12 +2258,21 @@ function BaseMap(props) {
                         ? allLayers[element]?.layerLabel
                         : "No label selected"
                     );
+                    setSelectedLayerPopupLabel(
+                      allLayers[element]?.layerPopupLabel
+                        ? allLayers[element]?.layerPopupLabel
+                        : "No label selected"
+                    );
                   } else {
                     setSelectedLayerId(element.split("-")[1]);
                     setColorChangeFeatureData(data);
                     setShowColorChangeForm(true);
                   }
                 },
+                onHover: (data, e) => {
+                  setLayerName(allLayers[element]?.name);
+                  setSelectedLayerPopupLabel(allLayers[element]?.layerPopupLabel);
+                }
               })
             );
             break;
@@ -3451,6 +3479,11 @@ function BaseMap(props) {
                             ? layer.layerLabel
                             : "No label selected"
                         );
+                        setSelectedLayerPopupLabel(
+                          layer.layerPopupLabel
+                            ? layer.layerPopupLabel
+                            : "No label selected"
+                        );
                         setIsLayerDocs(true);
                       }}
                     >
@@ -4292,6 +4325,7 @@ function BaseMap(props) {
         T3DTranspose: false,
         groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
         layerLabel: layer.layerLabel,
+        layerPopupLabel: layer.layerPopupLabel,
         isPublic: layer.isPublic,
         flaggedFeatures: layer.flaggedFeatures,
       };
@@ -5019,6 +5053,7 @@ function BaseMap(props) {
             name: data.name,
             id: data._id,
             layerLabel: data.layerLabel,
+            layerPopupLabel: data.layerPopupLabel,
             isPublic: data.isPublic,
             flaggedFeatures: data.flaggedFeatures,
           };
@@ -6030,6 +6065,16 @@ function BaseMap(props) {
         style={{ height: "100vh", width: "100%" }}
         getCursor={() => {
           return isDrawing ? "crosshair" : "grab";
+        }}
+        getTooltip={({object}) => {
+          return object && object?.properties?.[selectedLayerPopupLabel] && {
+          html: `<div style="font-size: 1rem; color: #000">${layerName}</div><hr style="color: ${object.properties.color}"/>${selectedLayerPopupLabel} : ${object?.properties?.[selectedLayerPopupLabel]}`,
+          style: {
+            backgroundColor: '#fff',
+            margin: '0px',
+            borderRadius: '5px',
+          }
+        }
         }}
         onClick={(info, event) => {
           setShowDrawingTools(false);
@@ -7084,6 +7129,8 @@ function BaseMap(props) {
         renderLayerDocs={setIsLayerDocs}
         isRenderContent={isLayerDocs}
         setSelectedLayerLabel={setSelectedLayerLabel}
+        layerPopupLabel={selectedLayerPopupLabel}
+        setSelectedLayerPopupLabel={setSelectedLayerPopupLabel}
         missionId={id}
         picToMapData={picToMapData}
         setPicToMapData={setPicToMapData}
