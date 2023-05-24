@@ -775,24 +775,24 @@ function LayerDocs(props) {
       layerId: props.layerId,
       label: value,
     };
-      setSelectLoader(true);
-      http
-        .patch(`${apis.SET_LAYER_LABEL}`, payload)
-        .then((res: any) => {
-          if (res.data.status) {
-            message.success("Layer labelled!");
-            setIsLayerLabel(true);
-            props.setSelectedLayerLabel(res.data.data.layerLabel);
-            props.updateLayerDataAfterEditing(res.data.data, null, null);
-          } else {
-            message.error(res.data.message);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          AxiosErrorHandler(err, props.logout);
-        })
-        .finally(() => setSelectLoader(false));
+    setSelectLoader(true);
+    http
+      .patch(`${apis.SET_LAYER_LABEL}`, payload)
+      .then((res: any) => {
+        if (res.data.status) {
+          message.success("Layer labelled!");
+          setIsLayerLabel(true);
+          props.setSelectedLayerLabel(res.data.data.layerLabel);
+          props.updateLayerDataAfterEditing(res.data.data, null, null);
+        } else {
+          message.error(res.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => setSelectLoader(false));
   }
 
   function handlePopupAttrChange(value) {
@@ -801,21 +801,21 @@ function LayerDocs(props) {
       layerId: props.layerId,
       label: value,
     };
-      http
-        .patch(`${apis.SET_LAYER_LABEL}?popup=true`, payload)
-        .then((res: any) => {
-          if (res.data.status) {
-            message.success("Feature Point popup labelled!");
-            props.setSelectedLayerPopupLabel(res.data.data.layerPopupLabel);
-            props.updateLayerDataAfterEditing(res.data.data, null, null);
-          } else {
-            message.error(res.data.message);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          AxiosErrorHandler(err, props.logout);
-        });
+    http
+      .patch(`${apis.SET_LAYER_LABEL}?popup=true`, payload)
+      .then((res: any) => {
+        if (res.data.status) {
+          message.success("Feature Point popup labelled!");
+          props.setSelectedLayerPopupLabel(res.data.data.layerPopupLabel);
+          props.updateLayerDataAfterEditing(res.data.data, null, null);
+        } else {
+          message.error(res.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, props.logout);
+      });
   }
 
   // make layer public

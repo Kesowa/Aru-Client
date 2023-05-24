@@ -2063,8 +2063,10 @@ function BaseMap(props) {
                 },
                 onHover: (data, e) => {
                   setLayerName(allLayers[element]?.name);
-                  setSelectedLayerPopupLabel(allLayers[element]?.layerPopupLabel);
-                }
+                  setSelectedLayerPopupLabel(
+                    allLayers[element]?.layerPopupLabel
+                  );
+                },
               })
             );
             break;
@@ -2159,7 +2161,9 @@ function BaseMap(props) {
                 },
                 onHover: (data, e) => {
                   setLayerName(allLayers[element]?.name);
-                  setSelectedLayerPopupLabel(allLayers[element]?.layerPopupLabel);
+                  setSelectedLayerPopupLabel(
+                    allLayers[element]?.layerPopupLabel
+                  );
                 },
                 extensions: [new DataFilterExtension({ filterSize: 1 })],
                 getFilterValue: (f, i) => {
@@ -2271,8 +2275,10 @@ function BaseMap(props) {
                 },
                 onHover: (data, e) => {
                   setLayerName(allLayers[element]?.name);
-                  setSelectedLayerPopupLabel(allLayers[element]?.layerPopupLabel);
-                }
+                  setSelectedLayerPopupLabel(
+                    allLayers[element]?.layerPopupLabel
+                  );
+                },
               })
             );
             break;
@@ -6066,15 +6072,18 @@ function BaseMap(props) {
         getCursor={() => {
           return isDrawing ? "crosshair" : "grab";
         }}
-        getTooltip={({object}) => {
-          return object && object?.properties?.[selectedLayerPopupLabel] && {
-          html: `<div style="font-size: 1rem; color: #000">${layerName}</div><hr style="color: ${object.properties.color}"/>${selectedLayerPopupLabel} : ${object?.properties?.[selectedLayerPopupLabel]}`,
-          style: {
-            backgroundColor: '#fff',
-            margin: '0px',
-            borderRadius: '5px',
-          }
-        }
+        getTooltip={({ object }) => {
+          return (
+            object &&
+            object?.properties?.[selectedLayerPopupLabel] && {
+              html: `<div style="font-size: 1rem; color: #000">${layerName}</div><hr style="color: ${object.properties.color}"/>${selectedLayerPopupLabel} : ${object?.properties?.[selectedLayerPopupLabel]}`,
+              style: {
+                backgroundColor: "#fff",
+                margin: "0px",
+                borderRadius: "5px",
+              },
+            }
+          );
         }}
         onClick={(info, event) => {
           setShowDrawingTools(false);
