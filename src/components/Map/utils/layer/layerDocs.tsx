@@ -72,6 +72,9 @@ function LayerDocs(props) {
   const [reviewFiles, populateReviewFiles] = useState([]);
   const [reviewFilesLoader, setReviewFilesLoader] = useState(true);
   const [reviewOptions, setReviewOptions] = useState([]);
+  const [isLayerLabel, setIsLayerLabel] = useState(
+    props.layerLabel === "No label selected" ? false : true
+  );
   const [activateButtons, setActivateButtons] = useState(true);
   const [showConfirmBtn, setShowConfirmBtn] = useState(false);
   const [reviewList, setReviewList] = useState<any>([]);
@@ -383,7 +386,59 @@ function LayerDocs(props) {
       }
     }
   }
-
+  const layerLabelSelector = () => {
+    console.log("props.layerLabel", props.layerLabel);
+    return (
+      <>
+        <Title level={4}>Layer Label</Title>
+        <Alert
+          message="What is layer label?"
+          description="A layer label points to the attribute of a feature, that you want to associate with all the files linked with a layer"
+          type="info"
+          showIcon
+        />
+        <div style={{ marginTop: "8px" }}>
+          <p>Select your layer label</p>
+          <Spin spinning={attributesLoading}>
+            <Select
+              placeholder={props.layerLabel}
+              style={{ width: "100%" }}
+              onChange={handleChange}
+              loading={selectLoader}
+              virtual={false}
+            >
+              {attributess.map((item: any) => {
+                return (
+                  <Option key={`1-${item}`} value={item}>
+                    {item}
+                  </Option>
+                );
+              })}
+            </Select>
+          </Spin>
+        </div>
+        {isLayerLabel && (
+          <div style={{ marginTop: "1rem" }}>
+            <p>Popup Attribute</p>
+            <Select
+              placeholder={props.layerPopupLabel}
+              style={{ width: "100%" }}
+              onChange={handlePopupAttrChange}
+              virtual={false}
+            >
+              {attributess.map((item: any) => {
+                return (
+                  <Option key={`1-${item}`} value={item}>
+                    {item}
+                  </Option>
+                );
+              })}
+            </Select>
+          </div>
+        )}
+      </>
+    );
+  };
   //------Review single item-----------------------
   function updateReviewListSingle(
     id: any,
@@ -726,6 +781,7 @@ function LayerDocs(props) {
       .then((res: any) => {
         if (res.data.status) {
           message.success("Layer labelled!");
+          setIsLayerLabel(true);
           props.setSelectedLayerLabel(res.data.data.layerLabel);
           props.updateLayerDataAfterEditing(res.data.data, null, null);
         } else {
@@ -737,6 +793,29 @@ function LayerDocs(props) {
         AxiosErrorHandler(err, props.logout);
       })
       .finally(() => setSelectLoader(false));
+  }
+
+  function handlePopupAttrChange(value) {
+    //console.log(`selected ${value}`);
+    const payload = {
+      layerId: props.layerId,
+      label: value,
+    };
+    http
+      .patch(`${apis.SET_LAYER_LABEL}?popup=true`, payload)
+      .then((res: any) => {
+        if (res.data.status) {
+          message.success("Feature Point popup labelled!");
+          props.setSelectedLayerPopupLabel(res.data.data.layerPopupLabel);
+          props.updateLayerDataAfterEditing(res.data.data, null, null);
+        } else {
+          message.error(res.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, props.logout);
+      });
   }
 
   // make layer public
@@ -1047,33 +1126,7 @@ function LayerDocs(props) {
                               />
                             </div>
                             <Divider />
-                            <Title level={4}>Layer Label</Title>
-                            <Alert
-                              message="What is layer label?"
-                              description="A layer label points to the attribute of a feature, that you want to associate with all the files linked with a layer"
-                              type="info"
-                              showIcon
-                            />
-                            <div style={{ marginTop: "8px" }}>
-                              <p>Select your layer label</p>
-                              <Spin spinning={attributesLoading}>
-                                <Select
-                                  placeholder={props.layerLabel}
-                                  style={{ width: "100%" }}
-                                  onChange={handleChange}
-                                  loading={selectLoader}
-                                  virtual={false}
-                                >
-                                  {attributess.map((item: any) => {
-                                    return (
-                                      <Option key={`1-${item}`} value={item}>
-                                        {item}
-                                      </Option>
-                                    );
-                                  })}
-                                </Select>
-                              </Spin>
-                            </div>
+                            {layerLabelSelector()}
                             {/* Make map public */}
                             <Divider />
                             <Title level={4}>Make layer public</Title>
@@ -1150,27 +1203,7 @@ function LayerDocs(props) {
                           </>
                         ) : (
                           <>
-                            <Title level={3}>Layer Label</Title>
-                            <div>
-                              <p>Select your layer label</p>
-                              <Spin spinning={attributesLoading}>
-                                <Select
-                                  placeholder={props.layerLabel}
-                                  style={{ width: "100%" }}
-                                  onChange={handleChange}
-                                  loading={selectLoader}
-                                  virtual={false}
-                                >
-                                  {attributess.map((item: any) => {
-                                    return (
-                                      <Option key={`1-${item}`} value={item}>
-                                        {item}
-                                      </Option>
-                                    );
-                                  })}
-                                </Select>
-                              </Spin>
-                            </div>
+                            {layerLabelSelector()}
                             <Divider />
                             <Title level={4}>Make layer public</Title>
                             {!props.layer.isPublic && (
@@ -1284,52 +1317,10 @@ function LayerDocs(props) {
                           />
                         </div>
                         <Divider />
-                        <Title level={3}>Layer Label</Title>
-                        <div>
-                          <p>Select your layer label</p>
-                          <Spin spinning={attributesLoading}>
-                            <Select
-                              placeholder={props.layerLabel}
-                              style={{ width: "100%" }}
-                              onChange={handleChange}
-                              loading={selectLoader}
-                              virtual={false}
-                            >
-                              {attributess.map((item: any) => {
-                                return (
-                                  <Option key={`1-${item}`} value={item}>
-                                    {item}
-                                  </Option>
-                                );
-                              })}
-                            </Select>
-                          </Spin>
-                        </div>
+                        {layerLabelSelector()}
                       </>
                     ) : (
-                      <>
-                        <Title level={3}>Layer Label</Title>
-                        <div>
-                          <p>Select your layer label</p>
-                          <Spin spinning={attributesLoading}>
-                            <Select
-                              placeholder={props.layerLabel}
-                              style={{ width: "100%" }}
-                              onChange={handleChange}
-                              loading={selectLoader}
-                              virtual={false}
-                            >
-                              {attributess.map((item: any) => {
-                                return (
-                                  <Option key={`1-${item}`} value={item}>
-                                    {item}
-                                  </Option>
-                                );
-                              })}
-                            </Select>
-                          </Spin>
-                        </div>
-                      </>
+                      <>{layerLabelSelector()}</>
                     )}
                   </>
                 </TabPane>
