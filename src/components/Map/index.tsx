@@ -4518,6 +4518,26 @@ function BaseMap(props) {
     return 0;
   }
 
+  const getEditLayerTypeOptions = (layerType) => {
+    console.log(layerType);
+    let filteredOptions = options.filter(option => option.value.toUpperCase() == layerType[0]);
+
+    filteredOptions[0].label = filteredOptions[0].title;
+    delete filteredOptions[0].title;
+    
+    if(filteredOptions[0].children.length > 0 && layerType.length > 0) {
+      filteredOptions[0].children = filteredOptions[0].children.filter(child => child.value.toUpperCase() == layerType[1]);
+      filteredOptions[0].children[0].label = filteredOptions[0].children[0].title;
+      delete filteredOptions[0].children[0].title;
+      filteredOptions[0].children[0].children = filteredOptions[0].children[0].children.map(option => {
+        option.label = option.title;
+        delete option.title;
+        return option;
+      });
+    }
+    return filteredOptions;
+  };
+
   const uploadProps = {
     name: "file",
     multiple: false,
@@ -4960,10 +4980,13 @@ function BaseMap(props) {
 
   const editLayer = () => {
     props.loading(true);
-    const data = {
+    const data: any = {
       name: layerName,
-      captureDate: captureDate,
+      captureDate: captureDate
     };
+    if(layerTypeId !== "") {
+      data.layerType = layerTypeId
+    }
 
     // change color
     if (selectedLayerType === "vector") {
@@ -4971,6 +4994,7 @@ function BaseMap(props) {
         .patch(apis.CHANGE_COLOR_BY_ID, {
           id: selectedLayerId,
           color: layerColor,
+          icon: icon2
         })
         .then((res) => {
           if (res.data.status) {
@@ -4994,11 +5018,14 @@ function BaseMap(props) {
           AxiosErrorHandler(err, props.logout);
         })
         .finally(() => {
-          setLayerColor("");
+          setLayerColor("#ffaa00"); // default value that was previously also used in first declaration
           setLayerName("");
           setCaptureDate("");
+          setIcon2(iconOptions[0].value); // default value that was previously also used in first declaration
           props.loading(false);
         });
+
+        refreshLayers();
     }
 
     props.loading(true);
@@ -5034,8 +5061,11 @@ function BaseMap(props) {
         setLayerName("");
         setCaptureDate("");
         setLayerColor("");
+        setLayerTypeId("");
         props.loading(false);
       });
+
+      refreshLayers();
   };
 
   const editFeature = (data, color, index) => {
@@ -6866,8 +6896,13 @@ function BaseMap(props) {
                         <Cascader
                           style={{ width: "100%" }}
                           defaultValue={defaultLayerType}
-                          disabled
+                          options={getEditLayerTypeOptions(defaultLayerType)}
                           placeholder="Select Layer Type"
+                          onChange={(value) => {
+                            const temp = String(value[value.length - 1]).split("-");
+                            const updatedTypeId = temp[temp.length - 2];
+                            setLayerTypeId(updatedTypeId);
+                          }}
                         />
                         {/* </Form.Item> */}
 
@@ -6881,6 +6916,19 @@ function BaseMap(props) {
                                 )
                               );
                             }}
+                          />
+                        </Form.Item>
+
+                        <Form.Item label="Icon" name="icon">
+                          <TreeSelect
+                            showSearch
+                            dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+                            placeholder="Select Icon"
+                            placement="bottomLeft"
+                            defaultValue={icon2}
+                            treeData={iconOptions}
+                            onChange={(value) => setIcon2(value)}
+                            treeIcon={true}
                           />
                         </Form.Item>
                       </Col>
