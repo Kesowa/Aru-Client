@@ -112,6 +112,7 @@ import CreateLayer from "./utils/layer/createLayer";
 import CreateBaseLayer from "./utils/layer/createBaseLayer";
 import io from "socket.io-client";
 import Thread from "../shared/Thread";
+import { thread } from "../../actions/threadAction";
 import {
   COG_URL,
   MAPBOX_API_KEY,
@@ -2935,7 +2936,6 @@ function BaseMap(props) {
   };
 
   const getTreeData = (layer, type, keyPrefix) => {
-    //console.log("layer info from gettree data", layer);
     switch (type) {
       case "raster":
         return {
@@ -2966,6 +2966,7 @@ function BaseMap(props) {
                         ) : (
                           <></>
                         )}
+                        
                       </>
                     ) : (
                       <Menu.Item
@@ -2984,6 +2985,19 @@ function BaseMap(props) {
                       >
                         Edit
                       </Menu.Item>
+                    )}
+                    {layer.type === "Raster" && (
+                      <Menu.Item
+                      key="10"
+                      onClick={() => {
+                        props.thread(true, {
+                          docType: "layer",
+                          docId: layer._id,
+                        });
+                      }}
+                    >
+                       Open Thread
+                    </Menu.Item>
                     )}
                     {props.isBaseMap ? (
                       <>
@@ -3246,6 +3260,16 @@ function BaseMap(props) {
                     </span>
                   }
                 >
+                  <Badge
+                      style={{
+                        backgroundColor: "#3b86ff",
+                        boxShadow: "0 0 3px 1px black",
+                        zIndex: 10,
+                      }}
+                      offset={[25, 6]}
+                      count={layer.isThreadExist ? layer.commentCount : 0}
+                      overflowCount={9}
+                    >
                   <Text
                     style={
                       layer.layerGroupId
@@ -3267,6 +3291,7 @@ function BaseMap(props) {
                   >
                     {layer.name}
                   </Text>
+                  </Badge>
                 </Tooltip>
               </Dropdown>
             </>
@@ -3350,6 +3375,18 @@ function BaseMap(props) {
                       <></>
                     )}
                     {layer.type === "Vector" && (
+                      <>
+                      <Menu.Item
+                                    key="10"
+                                    onClick={() => {
+                                      props.thread(true, {
+                                        docType: "layer",
+                                        docId: layer._id,
+                                      });
+                                    }}
+                                  >
+                                     Open Thread
+                                  </Menu.Item>
                       <SubMenu title="Toggle Flag" key="3">
                         <Menu.Item
                           key="3-1"
@@ -3388,6 +3425,7 @@ function BaseMap(props) {
                           Un-flag Layer
                         </Menu.Item>
                       </SubMenu>
+                      </>
                     )}
 
                     {props.isBaseMap ? (
@@ -3678,7 +3716,16 @@ function BaseMap(props) {
                     </span>
                   }
                 >
-                  <span>
+                  <Badge
+                      style={{
+                        backgroundColor: "#3b86ff",
+                        boxShadow: "0 0 3px 1px black",
+                        zIndex: 10,
+                      }}
+                      offset={[25, 6]}
+                      count={layer.isThreadExist ? layer.commentCount : 0}
+                      overflowCount={9}
+                    >
                     <Text
                       style={
                         layer.layerGroupId
@@ -3704,7 +3751,7 @@ function BaseMap(props) {
                     {layer.isPublic && (
                       <EyeOutlined style={{ color: "#3b86ff" }} />
                     )}
-                  </span>
+                  </Badge>
                 </Tooltip>
               </Dropdown>
             </>
@@ -4153,7 +4200,11 @@ function BaseMap(props) {
   useEffect(() => {
     refreshLayers();
   }, [treeStructure, checkedKeys, panes, dateRange]);
-
+  useEffect(() => {
+    if (!props.Thread.open) {
+      setRefreshLayer(!refreshLayer);
+    }
+  }, [props.Thread.open]);
   const refreshLayers = () => {
     const td: any = [...treeStructure];
     let newTreeDataVector: any = [];
@@ -7268,10 +7319,12 @@ const mapStateToProps = (state) => {
   return {
     userType: state.Auth.userdetails.userType,
     userDetails: state.Auth.userdetails,
+    Thread: state.Thread,
   };
 };
 
 export default connect(mapStateToProps, {
   loading,
   logout,
+  thread,
 })(BaseMap);
