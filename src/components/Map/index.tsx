@@ -3325,6 +3325,7 @@ function BaseMap(props) {
                                 layer.vector.name.toUpperCase(),
                               ]);
                               setSelectedLayerType("vector");
+                              setLayerColor(layer.color);
                             }}
                           >
                             Edit
@@ -3347,6 +3348,7 @@ function BaseMap(props) {
                             layer.vector.name.toUpperCase(),
                           ]);
                           setSelectedLayerType("vector");
+                          setLayerColor(layer.color);
                         }}
                       >
                         Edit
@@ -5060,7 +5062,7 @@ function BaseMap(props) {
         form.resetFields();
         setLayerName("");
         setCaptureDate("");
-        setLayerColor("");
+        setLayerColor("#ffaa00");
         setLayerTypeId("");
         props.loading(false);
       });
