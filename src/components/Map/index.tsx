@@ -2965,7 +2965,7 @@ function BaseMap(props) {
                           </Menu.Item>
                         ) : (
                           <></>
-                        )}
+                        )}     
                       </>
                     ) : (
                       <Menu.Item
@@ -2987,16 +2987,16 @@ function BaseMap(props) {
                     )}
                     {layer.type === "Raster" && (
                       <Menu.Item
-                        key="10"
-                        onClick={() => {
-                          props.thread(true, {
-                            docType: "layer",
-                            docId: layer._id,
-                          });
-                        }}
-                      >
-                        Open Thread
-                      </Menu.Item>
+                      key="10"
+                      onClick={() => {
+                        props.thread(true, {
+                          docType: "layer",
+                          docId: layer._id,
+                        });
+                      }}
+                    >
+                       Open Thread
+                    </Menu.Item>
                     )}
                     {props.isBaseMap ? (
                       <>
@@ -3260,36 +3260,36 @@ function BaseMap(props) {
                   }
                 >
                   <Badge
-                    style={{
-                      backgroundColor: "#3b86ff",
-                      boxShadow: "0 0 3px 1px black",
-                      zIndex: 10,
-                    }}
-                    offset={[25, 6]}
-                    count={layer.isThreadExist ? layer.commentCount : 0}
-                    overflowCount={9}
-                  >
-                    <Text
-                      style={
-                        layer.layerGroupId
-                          ? { width: "139px" }
-                          : { width: "160px" }
-                      }
-                      ellipsis={true}
-                      onClick={() => {
-                        if (!props.isBaseMap) {
-                          setlayerToAddInAttributeTable({
-                            name: layer.name,
-                            type: layer.type,
-                            id: layer._id,
-                            path: layer.layerpath,
-                            count: layer.featureCount,
-                          });
-                        }
+                      style={{
+                        backgroundColor: "#3b86ff",
+                        boxShadow: "0 0 3px 1px black",
+                        zIndex: 10,
                       }}
+                      offset={[25, 6]}
+                      count={layer.isThreadExist ? layer.commentCount : 0}
+                      overflowCount={9}
                     >
-                      {layer.name}
-                    </Text>
+                  <Text
+                    style={
+                      layer.layerGroupId
+                        ? { width: "139px" }
+                        : { width: "160px" }
+                    }
+                    ellipsis={true}
+                    onClick={() => {
+                      if (!props.isBaseMap) {
+                        setlayerToAddInAttributeTable({
+                          name: layer.name,
+                          type: layer.type,
+                          id: layer._id,
+                          path: layer.layerpath,
+                          count: layer.featureCount,
+                        });
+                      }
+                    }}
+                  >
+                    {layer.name}
+                  </Text>
                   </Badge>
                 </Tooltip>
               </Dropdown>
@@ -3375,55 +3375,55 @@ function BaseMap(props) {
                     )}
                     {layer.type === "Vector" && (
                       <>
+                      <Menu.Item
+                                    key="10"
+                                    onClick={() => {
+                                      props.thread(true, {
+                                        docType: "layer",
+                                        docId: layer._id,
+                                      });
+                                    }}
+                                  >
+                                     Open Thread
+                                  </Menu.Item>
+                      <SubMenu title="Toggle Flag" key="3">
                         <Menu.Item
-                          key="10"
+                          key="3-1"
                           onClick={() => {
-                            props.thread(true, {
-                              docType: "layer",
-                              docId: layer._id,
+                            Modal.confirm({
+                              title: "Flag Layer?",
+                              icon: <ExclamationCircleOutlined />,
+                              content:
+                                "Are you sure you want to flag the entire layer?",
+                              okText: "Yes",
+                              cancelText: "No",
+                              onOk: () => {
+                                toggleLayerFlag(layer._id, true);
+                              },
                             });
                           }}
                         >
-                          Open Thread
+                          Flag Layer
                         </Menu.Item>
-                        <SubMenu title="Toggle Flag" key="3">
-                          <Menu.Item
-                            key="3-1"
-                            onClick={() => {
-                              Modal.confirm({
-                                title: "Flag Layer?",
-                                icon: <ExclamationCircleOutlined />,
-                                content:
-                                  "Are you sure you want to flag the entire layer?",
-                                okText: "Yes",
-                                cancelText: "No",
-                                onOk: () => {
-                                  toggleLayerFlag(layer._id, true);
-                                },
-                              });
-                            }}
-                          >
-                            Flag Layer
-                          </Menu.Item>
-                          <Menu.Item
-                            key="3-2"
-                            onClick={() => {
-                              Modal.confirm({
-                                title: "Un-flag Layer?",
-                                icon: <ExclamationCircleOutlined />,
-                                content:
-                                  "Are you sure you want to un-flag the entire layer? This will un-flag all flagged features as well.",
-                                okText: "Yes",
-                                cancelText: "No",
-                                onOk: () => {
-                                  toggleLayerFlag(layer._id, false);
-                                },
-                              });
-                            }}
-                          >
-                            Un-flag Layer
-                          </Menu.Item>
-                        </SubMenu>
+                        <Menu.Item
+                          key="3-2"
+                          onClick={() => {
+                            Modal.confirm({
+                              title: "Un-flag Layer?",
+                              icon: <ExclamationCircleOutlined />,
+                              content:
+                                "Are you sure you want to un-flag the entire layer? This will un-flag all flagged features as well.",
+                              okText: "Yes",
+                              cancelText: "No",
+                              onOk: () => {
+                                toggleLayerFlag(layer._id, false);
+                              },
+                            });
+                          }}
+                        >
+                          Un-flag Layer
+                        </Menu.Item>
+                      </SubMenu>
                       </>
                     )}
 
@@ -3716,15 +3716,15 @@ function BaseMap(props) {
                   }
                 >
                   <Badge
-                    style={{
-                      backgroundColor: "#3b86ff",
-                      boxShadow: "0 0 3px 1px black",
-                      zIndex: 10,
-                    }}
-                    offset={[25, 6]}
-                    count={layer.isThreadExist ? layer.commentCount : 0}
-                    overflowCount={9}
-                  >
+                      style={{
+                        backgroundColor: "#3b86ff",
+                        boxShadow: "0 0 3px 1px black",
+                        zIndex: 10,
+                      }}
+                      offset={[25, 6]}
+                      count={layer.isThreadExist ? layer.commentCount : 0}
+                      overflowCount={9}
+                    >
                     <Text
                       style={
                         layer.layerGroupId
