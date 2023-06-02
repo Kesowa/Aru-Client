@@ -145,6 +145,18 @@ const Thread = (props) => {
       </span>,
     ];
   };
+  const filterArrayWithUniqueIds = (data: any) => {
+    const uniqueIds = new Set();
+    return data.filter(obj => {
+      if (uniqueIds.has(obj.id)) {
+        return false; // Skip duplicates
+      } else {
+        uniqueIds.add(obj.id);
+        return true; // Include unique objects
+      }
+    });
+  };
+  
   const extractMentionsAndFormatText = (comments) => {
     const regex = /@\[([^[\]]+)\]\(([^()]+)\)/g;
     const mentions = [];
@@ -159,8 +171,9 @@ const Thread = (props) => {
       );
       modifiedComments.push({ ...comment, displayContent: modifiedText });
     });
-    console.log(mentions, modifiedComments);
-    setAllMentions(mentions);
+    const uniqueMentions = filterArrayWithUniqueIds(mentions)
+    console.log(uniqueMentions, modifiedComments);
+    setAllMentions(uniqueMentions);
     setComments(modifiedComments);
   };
 

@@ -11,6 +11,7 @@ const mentionsInput = {
   },
   input: {
     outline: "none",
+    borderRadius: "5px",
   },
   "&multiLine": {
     control: {
@@ -45,12 +46,13 @@ const mentionsInput = {
       backgroundColor: "white",
       border: "1px solid rgba(0,0,0,0.15)",
       fontSize: 16,
+      borderRadius: "5px",
     },
     item: {
       padding: "5px 15px",
-      borderBottom: "1px solid rgba(0,0,0,0.15)",
       "&focused": {
-        backgroundColor: "#cee4e5",
+        backgroundColor: "#d3d3d3",
+        borderRadius: "5px",
       },
     },
   },
