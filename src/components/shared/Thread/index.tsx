@@ -269,11 +269,9 @@ const Thread = (props) => {
 
   // ----- Form handler (Add or Edit Comment)
   const addHandleChange = (e) => {
-    console.log("value", e.target.value);
     setAddCommentValue(e.target.value);
   };
   const editHandleChange = (e) => {
-    console.log("value", e.target.value);
     setEditCommentValue(e.target.value);
   };
   const addHandleSubmit = async (e) => {

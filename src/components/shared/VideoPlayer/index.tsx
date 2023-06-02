@@ -616,6 +616,7 @@ function VideoPlayer(props: any) {
     }
   };
   useEffect(()=>{
+    console.log('props.seek', props.seek)
     if (props.seek){
       handleSeekChange(props.seek);
       handleSeekMouseUp(props.seek);
