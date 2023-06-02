@@ -4522,20 +4522,26 @@ function BaseMap(props) {
 
   const getEditLayerTypeOptions = (layerType) => {
     console.log(layerType);
-    let filteredOptions = options.filter(option => option.value.toUpperCase() == layerType[0]);
+    const filteredOptions = options.filter(
+      (option) => option.value.toUpperCase() == layerType[0]
+    );
 
     filteredOptions[0].label = filteredOptions[0].title;
     delete filteredOptions[0].title;
-    
-    if(filteredOptions[0].children.length > 0 && layerType.length > 0) {
-      filteredOptions[0].children = filteredOptions[0].children.filter(child => child.value.toUpperCase() == layerType[1]);
-      filteredOptions[0].children[0].label = filteredOptions[0].children[0].title;
+
+    if (filteredOptions[0].children.length > 0 && layerType.length > 0) {
+      filteredOptions[0].children = filteredOptions[0].children.filter(
+        (child) => child.value.toUpperCase() == layerType[1]
+      );
+      filteredOptions[0].children[0].label =
+        filteredOptions[0].children[0].title;
       delete filteredOptions[0].children[0].title;
-      filteredOptions[0].children[0].children = filteredOptions[0].children[0].children.map(option => {
-        option.label = option.title;
-        delete option.title;
-        return option;
-      });
+      filteredOptions[0].children[0].children =
+        filteredOptions[0].children[0].children.map((option) => {
+          option.label = option.title;
+          delete option.title;
+          return option;
+        });
     }
     return filteredOptions;
   };
@@ -4984,10 +4990,10 @@ function BaseMap(props) {
     props.loading(true);
     const data: any = {
       name: layerName,
-      captureDate: captureDate
+      captureDate: captureDate,
     };
-    if(layerTypeId !== "") {
-      data.layerType = layerTypeId
+    if (layerTypeId !== "") {
+      data.layerType = layerTypeId;
     }
 
     // change color
@@ -4996,7 +5002,7 @@ function BaseMap(props) {
         .patch(apis.CHANGE_COLOR_BY_ID, {
           id: selectedLayerId,
           color: layerColor,
-          icon: icon2
+          icon: icon2,
         })
         .then((res) => {
           if (res.data.status) {
@@ -5027,7 +5033,7 @@ function BaseMap(props) {
           props.loading(false);
         });
 
-        refreshLayers();
+      refreshLayers();
     }
 
     props.loading(true);
@@ -5067,7 +5073,7 @@ function BaseMap(props) {
         props.loading(false);
       });
 
-      refreshLayers();
+    refreshLayers();
   };
 
   const editFeature = (data, color, index) => {
@@ -6901,7 +6907,9 @@ function BaseMap(props) {
                           options={getEditLayerTypeOptions(defaultLayerType)}
                           placeholder="Select Layer Type"
                           onChange={(value) => {
-                            const temp = String(value[value.length - 1]).split("-");
+                            const temp = String(value[value.length - 1]).split(
+                              "-"
+                            );
                             const updatedTypeId = temp[temp.length - 2];
                             setLayerTypeId(updatedTypeId);
                           }}
