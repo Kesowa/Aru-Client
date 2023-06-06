@@ -172,7 +172,7 @@ const Thread = (props) => {
       modifiedComments.push({ ...comment, displayContent: modifiedText });
     });
     const uniqueMentions = filterArrayWithUniqueIds(mentions)
-    console.log(uniqueMentions, modifiedComments);
+    //console.log('extract', uniqueMentions, modifiedComments);
     setAllMentions(uniqueMentions);
     setComments(modifiedComments);
   };
@@ -192,10 +192,9 @@ const Thread = (props) => {
     return foundObject || false;
   };
   const CommentWithFormattedMentions = ({ text }) => {
-    const words = text.split(" ");
+    const words = text.replace("\n"," \n").split(" ");
     return words.map((word, index) => {
       const mention = checkStringForKeyValue(word, "display");
-
       // Apply formatting to specific words based on conditions
       if (mention) {
         return (
