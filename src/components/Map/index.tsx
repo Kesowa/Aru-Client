@@ -112,6 +112,7 @@ import CreateLayer from "./utils/layer/createLayer";
 import CreateBaseLayer from "./utils/layer/createBaseLayer";
 import io from "socket.io-client";
 import Thread from "../shared/Thread";
+import { thread } from "../../actions/threadAction";
 import {
   COG_URL,
   MAPBOX_API_KEY,
@@ -1124,6 +1125,7 @@ function BaseMap(props) {
   const [featureLayerPath, setFeatureLayerPath] = useState("");
   const [windowTitle, setWindowTitle] = useState("");
   const [selectedLayerLabel, setSelectedLayerLabel] = useState("");
+  const [selectedLayerPopupLabel, setSelectedLayerPopupLabel] = useState("");
   const [activeID, setActiveID] = useState("");
   const [selectedIndexes, setSelectedIndexes] = useState<React.Key[]>([]);
   const [showSelectedIndexes, setshowSelectedIndexes] = useState([]);
@@ -2049,11 +2051,22 @@ function BaseMap(props) {
                         ? allLayers[element]?.layerLabel
                         : "No label selected"
                     );
+                    setSelectedLayerPopupLabel(
+                      allLayers[element]?.layerPopupLabel
+                        ? allLayers[element]?.layerPopupLabel
+                        : "No label selected"
+                    );
                   } else {
                     setSelectedLayerId(element.split("-")[1]);
                     setColorChangeFeatureData(data);
                     setShowColorChangeForm(true);
                   }
+                },
+                onHover: (data, e) => {
+                  setLayerName(allLayers[element]?.name);
+                  setSelectedLayerPopupLabel(
+                    allLayers[element]?.layerPopupLabel
+                  );
                 },
               })
             );
@@ -2136,11 +2149,22 @@ function BaseMap(props) {
                         ? allLayers[element]?.layerLabel
                         : "No label selected"
                     );
+                    setSelectedLayerPopupLabel(
+                      allLayers[element]?.layerPopupLabel
+                        ? allLayers[element]?.layerPopupLabel
+                        : "No label selected"
+                    );
                   } else {
                     setSelectedLayerId(element.split("-")[1]);
                     setColorChangeFeatureData(data);
                     setShowColorChangeForm(true);
                   }
+                },
+                onHover: (data, e) => {
+                  setLayerName(allLayers[element]?.name);
+                  setSelectedLayerPopupLabel(
+                    allLayers[element]?.layerPopupLabel
+                  );
                 },
                 extensions: [new DataFilterExtension({ filterSize: 1 })],
                 getFilterValue: (f, i) => {
@@ -2239,11 +2263,22 @@ function BaseMap(props) {
                         ? allLayers[element]?.layerLabel
                         : "No label selected"
                     );
+                    setSelectedLayerPopupLabel(
+                      allLayers[element]?.layerPopupLabel
+                        ? allLayers[element]?.layerPopupLabel
+                        : "No label selected"
+                    );
                   } else {
                     setSelectedLayerId(element.split("-")[1]);
                     setColorChangeFeatureData(data);
                     setShowColorChangeForm(true);
                   }
+                },
+                onHover: (data, e) => {
+                  setLayerName(allLayers[element]?.name);
+                  setSelectedLayerPopupLabel(
+                    allLayers[element]?.layerPopupLabel
+                  );
                 },
               })
             );
@@ -2901,7 +2936,6 @@ function BaseMap(props) {
   };
 
   const getTreeData = (layer, type, keyPrefix) => {
-    //console.log("layer info from gettree data", layer);
     switch (type) {
       case "raster":
         return {
@@ -2949,6 +2983,19 @@ function BaseMap(props) {
                         }}
                       >
                         Edit
+                      </Menu.Item>
+                    )}
+                    {layer.type === "Raster" && (
+                      <Menu.Item
+                        key="10"
+                        onClick={() => {
+                          props.thread(true, {
+                            docType: "layer",
+                            docId: layer._id,
+                          });
+                        }}
+                      >
+                        Open Thread
                       </Menu.Item>
                     )}
                     {props.isBaseMap ? (
@@ -3212,27 +3259,38 @@ function BaseMap(props) {
                     </span>
                   }
                 >
-                  <Text
-                    style={
-                      layer.layerGroupId
-                        ? { width: "139px" }
-                        : { width: "160px" }
-                    }
-                    ellipsis={true}
-                    onClick={() => {
-                      if (!props.isBaseMap) {
-                        setlayerToAddInAttributeTable({
-                          name: layer.name,
-                          type: layer.type,
-                          id: layer._id,
-                          path: layer.layerpath,
-                          count: layer.featureCount,
-                        });
-                      }
+                  <Badge
+                    style={{
+                      backgroundColor: "#3b86ff",
+                      boxShadow: "0 0 3px 1px black",
+                      zIndex: 10,
                     }}
+                    offset={[25, 6]}
+                    count={layer.isThreadExist ? layer.commentCount : 0}
+                    overflowCount={9}
                   >
-                    {layer.name}
-                  </Text>
+                    <Text
+                      style={
+                        layer.layerGroupId
+                          ? { width: "139px" }
+                          : { width: "160px" }
+                      }
+                      ellipsis={true}
+                      onClick={() => {
+                        if (!props.isBaseMap) {
+                          setlayerToAddInAttributeTable({
+                            name: layer.name,
+                            type: layer.type,
+                            id: layer._id,
+                            path: layer.layerpath,
+                            count: layer.featureCount,
+                          });
+                        }
+                      }}
+                    >
+                      {layer.name}
+                    </Text>
+                  </Badge>
                 </Tooltip>
               </Dropdown>
             </>
@@ -3267,6 +3325,7 @@ function BaseMap(props) {
                                 layer.vector.name.toUpperCase(),
                               ]);
                               setSelectedLayerType("vector");
+                              setLayerColor(layer.color);
                             }}
                           >
                             Edit
@@ -3289,6 +3348,7 @@ function BaseMap(props) {
                             layer.vector.name.toUpperCase(),
                           ]);
                           setSelectedLayerType("vector");
+                          setLayerColor(layer.color);
                         }}
                       >
                         Edit
@@ -3316,44 +3376,57 @@ function BaseMap(props) {
                       <></>
                     )}
                     {layer.type === "Vector" && (
-                      <SubMenu title="Toggle Flag" key="3">
+                      <>
                         <Menu.Item
-                          key="3-1"
+                          key="10"
                           onClick={() => {
-                            Modal.confirm({
-                              title: "Flag Layer?",
-                              icon: <ExclamationCircleOutlined />,
-                              content:
-                                "Are you sure you want to flag the entire layer?",
-                              okText: "Yes",
-                              cancelText: "No",
-                              onOk: () => {
-                                toggleLayerFlag(layer._id, true);
-                              },
+                            props.thread(true, {
+                              docType: "layer",
+                              docId: layer._id,
                             });
                           }}
                         >
-                          Flag Layer
+                          Open Thread
                         </Menu.Item>
-                        <Menu.Item
-                          key="3-2"
-                          onClick={() => {
-                            Modal.confirm({
-                              title: "Un-flag Layer?",
-                              icon: <ExclamationCircleOutlined />,
-                              content:
-                                "Are you sure you want to un-flag the entire layer? This will un-flag all flagged features as well.",
-                              okText: "Yes",
-                              cancelText: "No",
-                              onOk: () => {
-                                toggleLayerFlag(layer._id, false);
-                              },
-                            });
-                          }}
-                        >
-                          Un-flag Layer
-                        </Menu.Item>
-                      </SubMenu>
+                        <SubMenu title="Toggle Flag" key="3">
+                          <Menu.Item
+                            key="3-1"
+                            onClick={() => {
+                              Modal.confirm({
+                                title: "Flag Layer?",
+                                icon: <ExclamationCircleOutlined />,
+                                content:
+                                  "Are you sure you want to flag the entire layer?",
+                                okText: "Yes",
+                                cancelText: "No",
+                                onOk: () => {
+                                  toggleLayerFlag(layer._id, true);
+                                },
+                              });
+                            }}
+                          >
+                            Flag Layer
+                          </Menu.Item>
+                          <Menu.Item
+                            key="3-2"
+                            onClick={() => {
+                              Modal.confirm({
+                                title: "Un-flag Layer?",
+                                icon: <ExclamationCircleOutlined />,
+                                content:
+                                  "Are you sure you want to un-flag the entire layer? This will un-flag all flagged features as well.",
+                                okText: "Yes",
+                                cancelText: "No",
+                                onOk: () => {
+                                  toggleLayerFlag(layer._id, false);
+                                },
+                              });
+                            }}
+                          >
+                            Un-flag Layer
+                          </Menu.Item>
+                        </SubMenu>
+                      </>
                     )}
 
                     {props.isBaseMap ? (
@@ -3449,6 +3522,11 @@ function BaseMap(props) {
                         setSelectedLayerLabel(
                           layer.layerLabel
                             ? layer.layerLabel
+                            : "No label selected"
+                        );
+                        setSelectedLayerPopupLabel(
+                          layer.layerPopupLabel
+                            ? layer.layerPopupLabel
                             : "No label selected"
                         );
                         setIsLayerDocs(true);
@@ -3639,7 +3717,16 @@ function BaseMap(props) {
                     </span>
                   }
                 >
-                  <span>
+                  <Badge
+                    style={{
+                      backgroundColor: "#3b86ff",
+                      boxShadow: "0 0 3px 1px black",
+                      zIndex: 10,
+                    }}
+                    offset={[25, 6]}
+                    count={layer.isThreadExist ? layer.commentCount : 0}
+                    overflowCount={9}
+                  >
                     <Text
                       style={
                         layer.layerGroupId
@@ -3665,7 +3752,7 @@ function BaseMap(props) {
                     {layer.isPublic && (
                       <EyeOutlined style={{ color: "#3b86ff" }} />
                     )}
-                  </span>
+                  </Badge>
                 </Tooltip>
               </Dropdown>
             </>
@@ -4114,7 +4201,11 @@ function BaseMap(props) {
   useEffect(() => {
     refreshLayers();
   }, [treeStructure, checkedKeys, panes, dateRange]);
-
+  useEffect(() => {
+    if (!props.Thread.open) {
+      setRefreshLayer(!refreshLayer);
+    }
+  }, [props.Thread.open]);
   const refreshLayers = () => {
     const td: any = [...treeStructure];
     let newTreeDataVector: any = [];
@@ -4292,6 +4383,7 @@ function BaseMap(props) {
         T3DTranspose: false,
         groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
         layerLabel: layer.layerLabel,
+        layerPopupLabel: layer.layerPopupLabel,
         isPublic: layer.isPublic,
         flaggedFeatures: layer.flaggedFeatures,
       };
@@ -4427,6 +4519,32 @@ function BaseMap(props) {
     if (x > y) return 1;
     return 0;
   }
+
+  const getEditLayerTypeOptions = (layerType) => {
+    console.log(layerType);
+    const filteredOptions = options.filter(
+      (option) => option.value.toUpperCase() == layerType[0]
+    );
+
+    filteredOptions[0].label = filteredOptions[0].title;
+    delete filteredOptions[0].title;
+
+    if (filteredOptions[0].children.length > 0 && layerType.length > 0) {
+      filteredOptions[0].children = filteredOptions[0].children.filter(
+        (child) => child.value.toUpperCase() == layerType[1]
+      );
+      filteredOptions[0].children[0].label =
+        filteredOptions[0].children[0].title;
+      delete filteredOptions[0].children[0].title;
+      filteredOptions[0].children[0].children =
+        filteredOptions[0].children[0].children.map((option) => {
+          option.label = option.title;
+          delete option.title;
+          return option;
+        });
+    }
+    return filteredOptions;
+  };
 
   const uploadProps = {
     name: "file",
@@ -4870,10 +4988,13 @@ function BaseMap(props) {
 
   const editLayer = () => {
     props.loading(true);
-    const data = {
+    const data: any = {
       name: layerName,
       captureDate: captureDate,
     };
+    if (layerTypeId !== "") {
+      data.layerType = layerTypeId;
+    }
 
     // change color
     if (selectedLayerType === "vector") {
@@ -4881,6 +5002,7 @@ function BaseMap(props) {
         .patch(apis.CHANGE_COLOR_BY_ID, {
           id: selectedLayerId,
           color: layerColor,
+          icon: icon2,
         })
         .then((res) => {
           if (res.data.status) {
@@ -4904,11 +5026,14 @@ function BaseMap(props) {
           AxiosErrorHandler(err, props.logout);
         })
         .finally(() => {
-          setLayerColor("");
+          setLayerColor("#ffaa00"); // default value that was previously also used in first declaration
           setLayerName("");
           setCaptureDate("");
+          setIcon2(iconOptions[0].value); // default value that was previously also used in first declaration
           props.loading(false);
         });
+
+      refreshLayers();
     }
 
     props.loading(true);
@@ -4943,9 +5068,12 @@ function BaseMap(props) {
         form.resetFields();
         setLayerName("");
         setCaptureDate("");
-        setLayerColor("");
+        setLayerColor("#ffaa00");
+        setLayerTypeId("");
         props.loading(false);
       });
+
+    refreshLayers();
   };
 
   const editFeature = (data, color, index) => {
@@ -5019,6 +5147,7 @@ function BaseMap(props) {
             name: data.name,
             id: data._id,
             layerLabel: data.layerLabel,
+            layerPopupLabel: data.layerPopupLabel,
             isPublic: data.isPublic,
             flaggedFeatures: data.flaggedFeatures,
           };
@@ -6031,6 +6160,19 @@ function BaseMap(props) {
         getCursor={() => {
           return isDrawing ? "crosshair" : "grab";
         }}
+        getTooltip={({ object }) => {
+          return (
+            object &&
+            object?.properties?.[selectedLayerPopupLabel] && {
+              html: `<div style="font-size: 1rem; color: #000">${layerName}</div><hr style="color: ${object.properties.color}"/>${selectedLayerPopupLabel} : ${object?.properties?.[selectedLayerPopupLabel]}`,
+              style: {
+                backgroundColor: "#fff",
+                margin: "0px",
+                borderRadius: "5px",
+              },
+            }
+          );
+        }}
         onClick={(info, event) => {
           setShowDrawingTools(false);
           if (event.rightButton) {
@@ -6762,8 +6904,15 @@ function BaseMap(props) {
                         <Cascader
                           style={{ width: "100%" }}
                           defaultValue={defaultLayerType}
-                          disabled
+                          options={getEditLayerTypeOptions(defaultLayerType)}
                           placeholder="Select Layer Type"
+                          onChange={(value) => {
+                            const temp = String(value[value.length - 1]).split(
+                              "-"
+                            );
+                            const updatedTypeId = temp[temp.length - 2];
+                            setLayerTypeId(updatedTypeId);
+                          }}
                         />
                         {/* </Form.Item> */}
 
@@ -6777,6 +6926,19 @@ function BaseMap(props) {
                                 )
                               );
                             }}
+                          />
+                        </Form.Item>
+
+                        <Form.Item label="Icon" name="icon">
+                          <TreeSelect
+                            showSearch
+                            dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+                            placeholder="Select Icon"
+                            placement="bottomLeft"
+                            defaultValue={icon2}
+                            treeData={iconOptions}
+                            onChange={(value) => setIcon2(value)}
+                            treeIcon={true}
                           />
                         </Form.Item>
                       </Col>
@@ -7084,6 +7246,8 @@ function BaseMap(props) {
         renderLayerDocs={setIsLayerDocs}
         isRenderContent={isLayerDocs}
         setSelectedLayerLabel={setSelectedLayerLabel}
+        layerPopupLabel={selectedLayerPopupLabel}
+        setSelectedLayerPopupLabel={setSelectedLayerPopupLabel}
         missionId={id}
         picToMapData={picToMapData}
         setPicToMapData={setPicToMapData}
@@ -7212,10 +7376,12 @@ const mapStateToProps = (state) => {
   return {
     userType: state.Auth.userdetails.userType,
     userDetails: state.Auth.userdetails,
+    Thread: state.Thread,
   };
 };
 
 export default connect(mapStateToProps, {
   loading,
   logout,
+  thread,
 })(BaseMap);
