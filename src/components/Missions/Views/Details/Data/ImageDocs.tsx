@@ -30,6 +30,7 @@ import { connect } from "react-redux";
 import {
   InboxOutlined,
   ExclamationCircleOutlined,
+  FireOutlined,
   DownloadOutlined,
   DeleteOutlined,
   UploadOutlined,
@@ -47,6 +48,7 @@ import FilterToolbar from "src/components/shared/Toolbar/filter";
 import { BsFlagFill } from "react-icons/bs";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
+import ThermalImaging from "src/components/shared/ThermalImaging";
 
 const { Option } = Select;
 let plainOptions = new Array<any>();
@@ -62,6 +64,7 @@ function ImageDocs(props) {
   const [activateSelection, setActivateSelection] = useState(false);
   const [isAscending, setIsAscending] = useState(false);
   const [sortType, setSortType] = useState("timeStamp");
+  const [filePath, setFilePath] = useState("");
   // This is a comment
   const [flag, setFlag] = useState(false);
   const [isFlagged, setIsFlagged] = useState(false);
@@ -80,7 +83,6 @@ function ImageDocs(props) {
       setActivateSelection(false);
     }
   }, [images]);
-
   //--------------------------- ImageCompononent --------------
 
   const ImageCompononent = (item: any) => {
@@ -674,6 +676,7 @@ function ImageDocs(props) {
   // This is a list view
   return (
     <>
+      <ThermalImaging filePath={filePath} setFilePath={setFilePath}/>
       <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
       <FilterToolbar
         type="Image"
@@ -759,6 +762,14 @@ function ImageDocs(props) {
                                           }
                                         >
                                           <DownloadOutlined /> Download
+                                        </Menu.Item>
+                                        <Menu.Item
+                                          key="5"
+                                          onClick={() =>
+                                            setFilePath(item.filePath)
+                                          }
+                                        >
+                                          <FireOutlined /> Thermal View
                                         </Menu.Item>
                                         <Menu.Item
                                           key="2"
@@ -978,6 +989,14 @@ function ImageDocs(props) {
                                       }
                                     >
                                       <DownloadOutlined /> Download
+                                    </Menu.Item>
+                                    <Menu.Item
+                                      key="5"
+                                      onClick={() =>
+                                        setFilePath(item.filePath)
+                                      }
+                                    >
+                                      <FireOutlined /> Thermal View
                                     </Menu.Item>
                                     <Menu.Item
                                       key="2"

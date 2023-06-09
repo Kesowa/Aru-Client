@@ -250,6 +250,9 @@ const apis = {
   //AIML
   INFER_VOD_VIOLENCE: "apis/v1/aiml/vod/:vodId/violence/infer",
   FETCH_AI_TASK: "apis/v1/aiml", //  /:docModel/:docId?infer=
+
+  //Data
+  THERMAL_DATA: "/apis/v1/data/thermal",
 };
 
 export default apis;
