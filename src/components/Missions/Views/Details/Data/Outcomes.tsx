@@ -75,7 +75,7 @@ function Outcomes(props) {
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [alertType, setAlertType] = useState("");
-  const [filePath, setFilePath] = useState("")
+  const [filePath, setFilePath] = useState("");
   const [showOutcomeModal, setShowOutcomeModal] = useState(false);
   const [modalIndex, setModalIndex] = useState(0);
   const [refresh, setRefresh] = useState(true);
@@ -616,9 +616,9 @@ function Outcomes(props) {
       });
   };
   async function downloadImage(imageSrc) {
-    console.log('imageSrc', imageSrc)
+    console.log("imageSrc", imageSrc);
     const image = await fetch(imageSrc);
-    console.log('imageSrc', image)
+    console.log("imageSrc", image);
     const imageBlog = await image.blob();
     const imageURL = URL.createObjectURL(imageBlog);
 
@@ -995,13 +995,11 @@ function Outcomes(props) {
                                 </span>
                               </Menu.Item>
                               <Menu.Item
-                                          key="5"
-                                          onClick={() =>
-                                            setFilePath(outcome.image)
-                                          }
-                                        >
-                                          <FireOutlined /> Thermal View
-                                        </Menu.Item>
+                                key="5"
+                                onClick={() => setFilePath(outcome.image)}
+                              >
+                                <FireOutlined /> Thermal View
+                              </Menu.Item>
                               <Menu.Item
                                 key="2"
                                 onClick={() => {
@@ -1190,13 +1188,11 @@ function Outcomes(props) {
                                     </span>
                                   </Menu.Item>
                                   <Menu.Item
-                                          key="5"
-                                          onClick={() =>
-                                            setFilePath(outcome.image)
-                                          }
-                                        >
-                                          <FireOutlined /> Thermal View
-                                        </Menu.Item>
+                                    key="5"
+                                    onClick={() => setFilePath(outcome.image)}
+                                  >
+                                    <FireOutlined /> Thermal View
+                                  </Menu.Item>
                                   <Menu.Item
                                     key="2"
                                     onClick={() => {
@@ -1368,7 +1364,7 @@ function Outcomes(props) {
             </>
           ) : null}
           <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
-          <ThermalImaging filePath={filePath} setFilePath={setFilePath}/>
+          <ThermalImaging filePath={filePath} setFilePath={setFilePath} />
           <OutcomeModal
             visible={showOutcomeModal}
             closeModal={setShowOutcomeModal}

@@ -676,7 +676,7 @@ function ImageDocs(props) {
   // This is a list view
   return (
     <>
-      <ThermalImaging filePath={filePath} setFilePath={setFilePath}/>
+      <ThermalImaging filePath={filePath} setFilePath={setFilePath} />
       <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
       <FilterToolbar
         type="Image"
@@ -992,9 +992,7 @@ function ImageDocs(props) {
                                     </Menu.Item>
                                     <Menu.Item
                                       key="5"
-                                      onClick={() =>
-                                        setFilePath(item.filePath)
-                                      }
+                                      onClick={() => setFilePath(item.filePath)}
                                     >
                                       <FireOutlined /> Thermal View
                                     </Menu.Item>

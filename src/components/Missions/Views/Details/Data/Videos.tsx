@@ -1691,7 +1691,11 @@ function Videos(props) {
           }
         />
       </Modal>
-      <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} data={threadDetails} />
+      <Thread
+        thumbnail={thumbnail}
+        setThumbnail={setThumbnail}
+        data={threadDetails}
+      />
       <FilterToolbar
         type="Video"
         loader={loader}

@@ -147,7 +147,7 @@ const Thread = (props) => {
   };
   const filterArrayWithUniqueIds = (data: any) => {
     const uniqueIds = new Set();
-    return data.filter(obj => {
+    return data.filter((obj) => {
       if (uniqueIds.has(obj.id)) {
         return false; // Skip duplicates
       } else {
@@ -156,7 +156,7 @@ const Thread = (props) => {
       }
     });
   };
-  
+
   const extractMentionsAndFormatText = (comments) => {
     const regex = /@\[([^[\]]+)\]\(([^()]+)\)/g;
     const mentions = [];
@@ -171,7 +171,7 @@ const Thread = (props) => {
       );
       modifiedComments.push({ ...comment, displayContent: modifiedText });
     });
-    const uniqueMentions = filterArrayWithUniqueIds(mentions)
+    const uniqueMentions = filterArrayWithUniqueIds(mentions);
     //console.log('extract', uniqueMentions, modifiedComments);
     setAllMentions(uniqueMentions);
     setComments(modifiedComments);
@@ -192,7 +192,7 @@ const Thread = (props) => {
     return foundObject || false;
   };
   const CommentWithFormattedMentions = ({ text }) => {
-    const words = text.replace("\n"," \n").split(" ");
+    const words = text.replace("\n", " \n").split(" ");
     return words.map((word, index) => {
       const mention = checkStringForKeyValue(word, "display");
       // Apply formatting to specific words based on conditions

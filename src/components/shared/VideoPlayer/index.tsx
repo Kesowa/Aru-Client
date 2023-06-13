@@ -576,8 +576,8 @@ function VideoPlayer(props: any) {
 
   const handleProgress = (changedState) => {
     if (!seeking) {
-      if (props.seek && !changedState.played){
-        setPlayed((props.seek/100)+changedState.played);
+      if (props.seek && !changedState.played) {
+        setPlayed(props.seek / 100 + changedState.played);
       } else {
         setPlayed(changedState.played);
       }
@@ -615,14 +615,14 @@ function VideoPlayer(props: any) {
       playerRef.current.seekTo(newValue / 100);
     }
   };
-  useEffect(()=>{
-    console.log('props.seek', props.seek)
-    if (props.seek){
+  useEffect(() => {
+    console.log("props.seek", props.seek);
+    if (props.seek) {
       handleSeekChange(props.seek);
       handleSeekMouseUp(props.seek);
       setPlaying(false);
     }
-  },[props.seek])
+  }, [props.seek]);
   const handleMouseMove = () => {
     if (playerControlsRef && playerControlsRef.current) {
       playerControlsRef.current.style.opacity = "1";

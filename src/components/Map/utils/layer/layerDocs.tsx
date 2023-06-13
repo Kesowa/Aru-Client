@@ -851,7 +851,7 @@ function LayerDocs(props) {
   //---Get properties keys ---
 
   function fetchJSON() {
-    console.log('props.layerPath',props.layerPath)
+    console.log("props.layerPath", props.layerPath);
     return fetch(`${STATIC_URL}${props.layerPath}`)
       .then(function (res) {
         return res.json();
