@@ -16,7 +16,7 @@ import { logout } from "../../../../actions/authAction";
 import NoMap from "../../../../static/no-map.svg";
 import streamEnd from "../../../../static/streamended.svg";
 import Weather from "../../../shared/Weather";
-import { LIVE_URL, API_URL } from "src/constants";
+import { LIVE_URL, API_URL, STATIC_URL } from "src/constants";
 
 function LiveViewBase(props: any) {
   const { TabPane } = Tabs;
@@ -89,7 +89,7 @@ function LiveViewBase(props: any) {
   //---------------------------Setting Stream URL-------------------------
   useEffect(() => {
     if (streamKey) {
-      setstreamURL(`${LIVE_URL}/live/${streamKey}.m3u8`);
+      setstreamURL(`${STATIC_URL}/vod/${streamKey}/index.m3u8`);
     }
   }, [streamKey]);
 

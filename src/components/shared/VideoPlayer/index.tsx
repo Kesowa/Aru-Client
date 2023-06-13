@@ -273,9 +273,9 @@ function VideoPlayer(props: any) {
   } = props; //add prop for alert button #2
 
   const resolutionURLs = {
-    auto: `${LIVE_URL}/live/${streamKey}.m3u8`,
-    fullDefinition: `${LIVE_URL}/live/${streamKey}_480p1128kbs/index.m3u8`, //480p
-    highDefinition: `${LIVE_URL}/live/${streamKey}_720p2628kbs/index.m3u8`, //720p
+    auto: `${STATIC_URL}/vod/${streamKey}/index.m3u8`,
+    fullDefinition: `${STATIC_URL}/vod/${streamKey}/index.m3u8`, //480p
+    highDefinition: `${STATIC_URL}/vod/${streamKey}/index.m3u8`, //720p
   };
 
   const [activeURL, setActiveURL] = useState(resolutionURLs.fullDefinition);

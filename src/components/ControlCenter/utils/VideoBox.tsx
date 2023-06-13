@@ -11,7 +11,7 @@ const VideoBox = (props: any) => {
   const history = useHistory();
 
   useEffect(() => {
-    const url = `${LIVE_URL}/live/${props.streamKey}.m3u8`;
+    const url = `${STATIC_URL}/vod/${props.streamKey}/index.m3u8`;
 
     setstreamURL(url);
   }, [props.streamKey]);

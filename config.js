@@ -1,7 +1,8 @@
 const config = {
   VITE_COG_URL: "http://localhost:8000",
   VITE_LIVE_URL: "http://localhost:8080",
-  VITE_RTMP_URL: "rtmp://localhost:1935/stream",
+  VITE_RTMP_URL:
+    "rtmp://RtmpStreamingBalancer-7c6c94ac0db39cd0.elb.ap-south-1.amazonaws.com:1935/live",
   VITE_PUBLIC_URL: "http://localhost:3000",
   VITE_ENV: "development",
   VITE_TITILER_STATIC: "http://server:5011",
