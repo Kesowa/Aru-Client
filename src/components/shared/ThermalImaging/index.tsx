@@ -1,5 +1,5 @@
 import {useState, useEffect, useRef} from "react"
-import { Modal, Tooltip } from "antd";
+import { Modal, Tooltip, message } from "antd";
 import ReactCursorPosition, { INTERACTIONS } from 'react-cursor-position';
 import ThermalImage from "./thermalImage";
 import "./index.less";
@@ -11,12 +11,16 @@ const ThermalImaging = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [thermalData, setThermalData] = useState<any>([]);
     const thermalImagingData = async ({id, doc}) => {
-        let thermalData = (await http.post(apis.THERMAL_DATA, {id, doc}));
-        let rawFile = (await fetch(API_URL+thermalData.data.rawFilePath));
-        const rawBlob = await rawFile.blob();
-        let rawArray =  new Float32Array(await rawBlob.arrayBuffer())
-        setThermalData(rawArray)
-        console.log("thermal", thermalData.data.rawFilePath, rawArray);
+        try {
+            let thermalData = (await http.post(apis.THERMAL_DATA, {id, doc}));
+            let rawFile = (await fetch(API_URL+thermalData.data.rawFilePath));
+            const rawBlob = await rawFile.blob();
+            let rawArray =  new Float32Array(await rawBlob.arrayBuffer())
+            setThermalData(rawArray)
+            console.log("thermal", thermalData.data.rawFilePath, rawArray);
+        } catch (err) {
+            message.info("Selected image does not have a thermal view.")
+        }
       };
     useEffect(()=>{
         if (Object.keys(props.thermalPayload).length>0){
