@@ -75,7 +75,7 @@ function Outcomes(props) {
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [alertType, setAlertType] = useState("");
-  const [thermalPayload, setThermalPayload] = useState({})
+  const [thermalPayload, setThermalPayload] = useState({});
   const [showOutcomeModal, setShowOutcomeModal] = useState(false);
   const [modalIndex, setModalIndex] = useState(0);
   const [refresh, setRefresh] = useState(true);
@@ -995,13 +995,17 @@ function Outcomes(props) {
                                 </span>
                               </Menu.Item>
                               <Menu.Item
-                                          key="5"
-                                          onClick={() =>
-                                            setThermalPayload({id: outcome._id, doc: "alerts", filePath: outcome.image})
-                                          }
-                                        >
-                                          <FireOutlined /> Thermal View
-                                        </Menu.Item>
+                                key="5"
+                                onClick={() =>
+                                  setThermalPayload({
+                                    id: outcome._id,
+                                    doc: "alerts",
+                                    filePath: outcome.image,
+                                  })
+                                }
+                              >
+                                <FireOutlined /> Thermal View
+                              </Menu.Item>
                               <Menu.Item
                                 key="2"
                                 onClick={() => {
@@ -1190,13 +1194,17 @@ function Outcomes(props) {
                                     </span>
                                   </Menu.Item>
                                   <Menu.Item
-                                          key="5"
-                                          onClick={() =>
-                                            setThermalPayload({id: outcome._id, doc: "alerts", filePath: outcome.image})
-                                          }
-                                        >
-                                          <FireOutlined /> Thermal View
-                                        </Menu.Item>
+                                    key="5"
+                                    onClick={() =>
+                                      setThermalPayload({
+                                        id: outcome._id,
+                                        doc: "alerts",
+                                        filePath: outcome.image,
+                                      })
+                                    }
+                                  >
+                                    <FireOutlined /> Thermal View
+                                  </Menu.Item>
                                   <Menu.Item
                                     key="2"
                                     onClick={() => {
@@ -1367,9 +1375,12 @@ function Outcomes(props) {
               <Empty style={{ margin: "auto" }} />
             </>
           ) : null}
-          
+
           <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
-          <ThermalImaging thermalPayload={thermalPayload} setThermalPayload={setThermalPayload}/>
+          <ThermalImaging
+            thermalPayload={thermalPayload}
+            setThermalPayload={setThermalPayload}
+          />
           <OutcomeModal
             visible={showOutcomeModal}
             closeModal={setShowOutcomeModal}

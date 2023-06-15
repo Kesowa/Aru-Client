@@ -676,7 +676,10 @@ function ImageDocs(props) {
   // This is a list view
   return (
     <>
-      <ThermalImaging thermalPayload={thermalPayload} setThermalPayload={setThermalPayload}/>
+      <ThermalImaging
+        thermalPayload={thermalPayload}
+        setThermalPayload={setThermalPayload}
+      />
       <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
       <FilterToolbar
         type="Image"
@@ -766,7 +769,11 @@ function ImageDocs(props) {
                                         <Menu.Item
                                           key="5"
                                           onClick={() =>
-                                            setThermalPayload({id: item._id, doc: "documents", filePath: item.filePath})
+                                            setThermalPayload({
+                                              id: item._id,
+                                              doc: "documents",
+                                              filePath: item.filePath,
+                                            })
                                           }
                                         >
                                           <FireOutlined /> Thermal View
@@ -993,7 +1000,11 @@ function ImageDocs(props) {
                                     <Menu.Item
                                       key="5"
                                       onClick={() =>
-                                        setThermalPayload({id: item._id, doc: "documents", filePath: item.filePath})
+                                        setThermalPayload({
+                                          id: item._id,
+                                          doc: "documents",
+                                          filePath: item.filePath,
+                                        })
                                       }
                                     >
                                       <FireOutlined /> Thermal View
