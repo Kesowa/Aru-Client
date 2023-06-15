@@ -2,6 +2,7 @@ const initialState = {
   open: false,
   docType: "",
   docId: "",
+  tags: {},
 };
 
 export default (state = initialState, action: any) => {

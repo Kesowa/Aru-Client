@@ -158,6 +158,7 @@ function BaseMap(props) {
   const [missionData, setMissionData] = useState({});
   const [loader, setLoader] = useState(props.isBaseMap ? false : true);
   const [thumbnail, setThumbnail] = useState("");
+  const [threadDetails, setThreadDetails] = useState({});
   const [geoJsonVOD, setGeoJsonVOD] = useState({});
   const [geoJsonAlert, setGeoJsonAlert] = useState({});
   const [srtVideoPath, setSrtVideoPath] = useState("");
@@ -6113,7 +6114,11 @@ function BaseMap(props) {
 
   return (
     <div className="map_wrapper" onKeyDown={handleKeyDown}>
-      <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
+      <Thread
+        thumbnail={thumbnail}
+        setThumbnail={setThumbnail}
+        data={threadDetails}
+      />
       <Modal
         title="Maximum Limit reached!"
         open={LimitModal}
@@ -7225,6 +7230,7 @@ function BaseMap(props) {
         setShowFlightPath={setShowFlightPath}
         setSrtVideoPath={setSrtVideoPath}
         setThumbnail={setThumbnail}
+        setThreadDetails={setThreadDetails}
       />
       <LayerDocs
         setVisibility={setViewDocs}
