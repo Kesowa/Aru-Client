@@ -1870,7 +1870,7 @@ function BaseMap(props) {
     flaggedFilter,
     unflaggedFilter,
     flag,
-    pointMarkerSize
+    pointMarkerSize,
   ]);
 
   useEffect(() => {
@@ -2237,7 +2237,7 @@ function BaseMap(props) {
                 //   }
                 //   return hexToRGB2(d.properties.color, false);
                 // },
-                sizeScale: 12*pointMarkerSize,
+                sizeScale: 12 * pointMarkerSize,
                 getPosition: (d) => d.geometry.coordinates,
                 getSize: (d) => 5,
                 getColor: (d, i) => {
@@ -2326,7 +2326,7 @@ function BaseMap(props) {
               //   }
               //   return hexToRGB2(d.properties.color, false);
               // },
-              sizeScale: 15*pointMarkerSize,
+              sizeScale: 15 * pointMarkerSize,
               getPosition: (d) => d.geometry.coordinates,
               getSize: (d) => 5,
               getColor: (d, i) => {
@@ -2384,7 +2384,7 @@ function BaseMap(props) {
               //   }
               //   return hexToRGB2(d.properties.color, false);
               // },
-              sizeScale: 15*pointMarkerSize,
+              sizeScale: 15 * pointMarkerSize,
               getPosition: (d) => d.geometry.coordinates,
               getSize: (d) => 5,
               getColor: (d, i) => {
@@ -6322,19 +6322,21 @@ function BaseMap(props) {
               >
                 Marker Tool
               </Menu.Item>
-              {showMarkerSizeTool&&<Tooltip placement="bottom" title="Marker Size">
-              <Menu.Item>
-                <Slider
-                  min={0.3}
-                  max={1}
-                  onChange={onChangeSizeSlider}
-                  step={0.1}
-                  defaultValue={1}
-                  tooltip={{ placement: "right" }}
-                  style={{margin: 0, padding: "5px 4px"}}
-                />
-                </Menu.Item>
-              </Tooltip>}
+              {showMarkerSizeTool && (
+                <Tooltip placement="bottom" title="Marker Size">
+                  <Menu.Item>
+                    <Slider
+                      min={0.3}
+                      max={1}
+                      onChange={onChangeSizeSlider}
+                      step={0.1}
+                      defaultValue={1}
+                      tooltip={{ placement: "right" }}
+                      style={{ margin: 0, padding: "5px 4px" }}
+                    />
+                  </Menu.Item>
+                </Tooltip>
+              )}
             </Menu>
           )}
           // ref={drawingMenuRef}
@@ -6384,20 +6386,20 @@ function BaseMap(props) {
                   />
                 </Tooltip>
               )}
-              {showMarkerSizeTool&&<Tooltip placement="bottom" title="Marker Size">
-              <div
-                  className="marker-size-tool"
-                >
-                <Slider
-                  min={0.3}
-                  max={1}
-                  onChange={onChangeSizeSlider}
-                  step={0.1}
-                  defaultValue={1}
-                  tooltip={{ placement: "right" }}
-                />
-                </div>
-              </Tooltip>}
+              {showMarkerSizeTool && (
+                <Tooltip placement="bottom" title="Marker Size">
+                  <div className="marker-size-tool">
+                    <Slider
+                      min={0.3}
+                      max={1}
+                      onChange={onChangeSizeSlider}
+                      step={0.1}
+                      defaultValue={1}
+                      tooltip={{ placement: "right" }}
+                    />
+                  </div>
+                </Tooltip>
+              )}
               <Tooltip title="Time" placement="bottom">
                 <div
                   className="time-filter-tool"
