@@ -3,7 +3,7 @@ import { Modal, message } from "antd";
 import ReactCursorPosition, { INTERACTIONS } from "react-cursor-position";
 import ThermalImage from "./thermalImage";
 import "./index.less";
-import { API_URL } from "src/constants";
+import { STATIC_URL } from "src/constants";
 import http from "src/services/httpCall";
 import apis from "src/services/apis";
 
@@ -13,7 +13,7 @@ const ThermalImaging = (props) => {
   const thermalImagingData = async ({ id, doc }) => {
     try {
       const thermalData = await http.post(apis.THERMAL_DATA, { id, doc });
-      const rawFile = await fetch(API_URL + thermalData.data.rawFilePath);
+      const rawFile = await fetch(STATIC_URL + thermalData.data.rawFilePath);
       const rawBlob = await rawFile.blob();
       const rawArray = new Float32Array(await rawBlob.arrayBuffer());
       setThermalData(rawArray);
