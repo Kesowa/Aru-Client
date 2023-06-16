@@ -1956,6 +1956,7 @@ function VideoPlayer(props: any) {
                   )}
 
                   <Slider
+                    className="video-slider"
                     min={0}
                     max={100}
                     value={played * 100}
