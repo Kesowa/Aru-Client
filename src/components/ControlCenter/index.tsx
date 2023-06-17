@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { loading } from "../../actions/loadingAction";
 import {
@@ -165,7 +164,6 @@ function GridLive(props: any) {
           }
         }
 
-        
         break;
 
       default:
@@ -381,7 +379,6 @@ function GridLive(props: any) {
 
     const now = moment(new Date());
 
-
     const duration = moment.duration(now.diff(flightStarted));
 
     const hours = ("0" + duration.hours().toString()).slice(-2);
@@ -507,7 +504,6 @@ function GridLive(props: any) {
           <Header className="header">
             <Row style={{ justifyContent: "flex-end" }}>
               <div className="header-right-content">
-
                 <Tooltip title="Notification">
                   <BellFilled className="header-icon gray" />
                 </Tooltip>
@@ -817,7 +813,6 @@ function GridLive(props: any) {
               ))}
             </Row>
           </Modal>
-
         </Layout>
       </Layout>
     </div>

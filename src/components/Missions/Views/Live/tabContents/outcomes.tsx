@@ -211,8 +211,6 @@ function Outcomes(props: any) {
     }
   };
 
- 
-
   function showModal(
     id: any,
     mID: any,
@@ -281,9 +279,7 @@ function Outcomes(props: any) {
                 </Title>
               </Row>
               <Row>
-                &nbsp;&nbsp;&nbsp;&nbsp;
-                
-                &nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
                 <Tooltip placement="bottom" title="download image">
                   <Button
                     type="primary"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import GoogleMap from "../../GoogleMap";
 import EditFlightForm from "./Form";
 import "../../Views/Details/Data/data.less";

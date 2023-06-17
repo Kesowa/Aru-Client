@@ -8,8 +8,6 @@ import {
   Tooltip,
   Button,
   Avatar,
-  Select,
-  Input,
 } from "antd";
 import {
   UserOutlined,
@@ -52,7 +50,6 @@ function OutcomeModal(props) {
     const ind = currIndex - 1;
     setcurrIndex(ind < 0 ? props.data.length - 1 : ind);
   };
-
 
   return (
     <>
@@ -135,7 +132,6 @@ function OutcomeModal(props) {
                 <Row>
                   &nbsp;&nbsp;&nbsp;&nbsp;
                   {/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++TO BE MADE++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
-
                   &nbsp;&nbsp;
                   <Tooltip placement="bottom" title="download image">
                     <Button
@@ -196,7 +192,7 @@ function OutcomeModal(props) {
                   <Row>
                     <Text strong>{props.missionId}</Text>
                   </Row>
-                 
+
                   {!locationNull && (
                     <>
                       <Row style={{ marginTop: 8 }}>

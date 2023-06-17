@@ -64,7 +64,7 @@ import { connect } from "react-redux";
 import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";
 import moment from "moment";
-import { useHistory, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import MarkerIcon from "../../../../static/MarkerIcon.png";
 import TankIcon from "../../../../static/TankIcon.png";
 import ValveIcon from "../../../../static/ValveIcon.png";
@@ -221,7 +221,6 @@ function PublicMap(props) {
   const devicePixelRatio =
     (typeof window !== "undefined" && window.devicePixelRatio) || 1;
 
-
   //---------------------Open Stree Maps Layer ----------------------------------------------------
   const osm = [
     new TileLayer({
@@ -283,15 +282,15 @@ function PublicMap(props) {
   const [sideBarState, setSideBarState] = useState(true);
   const [sideBarIcon, setSideBarIcon] = useState(<DoubleRightOutlined />);
   const [mapMode, setMapMode] = useState("mapbox://styles/mapbox/streets-v8");
-  
+
   const [bottomBarHeight, setBottomBarHeight] = useState("240px");
 
   const [rasterProps, setRasterProps] = useState<any>([]);
   const [vectorProps, setVectorProps] = useState<any>([]);
-  
+
   const [tenantName, setTenantName] = useState("");
   const [mission, setMission] = useState<IMission>("");
-  
+
   const [layerName, setLayerName] = useState("");
   const [infoWindowMode, setInfoWindowMode] = useState("");
   const [activeKey, setActiveKey] = useState<any>();
@@ -300,14 +299,14 @@ function PublicMap(props) {
   const [drawMode, setdrawMode] = useState("");
   const [formDrawerVisible, setformDrawerVisible] = useState(false);
   const [viewImages, setViewImages] = useState(false);
- 
+
   const [vectorLayers, setvectorLayers] = useState<
     (ILayer & { type: "Vector" })[]
   >([]);
   const [saveButtonShow, setSaveButtonShow] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [toolSelected, setToolSelected] = useState("");
-  
+
   const [activeType, setActiveType] = useState(false);
   const [totalLayers, setTotalLayers] = useState(0);
   const [time, setTime] = useState("100 days");
@@ -322,18 +321,16 @@ function PublicMap(props) {
   );
   const [layerLoading, setLayerLoading] = useState(false);
   const [threeDState, set3DState] = useState("");
-  
+
   const [layerz, setlayerz] = useState<ILayer[]>([]);
   const [activeGroupButton, setActiveGroupButton] = useState(true);
-  
+
   //----------------auto detect browser height---------------------
   // let initHeight = window.screen.height;
   // if(initHeight === 1080){
   //   setBottomBarHeight("500px");
 
   // }
-
-  
 
   useEffect(() => {
     setTimeout(() => {
@@ -422,7 +419,7 @@ function PublicMap(props) {
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
   const [colorMap, SetColorMap] = useState("plasma");
   const [featureLayer, setFeatureLayer] = useState("");
-  
+
   const [selectedLayerLabel, setSelectedLayerLabel] = useState("");
   const [activeID, setActiveID] = useState("");
   const [selectedIndexes, setSelectedIndexes] = useState<React.Key[]>([]);

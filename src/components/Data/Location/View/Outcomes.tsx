@@ -232,9 +232,7 @@ function Outcomes(outcomeProps) {
                 </Title>
               </Row>
               <Row>
-                &nbsp;&nbsp;&nbsp;&nbsp;
-
-                &nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
                 <Tooltip placement="bottom" title="download image">
                   <Button
                     type="primary"

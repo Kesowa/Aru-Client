@@ -14,7 +14,6 @@ import {
   Empty,
   Result,
   Checkbox,
-  Select,
   Badge,
   Pagination,
 } from "antd";
@@ -927,7 +926,6 @@ function ImageDocs(props) {
                               }}
                             ></Image>
                           </Badge>
-                          
                         );
                       })}
                     </Row>

@@ -369,7 +369,6 @@ function Documents(props) {
             break;
           default:
         }
-
       },
       [setCurrentFolderId, currentFolderId]
     );

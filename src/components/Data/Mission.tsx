@@ -13,12 +13,7 @@ import {
   Spin,
 } from "antd";
 import { Input } from "antd";
-import {
-  AudioOutlined,
-  SearchOutlined,
-  DeleteOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
+import { SearchOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
@@ -62,7 +57,7 @@ function DataMission(props) {
   };
 
   const { Title } = Typography;
-  
+
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -399,7 +394,6 @@ function DataMission(props) {
       .finally(() => setTypesLoader(false));
   }, []);
 
-
   const handleTableChange = (pagination, filter, sorter) => {
     let filterString = "";
     Object.entries(filter).forEach((f: any) => {
@@ -443,7 +437,6 @@ function DataMission(props) {
             </Radio.Group>
           </Spin>
         </Row>
-
       }
       {/* +++++++++++++++++++++++++++++++++MISION LISTING+++++++++++++++++++++++++++++++++++++++++ */}
       <Row style={{ marginTop: "1rem" }}>

@@ -11,15 +11,12 @@ import {
   Button,
   notification,
   Tag,
-  Select,
-  Input,
   Pagination,
   Empty,
   Skeleton,
   message,
   Dropdown,
   Menu,
-  Checkbox,
   Badge,
 } from "antd";
 import {
@@ -169,7 +166,7 @@ function Outcomes(props) {
       setRefresh(true);
     }
   }, [props.Thread.open]);
-  
+
   function fetchOutcomes() {
     if (refresh) {
       setRefresh(false);
@@ -261,23 +258,21 @@ function Outcomes(props) {
                   }
                 : {}
             }
-            onClick={
-              () => {
-                if (activateSelection) {
-                  if (checkedList.includes(outcome._id)) {
-                    const filtered: any = checkedList.filter(
-                      (i: any) => i !== outcome._id
-                    );
-                    setCheckedList(filtered);
-                  } else {
-                    setCheckedList([...checkedList, outcome._id]);
-                  }
+            onClick={() => {
+              if (activateSelection) {
+                if (checkedList.includes(outcome._id)) {
+                  const filtered: any = checkedList.filter(
+                    (i: any) => i !== outcome._id
+                  );
+                  setCheckedList(filtered);
                 } else {
-                  setShowOutcomeModal(true);
-                  setModalIndex(ind);
+                  setCheckedList([...checkedList, outcome._id]);
                 }
+              } else {
+                setShowOutcomeModal(true);
+                setModalIndex(ind);
               }
-            }
+            }}
           >
             <Col md={4} style={{ padding: "10px" }}>
               <img
@@ -457,9 +452,6 @@ function Outcomes(props) {
     );
   }, [outcomeData]);
 
-  
-
- 
   useEffect(() => {
     console.log("dsifhfhihfoihsdifh :" + checkedList);
   }, [checkedList]);

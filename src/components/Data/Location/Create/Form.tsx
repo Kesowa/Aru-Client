@@ -94,7 +94,6 @@ const StageTwoForm = (props: any) => {
     });
   };
 
-
   const handleFormSubmit = (values) => {
     if (formState.locationName) {
       props.setFormComplete(true);

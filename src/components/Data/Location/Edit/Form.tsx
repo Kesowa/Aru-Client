@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
-import { Form, Input, Button, Select, message } from "antd";
+import { Form, Input, Button, message } from "antd";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
 import {
@@ -15,8 +15,6 @@ import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
-
-
 
 const StageTwoForm = (props: any) => {
   const [formState, setFormState] = useState<any>({

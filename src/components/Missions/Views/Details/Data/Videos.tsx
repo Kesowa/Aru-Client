@@ -18,7 +18,6 @@ import {
   Carousel,
   Input,
   Skeleton,
-  Checkbox,
   Select,
   Badge,
   Pagination,
@@ -193,7 +192,6 @@ function Videos(props) {
                     objectFit: "cover",
                     objectPosition: "0 0",
                   }}
-
                   onError={(e: any) => (e.target.src = `/icons/fallback.png`)}
                 />
               }
@@ -630,13 +628,10 @@ function Videos(props) {
         .catch((err) => {
           message.error("ERROR" + err);
         });
-    }
-    else {
+    } else {
       message.info("Please select some videos to delete!");
     }
   };
-
-  
 
   //-------- Upload Modal ------------------------
 

@@ -26,9 +26,7 @@ function ThreeStreamViewDetails(props) {
 
     const now = moment(new Date());
 
-
     const duration = moment.duration(now.diff(flightStarted));
-
 
     // duration in hours
     const hours = ("0" + duration.hours().toString()).slice(-2);

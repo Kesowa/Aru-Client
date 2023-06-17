@@ -366,8 +366,6 @@ function MapAttributes(props) {
     default:
       return null;
   }
-
-  
 }
 
 const mapStateToProps = (state: any) => ({

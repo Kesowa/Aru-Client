@@ -103,7 +103,6 @@ function StageTwo(props: any) {
                 />
               )}
             </div>
-            
           </Card>
         </Panel>
       </Collapse>

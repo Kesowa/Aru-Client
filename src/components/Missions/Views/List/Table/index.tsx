@@ -445,7 +445,6 @@ function MissionTable(props: TableProps) {
     },
   ];
 
-
   const onSearch = (value) => {
     props.setIsTableLoading(true);
     if (!value) {

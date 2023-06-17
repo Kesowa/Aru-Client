@@ -20,7 +20,6 @@ function Dashboard(props: any) {
     setSideBarCollapsed(!sideBarCollapsed);
   };
 
-
   return (
     <Layout className="dashboard-container">
       <Row className="dashboard-content-container">
