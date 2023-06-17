@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-// import { Link } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 import {
   Row,
   Col,
@@ -39,7 +38,7 @@ import Alone from "../../../../../static/Alone-rafiki.svg";
 import moment from "moment";
 import io from "socket.io-client";
 import { components } from "src/handlers/schema";
-const { Title, Text, Link } = Typography;
+const { Title, Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
@@ -91,10 +90,8 @@ function Outcomes(props: any) {
   const [total, setTotal] = useState(0);
   const [alertSocketEvent, setAlertSocketEvent] = useState("");
   const [downloadLoading, setDownloadLoading] = useState(false);
-  //socket connectino variable
   const socket: any = useRef();
 
-  //socket listening to re-render component
   useEffect(() => {
     if (missionId !== 0) {
       if (tenantId) {
@@ -104,7 +101,6 @@ function Outcomes(props: any) {
           );
           socket.current.on("ALERT_CREATED", (data) => {
             if (data.missionId === missionId) {
-              //console.log("FORCE UPDATING!!!")
               setAlertSocketEvent("refreshAlerts");
             }
           });
@@ -126,7 +122,6 @@ function Outcomes(props: any) {
             setDisplayData(res.data.data);
             setTotal(res.data.total);
             setAllOutcomes(res.data.data);
-            //console.log("Alerts:  " + res.data.data);
           })
           .catch((err) => {
             console.log(err);
@@ -146,7 +141,6 @@ function Outcomes(props: any) {
             setDisplayData(res.data.data);
             setTotal(res.data.total);
             setAllOutcomes(res.data.data);
-            //console.log("Alerts:  " + res.data.data);
           })
           .catch((err) => {
             console.log(err);
@@ -164,10 +158,6 @@ function Outcomes(props: any) {
       handleSortChange(sortType);
     }
   }, [isAscending]);
-
-  function onChange(e) {
-    //console.log(`checked = ${e.target.checked}`);
-  }
 
   const onSearch = (e) => {
     const value = e.target.value;
@@ -221,33 +211,7 @@ function Outcomes(props: any) {
     }
   };
 
-  const handleFilterChange = (value) => {
-    setLoading(true);
-    if (value.length > 0) {
-      const filterType = value[0];
-      const filterValue = value[1];
-
-      //console.log(filterType === 'type' || filterType === 'createdBy');
-
-      const data = [...outcomeData];
-      let tempData;
-
-      if (filterType === "type") {
-        tempData = data.filter((alert: any) => {
-          return alert.type === filterValue;
-        });
-      } else if (filterType === "createdBy") {
-        tempData = data.filter((alert: any) => {
-          return alert.createdBy.name === filterValue;
-        });
-      }
-
-      setDisplayData(tempData);
-    } else {
-      setDisplayData(outcomeData);
-    }
-    setLoading(false);
-  };
+ 
 
   function showModal(
     id: any,
@@ -260,16 +224,13 @@ function Outcomes(props: any) {
     coor: any,
     geoCode: any,
     pcount: any
-    //fID: any
   ) {
-    //console.log(id, mID, crBy, crAt, thumb);
     Modal.info({
       title: "Outcome ID: " + id,
       content: (
         <div>
           <Row style={{ marginTop: 16 }}>
             <Col span={17}>
-              {/* <img src={thumb} style={{ width: "100%", height: "auto" }} /> */}
               <div id="image" className="outcome-view">
                 <Image
                   style={{ width: "100%", height: "auto", cursor: "pointer" }}
@@ -308,9 +269,6 @@ function Outcomes(props: any) {
                       className="static-map"
                       src={`https://maps.googleapis.com/maps/api/staticmap?center=${coor.lat},${coor.long}&zoom=16&size=200x130&markers=size:mid|color:red|${coor.lat},${coor.long}&maptype=roadmap&key=AIzaSyCYWROYTFQ3XH4bhhLJnmJSV-0k9a-PHY8`}
                     />
-                    {/* <StaticGoogleMap zoom="16" center={`${coor.lat}, ${coor.long}`} maptype="roadmap" size="200x130" className="static-map" apiKey="AIzaSyCYWROYTFQ3XH4bhhLJnmJSV-0k9a-PHY8">
-                      <Marker size="mid" location={`${coor.lat},${coor.long}`} color="red" label="P" />
-                    </StaticGoogleMap> */}
                   </a>
                 </div>
               </div>
@@ -324,15 +282,7 @@ function Outcomes(props: any) {
               </Row>
               <Row>
                 &nbsp;&nbsp;&nbsp;&nbsp;
-                {/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++TO BE MADE++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
-                {/* <Tooltip placement="bottom" title="share via email">
-                  <Button
-                    type="primary"
-                    shape="round"
-                    icon={<MailOutlined />}
-                    size="large"
-                  />
-                </Tooltip> */}
+                
                 &nbsp;&nbsp;
                 <Tooltip placement="bottom" title="download image">
                   <Button
@@ -438,7 +388,6 @@ function Outcomes(props: any) {
       ),
       centered: true,
       width: 1200,
-      // closable: true,
       onOk() {},
     });
   }
@@ -449,7 +398,7 @@ function Outcomes(props: any) {
         <div className="outcome-live-view-thumb">
           <Row align="middle">
             <Col md={1}>
-              <Checkbox onChange={onChange}></Checkbox>
+              <Checkbox></Checkbox>
             </Col>
             <Col
               md={4}
@@ -528,20 +477,6 @@ function Outcomes(props: any) {
         },
       ],
     },
-    // { // TBD
-    //   value: 'createdBy',
-    //   label: 'Created By',
-    //   children: [
-    //     {
-    //       value: 'user1',
-    //       label: 'John Doe',
-    //     },
-    //     {
-    //       value: 'user2',
-    //       label: 'Jane Doe',
-    //     },
-    //   ],
-    // },
   ];
   return (
     <>

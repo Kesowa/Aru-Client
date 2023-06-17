@@ -10,7 +10,6 @@ const TermsAndCondition = (props: any) => {
   const { Title, Paragraph } = Typography;
   useEffect(() => {
     if (props.Auth !== undefined) {
-      //console.log(props.Auth.userdetails.isTermsAccepted);
       if (!props.Auth.userdetails.isTermsAccepted) {
         setTermsModal(true);
       }
@@ -27,7 +26,6 @@ const TermsAndCondition = (props: any) => {
       })
       .catch((err: any) => {
         console.log(err);
-        // props.logout();
         AxiosErrorHandler(err, props.logout);
       })
       .finally(() => setLoading(false));

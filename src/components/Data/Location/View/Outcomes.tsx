@@ -43,9 +43,7 @@ import { STATIC_URL } from "src/constants";
 const { Search } = Input;
 const { Option } = Select;
 const { Text, Title } = Typography;
-type OutcomeProps = {
-  id: any;
-};
+
 function Outcomes(outcomeProps) {
   const [outcomeData, setOutcomeData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -184,7 +182,6 @@ function Outcomes(outcomeProps) {
         <div>
           <Row style={{ marginTop: 16 }}>
             <Col span={17}>
-              {/* <img src={thumb} style={{ width: "100%", height: "auto" }} /> */}
               <div id="image" className="outcome-view">
                 <Image
                   style={{ width: "100%", height: "auto", cursor: "pointer" }}
@@ -236,15 +233,7 @@ function Outcomes(outcomeProps) {
               </Row>
               <Row>
                 &nbsp;&nbsp;&nbsp;&nbsp;
-                {/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++TO BE MADE++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
-                {/* <Tooltip placement="bottom" title="share via email">
-                      <Button
-                        type="primary"
-                        shape="round"
-                        icon={<MailOutlined />}
-                        size="large"
-                      />
-                    </Tooltip> */}
+
                 &nbsp;&nbsp;
                 <Tooltip placement="bottom" title="download image">
                   <Button
@@ -348,7 +337,6 @@ function Outcomes(outcomeProps) {
       ),
       centered: true,
       width: 1200,
-      // closable: true,
       onOk() {},
     });
   }
@@ -447,22 +435,6 @@ function Outcomes(outcomeProps) {
         <div
           style={{ position: "relative", height: "500px", overflow: "auto" }}
         >
-          {/* <span className="switcher">
-                        <AppstoreOutlined onClick={() => {
-                            setListView(false)
-                            setLoading(true);
-                            setTimeout(() => {
-                                setLoading(false);
-                            }, 1000)
-                        }} style={{fontSize : "30px", marginRight : "10px", color : listView ? "#000000" : "#1B98F5"}}/>
-                        <BarsOutlined onClick={() => {
-                            setListView(true)
-                            setLoading(true);
-                            setTimeout(() => {
-                                setLoading(false);
-                            }, 1000)
-                        }} style={{fontSize : "30px", color : !listView ? "#000000" : "#1B98F5"}}/>
-                    </span> */}
           {listView ? (
             <React.Fragment>
               {outcomeData.map((dataa) => (

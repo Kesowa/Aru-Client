@@ -24,18 +24,6 @@ import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 
 const { Option } = Select;
-// const { RangePicker } = DatePicker;
-
-// const dayList = {
-//   Sunday: false,
-//   Monday: false,
-//   Tuesday: false,
-//   Wednesday: false,
-//   Thursday: false,
-//   Friday: false,
-//   Saturday: false,
-// }; Future Purpose
-
 const StageTwoForm = (props: any) => {
   const [formState, setFormState] = useState<any>({
     locationId: "none",
@@ -92,26 +80,7 @@ const StageTwoForm = (props: any) => {
     });
   };
 
-  // const enumerateDaysBetweenDates = function (selectedDates: any) {
-  //   var dates: string[] = [];
-  //   let startDate = selectedDates[0];
-  //   let endDate = selectedDates[1];
-
-  //   var currDate = moment(startDate).startOf("day");
-  //   var lastDate = moment(endDate).startOf("day");
-
-  //   dates.push(currDate.clone().format("D MMMM YYYY dddd").toString());
-  //   while (currDate.add(1, "days").diff(lastDate) <= 0) {
-  //     dates.push(currDate.clone().format("D MMMM YYYY dddd").toString());
-  //   }
-
-  //   setFormState({
-  //     ...formState,
-  //     ["startDate"]: startDate.format("D MMMM YYYY dddd").toString(),
-  //     ["endDate"]: endDate.format("D MMMM YYYY dddd").toString(),
-  //     dates: dates,
-  //   });
-  // };
+ 
 
   const handleFormSubmit = (values) => {
     if (
@@ -164,32 +133,6 @@ const StageTwoForm = (props: any) => {
             />
           </Form.Item>
 
-          {/* <Form.Item
-            name="flight_type"
-            hasFeedback
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-          >
-            <Select
-              defaultActiveFirstOption={true}
-              className="selectBox"
-              placeholder="Flight Type"
-              onChange={(value) => {
-                setFormState({
-                  ...formState,
-                  ["flight_type"]: value.toString(),
-                });
-              }}
-            >
-              <Option value="scheduled_dates" selected>
-                Schedule Dates
-              </Option>
-              <Option value="single_date">Single Date</Option>
-            </Select>
-          </Form.Item> */}
 
           <Form.Item
             name="date"
@@ -219,49 +162,7 @@ const StageTwoForm = (props: any) => {
             />
           </Form.Item>
 
-          {/* {formState.flight_type === "scheduled_dates" && (
-            <div>
-              <Form.Item
-                name="date"
-                hasFeedback
-                rules={[
-                  {
-                    required: true,
-                  },
-                ]}
-              >
-                <RangePicker onChange={enumerateDaysBetweenDates} />
-              </Form.Item>
-              <div className="scheduled_dates">
-                {Object.keys(dayList).map((day, ind) => {
-                  return (
-                    <label
-                      key={ind}
-                      htmlFor={day}
-                      style={{
-                        background: formState.days[day] ? "#eb4527" : "#0A79DF",
-                      }}
-                    >
-                      <span>{day[0].toUpperCase()}</span>
-                      <input
-                        type="checkbox"
-                        value={day}
-                        onChange={(e) => {
-                          setFormState({
-                            ...formState,
-                            days: {
-                              ...formState.days,
-                              [day]: !formState.days[day],
-                            },
-                          });
-                        }}
-                      ></input>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          )} */}
+          
 
           <Form.Item
             name="time"
@@ -276,7 +177,6 @@ const StageTwoForm = (props: any) => {
               use12Hours={true}
               format={"hh:mm:ss A"}
               onChange={(value) => {
-                //console.log(value);
 
                 setFormState({
                   ...formState,
@@ -329,7 +229,6 @@ const StageTwoForm = (props: any) => {
                   locationId: value.toString(),
                 });
               }}
-              //defaultValue={"none"}
             >
               <Option value="none">none</Option>
 
@@ -387,7 +286,6 @@ const StageTwoForm = (props: any) => {
               </div>
 
               <div className="data_selcted_2">
-                {/* <h3>Location Selected</h3> */}
                 <div className="location_details">
                   <img src={l_a} style={{ height: "20px" }} alt="" />
                   <div>

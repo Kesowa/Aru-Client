@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
 import { loading } from "../../actions/loadingAction";

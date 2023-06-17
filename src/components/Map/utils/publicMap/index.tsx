@@ -8,8 +8,6 @@ import * as turf from "@turf/turf";
 import {
   Row,
   Col,
-  Card,
-  Tabs,
   Typography,
   Button,
   Tooltip,
@@ -19,7 +17,6 @@ import {
   Menu,
   Dropdown,
   Modal,
-  Upload,
   Input,
   Select,
   Space,
@@ -59,7 +56,7 @@ import {
   GeoJsonEditMode,
 } from "nebula.gl";
 import { StaticMap } from "react-map-gl";
-//import MapAttributes from "./mapAttributes";
+
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -72,10 +69,7 @@ import MarkerIcon from "../../../../static/MarkerIcon.png";
 import TankIcon from "../../../../static/TankIcon.png";
 import ValveIcon from "../../../../static/ValveIcon.png";
 import DotIcon from "../../../../static/DotIcon.png";
-//import Images from "./Images";
-//import LayerDocs from "./layerDocs";
-//import CreateLayer from "./createLayer";
-//import CreateBaseLayer from "./createBaseLayer";
+
 import {
   COG_URL,
   MAPBOX_API_KEY,
@@ -108,17 +102,15 @@ const DRAW_EDIT_POINT = new CompositeMode([
   new ModifyMode(),
 ]);
 
-const { Title, Text, Link } = Typography;
-const { Dragger } = Upload;
+const { Title, Text } = Typography;
+
 const { Option } = Select;
-const { TabPane } = Tabs;
-const { SubMenu } = Menu;
-const { Meta } = Card;
+
 const { Search } = Input;
 
 function PublicMap(props) {
   const selectedLayer = decodeURI(window.location.hash).slice(1); // Get selected layer from url hashed part
-  const socket: any = useRef();
+
   const [showBorder, setShowBorder] = useState(false);
   const [osmState, setOsmState] = useState(false);
   const [errorState, setErrorState] = useState("");
@@ -229,7 +221,6 @@ function PublicMap(props) {
   const devicePixelRatio =
     (typeof window !== "undefined" && window.devicePixelRatio) || 1;
 
-  const [selectedKey, setSelectedKey] = useState<any>();
 
   //---------------------Open Stree Maps Layer ----------------------------------------------------
   const osm = [
@@ -291,30 +282,16 @@ function PublicMap(props) {
   const [coordinates, setCoordinates] = useState([]);
   const [sideBarState, setSideBarState] = useState(true);
   const [sideBarIcon, setSideBarIcon] = useState(<DoubleRightOutlined />);
-  const [loader, setLoader] = useState(false);
-  const [attributeTable, SetAttributeTable] = useState([]);
   const [mapMode, setMapMode] = useState("mapbox://styles/mapbox/streets-v8");
-  const [isModalVisible, setIsModalVisible] = useState(false); // upload layer
-  const [isModalVisible1, setIsModalVisible1] = useState(false);
-  const [isModalVisible2, setIsModalVisible2] = useState(false); // upload layer modal
-  const [isModalVisible3, setIsModalVisible3] = useState(false); // create layer modal
-  const [isModalVisible4, setIsModalVisible4] = useState(false); // create base layer modal
-  const [timeFilter, setTimeFilter] = useState(false);
+  
   const [bottomBarHeight, setBottomBarHeight] = useState("240px");
-  const [layerColor, setLayerColor] = useState("#ffaa00");
-  const [icon, setIcon] = useState("");
-  const [fileList, setFileList] = useState<any>([]);
+
   const [rasterProps, setRasterProps] = useState<any>([]);
   const [vectorProps, setVectorProps] = useState<any>([]);
-  const [data, setData] = useState();
-  const [editingKey, setEditingKey] = useState("");
+  
   const [tenantName, setTenantName] = useState("");
   const [mission, setMission] = useState<IMission>("");
-  const [layerType, setLayerType] = useState("");
-  const [layerTypeId, setLayerTypeId] = useState("");
-  const [captureDate, setCaptureDate] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
+  
   const [layerName, setLayerName] = useState("");
   const [infoWindowMode, setInfoWindowMode] = useState("");
   const [activeKey, setActiveKey] = useState<any>();
@@ -323,44 +300,32 @@ function PublicMap(props) {
   const [drawMode, setdrawMode] = useState("");
   const [formDrawerVisible, setformDrawerVisible] = useState(false);
   const [viewImages, setViewImages] = useState(false);
-  const [selectedLayerInfo, setSelectedLayerInfo] = useState({});
-  const [viewDocs, setViewDocs] = useState(false);
+ 
   const [vectorLayers, setvectorLayers] = useState<
     (ILayer & { type: "Vector" })[]
   >([]);
   const [saveButtonShow, setSaveButtonShow] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [toolSelected, setToolSelected] = useState("");
-  const [defaultLayerType, setDefaultLayerType] = useState<any>([]);
+  
   const [activeType, setActiveType] = useState(false);
   const [totalLayers, setTotalLayers] = useState(0);
   const [time, setTime] = useState("100 days");
   const [timeEnabled, setTimeEnabled] = useState<any>();
   const [sortType, setSortType] = useState("");
   const [isAscending, setIsAscending] = useState(true);
-  const [showEditModel, setshowEditModel] = useState(false);
+
   const [selectedRasterProps, setSelectedRasterProps] = useState<any>([]);
   const [selectedVectorProps, setSelectedVectorProps] = useState<any>([]);
   const [selectedVectorPropsType, setSelectedVectorPropsType] = useState<any>(
     []
   );
-  const [inheritColor, setInheritColor] = useState(false);
-  const [chipsLoading, setChipsLoading] = useState(false);
-  const [lastAdded, setLastAdded] = useState("");
-  const [valid, setValid] = useState(true);
-  const [showColorPicker, setshowColorPicker] = useState(true);
   const [layerLoading, setLayerLoading] = useState(false);
   const [threeDState, set3DState] = useState("");
-  const [T3DTranspose, set3DTranspose] = useState(false);
-  const [picToMapData, setPicToMapData] = useState([]);
-  const [pic2Mapv2Status, setPic2Mapv2Status] = useState(false);
-  const [pic2Mapv2Data, setPic2Mapv2Data] = useState<any>({});
+  
   const [layerz, setlayerz] = useState<ILayer[]>([]);
   const [activeGroupButton, setActiveGroupButton] = useState(true);
-  const [isLayerDocs, setIsLayerDocs] = useState(false);
-  const [isUpdate, setUpdate] = useState(false);
-  const [updateType, setUpdateType] = useState("");
-  const [updateId, setUpdateId] = useState("");
+  
   //----------------auto detect browser height---------------------
   // let initHeight = window.screen.height;
   // if(initHeight === 1080){
@@ -368,7 +333,7 @@ function PublicMap(props) {
 
   // }
 
-  const history = useHistory();
+  
 
   useEffect(() => {
     setTimeout(() => {
@@ -457,8 +422,7 @@ function PublicMap(props) {
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
   const [colorMap, SetColorMap] = useState("plasma");
   const [featureLayer, setFeatureLayer] = useState("");
-  const [featureLayerPath, setFeatureLayerPath] = useState("");
-  const [windowTitle, setWindowTitle] = useState("");
+  
   const [selectedLayerLabel, setSelectedLayerLabel] = useState("");
   const [activeID, setActiveID] = useState("");
   const [selectedIndexes, setSelectedIndexes] = useState<React.Key[]>([]);

@@ -41,7 +41,6 @@ function SideBar(props: any) {
   useEffect(() => {
     const l = window.location.pathname;
     const loc = l.split("/");
-    //console.log(loc);
     if (loc[3] === "live") {
       setHref("/dashboard/missions");
     } else {
@@ -139,7 +138,6 @@ function SideBar(props: any) {
                 <Col span={8}>
                   <Avatar
                     className="user-avatar"
-                    // icon={<UserOutlined />}
                     src={STATIC_URL + props.UserDetails.avatar}
                   >
                     {getInitials(props.UserDetails.name)}
@@ -210,7 +208,6 @@ function SideBar(props: any) {
               selectedKeys={[href]}
             >
               {props.Auth.userdetails.sideBar.map((ele: any, i: number) => {
-                //console.log(ele, i);
                 if (ele.type === "sub_menu") {
                   return (
                     <Menu.SubMenu
@@ -241,41 +238,6 @@ function SideBar(props: any) {
                   );
                 }
               })}
-              {/* <Menu.Item key={`global-map-12123123`} onClick={() => setR(!r)}>
-                <Link to="/dashboard/basemap">
-                  {decideIcon("CompassOutlined")}
-                  <span>Map</span>
-                </Link>
-              </Menu.Item> */}
-
-              {/* <Menu.SubMenu key="main-1" icon={<UserOutlined />} title="Tenant">
-                    <Menu.Item  key="sub-1">
-                        <Link to="/dashboard/admin/tenant/list">
-                            <UnorderedListOutlined />
-                            <span>Tenat List</span>
-                        </Link>
-                    </Menu.Item>
-                    <Menu.Item  key="sub-2">
-                        <Link to="/dashboard/admin/tenant/create">
-                            <PlusCircleOutlined />
-                            <span>Add Tenat</span>
-                        </Link>
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.SubMenu key="main-2" icon={<ShoppingCartOutlined />} title="Package">
-                    <Menu.Item  key="sub-3">
-                        <Link to="/dashboard/admin/package/list">
-                            <UnorderedListOutlined />
-                            <span>Package List</span>
-                        </Link>
-                    </Menu.Item>
-                    <Menu.Item  key="sub-4">
-                        <Link to="/dashboard/admin/package/create">
-                            <PlusCircleOutlined />
-                            <span>Add Package</span>
-                        </Link>
-                    </Menu.Item>
-                </Menu.SubMenu> */}
             </Menu>
           </Sider>
           <div className="logo-container">

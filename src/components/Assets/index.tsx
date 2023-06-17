@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { useHistory, Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import {
   Typography,
   Button,
@@ -12,7 +12,6 @@ import {
   Input,
   message,
   Table,
-  InputNumber,
   Popconfirm,
   DatePicker,
   Tabs,
@@ -27,8 +26,6 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
-import { FormInstance } from "antd/lib/form";
-import { stat } from "fs";
 import AssetList from "./utils/assetListing";
 import ModelList from "./utils/ModelList";
 import ManufacturerList from "./utils/ManufacturerList";
@@ -36,10 +33,8 @@ import http from "../../services/httpCall";
 import apis from "../../services/apis";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { logout } from "../../actions/authAction";
-import { type } from "os";
 import "./index.less";
-import { components } from "src/handlers/schema";
-const { Title, Text } = Typography;
+
 const { TabPane } = Tabs;
 
 type optionType = {
@@ -324,7 +319,6 @@ function AssetBase(props: any) {
       manufactureID: values.type[0],
     };
 
-    //console.log("this asset--------------:", asset);
     http
       .post(`${apis.CREATE_ASSET}`, asset)
       .then((result) => {
@@ -345,7 +339,6 @@ function AssetBase(props: any) {
 
   const onFinish2 = async (values: any) => {
     form.resetFields();
-    //console.log("model form", values);
     const props2 = {};
     for (let i = 0; i < data.length; ++i) {
       props2[data[i].key] = data[i].value;
@@ -363,7 +356,6 @@ function AssetBase(props: any) {
       dimensions: dimensions,
       props: props2,
     };
-    //console.log(model);
     http
       .post(`${apis.CREATE_MODEL}`, model)
       .then((result) => {
@@ -392,7 +384,7 @@ function AssetBase(props: any) {
       return;
     }
     form.resetFields();
-    //console.log("manufacturer form", values, values.contacts);
+
     const manufacturer = {
       name: values.name,
       address: values.address,
@@ -400,7 +392,7 @@ function AssetBase(props: any) {
       website: values.website,
       contacts: values.contacts,
     };
-    //console.log(manufacturer);
+  
     http
       .post(`${apis.CREATE_MANUFACTURER}`, manufacturer)
       .then((result) => {
@@ -420,10 +412,7 @@ function AssetBase(props: any) {
   };
 
   if (manufacturers && models) {
-    //console.log("List of manufactures-----" + manufacturers);
-    //console.log("List of models---------" + models);
     getModelOptions();
-    //console.log(modelOptions, "modeloptions here---------------------");
   }
 
   const isEditing = (record: Item) => record.key === editingKey;
@@ -918,7 +907,6 @@ function AssetBase(props: any) {
               {
                 validator: async (_, contacts) => {
                   if (!contacts || contacts.length < 1) {
-                    // message.error("Please enter atleast 1 contact");
                     return new Error("Please enter atleast 1 contact");
                   }
                 },

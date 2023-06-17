@@ -18,7 +18,6 @@ const EditFlight = (props: any) => {
   const [drawingToolBtns, setDrawingToolBtns] = useState(false);
   const [flightEditing, setFlightEditing] = useState(false);
   const [flightDetails, setFlightDetails] = useState<any>(null);
-  const history = useHistory();
   const { id } = useParams<any>();
   const [location, setlocation] = useState<any>({});
   const [isoDate, setisoDate] = useState(new Date().toISOString());
@@ -58,7 +57,6 @@ const EditFlight = (props: any) => {
       })
       .catch((err) => {
         console.log(err.message);
-        // AxiosErrorHandler(err, props.logout);
       });
   };
 

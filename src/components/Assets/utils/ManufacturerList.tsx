@@ -1,30 +1,17 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import {
   Row,
   Col,
-  Card,
   Typography,
-  Avatar,
   Button,
-  Tooltip,
-  Divider,
-  Tag,
-  PageHeader,
   Input,
-  Popconfirm,
   Table,
-  Dropdown,
-  Menu,
-  message,
+  message
 } from "antd";
 import {
   SearchOutlined,
-  ShakeOutlined,
-  EyeOutlined,
-  DeleteOutlined,
-  StopOutlined,
-  EditOutlined,
+  ShakeOutlined
 } from "@ant-design/icons";
 
 import Highlighter from "react-highlight-words";
@@ -42,7 +29,6 @@ import ManufacturerCard from "./ManufacturerCard";
 const { Title, Text } = Typography;
 
 interface TableProps {
-  //filter: any;
   userType: any;
   tenantId: any;
   userId: any;
@@ -66,13 +52,10 @@ function ManufacturerList(props: TableProps) {
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++ Fetch Manufacturers +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   const fetchManufacturers = () => {
-    const { userType } = props;
-    const { tenantId } = props;
 
     http
       .get(`${apis.GET_MANUFACTURERS}`)
       .then((result) => {
-        //console.log(result.data);
         if (result.data.status) {
           props.setManufacturersToState(result.data.data);
           console.log(result.data.data);
@@ -92,15 +75,6 @@ function ManufacturerList(props: TableProps) {
   useEffect(() => {
     if (props.manufacturers.length) {
       setManufacturerTableData(props.manufacturers);
-
-      //   if (props.filter === "all") {
-      //     setManufacturerTableData(props.manufacturers);
-      //   } else {
-      //     let data = props.manufacturers.filter((row) => {
-      //       return row.status === props.filter;
-      //     });
-      //     setManufacturerTableData(data);
-      //   }
     }
   }, [props.manufacturers]);
 
@@ -269,17 +243,6 @@ function ManufacturerList(props: TableProps) {
     },
   ];
 
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      // console.log(
-      //   `selectedRowKeys: ${selectedRowKeys}`,
-      //   "selectedRows: ",
-      //   selectedRows[0]._id
-      // );
-      // setSelectedManufacturerID(selectedRows[0]._id);
-      // console.log(selectedManufacturerID);
-    },
-  };
 
   return (
     <div>
@@ -291,7 +254,7 @@ function ManufacturerList(props: TableProps) {
             rowKey="_id"
             style={{ cursor: "pointer", width: "100%" }}
             loading={isTableLoading}
-            rowSelection={{ type: "radio", ...rowSelection }}
+            rowSelection={{ type: "radio" }}
             scroll={{ x: "max-content" }}
           />
         </Col>

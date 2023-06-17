@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { message, Typography, Row, Col, PageHeader } from "antd";
 import ManufacturerCard from "../utils/ManufacturerCard";
@@ -6,10 +6,7 @@ import ModelCard from "../utils/ModelCard";
 import { connect } from "react-redux";
 import { loading } from "../../../actions/loadingAction";
 import moment from "moment";
-import { Link } from "react-router-dom";
-import assetBase from "..";
-import http from "../../../services/httpCall";
-import apis from "../../../services/apis";
+
 
 const { Title, Text } = Typography;
 
@@ -27,7 +24,6 @@ function AssetView(props) {
   }, []);
 
   useEffect(() => {
-    //console.log(data.assetInfo);
     setDeviceInfo(Object.assign({}, data.assetInfo));
   }, [data]);
 
@@ -36,7 +32,6 @@ function AssetView(props) {
       return asset._id === id;
     });
     asset = asset[0];
-    //console.log(asset);
     if (!asset) {
       message.error("Asset is not available");
       history.push("/dashboard/assets");
@@ -47,32 +42,11 @@ function AssetView(props) {
     setData(asset);
     props.loading(false);
     setIsLoading(false);
-    // http
-    //   .get(`${API_URL}${apis.GET_MODEL_BY_ID}`, {
-    //     params: {
-    //       assetID: id,
-    //     },
-    //   })
-    //   .then((result) => {
-    //     console.log(result.data);
-    //     if (result.data.status) {
-    //       setData(result.data.data);
-    //       console.log(result.data.data);
-    //     } else {
-    //       message.error(result.data.message);
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   })
-    //   .finally(() => {
-    //     setIsLoading(false);
-    //   });
+    
   };
 
   return (
     <div style={{ padding: "24px" }}>
-      {/* <Title level={2}>{data.assetName}</Title> */}
       <PageHeader onBack={() => window.history.back()} title={data.assetName} />
       <Row style={{ padding: "25px" }}>
         <Col span={8} style={{ paddingRight: "15px" }}>

@@ -21,17 +21,6 @@ import { connect } from "react-redux";
 import moment from "moment";
 
 const { Option } = Select;
-// const { RangePicker } = DatePicker;
-
-// const dayList = {
-//   Sunday: false,
-//   Monday: false,
-//   Tuesday: false,
-//   Wednesday: false,
-//   Thursday: false,
-//   Friday: false,
-//   Saturday: false,
-// };
 
 const FlightEditing = (props: any) => {
   const [formState, setFormState] = useState<any>({
@@ -70,26 +59,6 @@ const FlightEditing = (props: any) => {
     });
   };
 
-  // const enumerateDaysBetweenDates = function (selectedDates: any) {
-  //   var dates: string[] = [];
-  //   let startDate = selectedDates[0];
-  //   let endDate = selectedDates[1];
-
-  //   var currDate = moment(startDate).startOf("day");
-  //   var lastDate = moment(endDate).startOf("day");
-
-  //   dates.push(currDate.clone().format("D MMMM YYYY dddd").toString());
-  //   while (currDate.add(1, "days").diff(lastDate) <= 0) {
-  //     dates.push(currDate.clone().format("D MMMM YYYY dddd").toString());
-  //   }
-
-  //   setFormState({
-  //     ...formState,
-  //     ["startDate"]: startDate.format("D MMMM YYYY dddd").toString(),
-  //     ["endDate"]: endDate.format("D MMMM YYYY dddd").toString(),
-  //     dates: dates,
-  //   });
-  // };
 
   const handleFormSubmit = () => {
     if (
@@ -139,32 +108,6 @@ const FlightEditing = (props: any) => {
             />
           </Form.Item>
 
-          {/* <Form.Item
-            name="flight_type"
-            hasFeedback
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-          >
-            <Select
-              defaultActiveFirstOption={true}
-              className="selectBox"
-              placeholder="Flight Type"
-              onChange={(value) => {
-                setFormState({
-                  ...formState,
-                  ["flight_type"]: value.toString(),
-                });
-              }}
-            >
-              <Option value="scheduled_dates" selected>
-                Schedule Dates
-              </Option>
-              <Option value="single_date">Single Date</Option>
-            </Select>
-          </Form.Item> */}
 
           <Form.Item
             name="date"
@@ -178,7 +121,6 @@ const FlightEditing = (props: any) => {
             <DatePicker
               defaultValue={moment(props.flightDetails.date, "YYYY-MM-DD")}
               onChange={(e: moment.Moment | null) => {
-                //console.log(e?.format("YYYY-MM-DD").toString());
                 setFormState({
                   ...formState,
                   date: e?.format("YYYY-MM-DD").toString(),
@@ -187,50 +129,7 @@ const FlightEditing = (props: any) => {
             />
           </Form.Item>
 
-          {/* {formState.flight_type === "scheduled_dates" && (
-            <div>
-              <Form.Item
-                name="date"
-                hasFeedback
-                rules={[
-                  {
-                    required: true,
-                  },
-                ]}
-              >
-                <RangePicker onChange={enumerateDaysBetweenDates} />
-              </Form.Item>
-
-              <div className="scheduled_dates">
-                {Object.keys(dayList).map((day, ind) => {
-                  return (
-                    <label
-                      key={ind}
-                      htmlFor={day}
-                      style={{
-                        background: formState.days[day] ? "#eb4527" : "#0A79DF",
-                      }}
-                    >
-                      <span>{day[0].toUpperCase()}</span>
-                      <input
-                        type="checkbox"
-                        value={day}
-                        onChange={(e) => {
-                          setFormState({
-                            ...formState,
-                            days: {
-                              ...formState.days,
-                              [day]: !formState.days[day],
-                            },
-                          });
-                        }}
-                      ></input>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          )} */}
+          
 
           <Form.Item
             name="time"

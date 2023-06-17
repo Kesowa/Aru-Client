@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useHistory, useLocation } from "react-router-dom";
 import { connect } from "react-redux";
 import EmptyGraphics from "../../../../static/Alone-rafiki.svg";
@@ -72,7 +72,6 @@ function MissionView(props) {
   const history = useHistory();
   const [missionEditFormData, setMissionEditFormData] = useState<any>({});
   const [missionTypes, setMissionTypes] = useState<any>([]);
-  const [tableData, setTableData] = useState<any>({});
   const [isPilotModalVisible, setIsPilotModalVisible] = useState(false);
   const [pilots, setPilots] = useState<any>([]);
   const [pilotToAssign, setPilotToAssign] = useState<any>({});
@@ -117,57 +116,6 @@ function MissionView(props) {
     { label: "NDWI map", value: "NDWI map" },
   ];
 
-  // useEffect(() => {
-  //   try {
-  //     let fetchPilots = async () => {
-  //       let result = await http.get(
-  //         `${apis.FETCH_ALL_PILOTS}`
-  //       );
-  //       setPilots(result.data.data);
-  //     };
-
-  //     fetchPilots();
-
-  //     http
-  //       .get(`${apis.GET_ALERT_VOD_COUNT}`, {
-  //         params: {
-  //           missionId: id,
-  //         },
-  //       })
-  //       .then((result) => {
-  //         if (result.data.status) {
-  //           console.log(result.data.data);
-  //           setTotalAlerts(result.data.data.alerts);
-  //           setTotalVOD(result.data.data.vods);
-  //         }
-  //       })
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   try {
-  //     http
-  //       .get(`${apis.GET_ALERT_VOD_COUNT}`, {
-  //         params: {
-  //           missionId: id,
-  //         },
-  //       })
-  //       .then((result) => {
-  //         if (result.data.status) {
-  //           console.log(result.data.data);
-  //           setTotalAlerts(result.data.data.alerts);
-  //           setTotalVOD(result.data.data.vods);
-  //         }
-  //       })
-  //       .catch((err) => {
-  //         console.log(err);
-  //       });
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // }, []);
 
   const fetchPilots = async () => {
     const result = await http.get(`${apis.FETCH_ALL_PILOTS}`);
@@ -191,7 +139,7 @@ function MissionView(props) {
 
   const getInitialData = async (id) => {
     const [userType, missionId] = id.split("-");
-    // console.log(id, userType, missionId);
+
     try {
       const result = await http.get(`${apis.GET_MISSION_DOC_COUNT}`, {
         params: {
@@ -210,11 +158,7 @@ function MissionView(props) {
       }
 
       let mission: any;
-      //let mission = props.missions.filter((mission) => {
-      // return mission._id === id;
-      //});
-      // mission = mission[0];
-      //console.log("MIssion details from state", mission);
+      
       if (!mission) {
         try {
           const result = await http.get(
@@ -298,9 +242,6 @@ function MissionView(props) {
         console.log("no clients here bitches");
       }
 
-      // if (details.pilotAssigned === "no-pilot") {
-      //   await fetchPilots();
-      // }
       await fetchPilots();
       setMissionDetails(details);
 
@@ -389,7 +330,6 @@ function MissionView(props) {
       });
 
     settypeflag(1);
-    // setEditModalVisible(false);
   };
 
   const EditCancel = () => {
@@ -1358,9 +1298,6 @@ function MissionView(props) {
             `Processing ${data.originalName}`,
             "info"
           );
-          // if(data.missionID === VideoProps.missionDetails.missionId) {
-          //
-          // }
         });
 
         socket.current.on("PROCESS_VIDEO_FINISHED", (data) => {
@@ -1371,10 +1308,6 @@ function MissionView(props) {
             "success"
           );
           setVodRefresh(true);
-          // if(data.missionID === VideoProps.missionDetails.missionId) {
-          //   openNotification("Video Processing Complete!", `You can now watch your video uplaoded to missionID: ${VideoProps.missionDetails.missionId}!`, 'success');
-          //   setRefresh(true);
-          // }
         });
 
         socket.current.on("POINTCLOUD_EXTRACTION_START", (data) => {
@@ -1456,13 +1389,6 @@ function MissionView(props) {
                       <div className="pilot-profile-badge">
                         {renderPilotBadge()}
                       </div>
-                      {/* <div className="share-btn">
-                        <Tooltip placement="bottom" title="Share this page">
-                          <a onClick={showModal}>
-                            <ShareAltOutlined style={{ fontSize: "24px" }} />
-                          </a>
-                        </Tooltip>
-                      </div> */}
                     </>,
                   ]}
                 >

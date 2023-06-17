@@ -65,7 +65,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   );
 };
 
-const { Text, Link } = Typography;
+const { Text } = Typography;
 
 function FeatureTable(props) {
   const [isTableLoading, setIsTableLoading] = useState(false);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { default as Shimmer } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import {
@@ -55,10 +55,6 @@ import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
 import axios from "axios";
-declare let require: any;
-
-//import { Replay } from "vimond-replay";
-//import "vimond-replay/index.css";
 
 type props = {
   missionDetails: any;
@@ -86,35 +82,25 @@ function Videos(props) {
   const [gridCount, setGridCount] = useState(0);
   const [videoNameLoader, setVideoNameLoader] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(0);
-  const [refreshState, setRefreshState] = useState(false);
   const [listView, setListView] = useState(false);
-  const [Video, setVideo] = useState([]);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [storageModal, setStorageModal] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(4);
   const [totalCount, setTotalCount] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
   const [threadDetails, setThreadDetails] = useState({});
   const [isUploading, setUploading] = useState(false);
-  const [uploadModall, setUploadModal] = useState(false);
   const socket: any = useRef();
-  const [updatedVideo, setUpdatedVideo] = useState("");
   const [activateSelection, setActivateSelection] = useState(false);
   const [isAscending, setIsAscending] = useState(false);
   const [sortType, setSortType] = useState("timeStamp");
   const [flag, setFlag] = useState(false);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
-  const CheckboxGroup = Checkbox.Group;
-  const carouselRef = useRef();
 
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
 
-  function truncateText(str) {
-    return str.length > 15 ? str.substring(0, 15) + "..." : str;
-  }
   const updateVODAttr = (body, action = null) => {
     http
       .patch(`${apis.UPDATE_VOD}`, body)
@@ -207,7 +193,6 @@ function Videos(props) {
                     objectFit: "cover",
                     objectPosition: "0 0",
                   }}
-                  // className='card-img-size'
 
                   onError={(e: any) => (e.target.src = `/icons/fallback.png`)}
                 />
@@ -291,7 +276,6 @@ function Videos(props) {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       console.log("here");
-      // console.log(props.missionDetails.locationId);
       setUploading(true);
       const fData = new FormData();
       fData.append("video", options.file);
@@ -450,12 +434,10 @@ function Videos(props) {
       );
 
       socket.current.on("PROCESS_VIDEO_FINISHED", (data) => {
-        // console.log("New video uploaded");
         setRefresh(true);
       });
 
       socket.current.on("VOD_REMOVED", (data) => {
-        // console.log("Video Deleted");
         setRefresh(true);
       });
     }
@@ -630,7 +612,6 @@ function Videos(props) {
   const deleteVideo = (id: any) => {
     console.log(id);
     message.loading("Deleting video...");
-    // if (checkedList.length > 0) {
     if (id !== undefined || id.length !== 0) {
       http
         .delete(
@@ -650,46 +631,16 @@ function Videos(props) {
           message.error("ERROR" + err);
         });
     }
-    // }
     else {
       message.info("Please select some videos to delete!");
     }
   };
 
-  //----------Video Player Modal-------------------------------------
-  // function openVideoPlayer(link: any, name: any, missionDetails: any[]) {
-  //   Modal.info({
-  //     // title: "Flight Name: " + name,
-  //     content: (
-  //       <div
-  //         style={{ height: "400px", backgroundColor: "#0000", padding: "0" }}
-  //       >
-  //         <VideoPlayer // NEED TO PASS MISSION DETAILS AND LIVE TAG CHECK
-  //           url={STATIC_URL + link}
-  //           map={true}
-  //           // handleTheater=''
-  //           // theater=''
-  //           // handlePip=''
-  //           // pip=''
-  //           // streamKey=''
-  //           mission={missionDetails}
-  //           alertBtnStatus=''
-  //           theatreModeStatus='none'
-  //           liveTagStatus='none'
-  //         />
-  //       </div>
-  //     ),
-  //     centered: true,
-  //     // width: 1000,
-  //     // closable: true,
-  //     onOk() {},
-  //   });
-  // }
+  
 
   //-------- Upload Modal ------------------------
 
   function uploadModal() {
-    // setUploadModal(true);
     Modal.info({
       title: "Upload video files!",
       content: (
@@ -715,8 +666,6 @@ function Videos(props) {
       ),
       centered: true,
       width: 640,
-      //closable: true,
-      //cancelText: "Cancel",
       okText: "Close",
       onOk() {},
       onCancel() {},
@@ -735,7 +684,6 @@ function Videos(props) {
       props.missionDetails.userType === "tenant-client"
     ) {
       let permissions: any = [];
-      //console.log(props.missionDetails.currentUserDetails);
       props.missionDetails.currentUserDetails.customPermissions.forEach((p) => {
         const filteredPermissions = p.permissions.filter(
           (d) => d.name === "vod_delete"
@@ -805,29 +753,6 @@ function Videos(props) {
     setRefresh(!refresh);
   }, [isAscending]);
 
-  // function UrlExists(url) {
-  //   var http = new XMLHttpRequest();
-  //   http.open("HEAD", url, false);
-  //   http.send();
-  //   return http.status;
-  // }
-
-  // useEffect(() => {
-  //   if (videoDetails.link) {
-  //     console.log(
-  //       UrlExists(
-  //         STATIC_URL +
-  //           videoDetails.link.toString().replace(".m3u8", ".flv")
-  //       )
-  //     );
-  //     console.log(
-  //       UrlExists(
-  //         STATIC_URL +
-  //           videoDetails.link.toString().replace(".m3u8", ".mp43")
-  //       )
-  //     );
-  //   }
-  // }, [videoDetails.link]);
   const generateTags = (data: any) => {
     return Object.keys(data).map((key) => ({
       id: Number(key),
@@ -840,7 +765,6 @@ function Videos(props) {
     }
 
     const flaggedArray = VodData.map((data: any) => {
-      //console.log('toggleFlag', checkedList, data._id);
       if (checkedList.includes(data._id)) {
         return data.isFlagged;
       }
@@ -903,7 +827,6 @@ function Videos(props) {
                                   .toString()
                                   .replace(".m3u8", ".flv")
                               }
-                              // target='_blank'
                               download
                             >
                               <DownloadOutlined className="btn-icon" />
@@ -1002,7 +925,6 @@ function Videos(props) {
                                             .toString()
                                             .replace(".m3u8", ".flv")
                                         }
-                                        // target='_blank'
                                         download
                                       >
                                         <DownloadOutlined /> Download{" "}
@@ -1145,7 +1067,6 @@ function Videos(props) {
                                             .toString()
                                             .replace(".m3u8", ".flv")
                                         }
-                                        // target='_blank'
                                         download
                                       >
                                         <DownloadOutlined /> Download{" "}
@@ -1329,7 +1250,6 @@ function Videos(props) {
                               .toString()
                               .replace(".m3u8", ".flv")
                           }
-                          // target='_blank'
                           download
                         >
                           <DownloadOutlined className="btn-icon" />
@@ -1411,7 +1331,6 @@ function Videos(props) {
                                   .toString()
                                   .replace(".m3u8", ".flv")
                               }
-                              // target='_blank'
                               download
                             >
                               <DownloadOutlined /> Download{" "}
@@ -1643,7 +1562,6 @@ function Videos(props) {
           status="500"
           title="Oops! You have reached your limit of uploading videos!"
           subTitle="Please contact your admin."
-          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
@@ -1673,7 +1591,6 @@ function Videos(props) {
       <Modal
         title="Edit Video Name"
         visible={isEditModalVisible}
-        // onOk={handleOk3}
         onCancel={handleCancel3}
         footer={[
           <Button onClick={handleCancel3} disabled={videoNameLoader}>
@@ -1726,9 +1643,6 @@ function Videos(props) {
         delete={deleteVideo}
       />
       {loader ? (
-        // <div style={{ margin: "auto", marginTop: "5%" }}>
-        //   <Spin size='large' />
-        // </div>
         <>
           {!listView ? (
             <>

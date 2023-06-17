@@ -22,7 +22,6 @@ const ViewFlight = (props) => {
   const searchAutoComplete: any = useRef();
 
   const { id } = useParams<any>();
-  const history = useHistory();
 
   const getMissionDetails = async (id) => {
     let mission = props.missions.filter((mission) => {
@@ -156,7 +155,6 @@ const ViewFlight = (props) => {
   };
 
   const createMeasurements = (geofence) => {
-    //console.log(geofence);
     let obj;
     switch (geofence.shape) {
       case "Polygon":

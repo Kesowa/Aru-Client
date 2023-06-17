@@ -32,21 +32,10 @@ import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { logout } from "../../../actions/authAction";
 import AloneLogo from "../../../static/Alone-rafiki.svg";
 import moment from "moment";
-import { loading } from "../../../actions/loadingAction";
-import { components } from "src/handlers/schema";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
-type optionType = {
-  value: any;
-  label: any;
-};
 
-type optionType1 = {
-  value: any;
-  label: any;
-  children: optionType[];
-};
 
 interface Item {
   id: any;
@@ -171,13 +160,6 @@ function ManufacturerCard(props) {
       });
   };
 
-  const getManufacturerDetails = (id) => {
-    let manufacturer = props.manufacturers.filter((manufacturer) => {
-      return manufacturer._id === id;
-    });
-    manufacturer = manufacturer[0];
-    setData(manufacturer);
-  };
 
   useEffect(() => {
     getManufacturer();
@@ -185,7 +167,6 @@ function ManufacturerCard(props) {
   }, []);
 
   useEffect(() => {
-    //console.log(props);
     setIsCardLoading(true);
     setSelectedID(props.id);
     if (props.id) {
@@ -196,7 +177,6 @@ function ManufacturerCard(props) {
           },
         })
         .then((result) => {
-          //console.log(result.data);
           if (result.data.status) {
             setData(result.data.data[0]);
           } else {
@@ -211,8 +191,6 @@ function ManufacturerCard(props) {
           setIsCardLoading(false);
         });
     }
-    //getManufacturerDetails(selectedID);
-    //setIsCardLoading(false);
   }, []);
 
   useEffect(() => {
@@ -223,7 +201,6 @@ function ManufacturerCard(props) {
 
   const onFinish = async (values: any) => {
     form.resetFields();
-    //console.log("model form", values);
     const props2 = {};
     for (let i = 0; i < tableData.length; ++i) {
       props2[tableData[i].key] = tableData[i].value;
@@ -241,7 +218,6 @@ function ManufacturerCard(props) {
       dimensions: dimensions,
       props: props2,
     };
-    //console.log(model);
     http
       .post(`${apis.CREATE_MODEL}`, model)
       .then((result) => {

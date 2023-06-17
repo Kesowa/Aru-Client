@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Row, Col, Avatar, message } from "antd";
 import "./threeStreamsView.less";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -26,12 +26,9 @@ function ThreeStreamViewDetails(props) {
 
     const now = moment(new Date());
 
-    // console.log(now);
-    // console.log(flightStarted);
 
     const duration = moment.duration(now.diff(flightStarted));
 
-    // console.log(duration);
 
     // duration in hours
     const hours = ("0" + duration.hours().toString()).slice(-2);

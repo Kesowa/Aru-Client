@@ -1,17 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import {
-  Row,
-  Col,
-  Card,
   Typography,
-  Avatar,
   Button,
-  Tooltip,
-  Divider,
   Tag,
-  PageHeader,
   Input,
   Popconfirm,
   Table,
@@ -27,19 +20,15 @@ import {
   StopOutlined,
   EditOutlined,
 } from "@ant-design/icons";
-import { stat } from "fs";
 import Highlighter from "react-highlight-words";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { logout } from "../../../actions/authAction";
 import { setAssetsToState, deleteAsset } from "../../../actions/assetAction";
-import { components } from "src/handlers/schema";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 interface TableProps {
   filter: any;
@@ -67,8 +56,6 @@ function AssetListing(props: TableProps) {
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++ Fetch Assets +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   const fetchAssets = () => {
-    const { userType } = props;
-    const { tenantId } = props;
 
     http
       .get(`${apis.GET_ALL_ASSETS}`)
@@ -280,7 +267,6 @@ function AssetListing(props: TableProps) {
       sorter: (a: any, b: any) => a.isActive.length - b.isActive.length,
       sortDirections: ["ascend", "descend"],
       render: (tags: any) => {
-        //console.log("This is tags", tags);
         let color;
         let status;
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Button, Row, Col, Card, Avatar } from "antd";
 import { VideoCameraOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";

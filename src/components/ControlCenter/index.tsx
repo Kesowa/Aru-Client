@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { loading } from "../../actions/loadingAction";
@@ -29,7 +29,6 @@ import {
   BellFilled,
 } from "@ant-design/icons";
 import "./index.less";
-//import Layout from "antd/lib/layout/layout";
 import GridView from "./layouts/GridView";
 import MapHybrids from "./layouts/MapHybrids"; //TwoStreamWithMap
 import FocusHybrids from "./layouts/FocusHybrids"; //ThreeStreamsView
@@ -51,8 +50,6 @@ const themes = {
 };
 
 function GridLive(props: any) {
-  const history = useHistory();
-  const { userID } = props;
   const [allFeeds, setallFeeds] = useState<any>([]);
   const [feedGroups, setFeedGroups] = useState<any>([]);
   const [currentPage, setcurrentPage] = useState(0);
@@ -65,9 +62,7 @@ function GridLive(props: any) {
   const [replaceWith, setReplaceWith] = useState<any>({});
   const [replaceFeedModalData, setReplaceFeedModalData] = useState<any>([]);
   const [showSwapModal, setShowSwapModal] = useState(false);
-  const handleOk = () => {
-    setisLayoutModalVisible(false);
-  };
+
   useEffect(() => {
     props.setSideBarCollapsed(true);
   }, []);
@@ -170,29 +165,7 @@ function GridLive(props: any) {
           }
         }
 
-        /*allGroups = allGroups.map((group) => {
-          if (group.layout === "grid") {
-            while (group.feeds.length < 4) {
-              group.feeds.push({
-                type: "emptyFeed",
-              });
-            }
-          } else if (group.layout === "twoFeeds") {
-            while (group.feeds.length < 2) {
-              group.feeds.push({
-                type: "emptyFeed",
-              });
-            }
-          } else {
-            while (group.feeds.length < 3) {
-              group.feeds.push({
-                type: "emptyFeed",
-              });
-            }
-          }
-
-          return group;
-        });*/
+        
         break;
 
       default:
@@ -408,8 +381,6 @@ function GridLive(props: any) {
 
     const now = moment(new Date());
 
-    // console.log(now);
-    // console.log(flightStarted);
 
     const duration = moment.duration(now.diff(flightStarted));
 
@@ -536,11 +507,6 @@ function GridLive(props: any) {
           <Header className="header">
             <Row style={{ justifyContent: "flex-end" }}>
               <div className="header-right-content">
-                {/* <Button type="primary" className="back-btn" danger
-                  onClick={() => { history.push(`/dashboard/`); }}
-                >
-                  Back to Dashboard
-                </Button> */}
 
                 <Tooltip title="Notification">
                   <BellFilled className="header-icon gray" />
@@ -575,7 +541,6 @@ function GridLive(props: any) {
                   afterChange={(current) => {
                     setcurrentPage(current);
                   }}
-                  // style={{height : "80%"}}
                 >
                   {feedGroups.map((group, index) => {
                     if (group.layout === "grid") {
@@ -853,14 +818,6 @@ function GridLive(props: any) {
             </Row>
           </Modal>
 
-          {/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Footer ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
-          {/* <Footer className="footer">
-            <Button type="primary" className="back-btn" danger
-              onClick={() => { history.push(`/dashboard/`); }}
-            >
-              Back to Dashboard
-            </Button>
-          </Footer> */}
         </Layout>
       </Layout>
     </div>

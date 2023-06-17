@@ -32,32 +32,14 @@ import { STATIC_URL } from "src/constants";
 import { BsFlagFill } from "react-icons/bs";
 import { thread } from "src/actions/threadAction";
 
-const { Title, Text, Link, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 const { Option } = Select;
 
-const originData = [
-  {
-    id: "0",
-    key: "Attr 1",
-    value: "",
-  },
-  {
-    id: "1",
-    key: "Attr 2",
-    value: "",
-  },
-  {
-    id: "2",
-    key: "Attr 3",
-    value: "",
-  },
-];
 
 function InfoWindow(props) {
   const [properties, setProperties] = useState({});
   const [address, setAddress] = useState("");
   const [loader, setLoader] = useState(false);
-  const [id, setId] = useState("");
   const [area, setArea] = React.useState<any>(
     turf.area(props.feature).toFixed(2)
   );
@@ -66,8 +48,7 @@ function InfoWindow(props) {
   );
   const [areaUnit, setAreaUnit] = useState("sq. m");
   const [lengthUnit, setLenghtUnit] = useState("km");
-  const [featureProperties, setFeatureProperties] = useState({});
-  const [refresh, setRefresh] = useState(false);
+  
   const [fileCount, setFileCount] = useState(0);
   const [imageToShow, setImageToshow] = useState<any>([]);
   const [imageLoader, setImageLoader] = useState(false);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Steps, message } from "antd";
 import "./index.less";
 import StageOne from "./Steps/StageOne";
@@ -120,7 +120,6 @@ function CreateMissionBase(props: any) {
             }
             setCurrentStage(current);
           }}
-          //style={{width:'80%'}}
         >
           {steps.map((item) => (
             <Step key={item.title} description={item.title} />

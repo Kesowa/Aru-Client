@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Row,
   Card,
@@ -22,8 +22,6 @@ import { connect } from "react-redux";
 import "./data.less";
 import { STATIC_URL } from "src/constants";
 
-const { Search } = Input;
-const { Option } = Select;
 const { Text, Title } = Typography;
 
 function ManageClients(props) {
@@ -52,16 +50,11 @@ function ManageClients(props) {
       .get(`${apis.GET_CLIENT_LIST}?page=1&limit=100`)
       .then((res) => {
         if (res.data.status) {
-          // message.success("yes")
-          // console.log(res.data)
           populateClientList(res.data.data);
-        } else {
-          //console.log("Client Fetch status false: ", res.data.message);
         }
       })
       .catch((err) => {
         console.log("client list error", err);
-        // AxiosErrorHandler(err, props.logout);
       });
   }, []);
 
@@ -126,7 +119,6 @@ function ManageClients(props) {
   useEffect(() => console.log(currClientId), [currClientId]);
 
   const onChange = (a) => {
-    //console.log(e.target.value);
     console.log("value of a", a);
     setCurrClientId(a);
     setAddClient(true);
@@ -248,13 +240,6 @@ function ManageClients(props) {
       if (permissions.length > 0) {
         return (
           <>
-            {/* <SwapOutlined
-              style={{ color: "#a19f9f", cursor: "pointer" }}
-              onClick={() => {
-                setIsClientModalVisible(true);
-                setAddClient(false);
-              }}
-            /> */}
             &nbsp;&nbsp;&nbsp;&nbsp;
             <Popconfirm
               title="Are you want to remove this client?"
@@ -272,13 +257,6 @@ function ManageClients(props) {
     } else {
       return (
         <>
-          {/* <SwapOutlined
-            style={{ color: "#a19f9f", cursor: "pointer" }}
-            onClick={() => {
-              setIsClientModalVisible(true);
-              setAddClient(false);
-            }}
-          /> */}
           &nbsp;&nbsp;&nbsp;&nbsp;
           <Popconfirm
             title="Are you want to remove this client?"

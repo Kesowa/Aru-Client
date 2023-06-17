@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Tag,
   Row,
@@ -36,10 +36,6 @@ import mp from "../../static/mapping.svg";
 import { logout } from "../../actions/authAction";
 import "../shared/MissionList.less";
 
-interface TabOptions {
-  filter: any;
-  deleteMission: any;
-}
 function DataMission(props) {
   const history = useHistory();
   const [completedMissions, setCompletedMissions] = useState([]);
@@ -65,16 +61,8 @@ function DataMission(props) {
     setLimit(limit);
   };
 
-  const { Search } = Input;
   const { Title } = Typography;
-  const suffix = (
-    <AudioOutlined
-      style={{
-        fontSize: 16,
-        color: "#1890ff",
-      }}
-    />
-  );
+  
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -280,7 +268,6 @@ function DataMission(props) {
       sorter: (a: any, b: any) => a.status.length - b.status.length,
       sortDirections: ["ascend", "descend"],
       render: (tags: any) => {
-        //console.log("This is tags", tags);
         let color;
 
         switch (tags) {
@@ -401,48 +388,17 @@ function DataMission(props) {
       .get(`${apis.GET_ALL_MISSION_TYPES}`)
       .then((res) => {
         if (res.data.status) {
-          //console.log("MIssion types", res.data.data);
           populateMissionTypes(res.data.data);
         } else {
           message.error(res.data.message);
         }
       })
       .catch((err) => {
-        // message.error(err);
         AxiosErrorHandler(err, props.logout);
       })
       .finally(() => setTypesLoader(false));
   }, []);
 
-  function onChange(pagination, filters, sorter, extra) {
-    //console.log("params", pagination, filters, sorter, extra);
-  }
-
-  const onSearch = (value) => {
-    setIsTableLoading(true);
-    if (!value) {
-      if (props.missions) {
-        setCompletedMissions(props.missions);
-      }
-    } else {
-      value = value.toLowerCase();
-
-      if (props.missions) {
-        const searchedMissions = props.missions.filter((mission: any) => {
-          return (
-            mission.status.toLowerCase().startsWith(value) ||
-            mission.name.toLowerCase().startsWith(value) ||
-            mission._id.toLowerCase().startsWith(value) ||
-            mission.user.name.toLowerCase().startsWith(value)
-          );
-        });
-
-        setCompletedMissions(searchedMissions);
-      }
-    }
-
-    setIsTableLoading(false);
-  };
 
   const handleTableChange = (pagination, filter, sorter) => {
     let filterString = "";
@@ -488,7 +444,6 @@ function DataMission(props) {
           </Spin>
         </Row>
 
-        /* <MissionType a={typesLoader} b={onMissionTypeChange} c={missionTypes} /> */
       }
       {/* +++++++++++++++++++++++++++++++++MISION LISTING+++++++++++++++++++++++++++++++++++++++++ */}
       <Row style={{ marginTop: "1rem" }}>

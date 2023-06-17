@@ -1,5 +1,4 @@
 import { Col, Collapse, Divider, Row, Select, Typography } from "antd";
-import React from "react";
 import { memo } from "react";
 import { v4 as uuid } from "uuid";
 

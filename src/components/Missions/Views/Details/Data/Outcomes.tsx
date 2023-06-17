@@ -53,8 +53,6 @@ import Thread from "../../../../shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
 import axios from "axios";
 
-const { Search } = Input;
-const { Option } = Select;
 const { Text, Title } = Typography;
 let plainOptions = new Array<any>();
 type OutcomeProps = {
@@ -65,7 +63,6 @@ type OutcomeProps = {
 };
 function Outcomes(props) {
   const [outcomeData, setOutcomeData] = useState<any>(null);
-  // const [outcomeDataCopy, setOutcomeDataCopy] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isAscending, setIsAscending] = useState(false);
   const [sortType, setSortType] = useState("timeStamp");
@@ -86,18 +83,14 @@ function Outcomes(props) {
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
   const [thumbnail, setThumbnail] = useState("");
-  const [addr4Image, setAddr4Image] = useState("");
   const [progress, setProgress] = useState(0); //this can be used for a different progress component
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [storageModal, setStorageModal] = useState(false);
   const [activateSelection, setActivateSelection] = useState(false);
-  const CheckboxGroup = Checkbox.Group;
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
 
-  // console.log(props.missionDetails);
-  // console.log(outcomeData);
   const getFlaggedFilter = () => {
     if (flaggedFilter) {
       return flaggedFilter;
@@ -145,7 +138,6 @@ function Outcomes(props) {
           const outcomes = getOutcomeThumbnail(res.data.data);
           setOutcomeData(outcomes);
         } else setOutcomeData([]);
-        // setOutcomeDataCopy(res.data.data);
         setTotal(res.data.total);
         setAllOutcomes(res.data.data);
         console.log("Alerts: ", res.data.data);
@@ -177,11 +169,7 @@ function Outcomes(props) {
       setRefresh(true);
     }
   }, [props.Thread.open]);
-  // useEffect(() => {
-  //   if (!loading) {
-  //     handleSortChange(sortType);
-  //   }
-  // }, [isAscending]);
+  
   function fetchOutcomes() {
     if (refresh) {
       setRefresh(false);
@@ -289,20 +277,6 @@ function Outcomes(props) {
                   setModalIndex(ind);
                 }
               }
-              // showModal(
-              //   outcome._id,
-              //   outcome.missionId._id,
-              //   outcome.flightId._id,
-              //   outcome.createdBy.name,
-              //   outcome.createdBy.avatar,
-              //   outcome.createdAt,
-              //   API_URL + outcome.image,
-              //   outcome.location,
-              //   outcome.locationName
-              //     ? outcome.locationName
-              //     : "Default Location",
-              //   outcome.pcount,
-              // )
             }
           >
             <Col md={4} style={{ padding: "10px" }}>
@@ -483,36 +457,9 @@ function Outcomes(props) {
     );
   }, [outcomeData]);
 
-  const handleAction = (e) => {
-    if (e.key == 0) {
-      setActivateSelection(!activateSelection);
-      setCheckedList([]);
-    } else if (e.key == 1) {
-      setCheckedList([]);
-    } else if (e.key == 2) {
-      setActivateSelection(true);
-      setCheckedList(
-        plainOptions.map((item) => {
-          return item.value;
-        })
-      );
-    } else if (e.key == 3) {
-      Modal.confirm({
-        title: "Delete Image ?",
-        icon: <ExclamationCircleOutlined />,
-        content: "Are you sure you want to delete ?",
-        okText: "Yes",
-        cancelText: "No",
-        onOk: () => {
-          deleteMultupleOutcome();
-        },
-      });
-    }
-  };
+  
 
-  const onChangeCheckbox = (list) => {
-    setCheckedList(list);
-  };
+ 
   useEffect(() => {
     console.log("dsifhfhihfoihsdifh :" + checkedList);
   }, [checkedList]);
@@ -696,7 +643,6 @@ function Outcomes(props) {
           http
             .post(options.action, fData, config)
             .then((res: any) => {
-              // options.onSuccess(res.data, options.file);
               if (res.data.status) {
                 console.log("Upload successful! ", res.data);
                 message.success(
@@ -774,7 +720,6 @@ function Outcomes(props) {
           http
             .post(options.action, fData, config)
             .then((res: any) => {
-              // options.onSuccess(res.data, options.file);
               if (res.data.status) {
                 console.log("Upload successful! ", res.data);
                 message.success(

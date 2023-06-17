@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { default as Shimmer } from "react-loading-skeleton";
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
@@ -53,7 +53,7 @@ function Media(props) {
   const [files, populateFiles] = useState<any>([]);
   const [defaultFileList, setDefaultFileList] = useState<any>([]);
   const [progress, setProgress] = useState(0);
-  const socket: any = useRef();
+  
   const [multiDelete, setMultiDelete] = useState(false);
   const [checkedList, setCheckedList] = useState<any>([]);
   const [loader, setLoader] = useState(true);
@@ -808,9 +808,7 @@ function Media(props) {
             </List.Item>
           )}
         />
-        {/* {data.map((item:any)=>{
-            return(<p>{item.name}</p>)
-          })} */}
+        {}
       </>
     );
   }
@@ -840,7 +838,7 @@ function Media(props) {
 
   useEffect(() => {
     const media: any = files.filter((i) => i.coverPhoto === true);
-    //console.log("Filtered",media, "files", files);
+   
     setCoverPhoto(media);
   }, [files, props.visible]);
 
@@ -850,10 +848,10 @@ function Media(props) {
     let images: any = [];
     if (cover.length > 0) {
       images = cover;
-      //console.log("COver photo present")
+      
     } else {
       images = media;
-      //console.log("No cover photo")
+      
     }
 
     images.sort((a, b) => {
@@ -864,7 +862,7 @@ function Media(props) {
   }
 
   useEffect(() => {
-    //console.log("selected prop:", props.properties.properties ? props.properties.properties[props.layerLabel] : "null");
+    
   }, [props.videoDetails]);
 
   return (
@@ -899,7 +897,7 @@ function Media(props) {
                   STATIC_URL +
                   props.videoDetails.link.toString().replace(".m3u8", ".flv")
                 }
-                // target='_blank'
+                
                 download
               >
                 <DownloadOutlined className="btn-icon" />
