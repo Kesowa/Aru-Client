@@ -613,7 +613,6 @@ function VideoPlayer(props: any) {
     return format(fraction * duration);
   };
 
-
   // handle snapshot button
   const handleSnapShot = () => {
     if (!isAlertEnabled && canvasRef && canvasRef.current) {
@@ -680,7 +679,8 @@ function VideoPlayer(props: any) {
         body.image = res.data.file;
 
         if (captLat !== undefined && captLong !== undefined) {
-          let addressLocation: any = geocoder([     //Review
+          let addressLocation: any = geocoder([
+            //Review
             isLive ? location.long : captLong,
             isLive ? location.lat : captLat,
           ])
@@ -870,9 +870,9 @@ function VideoPlayer(props: any) {
 
           setFlightPathSrt(flightpath.features[0]); //-------need to filter out the z axis to access
           setFlightTeleSrt(flightTelemetry);
-          
+
           let getBounds = turf.bbox(flightpath.features[0]);
-          
+
           setMapZoom(computeZoomLevel(getBounds, 1));
           let reGetBounds = [
             [getBounds[0], getBounds[1]],
@@ -973,7 +973,6 @@ function VideoPlayer(props: any) {
       zoom={mapZoom}
     />
   );
-
 
   const settingsMenu = (
     <Menu
