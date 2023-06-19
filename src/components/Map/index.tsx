@@ -14,6 +14,7 @@ import {
   Badge,
   Button,
   Tooltip,
+  Slider,
   Tag,
   Switch,
   Spin,
@@ -685,6 +686,8 @@ function BaseMap(props) {
   const [isUpdate, setUpdate] = useState(false);
   const [updateType, setUpdateType] = useState("");
   const [updateId, setUpdateId] = useState("");
+  const [pointMarkerSize, setPointMarkerSize] = useState(1);
+  const [showMarkerSizeTool, setShowMarkerSizeTool] = useState(false);
 
   const iconOptions = [
     {
@@ -735,6 +738,12 @@ function BaseMap(props) {
     mode: ViewMode,
   });
 
+  const onChangeSizeSlider = (value: number) => {
+    if (isNaN(value)) {
+      return;
+    }
+    setPointMarkerSize(value);
+  };
   const myFeatureCollection: any = {
     type: "FeatureCollection",
     features: [],
@@ -1794,6 +1803,7 @@ function BaseMap(props) {
     flaggedFilter,
     unflaggedFilter,
     flag,
+    pointMarkerSize,
   ]);
 
   useEffect(() => {
@@ -1863,6 +1873,7 @@ function BaseMap(props) {
 
   const drawLayers = (checkedKeysValue: any) => {
     const vlayers: any = [];
+    setShowMarkerSizeTool(false);
     checkedKeysValue.forEach((element) => {
       if (element.split("-")[0] === "2" && element !== "2") {
         if (props.isBaseMap) {
@@ -2101,6 +2112,7 @@ function BaseMap(props) {
             );
             break;
           case "Point":
+            setShowMarkerSizeTool(true);
             vlayers.push(
               new IconLayer({
                 id: element,
@@ -2140,8 +2152,7 @@ function BaseMap(props) {
                 onDataLoad: () => {
                   setLayerLoading(false);
                 },
-
-                sizeScale: 12,
+                sizeScale: 12 * pointMarkerSize,
                 getPosition: (d) => d.geometry.coordinates,
                 getSize: (d) => 5,
                 getColor: (d, i) => {
@@ -2201,6 +2212,7 @@ function BaseMap(props) {
             break;
         }
       } else if (element.split("-")[0] === "3" && element !== "3") {
+        setShowMarkerSizeTool(true);
         if (element.split("-")[1] === "2") {
           vlayers.push(
             new IconLayer({
@@ -2220,8 +2232,7 @@ function BaseMap(props) {
               onDataLoad: () => {
                 setLayerLoading(false);
               },
-
-              sizeScale: 12,
+              sizeScale: 15 * pointMarkerSize,
               getPosition: (d) => d.geometry.coordinates,
               getSize: (d) => 5,
               getColor: (d, i) => {
@@ -2270,8 +2281,7 @@ function BaseMap(props) {
               onDataLoad: () => {
                 setLayerLoading(false);
               },
-
-              sizeScale: 12,
+              sizeScale: 15 * pointMarkerSize,
               getPosition: (d) => d.geometry.coordinates,
               getSize: (d) => 5,
               getColor: (d, i) => {
@@ -6058,6 +6068,22 @@ function BaseMap(props) {
               >
                 Marker Tool
               </Menu.Item>
+              {showMarkerSizeTool && (
+                <Tooltip placement="bottom" title="Marker Size">
+                  <Menu.Item>
+                    <Slider
+                      min={0.3}
+                      max={1}
+                      onChange={onChangeSizeSlider}
+                      step={0.1}
+                      defaultValue={1}
+                      value={pointMarkerSize}
+                      tooltip={{ placement: "right" }}
+                      style={{ margin: 0, padding: "5px 4px" }}
+                    />
+                  </Menu.Item>
+                </Tooltip>
+              )}
             </Menu>
           )}
           placement="bottom"
@@ -6099,6 +6125,21 @@ function BaseMap(props) {
                     danger
                     onClick={removeFlightPath}
                   />
+                </Tooltip>
+              )}
+              {showMarkerSizeTool && (
+                <Tooltip placement="bottom" title="Marker Size">
+                  <div className="marker-size-tool">
+                    <Slider
+                      min={0.3}
+                      max={1}
+                      onChange={onChangeSizeSlider}
+                      value={pointMarkerSize}
+                      step={0.1}
+                      defaultValue={1}
+                      tooltip={{ placement: "right" }}
+                    />
+                  </div>
                 </Tooltip>
               )}
               <Tooltip title="Time" placement="bottom">
