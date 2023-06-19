@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReactDom from "react-dom";
 import {
-  Input,
   Comment,
   Avatar,
   Drawer,
@@ -30,11 +29,7 @@ import moment from "moment-timezone";
 import "./index.less";
 import Mentions from "../Mentions";
 import VideoPlayer from "../VideoPlayer";
-const { TextArea } = Input;
 
-const CREATE_THREAD = async (docType: any, docID: any) => {
-  return await http.post(`${apis.THREAD}/${docType}/${docID}`);
-};
 
 const GET_THREAD = async (docType: any, docID: any) => {
   return await http.get(`${apis.THREAD}/${docType}/${docID}`);
@@ -172,7 +167,6 @@ const Thread = (props) => {
       modifiedComments.push({ ...comment, displayContent: modifiedText });
     });
     const uniqueMentions = filterArrayWithUniqueIds(mentions);
-    //console.log('extract', uniqueMentions, modifiedComments);
     setAllMentions(uniqueMentions);
     setComments(modifiedComments);
   };

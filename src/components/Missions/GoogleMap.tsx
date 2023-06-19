@@ -660,15 +660,12 @@ class GoogleMap extends Component<mapProps, mapState> {
       console.log("Geometry Type: " + newGeometry.getType());
       if (newGeometry.getType() === "MultiPolygon") {
         const polygonsContained = newGeometry.getArray();
-        // console.log("Geometry contained: "+ polygonsContained[0].getType());
         polygonsContained[0].forEachLatLng((latlng) => {
-          // console.log(latlng.lat(), latlng.lng());
           coords.push({ lat: latlng.lat(), lng: latlng.lng() });
         });
       }
       if (newGeometry.getType() === "Polygon") {
         newGeometry.forEachLatLng((latlng) => {
-          // console.log(latlng.lat(), latlng.lng());
           coords.push({ lat: latlng.lat(), lng: latlng.lng() });
         });
       }
@@ -908,7 +905,6 @@ class GoogleMap extends Component<mapProps, mapState> {
                     this.oldShape.setMap(null);
                     this.oldShape = null;
                   }
-                  // console.log(this.geojsonInputRef.current)
                   this.geojsonInputRef.current.click();
                   console.log("Rendering Geojson");
                 }}

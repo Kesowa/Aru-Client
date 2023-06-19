@@ -1,5 +1,4 @@
 import { message } from "antd";
-import React from "react";
 import apis from "../../../services/apis";
 import http from "../../../services/httpCall";
 

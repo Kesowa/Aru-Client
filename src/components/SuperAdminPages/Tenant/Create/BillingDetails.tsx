@@ -1,11 +1,9 @@
-import React from "react";
 import { Form, Input, Row, Col, Button } from "antd";
 
 export default function BillingDetails(props: any) {
   const [form] = Form.useForm();
 
   const onFinish = (data: any) => {
-    //console.log(data);
     props.goToNextfromBilling(data);
   };
 

@@ -57,8 +57,6 @@ function InfoWindow(props) {
     props.togglePopup(false);
   }
 
-  //console.log(props.feature);
-
   function reverseGeocoder(coordinates: any) {
     setLoader(true);
     getAddressfromLatLong(coordinates[1], coordinates[0], (err, address) => {
@@ -161,8 +159,6 @@ function InfoWindow(props) {
     const featureData = Object.keys(props.feature.properties).filter(
       (key: any, i: any) => key !== "Id" && key !== "color"
     );
-    //props.feature.properties.forEach(p=>)
-    //console.log(featureData);
   }, []);
 
   const saveDrawingButton = () => {
@@ -241,7 +237,6 @@ function InfoWindow(props) {
         })
         .catch((err) => {
           console.log(err);
-          // AxiosErrorHandler(err, this.props.logout);
         });
     } else if (props.missionLayer === "Vector" && props.mode === "PointView") {
       if (
@@ -402,7 +397,6 @@ function InfoWindow(props) {
                 return moment(b.createdAt).diff(moment(a.createdAt));
               });
               setImageToshow(toshow);
-              //console.log(`1x_${images[0].filePath.split('/')[3]}`, images[0].filePath)
               setFileCount(res.data.data.length);
             } else {
               console.log(res.data.message);
@@ -726,18 +720,6 @@ function InfoWindow(props) {
                     </Option>
                   </Select>
                 </Text>
-                {/* <div
-                  style={{
-                    width: "14px",
-                    height: "14px",
-                    backgroundColor: props.feature.properties.color,
-                    float: "right",
-                    marginTop: "4px",
-                    borderRadius: "2px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {}}
-                /> */}
               </span>
               <span>
                 {!props.isPublic && (
@@ -884,18 +866,6 @@ function InfoWindow(props) {
                     </Option>
                   </Select>
                 </Text>
-                {/* <div
-                  style={{
-                    width: "14px",
-                    height: "14px",
-                    backgroundColor: props.feature.properties.color,
-                    float: "right",
-                    marginTop: "4px",
-                    borderRadius: "2px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {}}
-                /> */}
               </span>
               <span>
                 {!props.isPublic && (

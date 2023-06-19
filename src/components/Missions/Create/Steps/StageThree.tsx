@@ -13,7 +13,6 @@ import {
   Tag,
   Select,
   Modal,
-  Typography,
   Popconfirm,
   Result,
 } from "antd";
@@ -56,8 +55,6 @@ function StageThree(props: any) {
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [clients, setClients] = useState([]);
   const [client, setClient] = useState("");
-  const [errorState, setErrorState] = useState("");
-  const [weatherData, setweatherData] = useState();
 
   const history = useHistory();
 
@@ -184,7 +181,6 @@ function StageThree(props: any) {
           ...props.missionCreationData.flights,
           assetID: asset,
         },
-        //clientId: client,
       };
     } else {
       data = {

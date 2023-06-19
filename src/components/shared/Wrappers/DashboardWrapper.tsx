@@ -69,7 +69,6 @@ function DashboardWrapper(props: any) {
             sidebarOptions = [...clientOptions];
           }
           result.data.data.sidebarOptions = sidebarOptions;
-          //console.log(result.data.data);
           props.setUserDetails(result.data.data);
         } else {
           message.error(result.status.toString());
@@ -86,7 +85,6 @@ function DashboardWrapper(props: any) {
   //fetching user details on component load
   useEffect(() => {
     if (!props.Auth.userdetails || !isFetched) {
-      //console.log(props.Auth.userdetails);
       fetchUserDetails();
       fetchPaymentDetails();
     }

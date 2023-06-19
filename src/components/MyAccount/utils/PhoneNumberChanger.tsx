@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Form, Input } from "antd";
 import { connect } from "react-redux";
 import { loading } from "../../../actions/loadingAction";

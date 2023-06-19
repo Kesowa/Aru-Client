@@ -30,8 +30,6 @@ function LoginErrorModal(props: any) {
   props.loading(false);
   const [errMessage, setErrMessage] = useState("");
   const onFinish = (values: any) => {
-    //console.log(`getting ${values} from the form`);
-    //props.loading(true);
     http
       .post(apis.LOGIN, values)
       .then((result) => {
@@ -48,9 +46,7 @@ function LoginErrorModal(props: any) {
               const filteredPermissions = p.permissions.filter(
                 (d) => d.isFrontendRoute === true
               );
-              //console.log(filteredPermissions);
               const k = filteredPermissions.map((e) => {
-                //console.log(e);
                 return {
                   type: "menu",
                   link: e.frontendRoute.trim(),
@@ -73,7 +69,6 @@ function LoginErrorModal(props: any) {
           );
           props.setUserDetails(result.data.data);
         } else {
-          // message.error(result.data.message);
           setErrMessage(result.data.message);
         }
       })
@@ -81,9 +76,6 @@ function LoginErrorModal(props: any) {
         console.log(err);
         setErrMessage(err?.response?.data?.message);
         AxiosErrorHandler(err, props.logout);
-      })
-      .finally(() => {
-        //props.loading(false);
       });
   };
 
@@ -101,7 +93,6 @@ function LoginErrorModal(props: any) {
             />
           )}
           <Typography.Title level={1}>Aru</Typography.Title>
-          {/* <img src={AryaLogo} className="brand-logo" alt="brand-logo" /> */}
           <img src={KesowaLogo} className="brand-logo" alt="kiv-logo" />
           <Form name="login-form" className="login-form" onFinish={onFinish}>
             <Form.Item

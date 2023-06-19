@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 import { Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import LoginErrorModal from "../../Login/LoginErrorModal";

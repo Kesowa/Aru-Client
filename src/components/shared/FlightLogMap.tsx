@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import DeckGL, { FlyToInterpolator } from "deck.gl";
 import { IconLayer, PathLayer } from "@deck.gl/layers";
 import { StaticMap } from "react-map-gl";
@@ -6,17 +6,6 @@ import * as turf from "@turf/turf";
 import { MAPBOX_API_KEY } from "src/constants";
 import NavIcon from "../../static/nav_icon.png";
 
-const ICON_MAPPING = {
-  marker: {
-    x: 0,
-    y: 0,
-    width: 128,
-    height: 128,
-    mask: true,
-    anchorX: 64,
-    anchorY: 120,
-  },
-};
 
 function FlightLogMap(props) {
   const [marker, setMarker] = useState([]);
@@ -65,8 +54,6 @@ function FlightLogMap(props) {
         maxZoom: 17,
         pitch: 0,
         bearing: 0,
-        // transitionDuration: 1000,
-        // transitionInterpolator: new FlyToInterpolator(),
       });
     }
   }, [marker]);
@@ -136,58 +123,15 @@ function FlightLogMap(props) {
       widthMinPixels: 1,
       capRounded: true,
       jointRounded: true,
-      //billboard: true,
       getPath: (d) => d.path,
       getColor: (d) => [0, 195, 255],
       getWidth: (d) => 3,
     }),
-    // new PathLayer({
-    //   id: "path-layer-completed",
-    //   data: compPath,
-    //   pickable: true,
-    //   widthScale: 1,
-    //   widthMinPixels: 1,
-    //   capRounded: true,
-    //   jointRounded: true,
-    //   getPath: (d) => d.path,
-    //   getColor: (d) => [10, 204, 72],
-    //   getWidth: (d) => 5,
-    // }),
-    // new IconLayer({
-    //   id: "icon-layer2",
-    //   data: markerData,
-    //   pickable: true,
-    //   // iconAtlas and iconMapping are required
-    //   // getIcon: return a string
-    //   iconAtlas:
-    //     "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png",
-    //   iconMapping: ICON_MAPPING,
-    //   getIcon: (d) => "marker",
-    //   // getIcon: (d) => ({
-    //   //   url: `${API_URL}/icons/nav_icon.png`,
-    //   //   width: 100,
-    //   //   height: 129,
-    //   //   anchorY: 115,
-    //   //   mask: false,
-    //   // }),
-    //   sizeScale: 15,
-    //   getPosition: (d) => {
-    //     // console.log(d, "getpos");
-    //     return d.coordinates;
-    //   },
-    //   getSize: (d) => 5,
-    //   getColor: (d) => [Math.sqrt(d.exits), 140, 0],
-    // }),
+  
     new IconLayer({
       id: "icon-layer",
       data: markerData,
       pickable: true,
-      // iconAtlas and iconMapping are required
-      // getIcon: return a string
-      // iconAtlas:
-      //   "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png",
-      // iconMapping: ICON_MAPPING,
-      // getIcon: (d) => "marker",
       getIcon: (d) => ({
         url: `${NavIcon}`,
         width: 100,
@@ -197,12 +141,10 @@ function FlightLogMap(props) {
       }),
       sizeScale: 15,
       getPosition: (d) => {
-        // console.log(d, "getpos");
         return d.coordinates;
       },
       getSize: (d) => 4,
       getAngle: (d) => bearing,
-      //getColor: (d) => [Math.sqrt(d.exits), 140, 0],
     }),
   ];
 
@@ -213,9 +155,6 @@ function FlightLogMap(props) {
           initialViewState={INITIAL_VIEW_STATE}
           controller={true}
           layers={layers}
-          // getTooltip={({ object }) =>
-          //   object && `${object.name}\n${object.address}`
-          // }
           getTooltip={({ object }) => object && object.name}
         >
           <StaticMap

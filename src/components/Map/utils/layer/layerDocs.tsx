@@ -157,7 +157,6 @@ function LayerDocs(props) {
               populateFiles(finalArray);
             } else {
               if (res.data.message !== "Oops no data to show") {
-                //console.log(res.data);
                 message.error(res.data.message);
               }
             }
@@ -207,7 +206,6 @@ function LayerDocs(props) {
               populateFiles(finalArray);
             } else {
               if (res.data.message !== "Oops no data to show") {
-                //console.log(res.data);
                 message.error(res.data.message);
               }
             }
@@ -224,7 +222,6 @@ function LayerDocs(props) {
   //-------------Fetching review files-----------------------------
   useEffect(() => {
     if (props.visible || fetchReviewFiles) {
-      //setActivateButtons(true);
       setReviewFilesLoader(true);
       setFetchReviewFiles(false);
       http
@@ -237,7 +234,6 @@ function LayerDocs(props) {
           if (res.data.status) {
             const finalArray: any = [];
             const lastFeature: any = [];
-            //console.log("array is full")
             console.log(res.data.data);
             res.data.data.map((data: any) => {
               if (lastFeature.includes(data.sys_Id) === false) {
@@ -274,7 +270,6 @@ function LayerDocs(props) {
             if (res.data.message !== "Could not fetch layer files!") {
               message.error(res.data.message);
             } else {
-              //console.log(res.data);
               const emptyArray: any = [];
               populateReviewFiles(emptyArray);
             }
@@ -306,8 +301,6 @@ function LayerDocs(props) {
         });
         setReviewOptions(filteredArrayy);
       });
-
-      //console.log(data);
     }
   }, [
     props.layerId,
@@ -342,7 +335,6 @@ function LayerDocs(props) {
   function updateReviewList(value, currentIndex) {
     const files: any = reviewFiles;
     const [featureIndex, featureLabel] = value.split(/-(.+)/);
-    //console.log("featureLable: ", featureLabel, "selectedIndex: ", featureIndex, "currentIndex: ", currentIndex)
     if (currentIndex === featureIndex) {
       console.log("no change");
     } else {
@@ -446,24 +438,20 @@ function LayerDocs(props) {
     current: any,
     newLabel: any
   ) {
-    //console.log(id, index, current);
     if (index.toString() !== current) {
       const files: any = reviewFiles;
       const originalDesitination = files.filter(
         (i: any) => i.data.fIndex === current
       ); //---filtering the current layerfile
-      //console.log(originalDesitination);
       const fileInQuestion = originalDesitination[0].data.files.filter(
         (i: any) => i._id === id
       ); //------filtering the file in question
-      //console.log(originalDesitination, fileInQuestion);
       originalDesitination[0].data.files =
         originalDesitination[0].data.files.filter((i: any) => i._id !== id); //---removing selected file from original destination
       const newDestination = files.filter(
         (i: any) => i.data.fIndex === index.toString()
       ); //-----filtering new destination for file
-      //console.log("new destination",newDestination, "original destination",originalDesitination,"file in question", fileInQuestion)
-      if (newDestination.length > 0) {
+
         newDestination[0].data.files.push(fileInQuestion[0]);
         const filtered = files.filter(
           (i: any) =>
@@ -473,7 +461,6 @@ function LayerDocs(props) {
           filtered.push(originalDesitination[0]);
         }
         filtered.push(newDestination[0]);
-        //console.log(filtered);
         const UnassignedImages: any = filtered.filter((i) => i.label === null); // filtering the unassigned entry
         const filtered2Array: any = filtered.filter((i) => i.label !== null); //filtering the array to get rid of the unassigned object
         if (UnassignedImages.length > 0) {
@@ -482,7 +469,6 @@ function LayerDocs(props) {
         } else {
           populateReviewFiles(filtered);
         }
-        //populateReviewFiles(filtered);
       } else {
         const object: any = {
           label: newLabel,
@@ -497,7 +483,6 @@ function LayerDocs(props) {
         if (originalDesitination[0].data.files.length > 0) {
           filtered.push(originalDesitination[0]);
         }
-        //console.log(filtered);
         const UnassignedImages: any = filtered.filter((i) => i.label === null); // filtering the unassigned entry
         const filtered2Array: any = filtered.filter((i) => i.label !== null); //filtering the array to get rid of the unassigned object
         if (UnassignedImages.length > 0) {
@@ -506,7 +491,6 @@ function LayerDocs(props) {
         } else {
           populateReviewFiles(filtered);
         }
-        //populateReviewFiles(filtered);
       }
     }
   }
@@ -554,7 +538,6 @@ function LayerDocs(props) {
       })
       .then((res) => {
         if (res.data.status) {
-          //console.log("FIle detelted", res.data);
           message.success("File Deleted!");
         } else {
           message.error(res.data.message);
@@ -748,15 +731,11 @@ function LayerDocs(props) {
             </List.Item>
           )}
         />
-        {/* {data.map((item:any)=>{
-            return(<p>{item.name}</p>)
-          })} */}
       </>
     );
   }
 
   function switchHandle(checked) {
-    //console.log(`switch to ${checked}`);
     if (checked) {
       props.set3Dstate("Enabled");
     } else {
@@ -770,7 +749,6 @@ function LayerDocs(props) {
 
   // set layer label api
   function handleChange(value) {
-    //console.log(`selected ${value}`);
     const payload = {
       layerId: props.layerId,
       label: value,
@@ -796,7 +774,6 @@ function LayerDocs(props) {
   }
 
   function handlePopupAttrChange(value) {
-    //console.log(`selected ${value}`);
     const payload = {
       layerId: props.layerId,
       label: value,
@@ -864,23 +841,6 @@ function LayerDocs(props) {
       setAttLoading(true);
       const data = fetchJSON()
         .then((data) => {
-          // let filteredObjectArray:any = [];
-          // data.features.map((feature: any)=>{
-          //   let filteredProps = {};
-          //   Object.keys(feature.properties).filter((key: any)=>{
-          //     if(
-          //       key !== "color" &&
-          //       key !== "Id" &&
-          //       key !== "imagepaths" &&
-          //       key !== "icon"
-          //     ) {
-          //       filteredProps[key] = feature.properties[key];
-          //     }
-          //   });
-          //   filteredObjectArray.push(filteredProps);
-          // });
-          // console.log(filteredObjectArray);
-
           const attributes: any = [];
           Object.keys(data.features[0].properties).filter((key: any) => {
             if (
@@ -894,7 +854,6 @@ function LayerDocs(props) {
               attributes.push(key);
             }
           });
-          //console.log(attributes);
           setAttributes(attributes);
         })
         .catch((err) => {
@@ -1115,7 +1074,6 @@ function LayerDocs(props) {
                                 paddingLeft: "5rem",
                                 paddingRight: "5rem",
                                 paddingTop: "1rem",
-                                //backgroundColor: "orange",
                                 display: "flex",
                               }}
                             >
@@ -1150,7 +1108,6 @@ function LayerDocs(props) {
                                 paddingLeft: "5rem",
                                 paddingRight: "5rem",
                                 paddingTop: "1rem",
-                                //backgroundColor: "orange",
                                 display: "flex",
                               }}
                             >
@@ -1226,7 +1183,6 @@ function LayerDocs(props) {
                                 paddingLeft: "5rem",
                                 paddingRight: "5rem",
                                 paddingTop: "1rem",
-                                //backgroundColor: "orange",
                                 display: "flex",
                               }}
                             >
@@ -1306,7 +1262,6 @@ function LayerDocs(props) {
                             paddingLeft: "5rem",
                             paddingRight: "5rem",
                             paddingTop: "1rem",
-                            //backgroundColor: "orange",
                             display: "flex",
                           }}
                         >
@@ -1418,7 +1373,6 @@ function LayerDocs(props) {
                                                           `${item.index}-${item.label}`,
                                                           subHeading.data.fIndex
                                                         );
-                                                        //setActivateButtons(true);
                                                       }}
                                                     >
                                                       {item.label}
@@ -1478,9 +1432,6 @@ function LayerDocs(props) {
                                                                         .fIndex,
                                                                       itema.label
                                                                     );
-                                                                    // setActivateButtons(
-                                                                    //   true
-                                                                    // );
                                                                   }}
                                                                 >
                                                                   {itema.label}
@@ -1615,7 +1566,6 @@ function LayerDocs(props) {
                                                     `${item.index}-${item.label}`,
                                                     subHeading.data.fIndex
                                                   );
-                                                  //setActivateButtons(true);
                                                 }}
                                               >
                                                 {item.label}
@@ -1670,9 +1620,6 @@ function LayerDocs(props) {
                                                                   .fIndex,
                                                                 itema.label
                                                               );
-                                                              // setActivateButtons(
-                                                              //   true
-                                                              // );
                                                             }}
                                                           >
                                                             {itema.label}
@@ -1724,7 +1671,7 @@ function LayerDocs(props) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
+const mapStateToProps = (state: any) => ({ //Review
   Auth: state.Auth,
   Theme: state.Theme,
 });

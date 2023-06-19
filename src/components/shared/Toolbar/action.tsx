@@ -1,4 +1,3 @@
-import React from "react";
 import "./index.less";
 import {
   Typography,
@@ -140,7 +139,6 @@ const ActionToolbar = (props) => {
         </Dropdown>
         {props.uploadBtn()}
       </div>
-      {/* <Divider/> */}
     </div>
   );
 };

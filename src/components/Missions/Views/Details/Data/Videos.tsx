@@ -18,8 +18,6 @@ import {
   Carousel,
   Input,
   Skeleton,
-  Checkbox,
-  Select,
   Badge,
   Pagination,
 } from "antd";
@@ -63,10 +61,7 @@ type props = {
   logout: any;
   thread: any;
 };
-const { next, prev } = Carousel;
 const { Text } = Typography;
-const { Option } = Select;
-const plainOptions = new Array<any>();
 function Videos(props) {
   const [VodData, setVodData] = useState([]);
   const [loader, setLoader] = useState(true);
@@ -1178,7 +1173,6 @@ function Videos(props) {
                                               objectPosition: "0 0",
                                             }}
                                             src={STATIC_URL + dataa.thumbnail}
-                                            // className='card-img-size'
                                             onClick={() => {
                                               updateSelectedVOD(dataa, idx);
                                             }}

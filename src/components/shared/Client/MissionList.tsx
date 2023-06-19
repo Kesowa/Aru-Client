@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Tag,
   Row,
@@ -11,7 +11,7 @@ import {
   PageHeader,
 } from "antd";
 import { Input } from "antd";
-import { AudioOutlined, SearchOutlined, EyeOutlined } from "@ant-design/icons";
+import {  SearchOutlined, EyeOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
@@ -29,10 +29,6 @@ import { useHistory } from "react-router-dom";
 import mp from "../../../static/mapping.svg";
 import "../MissionList.less";
 
-interface TabOptions {
-  filter: any;
-  deleteMission: any;
-}
 
 function ClientMission(props) {
   const history = useHistory();
@@ -41,13 +37,8 @@ function ClientMission(props) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
-  // const [usedFilter, setUsedFilter] = useState("Completed");
-  const [missionCount, setMissionCount] = useState({});
-  const [totalMissions, settotalMissions] = useState(0);
   const [sortOrder, setSortOrder] = useState("createdAt:descend");
   const [searchFilters, setSearchFilters] = useState("");
-  const [missionTypes, populateMissionTypes] = useState([]);
-  const [typesLoader, setTypesLoader] = useState(false);
   const [missionType, setMissionType] = useState("");
 
   const setPaginationPage = (p) => {
@@ -59,16 +50,8 @@ function ClientMission(props) {
     setLimit(limit);
   };
 
-  const { Search } = Input;
   const { Title } = Typography;
-  const suffix = (
-    <AudioOutlined
-      style={{
-        fontSize: 16,
-        color: "#1890ff",
-      }}
-    />
-  );
+  
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -141,37 +124,6 @@ function ClientMission(props) {
         text
       ),
   });
-
-  // ++++++++++++++++++++++++++++++++++++++++++++++ Delete mission handler +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-  // let deleteMission = (name, id) => {
-  //   setIsTableLoading(true);
-  //   http
-  //     .post(`${API_URL}${apis.DELETE_MISSION_BY_ID}`, {
-  //       _id: id,
-  //     })
-  //     .then((result) => {
-  //       if (result.data.status) {
-  //         let newTableData = completedMissions.filter((mission: any) => {
-  //           return (
-  //             mission._id.toString() !== id.toString() &&
-  //             mission.status === "Completed"
-  //           );
-  //         });
-  //         setCompletedMissions(newTableData);
-  //         props.deleteMission(id);
-  //         message.success(`Mission "${name}" deleted`);
-  //       } else {
-  //         message.error(result.data.message);
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       message.error(err.message);
-  //     })
-  //     .finally(() => {
-  //       setIsTableLoading(false);
-  //     });
-  // };
 
   // ++++++++++++++++++++++++++++++++++++++++++Defining Columns++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const columns: any[] = [
@@ -273,7 +225,6 @@ function ClientMission(props) {
       sorter: (a: any, b: any) => a.status.length - b.status.length,
       sortDirections: ["ascend", "descend"],
       render: (tags: any) => {
-        //console.log("This is tags", tags);
         let color;
 
         switch (tags) {
@@ -337,7 +288,6 @@ function ClientMission(props) {
           },
         })
         .then((result) => {
-          //console.log(result);
           if (result.data.status) {
             props.setMissionsToState(result.data.data);
             setCompletedMissions(result.data.data);
@@ -362,52 +312,8 @@ function ClientMission(props) {
     fetchMissions();
   }, [page, limit, sortOrder, searchFilters, missionType]);
 
-  //fetch mission types
-  // useEffect(() => {
-  //   setTypesLoader(true);
-  //   http
-  //     .get(`${apis.GET_ALL_MISSION_TYPES}`)
-  //     .then((res) => {
-  //       if (res.data.status) {
-  //         console.log("MIssion types", res.data.data);
-  //         populateMissionTypes(res.data.data);
-  //       } else {
-  //         message.error(res.data.message);
-  //       }
-  //     })
-  //     .catch((err) => message.error(err))
-  //     .finally(() => setTypesLoader(false));
-  // }, []);
 
-  function onChange(pagination, filters, sorter, extra) {
-    //console.log("params", pagination, filters, sorter, extra);
-  }
 
-  const onSearch = (value) => {
-    setIsTableLoading(true);
-    if (!value) {
-      if (props.missions) {
-        setCompletedMissions(props.missions);
-      }
-    } else {
-      value = value.toLowerCase();
-
-      if (props.missions) {
-        const searchedMissions = props.missions.filter((mission: any) => {
-          return (
-            mission.status.toLowerCase().startsWith(value) ||
-            mission.name.toLowerCase().startsWith(value) ||
-            mission._id.toLowerCase().startsWith(value) ||
-            mission.user.name.toLowerCase().startsWith(value)
-          );
-        });
-
-        setCompletedMissions(searchedMissions);
-      }
-    }
-
-    setIsTableLoading(false);
-  };
 
   const handleTableChange = (pagination, filter, sorter) => {
     let filterString = "";
@@ -422,10 +328,6 @@ function ClientMission(props) {
     setSortOrder(`${sorter.field}:${sorter.order}`);
   };
 
-  const onMissionTypeChange = (e) => {
-    if (e.target.value !== "all") setMissionType(e.target.value);
-    else setMissionType("");
-  };
 
   return (
     <div className="tenant-root-usercreatepage-wrapper full-width-height">
@@ -435,25 +337,6 @@ function ClientMission(props) {
         title="Missions"
         subTitle="All Missions create by client"
       ></PageHeader>
-      <Row>
-        {/* <Spin spinning={typesLoader}>
-          <Radio.Group
-            defaultValue="all"
-            buttonStyle="solid"
-            onChange={onMissionTypeChange}>
-            <Radio.Button value="all" key="1">
-              All
-            </Radio.Button>
-            {missionTypes.map((item: any) => {
-              return (
-                <Radio.Button value={item._id} key={item._id}>
-                  {item.name}
-                </Radio.Button>
-              );
-            })}
-          </Radio.Group>
-        </Spin> */}
-      </Row>
       {/* +++++++++++++++++++++++++++++++++MISION LISTING+++++++++++++++++++++++++++++++++++++++++ */}
       <Row style={{ marginTop: "1rem" }}>
         <Col span={24}>

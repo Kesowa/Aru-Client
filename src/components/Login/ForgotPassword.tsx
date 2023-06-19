@@ -17,7 +17,6 @@ function ForgotPassword(props: any) {
   const [msg, setMsg] = useState("");
 
   const onFinish = (values: any) => {
-    //console.log(`getting ${values} from the form`);
     props.loading(true);
     http
       .post<components["schemas"]["ForgotPasswordAuthResponse"]>(
@@ -25,7 +24,6 @@ function ForgotPassword(props: any) {
         values
       )
       .then((result) => {
-        //console.log(result.data);
         if (result.data.status) {
           //login
           setmessageType("success");

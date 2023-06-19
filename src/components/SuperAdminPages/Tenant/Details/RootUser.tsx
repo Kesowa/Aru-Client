@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Row, Col, Typography } from "antd";
-
-const { Text } = Typography;
+import { useEffect, useState } from "react";
+import { Row, Col } from "antd";
 
 export default function RootUser(props: any) {
   const [data, setData] = useState({});

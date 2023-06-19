@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
-import { useHistory } from "react-router-dom";
 import io from "socket.io-client";
 import {
   Button,
@@ -34,7 +33,6 @@ import { API_URL, STATIC_URL } from "src/constants";
 const { Text, Title } = Typography;
 
 function Socket(props: any) {
-  const history = useHistory();
 
   const socket: any = useRef();
   const [refresh, setrefresh] = useState(false);
@@ -104,7 +102,6 @@ function Socket(props: any) {
     coor: any,
     geoCode: any,
     pcount: any
-    //fID: any
   ) {
     console.log(id, mID, crBy, crAt, thumb);
     Modal.info({
@@ -113,7 +110,6 @@ function Socket(props: any) {
         <div>
           <Row style={{ marginTop: 16 }}>
             <Col span={17}>
-              {/* <img src={thumb} style={{ width: "100%", height: "auto" }} /> */}
               <div id="image" className="outcome-view">
                 <Image
                   style={{ width: "100%", height: "auto", cursor: "pointer" }}
@@ -173,15 +169,6 @@ function Socket(props: any) {
               </Row>
               <Row>
                 &nbsp;&nbsp;&nbsp;&nbsp;
-                {/* //-----------------TO BE MADE------------------------// */}
-                {/* <Tooltip placement="bottom" title="share via email">
-                    <Button
-                      type="primary"
-                      shape="round"
-                      icon={<MailOutlined />}
-                      size="large"
-                    />
-                  </Tooltip> */}
                 &nbsp;&nbsp;
                 <Tooltip placement="bottom" title="download image">
                   <Button
@@ -297,7 +284,6 @@ function Socket(props: any) {
       ),
       centered: true,
       width: 1200,
-      // closable: true,
       onOk() {},
     });
   }
@@ -317,7 +303,6 @@ function Socket(props: any) {
                 : props.Auth.userdetails.tenantId
             }`
           );
-          //console.log(socket);
           // New mission added
           socket.current.on("MISSION_ADDED", ({ mission, flight }) => {
             setReload(mission);

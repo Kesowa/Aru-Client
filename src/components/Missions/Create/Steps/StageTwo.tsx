@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, Typography } from "antd";
 import { InfoCircleFilled } from "@ant-design/icons";
 import { Collapse } from "antd";

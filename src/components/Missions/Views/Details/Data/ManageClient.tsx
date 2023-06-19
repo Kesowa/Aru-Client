@@ -6,8 +6,6 @@ import {
   Modal,
   Button,
   Avatar,
-  Select,
-  Input,
   Empty,
   message,
   Popconfirm,

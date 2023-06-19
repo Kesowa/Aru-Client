@@ -179,13 +179,11 @@ function Documents(props) {
   const useFiles = (currentFolderId: string): FileArray => {
     return useMemo(() => {
       const currentFolder = fileMap[currentFolderId];
-      //console.log(currentFolder)
       const files = currentFolder.childrenIds
         ? currentFolder.childrenIds.map(
             (fileId: string) => fileMap[fileId] ?? null
           )
         : [];
-      //console.log(files)
       return files;
     }, [currentFolderId, filesSystem]);
   };
