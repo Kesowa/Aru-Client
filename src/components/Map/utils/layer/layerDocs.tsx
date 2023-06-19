@@ -889,7 +889,6 @@ function LayerDocs(props) {
       filteredArray.push(x);
     });
     populateReviewFiles(filteredArray);
-  }
 
   return (
     <>
