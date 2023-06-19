@@ -18,6 +18,10 @@ import {
   Carousel,
   Input,
   Skeleton,
+<<<<<<< HEAD
+=======
+  Select,
+>>>>>>> 12be6fb76f33b85ea2ee5b10a291aa156fffbd6e
   Badge,
   Pagination,
 } from "antd";
@@ -188,7 +192,6 @@ function Videos(props) {
                     objectFit: "cover",
                     objectPosition: "0 0",
                   }}
-
                   onError={(e: any) => (e.target.src = `/icons/fallback.png`)}
                 />
               }
@@ -625,13 +628,10 @@ function Videos(props) {
         .catch((err) => {
           message.error("ERROR" + err);
         });
-    }
-    else {
+    } else {
       message.info("Please select some videos to delete!");
     }
   };
-
-  
 
   //-------- Upload Modal ------------------------
 

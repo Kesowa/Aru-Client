@@ -35,7 +35,6 @@ import { thread } from "src/actions/threadAction";
 const { Text, Paragraph } = Typography;
 const { Option } = Select;
 
-
 function InfoWindow(props) {
   const [properties, setProperties] = useState({});
   const [address, setAddress] = useState("");
@@ -48,7 +47,7 @@ function InfoWindow(props) {
   );
   const [areaUnit, setAreaUnit] = useState("sq. m");
   const [lengthUnit, setLenghtUnit] = useState("km");
-  
+
   const [fileCount, setFileCount] = useState(0);
   const [imageToShow, setImageToshow] = useState<any>([]);
   const [imageLoader, setImageLoader] = useState(false);

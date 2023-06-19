@@ -571,7 +571,6 @@ function DashboardContent(props: any) {
     );
   }
 
-
   if (
     props.UserDetails.userType === "tenant-staff" ||
     props.UserDetails.userType === "tenant-root"

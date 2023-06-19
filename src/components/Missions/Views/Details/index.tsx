@@ -116,7 +116,6 @@ function MissionView(props) {
     { label: "NDWI map", value: "NDWI map" },
   ];
 
-
   const fetchPilots = async () => {
     const result = await http.get(`${apis.FETCH_ALL_PILOTS}`);
     if (result.data.data !== undefined) {
@@ -158,7 +157,7 @@ function MissionView(props) {
       }
 
       let mission: any;
-      
+
       if (!mission) {
         try {
           const result = await http.get(

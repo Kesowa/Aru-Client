@@ -434,8 +434,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
                 </Title>
               </Row>
               <Row>
-                &nbsp;&nbsp;&nbsp;&nbsp;
-                &nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
                 <Tooltip placement="bottom" title="download image">
                   <Button
                     type="primary"

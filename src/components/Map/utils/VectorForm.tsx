@@ -53,11 +53,10 @@ const layerTypes: any = [
 ];
 
 function VectorForm(props) {
-
   const [data, setData] = useState<any>(originData);
   const [count, setCount] = useState(0);
   const [editingKey, setEditingKey] = useState("");
-  
+
   const [layerName, setLayerName] = useState("");
   const [id, setId] = useState("");
   const [description, setDescription] = useState("");

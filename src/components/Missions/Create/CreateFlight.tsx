@@ -59,7 +59,6 @@ const FlightEditing = (props: any) => {
     });
   };
 
-
   const handleFormSubmit = () => {
     if (
       formState.flightName &&
@@ -108,7 +107,6 @@ const FlightEditing = (props: any) => {
             />
           </Form.Item>
 
-
           <Form.Item
             name="date"
             hasFeedback
@@ -128,8 +126,6 @@ const FlightEditing = (props: any) => {
               }}
             />
           </Form.Item>
-
-          
 
           <Form.Item
             name="time"

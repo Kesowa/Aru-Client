@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { default as Shimmer } from "react-loading-skeleton";
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
@@ -53,7 +53,7 @@ function Media(props) {
   const [files, populateFiles] = useState<any>([]);
   const [defaultFileList, setDefaultFileList] = useState<any>([]);
   const [progress, setProgress] = useState(0);
-  
+
   const [multiDelete, setMultiDelete] = useState(false);
   const [checkedList, setCheckedList] = useState<any>([]);
   const [loader, setLoader] = useState(true);
@@ -829,7 +829,7 @@ function Media(props) {
 
   useEffect(() => {
     const media: any = files.filter((i) => i.coverPhoto === true);
-   
+
     setCoverPhoto(media);
   }, [files, props.visible]);
 
@@ -839,10 +839,8 @@ function Media(props) {
     let images: any = [];
     if (cover.length > 0) {
       images = cover;
-      
     } else {
       images = media;
-      
     }
 
     images.sort((a, b) => {
@@ -852,9 +850,7 @@ function Media(props) {
     return images[0];
   }
 
-  useEffect(() => {
-    
-  }, [props.videoDetails]);
+  useEffect(() => {}, [props.videoDetails]);
 
   return (
     <>
@@ -888,7 +884,6 @@ function Media(props) {
                   STATIC_URL +
                   props.videoDetails.link.toString().replace(".m3u8", ".flv")
                 }
-                
                 download
               >
                 <DownloadOutlined className="btn-icon" />

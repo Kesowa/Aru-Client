@@ -51,7 +51,6 @@ function OutcomeModal(props) {
     setcurrIndex(ind < 0 ? props.data.length - 1 : ind);
   };
 
-
   return (
     <>
       {dataa && (
@@ -133,7 +132,6 @@ function OutcomeModal(props) {
                 <Row>
                   &nbsp;&nbsp;&nbsp;&nbsp;
                   {/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++TO BE MADE++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
-
                   &nbsp;&nbsp;
                   <Tooltip placement="bottom" title="download image">
                     <Button
@@ -194,7 +192,7 @@ function OutcomeModal(props) {
                   <Row>
                     <Text strong>{props.missionId}</Text>
                   </Row>
-                 
+
                   {!locationNull && (
                     <>
                       <Row style={{ marginTop: 8 }}>

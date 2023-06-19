@@ -80,8 +80,6 @@ const StageTwoForm = (props: any) => {
     });
   };
 
- 
-
   const handleFormSubmit = (values) => {
     if (
       formState.flightName &&
@@ -133,7 +131,6 @@ const StageTwoForm = (props: any) => {
             />
           </Form.Item>
 
-
           <Form.Item
             name="date"
             hasFeedback
@@ -162,8 +159,6 @@ const StageTwoForm = (props: any) => {
             />
           </Form.Item>
 
-          
-
           <Form.Item
             name="time"
             hasFeedback
@@ -177,7 +172,6 @@ const StageTwoForm = (props: any) => {
               use12Hours={true}
               format={"hh:mm:ss A"}
               onChange={(value) => {
-
                 setFormState({
                   ...formState,
                   time: value?.format("hh:mm A").toString(),
