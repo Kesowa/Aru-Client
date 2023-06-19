@@ -11,7 +11,7 @@ import {
   PageHeader,
 } from "antd";
 import { Input } from "antd";
-import {  SearchOutlined, EyeOutlined } from "@ant-design/icons";
+import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
@@ -28,7 +28,6 @@ import moment from "moment";
 import { useHistory } from "react-router-dom";
 import mp from "../../../static/mapping.svg";
 import "../MissionList.less";
-
 
 function ClientMission(props) {
   const history = useHistory();
@@ -51,7 +50,7 @@ function ClientMission(props) {
   };
 
   const { Title } = Typography;
-  
+
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -312,9 +311,6 @@ function ClientMission(props) {
     fetchMissions();
   }, [page, limit, sortOrder, searchFilters, missionType]);
 
-
-
-
   const handleTableChange = (pagination, filter, sorter) => {
     let filterString = "";
     Object.entries(filter).forEach((f: any) => {
@@ -327,7 +323,6 @@ function ClientMission(props) {
 
     setSortOrder(`${sorter.field}:${sorter.order}`);
   };
-
 
   return (
     <div className="tenant-root-usercreatepage-wrapper full-width-height">

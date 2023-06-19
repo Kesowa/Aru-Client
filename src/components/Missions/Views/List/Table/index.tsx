@@ -12,7 +12,7 @@ import {
 } from "antd";
 import { Input } from "antd";
 import { logout } from "../../../../../actions/authAction";
-import { AudioOutlined, SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
@@ -60,7 +60,7 @@ interface TableProps {
 function MissionTable(props: TableProps) {
   const history = useHistory();
   const { Title } = Typography;
-  
+
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");

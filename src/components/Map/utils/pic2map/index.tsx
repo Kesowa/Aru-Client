@@ -51,7 +51,7 @@ function Pictomap(props) {
   const [storageModal, setStorageModal] = useState(false);
 
   const [, setState] = useState<any>();
-  
+
   //---------------------File validator----------------
   function validateFile(file: any) {
     switch (file.type) {

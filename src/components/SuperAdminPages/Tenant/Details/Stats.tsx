@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Row, Col } from "antd";
 import moment from "moment";
 
-
 export default function Stats(props: any) {
   const [data, setData] = useState({});
 

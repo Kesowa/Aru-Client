@@ -182,8 +182,7 @@ function TenantInfo(props: any) {
         <Divider orientation="left" plain>
           Billing details
         </Divider>
-        <Row gutter={16}>
-        </Row>
+        <Row gutter={16}></Row>
         <Row gutter={16}>
           <Col span="12">
             <Form.Item

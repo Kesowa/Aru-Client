@@ -49,7 +49,7 @@ const ThermalImage = (props) => {
         const { offsetX, offsetY } = ev;
         //call the method to get the r,g,b,a values for current pixel
         const c = extractPixelColor(data, cols, offsetY, offsetX);
-        
+
         const hexCode = `#${[c.red, c.green, c.blue]
           .map((x) => x.toString(16).padStart(2, "0"))
           .join("")}`;

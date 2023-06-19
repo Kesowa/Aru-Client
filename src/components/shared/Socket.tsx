@@ -33,7 +33,6 @@ import { API_URL, STATIC_URL } from "src/constants";
 const { Text, Title } = Typography;
 
 function Socket(props: any) {
-
   const socket: any = useRef();
   const [refresh, setrefresh] = useState(false);
   const [reload, setReload] = useState(null);
@@ -168,8 +167,7 @@ function Socket(props: any) {
                 </Title>
               </Row>
               <Row>
-                &nbsp;&nbsp;&nbsp;&nbsp;
-                &nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
                 <Tooltip placement="bottom" title="download image">
                   <Button
                     type="primary"

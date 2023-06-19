@@ -430,7 +430,6 @@ const CreateLayer = (props: any) => {
           ))}
         </Steps>
         <div className="steps-content">{steps[current].content}</div>
-        
       </Modal>
       <Modal
         title="Storage Exceeded!"

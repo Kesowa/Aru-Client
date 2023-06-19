@@ -1,8 +1,6 @@
-import { useEffect } from "react";
 import "./scale.less";
 
 const ShowColorscale = (props) => {
-
   return (
     <div id="Scale">
       <svg className="Rectangle_1877">

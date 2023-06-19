@@ -6,7 +6,6 @@ import * as turf from "@turf/turf";
 import { MAPBOX_API_KEY } from "src/constants";
 import NavIcon from "../../static/nav_icon.png";
 
-
 function FlightLogMap(props) {
   const [marker, setMarker] = useState([]);
   const [bearing, setBearing] = useState(0);
@@ -127,7 +126,7 @@ function FlightLogMap(props) {
       getColor: (d) => [0, 195, 255],
       getWidth: (d) => 3,
     }),
-  
+
     new IconLayer({
       id: "icon-layer",
       data: markerData,

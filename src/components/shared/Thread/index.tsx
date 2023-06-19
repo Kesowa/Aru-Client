@@ -30,7 +30,6 @@ import "./index.less";
 import Mentions from "../Mentions";
 import VideoPlayer from "../VideoPlayer";
 
-
 const GET_THREAD = async (docType: any, docID: any) => {
   return await http.get(`${apis.THREAD}/${docType}/${docID}`);
 };

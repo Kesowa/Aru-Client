@@ -958,7 +958,6 @@ function PublicMap(props) {
 
   const [isDrawing, setIsDrawing] = useState(false);
 
-
   const cancelDrawing = () => {
     setIsDrawing(false);
     setFeatureState({
@@ -982,7 +981,6 @@ function PublicMap(props) {
   const onSelect = (selectedKeysValue: React.Key[], info: any) => {
     setSelectedKeys(selectedKeysValue);
   };
-
 
   const generateIcon = (type: any, color: any) => {
     switch (type) {
@@ -2375,7 +2373,8 @@ function PublicMap(props) {
   return <>{renderMap()}</>;
 }
 
-const mapStateToProps = (state) => {   //Review
+const mapStateToProps = (state) => {
+  //Review
   // return {
   //   userType: state.Auth.userdetails.userType,
   //   userDetails: state.Auth.userdetails,

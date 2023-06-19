@@ -1167,7 +1167,6 @@ const CreateBaseLayer = (props) => {
                   onClick={() => {
                     console.log("clicked");
 
-
                     if (layerName == "") {
                       message.warning("PLease neter layer name");
                       return;
@@ -1178,7 +1177,7 @@ const CreateBaseLayer = (props) => {
                         return;
                       }
                     }
-                    
+
                     if (captureDate == "") {
                       message.warning("Please choose a capture date!");
                       return;
@@ -2125,7 +2124,6 @@ const CreateBaseLayer = (props) => {
                                               : null
                                             : null
                                         }
-                                       
                                         onSelect={(e) =>
                                           handleAttributeMapping(
                                             e,
@@ -2501,7 +2499,6 @@ const CreateBaseLayer = (props) => {
                                               : null
                                             : null
                                         }
-                                      
                                         onSelect={(e) =>
                                           handleAttributeMapping(
                                             e,
@@ -2809,7 +2806,6 @@ const CreateBaseLayer = (props) => {
         ) : (
           <div className="steps-content">{steps2[current2].content}</div>
         )}
-
       </Modal>
       <Modal
         title="Storage Exceeded!"
