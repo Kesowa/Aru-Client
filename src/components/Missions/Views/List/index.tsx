@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { PageHeader, Button, Tabs, message, Badge } from "antd";
 import { PlusCircleOutlined } from "@ant-design/icons";
@@ -65,7 +65,6 @@ function MissionList(props) {
             props.setMissionsToState(result.data.data);
             setMissionTableData(result.data.data);
             setTotal(result.data.total);
-            // console.log(result.data);
             const count = {};
             let tm = 0;
             result.data.missionCount.forEach((c) => {
@@ -156,10 +155,8 @@ function MissionList(props) {
       />
 
       <Tabs
-        // defaultActiveKey= {displayedMissionType}
         activeKey={displayedMissionType}
         onChange={(key) => {
-          // console.log(key);
           setDisplayedMissionType(key);
           setUsedFilter(filters[key]);
           setPage(1);

@@ -179,13 +179,11 @@ function Documents(props) {
   const useFiles = (currentFolderId: string): FileArray => {
     return useMemo(() => {
       const currentFolder = fileMap[currentFolderId];
-      //console.log(currentFolder)
       const files = currentFolder.childrenIds
         ? currentFolder.childrenIds.map(
             (fileId: string) => fileMap[fileId] ?? null
           )
         : [];
-      //console.log(files)
       return files;
     }, [currentFolderId, filesSystem]);
   };
@@ -222,8 +220,6 @@ function Documents(props) {
       })
       .then((res) => {
         if (res.data.status) {
-          //message.loading("Starting download...");
-          //console.log(res.data);
           const url = `${STATIC_URL}${res.data.link}`;
           const key = `open${Date.now()}`;
           const btn = (
@@ -233,15 +229,6 @@ function Documents(props) {
               </Button>
             </a>
           );
-          // notification['success']({
-          //   message: `${id} folder files are ready!`,
-          //   description:
-          //     `Click the download button to download the contents of ${id} folder in a zipped file.`,
-          //   btn,
-          //   key,
-          //   placement: "bottomRight",
-          //   duration: null
-          // });
         } else {
           console.log(res.data);
           message.info("No files to download inside this folder!");
@@ -278,9 +265,7 @@ function Documents(props) {
                 currentFolderId === "rawPhotos" ||
                 currentFolderId === "rawVideos"
               ) {
-                //if(data.state.selectedFilesForAction[0].id !== "rawData")
                 var url = data.state.selectedFilesForAction[0]?.path;
-                //console.log(url)
                 window.open(url);
               }
             }
@@ -288,7 +273,6 @@ function Documents(props) {
           //----------Delete Files---------------------------------------------------
           case ChonkyActions.DeleteFiles.id:
             if (data.state.selectedFilesForAction.length > 1) {
-              //console.log("Delete multiple files", data.state.selectedFilesForAction);
               let restrictedFolder = 0;
               data.state.selectedFilesForAction.map((file: any) => {
                 if (file.id === "rawData" || file.parentId === "rawData") {
@@ -314,7 +298,6 @@ function Documents(props) {
                 });
               }
             } else if (data.state.selectedFilesForAction.length === 1) {
-              //console.log("Delete single file ID: ",data.state.selectedFilesForAction[0].id);
               if (
                 data.state.selectedFilesForAction[0].parentId === "rawData" ||
                 data.state.selectedFilesForAction[0].id === "rawData"
@@ -346,13 +329,11 @@ function Documents(props) {
           //----------------Download Files-------------------------------------------
           case ChonkyActions.DownloadFiles.id:
             if (data.state.selectedFilesForAction.length > 1) {
-              //console.log("Multiple file download: ", data.state.selectedFilesForAction);
               if (currentFolderId === "root1234") {
                 data.state.selectedFilesForAction.map((data) => {
                   if (data.id === "rawData") {
                     bulkDownload("rawData");
                   } else {
-                    //console.log(data.path)
                     download(data.path);
                   }
                 });
@@ -360,12 +341,10 @@ function Documents(props) {
                 bulkDownload("rawData");
               } else {
                 data.state.selectedFilesForAction.map((data) => {
-                  //console.log(data.path)
                   download(data.path);
                 });
               }
             } else if (data.state.selectedFilesForAction.length === 1) {
-              //console.log("Single File download: ", data.state.selectedFilesForAction, currentFolderId);
               if (
                 currentFolderId === "root1234" ||
                 currentFolderId === "rawData"
@@ -375,7 +354,6 @@ function Documents(props) {
                     bulkDownload("rawData");
                   } else {
                     var url = data.state.selectedFilesForAction[0].path;
-                    //console.log(url);
                     window.open(url);
                   }
                 } else {
@@ -383,15 +361,12 @@ function Documents(props) {
                 }
               } else {
                 var url = data.state.selectedFilesForAction[0].path;
-                //console.log(url);
                 window.open(url);
               }
             }
             break;
           default:
         }
-
-        //console.log("Used FileActionHandler",data);
       },
       [setCurrentFolderId, currentFolderId]
     );
@@ -439,7 +414,6 @@ function Documents(props) {
       const source = cancelToken.source();
       if (validateFile(options.file)) {
         const fData = new FormData();
-        //console.log("file in question: ", options.file)
         fData.append("file", options.file);
         fData.append("missionId", props.missionDetails.missionId);
         fData.append("folderName", currentFolderId);
@@ -451,15 +425,10 @@ function Documents(props) {
             options.file.name.lastIndexOf(".") + 1
           ) === "LAS"
         ) {
-          // message.info("ins")
           fData.append("type", "pointCloud");
-          //console.log("is pointCloud")
         } else {
           fData.append("type", options.file.type);
-          // message.info("out")
         }
-        //fData.append("type", options.file.type);
-        // console.log("type: ",options.file.type);
         const config = {
           headers: {
             "content-type": "multipart/form-data;",
@@ -483,7 +452,6 @@ function Documents(props) {
               .post(options.action, fData, config)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
-                //console.log("Upload successful! ",res.data);
                 message.success(
                   "File " + options.file.name + " uploaded successfully"
                 );
@@ -517,7 +485,6 @@ function Documents(props) {
               .post(options.action, fData, config)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
-                //console.log("Upload successful! ",res.data);
                 message.success(
                   "File " + options.file.name + " uploaded successfully"
                 );
@@ -589,7 +556,6 @@ function Documents(props) {
       ),
       centered: true,
       width: 640,
-      // closable: true,
       cancelText: "Cancel",
       onOk() {},
       onCancel() {},
@@ -613,7 +579,6 @@ function Documents(props) {
           let rawvideosChildrenCount = 0;
           const rawvideosChildrenIds: any = [];
           res.data.data.documents.map((data: any) => {
-            //console.log(data);
             //pushing data into reports
             if (data.folderName === "root1234") {
               reportsChildrenCount = reportsChildrenCount + 1;
@@ -761,10 +726,8 @@ function Documents(props) {
         if (res.data.status) {
           message.success("File deleted succesfully!");
           setRefreshState(true);
-          //console.log(res);
         } else {
           message.error(res.data.message);
-          //console.log(res);
         }
       })
       .catch((err) => {
@@ -780,7 +743,6 @@ function Documents(props) {
     files.map((file) => {
       IdsArray.push(file.id);
     });
-    //console.log(IdsArray);
     const payload = {
       id: IdsArray,
     };
@@ -790,16 +752,13 @@ function Documents(props) {
       })
       .then((res) => {
         if (res.data.status) {
-          //console.log(res.data.message);
           message.success("Documents deleted successfully!");
           setRefreshState(true);
         } else {
-          //console.log(res.data.message);
           message.error(res.data.message);
         }
       })
       .catch((err) => {
-        //console.log("error",err);
         message.error("API Error: Please report bug!");
         AxiosErrorHandler(err, props.logout);
       });
@@ -815,26 +774,20 @@ function Documents(props) {
         );
 
         socket.current.on("DOCUMENT_CREATED", (data) => {
-          //console.log("Document uploaded",data);
           setRefreshState(true);
           fetchDocuments();
         });
 
         socket.current.on("DOCUMENT_DELETED", (data) => {
-          //console.log("Document Deleted",data);
           setRefreshState(true);
           fetchDocuments();
         });
 
         socket.current.on("DOCUMENT_ZIP_START", (data) => {
-          //console.log("RECC",data);
           message.success("Preparing your download...");
-          // setRefreshState(true);
-          // fetchDocuments();
         });
 
         socket.current.on("DOCUMENT_ZIP_COMPLETED", (data) => {
-          //console.log("RECC2",data);
           const key = `open${Date.now()}`;
           const btn = (
             <a href={`${STATIC_URL}${data}`} target="_blank" rel="noreferrer">
@@ -851,14 +804,10 @@ function Documents(props) {
             placement: "bottomRight",
             duration: null,
           });
-          // setRefreshState(true);
-          // fetchDocuments();
         });
         socket.current.on("DOCUMENT_ZIP_FAILED", (data) => {
           console.log("ERROR! Could not compress folder items!", data);
           message.error("Oops! Failed to compress files. Please try again!");
-          // setRefreshState(true);
-          // fetchDocuments();
         });
       }
     }

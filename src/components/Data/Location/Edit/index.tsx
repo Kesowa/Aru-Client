@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import LocationMap from "../Map";
 import "../../index.less";
 import { Card, Typography, Collapse } from "antd";

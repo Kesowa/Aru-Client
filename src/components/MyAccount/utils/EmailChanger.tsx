@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Form, Input, Row, Col, message, Button } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import http from "../../../services/httpCall";
@@ -21,7 +21,6 @@ function EmailChanger(props: any) {
 
   useEffect(() => {
     if (props.tenantData) {
-      //console.log(props.tenantData);
       form.setFieldsValue(props.tenantData);
     }
   }, [props.tenantData]);

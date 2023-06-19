@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   Alert,
   message,
@@ -14,7 +14,6 @@ import {
   Empty,
   Result,
   Checkbox,
-  Select,
   Badge,
   Pagination,
 } from "antd";
@@ -50,7 +49,6 @@ import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
 
-const { Option } = Select;
 let plainOptions = new Array<any>();
 function ImageDocs(props) {
   const [defaultFileList, setDefaultFileList] = useState([]);
@@ -67,7 +65,6 @@ function ImageDocs(props) {
   const [thermalPayload, setThermalPayload] = useState({});
   // This is a comment
   const [flag, setFlag] = useState(false);
-  const [isFlagged, setIsFlagged] = useState(false);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
   const [thumbnail, setThumbnail] = useState("");
@@ -194,7 +191,6 @@ function ImageDocs(props) {
               .post(options.action, fData, config)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
-                //console.log("Upload successful! ",res.data);
                 message.success(
                   "File " + options.file.name + " uploaded successfully"
                 );
@@ -228,7 +224,6 @@ function ImageDocs(props) {
               .post(options.action, fData, config)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
-                //console.log("Upload successful! ",res.data);
                 message.success(
                   "File " + options.file.name + " uploaded successfully"
                 );
@@ -299,7 +294,6 @@ function ImageDocs(props) {
       ),
       centered: true,
       width: 640,
-      // closable: true,
       cancelText: "Cancel",
       onOk() {},
       onCancel() {},
@@ -477,13 +471,11 @@ function ImageDocs(props) {
         .then((res) => {
           if (res.data.status) {
             message.success("Files deleted succesfully!");
-            // console.log(res);
             setRefreshState(true);
             fetchDocuments();
             setCheckedList([]);
           } else {
             message.error(res.data.message);
-            //console.log(res);
           }
         })
         .catch((err) => {
@@ -495,7 +487,6 @@ function ImageDocs(props) {
     }
   }
 
-  // Delete single file
   function deleteSingleFile(id: any) {
     http
       .delete(`${apis.DELETE_DOCUMENT_MULTIPLE}`, {
@@ -506,12 +497,10 @@ function ImageDocs(props) {
       .then((res) => {
         if (res.data.status) {
           message.success("File deleted succesfully!");
-          // console.log(res);
           setRefreshState(true);
           fetchDocuments();
         } else {
           message.error(res.data.message);
-          //console.log(res);
         }
       })
       .catch((err) => {
@@ -530,7 +519,6 @@ function ImageDocs(props) {
         );
 
         socket.current.on("DOCUMENT_CREATED", () => {
-          //console.log("Document uploaded",data);
           setRefreshState(true);
           fetchDocuments();
         });
@@ -655,7 +643,6 @@ function ImageDocs(props) {
 
     const flaggedArray = images
       .map((data: any) => {
-        //console.log('toggleFlag', checkedList, data._id);
         if (checkedList.includes(data._id)) {
           return data.isFlagged;
         }
@@ -939,42 +926,6 @@ function ImageDocs(props) {
                               }}
                             ></Image>
                           </Badge>
-                          /**<Col span={6}>
-                            <img
-                              alt={`${item._id}`}
-                              className="imageMain"
-                              key={`${item._id}`}
-                              style={
-                                checkedList.includes(item._id)
-                                  ? {
-                                      border: "4px solid #3b86ff",
-                                      cursor: "pointer",
-                                      aspectRatio: "16/9",
-                                    }
-                                  : {
-                                      cursor: "pointer",
-                                      aspectRatio: "16/9",
-                                    }
-                              }
-                              width={320}
-                              height={180}
-                              src={
-                                STATIC_URL +
-                                "/documents/2x_" +
-                                item.filePath.split("/")[2]
-                              }
-                              onClick={() => {
-                                if (checkedList.includes(item._id)) {
-                                  const filtered: any = checkedList.filter(
-                                    (i: any) => i !== item._id
-                                  );
-                                  setCheckedList(filtered);
-                                } else {
-                                  setCheckedList([...checkedList, item._id]);
-                                }
-                              }}
-                            />
-                          </Col>**/
                         );
                       })}
                     </Row>

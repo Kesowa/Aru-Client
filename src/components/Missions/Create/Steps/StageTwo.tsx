@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, Typography } from "antd";
 import { InfoCircleFilled } from "@ant-design/icons";
 import { Collapse } from "antd";
@@ -46,11 +46,9 @@ function StageTwo(props: any) {
           windSpeed: data.windSpeed,
         };
         setweatherData(wData);
-        //console.log(wData);
       })
       .catch((err) => {
         console.log(err.message);
-        // AxiosErrorHandler(err, props.logout);
       });
   };
 
@@ -105,46 +103,6 @@ function StageTwo(props: any) {
                 />
               )}
             </div>
-            {/* <Collapse
-              accordion
-              bordered={false}
-              ghost
-              expandIconPosition={"right"}
-              defaultActiveKey={"2"}
-            >
-              <Panel header="Select from previous flights" key="1">
-                <Button type="text" className="previous_job_data">
-                  <img src={s_m} className="icon" alt="" />{" "}
-                  <span style={{ paddingLeft: "15px" }}>Hello</span>
-                </Button>
-                <Button type="text" className="previous_job_data">
-                  <img src={s_m} className="icon" alt="" />{" "}
-                  <span style={{ paddingLeft: "15px" }}>Hello</span>
-                </Button>
-                <Button type="text" className="previous_job_data">
-                  <img src={s_m} className="icon" alt="" />{" "}
-                  <span style={{ paddingLeft: "15px" }}>Hello</span>
-                </Button>
-              </Panel>
-              <Panel header="Create New" key="2" className="mission_form">
-                {!props.isEditing ? (
-                  <StageTwoForm
-                    setFormComplete={setFormComplete}
-                    nextStage={props.nextStage}
-                    areaSelected={props.areaSelected}
-                    setAreaSelected={props.setAreaSelected}
-                    setisoDate={setisoDate}
-                  />
-                ) : (
-                  <FlightEditing
-                    setFormComplete={setFormComplete}
-                    nextStage={props.nextStage}
-                    areaSelected={props.areaSelected}
-                    setAreaSelected={props.setAreaSelected}
-                  />
-                )}
-              </Panel>
-            </Collapse> */}
           </Card>
         </Panel>
       </Collapse>

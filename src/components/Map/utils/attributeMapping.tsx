@@ -1,5 +1,4 @@
 import { Col, Collapse, Divider, Row, Select, Typography } from "antd";
-import React from "react";
 import { memo } from "react";
 import { v4 as uuid } from "uuid";
 
@@ -14,13 +13,10 @@ function AttributeMapping(props: any) {
     if (props.responseArray.length > 0) {
       ooi = props.responseArray.filter((i) => i.layerId == layers._id);
       if (ooi.length > 0) {
-        //console.log("test",ooi)
         ooi[0].attrMapping[`${e}`] = fields.key;
-        // console.log(ooi);
         const arraywoObj: any = props.responseArray.filter(
           (i) => i.layerId !== layers._id
         );
-        //console.log("array",arraywoObj);
         arraywoObj.push(ooi[0]);
         props.setResponseArray(arraywoObj);
       } else {
@@ -44,8 +40,6 @@ function AttributeMapping(props: any) {
   }
   return (
     <Collapse
-      //defaultActiveKey={["1"]}
-      //onChange={(e) => console.log(e)}
       style={{
         width: "100%",
         overflow: "auto",
@@ -93,9 +87,6 @@ function AttributeMapping(props: any) {
                                 <Select
                                   key={`${fields.key}-${uuid()}`}
                                   style={{ width: "200px" }}
-                                  // onChange={(e)=>{
-                                  //   handleAttributeMapping(e, fields, layers)
-                                  // }}
                                   onSelect={(e) =>
                                     handleAttributeMapping(e, fields, layers)
                                   }

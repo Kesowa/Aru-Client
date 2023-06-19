@@ -104,7 +104,6 @@ function LocationCard(props) {
       });
 
       if (location.data.status) {
-        //console.log(location.data)
         const points = location.data.data.geometry.coordinates[0].map(
           (point) => {
             return {
@@ -174,7 +173,6 @@ function LocationCard(props) {
       })
       .then((result) => {
         if (result.data.status) {
-          //console.log(result.data.data[0]);
           setSelectedMissionDetails(result.data.data[0]);
           setCenterPoints(result.data.data[0].centerPoints);
         } else {
@@ -288,7 +286,6 @@ function LocationCard(props) {
   return (
     <div>
       <PageHeader
-        //style={{ margin: "-24px", marginBottom: 0 }}
         ghost={false}
         onBack={() => window.history.back()}
         title={locationName}
@@ -305,20 +302,12 @@ function LocationCard(props) {
               <Text>18 June, 2020</Text>
             </Col>
           </Row>,
-          // <EditOutlined/>,
-          // <DeleteOutlined/>
         ]}
-        // footer={
-        //   <div>
-        //     <EditOutlined /> <DeleteOutlined />
-        //   </div>
-        // }
       ></PageHeader>
       <Row className="location_card_data">
         <Col
           span={16}
           style={{
-            //marginLeft:'-24px',
             minHeight: "450px",
             height: "100%",
           }}
@@ -345,7 +334,6 @@ function LocationCard(props) {
           span={8}
           style={{
             padding: "10px",
-            //width : "300px"
           }}
           className="mission-tab"
         >

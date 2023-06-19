@@ -13,7 +13,6 @@ import {
   Tag,
   Select,
   Modal,
-  Typography,
   Popconfirm,
   Result,
 } from "antd";
@@ -42,7 +41,6 @@ import {
 
 const { TextArea } = Input;
 const { Option } = Select;
-const { Text } = Typography;
 
 function StageThree(props: any) {
   // Form control states
@@ -57,8 +55,6 @@ function StageThree(props: any) {
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [clients, setClients] = useState([]);
   const [client, setClient] = useState("");
-  const [errorState, setErrorState] = useState("");
-  const [weatherData, setweatherData] = useState();
 
   const history = useHistory();
 
@@ -138,8 +134,6 @@ function StageThree(props: any) {
           console.log(err);
           AxiosErrorHandler(err, props.logout);
         }
-
-        //message.error(err.message);
       });
   }, []);
 
@@ -147,7 +141,6 @@ function StageThree(props: any) {
     http
       .get(`${apis.GET_CLIENT_LIST}?page=1&limit=100`)
       .then((result) => {
-        //console.log(result.data);
         if (result.data.status) {
           setClients(result.data.data);
         } else {
@@ -173,10 +166,6 @@ function StageThree(props: any) {
       return;
     }
 
-    // if (!client) {
-    //   message.error("Please Select client");
-    //   return;
-    // }
     props.loading(true);
     let data;
     console.log("Hiiii");
@@ -192,7 +181,6 @@ function StageThree(props: any) {
           ...props.missionCreationData.flights,
           assetID: asset,
         },
-        //clientId: client,
       };
     } else {
       data = {
@@ -232,7 +220,6 @@ function StageThree(props: any) {
         }
       }
       AxiosErrorHandler(err, props.logout);
-      //message.error("Something went wrong");
     } finally {
       props.loading(false);
     }
@@ -312,7 +299,6 @@ function StageThree(props: any) {
           status="500"
           title="Oops! You have reached your organisation mission limit!"
           subTitle="Please contact your admin."
-          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
@@ -501,11 +487,6 @@ function StageThree(props: any) {
 
         <Row justify="center" className="step_buttons"></Row>
       </React.Fragment>
-      {/* <Weather setweatherData={setweatherData} isoDate={data.date}   /> */}
-      {/* <Modal visible={isModalVisible} onOk={()=> history.push('/dashboard/missions')} onCancel={()=>setIsModalVisible(false)} 
-           okText='YES' cancelText='NO'  >
-       <ExclamationCircleOutlined /> <Text> Confirm</Text>
-      </Modal> */}
     </div>
   );
 }
@@ -523,5 +504,3 @@ export default connect(mapStateToProps, {
   setCircleMeasurements,
   setGeolocation,
 })(StageThree);
-
-// href="/dashboard/missions"

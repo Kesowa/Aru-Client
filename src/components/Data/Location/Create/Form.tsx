@@ -17,17 +17,6 @@ import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 
 const { Option } = Select;
-// const { RangePicker } = DatePicker;
-
-// const dayList = {
-//   Sunday: false,
-//   Monday: false,
-//   Tuesday: false,
-//   Wednesday: false,
-//   Thursday: false,
-//   Friday: false,
-//   Saturday: false,
-// }; Future Purpose
 
 const StageTwoForm = (props: any) => {
   const [formState, setFormState] = useState<any>({});
@@ -70,7 +59,6 @@ const StageTwoForm = (props: any) => {
     };
 
     data.coordinates[0].push(data.coordinates[0][0]);
-    //console.log(data)
 
     http
       .post(`${apis.CREATE_LOCATION}`, data)
@@ -81,15 +69,11 @@ const StageTwoForm = (props: any) => {
         }
       })
       .catch((err) => {
-        //message.error(err.message);
         if (err.response.status === 403) {
           if (
             err.response.data.message === "Package has expired! Please renew!"
           ) {
             setIsModalVisible2(true);
-            // window.setTimeout(function () {
-            //   AxiosErrorHandler(err, VideoProps.logout); //needs to be connected with redux
-            // }, 5000);
           } else {
             setIsModalVisible(true);
           }
@@ -109,27 +93,6 @@ const StageTwoForm = (props: any) => {
       locationName: e.target.value,
     });
   };
-
-  // const enumerateDaysBetweenDates = function (selectedDates: any) {
-  //   var dates: string[] = [];
-  //   let startDate = selectedDates[0];
-  //   let endDate = selectedDates[1];
-
-  //   var currDate = moment(startDate).startOf("day");
-  //   var lastDate = moment(endDate).startOf("day");
-
-  //   dates.push(currDate.clone().format("D MMMM YYYY dddd").toString());
-  //   while (currDate.add(1, "days").diff(lastDate) <= 0) {
-  //     dates.push(currDate.clone().format("D MMMM YYYY dddd").toString());
-  //   }
-
-  //   setFormState({
-  //     ...formState,
-  //     ["startDate"]: startDate.format("D MMMM YYYY dddd").toString(),
-  //     ["endDate"]: endDate.format("D MMMM YYYY dddd").toString(),
-  //     dates: dates,
-  //   });
-  // };
 
   const handleFormSubmit = (values) => {
     if (formState.locationName) {
@@ -159,7 +122,6 @@ const StageTwoForm = (props: any) => {
           status="500"
           title="Oops! You have reached the limit of creating further locations!"
           subTitle="Please contact your admin."
-          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
@@ -248,7 +210,6 @@ const StageTwoForm = (props: any) => {
                 </div>
 
                 <div className="data_selcted_2" style={{ marginTop: "20px" }}>
-                  {/* <h3>Location Selected</h3> */}
                   <div className="location_details">
                     <img src={l_a} alt="" style={{ height: "20px" }} />
                     <div>

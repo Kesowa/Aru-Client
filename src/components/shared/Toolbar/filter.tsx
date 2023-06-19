@@ -128,7 +128,6 @@ const FilterToolbar = (props) => {
               <Option value="size">Size</Option>
             </>
           )}
-          {/* <Option value='inference'>Inference</Option> */}
         </Select>
       </div>
       <Divider style={{ margin: "16px 0" }} />

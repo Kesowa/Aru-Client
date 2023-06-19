@@ -65,7 +65,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   );
 };
 
-const { Text, Link } = Typography;
+const { Text } = Typography;
 
 function FeatureTable(props) {
   const [isTableLoading, setIsTableLoading] = useState(false);
@@ -141,15 +141,12 @@ function FeatureTable(props) {
   //-------------------------------Filter Layer By Range----------------------------------------
   const onFinish = async (values: any, key: any) => {
     console.log(values, key);
-    // form1.resetFields();
     setIsTableLoading(true);
     const range: any = [];
     range.push(values.lower);
     range.push(values.upper);
     const body = {
       id: props.id,
-      // page: page - 1,
-      // limit: limit,
       key: key,
       range: range,
     };
@@ -177,7 +174,6 @@ function FeatureTable(props) {
             props.setshowSelectedIndexes([values.lower, values.upper]);
             props.setKey(key);
             setTableData(obj);
-            //message.success(res.data.message);
           }
         } else {
           message.error(res.data.message);
@@ -200,8 +196,6 @@ function FeatureTable(props) {
       id: props.id,
       key: key,
       value: value,
-      // page: page - 1,
-      // limit: limit,
     };
     http
       .patch(`${apis.GET_FEATURE_BY_LAYER}`, payload)
@@ -224,7 +218,6 @@ function FeatureTable(props) {
             props.updateFeatureCountInLayers(res.data.count, props.id);
             console.log(obj);
             setTableData(obj);
-            //message.success(res.data.message);
           }
         } else {
           message.error(res.data.message);
@@ -293,7 +286,6 @@ function FeatureTable(props) {
       clearFilters,
     }) => (
       <>
-        {/* {isFiltering ? ( */}
         <div style={{ padding: 8 }}>
           <Input
             ref={(node) => {
@@ -336,7 +328,6 @@ function FeatureTable(props) {
             </Button>
           </Space>
         </div>
-        {/*  ) : ( */}
         <div style={{ padding: 8 }}>
           <Form
             form={form1}
@@ -379,7 +370,6 @@ function FeatureTable(props) {
             </Space>
           </Form>
         </div>
-        {/* )} */}
       </>
     ),
     filterIcon: (filtered) => (
@@ -394,24 +384,6 @@ function FeatureTable(props) {
         />
       </>
     ),
-    // onFilter: (value: any, record: any) => true,
-    // onFilterDropdownVisibleChange: (visible: any) => {
-    //   if (visible) {
-    //     setTimeout(() => searchInput.select());
-    //   }
-    // },
-    // onFilter: (value, record) =>
-    //   record[dataIndex]
-    //     ? record[dataIndex]
-    //         .toString()
-    //         .toLowerCase()
-    //         .includes(value.toLowerCase())
-    //     : "",
-    // onFilterDropdownVisibleChange: (visible) => {
-    //   if (visible) {
-    //     setTimeout(() => searchInput.select(), 100);
-    //   }
-    // },
     render: (text) =>
       searchedColumn === dataIndex ? (
         <Highlighter
@@ -531,7 +503,6 @@ function FeatureTable(props) {
           setEditingKey("");
         }
       }
-      //editGeoJsonFeature(featureIndex, key);
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
@@ -563,7 +534,6 @@ function FeatureTable(props) {
       }
     } else if (type === "Polygon") {
       const features = turf.points([...coordinates[0]]);
-      //console.log(turf.point(turf.center(features).geometry.coordinates));
       centerPoint = turf.center(features);
       centerPoint = centerPoint.geometry.coordinates;
     } else if (type === "LineString") {
@@ -682,20 +652,6 @@ function FeatureTable(props) {
           ),
         });
       }
-      // if(key == "Nth"){
-      //   columns.push({
-      //     title: key,
-      //     dataIndex: key,
-      //     editable: false,
-      //     render: (name, record) => (
-      //       <>
-      //         {Object.keys(name).map(function(key, index) {
-      //           console.log("Hose Halapino",key, index);
-      //         })}
-      //       </>
-      //     ),
-      //   });
-      // }
     }
 
     if (props.canEditGeojson || props.canDeleteFeature) {
@@ -804,7 +760,6 @@ function FeatureTable(props) {
           rowExpandable: (record) => record.Nth,
         }}
         rowKey={(record) => {
-          //console.log(record.Nth);
           return record.key;
         }}
         columns={mergedColumns}
@@ -827,9 +782,7 @@ function FeatureTable(props) {
             ? "flagged-row"
             : "unflagged-row";
         }}
-        //scroll={{ x: 1100, y: 355 }}
         style={{
-          // maxHeight: props.contentHeight,
           height: "calc(100% - 30px)",
           marginBottom: "5px",
           overflowY: "scroll",
@@ -837,7 +790,6 @@ function FeatureTable(props) {
       />
       <Pagination
         style={{
-          // maxHeight: props.contentHeight,
           display: "flex",
           justifyContent: "end",
           height: "30px",

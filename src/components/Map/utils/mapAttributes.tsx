@@ -130,7 +130,6 @@ function MapAttributes(props) {
           if (result.data.status) {
             setRasterDetails(result.data.data[0]);
             console.log("Raster details: ", result.data);
-            //getRasterMetaData();
           } else {
             setError(true);
           }
@@ -142,13 +141,6 @@ function MapAttributes(props) {
         })
         .finally(() => setLoading(false));
     } else if (props.type == "vector") {
-      // fetch(`${props.path}`)
-      //   .then((res) => res.json())
-      //   .then((res) => {
-      //     setTableData(res.features);
-      //     console.log(res);
-      //   })
-      //   .catch((err) => console.log(err));
       if (props.featureCount) setTotal(props.featureCount);
       fetchJsonData();
     }
@@ -374,8 +366,6 @@ function MapAttributes(props) {
     default:
       return null;
   }
-
-  return <div>Map Attributes</div>;
 }
 
 const mapStateToProps = (state: any) => ({

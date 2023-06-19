@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { PageHeader, Tabs } from "antd";
 import { loading } from "../../actions/loadingAction";
@@ -21,7 +20,6 @@ const { TabPane } = Tabs;
 function Organisation(props: any) {
   const [tenantData, setTenantData] = useState();
   const [errorState, setErrorState] = useState("");
-  const history = useHistory();
 
   const fetchTenantData = () => {
     props.loading(true);
@@ -96,14 +94,6 @@ function Organisation(props: any) {
                   setTenantData={setTenantData}
                   tenantData={tenantData}
                 />
-                {/* <Row gutter={16}>
-                                    <Col span="12" className="">
-                                        <EmailChanger setTenantData={setTenantData} tenantData={tenantData} />
-                                    </Col>
-                                    <Col span="12" className="">
-                                        <PhoneNumberChanger setTenantData={setTenantData} tenantData={tenantData} />
-                                    </Col>
-                                </Row> */}
               </>
             </TabPane>
             <TabPane tab="Package" key="2">

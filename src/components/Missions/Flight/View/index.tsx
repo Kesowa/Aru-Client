@@ -6,7 +6,7 @@ import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import FlightDetails from "./Details";
 import "./index.less";
 import { useEffect } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -22,7 +22,6 @@ const ViewFlight = (props) => {
   const searchAutoComplete: any = useRef();
 
   const { id } = useParams<any>();
-  const history = useHistory();
 
   const getMissionDetails = async (id) => {
     let mission = props.missions.filter((mission) => {
@@ -156,7 +155,6 @@ const ViewFlight = (props) => {
   };
 
   const createMeasurements = (geofence) => {
-    //console.log(geofence);
     let obj;
     switch (geofence.shape) {
       case "Polygon":

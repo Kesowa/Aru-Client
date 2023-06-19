@@ -388,7 +388,6 @@ const EditFlightForm = (props: any) => {
               </div>
 
               <div className="data_selcted_2">
-                {/* <h3>Location Selected</h3> */}
                 <div className="location_details">
                   <img src={l_a} alt="" style={{ height: "20px" }} />
                   <div style={{ marginTop: "-5px" }}>

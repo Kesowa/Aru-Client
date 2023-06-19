@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { PageHeader, Button, Tabs, Badge } from "antd";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import DataMission from "./Mission";
@@ -10,7 +10,6 @@ const { TabPane } = Tabs;
 
 function DataList() {
   const [displayedDataType, setDisplayedDataType] = useState("1");
-  const history = useHistory();
   const [missionCount, setMissionCount] = useState(0);
 
   return (

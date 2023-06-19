@@ -49,7 +49,6 @@ function DataLocation(props) {
       .get(`${apis.GET_ALL_LOCATIONS}`)
       .then((result) => {
         if (result.data.data) {
-          //console.log(result.data.data);
           const data: any = [];
           for (const location of result.data.data) {
             const obj: any = new Object();
@@ -74,7 +73,6 @@ function DataLocation(props) {
             data.push(obj);
           }
 
-          //console.log(data);
           setLocationData(data);
         }
       })
@@ -375,14 +373,9 @@ function DataLocation(props) {
     },
   ];
 
-  function onChange(pagination, filters, sorter, extra) {
-    //console.log("params", pagination, filters, sorter, extra);
-  }
-
   const onSearch = (value) => console.log(value);
 
   function fetchRowDetails(geofence, name) {
-    //return console.log(`coordinates: ${geofence}`, `location name: ${name}`);
     return console.log("");
   }
 
@@ -400,11 +393,6 @@ function DataLocation(props) {
   // rowSelection object indicates the need for row selection
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
-      // console.log(
-      //   `selectedRowKeys: ${selectedRowKeys}`,
-      //   "selectedRows: ",
-      //   selectedRows[0].geofence
-      // );
       fetchRowDetails(selectedRows[0].geofence, selectedRows[0].name);
       setGeofence(selectedRows[0].geofence);
       setCenterPoint(selectedRows[0].centerPoint);
@@ -412,20 +400,7 @@ function DataLocation(props) {
   };
   return (
     <div>
-      {/* ++++++++++++++++++SEARCH BOX+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
-      {/* <Row>
-        <Col>
-          <Tooltip placement='bottomLeft' title='search for missions'>
-            <Search
-              placeholder='input search text'
-              allowClear
-              onSearch={onSearch}
-              style={{ width: "20rem", margin: "0 10px" }}
-            />
-          </Tooltip>
-        </Col>
-      </Row> */}
-      {/* +++++++++++++++++++++++++++++++++MISION LISTING+++++++++++++++++++++++++++++++++++++++++ */}
+      {/* +++++++++++++++++++++++++++++++++MISSION LISTING+++++++++++++++++++++++++++++++++++++++++ */}
       <Row style={{ marginTop: "1rem" }}>
         <Col span={16}>
           <Table

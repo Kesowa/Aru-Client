@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { default as Shimmer } from "react-loading-skeleton";
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
@@ -53,7 +53,7 @@ function Media(props) {
   const [files, populateFiles] = useState<any>([]);
   const [defaultFileList, setDefaultFileList] = useState<any>([]);
   const [progress, setProgress] = useState(0);
-  const socket: any = useRef();
+
   const [multiDelete, setMultiDelete] = useState(false);
   const [checkedList, setCheckedList] = useState<any>([]);
   const [loader, setLoader] = useState(true);
@@ -68,7 +68,6 @@ function Media(props) {
 
   //---------------------File validator----------------
   function validateFile(file: any) {
-    const extension = file.name.split(".")[1];
     switch (file.type) {
       case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         return true;
@@ -174,7 +173,6 @@ function Media(props) {
   //-----------extract images------------------------
   function extractImages(files: any) {
     const images: any = [];
-    //console.log("Uploaded files here",files)
     files.map((item: any) => {
       if (item.fileType === "image/png" || item.fileType === "image/jpeg") {
         images.push(item);
@@ -206,7 +204,6 @@ function Media(props) {
     multiple: true,
     action: `${apis.UPLOAD_FILE_TO_FEATURE}`,
     customRequest: (options: any) => {
-      //console.log(options.file)
       if (props.layerLabel === "No label selected") {
         message.warning(
           "Please select a layer label before uploading to a node!"
@@ -214,7 +211,6 @@ function Media(props) {
         options.onError("File not Supported!");
       } else {
         if (validateFile(options.file)) {
-          //console.log(options.file);
           const fData = new FormData();
           fData.append("file", options.file);
           fData.append("layerId", props.layerId);
@@ -310,7 +306,6 @@ function Media(props) {
           })
           .then((res) => {
             if (res.data.status) {
-              //console.log(res.data.data);
               res.data.data.map((item: any) => {
                 newdata.push(item);
               });
@@ -346,7 +341,6 @@ function Media(props) {
       })
       .then((res) => {
         if (res.data.status) {
-          //console.log("FIle detelted",res.data)
           message.success("File Deleted!");
           const filteredArray = files.filter(function (obj) {
             return obj._id !== res.data.data._id;
@@ -374,7 +368,6 @@ function Media(props) {
       })
       .then((res) => {
         if (res.data.status) {
-          //console.log("FIle detelted",res.data)
           message.success("Files Deleted!");
           const filteredArray = files.filter(function (obj) {
             return !ids.include(obj._id);
@@ -465,7 +458,6 @@ function Media(props) {
       display: data[key],
     }));
   };
-  //console.log("data from props:",props.visible, props.layerId, props.featureIndex, props.properties);
   const renderVideo = () => {
     console.log("videoToShow", props.videoToShow);
     return (
@@ -490,7 +482,6 @@ function Media(props) {
                               STATIC_URL +
                               item.videoPath.toString().replace(".m3u8", ".flv")
                             }
-                            // target='_blank'
                             download
                           >
                             <DownloadOutlined /> Download{" "}
@@ -808,9 +799,7 @@ function Media(props) {
             </List.Item>
           )}
         />
-        {/* {data.map((item:any)=>{
-            return(<p>{item.name}</p>)
-          })} */}
+        {}
       </>
     );
   }
@@ -840,7 +829,7 @@ function Media(props) {
 
   useEffect(() => {
     const media: any = files.filter((i) => i.coverPhoto === true);
-    //console.log("Filtered",media, "files", files);
+
     setCoverPhoto(media);
   }, [files, props.visible]);
 
@@ -850,10 +839,8 @@ function Media(props) {
     let images: any = [];
     if (cover.length > 0) {
       images = cover;
-      //console.log("COver photo present")
     } else {
       images = media;
-      //console.log("No cover photo")
     }
 
     images.sort((a, b) => {
@@ -863,9 +850,7 @@ function Media(props) {
     return images[0];
   }
 
-  useEffect(() => {
-    //console.log("selected prop:", props.properties.properties ? props.properties.properties[props.layerLabel] : "null");
-  }, [props.videoDetails]);
+  useEffect(() => {}, [props.videoDetails]);
 
   return (
     <>
@@ -899,7 +884,6 @@ function Media(props) {
                   STATIC_URL +
                   props.videoDetails.link.toString().replace(".m3u8", ".flv")
                 }
-                // target='_blank'
                 download
               >
                 <DownloadOutlined className="btn-icon" />

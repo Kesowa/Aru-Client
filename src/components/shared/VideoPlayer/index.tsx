@@ -1,6 +1,5 @@
 /* eslint-disable */
 import React, { useState, useRef, useEffect } from "react";
-//import connectSocket from "../../.";
 import ReactPlayer from "react-player";
 import "./index.less";
 import "./hud.less";
@@ -261,8 +260,6 @@ function VideoPlayer(props: any) {
     url,
     handleTheater,
     theater,
-    // handlePip,
-    // pip,
     streamKey,
     mission,
     isLive,
@@ -289,31 +286,11 @@ function VideoPlayer(props: any) {
 
   let socket;
   let aiSocket: any = useRef();
-  // function geocoder(coordinates: any) {
-  //   //setLoader(true);
-  //   http
-  //     .get(
-  //       `https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates[0]},${coordinates[1]}.json?access_token=${import.meta.env.VITE_MAPBOX_API_KEY}`
-  //     )
-  //     .then((result) => {
-  //       //console.log(result.data.features[0]);
-  //       console.log(result.data.features[0].place_name);
-  //       setCaptAddress(result.data.features[0].place_name);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     })
-  //     .finally(() => {
-  //       //etLoader(false);
-  //     });
-  // }
 
-  //useEffect(()=>console.log(captAddress),[captAddress])
   useEffect(() => {
     setIsFlagged(props.mission?.isFlagged);
     if ("bookmarks" in props.mission) setBookmark(props.mission.bookmarks);
   }, [props.mission]);
-  //---listening for drone telemetry from socket------------
   useEffect(() => {
     socket = connectSocket(streamKey);
 
@@ -548,7 +525,6 @@ function VideoPlayer(props: any) {
       playerContainerRef.current
     ) {
       screenfull.toggle(playerContainerRef.current);
-      //setIsFullScreen(!isFullScreen);
     }
 
     if (screenfull.isEnabled) {
@@ -569,10 +545,6 @@ function VideoPlayer(props: any) {
       handleTheater();
     }
   };
-
-  // const handleDisablePip = () => {
-  //   handlepip();
-  // };
 
   const handleProgress = (changedState) => {
     if (!seeking) {
@@ -605,7 +577,6 @@ function VideoPlayer(props: any) {
 
   const handleSeekChange = (newValue) => {
     setPlayed(newValue / 100);
-    //console.log("handle seek change", newValue, newValue/100);
     setSeeking(true);
   };
 
@@ -642,16 +613,6 @@ function VideoPlayer(props: any) {
     return format(fraction * duration);
   };
 
-  const handleResolutionChange = (e) => {
-    setActiveURL(resolutionURLs[e.key]);
-    console.log("current selected URL++++++: " + activeURL);
-  };
-
-  const onInputChange = (e) => {
-    setInference(e.target.value);
-    console.log(inference);
-  };
-
   // handle snapshot button
   const handleSnapShot = () => {
     if (!isAlertEnabled && canvasRef && canvasRef.current) {
@@ -671,7 +632,6 @@ function VideoPlayer(props: any) {
 
       const imageURL = canvas.toDataURL();
       setAlertImage(imageURL);
-      //console.log(alertImage);
 
       canvas.width = 0;
       canvas.height = 0;
@@ -717,14 +677,10 @@ function VideoPlayer(props: any) {
       .post(`${apis.UPLOAD_ALERT_IMAGE}`, formDataToUpload)
       .then((res) => {
         body.image = res.data.file;
-        //console.log("Image uploaded at: " + res.data.file);
-        // setCaptAddress(geocoder([
-        //   isLive ? location.long : captLong,
-        //   isLive ? location.lat : captLat,
-        // ]));
 
         if (captLat !== undefined && captLong !== undefined) {
           let addressLocation: any = geocoder([
+            //Review
             isLive ? location.long : captLong,
             isLive ? location.lat : captLat,
           ])
@@ -874,13 +830,6 @@ function VideoPlayer(props: any) {
     let p2 = turf.point([endLong, endLat]);
     let bearing = turf.bearing(p1, p2);
     return bearing;
-    // if(bearing > 0){
-    //   return bearing * -1
-    // } else if(bearing < 0){
-    //   return bearing * -1
-    // } else {
-    //   return 0
-    // }
   }
 
   function getInterPolatedValue(
@@ -902,19 +851,12 @@ function VideoPlayer(props: any) {
   //-------------fetch flight log from srt geojson--------------------------------
   useEffect(() => {
     if (!isLive) {
-      //console.log(props.url.split('.')[0]);
       fetchJSON((props.url as string).replace(/.\w+$/, ".geojson"))
         .then((d) => {
           let data = d as FlightPath;
           const lineString = data.features.pop(); // Remove linestring at the very end
-          //console.log("the obejct", pathObject)
           let flightTelemetry = data.features;
-          // let points: [number, number, number][] = [];
-          // data.features.map((feat) => {
-          //   points.push(feat.geometry.coordinates);
-          // });
 
-          //console.log("filtered pints", points);
           let flightpath = {
             type: "FeatureCollection",
             crs: {
@@ -925,13 +867,12 @@ function VideoPlayer(props: any) {
             },
             features: [lineString],
           };
-          // //flightpath.push(flightTelemetry.at(-1));
-          // console.log("FLight features", flightTelemetry, "FLightpath", flightpath.features[0]);
+
           setFlightPathSrt(flightpath.features[0]); //-------need to filter out the z axis to access
           setFlightTeleSrt(flightTelemetry);
-          //console.log("test...", flightpath.features[0],turf.bbox(flightpath.features[0]), turf.centroid(flightpath.features[0]).geometry.coordinates);
+
           let getBounds = turf.bbox(flightpath.features[0]);
-          //console.log("Zoom level", computeZoomLevel(getBounds, 100));
+
           setMapZoom(computeZoomLevel(getBounds, 1));
           let reGetBounds = [
             [getBounds[0], getBounds[1]],
@@ -1006,7 +947,7 @@ function VideoPlayer(props: any) {
         flightTeleSrt[x + 1]?.geometry.coordinates[0],
         flightTeleSrt[x + 1]?.geometry.coordinates[1],
       ];
-      //console.log("etst----", startPoint, endPoint);
+
       if (
         startPoint[0] !== undefined &&
         endPoint[0] !== undefined &&
@@ -1032,27 +973,6 @@ function VideoPlayer(props: any) {
       zoom={mapZoom}
     />
   );
-
-  // const resolutionMenu = (
-  //   <Menu onClick={handleResolutionChange}>
-  //     <Menu.Item key='auto'>Auto</Menu.Item>
-  //     <Menu.Item key='fullDefinition'>480p</Menu.Item>
-  //     <Menu.Item key='highDefinition'>720p</Menu.Item>
-  //   </Menu>
-  // );
-
-  // const playBackMenu = (
-  //   <Menu
-  //     onClick={(e) => {
-  //       setPlaybackSpeed(e.key);
-  //     }}
-  //   >
-  //     <Menu.Item key='5'>5x</Menu.Item>
-  //     <Menu.Item key='2'>2x</Menu.Item>
-  //     <Menu.Item key='1.5'>1.5x</Menu.Item>
-  //     <Menu.Item key='1'>1x</Menu.Item>
-  //   </Menu>
-  // );
 
   const settingsMenu = (
     <Menu
@@ -1277,12 +1197,6 @@ function VideoPlayer(props: any) {
     </Menu>
   );
 
-  // const menu = (
-  //   <Menu>
-  //     <Menu.Item key="1" onClick={()=>{}}>more stats</Menu.Item>
-
-  //   </Menu>
-  // );
   const handleCancel = () => {
     setIsModalVisible(false);
     setPlaying(playingBeforeCapture);
@@ -1417,7 +1331,6 @@ function VideoPlayer(props: any) {
         pip={pip}
         volume={volume}
         onEnablePIP={handleEnablePip}
-        // onDisablePIP={handleDisablePip}
         playbackRate={playbackSpeed}
         onEnded={handlePlayPause}
         onProgress={handleProgress}
@@ -1943,7 +1856,6 @@ function VideoPlayer(props: any) {
             ) : null}
             <Col span={24}>
               {isLive ? (
-                // <Slider min={0} max={100} value={100} />
                 <div className="live-slider"></div>
               ) : (
                 <>
@@ -1993,12 +1905,7 @@ function VideoPlayer(props: any) {
                       >
                         replay_10
                       </span>
-                      {/* <FontAwesomeIcon
-                          
-                          icon={faFastBackward}
-                          className='video-control-icons'
-                          style={{ display: isLive ? "none" : "inline" }}
-                        /> */}
+
                       {playing ? (
                         <Tooltip title="Pause">
                           <FontAwesomeIcon
@@ -2016,12 +1923,6 @@ function VideoPlayer(props: any) {
                           />
                         </Tooltip>
                       )}
-                      {/* <FontAwesomeIcon
-                    onClick={fastforward}
-                    icon={faFastForward}
-                    className='video-control-icons'
-                    style={{ display: isLive ? "none" : "inline" }}
-                  /> */}
                       <span
                         onClick={fastforward}
                         className="material-icons video-control-icons"
@@ -2334,7 +2235,6 @@ function VideoPlayer(props: any) {
           {isFullScreen && !isLive && props.showHUD && showMap && (
             <>
               {!pip ? (
-                // <div className='full-map'>{flightlogmap}</div>
                 <div
                   className="map-box"
                   style={{ bottom: `${bottomMapHeight}px` }}

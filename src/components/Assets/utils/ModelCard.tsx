@@ -30,10 +30,9 @@ import { logout } from "../../../actions/authAction";
 import AloneLogo from "../../../static/Alone-rafiki.svg";
 import moment from "moment";
 import { connect } from "react-redux";
-import { loading } from "../../../actions/loadingAction";
-import { components } from "src/handlers/schema";
 
-const { Title, Text } = Typography;
+
+const { Text } = Typography;
 
 type optionType = {
   value: any;
@@ -162,14 +161,11 @@ function ModelCard(props) {
     });
     model = model[0];
     setData(model);
-    //console.log(data);
   };
 
   useEffect(() => {
-    //console.log(props);
     setIsCardLoading(true);
     setSelectedID(props.id);
-    //getModelDetails(props.id);
     if (props.id) {
       http
         .get(`${apis.GET_MODEL_BY_ID}`, {
@@ -178,10 +174,8 @@ function ModelCard(props) {
           },
         })
         .then((result) => {
-          //console.log(result.data);
           if (result.data.status) {
             setData(result.data.data);
-            //console.log(result.data.data);
           } else {
             message.error(result.data.message);
           }
@@ -194,8 +188,6 @@ function ModelCard(props) {
           setIsCardLoading(false);
         });
     }
-    //setIsCardLoading(false);
-    //console.log(data);
   }, []);
 
   useEffect(() => {
@@ -219,7 +211,6 @@ function ModelCard(props) {
     }
     setModelInfo(obj);
     setTableData(obj);
-    //console.log(modelInfo);
   }, [data]);
 
   const filter = (inputValue, path) => {
@@ -305,7 +296,6 @@ function ModelCard(props) {
 
   if (manufacturers && models) {
     getModelOptions();
-    //console.log(modelOptions);
   }
 
   const [editingKey, setEditingKey] = useState("");
@@ -352,7 +342,6 @@ function ModelCard(props) {
     for (let i = 0; i < tableData.length; ++i) {
       modelProps[tableData[i].key] = tableData[i].value;
     }
-    //console.log(modelProps);
 
     http
       .patch(`${apis.UPDATE_MODEL}`, {
@@ -362,8 +351,6 @@ function ModelCard(props) {
         },
       })
       .then((result) => {
-        //console.log(result.data);
-        //props.loading(true);
         if (result.data.status) {
           message.success(result.data.message);
           setData({
@@ -380,7 +367,6 @@ function ModelCard(props) {
         AxiosErrorHandler(err, props.logout);
       })
       .finally(() => {
-        //props.loading(false);
         handleCancel();
       });
   };
@@ -414,7 +400,6 @@ function ModelCard(props) {
       manufacturerID: values.type[0],
     };
 
-    //console.log("this asset--------------:", asset);
     http
       .post(`${apis.CREATE_ASSET}`, asset)
       .then((result) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Tag,
   Row,
@@ -12,7 +12,7 @@ import {
 } from "antd";
 import { Input } from "antd";
 import { logout } from "../../../../../actions/authAction";
-import { AudioOutlined, SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
@@ -59,16 +59,8 @@ interface TableProps {
 
 function MissionTable(props: TableProps) {
   const history = useHistory();
-  const { Search } = Input;
   const { Title } = Typography;
-  const suffix = (
-    <AudioOutlined
-      style={{
-        fontSize: 16,
-        color: "#1890ff",
-      }}
-    />
-  );
+
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -130,7 +122,6 @@ function MissionTable(props: TableProps) {
       <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
     ),
     onFilter: (value: any, record: any) => true,
-    // record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
     onFilterDropdownVisibleChange: (visible: any) => {
       if (visible) {
         setTimeout(() => searchInput.select());
@@ -161,7 +152,6 @@ function MissionTable(props: TableProps) {
             return row.status === props.filter;
           });
           props.setMissionTableData(data);
-          //console.log(data);
         }
       }
     }
@@ -269,7 +259,6 @@ function MissionTable(props: TableProps) {
           <>
             <span
               onClick={() => {
-                // history.push(`/dashboard/mission/view/${record._id}`);
                 history.push({
                   pathname: `/dashboard/mission/view/staff-${record._id}`,
                   state: {
@@ -343,10 +332,8 @@ function MissionTable(props: TableProps) {
       title: "Flight Date",
       dataIndex: "flight",
       sorter: (a: any, b: any) => true,
-      //  moment(a.flight.date).unix() - moment(b.flight.date).unix(),
       sortDirections: ["descend", "ascend"],
       ...getColumnSearchProps("flight"),
-      //defaultSortOrder: "descend",
       render: (flight: any) => (
         <span style={{ whiteSpace: "nowrap" }}>
           {moment(flight?.date).format("YYYY-MM-DD")}
@@ -361,7 +348,6 @@ function MissionTable(props: TableProps) {
         <>
           <span
             onClick={() => {
-              // history.push(`/dashboard/mission/view/${record._id}`);
               history.push({
                 pathname: `/dashboard/mission/view/staff-${record._id}`,
                 state: {
@@ -430,7 +416,6 @@ function MissionTable(props: TableProps) {
         <>
           <Button
             onClick={() => {
-              // history.push(`/dashboard/mission/view/${record._id}`);
               history.push({
                 pathname: `/dashboard/mission/view/staff-${record._id}`,
                 state: {
@@ -451,8 +436,6 @@ function MissionTable(props: TableProps) {
       ),
     },
   ];
-
-  // const onSearch = (value) => console.log(value);
 
   const onSearch = (value) => {
     props.setIsTableLoading(true);
@@ -495,19 +478,6 @@ function MissionTable(props: TableProps) {
 
   return (
     <div>
-      {/* ++++++++++++++++++SEARCH BOX+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
-      {/* <Row>
-        <Col>
-          <Tooltip placement="bottomLeft" title="search for missions">
-            <Search
-              placeholder="input search text"
-              allowClear
-              onSearch={onSearch}
-              style={{ width: "20rem", margin: "0 10px" }}
-            />
-          </Tooltip>
-        </Col>
-      </Row> */}
       {/* +++++++++++++++++++++++++++++++++MISION LISTING+++++++++++++++++++++++++++++++++++++++++ */}
       <Row style={{ marginTop: "1rem" }}>
         <Col span={24}>
@@ -525,14 +495,6 @@ function MissionTable(props: TableProps) {
               onChange: props.setPaginationPage,
             }}
             onChange={handleTableChange}
-            // onRow={(record: any, rowIndex) => {
-            //   return {
-            //     onClick: () => {
-            //       console.log(record);
-            //       history.push(`/dashboard/mission/view/${record._id}`);
-            //     },
-            //   };
-            // }}
           />
         </Col>
       </Row>

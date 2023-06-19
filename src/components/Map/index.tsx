@@ -124,9 +124,6 @@ import {
 } from "src/constants";
 import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
-// import { JSONLoader } from "@loaders.gl/json";
-// import { LASLoader } from "@loaders.gl/las";
-// import { load } from "@loaders.gl/core";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -155,7 +152,7 @@ const { Meta } = Card;
 function BaseMap(props) {
   const [refreshLayer, setRefreshLayer] = useState(false);
   const [isMinimise, setMinimise] = useState(false);
-  const [pointMarkerColour, setPointMarkerColour] = useState("#000");
+
   const [missionData, setMissionData] = useState({});
   const [loader, setLoader] = useState(props.isBaseMap ? false : true);
   const [thumbnail, setThumbnail] = useState("");
@@ -218,7 +215,7 @@ function BaseMap(props) {
       props.userType === "tenant-client"
     ) {
       console.log("logged in user is tenant-staff");
-      //console.log(props.userDetails);
+
       //--------set create layer---------------
       let createLayer: any = [];
       let createLayerAccess = false;
@@ -433,8 +430,6 @@ function BaseMap(props) {
         canUploadToBaseLayer: canUploadToBaseLayerAccess,
       });
     } else if (props.userType === "tenant-root") {
-      //console.log(props.userDetails);
-      //console.log("logged in user is tenant-root");
       setPerms({
         canCreateLayer: true,
         canDeleteLayer: true,
@@ -474,8 +469,6 @@ function BaseMap(props) {
     minZoom: 0,
     maxZoom: 22,
     bearing: 0,
-    // transitionDuration: 8000,
-    // transitionInterpolator: new FlyToInterpolator(),
   });
 
   // ---- setting map location -----------------
@@ -488,10 +481,7 @@ function BaseMap(props) {
             if (result.state === "granted") {
               navigator.geolocation.getCurrentPosition(function (pos: any) {
                 const crd = pos.coords;
-                // console.log("Your current position is:");
-                // console.log(`Latitude : ${crd.latitude}`);
-                // console.log(`Longitude: ${crd.longitude}`);
-                // console.log(`More or less ${crd.accuracy} meters.`);
+
                 setViewport({
                   longitude: crd.longitude,
                   latitude: crd.latitude,
@@ -508,10 +498,7 @@ function BaseMap(props) {
               navigator.geolocation.getCurrentPosition(
                 function (pos: any) {
                   const crd = pos.coords;
-                  // console.log("Your current position is:");
-                  // console.log(`Latitude : ${crd.latitude}`);
-                  // console.log(`Longitude: ${crd.longitude}`);
-                  // console.log(`More or less ${crd.accuracy} meters.`);
+
                   setViewport({
                     longitude: crd.longitude,
                     latitude: crd.latitude,
@@ -634,7 +621,7 @@ function BaseMap(props) {
   const [coordinates, setCoordinates] = useState([]);
   const [sideBarState, setSideBarState] = useState(true);
   const [sideBarIcon, setSideBarIcon] = useState(<DoubleRightOutlined />);
-  const [attributeTable, SetAttributeTable] = useState([]);
+
   const [mapMode, setMapMode] = useState("mapbox://styles/mapbox/streets-v8");
   const [isModalVisible, setIsModalVisible] = useState(false); // upload layer
   const [isModalVisible1, setIsModalVisible1] = useState(false);
@@ -648,8 +635,7 @@ function BaseMap(props) {
   const [fileList, setFileList] = useState<any>([]);
   const [rasterProps, setRasterProps] = useState<any>([]);
   const [vectorProps, setVectorProps] = useState<any>([]);
-  const [data, setData] = useState();
-  const [editingKey, setEditingKey] = useState("");
+
   const [missioName, setMissioName] = useState("");
   const [layerType, setLayerType] = useState("");
   const [layerTypeId, setLayerTypeId] = useState("");
@@ -690,7 +676,7 @@ function BaseMap(props) {
   const [showColorPicker, setshowColorPicker] = useState(true);
   const [layerLoading, setLayerLoading] = useState(false);
   const [threeDState, set3DState] = useState("");
-  const [T3DTranspose, set3DTranspose] = useState(false);
+
   const [picToMapData, setPicToMapData] = useState([]);
   const [pic2Mapv2Status, setPic2Mapv2Status] = useState(false);
   const [pic2Mapv2Data, setPic2Mapv2Data] = useState<any>({});
@@ -726,13 +712,6 @@ function BaseMap(props) {
     },
   ];
   const [icon2, setIcon2] = useState(iconOptions[0].value);
-  //----------------auto detect browser height---------------------
-  // let initHeight = window.screen.height;
-  // if(initHeight === 1080){
-  //   setBottomBarHeight("500px");
-
-  // }
-
   const history = useHistory();
 
   useEffect(() => {
@@ -759,10 +738,6 @@ function BaseMap(props) {
     mode: ViewMode,
   });
 
-  // const [geoJson, setGeoJson] = useState({
-  //     type: 'FeatureCollection',
-  //     features: []
-  // });
   const onChangeSizeSlider = (value: number) => {
     if (isNaN(value)) {
       return;
@@ -795,10 +770,6 @@ function BaseMap(props) {
 
   const showModal = () => {
     setIsModalVisible(true);
-  };
-
-  const handleOk = () => {
-    setIsModalVisible(false);
   };
 
   const handleCancel = () => {
@@ -881,8 +852,6 @@ function BaseMap(props) {
       if (selectedVectorProps.length) body["vectorProps"] = selectedVectorProps;
       if (timeEnabled) body["time"] = time;
 
-      //console.log(JSON.stringify(body));
-
       if (
         selectedVectorPropsType.length ||
         selectedRasterProps.length ||
@@ -898,10 +867,9 @@ function BaseMap(props) {
             .then((res) => {
               console.log("Filter API response", res);
               if (res.data.status) {
-                //console.log(res.data.data);
                 setTotalLayers(res.data.data.length);
                 segrigateLayers(res.data.data);
-                //message.success(res.data.message);
+
                 removeChips(res.data.data);
               } else {
                 if (res.data.message === " data not match!") {
@@ -1026,7 +994,6 @@ function BaseMap(props) {
 
   useEffect(() => {
     filterLayers(time);
-    //console.log("filterLayercalled");
   }, [
     selectedRasterProps,
     selectedVectorPropsType,
@@ -1257,7 +1224,6 @@ function BaseMap(props) {
       widthMinPixels: 1,
       capRounded: true,
       jointRounded: true,
-      //billboard: true,
       getPath: (d) => d.path,
       getColor: (d) => [0, 195, 255],
       getWidth: (d) => 3,
@@ -1275,12 +1241,10 @@ function BaseMap(props) {
       }),
       sizeScale: 15,
       getPosition: (d) => {
-        // console.log(d, "getpos");
         return d.coordinates;
       },
       getSize: (d) => 4,
       getAngle: (d) => bearing,
-      //getColor: (d) => [Math.sqrt(d.exits), 140, 0],
     }),
   ];
   function getBearing(
@@ -1332,17 +1296,16 @@ function BaseMap(props) {
         .then((data) => {
           const flightTelemetry: any = data.features;
           const pathObject: any = flightTelemetry.pop();
-          //console.log("the obejct", pathObject)
+
           const points: any = [];
           pathObject.geometry.coordinates.map((i: any) => {
             const values: any = [];
             values.push(i[0]);
             values.push(i[1]);
-            //console.log(values);
+
             points.push(values);
           });
-          // //flightpath.push(flightTelemetry.at(-1));
-          // console.log("FLight features", flightTelemetry, "FLightpath", flightpath.features[0]);
+
           const filterArray: any = points.filter(
             (i: any) => i[0] !== null && i[1] !== null
           );
@@ -1480,7 +1443,7 @@ function BaseMap(props) {
   useEffect(() => {
     console.log("missionLayer2", missionLayer, coordinates);
   }, [missionLayer, coordinates]);
-  // useEffect(() => console.log("All layers: ", allLayers), [allLayers]);
+
   const handleChangeComplete = (color) => {
     setColor(color.hex);
   };
@@ -1489,15 +1452,6 @@ function BaseMap(props) {
     setColor(color.hex);
   };
 
-  // //-------------export Function------------------------------------
-  // useEffect(() => {
-  //   console.log(
-  //     "Selected indexes: ",
-  //     selectedIndexes,
-  //     "Active layerID: ",
-  //     activeID,
-  //   );
-  // }, [selectedIndexes, activeID]);
   const actionMenuOnClick = ({ key }) => {
     console.log("key", key);
     switch (key) {
@@ -1639,7 +1593,7 @@ function BaseMap(props) {
       .then((res) => {
         if (res.data.status) {
           message.success("Export Successful");
-          //console.log(res.data);
+
           window.open(`${PUBLIC_URL}${res.data.pathh}`);
         } else {
           message.error(res.data.message);
@@ -1748,23 +1702,6 @@ function BaseMap(props) {
       : null;
   }
 
-  //---------------Generate stroke color and marker Color--------------------
-  function hexToRGBSolid(hex) {
-    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, function (m, r, g, b) {
-      return r + r + g + g + b + b;
-    });
-
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result
-      ? [
-          parseInt(result[1], 16),
-          parseInt(result[2], 16),
-          parseInt(result[3], 16),
-        ]
-      : null;
-  }
-
   //----------------------------INFO WINDOW handeller------------------------
   function InfoWindow(
     idx: any,
@@ -1777,7 +1714,6 @@ function BaseMap(props) {
     sysId: any,
     type: any = ""
   ) {
-    //console.log(data);
     setFeatureIdx(idx);
     setMissionLayer(type);
     setCoordinates(coordinate);
@@ -1788,12 +1724,9 @@ function BaseMap(props) {
     setFeatureLayer(id);
     togglePopup(true);
     setSaveButtonShow(show);
-
-    //console.log("onclick", index);
   }
   //-----------------------Fetch Raster URL----------------------------------
   const getRasterURL = (rasterType, path, settings) => {
-    //SetColorMap(settings.color);
     switch (rasterType) {
       case "NDVI":
         return (
@@ -1878,15 +1811,12 @@ function BaseMap(props) {
   }, [colorMap, selectedIndexes, showSelectedIndexes]);
 
   useEffect(() => {
-    //console.log("current 3d", threeDState);
     if (threeDState === "Enabled") {
-      // set3DTranspose(true);
       const al = { ...allLayers };
       al[`1-${featureLayer}`].T3DTranspose = true;
       setAllLayers(al);
       forceUpdateLayers(featureLayer);
     } else if (threeDState === "Disabled") {
-      // set3DTranspose(false);
       const al = { ...allLayers };
       al[`1-${featureLayer}`].T3DTranspose = false;
       setAllLayers(al);
@@ -1933,7 +1863,7 @@ function BaseMap(props) {
       demLayers.push(obj);
     });
     setScales(demLayers);
-    //console.log(demLayers);
+
     if (demLayers.length) {
       setScaleVisible(true);
     } else {
@@ -1947,7 +1877,6 @@ function BaseMap(props) {
     checkedKeysValue.forEach((element) => {
       if (element.split("-")[0] === "2" && element !== "2") {
         if (props.isBaseMap) {
-          //console.log("all the layers being drawn",allLayers[element]);
           const layer: any = allLayers[element];
           layer?.layerPath.map((layerr: any) => {
             const settings: any = {
@@ -1956,7 +1885,7 @@ function BaseMap(props) {
               resamplingMethod: layer.settings.resamplingMethod,
               bidx: layer.settings.bidx,
             };
-            // ---pushing tiler layers
+
             vlayers.push(
               new TileLayer({
                 id: `${element}-${uuid()}`,
@@ -2023,8 +1952,7 @@ function BaseMap(props) {
                 id: element,
                 data: STATIC_URL + allLayers[element]?.layerPath,
                 pickable: true,
-                // stroked: true,
-                // filled: true,
+
                 extruded: false,
                 lineWidthUnits: "pixels",
                 lineWidthScale: 4,
@@ -2041,9 +1969,7 @@ function BaseMap(props) {
                   }
                   return hexToRGB2(d.properties.color, false);
                 },
-                // getRadius: 100,
-                // getLineWidth: 1,
-                // getElevation: 30 ,
+
                 onClick: (data, e) => {
                   if (e.leftButton) {
                     InfoWindow(
@@ -2134,15 +2060,13 @@ function BaseMap(props) {
                     return hexToRGB2(d.properties.color, true);
                   }
                 },
-                //getRadius: 100,
-                //getLineWidth: 1,
+
                 getElevation: (d) => {
                   if (d.properties?.height) {
                     return d.properties.height;
                   }
                 },
                 onClick: (data, e) => {
-                  //console.log("data",allLayers[element]?);
                   if (e.leftButton) {
                     InfoWindow(
                       data.index,
@@ -2197,8 +2121,7 @@ function BaseMap(props) {
                   STATIC_URL + allLayers[element]?.layerPath
                 ),
                 pickable: true,
-                // iconAtlas: TankIcon,
-                //iconMapping: ICON_MAPPING,
+
                 getIcon: (d) => {
                   const iconSelector = (iconType) => {
                     let icon = "";
@@ -2229,14 +2152,6 @@ function BaseMap(props) {
                 onDataLoad: () => {
                   setLayerLoading(false);
                 },
-                // getFillColor: (d, i) => {
-                //   if (activeID === element.split("-")[1]) {
-                //     if (selectedIndexes.includes(i.index)) {
-                //       return hexToRGB2("#ffaa00", true);
-                //     }
-                //   }
-                //   return hexToRGB2(d.properties.color, false);
-                // },
                 sizeScale: 12 * pointMarkerSize,
                 getPosition: (d) => d.geometry.coordinates,
                 getSize: (d) => 5,
@@ -2304,8 +2219,7 @@ function BaseMap(props) {
               id: element,
               data: geoJsonAlert?.features,
               pickable: true,
-              // iconAtlas: TankIcon,
-              //iconMapping: ICON_MAPPING,
+
               getIcon: (d) => {
                 return {
                   url: AlertIcon,
@@ -2318,14 +2232,6 @@ function BaseMap(props) {
               onDataLoad: () => {
                 setLayerLoading(false);
               },
-              // getFillColor: (d, i) => {
-              //   if (activeID === element.split("-")[1]) {
-              //     if (selectedIndexes.includes(i.index)) {
-              //       return hexToRGB2("#ffaa00", true);
-              //     }
-              //   }
-              //   return hexToRGB2(d.properties.color, false);
-              // },
               sizeScale: 15 * pointMarkerSize,
               getPosition: (d) => d.geometry.coordinates,
               getSize: (d) => 5,
@@ -2362,8 +2268,7 @@ function BaseMap(props) {
               id: element,
               data: geoJsonVOD?.features,
               pickable: true,
-              // iconAtlas: TankIcon,
-              //iconMapping: ICON_MAPPING,
+
               getIcon: (d) => {
                 return {
                   url: VODIcon,
@@ -2376,14 +2281,6 @@ function BaseMap(props) {
               onDataLoad: () => {
                 setLayerLoading(false);
               },
-              // getFillColor: (d, i) => {
-              //   if (activeID === element.split("-")[1]) {
-              //     if (selectedIndexes.includes(i.index)) {
-              //       return hexToRGB2("#ffaa00", true);
-              //     }
-              //   }
-              //   return hexToRGB2(d.properties.color, false);
-              // },
               sizeScale: 15 * pointMarkerSize,
               getPosition: (d) => d.geometry.coordinates,
               getSize: (d) => 5,
@@ -2418,35 +2315,7 @@ function BaseMap(props) {
       }
       console.log("Missions", vlayers, allLayers, geoJsonVOD.features);
     });
-    // vlayers.push(
-    //   new TileLayer({
-    //     id: "BASE_LAYER-123123123",
-    //     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-    //     data: `${COG_URL}` +
-    //     `/cog/tiles` +
-    //     `/{z}/{x}/{y}@1x?url=${import.meta.env.VITE_BASE_URL}` +
-    //     `/raster/1642486263367_20_DEM_10cm.tif` +
-    //     `&resampling_method=nearest&bidx=1&rescale=17.799230575561523%2C93.64027404785156&colormap_name=plasma`,
 
-    //     minZoom: 0,
-    //     maxZoom: 24,
-    //     tileSize: 256,
-    //     // onDataLoad: () => {
-    //     //   setLayerLoading(false);
-    //     // },
-    //     renderSubLayers: (props) => {
-    //       const {
-    //         bbox: { west, south, east, north },
-    //       } = props.tile;
-
-    //       return new BitmapLayer(props, {
-    //         data: null,
-    //         image: props.data,
-    //         bounds: [west, south, east, north],
-    //       });
-    //     },
-    //   })
-    // )
     setVisibleLayers(vlayers);
   };
 
@@ -2485,7 +2354,6 @@ function BaseMap(props) {
       setLayerLoading(true);
     }
 
-    //console.log(checkedKeysValue);
     if (checkedKeysValue.length) {
       setActiveGroupButton(false);
     } else {
@@ -2504,7 +2372,7 @@ function BaseMap(props) {
       "mission"
     );
     setLastCount(checkedKeysValue.length);
-    //console.log(rasterOrdering);
+
     setCheckedKeys([...rasterOrdering, ...vectorOrdering, ...missionOrdering]);
   };
 
@@ -2570,16 +2438,6 @@ function BaseMap(props) {
     setSelectedKeys(selectedKeysValue);
   };
 
-  // const menu = (
-  //   <Menu>
-  //     <Menu.Item key='1' onClick={showModal1}>
-  //       Edit
-  //     </Menu.Item>
-  //     <Menu.Item key='2'>Delete</Menu.Item>
-  //     <Menu.Item key='3'>Download</Menu.Item>
-  //   </Menu>
-  // );
-
   const VectorLayerIcons = {
     Point: <EnvironmentOutlined />,
     MultiLineString: <BranchesOutlined />,
@@ -2634,11 +2492,8 @@ function BaseMap(props) {
               minZoom: 0,
               maxZoom: 22,
               bearing: 0,
-              // transitionDuration: 8000,
-              // transitionInterpolator: new FlyToInterpolator(),
             });
           } else {
-            //console.log("layers fetched: ", result.data.data);
             setMissioName(result.data.data.mission);
             setTotalLayers(0);
             console.log("api result", result.data.data.layers);
@@ -2652,8 +2507,6 @@ function BaseMap(props) {
               minZoom: 0,
               maxZoom: 22,
               bearing: 0,
-              // transitionDuration: 8000,
-              // transitionInterpolator: new FlyToInterpolator(),
             });
           }
         } else {
@@ -2678,14 +2531,12 @@ function BaseMap(props) {
         } else {
           message.error(result.data.message);
         }
-        //message.info("ola amigo")
       } catch (error) {
         console.log(error);
-        //message.error("errrorrrrr");
+
         AxiosErrorHandler(error, props.logout);
       } finally {
         props.loading(false);
-        //message.info("land")
       }
     }
   };
@@ -2776,7 +2627,6 @@ function BaseMap(props) {
             setPanes(newPanes);
 
             message.success(res.data.message);
-            //console.log(res.data);
           } else {
             message.error(res.data.message);
             console.log(res.data);
@@ -2822,7 +2672,6 @@ function BaseMap(props) {
             setPanes(newPanes);
 
             message.success(res.data.message);
-            //console.log(res.data);
           } else {
             message.error(res.data.message);
             console.log(res.data);
@@ -2881,7 +2730,6 @@ function BaseMap(props) {
             setPanes(newPanes);
 
             message.success(res.data.message);
-            //console.log(res.data);
           } else {
             message.error(res.data.message);
             console.log(res.data);
@@ -2927,7 +2775,6 @@ function BaseMap(props) {
             setPanes(newPanes);
 
             message.success(res.data.message);
-            //console.log(res.data);
           } else {
             message.error(res.data.message);
             console.log(res.data);
@@ -3496,7 +3343,6 @@ function BaseMap(props) {
                     <Menu.Item
                       key="5"
                       onClick={() => {
-                        //window.open(API_URL + layer.layerpath);
                         download(STATIC_URL + layer.layerpath);
                       }}
                     >
@@ -3505,12 +3351,10 @@ function BaseMap(props) {
                     <Menu.Item
                       key="6"
                       onClick={() => {
-                        //window.open(API_URL + layer.layerpath);
                         http
                           .get(`${apis.DOWNLOAD_KML}?id=${layer._id}`)
                           .then((res: any) => {
                             if (res.data.status) {
-                              //download(API_URL + res.data.link);
                               window.open(PUBLIC_URL + res.data.link);
                             } else {
                               console.log(res.data.message);
@@ -4224,7 +4068,6 @@ function BaseMap(props) {
     let newTreeDataVector: any = [];
     let newTreeDataRaster: any = [];
 
-    //console.log(td);
     const data: any = treeData;
 
     newTreeDataVector = td[0].children.map((layer) => {
@@ -4266,7 +4109,6 @@ function BaseMap(props) {
   };
 
   const segrigateLayers = (layers) => {
-    //console.log("segrate layer");
     let data: any = [...treeDataa];
     let allLayers: any = {};
     if (
@@ -4335,8 +4177,6 @@ function BaseMap(props) {
           type: layer.raster.name,
           settings: {
             ...layer.raster,
-            // minp: layer.minp,
-            // maxp: layer.maxp,
           },
           name: layer.name,
           groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
@@ -4432,24 +4272,14 @@ function BaseMap(props) {
     setTreeStructure(data);
     //--------check last ortho-----
     rasters.forEach((element) => {
-      //console.log(element)
       if (element.raster.name === "ORTHO") {
-        //console.log(element);
         const cl: any = [];
         cl.push(`2-${element._id}`);
-        //console.log(cl);
+
         setCheckedKeys(cl);
         return;
       }
     });
-  };
-
-  const onFinish = (values: any) => {
-    //console.log("Success:", values);
-  };
-
-  const onFinish1 = (values: any) => {
-    //console.log("Success:", values);
   };
 
   const options: any = [
@@ -4566,7 +4396,6 @@ function BaseMap(props) {
       setFileList([]);
     },
     beforeUpload: (file) => {
-      //console.log(file);
       setFileList([file]);
       return false;
     },
@@ -4607,14 +4436,6 @@ function BaseMap(props) {
       setPanes(panes);
       setActiveKey(id);
     } else setActiveKey(id);
-
-    // const newPanes = [...panes];
-    // newPanes.push({ title: name, content: 'Content of new Tab', key: id,id:id, type: type == "Raster" ? "raster" : "vector", });
-    // setPanes(newPanes);
-    // setActiveKey(id)
-    //setNewTabIndex(newTabIndex + 1);
-    //const activeKey = `newTab${newTabIndex}`;
-    //const newPanes = [...panes];
   };
 
   useEffect(() => {
@@ -4729,9 +4550,6 @@ function BaseMap(props) {
           err.response?.data.message === "Package has expired! Please renew!"
         ) {
           setExpiryModal(true);
-          // window.setTimeout(function () {
-          //   AxiosErrorHandler(err, VideoProps.logout); //needs to be connected with redux
-          // }, 5000);
         } else {
           setLimitModal(true);
           console.log(err.response);
@@ -4800,8 +4618,6 @@ function BaseMap(props) {
             type: layer.raster.name,
             settings: {
               ...layer.raster,
-              // minp: layer.minp,
-              // maxp: layer.maxp,
             },
             name: layer.name,
             id: layer._id,
@@ -4864,7 +4680,7 @@ function BaseMap(props) {
       });
       if (editType === "addFeature") {
         //event to fire up infowindow for registering new vector layer/shape
-        //console.log("New Shape Created!", updatedData);
+
         const { featureIndexes } = editContext;
         updatedSelectedFeatureIndexes = [
           ...selectedFeatureIndexes,
@@ -4968,36 +4784,6 @@ function BaseMap(props) {
     pointRadiusScale: 1,
     pointRadiusMinPixels: 8,
   });
-  // ++++++++++++++++++++++++++++++++++++++++++++++ Edit Layer +++++++++++++++++++++++++++++++++++++++++++++++
-  // const editLayer = () => {
-  //   let data = {
-  //     name: layerName,
-  //     captureDate: captureDate,
-  //   };
-
-  //   // change color
-  //   if(selectedLayerType=='vector'){
-  //     http
-  //     .patch(API_URL + apis.CHANGE_COLOR_BY_ID, {
-  //       id: selectedLayerId,
-  //       color: layerColor,
-  //     })
-  //     .then((res) => {
-  //       console.log(res);
-  //       if (res.data.status) {
-  //         console.log(res.data.status);
-  //         updateLayerDataAfterEditing(res.data.data[0]);
-  //         message.success(res.data.message);
-  //       } else {
-  //         message.error('Color not updated: '+res.data.message);
-  //       }
-  //     })
-  //     .catch((err) => message.error('Error updating color: '+err.message))
-  //     .finally(() => {
-  //       setLayerColor("");
-  //     });
-  //   }
-  // }
 
   const editLayer = () => {
     props.loading(true);
@@ -5060,7 +4846,7 @@ function BaseMap(props) {
       .then((res) => {
         if (res.data.data) {
           message.success(res.data.message);
-          //console.log(res.data.data);
+
           // --update layer
           updateLayerDataAfterEditing(res.data.data[0], null, null);
           props.loading(false);
@@ -5174,8 +4960,6 @@ function BaseMap(props) {
               type: data.raster.name,
               settings: {
                 ...data.raster,
-                // minp: layer.minp,
-                // maxp: layer.maxp,
               },
               name: data.name,
               id: data._id,
@@ -5249,7 +5033,6 @@ function BaseMap(props) {
         );
 
         socket.current.on("IMAGE_UPLOADED", (data) => {
-          //console.log("Image upload successful!!", data);
           forceUpdateLayers(data.layerId);
         });
 
@@ -5265,7 +5048,7 @@ function BaseMap(props) {
           if (data.result) {
             message.success("Layer Created Successfully!");
             console.log(data.result);
-            //addLayer(data.result);
+
             setPic2Mapv2Data(data);
             setPic2Mapv2Status(true);
           }
@@ -5273,23 +5056,6 @@ function BaseMap(props) {
       }
     }
   }, [id]);
-  // const rowSelection = {
-  //   onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
-  //     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-  //   },
-  //   getCheckboxProps: (record: DataType) => ({
-  //     disabled: record.name === 'Disabled User', // Column configuration not to be checked
-  //     name: record.name,
-  //   }),
-  // };
-
-  useEffect(() => {
-    // console.log(
-    //   selectedRasterProps,
-    //   selectedVectorPropsType,
-    //   selectedVectorProps
-    // );
-  }, [selectedRasterProps, selectedVectorPropsType, selectedVectorProps]);
 
   const onToggleSelectRasterProps = (item) => {
     let newArr = [...selectedRasterProps];
@@ -5419,7 +5185,6 @@ function BaseMap(props) {
         setActiveID(pane.id);
       }
       if (pane.id === activeKey) setActiveType(pane.type === "vector");
-      //console.log(pane.type);
     });
   }, [activeKey]);
 
@@ -5465,7 +5230,7 @@ function BaseMap(props) {
   const changeGroupOfLayer = async (groupid, layerids, keys) => {
     const al = { ...allLayers };
     props.loading(true);
-    //console.log(groupid);
+
     try {
       const res = await http.patch(`${apis.EDIT_LAYER_GROUP}`, {
         _id: groupid,
@@ -5612,7 +5377,6 @@ function BaseMap(props) {
   };
 
   const onDrop = async (info) => {
-    //console.log(info);
     const dropKey = info.node.key;
     const dragKey = info.dragNode.key;
     const dropPos = info.node.pos.split("-");
@@ -5679,7 +5443,6 @@ function BaseMap(props) {
         } else if (info.dragNode.layer) {
           const layerid = info.dragNode.layer._id;
           const key = info.dragNode.key;
-          //console.log(layerid, groupid);
           await changeGroupOfLayer(groupid, [layerid], [key]);
         }
       }
@@ -5806,21 +5569,11 @@ function BaseMap(props) {
       });
       setOsmState(true);
     } else {
-      // let currenViewPort:any = INITIAL_VIEW_STATE;
-      // setViewport({
-      //   longitude: INITIAL_VIEW_STATE.longitude,
-      //   latitude: INITIAL_VIEW_STATE.latitude,
-      //   zoom: INITIAL_VIEW_STATE.zoom,
-      //   pitch: INITIAL_VIEW_STATE.pitch,
-      //   minZoom: 0,
-      //   maxZoom: 22,
-      // });
       setOsmState(false);
       setMapMode(`mapbox://styles/mapbox/${value}-v8`);
     }
   }
   function onChangeInherit(checked) {
-    //console.log(`switch to ${checked}`);
     if (checked) {
       setInheritColor(true);
       setshowColorPicker(false);
@@ -6010,7 +5763,6 @@ function BaseMap(props) {
   };
 
   const moveLayers = async (data) => {
-    // props.loading(true)
     try {
       const layersToMove = [];
 
@@ -6141,7 +5893,6 @@ function BaseMap(props) {
           status="500"
           title="Oops! You have reached your limit of creating layers!"
           subTitle="Please contact your admin."
-          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
@@ -6194,9 +5945,6 @@ function BaseMap(props) {
           setShowDrawingTools(false);
           if (event.rightButton) {
             if (!info.layer) {
-              // setMode({
-              //   mode: ViewMode,
-              // });
               setToolSelected("");
               setShowDrawingTools(false);
               settoolCoordinates([
@@ -6210,7 +5958,6 @@ function BaseMap(props) {
             setShowDrawingTools(false);
           }
         }}
-        //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         {osmState ? (
           <>
@@ -6293,7 +6040,6 @@ function BaseMap(props) {
         )}
       </DeckGL>
 
-      {/* {showDrawingTools && ( */}
       <div
         className="drawing-tools"
         style={{
@@ -6340,7 +6086,6 @@ function BaseMap(props) {
               )}
             </Menu>
           )}
-          // ref={drawingMenuRef}
           placement="bottom"
           trigger={["click"]}
         >
@@ -6350,7 +6095,6 @@ function BaseMap(props) {
           ></Button>
         </Dropdown>
       </div>
-      {/* )} */}
 
       <div className="map-header-toolbar">
         <Row>
@@ -6368,10 +6112,6 @@ function BaseMap(props) {
                 <Option value="dark">Dark mode</Option>
               </Select>
             </div>
-            {/* <div className='streelabel-toggle'>
-              <Text className='text-1'>Street labels</Text>
-              <Switch className='switch-1' defaultChecked />
-            </div> */}
           </Col>
           <Col md={12}>
             <div className="toolbar">
@@ -6409,7 +6149,6 @@ function BaseMap(props) {
                 >
                   <div
                     style={{
-                      //backgroundColor: "gold",
                       marginTop: "-4px",
                     }}
                   >
@@ -6589,7 +6328,6 @@ function BaseMap(props) {
                       fontSize: "1.2rem",
                       marginTop: "0.5rem",
                       marginBottom: "0.5rem",
-                      //marginRight: "0.4rem",
                     }}
                   />
                   <SortDescendingOutlined
@@ -6608,11 +6346,7 @@ function BaseMap(props) {
                   Sort
                 </Button>
               </Dropdown>
-              <Dropdown
-                overlay={filterMenu}
-                disabled={chipsLoading}
-                //overlayStyle={{}}
-              >
+              <Dropdown overlay={filterMenu} disabled={chipsLoading}>
                 <Button style={{ float: "right" }} type="link">
                   Filter <DownOutlined />
                 </Button>
@@ -6629,7 +6363,6 @@ function BaseMap(props) {
             >
               <Tag
                 style={{ display: timeEnabled ? "inline" : "none" }}
-                // color='#108ee9'
                 icon={
                   chipsLoading ? <SyncOutlined spin /> : <CheckCircleOutlined />
                 }
@@ -6708,7 +6441,6 @@ function BaseMap(props) {
                         ? "create-mission-extended-card-selected"
                         : ""
                     }`}
-                    // loading={isLoading}
                     hoverable
                   >
                     <Meta
@@ -6734,7 +6466,6 @@ function BaseMap(props) {
                         ? "create-mission-extended-card-selected"
                         : ""
                     }`}
-                    // loading={isLoading}
                     hoverable
                   >
                     <Meta
@@ -6756,7 +6487,6 @@ function BaseMap(props) {
                   <Button
                     className="create-mission-proceed-button"
                     type="primary"
-                    // onClick={() => nextStage()}
                     onClick={() => {
                       handleCancel2();
                       if (selectedKey == 1) showModal();
@@ -6908,7 +6638,6 @@ function BaseMap(props) {
             />
             <CreateBaseLayer
               isModalVisible={isModalVisible4}
-              // handleCancel={() => setIsModalVisible4(false)}
               isUpdate={isUpdate}
               updateType={updateType}
               BaseLayerId={updateId}
@@ -6948,7 +6677,6 @@ function BaseMap(props) {
                           />
                         </Form.Item>
 
-                        {/* <Form.Item label="Layer Type" name="type"> */}
                         <Cascader
                           style={{ width: "100%" }}
                           defaultValue={defaultLayerType}
@@ -6962,7 +6690,6 @@ function BaseMap(props) {
                             setLayerTypeId(updatedTypeId);
                           }}
                         />
-                        {/* </Form.Item> */}
 
                         <Form.Item label="Capture Date" name="date">
                           <DatePicker
@@ -6998,17 +6725,6 @@ function BaseMap(props) {
                               setLayerColor(color.hex)
                             }
                           />
-                          {/* <Button
-                          style={{
-                            marginTop: "10px",
-                            float: "right",
-                            marginRight: "10px",
-                          }}
-                          type="primary"
-                          size="small"
-                          onClick={changeColor}>
-                          Change Color
-                        </Button> */}
                         </Col>
                       ) : null}
                     </Row>
@@ -7024,7 +6740,6 @@ function BaseMap(props) {
           <div className="body-content">
             <Tree
               virtual={false}
-              //height={250}
               showIcon
               checkable
               onExpand={onExpand}
@@ -7049,7 +6764,6 @@ function BaseMap(props) {
               blockNode
             />
           </div>
-          {/* <Button onClick={() => setIsModalVisible4(true)}>new</Button> */}
         </div>
       )}
       <div
@@ -7073,8 +6787,6 @@ function BaseMap(props) {
             setSelectedIndexes([]);
             setDefaultKeys([]);
           }}
-          //onEdit={(targetKey) => remove(targetKey)}
-          //onClick={() => console.log(activeKey)}
           hideAdd
           tabBarExtraContent={
             <div>
