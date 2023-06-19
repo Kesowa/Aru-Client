@@ -314,15 +314,13 @@ function PublicMap(props) {
 
   const [layerz, setlayerz] = useState<ILayer[]>([]);
   const [activeGroupButton, setActiveGroupButton] = useState(true);
-  
+
   //----------------auto detect browser height---------------------
   // let initHeight = window.screen.height;
   // if(initHeight === 1080){
   //   setBottomBarHeight("500px");
 
   // }
-
-  
 
   useEffect(() => {
     setTimeout(() => {

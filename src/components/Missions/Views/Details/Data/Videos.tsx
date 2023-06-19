@@ -18,10 +18,6 @@ import {
   Carousel,
   Input,
   Skeleton,
-<<<<<<< HEAD
-=======
-  Select,
->>>>>>> 12be6fb76f33b85ea2ee5b10a291aa156fffbd6e
   Badge,
   Pagination,
 } from "antd";
