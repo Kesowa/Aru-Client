@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Row, Col, Typography } from "antd";
+import { useEffect, useState } from "react";
+import { Row, Col } from "antd";
 import moment from "moment";
 
-const { Text } = Typography;
 
 export default function Stats(props: any) {
   const [data, setData] = useState({});

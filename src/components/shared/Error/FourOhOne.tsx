@@ -1,4 +1,3 @@
-import React from "react";
 import { Row, Col, Typography } from "antd";
 import "./index.less";
 import FourOhOnePic from "../../../static/401.svg";

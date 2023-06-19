@@ -22,7 +22,6 @@ function Login(props: any) {
   console.log("location", location);
   const { from } = location.state || { from: { pathname: "/" } };
   const onFinish = (values: any) => {
-    //console.log(`getting ${values} from the form`);
     props.loading(true);
     http
       .post<components["schemas"]["LoginAuthResponse"]>(apis.LOGIN, values)
@@ -41,9 +40,7 @@ function Login(props: any) {
               const filteredPermissions = p.permissions.filter(
                 (d) => d.isFrontendRoute === true
               );
-              //console.log(filteredPermissions);
               const k = filteredPermissions.map((e) => {
-                //console.log(e);
                 return {
                   type: "menu",
                   link: e.frontendRoute.trim(),
@@ -67,7 +64,6 @@ function Login(props: any) {
           props.setUserDetails(result.data.data);
           history.replace(from);
         } else {
-          // message.error(result.data.message);
           setErrMessage(result.data.message);
         }
       })
@@ -94,7 +90,6 @@ function Login(props: any) {
           />
         )}
         <Typography.Title level={1}>Aru</Typography.Title>
-        {/* <img src={AryaLogo} className="brand-logo" alt="brand-logo" /> */}
         <Logo className="brand-logo" alt="kiv-logo" />
         <Form name="login-form" className="login-form" onFinish={onFinish}>
           <Form.Item

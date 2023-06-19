@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import {
   PageHeader,
@@ -69,7 +69,6 @@ function EditPackage(props: any) {
   }, [props.package]);
 
   const onFinish = (data: any) => {
-    //console.log("poster", data);
     if (poster) {
       props.loading(true);
       console.log(poster, data);

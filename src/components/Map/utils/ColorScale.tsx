@@ -2,9 +2,6 @@ import { useEffect } from "react";
 import "./scale.less";
 
 const ShowColorscale = (props) => {
-  useEffect(() => {
-    //console.log(props.colorMap);
-  }, [props.colorMap]);
 
   return (
     <div id="Scale">

@@ -691,7 +691,6 @@ function MissionView(props) {
 
   function renderDataCard(status: any) {
     const [userType, missionId] = id.split("-");
-    //console.log(id);
     switch (status) {
       case "Review":
         return <DataTabs id={missionId} />;

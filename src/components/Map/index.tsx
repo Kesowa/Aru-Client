@@ -429,8 +429,6 @@ function BaseMap(props) {
         canUploadToBaseLayer: canUploadToBaseLayerAccess,
       });
     } else if (props.userType === "tenant-root") {
-      //console.log(props.userDetails);
-      //console.log("logged in user is tenant-root");
       setPerms({
         canCreateLayer: true,
         canDeleteLayer: true,
@@ -470,8 +468,6 @@ function BaseMap(props) {
     minZoom: 0,
     maxZoom: 22,
     bearing: 0,
-    // transitionDuration: 8000,
-    // transitionInterpolator: new FlyToInterpolator(),
   });
 
   // ---- setting map location -----------------
@@ -713,13 +709,6 @@ function BaseMap(props) {
     },
   ];
   const [icon2, setIcon2] = useState(iconOptions[0].value);
-  //----------------auto detect browser height---------------------
-  // let initHeight = window.screen.height;
-  // if(initHeight === 1080){
-  //   setBottomBarHeight("500px");
-
-  // }
-
   const history = useHistory();
 
   useEffect(() => {
@@ -1226,7 +1215,6 @@ function BaseMap(props) {
       widthMinPixels: 1,
       capRounded: true,
       jointRounded: true,
-      //billboard: true,
       getPath: (d) => d.path,
       getColor: (d) => [0, 195, 255],
       getWidth: (d) => 3,
@@ -1455,15 +1443,6 @@ function BaseMap(props) {
     setColor(color.hex);
   };
 
-  // //-------------export Function------------------------------------
-  // useEffect(() => {
-  //   console.log(
-  //     "Selected indexes: ",
-  //     selectedIndexes,
-  //     "Active layerID: ",
-  //     activeID,
-  //   );
-  // }, [selectedIndexes, activeID]);
   const actionMenuOnClick = ({ key }) => {
     console.log("key", key);
     switch (key) {
@@ -4561,9 +4540,6 @@ function BaseMap(props) {
           err.response?.data.message === "Package has expired! Please renew!"
         ) {
           setExpiryModal(true);
-          // window.setTimeout(function () {
-          //   AxiosErrorHandler(err, VideoProps.logout); //needs to be connected with redux
-          // }, 5000);
         } else {
           setLimitModal(true);
           console.log(err.response);
@@ -5907,7 +5883,6 @@ function BaseMap(props) {
           status="500"
           title="Oops! You have reached your limit of creating layers!"
           subTitle="Please contact your admin."
-          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
@@ -5960,9 +5935,6 @@ function BaseMap(props) {
           setShowDrawingTools(false);
           if (event.rightButton) {
             if (!info.layer) {
-              // setMode({
-              //   mode: ViewMode,
-              // });
               setToolSelected("");
               setShowDrawingTools(false);
               settoolCoordinates([
@@ -5976,7 +5948,6 @@ function BaseMap(props) {
             setShowDrawingTools(false);
           }
         }}
-        //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         {osmState ? (
           <>
@@ -6728,7 +6699,6 @@ function BaseMap(props) {
           <div className="body-content">
             <Tree
               virtual={false}
-              //height={250}
               showIcon
               checkable
               onExpand={onExpand}

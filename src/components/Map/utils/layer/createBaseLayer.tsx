@@ -373,8 +373,6 @@ const CreateBaseLayer = (props) => {
           );
           if (result.data.success) {
             console.log("update by file", result.data);
-            // message.success("Layer updated successfully!");
-            //props.updateLayer(result.data.data, null, null);
             setPrimeAttributes(
               result.data.data.primeAttributes.filter(
                 (i: any) => i !== "color" && i !== "icon" && i !== "sys_id"
@@ -502,9 +500,7 @@ const CreateBaseLayer = (props) => {
       setFileList([]);
       setCaptureDate("");
       setLayerName("");
-      //setLayerType("");
       setLayerTypeId("");
-      //setCurrentLayerId("");
       form.resetFields();
     }
   };
@@ -558,7 +554,6 @@ const CreateBaseLayer = (props) => {
                         };
                         break;
                       default:
-                      // dsfdfdf
                     }
                     attrset.push(obj);
                   });
@@ -616,7 +611,6 @@ const CreateBaseLayer = (props) => {
           setUploading(false);
           setMissionOptions([]);
           setSelectedLayers([]);
-          //setLayerType1("");
           setUIElement([]);
         });
     } else
@@ -758,11 +752,6 @@ const CreateBaseLayer = (props) => {
     const fmData = new FormData();
     let payload: any = {};
     if (props.isUpdate) {
-      // fmData.append("layerId",props.BaseLayerId);
-      // selectedLayers.map((index:any, value:any)=>{
-      //   //console.log(`layers[${value}], ${index}`)
-      //   fmData.append(`layers[${value}]`, index);
-      // })
       payload = {
         layerId: props.BaseLayerId,
         layers: selectedLayers,
@@ -773,9 +762,7 @@ const CreateBaseLayer = (props) => {
       .then((res: any) => {
         if (res.data.status) {
           console.log("update by import", res.data.data);
-          //props.addLayer(res.data.data)
           props.updateLayer(res.data.data, null, null);
-          //message.success("Layer Updated Successfully!")
         } else {
           console.log(res.data);
           message.warning(res.data.message);
@@ -806,9 +793,7 @@ const CreateBaseLayer = (props) => {
         setUIElement([]);
         setCurrent2(2);
         setResponseArray([]);
-        //setLayerType1("");
         setUploading(false);
-        //setIsModalVisible2(false);
         form.resetFields();
       });
   };
@@ -864,8 +849,6 @@ const CreateBaseLayer = (props) => {
       });
   };
 
-  // const missionLayer: any = [];
-
   useEffect(() => {
     console.log(uiElement);
   }, [uiElement]);
@@ -873,67 +856,6 @@ const CreateBaseLayer = (props) => {
   const addMore = () => {
     const array: any = [...uiElement];
     array.push(uuid());
-    // array.push(
-    //   <Row style={{ backgroundColor: "khaki"}}>
-    //     <Col span={12}>
-    //       <h4><span style={{color: "red"}}>*</span> Choose mission(s) to import data from</h4>
-    //       <Select
-    //         placeholder='Select Mission(s)'
-    //         showSearch
-    //         loading={missionsLoading}
-    //         // options={missionOptions}
-    //         onSearch={handleSearch}
-    //         // optionFilterProp='label'
-    //         showArrow
-    //         allowClear
-    //         onChange={(e) => setSelectedMissions([e])}
-    //         style={{ width: "200px" }}
-    //         onPopupScroll={onScroll}
-    //         onFocus={()=>{
-    //           setPage(1);
-    //           setMissionOptions([]);
-    //           setMissionSearchValue("");
-    //           setFetch(true);
-    //         }}
-    //         notFoundContent={null}
-    //         filterOption={false}
-    //       >
-    //         {missionOptions.map((mission) => (
-    //           <Option key={mission._id} value={mission._id}>
-    //             {mission.name}
-    //           </Option>
-    //         ))}
-    //       </Select>
-    //     </Col>
-    //     <Col span={12}>
-    //       <h4><span style={{color: "red"}}>*</span> Choose layer(s) from mission</h4>
-    //       <Select
-    //         placeholder='Select Layers(s)'
-    //         showSearch
-    //         loading={layersLoading}
-    //         // options={missionOptions}
-    //         // onSearch={(e) => console.log(e)}
-    //         optionFilterProp='label'
-    //         showArrow
-    //         allowClear
-    //         onChange={(e) => {
-    //           console.log(e);
-    //           // getMetadataForBaseLayer(e);
-    //           setSelectedLayers(e);
-    //         }}
-    //         mode='tags'
-    //         style={{ minWidth: "200px", maxWidth: "500px" }}
-    //       >
-    //         {selectedMissions &&
-    //           layerOptions.map((layer) => (
-    //             <Option key={layer._id} value={layer._id}>
-    //               {layer.name}
-    //             </Option>
-    //           ))}
-    //       </Select>
-    //     </Col>
-    //   </Row>
-    // );
     setUIElement(array);
   };
 
@@ -967,7 +889,6 @@ const CreateBaseLayer = (props) => {
   };
 
   function onChangeInherit(checked) {
-    //console.log(`switch to ${checked}`);
     if (checked) {
       setInheritColor(true);
       setShowColorPicker(false);
@@ -1245,18 +1166,7 @@ const CreateBaseLayer = (props) => {
                   type={"primary"}
                   onClick={() => {
                     console.log("clicked");
-                    // if(layerName == ""){
-                    //   message.warning("Please enter layer name!")
-                    // } else if(layerType1 == "Vector") {
-                    //   console.log("clicked 1")
-                    //   if(layerTypeId == "") message.warning("Please select a layer type!");
-                    //   if(captureDate == "") message.warning("Please choose a capture date!");
-                    // } else if(captureDate == ""){
-                    //   message.warning("Please choose a capture date!")
-                    // }else{
-                    //   if (layerType1 == "Vector") createVectorBaseByAttr();
-                    //   else if (layerType1 == "Raster")
-                    // }
+
 
                     if (layerName == "") {
                       message.warning("PLease neter layer name");
@@ -1268,10 +1178,7 @@ const CreateBaseLayer = (props) => {
                         return;
                       }
                     }
-                    // if(layerTypeId == ""){
-                    //   message.warning("Please select a layer type!");
-                    //   return;
-                    // }
+                    
                     if (captureDate == "") {
                       message.warning("Please choose a capture date!");
                       return;
@@ -1474,11 +1381,8 @@ const CreateBaseLayer = (props) => {
               style={{ height: "200px", width: "100%" }}
               columns={columns}
               dataSource={tableData}
-              // size='small'
-              // pagination={{ hideOnSinglePage: true }}
               scroll={{ y: "400px" }}
               pagination={false}
-              // pagination={{ hideOnSinglePage: true }}
             />
           </div>
         </>
@@ -1578,9 +1482,6 @@ const CreateBaseLayer = (props) => {
                           <Select
                             key={`${f.attr}-${uuid()}`}
                             style={{ width: "200px" }}
-                            // onChange={(e)=>{
-                            //   handleAttributeMapping(e, fields, layers)
-                            // }}
                             defaultValue={
                               selectedAttr[f.attr] ? selectedAttr[f.attr] : null
                             }
@@ -1769,7 +1670,6 @@ const CreateBaseLayer = (props) => {
                     width: "500px",
                     height: "300px",
                     margin: "auto",
-                    //backgroundColor: "whitesmoke",
                     padding: "2rem",
                   }}
                 >
@@ -1836,7 +1736,6 @@ const CreateBaseLayer = (props) => {
       .then((res: any) => {
         if (res.data.success) {
           console.log(res.data);
-          //message.success("Layer was successfully updated!");
           props.updateLayer(res.data.data, null, null);
         } else {
           console.log(res.data);
@@ -1897,13 +1796,10 @@ const CreateBaseLayer = (props) => {
     if (responseArray.length > 0) {
       ooi = responseArray.filter((i) => i.layerId == layers._id);
       if (ooi.length > 0) {
-        //console.log("test",ooi)
         ooi[0].attrMapping[`${e}`] = fields.key;
-        // console.log(ooi);
         const arraywoObj: any = responseArray.filter(
           (i) => i.layerId !== layers._id
         );
-        //console.log("array",arraywoObj);
         arraywoObj.push(ooi[0]);
         setResponseArray(arraywoObj);
       } else {
@@ -1955,7 +1851,6 @@ const CreateBaseLayer = (props) => {
               <div
                 className="vertical-center"
                 style={{
-                  //backgroundColor: "indigo",
                   height: "500px",
                   overflow: "auto",
                 }}
@@ -1970,9 +1865,7 @@ const CreateBaseLayer = (props) => {
                       placeholder="Select Mission(s)"
                       showSearch
                       loading={missionsLoading}
-                      // options={missionOptions}
                       onSearch={handleSearch}
-                      // optionFilterProp='label'
                       showArrow
                       allowClear
                       onChange={(e) => setSelectedMissions([e])}
@@ -2003,8 +1896,6 @@ const CreateBaseLayer = (props) => {
                       placeholder="Select Layers(s)"
                       showSearch
                       loading={layersLoading}
-                      // options={missionOptions}
-                      // onSearch={(e) => console.log(e)}
                       optionFilterProp="label"
                       showArrow
                       allowClear={false}
@@ -2052,9 +1943,7 @@ const CreateBaseLayer = (props) => {
                           placeholder="Select Mission(s)"
                           showSearch
                           loading={missionsLoading}
-                          // options={missionOptions}
                           onSearch={handleSearch}
-                          // optionFilterProp='label'
                           showArrow
                           allowClear
                           onChange={(e) => setSelectedMissions([e])}
@@ -2085,8 +1974,6 @@ const CreateBaseLayer = (props) => {
                           placeholder="Select Layers(s)"
                           showSearch
                           loading={layersLoading}
-                          // options={missionOptions}
-                          // onSearch={(e) => console.log(e)}
                           optionFilterProp="label"
                           showArrow
                           allowClear={false}
@@ -2142,9 +2029,6 @@ const CreateBaseLayer = (props) => {
       title: "Attribute Selection",
       content: (
         <>
-          {/* <Title style={{ marginTop: "12px" }} level={5}>
-            *Choose attributes to inherit in layer.
-          </Title> */}
           <Title level={4} style={{ marginTop: "8px" }}>
             Select Attributes to inherit in layer
           </Title>
@@ -2160,10 +2044,8 @@ const CreateBaseLayer = (props) => {
             columns={columns2}
             dataSource={tableData}
             style={{ height: "400px", width: "100%", margin: "10px auto" }}
-            // size='small'
             scroll={{ y: "390px" }}
             pagination={false}
-            // pagination={{ hideOnSinglePage: true }}
           />
         </>
       ),
@@ -2182,12 +2064,6 @@ const CreateBaseLayer = (props) => {
             layer.
           </Text>
 
-          {/* <AttributeMapping
-            metadata = {metadata}
-            primeAttributes = {primeAttributes}
-            responseArray = {responseArray}
-            setResponseArray = {setResponseArray}
-          /> */}
           <Collapse
             defaultActiveKey={activeTab}
             onChange={(e) => setActiveTab(e)}
@@ -2249,9 +2125,7 @@ const CreateBaseLayer = (props) => {
                                               : null
                                             : null
                                         }
-                                        // onChange={(e)=>{
-                                        //   handleAttributeMapping(e, fields, layers)
-                                        // }}
+                                       
                                         onSelect={(e) =>
                                           handleAttributeMapping(
                                             e,
@@ -2378,7 +2252,6 @@ const CreateBaseLayer = (props) => {
               <div
                 className="vertical-center"
                 style={{
-                  //backgroundColor: "indigo",
                   height: "500px",
                   overflow: "auto",
                 }}
@@ -2393,9 +2266,7 @@ const CreateBaseLayer = (props) => {
                       placeholder="Select Mission(s)"
                       showSearch
                       loading={missionsLoading}
-                      // options={missionOptions}
                       onSearch={handleSearch}
-                      // optionFilterProp='label'
                       showArrow
                       allowClear
                       onChange={(e) => setSelectedMissions([e])}
@@ -2426,8 +2297,6 @@ const CreateBaseLayer = (props) => {
                       placeholder="Select Layers(s)"
                       showSearch
                       loading={layersLoading}
-                      // options={missionOptions}
-                      // onSearch={(e) => console.log(e)}
                       optionFilterProp="label"
                       showArrow
                       allowClear={false}
@@ -2475,9 +2344,7 @@ const CreateBaseLayer = (props) => {
                           placeholder="Select Mission(s)"
                           showSearch
                           loading={missionsLoading}
-                          // options={missionOptions}
                           onSearch={handleSearch}
-                          // optionFilterProp='label'
                           showArrow
                           allowClear
                           onChange={(e) => setSelectedMissions([e])}
@@ -2508,8 +2375,6 @@ const CreateBaseLayer = (props) => {
                           placeholder="Select Layers(s)"
                           showSearch
                           loading={layersLoading}
-                          // options={missionOptions}
-                          // onSearch={(e) => console.log(e)}
                           optionFilterProp="label"
                           showArrow
                           allowClear={false}
@@ -2574,12 +2439,7 @@ const CreateBaseLayer = (props) => {
             information will not be lost as it will be still stored in your
             layer.
           </Text>
-          {/* <AttributeMapping
-            metadata = {metadata}
-            primeAttributes = {primeAttributes}
-            responseArray = {responseArray}
-            setResponseArray = {setResponseArray}
-          /> */}
+
           <Collapse
             defaultActiveKey={activeTab}
             onChange={(e) => setActiveTab(e)}
@@ -2641,9 +2501,7 @@ const CreateBaseLayer = (props) => {
                                               : null
                                             : null
                                         }
-                                        // onChange={(e)=>{
-                                        //   handleAttributeMapping(e, fields, layers)
-                                        // }}
+                                      
                                         onSelect={(e) =>
                                           handleAttributeMapping(
                                             e,
@@ -2843,7 +2701,6 @@ const CreateBaseLayer = (props) => {
           padding: "1rem",
           width: "800px",
           margin: "auto",
-          //height: "580px",
         }}
         width={900}
         centered={true}
@@ -2953,29 +2810,6 @@ const CreateBaseLayer = (props) => {
           <div className="steps-content">{steps2[current2].content}</div>
         )}
 
-        {/* <div className='steps-action'>
-          {current2 < steps2.length - 1 && (
-            <Button type='primary' onClick={() => setCurrent2(current2 + 1)}>
-              Next
-            </Button>
-          )}
-          {current2 === steps2.length - 1 && (
-            <Button
-              type='primary'
-              onClick={() => message.success("Processing complete!")}
-            >
-              Done
-            </Button>
-          )}
-          {current2 > 0 && (
-            <Button
-              style={{ margin: "0 8px" }}
-              onClick={() => setCurrent2(current2 - 1)}
-            >
-              Previous
-            </Button>
-          )}
-        </div> */}
       </Modal>
       <Modal
         title="Storage Exceeded!"

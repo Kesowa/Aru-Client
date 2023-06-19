@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Row, Col, Card, message, Skeleton, Button } from "antd";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
@@ -16,7 +16,6 @@ function ChoosePackage(props: any) {
       .get(apis.FETCH_ACTIVE_PACKAGES)
       .then((result) => {
         if (result.data.status) {
-          //console.log(result.data.data)
           setPackages(result.data.data);
         } else {
           message.error(result.data.message);
@@ -51,11 +50,6 @@ function ChoosePackage(props: any) {
           </Button>
         </Col>
       </Row>
-      {/* <Row gutter={16} justify="end">
-                <Col>
-                    <Button type="primary">Custom package</Button>
-                </Col>
-            </Row> */}
     </div>
   );
 }

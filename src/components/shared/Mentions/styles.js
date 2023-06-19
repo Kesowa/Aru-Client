@@ -7,7 +7,6 @@ const mentionsInput = {
   control: {
     backgroundColor: "#fff",
     fontSize: 16,
-    // fontWeight: 'normal',
   },
   input: {
     outline: "none",

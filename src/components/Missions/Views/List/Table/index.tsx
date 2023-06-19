@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Tag,
   Row,
@@ -59,16 +59,8 @@ interface TableProps {
 
 function MissionTable(props: TableProps) {
   const history = useHistory();
-  const { Search } = Input;
   const { Title } = Typography;
-  const suffix = (
-    <AudioOutlined
-      style={{
-        fontSize: 16,
-        color: "#1890ff",
-      }}
-    />
-  );
+  
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");

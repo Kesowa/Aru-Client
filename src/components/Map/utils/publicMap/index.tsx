@@ -127,8 +127,6 @@ function PublicMap(props) {
     minZoom: 0,
     maxZoom: 22,
     bearing: 0,
-    // transitionDuration: 8000,
-    // transitionInterpolator: new FlyToInterpolator(),
   });
 
   // ---- setting map location -----------------
@@ -142,10 +140,6 @@ function PublicMap(props) {
               if (result.state === "granted") {
                 navigator.geolocation.getCurrentPosition(function (pos: any) {
                   const crd = pos.coords;
-                  // console.log("Your current position is:");
-                  // console.log(`Latitude : ${crd.latitude}`);
-                  // console.log(`Longitude: ${crd.longitude}`);
-                  // console.log(`More or less ${crd.accuracy} meters.`);
                   setViewport({
                     longitude: crd.longitude,
                     latitude: crd.latitude,
@@ -162,10 +156,6 @@ function PublicMap(props) {
                 navigator.geolocation.getCurrentPosition(
                   function (pos: any) {
                     const crd = pos.coords;
-                    // console.log("Your current position is:");
-                    // console.log(`Latitude : ${crd.latitude}`);
-                    // console.log(`Longitude: ${crd.longitude}`);
-                    // console.log(`More or less ${crd.accuracy} meters.`);
                     setViewport({
                       longitude: crd.longitude,
                       latitude: crd.latitude,
@@ -427,7 +417,6 @@ function PublicMap(props) {
   const [key, setKey] = useState("");
   const [defaultKeys, setDefaultKeys] = useState<React.Key[]>([]);
   const onExpand = (expandedKeysValue: React.Key[]) => {
-    //console.log("onExpand", expandedKeysValue);
     // if not set autoExpandParent to false, if children expanded, parent can not collapse.
     // or, you can remove all expanded children keys.
     setExpandedKeys(expandedKeysValue);
@@ -490,8 +479,6 @@ function PublicMap(props) {
     id: any,
     sysId: any
   ) {
-    //console.log(data);
-    //console.log(coordinate);
     console.log("sysid:", sysId);
     setCoordinates(coordinate);
     setSysId(sysId);
@@ -501,12 +488,10 @@ function PublicMap(props) {
     setFeatureLayer(id);
     togglePopup(true);
     setSaveButtonShow(show);
-    //console.log("onclick", index);
   }
 
   //-----------------------Fetch Raster URL----------------------------------
   const getRasterURL = (rasterType, path, settings) => {
-    //SetColorMap(settings.color);
     switch (rasterType) {
       case "NDVI":
         return (
@@ -570,15 +555,12 @@ function PublicMap(props) {
   }, [colorMap, selectedIndexes, showSelectedIndexes]);
 
   useEffect(() => {
-    //console.log("current 3d", threeDState);
     if (threeDState === "Enabled") {
-      // set3DTranspose(true);
       const al = { ...allLayers };
       al[`1-${featureLayer}`].T3DTranspose = true;
       setAllLayers(al);
       forceUpdateLayers(featureLayer);
     } else if (threeDState === "Disabled") {
-      // set3DTranspose(false);
       const al = { ...allLayers };
       al[`1-${featureLayer}`].T3DTranspose = false;
       setAllLayers(al);
@@ -626,7 +608,6 @@ function PublicMap(props) {
       demLayers.push(obj);
     });
     setScales(demLayers);
-    //console.log(demLayers);
     if (demLayers.length) {
       setScaleVisible(true);
     } else {
@@ -640,7 +621,6 @@ function PublicMap(props) {
     checkedKeysValue.forEach((element) => {
       if (element.split("-")[0] === "2" && element !== "2") {
         if (props.isBaseMap) {
-          //console.log("all the layers being drawn",allLayers[element]);
           const layer: any = allLayers[element];
           layer?.layerPath.map((layerr: any) => {
             const settings: any = {
@@ -716,8 +696,6 @@ function PublicMap(props) {
                 id: element,
                 data: STATIC_URL + allLayers[element]?.layerPath,
                 pickable: true,
-                // stroked: true,
-                // filled: true,
                 extruded: false,
                 lineWidthUnits: "pixels",
                 lineWidthScale: 4,
@@ -734,9 +712,6 @@ function PublicMap(props) {
                   }
                   return hexToRGB2(d.properties.color, false);
                 },
-                // getRadius: 100,
-                // getLineWidth: 1,
-                // getElevation: 30 ,
                 onClick: (data, e) => {
                   if (e.leftButton) {
                     InfoWindow(
@@ -812,15 +787,12 @@ function PublicMap(props) {
                     return hexToRGB2(d.properties.color, true);
                   }
                 },
-                //getRadius: 100,
-                //getLineWidth: 1,
                 getElevation: (d) => {
                   if (d.properties?.height) {
                     return d.properties.height;
                   }
                 },
                 onClick: (data, e) => {
-                  //console.log("data",allLayers[element]?);
                   if (e.leftButton) {
                     InfoWindow(
                       data.coordinate,
@@ -858,8 +830,6 @@ function PublicMap(props) {
                 id: element,
                 data: parseGeoJson(STATIC_URL + allLayers[element]?.layerPath),
                 pickable: true,
-                // iconAtlas: TankIcon,
-                //iconMapping: ICON_MAPPING,
                 getIcon: (d) => {
                   const iconSelector = (iconType) => {
                     let icon = "";
@@ -890,14 +860,6 @@ function PublicMap(props) {
                 onDataLoad: () => {
                   setLayerLoading(false);
                 },
-                // getFillColor: (d, i) => {
-                //   if (activeID === element.split("-")[1]) {
-                //     if (selectedIndexes.includes(i.index)) {
-                //       return hexToRGB2("#ffaa00", true);
-                //     }
-                //   }
-                //   return hexToRGB2(d.properties.color, false);
-                // },
                 sizeScale: 12,
                 getPosition: (d) => d.geometry.coordinates,
                 getSize: (d) => 5,
@@ -937,35 +899,6 @@ function PublicMap(props) {
         }
       }
     });
-    // vlayers.push(
-    //   new TileLayer({
-    //     id: "BASE_LAYER-123123123",
-    //     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-    //     data: `${COG_URL}` +
-    //     `/cog/tiles` +
-    //     `/{z}/{x}/{y}@1x?url=${import.meta.env.VITE_BASE_URL}` +
-    //     `/raster/1642486263367_20_DEM_10cm.tif` +
-    //     `&resampling_method=nearest&bidx=1&rescale=17.799230575561523%2C93.64027404785156&colormap_name=plasma`,
-
-    //     minZoom: 0,
-    //     maxZoom: 24,
-    //     tileSize: 256,
-    //     // onDataLoad: () => {
-    //     //   setLayerLoading(false);
-    //     // },
-    //     renderSubLayers: (props) => {
-    //       const {
-    //         bbox: { west, south, east, north },
-    //       } = props.tile;
-
-    //       return new BitmapLayer(props, {
-    //         data: null,
-    //         image: props.data,
-    //         bounds: [west, south, east, north],
-    //       });
-    //     },
-    //   })
-    // )
     setVisibleLayers(vlayers);
   };
 
@@ -1005,7 +938,6 @@ function PublicMap(props) {
       setLayerLoading(true);
     }
 
-    //console.log(checkedKeysValue);
     if (checkedKeysValue.length) {
       setActiveGroupButton(false);
     } else {
@@ -1019,7 +951,6 @@ function PublicMap(props) {
     const vectorOrdering: any = sortLayersBySidebarOrdering(vectors, "vector");
 
     setLastCount(checkedKeysValue.length);
-    //console.log(rasterOrdering);
     setCheckedKeys([...rasterOrdering, ...vectorOrdering]);
   };
 
@@ -1027,39 +958,6 @@ function PublicMap(props) {
 
   const [isDrawing, setIsDrawing] = useState(false);
 
-  const startDrawing = (mode, tool) => {
-    setShowDrawingTools(false);
-    setToolSelected(tool);
-
-    const modes = {
-      DrawPolygon: DrawPolygonMode,
-      DrawLine: DrawLineStringMode,
-      DrawPoint: DrawPointMode,
-    };
-
-    const drawModes = {
-      DrawPolygon: "PolygonView",
-      DrawLine: "LineView",
-      DrawPoint: "PointView",
-    };
-
-    setFeatureState({
-      data: myFeatureCollection,
-    });
-
-    setdrawMode(drawModes[mode]);
-
-    setMode({
-      mode: modes[mode],
-    });
-
-    setModeState({
-      editMode: null,
-      isCompleted: false,
-    });
-
-    setIsDrawing(true);
-  };
 
   const cancelDrawing = () => {
     setIsDrawing(false);
@@ -1085,11 +983,6 @@ function PublicMap(props) {
     setSelectedKeys(selectedKeysValue);
   };
 
-  const VectorLayerIcons = {
-    Point: <EnvironmentOutlined />,
-    MultiLineString: <BranchesOutlined />,
-    MultiPolygon: <GatewayOutlined />,
-  };
 
   const generateIcon = (type: any, color: any) => {
     switch (type) {
@@ -1174,7 +1067,6 @@ function PublicMap(props) {
   };
 
   const getTreeData = (layer, type, keyPrefix) => {
-    //console.log("layer info from gettree data", layer);
     switch (type) {
       case "raster":
         return {
@@ -1379,9 +1271,7 @@ function PublicMap(props) {
   const refreshLayers = () => {
     const td: any = [...treeStructure];
     let newTreeDataVector: any = [];
-    const newTreeDataRaster: any = [];
 
-    //console.log(td);
     const data: any = [
       {
         title: `${props.isMissionMap ? "Mission" : "City"} Data`,
@@ -1408,28 +1298,10 @@ function PublicMap(props) {
     });
     data[0].children = [...newTreeDataVector];
 
-    // newTreeDataRaster = td[1].children.map((layer) => {
-    //   if (layer.group) {
-    //     let groupLayers = [];
-    //     let value = {
-    //       ...layer.value,
-    //     };
-    //     groupLayers = layer.value.children.map((l) => {
-    //       return getTreeData(l, "raster", td[1]["key"]);
-    //     });
-    //     value.children = [...groupLayers];
-    //     return getGroupTitle(value, layer.id);
-    //   } else {
-    //     return getTreeData(layer, "raster", td[1]["key"]);
-    //   }
-    // });
-    // data[1].children = [...newTreeDataRaster];
-
     setTreeDataa(data);
   };
 
   const segrigateLayers = (layers: ILayer[]) => {
-    //console.log("segrate layer");
     let data = [...treeDataa];
     console.log("TREE DATA COPY", data);
     let allLayers = {};
@@ -1494,8 +1366,6 @@ function PublicMap(props) {
           type: layer.raster.name,
           settings: {
             ...layer.raster,
-            // minp: layer.minp,
-            // maxp: layer.maxp,
           },
           name: layer.name,
           groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
@@ -1588,12 +1458,9 @@ function PublicMap(props) {
     setTreeStructure(data);
     //--------check last ortho-----
     rasters.forEach((element) => {
-      //console.log(element)
       if (element.raster.name === "ORTHO") {
-        //console.log(element);
         const cl: any = [];
         cl.push(`2-${element._id}`);
-        //console.log(cl);
         setCheckedKeys(cl);
         return;
       }
@@ -1698,14 +1565,6 @@ function PublicMap(props) {
       setPanes(panes);
       setActiveKey(id);
     } else setActiveKey(id);
-
-    // const newPanes = [...panes];
-    // newPanes.push({ title: name, content: 'Content of new Tab', key: id,id:id, type: type == "Raster" ? "raster" : "vector", });
-    // setPanes(newPanes);
-    // setActiveKey(id)
-    //setNewTabIndex(newTabIndex + 1);
-    //const activeKey = `newTab${newTabIndex}`;
-    //const newPanes = [...panes];
   };
 
   useEffect(() => {
@@ -1760,8 +1619,6 @@ function PublicMap(props) {
             type: layer.raster.name,
             settings: {
               ...layer.raster,
-              // minp: layer.minp,
-              // maxp: layer.maxp,
             },
             name: layer.name,
             id: layer._id,
@@ -1824,7 +1681,6 @@ function PublicMap(props) {
       });
       if (editType === "addFeature") {
         //event to fire up infowindow for registering new vector layer/shape
-        //console.log("New Shape Created!", updatedData);
         const { featureIndexes } = editContext;
         updatedSelectedFeatureIndexes = [
           ...selectedFeatureIndexes,
@@ -1946,7 +1802,6 @@ function PublicMap(props) {
         setActiveID(pane.id);
       }
       if (pane.id === activeKey) setActiveType(pane.type === "vector");
-      //console.log(pane.type);
     });
   }, [activeKey]);
 
@@ -1971,7 +1826,6 @@ function PublicMap(props) {
 
   // ANTD TREE DROP FUNCTION
   const onDrop = async (info) => {
-    //console.log(info);
     const dropKey = info.node.key;
     const dragKey = info.dragNode.key;
     const dropPos = info.node.pos.split("-");
@@ -2038,7 +1892,6 @@ function PublicMap(props) {
         } else if (info.dragNode.layer) {
           const layerid = info.dragNode.layer._id;
           const key = info.dragNode.key;
-          //console.log(layerid, groupid);
           await changeGroupOfLayer(groupid, [layerid], [key]);
         }
       }
@@ -2164,25 +2017,12 @@ function PublicMap(props) {
       });
       setOsmState(true);
     } else {
-      // let currenViewPort:any = INITIAL_VIEW_STATE;
-      // setViewport({
-      //   longitude: INITIAL_VIEW_STATE.longitude,
-      //   latitude: INITIAL_VIEW_STATE.latitude,
-      //   zoom: INITIAL_VIEW_STATE.zoom,
-      //   pitch: INITIAL_VIEW_STATE.pitch,
-      //   minZoom: 0,
-      //   maxZoom: 22,
-      // });
       setOsmState(false);
       setMapMode(`mapbox://styles/mapbox/${value}-v8`);
     }
   }
 
   // Handle Current Layer
-
-  function currentLayer(value) {
-    console.log(value);
-  }
 
   // Public map search
   useEffect(() => {
@@ -2204,24 +2044,6 @@ function PublicMap(props) {
             console.log("search successful", res.data);
             setSelectedIndexes([res.data.data[0].index]);
             setActiveID(res.data.layerId);
-            //console.log(turf.centroid(res.data.data[0]));
-            // fit to bounds
-            // console.log(INITIAL_VIEW_STATE);
-            // const feature:any = res.data.data[0];
-            // const [minLng, minLat, maxLng, maxLat] = turf.bbox(feature);
-            // const viewportWebMercator = new WebMercatorViewport(INITIAL_VIEW_STATE);
-            // console.log(viewportWebMercator);
-            // const {longitude, latitude, zoom} = viewportWebMercator.fitBounds([[minLng, minLat], [maxLng, maxLat]]);
-            // console.log(longitude, latitude, zoom)
-            // viewportWebMercator = {
-            //   ...INITIAL_VIEW_STATE,
-            //   longitude,
-            //   latitude,
-            //   zoom,
-            //   transitionInterpolator: new FlyToInterpolator(),
-            //   transitionDuration: 1500,
-            // };
-            // setViewport(viewportWebMercator);
             const centerPoint = turf.centroid(res.data.data[0]);
             setViewport({
               longitude: centerPoint.geometry.coordinates[0],
@@ -2308,7 +2130,6 @@ function PublicMap(props) {
                   setShowDrawingTools(false);
                 }
               }}
-              //getTooltip={({object}) => object && (object.properties.Block_Nm)}
             >
               {osmState ? (
                 <>
@@ -2379,49 +2200,6 @@ function PublicMap(props) {
                 </HtmlOverlay>
               )}
             </DeckGL>
-
-            {/* {showDrawingTools && ( */}
-            {/* <div
-      className='drawing-tools'
-      style={{
-        top: toolCoordinates[1] + "px",
-        left: toolCoordinates[0] + "px",
-      }}
-    >
-      <Dropdown
-        overlay={() => (
-          <Menu>
-            <Menu.Item
-              key='0'
-              onClick={() => startDrawing("DrawLine", "Line")}
-            >
-              Line Tool
-            </Menu.Item>
-            <Menu.Item
-              key='1'
-              onClick={() => startDrawing("DrawPolygon", "Polygon")}
-            >
-              Polygon Tool
-            </Menu.Item>
-            <Menu.Item
-              key='2'
-              onClick={() => startDrawing("DrawPoint", "Marker")}
-            >
-              Marker Tool
-            </Menu.Item>
-          </Menu>
-        )}
-        // ref={drawingMenuRef}
-        placement='bottomCenter'
-        trigger={["click"]}
-      >
-        <Button
-          style={{ visibility: "hidden" }}
-          ref={drawingMenuRef}
-        ></Button>
-      </Dropdown>
-    </div> */}
-            {/* )} */}
 
             <div className="map-header-toolbar">
               <Row>
@@ -2531,7 +2309,6 @@ function PublicMap(props) {
                                 fontSize: "1.2rem",
                                 marginTop: "0.5rem",
                                 marginBottom: "0.5rem",
-                                //marginRight: "0.4rem",
                               }}
                             />
                             <SortDescendingOutlined
@@ -2557,7 +2334,6 @@ function PublicMap(props) {
                 <div className="body-content">
                   <Tree
                     virtual={false}
-                    //height={250}
                     showIcon
                     checkable
                     onExpand={onExpand}
@@ -2576,8 +2352,6 @@ function PublicMap(props) {
                     blockNode
                   />
                 </div>
-
-                {/* <Button onClick={() => setIsModalVisible4(true)}>new</Button> */}
               </div>
             )}
             <img
@@ -2601,7 +2375,7 @@ function PublicMap(props) {
   return <>{renderMap()}</>;
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state) => {   //Review
   // return {
   //   userType: state.Auth.userdetails.userType,
   //   userDetails: state.Auth.userdetails,

@@ -140,7 +140,6 @@ const FlightEditing = (props: any) => {
               defaultValue={moment(props.flightDetails.time, "HH:mm A")}
               use12Hours={true}
               onChange={(value) => {
-                //console.log(value);
                 setFormState({
                   ...formState,
                   time: value?.format("HH:mm A").toString(),

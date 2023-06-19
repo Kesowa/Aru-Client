@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { STATIC_URL } from "src/constants";
 import "rsuite/dist/rsuite.min.css";
 import { Tooltip, Whisper } from "rsuite";
@@ -7,13 +7,8 @@ const ThermalImage = (props) => {
   const [temperature, setTemperature] = useState("");
   const [pixelColor, setPixelColor] = useState("");
   const {
-    detectedEnvironment: {
-      isMouseDetected = false,
-      isTouchDetected = false,
-    } = {},
     elementDimensions: { width = 0, height = 0 } = {},
     position: { x = 0, y = 0 } = {},
-    isActive = false,
     isPositionOutside = false,
   } = props;
   useEffect(() => {
@@ -54,8 +49,7 @@ const ThermalImage = (props) => {
         const { offsetX, offsetY } = ev;
         //call the method to get the r,g,b,a values for current pixel
         const c = extractPixelColor(data, cols, offsetY, offsetX);
-        //build a colour string for
-        const colour = `rgb(${c.red}, ${c.green}, ${c.blue})`;
+        
         const hexCode = `#${[c.red, c.green, c.blue]
           .map((x) => x.toString(16).padStart(2, "0"))
           .join("")}`;

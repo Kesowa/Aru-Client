@@ -68,7 +68,6 @@ function Media(props) {
 
   //---------------------File validator----------------
   function validateFile(file: any) {
-    const extension = file.name.split(".")[1];
     switch (file.type) {
       case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         return true;
@@ -174,7 +173,6 @@ function Media(props) {
   //-----------extract images------------------------
   function extractImages(files: any) {
     const images: any = [];
-    //console.log("Uploaded files here",files)
     files.map((item: any) => {
       if (item.fileType === "image/png" || item.fileType === "image/jpeg") {
         images.push(item);
@@ -206,7 +204,6 @@ function Media(props) {
     multiple: true,
     action: `${apis.UPLOAD_FILE_TO_FEATURE}`,
     customRequest: (options: any) => {
-      //console.log(options.file)
       if (props.layerLabel === "No label selected") {
         message.warning(
           "Please select a layer label before uploading to a node!"
@@ -214,7 +211,6 @@ function Media(props) {
         options.onError("File not Supported!");
       } else {
         if (validateFile(options.file)) {
-          //console.log(options.file);
           const fData = new FormData();
           fData.append("file", options.file);
           fData.append("layerId", props.layerId);
@@ -310,7 +306,6 @@ function Media(props) {
           })
           .then((res) => {
             if (res.data.status) {
-              //console.log(res.data.data);
               res.data.data.map((item: any) => {
                 newdata.push(item);
               });
@@ -346,7 +341,6 @@ function Media(props) {
       })
       .then((res) => {
         if (res.data.status) {
-          //console.log("FIle detelted",res.data)
           message.success("File Deleted!");
           const filteredArray = files.filter(function (obj) {
             return obj._id !== res.data.data._id;
@@ -374,7 +368,6 @@ function Media(props) {
       })
       .then((res) => {
         if (res.data.status) {
-          //console.log("FIle detelted",res.data)
           message.success("Files Deleted!");
           const filteredArray = files.filter(function (obj) {
             return !ids.include(obj._id);
@@ -465,7 +458,6 @@ function Media(props) {
       display: data[key],
     }));
   };
-  //console.log("data from props:",props.visible, props.layerId, props.featureIndex, props.properties);
   const renderVideo = () => {
     console.log("videoToShow", props.videoToShow);
     return (
@@ -490,7 +482,6 @@ function Media(props) {
                               STATIC_URL +
                               item.videoPath.toString().replace(".m3u8", ".flv")
                             }
-                            // target='_blank'
                             download
                           >
                             <DownloadOutlined /> Download{" "}
