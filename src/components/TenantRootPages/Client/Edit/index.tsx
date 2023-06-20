@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
@@ -159,7 +159,6 @@ function UserCreatePage(props: any) {
 
   //subimt form
   const onFinish = (data: any) => {
-    //console.log(data);
     EditUserAccount(data);
   };
 

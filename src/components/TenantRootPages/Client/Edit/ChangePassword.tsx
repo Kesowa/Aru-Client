@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
@@ -23,7 +23,6 @@ function ChangePassword(props: any) {
 
   //subimt form
   const onFinish = (data: any) => {
-    //console.log(data);
     EditUserAccount(data);
   };
 
@@ -84,7 +83,6 @@ function ChangePassword(props: any) {
                 onBack={() => window.history.back()}
                 className="site-page-header-responsive"
                 title={`Change Password For Client - ${props.client.name}`}
-                // subTitle={`Change password for client ${props.client.name}`}
                 extra={[
                   <Link to="/dashboard/tenant/client/list" key="1">
                     <Button
