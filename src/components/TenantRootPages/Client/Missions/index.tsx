@@ -458,7 +458,6 @@ function DataMission(props) {
       .finally(() => setTypesLoader(false));
   }, []);
 
-
   const handleTableChange = (pagination, filter, sorter) => {
     let filterString = "";
     Object.entries(filter).forEach((f: any) => {

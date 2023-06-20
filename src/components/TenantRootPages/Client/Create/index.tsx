@@ -43,7 +43,7 @@ function UserCreatePage(props: any) {
   const [userGroups, setUserGroups]: [any, any] = useState([]);
   const [selectedUserGroup, setSelectedusergroup]: [any, any] = useState();
   const [errorState, setErrorState] = useState("");
- 
+
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
       setIsAvatarUploading(true);
@@ -72,7 +72,6 @@ function UserCreatePage(props: any) {
     });
     return false;
   };
-
 
   //change user group
   const onUserGroupChange = (value: any) => {
@@ -353,7 +352,7 @@ function UserCreatePage(props: any) {
                   </Form.Item>
                 </Col>
               </Row>
-              
+
               <Row gutter={16} align="bottom">
                 <Col span="8">
                   <Form.Item

@@ -350,7 +350,7 @@ function UserCreatePage(props: any) {
                   </Form.Item>
                 </Col>
               </Row>
-             
+
               <Row gutter={16}>
                 <Col span="8">
                   <Form.Item label="Date of Birth" name="dob">
