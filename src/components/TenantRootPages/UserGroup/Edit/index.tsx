@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { UnorderedListOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
 import { Link, useHistory, useParams } from "react-router-dom";

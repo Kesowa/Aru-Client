@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
@@ -167,7 +167,6 @@ function UserEditPage(props: any) {
 
   //subimt form
   const onFinish = (data: any) => {
-    //console.log(data);
     if (!data.dob) delete data.dob;
     if (!data.aadhaarNo) delete data.aadhaarNo;
     if (!data.pilotLicenceNo) delete data.pilotLicenceNo;

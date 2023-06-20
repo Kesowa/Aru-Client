@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
 import {
@@ -327,18 +327,6 @@ function UserListPage(props: any) {
             renderActionButtonsIfRoot(record)}
           {props.userDetails.userType === "tenant-staff" &&
             renderActionButtonsIfStaff(record)}
-          {/* {renderEditBtn(record)}
-          {renderDeleteBtn(record)}
-          <Button
-            style={{ marginLeft: "10px" }}
-            onClick={() => {
-              history.push(
-                `/dashboard/tenant/user/change-password/${record._id}`,
-              );
-              props.setUserToEdit(record);
-            }}>
-            <LockOutlined />
-          </Button> */}
         </>
       ),
     },

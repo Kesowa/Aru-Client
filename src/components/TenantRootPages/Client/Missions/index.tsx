@@ -50,7 +50,6 @@ function DataMission(props) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
-  // const [usedFilter, setUsedFilter] = useState("Completed");
   const [missionCount, setMissionCount] = useState({});
   const [totalMissions, settotalMissions] = useState(0);
   const [sortOrder, setSortOrder] = useState("createdAt:descend");
@@ -459,36 +458,6 @@ function DataMission(props) {
       .finally(() => setTypesLoader(false));
   }, []);
 
-  function onChange(pagination, filters, sorter, extra) {
-    console.log("params", pagination, filters, sorter, extra);
-  }
-
-  const onSearch = (value) => {
-    setIsTableLoading(true);
-    if (!value) {
-      if (props.missions) {
-        console.log(props.mission);
-        setCompletedMissions(props.missions);
-      }
-    } else {
-      value = value.toLowerCase();
-
-      if (props.missions) {
-        const searchedMissions = props.missions.filter((mission: any) => {
-          return (
-            mission.status.toLowerCase().startsWith(value) ||
-            mission.name.toLowerCase().startsWith(value) ||
-            mission._id.toLowerCase().startsWith(value) ||
-            mission.user.name.toLowerCase().startsWith(value)
-          );
-        });
-
-        setCompletedMissions(searchedMissions);
-      }
-    }
-
-    setIsTableLoading(false);
-  };
 
   const handleTableChange = (pagination, filter, sorter) => {
     let filterString = "";

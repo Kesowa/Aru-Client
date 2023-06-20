@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
 import {
@@ -11,12 +11,10 @@ import {
 import {
   PageHeader,
   message,
-  Tabs,
   Input,
   Button,
   Tag,
   Table,
-  Typography,
   Popconfirm,
 } from "antd";
 import { loading } from "../../../../actions/loadingAction";
@@ -34,8 +32,6 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
-const { TabPane } = Tabs;
-const { Title } = Typography;
 function UserListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
   const [tenantUserTableData, setTenantUserTableData] = useState([]);

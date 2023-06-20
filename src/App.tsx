@@ -21,11 +21,8 @@ const PublicMap = lazy(() => import("./components/Map/utils/publicMap"));
 const App = (props: any) => {
   //auth check if token exist
 
-  // document.body.oncontextmenu = () => false;
-
   const Token = localStorage.getItem("Token");
   const UserId = localStorage.getItem("UserId");
-  //console.log(Token, UserId);
   if (
     Token &&
     UserId &&

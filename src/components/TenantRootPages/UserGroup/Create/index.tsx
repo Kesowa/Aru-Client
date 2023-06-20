@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { UnorderedListOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   PageHeader,
   Row,
@@ -33,7 +33,6 @@ function UserGroupCreatePage(props: any) {
   const [selectedPermissionsIds, setSelectedPermissionsIds] = useState([]);
   const [selectedPermissions, setSelectedPermissions] = useState([]);
   const [errorState, setErrorState] = useState("");
-  const history = useHistory();
 
   const fetchAllPermissions = () => {
     props.loading(true);
