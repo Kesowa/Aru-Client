@@ -275,6 +275,8 @@ function MissionView(props) {
         missionType: mission.missionType ? mission.missionType.name : "",
         isPublic: mission.isPublic,
         clients: [],
+        size : mission.size<1 ? (mission.size*1000).toFixed(1)+" KB" 
+                    : mission.size>=1 && mission.size<=999 ? (mission.size).toFixed(1)+" MB" : (mission.size / 1000).toFixed(1)+" GB"
       };
 
       console.log("MIissss", details);
@@ -1436,6 +1438,9 @@ function MissionView(props) {
               </Descriptions.Item>
               <Descriptions.Item label="Location">
                 {MissionDetails.location}
+              </Descriptions.Item>
+              <Descriptions.Item label="Size">
+                {MissionDetails.size}
               </Descriptions.Item>
             </Descriptions>
           </PageHeader>
