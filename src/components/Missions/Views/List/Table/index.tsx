@@ -430,19 +430,15 @@ function MissionTable(props: TableProps) {
       sortDirections: ["ascend", "descend"],
       render: (text) => {
         let missionSize;
-        if(text < 1){
+        if (text < 1) {
           missionSize = (text * 1000).toFixed(1) + "KB";
-        }
-        else if(text >=1 && text <= 999){
-          missionSize = (text).toFixed(1) + "MB";
-        }
-        else{
+        } else if (text >= 1 && text <= 999) {
+          missionSize = text.toFixed(1) + "MB";
+        } else {
           missionSize = (text / 1000).toFixed(1) + "GB";
         }
 
-        return (
-          <div>{missionSize}</div>
-        );
+        return <div>{missionSize}</div>;
       },
     },
     {
