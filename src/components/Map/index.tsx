@@ -6509,7 +6509,6 @@ function BaseMap(props) {
             >
               <Form
                 name="upload2"
-                onFinish={onFinish}
                 layout="vertical"
                 form={form}
               >
