@@ -6507,11 +6507,7 @@ function BaseMap(props) {
               footer={null}
               width={700}
             >
-              <Form
-                name="upload2"
-                layout="vertical"
-                form={form}
-              >
+              <Form name="upload2" layout="vertical" form={form}>
                 <Row style={{ paddingLeft: "10px", paddingRight: "5px" }}>
                   <Alert
                     style={{ width: "100%" }}

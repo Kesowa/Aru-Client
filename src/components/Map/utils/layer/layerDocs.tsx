@@ -451,49 +451,49 @@ function LayerDocs(props) {
       const newDestination = files.filter(
         (i: any) => i.data.fIndex === index.toString()
       ); //-----filtering new destination for file
-      if(newDestination.length > 0){
-      newDestination[0].data.files.push(fileInQuestion[0]);
-      const filtered = files.filter(
-        (i: any) =>
-          i.data.fIndex !== index.toString() && i.data.fIndex !== current
-      );
-      if (originalDesitination[0].data.files.length > 0) {
-        filtered.push(originalDesitination[0]);
-      }
-      filtered.push(newDestination[0]);
-      const UnassignedImages: any = filtered.filter((i) => i.label === null); // filtering the unassigned entry
-      const filtered2Array: any = filtered.filter((i) => i.label !== null); //filtering the array to get rid of the unassigned object
-      if (UnassignedImages.length > 0) {
-        filtered2Array.unshift(UnassignedImages[0]);
-        populateReviewFiles(filtered2Array);
+      if (newDestination.length > 0) {
+        newDestination[0].data.files.push(fileInQuestion[0]);
+        const filtered = files.filter(
+          (i: any) =>
+            i.data.fIndex !== index.toString() && i.data.fIndex !== current
+        );
+        if (originalDesitination[0].data.files.length > 0) {
+          filtered.push(originalDesitination[0]);
+        }
+        filtered.push(newDestination[0]);
+        const UnassignedImages: any = filtered.filter((i) => i.label === null); // filtering the unassigned entry
+        const filtered2Array: any = filtered.filter((i) => i.label !== null); //filtering the array to get rid of the unassigned object
+        if (UnassignedImages.length > 0) {
+          filtered2Array.unshift(UnassignedImages[0]);
+          populateReviewFiles(filtered2Array);
+        } else {
+          populateReviewFiles(filtered);
+        }
       } else {
-        populateReviewFiles(filtered);
-      }
-    } else {
-      const object: any = {
-        label: newLabel,
-        data: {
-          fIndex: index.toString(),
-          files: [],
-        },
-      };
-      object.data.files.push(fileInQuestion[0]);
-      const filtered = files.filter((i: any) => i.data.fIndex !== current);
-      filtered.push(object);
-      if (originalDesitination[0].data.files.length > 0) {
-        filtered.push(originalDesitination[0]);
-      }
-      const UnassignedImages: any = filtered.filter((i) => i.label === null); // filtering the unassigned entry
-      const filtered2Array: any = filtered.filter((i) => i.label !== null); //filtering the array to get rid of the unassigned object
-      if (UnassignedImages.length > 0) {
-        filtered2Array.unshift(UnassignedImages[0]);
-        populateReviewFiles(filtered2Array);
-      } else {
-        populateReviewFiles(filtered);
+        const object: any = {
+          label: newLabel,
+          data: {
+            fIndex: index.toString(),
+            files: [],
+          },
+        };
+        object.data.files.push(fileInQuestion[0]);
+        const filtered = files.filter((i: any) => i.data.fIndex !== current);
+        filtered.push(object);
+        if (originalDesitination[0].data.files.length > 0) {
+          filtered.push(originalDesitination[0]);
+        }
+        const UnassignedImages: any = filtered.filter((i) => i.label === null); // filtering the unassigned entry
+        const filtered2Array: any = filtered.filter((i) => i.label !== null); //filtering the array to get rid of the unassigned object
+        if (UnassignedImages.length > 0) {
+          filtered2Array.unshift(UnassignedImages[0]);
+          populateReviewFiles(filtered2Array);
+        } else {
+          populateReviewFiles(filtered);
+        }
       }
     }
   }
-}
 
   useEffect(() => console.log(reviewList), [reviewList]);
   //------------confirm review list-----------------------
@@ -889,8 +889,6 @@ function LayerDocs(props) {
       filteredArray.push(x);
     });
     populateReviewFiles(filteredArray);
-
-    
   }
 
   return (
@@ -1373,8 +1371,7 @@ function LayerDocs(props) {
                                                       onClick={() => {
                                                         updateReviewList(
                                                           `${item.index}-${item.label}`,
-                                                          subHeading.data
-                                                            .fIndex
+                                                          subHeading.data.fIndex
                                                         );
                                                       }}
                                                     >
@@ -1437,9 +1434,7 @@ function LayerDocs(props) {
                                                                     );
                                                                   }}
                                                                 >
-                                                                  {
-                                                                    itema.label
-                                                                  }
+                                                                  {itema.label}
                                                                 </Menu.Item>
                                                               );
                                                             }
@@ -1621,8 +1616,7 @@ function LayerDocs(props) {
                                                               updateReviewListSingle(
                                                                 item._id,
                                                                 itema.index,
-                                                                subHeading
-                                                                  .data
+                                                                subHeading.data
                                                                   .fIndex,
                                                                 itema.label
                                                               );
