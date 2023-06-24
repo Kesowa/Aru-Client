@@ -67,6 +67,6 @@ function StageOne(props: any) {
   );
 }
 
-export default connect(() => {}, {
+export default connect(() => ({}), {
   clearMissionCreationStateWithGeoFence,
 })(StageOne);
