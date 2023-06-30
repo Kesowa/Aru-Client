@@ -174,7 +174,7 @@ function DashboardContent(props: any) {
     const AlertCount: any = storageRes.data.actualAlertCount;
     const LabelCount: any = storageRes.data.actualLayerCount;
     // doughnutLabelsLine plugin
-   
+
     const format = getDataFormat((videos + alerts + layers + documents) / 4);
     const data: any = {
       labels: [
