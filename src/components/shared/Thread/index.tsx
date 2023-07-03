@@ -28,6 +28,8 @@ import { thread } from "../../../actions/threadAction";
 import { connect } from "react-redux";
 import moment from "moment-timezone";
 import "./index.less";
+import Mentions from "../Mentions";
+import VideoPlayer from "../VideoPlayer";
 const { TextArea } = Input;
 
 const CREATE_THREAD = async (docType: any, docID: any) => {
@@ -65,43 +67,49 @@ const Editor = ({
   type,
   action,
   setAction,
-}) => (
-  <div>
-    <Form.Item>
-      <TextArea rows={4} onChange={onChange} value={value} />
-    </Form.Item>
-    <Form.Item>
-      <Button
-        htmlType="submit"
-        loading={submitting}
-        onClick={onSubmit}
-        type="primary"
-      >
-        {type} Comment
-      </Button>
-      {action === "edit" && type !== "Add" && (
+  tags,
+}) => {
+  return (
+    <div>
+      <Form.Item>
+        <Mentions tags={tags} handleChange={onChange} value={value} />
+      </Form.Item>
+      <Form.Item>
         <Button
-          style={{ marginLeft: "1rem" }}
+          htmlType="submit"
+          loading={submitting}
+          onClick={onSubmit}
           type="primary"
-          danger
-          onClick={() => setAction("")}
         >
-          Cancel
+          {type} Comment
         </Button>
-      )}
-    </Form.Item>
-  </div>
-);
+        {action === "edit" && type !== "Add" && (
+          <Button
+            style={{ marginLeft: "1rem" }}
+            type="primary"
+            danger
+            onClick={() => setAction("")}
+          >
+            Cancel
+          </Button>
+        )}
+      </Form.Item>
+    </div>
+  );
+};
 const Thread = (props) => {
   const [addSubmitting, setAddSubmitting] = useState(false);
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [addCommentValue, setAddCommentValue] = useState("");
   const [editCommentValue, setEditCommentValue] = useState("");
+  const [allMentions, setAllMentions] = useState([]);
+  const [openVOD, setOpenVOD] = useState({ status: false, seek: 0 });
   const [comments, setComments] = useState([]);
   const [refresh, setRefresh] = useState(false);
   const [action, setAction] = useState("");
   const [commentId, setCommentId] = useState("");
   const [actionIdx, setActionIdx] = useState("");
+
   const getActions = (comment: any, idx: any) => {
     return [
       <span key="delete">
@@ -137,9 +145,86 @@ const Thread = (props) => {
       </span>,
     ];
   };
+  const filterArrayWithUniqueIds = (data: any) => {
+    const uniqueIds = new Set();
+    return data.filter((obj) => {
+      if (uniqueIds.has(obj.id)) {
+        return false; // Skip duplicates
+      } else {
+        uniqueIds.add(obj.id);
+        return true; // Include unique objects
+      }
+    });
+  };
+
+  const extractMentionsAndFormatText = (comments) => {
+    const regex = /@\[([^[\]]+)\]\(([^()]+)\)/g;
+    const mentions = [];
+    const modifiedComments = [];
+    comments.map((comment) => {
+      const modifiedText = comment.content.replace(
+        regex,
+        (match, display, id) => {
+          mentions.push({ display, id });
+          return display;
+        }
+      );
+      modifiedComments.push({ ...comment, displayContent: modifiedText });
+    });
+    const uniqueMentions = filterArrayWithUniqueIds(mentions);
+    //console.log('extract', uniqueMentions, modifiedComments);
+    setAllMentions(uniqueMentions);
+    setComments(modifiedComments);
+  };
+
+  const checkStringForMentions = (str) => {
+    for (const mention of allMentions) {
+      if (str.includes(mention.display)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  const checkStringForKeyValue = (str, key) => {
+    const foundObject = allMentions.find(
+      (obj) => obj[key] && str.includes(obj[key])
+    );
+    return foundObject || false;
+  };
+  const CommentWithFormattedMentions = ({ text }) => {
+    const words = text.replace("\n", " \n").split(" ");
+    return words.map((word, index) => {
+      const mention = checkStringForKeyValue(word, "display");
+      // Apply formatting to specific words based on conditions
+      if (mention) {
+        return (
+          <a
+            className="mention-link"
+            onClick={() => {
+              setOpenVOD({ status: true, seek: mention.id });
+            }}
+          >
+            <span
+              key={index}
+              style={{
+                backgroundColor: "#d3d3d3",
+                borderRadius: "3px",
+                textDecoration: "underline",
+              }}
+            >
+              {word}
+            </span>{" "}
+          </a>
+        );
+      } else {
+        return `${word} `;
+      }
+    });
+  };
+
   const fetchThread = async () => {
     const response = await GET_THREAD(props.Thread.docType, props.Thread.docId);
-    setComments(response.data.data.comments);
+    extractMentionsAndFormatText(response.data.data.comments);
   };
   const deleteComment = async () => {
     const response = await DELETE_COMMENT(
@@ -159,8 +244,11 @@ const Thread = (props) => {
     }
   }, [props.open, refresh]);
   const onClose = () => {
-    if (props.setThumbnail) {
+    if (props.thumbnail) {
       props.setThumbnail("");
+    }
+    if (props.Thread.docType === "vod") {
+      setOpenVOD({ status: false, seek: 0 });
     }
     props.thread(false);
   };
@@ -263,13 +351,37 @@ const Thread = (props) => {
   };
   return ReactDom.createPortal(
     <div id="thread">
+      {props.Thread.docType === "vod" && props.data && openVOD.status && (
+        <>
+          <div
+            style={{
+              height: "400px", //video player
+              width: "712px",
+              margin: "auto",
+              backgroundColor: "black",
+              zIndex: 9999,
+            }}
+            className="video-div"
+          >
+            <VideoPlayer // NEED TO PASS MISSION DETAILS AND LIVE TAG CHECK
+              url={STATIC_URL + props.data.link}
+              mission={props.data.missionDetails}
+              alertBtnStatus=""
+              theatreModeStatus="none"
+              liveTagStatus="none"
+              liveTelemetry={false}
+              showHUD={false}
+              seek={openVOD.seek}
+            />
+          </div>
+        </>
+      )}
       <Drawer
         title="Thread"
         className="thread"
         placement="right"
         onClose={onClose}
         open={props.open}
-        zIndex={9999}
         bodyStyle={{
           overflow: "hidden",
         }}
@@ -305,6 +417,7 @@ const Thread = (props) => {
                         type="Edit"
                         action={action}
                         setAction={setAction}
+                        tags={props.tags?.bookmarks ? props.tags.bookmarks : {}}
                       />
                     }
                   />
@@ -331,7 +444,18 @@ const Thread = (props) => {
                         alt={comment.authorName}
                       />
                     }
-                    content={<p>{`${comment.content}`}</p>}
+                    content={
+                      checkStringForMentions(comment.content) &&
+                      comment.displayContent ? (
+                        <p>
+                          <CommentWithFormattedMentions
+                            text={comment.displayContent}
+                          />
+                        </p>
+                      ) : (
+                        <p>{`${comment.content}`}</p>
+                      )
+                    }
                   />
                 )}
               </>
@@ -347,13 +471,16 @@ const Thread = (props) => {
             />
           }
           content={
-            <Editor
-              onChange={addHandleChange}
-              onSubmit={addHandleSubmit}
-              submitting={addSubmitting}
-              value={addCommentValue}
-              type="Add"
-            />
+            <>
+              <Editor
+                onChange={addHandleChange}
+                onSubmit={addHandleSubmit}
+                submitting={addSubmitting}
+                value={addCommentValue}
+                tags={props.tags?.bookmarks ? props.tags.bookmarks : {}}
+                type="Add"
+              />
+            </>
           }
         />
       </Drawer>
@@ -367,6 +494,7 @@ const mapStateToProps = (state) => {
     userDetails: state.Auth.userdetails,
     open: state.Thread.open,
     Thread: state.Thread,
+    tags: state.Thread.tags,
   };
 };
 

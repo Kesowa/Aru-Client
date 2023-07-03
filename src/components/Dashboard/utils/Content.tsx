@@ -170,13 +170,17 @@ function DashboardContent(props: any) {
     const alerts: any = storageRes.data.allAlertSize;
     const layers: any = storageRes.data.allLayerSize;
     const documents: any = storageRes.data.allDocumentsSize;
+    const VideoCount: any = storageRes.data.actualVodCount;
+    const AlertCount: any = storageRes.data.actualAlertCount;
+    const LabelCount: any = storageRes.data.actualLayerCount;
+    // doughnutLabelsLine plugin
 
     const format = getDataFormat((videos + alerts + layers + documents) / 4);
     const data: any = {
       labels: [
-        `Videos (${format})`,
-        `Alerts (${format})`,
-        `Layers (${format})`,
+        `Videos (${format}) (${VideoCount})`,
+        `Alerts (${format}) (${AlertCount})`,
+        `Layers (${format}) (${LabelCount})`,
         `Documents (${format})`,
       ],
       datasets: [

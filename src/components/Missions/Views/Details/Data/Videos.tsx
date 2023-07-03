@@ -95,6 +95,7 @@ function Videos(props) {
   const [limit, setLimit] = useState(4);
   const [totalCount, setTotalCount] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [threadDetails, setThreadDetails] = useState({});
   const [isUploading, setUploading] = useState(false);
   const [uploadModall, setUploadModal] = useState(false);
   const socket: any = useRef();
@@ -558,7 +559,7 @@ function Videos(props) {
         isSRT: data.isSRT,
       };
     }
-
+    setThreadDetails(vodDetails);
     return (
       <Badge
         style={{
@@ -597,7 +598,6 @@ function Videos(props) {
             liveTagStatus="none"
             liveTelemetry={false}
             showHUD={false}
-            updateVOD={updateVODAttr}
             threadThumb={true}
             open={showCarousel}
           />
@@ -828,7 +828,12 @@ function Videos(props) {
   //     );
   //   }
   // }, [videoDetails.link]);
-
+  const generateTags = (data: any) => {
+    return Object.keys(data).map((key) => ({
+      id: Number(key),
+      display: data[key],
+    }));
+  };
   useEffect(() => {
     if (!(activateSelection && checkedList.length > 0)) {
       setFlag(false);
@@ -1007,11 +1012,18 @@ function Videos(props) {
                                   <Menu.Item
                                     key="2"
                                     onClick={() => {
-                                      setThumbnail(vodThumbnail(dataa, idx));
                                       props.thread(true, {
                                         docType: "vod",
                                         docId: dataa._id,
+                                        tags: dataa.bookmarks
+                                          ? {
+                                              bookmarks: generateTags(
+                                                dataa.bookmarks
+                                              ),
+                                            }
+                                          : {},
                                       });
+                                      setThumbnail(vodThumbnail(dataa, idx));
                                     }}
                                   >
                                     <MessageOutlined /> Open Thread{" "}
@@ -1143,11 +1155,18 @@ function Videos(props) {
                                   <Menu.Item
                                     key="2"
                                     onClick={() => {
-                                      setThumbnail(vodThumbnail(dataa, idx));
                                       props.thread(true, {
                                         docType: "vod",
                                         docId: dataa._id,
+                                        tags: dataa.bookmarks
+                                          ? {
+                                              bookmarks: generateTags(
+                                                dataa.bookmarks
+                                              ),
+                                            }
+                                          : {},
                                       });
+                                      setThumbnail(vodThumbnail(dataa, idx));
                                     }}
                                   >
                                     <MessageOutlined /> Open Thread{" "}
@@ -1402,11 +1421,14 @@ function Videos(props) {
                         <Menu.Item
                           key="2"
                           onClick={() => {
-                            setThumbnail(vodThumbnail(dataa, idx));
                             props.thread(true, {
                               docType: "vod",
                               docId: dataa._id,
+                              tags: dataa.bookmarks
+                                ? { bookmarks: generateTags(dataa.bookmarks) }
+                                : {},
                             });
+                            setThumbnail(vodThumbnail(dataa, idx));
                           }}
                         >
                           <MessageOutlined /> Open Thread{" "}
@@ -1669,7 +1691,11 @@ function Videos(props) {
           }
         />
       </Modal>
-      <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
+      <Thread
+        thumbnail={thumbnail}
+        setThumbnail={setThumbnail}
+        data={threadDetails}
+      />
       <FilterToolbar
         type="Video"
         loader={loader}
@@ -1699,7 +1725,6 @@ function Videos(props) {
         updateAPI={apis.UPDATE_MULTI_VOD}
         delete={deleteVideo}
       />
-
       {loader ? (
         // <div style={{ margin: "auto", marginTop: "5%" }}>
         //   <Spin size='large' />

@@ -576,10 +576,12 @@ function VideoPlayer(props: any) {
 
   const handleProgress = (changedState) => {
     if (!seeking) {
-      setPlayed(changedState.played);
-      //console.log("handleProgress.",changedState.played)-----------------------------------------------------
+      if (props.seek && !changedState.played) {
+        setPlayed(props.seek / 100 + changedState.played);
+      } else {
+        setPlayed(changedState.played);
+      }
     }
-
     if (
       controlVisibleCounter > 0 &&
       playerControlsRef &&
@@ -613,7 +615,14 @@ function VideoPlayer(props: any) {
       playerRef.current.seekTo(newValue / 100);
     }
   };
-
+  useEffect(() => {
+    console.log("props.seek", props.seek);
+    if (props.seek) {
+      handleSeekChange(props.seek);
+      handleSeekMouseUp(props.seek);
+      setPlaying(false);
+    }
+  }, [props.seek]);
   const handleMouseMove = () => {
     if (playerControlsRef && playerControlsRef.current) {
       playerControlsRef.current.style.opacity = "1";
@@ -1947,6 +1956,7 @@ function VideoPlayer(props: any) {
                   )}
 
                   <Slider
+                    className="video-slider"
                     min={0}
                     max={100}
                     value={played * 100}
@@ -1969,7 +1979,7 @@ function VideoPlayer(props: any) {
             </Col>
 
             <Col span={24}>
-              {!props.threadThumb && (
+              {!props.threadThumb && !props.seek && (
                 <Row justify="space-between">
                   <Col span={17}>
                     <Row>
