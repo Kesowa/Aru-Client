@@ -4,6 +4,7 @@ import {
   Col,
   Layout,
   Menu,
+  MenuProps,
   Popconfirm,
   Row,
   Tooltip,
@@ -25,7 +26,43 @@ function SideBar(props: any) {
   const [r, setR] = useState(true);
   const { switcher, themes, currentTheme, status } = useThemeSwitcher();
   const history = useHistory();
-
+  const menu: MenuProps["items"] = () => {
+    const items: MenuProps["items"] = [];
+    props.Auth.userdetails.sideBar.map((ele: any, i: number) => {
+      if (ele.type === "sub_menu") {
+        const submenu = {
+          key: `sub_menu${i}`,
+          icon: decideIcon(ele.icon),
+          label: ele.text,
+        };
+        const children: MenuProps["items"] = [];
+        ele.sub_menu.map((subEle: any, j: number) => {
+          children.push({
+            key: subEle.link,
+            label: (
+              <Link to={subEle.link}>
+                {decideIcon(subEle.icon)}
+                <span>{subEle.text}</span>
+              </Link>
+            ),
+          });
+        });
+        submenu["children"] = children;
+        items.push(submenu);
+      } else if (ele.type === "menu") {
+        items.push({
+          key: ele.link,
+          label: (
+            <Link to={ele.link}>
+              {decideIcon(ele.icon)}
+              <span>{ele.text}</span>
+            </Link>
+          ),
+        });
+      }
+    });
+    return items;
+  };
   useEffect(() => {
     history.listen((location) => {
       const loc = location.pathname.split("/");
@@ -206,39 +243,8 @@ function SideBar(props: any) {
               theme="dark"
               mode="inline"
               selectedKeys={[href]}
-            >
-              {props.Auth.userdetails.sideBar.map((ele: any, i: number) => {
-                if (ele.type === "sub_menu") {
-                  return (
-                    <Menu.SubMenu
-                      key={`sub_menu${i}`}
-                      icon={decideIcon(ele.icon)}
-                      title={ele.text}
-                    >
-                      {ele.sub_menu.map((subEle: any, j: number) => {
-                        return (
-                          <Menu.Item key={subEle.link} onClick={() => setR(!r)}>
-                            <Link to={subEle.link}>
-                              {decideIcon(subEle.icon)}
-                              <span>{subEle.text}</span>
-                            </Link>
-                          </Menu.Item>
-                        );
-                      })}
-                    </Menu.SubMenu>
-                  );
-                } else if (ele.type === "menu") {
-                  return (
-                    <Menu.Item key={`${ele.link}`} onClick={() => setR(!r)}>
-                      <Link to={ele.link}>
-                        {decideIcon(ele.icon)}
-                        <span>{ele.text}</span>
-                      </Link>
-                    </Menu.Item>
-                  );
-                }
-              })}
-            </Menu>
+              items={menu()}
+            />
           </Sider>
           <div className="logo-container">
             <Logo className="brand-logo" alt="kiv-logo" />

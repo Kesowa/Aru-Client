@@ -13,7 +13,6 @@ import {
   Spin,
   message,
   Dropdown,
-  Menu,
   Modal,
   Button,
   Steps,
@@ -28,11 +27,9 @@ import {
 } from "@ant-design/icons";
 import apis from "../../../../services/apis";
 import Dragger from "antd/lib/upload/Dragger";
-import SubMenu from "antd/lib/menu/SubMenu";
 import { API_URL, STATIC_URL } from "src/constants";
 import io from "socket.io-client";
 
-const { Step } = Steps;
 const { Title, Text } = Typography;
 
 function Pictomap(props) {
@@ -49,8 +46,57 @@ function Pictomap(props) {
   const [reviewList, setReviewList] = useState<any>([]);
   const [reviewPending, setReviewPending] = useState(false);
   const [storageModal, setStorageModal] = useState(false);
-
-  const [, setState] = useState<any>();
+  const [subHeading, setSubHeading] = useState("");
+  const menuItem1 = () => {
+    const item = [
+      {
+        key: "1",
+        label: "Unassign Group",
+      },
+    ];
+    layerFeatures.map((item) => {
+      item.push({
+        key: `2-${item.index}-${item.label}`,
+        label: item.label,
+      });
+    });
+    return item;
+  };
+  const onClickMenu1 = (e) => {
+    if (e.key === "1") {
+      unAssignGroup(subHeading.label);
+    }
+    const splitKey = e.key.split("-");
+    if (splitKey[0] === "2") {
+      updateReviewList(`${splitKey[1]}-${splitKey[2]}`, subHeading.data.fIndex);
+    }
+  };
+  const menuItem2 = () => {
+    const item = [
+      {
+        key: "submenu",
+        label: "Move To",
+        children: layerFeatures.map((item) => {
+          return {
+            key: `1-${item._id}-${item.index}-${item.label}`,
+            label: item.label,
+          };
+        }),
+      },
+    ];
+    return item;
+  };
+  const onClickMenu2 = (e) => {
+    const splitKey = e.key.split("-");
+    if (splitKey[0] === "1") {
+      updateReviewListSingle(
+        splitKey[1],
+        splitKey[2],
+        subHeading.data.fIndex,
+        splitKey[3]
+      );
+    }
+  };
 
   //---------------------File validator----------------
   function validateFile(file: any) {
@@ -546,31 +592,11 @@ function Pictomap(props) {
                     <>
                       <Row>
                         <Dropdown
-                          overlay={
-                            <Menu>
-                              <Menu.Item
-                                key="unassign-group"
-                                onClick={() => unAssignGroup(subHeading.label)}
-                              >
-                                Unassign Group
-                              </Menu.Item>
-                              {layerFeatures.map((item: any) => {
-                                return (
-                                  <Menu.Item
-                                    key={`1-${item.label}-${item.index}`}
-                                    onClick={() => {
-                                      updateReviewList(
-                                        `${item.index}-${item.label}`,
-                                        subHeading.data.fIndex
-                                      );
-                                    }}
-                                  >
-                                    {item.label}
-                                  </Menu.Item>
-                                );
-                              })}
-                            </Menu>
-                          }
+                          onOpenChange={() => setSubHeading(subHeading)}
+                          menu={{
+                            items: menuItem1(),
+                            onClick: onClickMenu1,
+                          }}
                           trigger={["click"]}
                         >
                           <Text
@@ -591,29 +617,11 @@ function Pictomap(props) {
                             <Col span={8} md={8}>
                               <div>
                                 <Dropdown
-                                  overlay={
-                                    <Menu>
-                                      <SubMenu title="Move to" key="submenu">
-                                        {layerFeatures.map((itema: any) => {
-                                          return (
-                                            <Menu.Item
-                                              key={`1-${itema.label}-${itema.index}`}
-                                              onClick={() => {
-                                                updateReviewListSingle(
-                                                  item._id,
-                                                  itema.index,
-                                                  subHeading.data.fIndex,
-                                                  itema.label
-                                                );
-                                              }}
-                                            >
-                                              {itema.label}
-                                            </Menu.Item>
-                                          );
-                                        })}
-                                      </SubMenu>
-                                    </Menu>
-                                  }
+                                  onOpenChange={() => setSubHeading(subHeading)}
+                                  menu={{
+                                    items: menuItem2(),
+                                    onClick: onClickMenu2,
+                                  }}
                                   trigger={["contextMenu"]}
                                 >
                                   <Image
@@ -764,7 +772,7 @@ function Pictomap(props) {
     <>
       <Modal
         title="Upload images to feature"
-        visible={props.visible}
+        open={props.visible}
         onOk={() => {
           props.setVisible(false);
         }}
@@ -798,22 +806,22 @@ function Pictomap(props) {
           />
         ) : (
           <>
-            <Steps current={currentStage}>
-              {steps.map((item) => (
-                <Step
-                  key={item.title}
-                  title={item.title}
-                  description={item.description}
-                />
-              ))}
-            </Steps>
+            <Steps
+              current={currentStage}
+              items={steps.map((item) => {
+                return {
+                  title: item.title,
+                  description: item.description,
+                };
+              })}
+            ></Steps>
             <div>{steps[currentStage].content}</div>
           </>
         )}
       </Modal>
       <Modal
         title="Storage Exceeded!"
-        visible={storageModal}
+        open={storageModal}
         onOk={() => setStorageModal(false)}
         onCancel={() => setStorageModal(false)}
       >

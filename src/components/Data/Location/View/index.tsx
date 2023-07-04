@@ -8,9 +8,9 @@ import {
   Collapse,
   message,
   Spin,
-  PageHeader,
   Typography,
 } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import "./index.less";
 import { ClockCircleOutlined } from "@ant-design/icons";
 import LocationCardMap from "./Map";
@@ -30,8 +30,6 @@ import moment from "moment";
 import { connect } from "react-redux";
 import { loading } from "../../../../actions/loadingAction";
 import { STATIC_URL } from "src/constants";
-
-const { TabPane } = Tabs;
 const { Panel } = Collapse;
 const { Text, Title } = Typography;
 
@@ -337,63 +335,77 @@ function LocationCard(props) {
           }}
           className="mission-tab"
         >
-          <Tabs defaultActiveKey="1">
-            <TabPane tab="Missions" key="1" className="mission_tab">
-              {isMissionsLoading && (
-                <div className="mission-loading">
-                  <Spin size="large" />
-                </div>
-              )}
-              {!isMissionsLoading && (
-                <React.Fragment>
-                  {missions.map((mis) => (
-                    <div
-                      className={`mission_tab_mission_content ${
-                        selectedMission.missionID === mis.missionID
-                          ? "mission_tab_mission_content-selected"
-                          : ""
-                      }`}
-                      key={mis.missionID}
-                      onClick={() => {
-                        setSelectedMission(mis);
-                        getMissionDetails(mis.missionID);
-                        setIsChecked(false);
-                      }}
-                    >
-                      <Row
-                        className="mission-tab-card"
-                        style={{ padding: "15px 10px" }}
-                      >
-                        <Col span={4}>
-                          {selectedMission.missionID === mis.missionID ? (
-                            <img
-                              src={mib}
-                              alt=""
-                              style={{ margin: "0 auto" }}
-                            />
-                          ) : (
-                            <img src={mi} alt="" style={{ margin: "0 auto" }} />
-                          )}
-                        </Col>
-                        <Col span={20} style={{ paddingLeft: "10px" }}>
-                          <Text
-                            className="mission-name"
-                            strong
-                            style={{ display: "block", fontSize: "16px" }}
+          <Tabs
+            defaultActiveKey="1"
+            className="mission_tab"
+            items={[
+              {
+                key: "1",
+                label: "Missions",
+                children: (
+                  <>
+                    {isMissionsLoading ? (
+                      <div className="mission-loading">
+                        <Spin size="large" />
+                      </div>
+                    ) : (
+                      <React.Fragment>
+                        {missions.map((mis) => (
+                          <div
+                            className={`mission_tab_mission_content ${
+                              selectedMission.missionID === mis.missionID
+                                ? "mission_tab_mission_content-selected"
+                                : ""
+                            }`}
+                            key={mis.missionID}
+                            onClick={() => {
+                              setSelectedMission(mis);
+                              getMissionDetails(mis.missionID);
+                              setIsChecked(false);
+                            }}
                           >
-                            {mis.MissionName}
-                          </Text>
-                          <Text type="secondary">
-                            {getTimeAgo(mis.orderDate)}
-                          </Text>
-                        </Col>
-                      </Row>
-                    </div>
-                  ))}
-                </React.Fragment>
-              )}
-            </TabPane>
-          </Tabs>
+                            <Row
+                              className="mission-tab-card"
+                              style={{ padding: "15px 10px" }}
+                            >
+                              <Col span={4}>
+                                {selectedMission.missionID === mis.missionID ? (
+                                  <img
+                                    src={mib}
+                                    alt=""
+                                    style={{ margin: "0 auto" }}
+                                  />
+                                ) : (
+                                  <img
+                                    src={mi}
+                                    alt=""
+                                    style={{ margin: "0 auto" }}
+                                  />
+                                )}
+                              </Col>
+                              <Col span={20} style={{ paddingLeft: "10px" }}>
+                                <Text
+                                  className="mission-name"
+                                  strong
+                                  style={{ display: "block", fontSize: "16px" }}
+                                >
+                                  {mis.MissionName}
+                                </Text>
+                                <Text type="secondary">
+                                  {getTimeAgo(mis.orderDate)}
+                                </Text>
+                              </Col>
+                            </Row>
+                          </div>
+                        ))}
+                      </React.Fragment>
+                    )}
+                  </>
+                ),
+              },
+            ]}
+          ></Tabs>
+
           {selectedMissionDetails && !selectedLoading ? (
             <div className="mission_details" style={{ padding: "10px" }}>
               <Title level={4}>Mission Details</Title>

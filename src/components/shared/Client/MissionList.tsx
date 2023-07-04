@@ -8,8 +8,8 @@ import {
   Table,
   Button,
   message,
-  PageHeader,
 } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { Input } from "antd";
 import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
@@ -106,7 +106,7 @@ function ClientMission(props) {
     ),
     onFilter: (value: any, record: any) =>
       record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownVisibleChange: (visible: any) => {
+    onFilterDropdownOpenChange: (visible: any) => {
       if (visible) {
         setTimeout(() => searchInput.select());
       }

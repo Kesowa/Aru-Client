@@ -9,7 +9,6 @@ import {
   Tooltip,
   Select,
   Dropdown,
-  Menu,
   Carousel,
   Modal,
   Card,
@@ -65,21 +64,21 @@ function GridLive(props: any) {
   useEffect(() => {
     props.setSideBarCollapsed(true);
   }, []);
-  const menu = (
-    <Menu>
-      <Menu.Item
-        onClick={() => {
-          setisLayoutModalVisible(true);
-        }}
-      >
-        <a target="_blank" rel="noopener noreferrer">
-          <LayoutOutlined />
-          {"   "}
-          Change layout
-        </a>
-      </Menu.Item>
-    </Menu>
-  );
+  const menu = {
+    items: [
+      {
+        key: "1",
+        label: (
+          <a target="_blank" rel="noopener noreferrer">
+            {"   "}
+            Change layout
+          </a>
+        ),
+        icon: <LayoutOutlined />,
+      },
+    ],
+    onClick: (e) => setisLayoutModalVisible(true),
+  };
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++ change current page layout +++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -475,7 +474,7 @@ function GridLive(props: any) {
       <Layout hasSider>
         <Sider className="right-sider">
           <div className="sider-header-div">
-            <Dropdown overlay={menu} placement="bottomCenter">
+            <Dropdown menu={menu} placement="bottomCenter">
               <Button
                 size="large"
                 shape="circle"
@@ -600,7 +599,7 @@ function GridLive(props: any) {
           {/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++ change layout model +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
           <Modal
             title="Change Layout"
-            visible={isLayoutModalVisible}
+            open={isLayoutModalVisible}
             footer={null}
             onCancel={() => {
               setisLayoutModalVisible(false);
@@ -677,7 +676,7 @@ function GridLive(props: any) {
               maxHeight: "calc(100vh - 200px)",
             }}
             className="feed-modal"
-            visible={addFeedModal}
+            open={addFeedModal}
             cancelButtonProps={{ style: { display: "none" } }}
             okText="Add"
             onCancel={() => {
@@ -754,7 +753,7 @@ function GridLive(props: any) {
             className="feed-modal"
             cancelButtonProps={{ style: { display: "none" } }}
             okText="Switch"
-            visible={showSwapModal}
+            open={showSwapModal}
             onCancel={resetChangeFeedModal}
             onOk={replaceFeed}
           >

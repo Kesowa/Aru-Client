@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { PageHeader, message, Button, Table, Tag, Popconfirm } from "antd";
+import { message, Button, Table, Tag, Popconfirm } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import {
   PlusCircleOutlined,
   EditOutlined,

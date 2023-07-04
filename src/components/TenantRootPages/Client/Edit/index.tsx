@@ -6,7 +6,6 @@ import { PlusCircleOutlined } from "@ant-design/icons";
 import {
   List,
   Typography,
-  PageHeader,
   Row,
   Col,
   message,
@@ -18,6 +17,7 @@ import {
   DatePicker,
   Collapse,
 } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";

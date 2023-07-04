@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { PageHeader, Tabs } from "antd";
+import { Tabs } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../actions/loadingAction";
 import { logout } from "../../actions/authAction";
 import http from "../../services/httpCall";
@@ -14,13 +15,25 @@ import FourOhOne from "../shared/Error/FourOhOne";
 import GatewayTimeout from "../shared/Error/GatewayTimeout";
 import InternalServerError from "../shared/Error/InternalServerError";
 import ServiceUnavailable from "../shared/Error/ServiceUnavailable";
-
-const { TabPane } = Tabs;
+import type { TabsProps } from "antd";
 
 function Organisation(props: any) {
   const [tenantData, setTenantData] = useState();
   const [errorState, setErrorState] = useState("");
-
+  const items: TabsProps["items"] = [
+    {
+      key: "1",
+      label: `Details`,
+      children: (
+        <TenantInfo setTenantData={setTenantData} tenantData={tenantData} />
+      ),
+    },
+    {
+      key: "2",
+      label: `Package`,
+      children: <OrganisationPackageDetails tenantData={tenantData} />,
+    },
+  ];
   const fetchTenantData = () => {
     props.loading(true);
     http
@@ -87,19 +100,7 @@ function Organisation(props: any) {
             subTitle="Details"
             extra={[]}
           ></PageHeader>
-          <Tabs className="padding-after-page-header">
-            <TabPane tab="Details" key="1">
-              <>
-                <TenantInfo
-                  setTenantData={setTenantData}
-                  tenantData={tenantData}
-                />
-              </>
-            </TabPane>
-            <TabPane tab="Package" key="2">
-              <OrganisationPackageDetails tenantData={tenantData} />
-            </TabPane>
-          </Tabs>
+          <Tabs className="padding-after-page-header" items={items} />
         </div>
       );
   }

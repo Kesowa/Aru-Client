@@ -11,8 +11,8 @@ import {
   Popconfirm,
   Radio,
   Spin,
-  PageHeader,
 } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { Input } from "antd";
 import { Link } from "react-router-dom";
 import {
@@ -142,7 +142,7 @@ function DataMission(props) {
         .toLowerCase()
         .includes(value.toLowerCase());
     },
-    onFilterDropdownVisibleChange: (visible: any) => {
+    onFilterDropdownOpenChange: (visible: any) => {
       if (visible) {
         setTimeout(() => searchInput.select());
       }

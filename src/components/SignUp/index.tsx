@@ -30,7 +30,6 @@ import Logo from "../shared/Logo";
 
 const { Meta } = Card;
 const { Title, Text } = Typography;
-const { Step } = Steps;
 
 function Registration(props: any) {
   const [otpError, setOtpError] = useState(false);
@@ -825,15 +824,14 @@ function Registration(props: any) {
             </Link>
           </Col>
           <Col md={22}>
-            <Steps current={stage}>
-              {steps.map((item, idx) => (
-                <Step
-                  key={item.title}
-                  title={item.title}
-                  style={{ cursor: "pointer" }}
-                />
-              ))}
-            </Steps>
+            <Steps
+              current={stage}
+              items={steps.map((item) => {
+                return {
+                  title: item.title,
+                };
+              })}
+            ></Steps>
           </Col>
         </Row>
 

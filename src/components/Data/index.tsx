@@ -1,12 +1,11 @@
 import { useState } from "react";
 
 import { Link } from "react-router-dom";
-import { PageHeader, Button, Tabs, Badge } from "antd";
+import { Button, Tabs, Badge } from "antd";
+import { PageHeader } from '@ant-design/pro-layout';
 import { PlusCircleOutlined } from "@ant-design/icons";
 import DataMission from "./Mission";
 import DataLocation from "./Location";
-
-const { TabPane } = Tabs;
 
 function DataList() {
   const [displayedDataType, setDisplayedDataType] = useState("1");
@@ -28,25 +27,30 @@ function DataList() {
         ]}
       />
 
-      <Tabs defaultActiveKey="1" onChange={(key) => setDisplayedDataType(key)}>
-        <TabPane
-          tab={
-            <span>
-              Completed{" "}
-              <Badge
-                style={{ backgroundColor: "#3D85FC" }}
-                count={missionCount}
-              />
-            </span>
-          }
-          key="1"
-        >
-          <DataMission setMissionCount={setMissionCount} />
-        </TabPane>
-        <TabPane tab="Location" key="2">
-          <DataLocation />
-        </TabPane>
-      </Tabs>
+      <Tabs
+        defaultActiveKey="1"
+        onChange={(key) => setDisplayedDataType(key)}
+        items={[
+          {
+            key: "1",
+            label: (
+              <span>
+                Completed{" "}
+                <Badge
+                  style={{ backgroundColor: "#3D85FC" }}
+                  count={missionCount}
+                />
+              </span>
+            ),
+            children: <DataMission setMissionCount={setMissionCount} />,
+          },
+          {
+            key: "2",
+            label: "Location",
+            children: <DataLocation />,
+          },
+        ]}
+      ></Tabs>
     </div>
   );
 }

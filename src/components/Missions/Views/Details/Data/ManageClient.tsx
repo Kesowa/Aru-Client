@@ -330,7 +330,7 @@ function ManageClients(props) {
       <Modal
         title="My Clients"
         destroyOnClose={true}
-        visible={isClientModalVidible}
+        open={isClientModalVidible}
         onOk={() => setIsClientModalVisible(false)}
         onCancel={() => setIsClientModalVisible(false)}
         footer={

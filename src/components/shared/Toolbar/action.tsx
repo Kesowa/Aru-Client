@@ -4,30 +4,37 @@ import {
   message,
   Modal,
   Tooltip,
-  Menu,
   Dropdown,
   Space,
   Switch,
+  MenuProps,
 } from "antd";
 import { ExclamationCircleOutlined, DownOutlined } from "@ant-design/icons";
 import { TbFlag, TbFlagOff } from "react-icons/tb";
 import http from "src/services/httpCall";
 const ActionToolbar = (props) => {
   const { Text } = Typography;
-  const actionMenu = (
-    <Menu onClick={(e) => handleAction(e)}>
-      <Menu.Item key={0}>Toggle Selection</Menu.Item>
-      <Menu.Item key={1} disabled={props.checkedList.length > 0 ? false : true}>
-        Clear Selection
-      </Menu.Item>
-      <Menu.Item key={2} disabled={props.data?.length > 0 ? false : true}>
-        Select all files
-      </Menu.Item>
-      <Menu.Item key={3} disabled={props.checkedList.length > 0 ? false : true}>
-        Delete files
-      </Menu.Item>
-    </Menu>
-  );
+  const actionMenu: MenuProps["items"] = [
+    {
+      key: "0",
+      label: "Toggle Selection",
+    },
+    {
+      key: "1",
+      label: "Clear Selection",
+      disabled: props.checkedList.length > 0 ? false : true,
+    },
+    {
+      key: "2",
+      label: "Select all files",
+      disabled: props.data.length > 0 ? false : true,
+    },
+    {
+      key: "3",
+      label: "Delete files",
+      disabled: props.checkedList.length > 0 ? false : true,
+    },
+  ];
   const handleAction = (e) => {
     if (e.key == 0) {
       props.setActivateSelection(!props.activateSelection);
@@ -129,7 +136,10 @@ const ActionToolbar = (props) => {
             checked={props.flag}
           />
         </Tooltip>
-        <Dropdown overlay={actionMenu} trigger={["click"]}>
+        <Dropdown
+          menu={{ items: actionMenu, onClick: handleAction }}
+          trigger={["click"]}
+        >
           <a onClick={(e) => e.preventDefault()} style={{ margin: "0 30px" }}>
             <Space>
               Actions

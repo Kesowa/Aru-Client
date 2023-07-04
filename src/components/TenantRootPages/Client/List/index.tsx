@@ -9,7 +9,6 @@ import {
   LockOutlined,
 } from "@ant-design/icons";
 import {
-  PageHeader,
   message,
   Input,
   Button,
@@ -17,6 +16,7 @@ import {
   Table,
   Popconfirm,
 } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
 import { setClientToEdit } from "../../../../actions/cliantActions";
 import { logout } from "../../../../actions/authAction";
@@ -99,7 +99,7 @@ function UserListPage(props: any) {
     ),
     onFilter: (value: any, record: any) =>
       record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownVisibleChange: (visible: any) => {
+    onFilterDropdownOpenChange: (visible: any) => {
       if (visible) {
         setTimeout(() => searchInput.select());
       }

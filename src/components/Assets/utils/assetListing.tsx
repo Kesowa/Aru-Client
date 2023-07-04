@@ -9,8 +9,8 @@ import {
   Popconfirm,
   Table,
   Dropdown,
-  Menu,
   message,
+  MenuProps,
 } from "antd";
 import {
   SearchOutlined,
@@ -40,7 +40,33 @@ interface TableProps {
   deleteAsset: any;
   assets: any;
 }
-
+const actionMenu = (record: any) => [
+  {
+    key: "1",
+    label: "Edit Asset",
+    icon: <EditOutlined />,
+  },
+  {
+    key: "2",
+    label: (
+      <Popconfirm
+        title="Are you sure to delete the asset"
+        okText="Yes"
+        cancelText="No"
+        onConfirm={() => {
+          deleteAsset(record.assetName, record._id);
+        }}
+      >
+        <DeleteOutlined /> Delete Asset
+      </Popconfirm>
+    ),
+  },
+  {
+    key: "3",
+    label: "Block Asset",
+    icon: <StopOutlined />,
+  },
+];
 function AssetListing(props: TableProps) {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -56,7 +82,6 @@ function AssetListing(props: TableProps) {
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++ Fetch Assets +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   const fetchAssets = () => {
-
     http
       .get(`${apis.GET_ALL_ASSETS}`)
       .then((result) => {
@@ -176,7 +201,7 @@ function AssetListing(props: TableProps) {
     ),
     onFilter: (value: any, record: any) =>
       record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownVisibleChange: (visible: any) => {
+    onFilterDropdownOpenChange: (visible: any) => {
       if (visible) {
         setTimeout(() => searchInput.select());
       }
@@ -297,28 +322,7 @@ function AssetListing(props: TableProps) {
               history.push(`/dashboard/asset/view/${record._id}`);
             }}
             className="dropdown-option"
-            overlay={
-              <Menu>
-                <Menu.Item key="1">
-                  <EditOutlined /> Edit Asset
-                </Menu.Item>
-                <Menu.Item key="2">
-                  <Popconfirm
-                    title="Are you sure to delete the asset"
-                    okText="Yes"
-                    cancelText="No"
-                    onConfirm={() => {
-                      deleteAsset(record.assetName, record._id);
-                    }}
-                  >
-                    <DeleteOutlined /> Delete Asset
-                  </Popconfirm>
-                </Menu.Item>
-                <Menu.Item key="3">
-                  <StopOutlined /> Block Asset
-                </Menu.Item>
-              </Menu>
-            }
+            menu={{ items: actionMenu(record) }}
           >
             <EyeOutlined />
           </Dropdown.Button>

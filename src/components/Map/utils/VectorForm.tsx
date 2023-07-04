@@ -611,7 +611,7 @@ function VectorForm(props) {
         title={null}
         width={600}
         onClose={onClose}
-        visible={props.visible}
+        open={props.visible}
         bodyStyle={{ paddingBottom: 80 }}
         mask={false}
         footer={

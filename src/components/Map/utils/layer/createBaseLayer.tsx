@@ -42,7 +42,6 @@ import TankIcon from "../../../../static/TankIcon.png";
 import ValveIcon from "../../../../static/ValveIcon.png";
 import DotIcon from "../../../../static/DotIcon.png";
 import { components } from "src/handlers/schema";
-const { Step } = Steps;
 const { Dragger } = Upload;
 const { Item } = Form;
 const { Meta } = Card;
@@ -51,18 +50,18 @@ const { Text, Title } = Typography;
 const { Panel } = Collapse;
 
 const CreateBaseLayer = (props) => {
-  const [selectedKey, setSelectedKey] = useState<any>();
+  const [selectedKey, setSelectedKey] = useState<unknown>();
   const [isModalVisible1, setIsModalVisible1] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [current1, setCurrent1] = useState(0);
   const [current2, setCurrent2] = useState(0);
-  const [missionOptions, setMissionOptions] = useState<any>([]);
+  const [missionOptions, setMissionOptions] = useState<unknown>([]);
   const [missionsLoading, setMissionsLoading] = useState(false);
   const [missionSearchValue, setMissionSearchValue] = useState("");
-  const [layerOptions, setLayerOptions] = useState<any>([]);
+  const [layerOptions, setLayerOptions] = useState<unknown>([]);
   const [layersLoading, setLayersLoading] = useState(false);
-  const [selectedMissions, setSelectedMissions] = useState<any>([]);
-  const [selectedLayers, setSelectedLayers] = useState<any>([]);
+  const [selectedMissions, setSelectedMissions] = useState<unknown>([]);
+  const [selectedLayers, setSelectedLayers] = useState<unknown>([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [layerName, setLayerName] = useState("");
@@ -70,28 +69,28 @@ const CreateBaseLayer = (props) => {
   const [layerColor, setLayerColor] = useState("");
   const [layerType, setLayerType] = useState("");
   const [layerTypeId, setLayerTypeId] = useState("");
-  const [fileList, setFileList] = useState<any>([]);
+  const [fileList, setFileList] = useState<unknown>([]);
   const [showColorPicker, setShowColorPicker] = useState(true);
   const [inheritColor, setInheritColor] = useState(false);
-  const [tableData, setTableData] = useState<any>([]);
-  const [primeAttributes, setPrimeAttributes] = useState<any>([]);
+  const [tableData, setTableData] = useState<unknown>([]);
+  const [primeAttributes, setPrimeAttributes] = useState<unknown>([]);
   const [fields, setFields] = useState([]);
   const [layerPath, setLayerPath] = useState("");
-  const [responseArray, setResponseArray] = useState<any>([]);
+  const [responseArray, setResponseArray] = useState<unknown>([]);
   const [vectorPath, setVectorPath] = useState("");
-  const [metadata, setMetadata] = useState<any>([]);
+  const [metadata, setMetadata] = useState<unknown>([]);
   const [showAddMissions, setShowAddMissions] = useState(false);
   const [layerType1, setLayerType1] = useState("");
   const [currentLayerId, setCurrentLayerId] = useState("");
   const [fetchList, setFetch] = useState(false);
   const [form] = Form.useForm();
   const [page, setPage] = useState(1);
-  const [uiElement, setUIElement] = useState<any>([]);
+  const [uiElement, setUIElement] = useState<unknown>([]);
   const [allowApiCall, setApiCall] = useState(true);
   const [storageModal, setStorageModal] = useState(false);
   const [selectedAttr, setSelectedAttr] = useState({});
-  const [activeTab, setActiveTab] = useState<any>([]);
-  const [icon, setIcon] = useState<any>("MarkerIcon");
+  const [activeTab, setActiveTab] = useState<unknown>([]);
+  const [icon, setIcon] = useState<unknown>("MarkerIcon");
 
   const iconOptions = [
     {
@@ -197,8 +196,8 @@ const CreateBaseLayer = (props) => {
             )
             .then((res) => {
               console.log(res.data.data);
-              const missions: any = [...missionOptions];
-              res.data.data.map((i: any) => {
+              const missions: unknown = [...missionOptions];
+              res.data.data.map((i: unknown) => {
                 missions.push(i);
               });
               console.log(missions);
@@ -221,8 +220,8 @@ const CreateBaseLayer = (props) => {
               `${apis.GET_ALL_MISSIONS_FOR_TENANT}?page=${page}&limit=10&filter=Completed&sort=createdAt:descend&searchFilters=name:${missionSearchValue}`
             )
             .then((res) => {
-              const missions: any = [...missionOptions];
-              res.data.data.map((i: any) => {
+              const missions: unknown = [...missionOptions];
+              res.data.data.map((i: unknown) => {
                 missions.push(i);
               });
               setMissionOptions(missions);
@@ -252,8 +251,8 @@ const CreateBaseLayer = (props) => {
         .then((res) => {
           console.log(res);
           if (props.isUpdate) {
-            const filtered: any = res.data.data.layers.filter(
-              (i: any) => i.type == props.updateType
+            const filtered: unknown = res.data.data.layers.filter(
+              (i: unknown) => i.type == props.updateType
             );
             setLayerOptions(filtered);
           } else {
@@ -375,7 +374,7 @@ const CreateBaseLayer = (props) => {
             console.log("update by file", result.data);
             setPrimeAttributes(
               result.data.data.primeAttributes.filter(
-                (i: any) => i !== "color" && i !== "icon" && i !== "sys_id"
+                (i: unknown) => i !== "color" && i !== "icon" && i !== "sys_id"
               )
             );
             setFields(result.data.data.layerAttributes);
@@ -440,7 +439,7 @@ const CreateBaseLayer = (props) => {
           if (result.data.status) {
             console.log(result.data);
             message.success("Vector Base Layer Created!");
-            const data: any = [];
+            const data: unknown = [];
             let c = 0;
             setVectorPath(result.data.data.layer.layerpath);
             setCurrentLayerId(result.data.data.layer._id);
@@ -509,7 +508,7 @@ const CreateBaseLayer = (props) => {
     if (selectedLayers.length > 0) {
       setUploading(true);
       console.log(layers);
-      let payload: any = {};
+      let payload: unknown = {};
       if (props.isUpdate) {
         payload = {
           layers: layers,
@@ -535,11 +534,11 @@ const CreateBaseLayer = (props) => {
           if (res.data.success == false) message.error(res.data.message);
           else {
             if (!props.isUpdate) {
-              const attrset: any = [];
+              const attrset: unknown = [];
               res.data.data.map((mission) => {
                 mission.layers.map((layer) => {
                   layer.fields.map((field) => {
-                    let obj: any = {};
+                    let obj: unknown = {};
                     switch (field.layerMatches) {
                       case "Matches With All":
                         obj = {
@@ -560,9 +559,9 @@ const CreateBaseLayer = (props) => {
                 });
               });
               console.log("attribute set", attrset);
-              const data: any = [];
+              const data: unknown = [];
               let c = 0;
-              attrset.map((i: any) => {
+              attrset.map((i: unknown) => {
                 if (
                   i.key !== "sys_id" &&
                   i.key !== "icon" &&
@@ -580,11 +579,11 @@ const CreateBaseLayer = (props) => {
               setMetadata(res.data.data);
               setCurrent2(1);
             } else {
-              const attrArray: any = [];
+              const attrArray: unknown = [];
               console.log("in here...");
               setMetadata(res.data.data.layerAttr);
-              res.data.data.pAttr.map((value: any, i) => {
-                let obj: any = {};
+              res.data.data.pAttr.map((value: unknown, i) => {
+                let obj: unknown = {};
                 if (
                   value !== "color" &&
                   value !== "icon" &&
@@ -614,13 +613,15 @@ const CreateBaseLayer = (props) => {
           setUIElement([]);
         });
     } else
-      message.warning("Please choose at least 1 layer in order to proceed!");
+      void message.warning(
+        "Please choose at least 1 layer in order to proceed!"
+      );
   };
 
   useEffect(() => console.log("id", currentLayerId), [currentLayerId]);
 
   const setPrimeAttr = () => {
-    const data: any = [];
+    const data: unknown = [];
     primeAttributes.map((attr) => {
       data.push(String(attr["attribute"]));
     });
@@ -637,10 +638,10 @@ const CreateBaseLayer = (props) => {
         console.log(res);
         if (res.data.success) {
           console.log(res.data);
-          message.success(res.data.message);
+          void message.success(res.data.message);
           setCurrent1(2);
           props.addLayer(res.data.data);
-        } else message.error(res.data.message);
+        } else void message.error(res.data.message);
       })
       .catch((err) => {
         console.log(err);
@@ -651,7 +652,7 @@ const CreateBaseLayer = (props) => {
 
   const createVectorBaseByAttr = () => {
     setUploading(true);
-    let body: any = {};
+    let body: unknown = {};
     if (props.isUpdate) {
       body = {
         baseLayer: props.BaseLayerId,
@@ -661,7 +662,7 @@ const CreateBaseLayer = (props) => {
         .patch(`${apis.UPDATE_BASE_VECTOR_IMPORT}`, body)
         .then((res) => {
           console.log("import update vector res", res);
-          message.success("Layer was successfully update!");
+          void message.success("Layer was successfully update!");
           props.updateLayer(res.data.data, null, null);
         })
         .catch((err) => {
@@ -750,7 +751,7 @@ const CreateBaseLayer = (props) => {
   const updateRasterBaseByImporting = () => {
     setUploading(true);
     const fmData = new FormData();
-    let payload: any = {};
+    let payload: unknown = {};
     if (props.isUpdate) {
       payload = {
         layerId: props.BaseLayerId,
@@ -759,7 +760,7 @@ const CreateBaseLayer = (props) => {
     }
     http
       .patch(`${apis.UPDATE_BASE_RASTER_IMPORT}`, payload)
-      .then((res: any) => {
+      .then((res: unknown) => {
         if (res.data.status) {
           console.log("update by import", res.data.data);
           props.updateLayer(res.data.data, null, null);
@@ -854,7 +855,7 @@ const CreateBaseLayer = (props) => {
   }, [uiElement]);
 
   const addMore = () => {
-    const array: any = [...uiElement];
+    const array: unknown = [...uiElement];
     array.push(uuid());
     setUIElement(array);
   };
@@ -1065,8 +1066,8 @@ const CreateBaseLayer = (props) => {
                       type={"primary"}
                       onClick={() => {
                         let totalLayers = 0;
-                        metadata.map((mission: any) => {
-                          mission.layers.map((layers: any) => {
+                        metadata.map((mission: unknown) => {
+                          mission.layers.map((layers: unknown) => {
                             ++totalLayers;
                           });
                         });
@@ -1139,8 +1140,8 @@ const CreateBaseLayer = (props) => {
                   type={"primary"}
                   onClick={() => {
                     let totalLayers = 0;
-                    metadata.map((mission: any) => {
-                      mission.layers.map((layers: any) => {
+                    metadata.map((mission: unknown) => {
+                      mission.layers.map((layers: unknown) => {
                         ++totalLayers;
                       });
                     });
@@ -1298,7 +1299,7 @@ const CreateBaseLayer = (props) => {
                   <Form.Item label="Capture Date" name="date">
                     <DatePicker
                       format={"YYYY/MM/DD HH:mm"}
-                      onChange={(value: any) => {
+                      onChange={(value: unknown) => {
                         if (value) {
                           setCaptureDate(value.toISOString(true));
                         } else setCaptureDate("");
@@ -1463,7 +1464,7 @@ const CreateBaseLayer = (props) => {
             </Row>
             <div style={{ height: "400px", overflow: "auto" }}>
               {/* -ROW------------------- */}
-              {fields.map((f: any) => {
+              {fields.map((f: unknown) => {
                 if (
                   f.attr !== "sys_id" &&
                   f.attr !== "icon" &&
@@ -1578,7 +1579,7 @@ const CreateBaseLayer = (props) => {
                 >
                   <DatePicker
                     format={"YYYY/MM/DD HH:mm"}
-                    onChange={(value: any) => {
+                    onChange={(value: unknown) => {
                       if (value) {
                         setCaptureDate(value.toISOString(true));
                       } else setCaptureDate("");
@@ -1725,14 +1726,14 @@ const CreateBaseLayer = (props) => {
   function updateBaseLayerAfterUploadedFile() {
     setUploading(true);
     console.log("insdie function", responseArray[0]);
-    const payload: any = {
+    const payload: unknown = {
       baseLayer: props.BaseLayerId,
       attrMapping: responseArray[0],
       filePath: layerPath,
     };
     http
       .patch(`${apis.UPDATE_BASE_VECTOR_AFTER_UPLOAD}`, payload)
-      .then((res: any) => {
+      .then((res: unknown) => {
         if (res.data.success) {
           console.log(res.data);
           props.updateLayer(res.data.data, null, null);
@@ -1741,7 +1742,7 @@ const CreateBaseLayer = (props) => {
           message.warning(res.data.message);
         }
       })
-      .catch((err: any) => {
+      .catch((err: unknown) => {
         console.log(err);
         AxiosErrorHandler(err, props.logout);
       })
@@ -1756,7 +1757,11 @@ const CreateBaseLayer = (props) => {
       });
   }
 
-  function handleAttributeMapping2(e: any, fields: any, layers: any) {
+  function handleAttributeMapping2(
+    e: unknown,
+    fields: unknown,
+    layers: unknown
+  ) {
     const temp = {
       ...selectedAttr,
     };
@@ -1764,8 +1769,8 @@ const CreateBaseLayer = (props) => {
     temp[`${fields.attr}`] = e;
     setSelectedAttr(temp);
 
-    const obj: any = { ...responseArray[0] };
-    const array: any = [];
+    const obj: unknown = { ...responseArray[0] };
+    const array: unknown = [];
     console.log("testtt", responseArray, e, fields, layerPath);
     obj[`${e}`] = fields.attr;
     console.log(obj);
@@ -1773,7 +1778,11 @@ const CreateBaseLayer = (props) => {
     setResponseArray(array);
   }
 
-  function handleAttributeMapping(e: any, fields: any, layers: any) {
+  function handleAttributeMapping(
+    e: unknown,
+    fields: unknown,
+    layers: unknown
+  ) {
     console.log(e);
     console.log(fields);
     console.log(layers);
@@ -1790,19 +1799,19 @@ const CreateBaseLayer = (props) => {
 
     setSelectedAttr(temp);
 
-    let ooi: any = [];
-    const finalArray: any = [...responseArray];
+    let ooi: unknown = [];
+    const finalArray: unknown = [...responseArray];
     if (responseArray.length > 0) {
       ooi = responseArray.filter((i) => i.layerId == layers._id);
       if (ooi.length > 0) {
         ooi[0].attrMapping[`${e}`] = fields.key;
-        const arraywoObj: any = responseArray.filter(
+        const arraywoObj: unknown = responseArray.filter(
           (i) => i.layerId !== layers._id
         );
         arraywoObj.push(ooi[0]);
         setResponseArray(arraywoObj);
       } else {
-        const obj: any = {
+        const obj: unknown = {
           layerId: layers._id,
           attrMapping: {},
         };
@@ -1811,7 +1820,7 @@ const CreateBaseLayer = (props) => {
         setResponseArray(finalArray);
       }
     } else {
-      const obj: any = {
+      const obj: unknown = {
         layerId: layers._id,
         attrMapping: {},
       };
@@ -1900,15 +1909,15 @@ const CreateBaseLayer = (props) => {
                       allowClear={false}
                       onDeselect={(e) => {
                         console.log(e);
-                        const filtered: any = selectedLayers.filter(
+                        const filtered: unknown = selectedLayers.filter(
                           (i) => i !== e && i !== undefined
                         );
                         setSelectedLayers(filtered);
                         setApiCall(true);
                       }}
                       onChange={(e) => {
-                        const value: any = e;
-                        const array: any = [...selectedLayers];
+                        const value: unknown = e;
+                        const array: unknown = [...selectedLayers];
                         if (value.length > 1) {
                           console.log(array.includes(value.at(-1)));
                           array.push(value.at(-1));
@@ -1930,7 +1939,7 @@ const CreateBaseLayer = (props) => {
                     </Select>
                   </Col>
                 </Row>
-                {uiElement.map((id: any) => {
+                {uiElement.map((id: unknown) => {
                   return (
                     <Row style={{ marginTop: "12px" }}>
                       <Col span={12}>
@@ -1978,15 +1987,15 @@ const CreateBaseLayer = (props) => {
                           allowClear={false}
                           onDeselect={(e) => {
                             console.log(e);
-                            const filtered: any = selectedLayers.filter(
+                            const filtered: unknown = selectedLayers.filter(
                               (i) => i !== e && i !== undefined
                             );
                             setSelectedLayers(filtered);
                             setApiCall(true);
                           }}
                           onChange={(e) => {
-                            const value: any = e;
-                            const array: any = [...selectedLayers];
+                            const value: unknown = e;
+                            const array: unknown = [...selectedLayers];
                             if (value.length > 1) {
                               console.log(array.includes(value.at(-1)));
                               array.push(value.at(-1));
@@ -2074,10 +2083,10 @@ const CreateBaseLayer = (props) => {
             }}
             //accordion
           >
-            {metadata.map((missions: any) => {
+            {metadata.map((missions: unknown) => {
               return (
                 <>
-                  {missions.layers.map((layers: any, i) => {
+                  {missions.layers.map((layers: unknown, i) => {
                     return (
                       <Panel
                         header={`${layers.name} (${missions.missionName})`}
@@ -2093,7 +2102,7 @@ const CreateBaseLayer = (props) => {
                             </Col>
                           </Row>
                           {/* -ROW------------------- */}
-                          {layers.fields.map((fields: any) => {
+                          {layers.fields.map((fields: unknown) => {
                             if (
                               fields.key !== "sys_id" &&
                               fields.key !== "icon" &&
@@ -2195,7 +2204,7 @@ const CreateBaseLayer = (props) => {
                 <Item label="Capture Date" name="date">
                   <DatePicker
                     format={"YYYY/MM/DD HH:mm"}
-                    onChange={(value: any) => {
+                    onChange={(value: unknown) => {
                       if (value) {
                         setCaptureDate(value.toISOString(true));
                       } else setCaptureDate("");
@@ -2300,15 +2309,15 @@ const CreateBaseLayer = (props) => {
                       allowClear={false}
                       onDeselect={(e) => {
                         console.log(e);
-                        const filtered: any = selectedLayers.filter(
+                        const filtered: unknown = selectedLayers.filter(
                           (i) => i !== e && i !== undefined
                         );
                         setSelectedLayers(filtered);
                         setApiCall(true);
                       }}
                       onChange={(e) => {
-                        const value: any = e;
-                        const array: any = [...selectedLayers];
+                        const value: unknown = e;
+                        const array: unknown = [...selectedLayers];
                         if (value.length > 1) {
                           console.log(array.includes(value.at(-1)));
                           array.push(value.at(-1));
@@ -2330,7 +2339,7 @@ const CreateBaseLayer = (props) => {
                     </Select>
                   </Col>
                 </Row>
-                {uiElement.map((id: any) => {
+                {uiElement.map((id: unknown) => {
                   return (
                     <Row style={{ marginTop: "12px" }}>
                       <Col span={12}>
@@ -2378,15 +2387,15 @@ const CreateBaseLayer = (props) => {
                           allowClear={false}
                           onDeselect={(e) => {
                             console.log(e);
-                            const filtered: any = selectedLayers.filter(
+                            const filtered: unknown = selectedLayers.filter(
                               (i) => i !== e && i !== undefined
                             );
                             setSelectedLayers(filtered);
                             setApiCall(true);
                           }}
                           onChange={(e) => {
-                            const value: any = e;
-                            const array: any = [...selectedLayers];
+                            const value: unknown = e;
+                            const array: unknown = [...selectedLayers];
                             if (value.length > 1) {
                               console.log(array.includes(value.at(-1)));
                               array.push(value.at(-1));
@@ -2449,10 +2458,10 @@ const CreateBaseLayer = (props) => {
             }}
             //accordion
           >
-            {metadata.map((missions: any) => {
+            {metadata.map((missions: unknown) => {
               return (
                 <>
-                  {missions.layers.map((layers: any, i) => {
+                  {missions.layers.map((layers: unknown, i) => {
                     return (
                       <Panel
                         header={`${layers.name} (${missions.missionName})`}
@@ -2468,7 +2477,7 @@ const CreateBaseLayer = (props) => {
                             </Col>
                           </Row>
                           {/* -ROW------------------- */}
-                          {layers.fields.map((fields: any) => {
+                          {layers.fields.map((fields: unknown) => {
                             if (
                               fields.key !== "sys_id" &&
                               fields.key !== "icon" &&
@@ -2564,7 +2573,7 @@ const CreateBaseLayer = (props) => {
     <div>
       <Modal
         title={props.isUpdate ? "Update layer" : "Create layer"}
-        visible={props.isModalVisible}
+        open={props.isModalVisible}
         onCancel={() => {
           props.setShow(false);
           setSelectedKey(0);
@@ -2678,7 +2687,7 @@ const CreateBaseLayer = (props) => {
 
       <Modal
         title={props.isUpdate ? "Update Layer" : "Create Layer"}
-        visible={isModalVisible1}
+        open={isModalVisible1}
         onCancel={() => {
           if (!uploading) {
             setIsModalVisible1(false);
@@ -2706,10 +2715,11 @@ const CreateBaseLayer = (props) => {
           <>
             {props.updateType == "Raster" ? (
               <>
-                <Steps current={current1}>
-                  {steps1RasterUpdate.map((item) => (
-                    <Step key={item.title} title={item.title} />
-                  ))}
+                <Steps current={current1} items={steps1RasterUpdate.map((item)=>{
+                  return {
+                    title: item.title
+                  }
+                })}>
                 </Steps>
                 <div className="steps-content">
                   {steps1RasterUpdate[current1].content}
@@ -2717,10 +2727,11 @@ const CreateBaseLayer = (props) => {
               </>
             ) : (
               <>
-                <Steps current={current1}>
-                  {steps1Update.map((item) => (
-                    <Step key={item.title} title={item.title} />
-                  ))}
+                <Steps current={current1} items={steps1Update.map((item)=>{
+                  return {
+                    title: item.title
+                  }
+                })}>
                 </Steps>
                 <div className="steps-content">
                   {steps1Update[current1].content}
@@ -2732,10 +2743,11 @@ const CreateBaseLayer = (props) => {
           <>
             {layerType == "Raster" ? (
               <>
-                <Steps current={current1}>
-                  {steps1Raster.map((item) => (
-                    <Step key={item.title} title={item.title} />
-                  ))}
+                <Steps current={current1} items={steps1Raster.map((item)=>{
+                  return {
+                    title: item.title
+                  }
+                })}>
                 </Steps>
                 <div className="steps-content">
                   {steps1Raster[current1].content}
@@ -2743,10 +2755,11 @@ const CreateBaseLayer = (props) => {
               </>
             ) : (
               <>
-                <Steps current={current1}>
-                  {steps1.map((item) => (
-                    <Step key={item.title} title={item.title} />
-                  ))}
+                <Steps current={current1} items={steps1.map((item)=>{
+                  return {
+                    title: item.title
+                  }
+                })}>
                 </Steps>
                 <div className="steps-content">{steps1[current1].content}</div>
               </>
@@ -2757,7 +2770,7 @@ const CreateBaseLayer = (props) => {
 
       <Modal
         title={props.isUpdate ? "Update layer" : "Create layer"}
-        visible={isModalVisible2}
+        open={isModalVisible2}
         onCancel={() => {
           if (!uploading) {
             setIsModalVisible2(false);
@@ -2786,20 +2799,15 @@ const CreateBaseLayer = (props) => {
         width={1150}
         centered={true}
       >
-        <Steps current={current2}>
-          {props.isUpdate ? (
-            <>
-              {steps2Update.map((item) => (
-                <Step key={item.title} title={item.title} />
-              ))}
-            </>
-          ) : (
-            <>
-              {steps2.map((item) => (
-                <Step key={item.title} title={item.title} />
-              ))}
-            </>
-          )}
+        <Steps current={current2} items={props.isUpdate?steps2Update.map((item)=>{
+                  return {
+                    title: item.title
+                  }
+                }):steps2.map((item)=>{
+                  return {
+                    title: item.title
+                  }
+                })}>
         </Steps>
         {props.isUpdate ? (
           <div className="steps-content">{steps2Update[current2].content}</div>
@@ -2809,7 +2817,7 @@ const CreateBaseLayer = (props) => {
       </Modal>
       <Modal
         title="Storage Exceeded!"
-        visible={storageModal}
+        open={storageModal}
         onOk={() => setStorageModal(false)}
         onCancel={() => setStorageModal(false)}
       >
@@ -2823,7 +2831,7 @@ const CreateBaseLayer = (props) => {
   );
 };
 
-const mapStateToProps = (state: any) => ({
+const mapStateToProps = (state: unknown) => ({
   Auth: state.Auth,
   Theme: state.Theme,
 });

@@ -57,7 +57,7 @@ function OutcomeModal(props) {
         <Modal
           title={"Outcome ID: " + dataa._id}
           centered={true}
-          visible={props.visible}
+          open={props.visible}
           width={1200}
           closable={true}
           onOk={() => {}}

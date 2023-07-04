@@ -114,7 +114,7 @@ const StageTwoForm = (props: any) => {
     <>
       <Modal
         title="Maximum Limit reached!"
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={handleCancel}
         onCancel={handleCancel}
       >
@@ -126,7 +126,7 @@ const StageTwoForm = (props: any) => {
       </Modal>
       <Modal
         title="Tenant Expired!"
-        visible={isModalVisible2}
+        open={isModalVisible2}
         onOk={handleCancel2}
         onCancel={handleCancel2}
       >

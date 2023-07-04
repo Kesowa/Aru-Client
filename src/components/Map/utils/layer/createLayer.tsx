@@ -24,7 +24,6 @@ import { connect } from "react-redux";
 import { InboxOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
 
-const { Step } = Steps;
 const { Dragger } = Upload;
 const { Text, Paragraph } = Typography;
 const { Item } = Form;
@@ -405,7 +404,7 @@ const CreateLayer = (props: any) => {
     <div>
       <Modal
         title="Create Layer From Images"
-        visible={props.isModalVisible}
+        open={props.isModalVisible}
         onCancel={() => {
           props.setVisbible(false);
           setCurrent(0);
@@ -420,20 +419,20 @@ const CreateLayer = (props: any) => {
         width={1000}
         centered={true}
       >
-        <Steps current={current}>
-          {steps.map((item) => (
-            <Step
-              key={item.title}
-              title={item.title}
-              description={item.description}
-            />
-          ))}
-        </Steps>
+        <Steps
+          current={current}
+          items={steps.map((item) => {
+            return {
+              title: item.title,
+              description: item.description,
+            };
+          })}
+        ></Steps>
         <div className="steps-content">{steps[current].content}</div>
       </Modal>
       <Modal
         title="Storage Exceeded!"
-        visible={storageModal}
+        open={storageModal}
         onOk={() => setStorageModal(false)}
         onCancel={() => setStorageModal(false)}
       >

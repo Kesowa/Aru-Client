@@ -36,6 +36,7 @@ import {
   Alert,
   Result,
   notification,
+  MenuProps,
 } from "antd";
 import {
   UploadOutlined,
@@ -124,6 +125,9 @@ import {
 } from "src/constants";
 import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
+// import { JSONLoader } from "@loaders.gl/json";
+// import { LASLoader } from "@loaders.gl/las";
+// import { load } from "@loaders.gl/core";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -145,14 +149,13 @@ const DRAW_EDIT_POINT = new CompositeMode([
 const { Title, Text, Link } = Typography;
 const { Dragger } = Upload;
 const { Option } = Select;
-const { TabPane } = Tabs;
 const { SubMenu } = Menu;
 const { Meta } = Card;
 
 function BaseMap(props) {
   const [refreshLayer, setRefreshLayer] = useState(false);
   const [isMinimise, setMinimise] = useState(false);
-
+  const [pointMarkerColour, setPointMarkerColour] = useState("#000");
   const [missionData, setMissionData] = useState({});
   const [loader, setLoader] = useState(props.isBaseMap ? false : true);
   const [thumbnail, setThumbnail] = useState("");
@@ -199,7 +202,254 @@ function BaseMap(props) {
     canDeleteBaseLayer: false,
     canUploadToBaseLayer: false,
   });
+  const treeMenu: MenuProps["items"] = (layer) => {
+    const items: MenuProps["items"] = [];
+    if ((props.isBaseMap && perms.canEditBaseLayer) || !props.isBaseMap) {
+      items.push({
+        key: "1",
+        label: "Edit",
+      });
+    }
+    if (layer.type === "Raster" || layer.type === "Vector") {
+      items.push({
+        key: "2",
+        label: "Open Thread",
+      });
+    }
+    items.push({
+      key: "3",
+      label: "Download",
+    });
+    if (layer.type === "Vector") {
+      items.push({
+        key: "10",
+        label: "Download KML",
+      });
+      items.push({
+        key: "flagSubMenu",
+        label: "Toggle Flag",
+        children: [
+          {
+            key: "11",
+            label: "Flag Layer",
+          },
+          {
+            key: "12",
+            label: "Unflag Layer",
+          },
+        ],
+      });
+    }
 
+    if (props.isBaseMap && perms.canUpdateBaseLayer) {
+      items.push({
+        key: "4",
+        label: "Update Layer",
+      });
+    }
+    if (props.isBaseMap && perms.canDeleteBaseLayer) {
+      items.push({
+        key: "5",
+        label: "Delete",
+      });
+    }
+
+    if (!props.isBaseMap && perms.canDeleteLayer) {
+      items.push({
+        key: "5",
+        label: "Delete",
+      });
+    }
+    if (
+      layer.layerGroupId &&
+      ((props.isBaseMap && perms.canCreateBaseLayer) || !props.isBaseMap)
+    ) {
+      items.push({
+        key: "6",
+        label: "Unassign Form Group",
+      });
+    }
+    if (checkedKeys.includes(layer.key)) {
+      const submenuChildren: MenuProps["items"] = [];
+      if ((props.isBaseMap && perms.canCreateBaseLayer) || !props.isBaseMap) {
+        submenuChildren.push({
+          key: "7",
+          label: "Group Selected Layers",
+        });
+      }
+      if (
+        (props.isBaseMap && perms.canDeleteBaseLayer) ||
+        (!props.isBaseMap && perms.canDeleteLayer)
+      ) {
+        submenuChildren.push({
+          key: "8",
+          label: "Delete Selected Layers",
+        });
+      }
+      if ((props.isBaseMap && perms.canCreateBaseLayer) || !props.isBaseMap) {
+        submenuChildren.push({
+          key: "9",
+          label: "Move Selected Layers",
+        });
+      }
+      items.push({
+        key: "submenu",
+        label: "Selected",
+        children: submenuChildren,
+      });
+    }
+    if (layer.type === "Vector") {
+      items.push({
+        key: "13",
+        label: "More",
+      });
+    }
+    return items;
+  };
+
+  const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
+    const type = selectedLayer.type;
+    switch (e.key) {
+      case "1":
+        showModal1();
+        setSelectedLayerId(selectedLayer._id);
+        setCaptureDate(selectedLayer.captureDate);
+        setLayerName(selectedLayer.name);
+        type === "Raster"
+          ? setDefaultLayerType([
+              type.toUpperCase(),
+              selectedLayer.raster.name.toUpperCase(),
+            ])
+          : setDefaultLayerType([
+              type.toUpperCase(),
+              selectedLayer.vector.type.toUpperCase(),
+              selectedLayer.vector.name.toUpperCase(),
+            ]);
+        setSelectedLayerType(type.toLowerCase());
+        break;
+      case "2":
+        props.thread(true, {
+          docType: "layer",
+          docId: selectedLayer._id,
+        });
+        break;
+      case "3":
+        download(STATIC_URL + selectedLayer.layerpath);
+        break;
+      case "4":
+        setUpdate(true);
+        setUpdateType(type);
+        setUpdateId(selectedLayer._id);
+        setIsModalVisible4(true);
+        break;
+      case "5":
+        Modal.confirm({
+          title: "Delete Layer?",
+          icon: <ExclamationCircleOutlined />,
+          content: "Are you sure you want to delete this layer?",
+          okText: "Yes",
+          cancelText: "No",
+          onOk: () => {
+            deleteLayer(selectedLayer._id, selectedLayer.type);
+          },
+        });
+        break;
+      case "6":
+        const idOfLayerGroup =
+          typeof selectedLayer.layerGroupId === "object"
+            ? selectedLayer.layerGroupId._id
+            : selectedLayer.layerGroupId;
+        await removeLayerFromGroup(
+          idOfLayerGroup,
+          selectedLayer._id,
+          `1-${selectedLayer._id}`
+        );
+        updateTreeDataAfterSingleLayerRemovalFromGroup(selectedLayer._id);
+        break;
+      case "7":
+        setVisibleGroupCreateModal(!visibleGroupCreateModal);
+        type === "Raster" ? setMoveType(2) : setMoveType(1);
+        break;
+      case "8":
+        Modal.confirm({
+          title: "Delete Selected Layers?",
+          icon: <ExclamationCircleOutlined />,
+          content: "Are you sure you want to delete selected layers?",
+          okText: "Yes",
+          cancelText: "No",
+          onOk: () => {
+            deleteMultipleLayers(checkedKeys, type === "Raster" ? "2" : "1");
+          },
+        });
+        break;
+      case "9":
+        setMoveToOtherGroupModal(true);
+        type === "Raster" ? setMoveType(2) : setMoveType(1);
+        break;
+      case "10":
+        http
+          .get(`${apis.DOWNLOAD_KML}?id=${selectedLayer._id}`)
+          .then((res: any) => {
+            if (res.data.status) {
+              //download(API_URL + res.data.link);
+              window.open(PUBLIC_URL + res.data.link);
+            } else {
+              console.log(res.data.message);
+            }
+          })
+          .catch((err: any) => {
+            console.log(err);
+            AxiosErrorHandler(err, props.logout);
+          });
+        break;
+      case "11":
+        Modal.confirm({
+          title: "Flag Layer?",
+          icon: <ExclamationCircleOutlined />,
+          content: "Are you sure you want to flag the entire layer?",
+          okText: "Yes",
+          cancelText: "No",
+          onOk: () => {
+            toggleLayerFlag(selectedLayer._id, true);
+          },
+        });
+        break;
+      case "12":
+        Modal.confirm({
+          title: "Un-flag Layer?",
+          icon: <ExclamationCircleOutlined />,
+          content:
+            "Are you sure you want to un-flag the entire layer? This will un-flag all flagged features as well.",
+          okText: "Yes",
+          cancelText: "No",
+          onOk: () => {
+            toggleLayerFlag(selectedLayer._id, false);
+          },
+        });
+        break;
+      case "13":
+        console.log("selectedLayer", selectedLayer);
+        setViewDocs(true);
+        setSelectedLayerInfo(selectedLayer);
+        setFeatureLayer(selectedLayer._id);
+        setFeatureLayerPath(selectedLayer.layerpath);
+        setWindowTitle(selectedLayer.name);
+        setSelectedLayerLabel(
+          selectedLayer.layerLabel
+            ? selectedLayer.layerLabel
+            : "No label selected"
+        );
+        setSelectedLayerPopupLabel(
+          selectedLayer.layerPopupLabel
+            ? selectedLayer.layerPopupLabel
+            : "No label selected"
+        );
+        setIsLayerDocs(true);
+        break;
+      default:
+        break;
+    }
+  };
   //---------Notifications--------------------------------------
   const openNotification = (layerName) => {
     notification.success({
@@ -215,7 +465,7 @@ function BaseMap(props) {
       props.userType === "tenant-client"
     ) {
       console.log("logged in user is tenant-staff");
-
+      //console.log(props.userDetails);
       //--------set create layer---------------
       let createLayer: any = [];
       let createLayerAccess = false;
@@ -430,6 +680,8 @@ function BaseMap(props) {
         canUploadToBaseLayer: canUploadToBaseLayerAccess,
       });
     } else if (props.userType === "tenant-root") {
+      //console.log(props.userDetails);
+      //console.log("logged in user is tenant-root");
       setPerms({
         canCreateLayer: true,
         canDeleteLayer: true,
@@ -469,6 +721,8 @@ function BaseMap(props) {
     minZoom: 0,
     maxZoom: 22,
     bearing: 0,
+    // transitionDuration: 8000,
+    // transitionInterpolator: new FlyToInterpolator(),
   });
 
   // ---- setting map location -----------------
@@ -481,7 +735,10 @@ function BaseMap(props) {
             if (result.state === "granted") {
               navigator.geolocation.getCurrentPosition(function (pos: any) {
                 const crd = pos.coords;
-
+                // console.log("Your current position is:");
+                // console.log(`Latitude : ${crd.latitude}`);
+                // console.log(`Longitude: ${crd.longitude}`);
+                // console.log(`More or less ${crd.accuracy} meters.`);
                 setViewport({
                   longitude: crd.longitude,
                   latitude: crd.latitude,
@@ -498,7 +755,10 @@ function BaseMap(props) {
               navigator.geolocation.getCurrentPosition(
                 function (pos: any) {
                   const crd = pos.coords;
-
+                  // console.log("Your current position is:");
+                  // console.log(`Latitude : ${crd.latitude}`);
+                  // console.log(`Longitude: ${crd.longitude}`);
+                  // console.log(`More or less ${crd.accuracy} meters.`);
                   setViewport({
                     longitude: crd.longitude,
                     latitude: crd.latitude,
@@ -621,7 +881,7 @@ function BaseMap(props) {
   const [coordinates, setCoordinates] = useState([]);
   const [sideBarState, setSideBarState] = useState(true);
   const [sideBarIcon, setSideBarIcon] = useState(<DoubleRightOutlined />);
-
+  const [attributeTable, SetAttributeTable] = useState([]);
   const [mapMode, setMapMode] = useState("mapbox://styles/mapbox/streets-v8");
   const [isModalVisible, setIsModalVisible] = useState(false); // upload layer
   const [isModalVisible1, setIsModalVisible1] = useState(false);
@@ -635,7 +895,8 @@ function BaseMap(props) {
   const [fileList, setFileList] = useState<any>([]);
   const [rasterProps, setRasterProps] = useState<any>([]);
   const [vectorProps, setVectorProps] = useState<any>([]);
-
+  const [data, setData] = useState();
+  const [editingKey, setEditingKey] = useState("");
   const [missioName, setMissioName] = useState("");
   const [layerType, setLayerType] = useState("");
   const [layerTypeId, setLayerTypeId] = useState("");
@@ -651,6 +912,7 @@ function BaseMap(props) {
   const [formDrawerVisible, setformDrawerVisible] = useState(false);
   const [viewMedia, setViewMedia] = useState(false);
   const [selectedLayerInfo, setSelectedLayerInfo] = useState({});
+  const [selectedLayer, setSelectedLayer] = useState({});
   const [viewDocs, setViewDocs] = useState(false);
   const [vectorLayers, setvectorLayers] = useState<any>([]);
   const [saveButtonShow, setSaveButtonShow] = useState(false);
@@ -676,7 +938,7 @@ function BaseMap(props) {
   const [showColorPicker, setshowColorPicker] = useState(true);
   const [layerLoading, setLayerLoading] = useState(false);
   const [threeDState, set3DState] = useState("");
-
+  const [T3DTranspose, set3DTranspose] = useState(false);
   const [picToMapData, setPicToMapData] = useState([]);
   const [pic2Mapv2Status, setPic2Mapv2Status] = useState(false);
   const [pic2Mapv2Data, setPic2Mapv2Data] = useState<any>({});
@@ -712,6 +974,13 @@ function BaseMap(props) {
     },
   ];
   const [icon2, setIcon2] = useState(iconOptions[0].value);
+  //----------------auto detect browser height---------------------
+  // let initHeight = window.screen.height;
+  // if(initHeight === 1080){
+  //   setBottomBarHeight("500px");
+
+  // }
+
   const history = useHistory();
 
   useEffect(() => {
@@ -738,6 +1007,10 @@ function BaseMap(props) {
     mode: ViewMode,
   });
 
+  // const [geoJson, setGeoJson] = useState({
+  //     type: 'FeatureCollection',
+  //     features: []
+  // });
   const onChangeSizeSlider = (value: number) => {
     if (isNaN(value)) {
       return;
@@ -770,6 +1043,10 @@ function BaseMap(props) {
 
   const showModal = () => {
     setIsModalVisible(true);
+  };
+
+  const handleOk = () => {
+    setIsModalVisible(false);
   };
 
   const handleCancel = () => {
@@ -852,6 +1129,8 @@ function BaseMap(props) {
       if (selectedVectorProps.length) body["vectorProps"] = selectedVectorProps;
       if (timeEnabled) body["time"] = time;
 
+      //console.log(JSON.stringify(body));
+
       if (
         selectedVectorPropsType.length ||
         selectedRasterProps.length ||
@@ -867,9 +1146,10 @@ function BaseMap(props) {
             .then((res) => {
               console.log("Filter API response", res);
               if (res.data.status) {
+                //console.log(res.data.data);
                 setTotalLayers(res.data.data.length);
                 segrigateLayers(res.data.data);
-
+                //message.success(res.data.message);
                 removeChips(res.data.data);
               } else {
                 if (res.data.message === " data not match!") {
@@ -994,6 +1274,7 @@ function BaseMap(props) {
 
   useEffect(() => {
     filterLayers(time);
+    //console.log("filterLayercalled");
   }, [
     selectedRasterProps,
     selectedVectorPropsType,
@@ -1224,6 +1505,7 @@ function BaseMap(props) {
       widthMinPixels: 1,
       capRounded: true,
       jointRounded: true,
+      //billboard: true,
       getPath: (d) => d.path,
       getColor: (d) => [0, 195, 255],
       getWidth: (d) => 3,
@@ -1241,10 +1523,12 @@ function BaseMap(props) {
       }),
       sizeScale: 15,
       getPosition: (d) => {
+        // console.log(d, "getpos");
         return d.coordinates;
       },
       getSize: (d) => 4,
       getAngle: (d) => bearing,
+      //getColor: (d) => [Math.sqrt(d.exits), 140, 0],
     }),
   ];
   function getBearing(
@@ -1296,16 +1580,17 @@ function BaseMap(props) {
         .then((data) => {
           const flightTelemetry: any = data.features;
           const pathObject: any = flightTelemetry.pop();
-
+          //console.log("the obejct", pathObject)
           const points: any = [];
           pathObject.geometry.coordinates.map((i: any) => {
             const values: any = [];
             values.push(i[0]);
             values.push(i[1]);
-
+            //console.log(values);
             points.push(values);
           });
-
+          // //flightpath.push(flightTelemetry.at(-1));
+          // console.log("FLight features", flightTelemetry, "FLightpath", flightpath.features[0]);
           const filterArray: any = points.filter(
             (i: any) => i[0] !== null && i[1] !== null
           );
@@ -1443,7 +1728,7 @@ function BaseMap(props) {
   useEffect(() => {
     console.log("missionLayer2", missionLayer, coordinates);
   }, [missionLayer, coordinates]);
-
+  // useEffect(() => console.log("All layers: ", allLayers), [allLayers]);
   const handleChangeComplete = (color) => {
     setColor(color.hex);
   };
@@ -1452,6 +1737,15 @@ function BaseMap(props) {
     setColor(color.hex);
   };
 
+  // //-------------export Function------------------------------------
+  // useEffect(() => {
+  //   console.log(
+  //     "Selected indexes: ",
+  //     selectedIndexes,
+  //     "Active layerID: ",
+  //     activeID,
+  //   );
+  // }, [selectedIndexes, activeID]);
   const actionMenuOnClick = ({ key }) => {
     console.log("key", key);
     switch (key) {
@@ -1593,7 +1887,7 @@ function BaseMap(props) {
       .then((res) => {
         if (res.data.status) {
           message.success("Export Successful");
-
+          //console.log(res.data);
           window.open(`${PUBLIC_URL}${res.data.pathh}`);
         } else {
           message.error(res.data.message);
@@ -1702,6 +1996,23 @@ function BaseMap(props) {
       : null;
   }
 
+  //---------------Generate stroke color and marker Color--------------------
+  function hexToRGBSolid(hex) {
+    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, function (m, r, g, b) {
+      return r + r + g + g + b + b;
+    });
+
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? [
+          parseInt(result[1], 16),
+          parseInt(result[2], 16),
+          parseInt(result[3], 16),
+        ]
+      : null;
+  }
+
   //----------------------------INFO WINDOW handeller------------------------
   function InfoWindow(
     idx: any,
@@ -1714,6 +2025,7 @@ function BaseMap(props) {
     sysId: any,
     type: any = ""
   ) {
+    //console.log(data);
     setFeatureIdx(idx);
     setMissionLayer(type);
     setCoordinates(coordinate);
@@ -1724,9 +2036,12 @@ function BaseMap(props) {
     setFeatureLayer(id);
     togglePopup(true);
     setSaveButtonShow(show);
+
+    //console.log("onclick", index);
   }
   //-----------------------Fetch Raster URL----------------------------------
   const getRasterURL = (rasterType, path, settings) => {
+    //SetColorMap(settings.color);
     switch (rasterType) {
       case "NDVI":
         return (
@@ -1811,12 +2126,15 @@ function BaseMap(props) {
   }, [colorMap, selectedIndexes, showSelectedIndexes]);
 
   useEffect(() => {
+    //console.log("current 3d", threeDState);
     if (threeDState === "Enabled") {
+      // set3DTranspose(true);
       const al = { ...allLayers };
       al[`1-${featureLayer}`].T3DTranspose = true;
       setAllLayers(al);
       forceUpdateLayers(featureLayer);
     } else if (threeDState === "Disabled") {
+      // set3DTranspose(false);
       const al = { ...allLayers };
       al[`1-${featureLayer}`].T3DTranspose = false;
       setAllLayers(al);
@@ -1863,7 +2181,7 @@ function BaseMap(props) {
       demLayers.push(obj);
     });
     setScales(demLayers);
-
+    //console.log(demLayers);
     if (demLayers.length) {
       setScaleVisible(true);
     } else {
@@ -1877,6 +2195,7 @@ function BaseMap(props) {
     checkedKeysValue.forEach((element) => {
       if (element.split("-")[0] === "2" && element !== "2") {
         if (props.isBaseMap) {
+          //console.log("all the layers being drawn",allLayers[element]);
           const layer: any = allLayers[element];
           layer?.layerPath.map((layerr: any) => {
             const settings: any = {
@@ -1885,7 +2204,7 @@ function BaseMap(props) {
               resamplingMethod: layer.settings.resamplingMethod,
               bidx: layer.settings.bidx,
             };
-
+            // ---pushing tiler layers
             vlayers.push(
               new TileLayer({
                 id: `${element}-${uuid()}`,
@@ -1952,7 +2271,8 @@ function BaseMap(props) {
                 id: element,
                 data: STATIC_URL + allLayers[element]?.layerPath,
                 pickable: true,
-
+                // stroked: true,
+                // filled: true,
                 extruded: false,
                 lineWidthUnits: "pixels",
                 lineWidthScale: 4,
@@ -1969,7 +2289,9 @@ function BaseMap(props) {
                   }
                   return hexToRGB2(d.properties.color, false);
                 },
-
+                // getRadius: 100,
+                // getLineWidth: 1,
+                // getElevation: 30 ,
                 onClick: (data, e) => {
                   if (e.leftButton) {
                     InfoWindow(
@@ -2060,13 +2382,15 @@ function BaseMap(props) {
                     return hexToRGB2(d.properties.color, true);
                   }
                 },
-
+                //getRadius: 100,
+                //getLineWidth: 1,
                 getElevation: (d) => {
                   if (d.properties?.height) {
                     return d.properties.height;
                   }
                 },
                 onClick: (data, e) => {
+                  //console.log("data",allLayers[element]?);
                   if (e.leftButton) {
                     InfoWindow(
                       data.index,
@@ -2121,7 +2445,8 @@ function BaseMap(props) {
                   STATIC_URL + allLayers[element]?.layerPath
                 ),
                 pickable: true,
-
+                // iconAtlas: TankIcon,
+                //iconMapping: ICON_MAPPING,
                 getIcon: (d) => {
                   const iconSelector = (iconType) => {
                     let icon = "";
@@ -2152,6 +2477,14 @@ function BaseMap(props) {
                 onDataLoad: () => {
                   setLayerLoading(false);
                 },
+                // getFillColor: (d, i) => {
+                //   if (activeID === element.split("-")[1]) {
+                //     if (selectedIndexes.includes(i.index)) {
+                //       return hexToRGB2("#ffaa00", true);
+                //     }
+                //   }
+                //   return hexToRGB2(d.properties.color, false);
+                // },
                 sizeScale: 12 * pointMarkerSize,
                 getPosition: (d) => d.geometry.coordinates,
                 getSize: (d) => 5,
@@ -2219,7 +2552,8 @@ function BaseMap(props) {
               id: element,
               data: geoJsonAlert?.features,
               pickable: true,
-
+              // iconAtlas: TankIcon,
+              //iconMapping: ICON_MAPPING,
               getIcon: (d) => {
                 return {
                   url: AlertIcon,
@@ -2232,6 +2566,14 @@ function BaseMap(props) {
               onDataLoad: () => {
                 setLayerLoading(false);
               },
+              // getFillColor: (d, i) => {
+              //   if (activeID === element.split("-")[1]) {
+              //     if (selectedIndexes.includes(i.index)) {
+              //       return hexToRGB2("#ffaa00", true);
+              //     }
+              //   }
+              //   return hexToRGB2(d.properties.color, false);
+              // },
               sizeScale: 15 * pointMarkerSize,
               getPosition: (d) => d.geometry.coordinates,
               getSize: (d) => 5,
@@ -2268,7 +2610,8 @@ function BaseMap(props) {
               id: element,
               data: geoJsonVOD?.features,
               pickable: true,
-
+              // iconAtlas: TankIcon,
+              //iconMapping: ICON_MAPPING,
               getIcon: (d) => {
                 return {
                   url: VODIcon,
@@ -2281,6 +2624,14 @@ function BaseMap(props) {
               onDataLoad: () => {
                 setLayerLoading(false);
               },
+              // getFillColor: (d, i) => {
+              //   if (activeID === element.split("-")[1]) {
+              //     if (selectedIndexes.includes(i.index)) {
+              //       return hexToRGB2("#ffaa00", true);
+              //     }
+              //   }
+              //   return hexToRGB2(d.properties.color, false);
+              // },
               sizeScale: 15 * pointMarkerSize,
               getPosition: (d) => d.geometry.coordinates,
               getSize: (d) => 5,
@@ -2315,7 +2666,35 @@ function BaseMap(props) {
       }
       console.log("Missions", vlayers, allLayers, geoJsonVOD.features);
     });
+    // vlayers.push(
+    //   new TileLayer({
+    //     id: "BASE_LAYER-123123123",
+    //     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
+    //     data: `${COG_URL}` +
+    //     `/cog/tiles` +
+    //     `/{z}/{x}/{y}@1x?url=${import.meta.env.VITE_BASE_URL}` +
+    //     `/raster/1642486263367_20_DEM_10cm.tif` +
+    //     `&resampling_method=nearest&bidx=1&rescale=17.799230575561523%2C93.64027404785156&colormap_name=plasma`,
 
+    //     minZoom: 0,
+    //     maxZoom: 24,
+    //     tileSize: 256,
+    //     // onDataLoad: () => {
+    //     //   setLayerLoading(false);
+    //     // },
+    //     renderSubLayers: (props) => {
+    //       const {
+    //         bbox: { west, south, east, north },
+    //       } = props.tile;
+
+    //       return new BitmapLayer(props, {
+    //         data: null,
+    //         image: props.data,
+    //         bounds: [west, south, east, north],
+    //       });
+    //     },
+    //   })
+    // )
     setVisibleLayers(vlayers);
   };
 
@@ -2354,6 +2733,7 @@ function BaseMap(props) {
       setLayerLoading(true);
     }
 
+    //console.log(checkedKeysValue);
     if (checkedKeysValue.length) {
       setActiveGroupButton(false);
     } else {
@@ -2372,7 +2752,7 @@ function BaseMap(props) {
       "mission"
     );
     setLastCount(checkedKeysValue.length);
-
+    //console.log(rasterOrdering);
     setCheckedKeys([...rasterOrdering, ...vectorOrdering, ...missionOrdering]);
   };
 
@@ -2492,8 +2872,11 @@ function BaseMap(props) {
               minZoom: 0,
               maxZoom: 22,
               bearing: 0,
+              // transitionDuration: 8000,
+              // transitionInterpolator: new FlyToInterpolator(),
             });
           } else {
+            //console.log("layers fetched: ", result.data.data);
             setMissioName(result.data.data.mission);
             setTotalLayers(0);
             console.log("api result", result.data.data.layers);
@@ -2507,6 +2890,8 @@ function BaseMap(props) {
               minZoom: 0,
               maxZoom: 22,
               bearing: 0,
+              // transitionDuration: 8000,
+              // transitionInterpolator: new FlyToInterpolator(),
             });
           }
         } else {
@@ -2531,12 +2916,14 @@ function BaseMap(props) {
         } else {
           message.error(result.data.message);
         }
+        //message.info("ola amigo")
       } catch (error) {
         console.log(error);
-
+        //message.error("errrorrrrr");
         AxiosErrorHandler(error, props.logout);
       } finally {
         props.loading(false);
+        //message.info("land")
       }
     }
   };
@@ -2627,6 +3014,7 @@ function BaseMap(props) {
             setPanes(newPanes);
 
             message.success(res.data.message);
+            //console.log(res.data);
           } else {
             message.error(res.data.message);
             console.log(res.data);
@@ -2672,6 +3060,7 @@ function BaseMap(props) {
             setPanes(newPanes);
 
             message.success(res.data.message);
+            //console.log(res.data);
           } else {
             message.error(res.data.message);
             console.log(res.data);
@@ -2730,6 +3119,7 @@ function BaseMap(props) {
             setPanes(newPanes);
 
             message.success(res.data.message);
+            //console.log(res.data);
           } else {
             message.error(res.data.message);
             console.log(res.data);
@@ -2775,6 +3165,7 @@ function BaseMap(props) {
             setPanes(newPanes);
 
             message.success(res.data.message);
+            //console.log(res.data);
           } else {
             message.error(res.data.message);
             console.log(res.data);
@@ -2802,310 +3193,8 @@ function BaseMap(props) {
           title: (
             <>
               <Dropdown
-                overlay={
-                  <Menu>
-                    {props.isBaseMap ? (
-                      <>
-                        {perms.canEditBaseLayer ? (
-                          <Menu.Item
-                            key="1"
-                            onClick={() => {
-                              showModal1();
-                              setSelectedLayerId(layer._id);
-                              setCaptureDate(layer.captureDate);
-                              setLayerName(layer.name);
-                              setDefaultLayerType([
-                                layer.type.toUpperCase(),
-                                layer.raster.name.toUpperCase(),
-                              ]);
-                              setSelectedLayerType("raster");
-                            }}
-                          >
-                            Edit
-                          </Menu.Item>
-                        ) : (
-                          <></>
-                        )}
-                      </>
-                    ) : (
-                      <Menu.Item
-                        key="1"
-                        onClick={() => {
-                          showModal1();
-                          setSelectedLayerId(layer._id);
-                          setCaptureDate(layer.captureDate);
-                          setLayerName(layer.name);
-                          setDefaultLayerType([
-                            layer.type.toUpperCase(),
-                            layer.raster.name.toUpperCase(),
-                          ]);
-                          setSelectedLayerType("raster");
-                        }}
-                      >
-                        Edit
-                      </Menu.Item>
-                    )}
-                    {layer.type === "Raster" && (
-                      <Menu.Item
-                        key="10"
-                        onClick={() => {
-                          props.thread(true, {
-                            docType: "layer",
-                            docId: layer._id,
-                          });
-                        }}
-                      >
-                        Open Thread
-                      </Menu.Item>
-                    )}
-                    {props.isBaseMap ? (
-                      <>
-                        {perms.canUpdateBaseLayer ? (
-                          <Menu.Item
-                            key="1-updateBase-Map"
-                            onClick={() => {
-                              setUpdate(true);
-                              setUpdateType("Raster");
-                              setUpdateId(layer._id);
-                              setIsModalVisible4(true);
-                            }}
-                          >
-                            Update layer
-                          </Menu.Item>
-                        ) : (
-                          <></>
-                        )}
-                      </>
-                    ) : (
-                      <></>
-                    )}
-                    {props.isBaseMap ? (
-                      <>
-                        {perms.canDeleteBaseLayer ? (
-                          <Menu.Item
-                            key="2"
-                            onClick={() => {
-                              Modal.confirm({
-                                title: "Delete Layer?",
-                                icon: <ExclamationCircleOutlined />,
-                                content:
-                                  "Are you sure you want to delete this layer?",
-                                okText: "Yes",
-                                cancelText: "No",
-                                onOk: () => {
-                                  deleteLayer(layer._id, layer.type);
-                                },
-                              });
-                            }}
-                          >
-                            <span> Delete</span>
-                          </Menu.Item>
-                        ) : (
-                          <></>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        {perms.canDeleteLayer ? (
-                          <Menu.Item
-                            key="2"
-                            onClick={() => {
-                              Modal.confirm({
-                                title: "Delete Layer?",
-                                icon: <ExclamationCircleOutlined />,
-                                content:
-                                  "Are you sure you want to delete this layer?",
-                                okText: "Yes",
-                                cancelText: "No",
-                                onOk: () => {
-                                  deleteLayer(layer._id, layer.type);
-                                },
-                              });
-                            }}
-                          >
-                            <span> Delete</span>
-                          </Menu.Item>
-                        ) : (
-                          <></>
-                        )}
-                      </>
-                    )}
-                    <Menu.Item
-                      key="3"
-                      onClick={() => {
-                        download(STATIC_URL + layer.layerpath);
-                      }}
-                    >
-                      Download
-                    </Menu.Item>
-                    {layer.layerGroupId && (
-                      <>
-                        {props.isBaseMap ? (
-                          <>
-                            {perms.canCreateBaseLayer ? (
-                              <Menu.Item
-                                key="4"
-                                onClick={async () => {
-                                  const idOfLayerGroup =
-                                    typeof layer.layerGroupId === "object"
-                                      ? layer.layerGroupId._id
-                                      : layer.layerGroupId;
-                                  await removeLayerFromGroup(
-                                    idOfLayerGroup,
-                                    layer._id,
-                                    `1-${layer._id}`
-                                  );
-                                  updateTreeDataAfterSingleLayerRemovalFromGroup(
-                                    layer._id
-                                  );
-                                }}
-                              >
-                                Unassign From Group
-                              </Menu.Item>
-                            ) : (
-                              <></>
-                            )}
-                          </>
-                        ) : (
-                          <Menu.Item
-                            key="4"
-                            onClick={async () => {
-                              const idOfLayerGroup =
-                                typeof layer.layerGroupId === "object"
-                                  ? layer.layerGroupId._id
-                                  : layer.layerGroupId;
-                              await removeLayerFromGroup(
-                                idOfLayerGroup,
-                                layer._id,
-                                `1-${layer._id}`
-                              );
-                              updateTreeDataAfterSingleLayerRemovalFromGroup(
-                                layer._id
-                              );
-                            }}
-                          >
-                            Unassign From Group
-                          </Menu.Item>
-                        )}
-                      </>
-                    )}
-                    {checkedKeys.includes(layer.key) && (
-                      <>
-                        <SubMenu title="Selected">
-                          {props.isBaseMap ? (
-                            <>
-                              {perms.canCreateBaseLayer ? (
-                                <Menu.Item
-                                  key="5"
-                                  onClick={() => {
-                                    setVisibleGroupCreateModal(
-                                      !visibleGroupCreateModal
-                                    );
-                                    setMoveType(2);
-                                  }}
-                                >
-                                  Group Selected Layers
-                                </Menu.Item>
-                              ) : (
-                                <></>
-                              )}
-                            </>
-                          ) : (
-                            <Menu.Item
-                              key="5"
-                              onClick={() => {
-                                setVisibleGroupCreateModal(
-                                  !visibleGroupCreateModal
-                                );
-                                setMoveType(2);
-                              }}
-                            >
-                              Group Selected Layers
-                            </Menu.Item>
-                          )}
-                          {props.isBaseMap ? (
-                            <>
-                              {perms.canDeleteBaseLayer ? (
-                                <Menu.Item
-                                  key="6"
-                                  onClick={() => {
-                                    Modal.confirm({
-                                      title: "Delete Selected Layers?",
-                                      icon: <ExclamationCircleOutlined />,
-                                      content:
-                                        "Are you sure you want to delete selected layers?",
-                                      okText: "Yes",
-                                      cancelText: "No",
-                                      onOk: () => {
-                                        deleteMultipleLayers(checkedKeys, "2");
-                                      },
-                                    });
-                                  }}
-                                >
-                                  Delete Selected Layers
-                                </Menu.Item>
-                              ) : (
-                                <></>
-                              )}
-                            </>
-                          ) : (
-                            <>
-                              {perms.canDeleteLayer ? (
-                                <Menu.Item
-                                  key="6"
-                                  onClick={() => {
-                                    Modal.confirm({
-                                      title: "Delete Selected Layers?",
-                                      icon: <ExclamationCircleOutlined />,
-                                      content:
-                                        "Are you sure you want to delete selected layers?",
-                                      okText: "Yes",
-                                      cancelText: "No",
-                                      onOk: () => {
-                                        deleteMultipleLayers(checkedKeys, "2");
-                                      },
-                                    });
-                                  }}
-                                >
-                                  Delete Selected Layers
-                                </Menu.Item>
-                              ) : (
-                                <></>
-                              )}
-                            </>
-                          )}
-                          {props.isBaseMap ? (
-                            <>
-                              {perms.canCreateBaseLayer ? (
-                                <Menu.Item
-                                  key="7"
-                                  onClick={() => {
-                                    setMoveToOtherGroupModal(true);
-                                    setMoveType(2);
-                                  }}
-                                >
-                                  Move Selected Layers
-                                </Menu.Item>
-                              ) : (
-                                <></>
-                              )}
-                            </>
-                          ) : (
-                            <Menu.Item
-                              key="7"
-                              onClick={() => {
-                                setMoveToOtherGroupModal(true);
-                                setMoveType(2);
-                              }}
-                            >
-                              Move Selected Layers
-                            </Menu.Item>
-                          )}
-                        </SubMenu>
-                      </>
-                    )}
-                  </Menu>
-                }
+                onOpenChange={() => setSelectedLayer(layer)}
+                menu={{ items: treeMenu(layer), onClick: treeMenuOnClick }}
                 trigger={["contextMenu"]}
               >
                 <Tooltip
@@ -3167,400 +3256,8 @@ function BaseMap(props) {
           title: (
             <>
               <Dropdown
-                overlay={
-                  <Menu>
-                    {props.isBaseMap ? (
-                      <>
-                        {perms.canEditBaseLayer ? (
-                          <Menu.Item
-                            key="1-1"
-                            onClick={() => {
-                              showModal1();
-                              setSelectedLayerId(layer._id);
-                              setCaptureDate(layer.captureDate);
-                              setLayerName(layer.name);
-                              setDefaultLayerType([
-                                layer.type.toUpperCase(),
-                                layer.vector.type.toUpperCase(),
-                                layer.vector.name.toUpperCase(),
-                              ]);
-                              setSelectedLayerType("vector");
-                              setLayerColor(layer.color);
-                            }}
-                          >
-                            Edit
-                          </Menu.Item>
-                        ) : (
-                          <></>
-                        )}
-                      </>
-                    ) : (
-                      <Menu.Item
-                        key="1-2"
-                        onClick={() => {
-                          showModal1();
-                          setSelectedLayerId(layer._id);
-                          setCaptureDate(layer.captureDate);
-                          setLayerName(layer.name);
-                          setDefaultLayerType([
-                            layer.type.toUpperCase(),
-                            layer.vector.type.toUpperCase(),
-                            layer.vector.name.toUpperCase(),
-                          ]);
-                          setSelectedLayerType("vector");
-                          setLayerColor(layer.color);
-                        }}
-                      >
-                        Edit
-                      </Menu.Item>
-                    )}
-                    {props.isBaseMap ? (
-                      <>
-                        {perms.canUpdateBaseLayer ? (
-                          <Menu.Item
-                            key="2"
-                            onClick={() => {
-                              setUpdate(true);
-                              setUpdateType("Vector");
-                              setUpdateId(layer._id);
-                              setIsModalVisible4(true);
-                            }}
-                          >
-                            Update layer
-                          </Menu.Item>
-                        ) : (
-                          <></>
-                        )}
-                      </>
-                    ) : (
-                      <></>
-                    )}
-                    {layer.type === "Vector" && (
-                      <>
-                        <Menu.Item
-                          key="10"
-                          onClick={() => {
-                            props.thread(true, {
-                              docType: "layer",
-                              docId: layer._id,
-                            });
-                          }}
-                        >
-                          Open Thread
-                        </Menu.Item>
-                        <SubMenu title="Toggle Flag" key="3">
-                          <Menu.Item
-                            key="3-1"
-                            onClick={() => {
-                              Modal.confirm({
-                                title: "Flag Layer?",
-                                icon: <ExclamationCircleOutlined />,
-                                content:
-                                  "Are you sure you want to flag the entire layer?",
-                                okText: "Yes",
-                                cancelText: "No",
-                                onOk: () => {
-                                  toggleLayerFlag(layer._id, true);
-                                },
-                              });
-                            }}
-                          >
-                            Flag Layer
-                          </Menu.Item>
-                          <Menu.Item
-                            key="3-2"
-                            onClick={() => {
-                              Modal.confirm({
-                                title: "Un-flag Layer?",
-                                icon: <ExclamationCircleOutlined />,
-                                content:
-                                  "Are you sure you want to un-flag the entire layer? This will un-flag all flagged features as well.",
-                                okText: "Yes",
-                                cancelText: "No",
-                                onOk: () => {
-                                  toggleLayerFlag(layer._id, false);
-                                },
-                              });
-                            }}
-                          >
-                            Un-flag Layer
-                          </Menu.Item>
-                        </SubMenu>
-                      </>
-                    )}
-
-                    {props.isBaseMap ? (
-                      <>
-                        {perms.canDeleteBaseLayer ? (
-                          <Menu.Item
-                            key="4-1"
-                            onClick={() => {
-                              Modal.confirm({
-                                title: "Delete Layer?",
-                                icon: <ExclamationCircleOutlined />,
-                                content:
-                                  "Are you sure you want to delete this layer?",
-                                okText: "Yes",
-                                cancelText: "No",
-                                onOk: () => {
-                                  deleteLayer(layer._id, layer.type);
-                                },
-                              });
-                            }}
-                          >
-                            <span> Delete</span>
-                          </Menu.Item>
-                        ) : (
-                          <></>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        {perms.canDeleteLayer ? (
-                          <Menu.Item
-                            key="4-2"
-                            onClick={() => {
-                              Modal.confirm({
-                                title: "Delete Layer?",
-                                icon: <ExclamationCircleOutlined />,
-                                content:
-                                  "Are you sure you want to delete this layer?",
-                                okText: "Yes",
-                                cancelText: "No",
-                                onOk: () => {
-                                  deleteLayer(layer._id, layer.type);
-                                },
-                              });
-                            }}
-                          >
-                            <span> Delete</span>
-                          </Menu.Item>
-                        ) : (
-                          <></>
-                        )}
-                      </>
-                    )}
-                    <Menu.Item
-                      key="5"
-                      onClick={() => {
-                        download(STATIC_URL + layer.layerpath);
-                      }}
-                    >
-                      Download
-                    </Menu.Item>
-                    <Menu.Item
-                      key="6"
-                      onClick={() => {
-                        http
-                          .get(`${apis.DOWNLOAD_KML}?id=${layer._id}`)
-                          .then((res: any) => {
-                            if (res.data.status) {
-                              window.open(PUBLIC_URL + res.data.link);
-                            } else {
-                              console.log(res.data.message);
-                            }
-                          })
-                          .catch((err: any) => {
-                            console.log(err);
-                            AxiosErrorHandler(err, props.logout);
-                          });
-                      }}
-                    >
-                      Download KML
-                    </Menu.Item>
-                    <Menu.Item
-                      key="7"
-                      onClick={() => {
-                        setViewDocs(true);
-                        setSelectedLayerInfo(layer);
-                        setFeatureLayer(layer._id);
-                        setFeatureLayerPath(layer.layerpath);
-                        setWindowTitle(layer.name);
-                        setSelectedLayerLabel(
-                          layer.layerLabel
-                            ? layer.layerLabel
-                            : "No label selected"
-                        );
-                        setSelectedLayerPopupLabel(
-                          layer.layerPopupLabel
-                            ? layer.layerPopupLabel
-                            : "No label selected"
-                        );
-                        setIsLayerDocs(true);
-                      }}
-                    >
-                      More
-                    </Menu.Item>
-                    {layer.layerGroupId && (
-                      <>
-                        {props.isBaseMap ? (
-                          <>
-                            {perms.canCreateBaseLayer ? (
-                              <>
-                                <Menu.Item
-                                  key="8-1"
-                                  onClick={async () => {
-                                    const idOfLayerGroup =
-                                      typeof layer.layerGroupId === "object"
-                                        ? layer.layerGroupId._id
-                                        : layer.layerGroupId;
-                                    await removeLayerFromGroup(
-                                      idOfLayerGroup,
-                                      layer._id,
-                                      `1-${layer._id}`
-                                    );
-                                    updateTreeDataAfterSingleLayerRemovalFromGroup(
-                                      layer._id
-                                    );
-                                  }}
-                                >
-                                  Unassign From Group
-                                </Menu.Item>
-                              </>
-                            ) : (
-                              <></>
-                            )}
-                          </>
-                        ) : (
-                          <Menu.Item
-                            key="8-2"
-                            onClick={async () => {
-                              const idOfLayerGroup =
-                                typeof layer.layerGroupId === "object"
-                                  ? layer.layerGroupId._id
-                                  : layer.layerGroupId;
-                              await removeLayerFromGroup(
-                                idOfLayerGroup,
-                                layer._id,
-                                `1-${layer._id}`
-                              );
-                              updateTreeDataAfterSingleLayerRemovalFromGroup(
-                                layer._id
-                              );
-                            }}
-                          >
-                            Unassign From Group
-                          </Menu.Item>
-                        )}
-                      </>
-                    )}
-                    {checkedKeys.includes(layer.key) && (
-                      <>
-                        <SubMenu title="Selected" key="9">
-                          {props.isBaseMap ? (
-                            <>
-                              {perms.canCreateBaseLayer ? (
-                                <Menu.Item
-                                  key="9-1"
-                                  onClick={() => {
-                                    setVisibleGroupCreateModal(
-                                      !visibleGroupCreateModal
-                                    );
-                                    setMoveType(1);
-                                  }}
-                                >
-                                  Group Selected Layers
-                                </Menu.Item>
-                              ) : (
-                                <></>
-                              )}
-                            </>
-                          ) : (
-                            <Menu.Item
-                              key="9-2"
-                              onClick={() => {
-                                setVisibleGroupCreateModal(
-                                  !visibleGroupCreateModal
-                                );
-                                setMoveType(1);
-                              }}
-                            >
-                              Group Selected Layers
-                            </Menu.Item>
-                          )}
-                          {!props.isBaseMap ? (
-                            <>
-                              {perms.canDeleteLayer ? (
-                                <Menu.Item
-                                  key="9-3-1"
-                                  onClick={() => {
-                                    Modal.confirm({
-                                      title: "Delete Selected Layers?",
-                                      icon: <ExclamationCircleOutlined />,
-                                      content:
-                                        "Are you sure you want to delete selected layers?",
-                                      okText: "Yes",
-                                      cancelText: "No",
-                                      onOk: () => {
-                                        deleteMultipleLayers(checkedKeys, "1");
-                                      },
-                                    });
-                                  }}
-                                >
-                                  Delete Selected Layers
-                                </Menu.Item>
-                              ) : (
-                                <></>
-                              )}
-                            </>
-                          ) : (
-                            <>
-                              {perms.canDeleteBaseLayer ? (
-                                <Menu.Item
-                                  key="9-3-2"
-                                  onClick={() => {
-                                    Modal.confirm({
-                                      title: "Delete Selected Layers?",
-                                      icon: <ExclamationCircleOutlined />,
-                                      content:
-                                        "Are you sure you want to delete selected layers?",
-                                      okText: "Yes",
-                                      cancelText: "No",
-                                      onOk: () => {
-                                        deleteMultipleLayers(checkedKeys, "1");
-                                      },
-                                    });
-                                  }}
-                                >
-                                  Delete Selected Layers
-                                </Menu.Item>
-                              ) : (
-                                <></>
-                              )}
-                            </>
-                          )}
-                          {props.isBaseMap ? (
-                            <>
-                              {perms.canCreateBaseLayer ? (
-                                <Menu.Item
-                                  key="9-4-1"
-                                  onClick={() => {
-                                    setMoveToOtherGroupModal(true);
-                                    setMoveType(1);
-                                  }}
-                                >
-                                  Move Selected Layers
-                                </Menu.Item>
-                              ) : (
-                                <></>
-                              )}
-                            </>
-                          ) : (
-                            <Menu.Item
-                              key="9-4-2"
-                              onClick={() => {
-                                setMoveToOtherGroupModal(true);
-                                setMoveType(1);
-                              }}
-                            >
-                              Move Selected Layers
-                            </Menu.Item>
-                          )}
-                        </SubMenu>
-                      </>
-                    )}
-                  </Menu>
-                }
+                onOpenChange={() => setSelectedLayer(layer)}
+                menu={{ items: treeMenu(layer), onClick: treeMenuOnClick }}
                 trigger={["contextMenu"]}
               >
                 <Tooltip
@@ -3632,58 +3329,52 @@ function BaseMap(props) {
   const [groupName, setgroupName] = useState("");
 
   const getGroupTitle = (value, id) => {
+    const items: MenuProps["items"] = [
+      {
+        key: "1",
+        label: "Rename",
+      },
+      {
+        key: "2",
+        label: "Delete",
+      },
+    ];
+    const onClick: MenuProps["onClick"] = (e) => {
+      if (e.key === "1") {
+        setgroupName(value.name);
+        setgroupToEdit({
+          id: id,
+          name: value.name,
+        });
+        setVisibleEditModal(true);
+      }
+      if (e.key === "2") {
+        Modal.confirm({
+          title: "Delete Group?",
+          icon: <ExclamationCircleOutlined />,
+          content: (
+            <>
+              <p>Are You Sure To Want To Delete This Group</p>
+              <b>These Layers Will be deleted along with this group</b>
+              <>
+                {value.children.map((layer) => {
+                  return <p>{layer.name}</p>;
+                })}
+              </>
+            </>
+          ),
+          okText: "Yes",
+          cancelText: "No",
+          onOk: () => {
+            deleteGroup(id);
+          },
+        });
+      }
+    };
     return {
       title: (
         <>
-          <Dropdown
-            overlay={
-              <Menu>
-                <Menu.Item
-                  key="1"
-                  onClick={() => {
-                    setgroupName(value.name);
-                    setgroupToEdit({
-                      id: id,
-                      name: value.name,
-                    });
-                    setVisibleEditModal(true);
-                  }}
-                >
-                  Rename
-                </Menu.Item>
-                <Menu.Item
-                  key="2"
-                  onClick={() => {
-                    Modal.confirm({
-                      title: "Delete Group?",
-                      icon: <ExclamationCircleOutlined />,
-                      content: (
-                        <>
-                          <p>Are You Sure To Want To Delete This Group</p>
-                          <b>
-                            These Layers Will be deleted along with this group
-                          </b>
-                          <>
-                            {value.children.map((layer) => {
-                              return <p>{layer.name}</p>;
-                            })}
-                          </>
-                        </>
-                      ),
-                      okText: "Yes",
-                      cancelText: "No",
-                      onOk: () => {
-                        deleteGroup(id);
-                      },
-                    });
-                  }}
-                >
-                  <span> Delete</span>
-                </Menu.Item>
-              </Menu>
-            }
-            trigger={["contextMenu"]}
-          >
+          <Dropdown menu={{ items, onClick }} trigger={["contextMenu"]}>
             <Text style={{ width: "160px" }} ellipsis={true}>
               {value.name}
             </Text>
@@ -4068,6 +3759,7 @@ function BaseMap(props) {
     let newTreeDataVector: any = [];
     let newTreeDataRaster: any = [];
 
+    //console.log(td);
     const data: any = treeData;
 
     newTreeDataVector = td[0].children.map((layer) => {
@@ -4109,6 +3801,7 @@ function BaseMap(props) {
   };
 
   const segrigateLayers = (layers) => {
+    //console.log("segrate layer");
     let data: any = [...treeDataa];
     let allLayers: any = {};
     if (
@@ -4177,6 +3870,8 @@ function BaseMap(props) {
           type: layer.raster.name,
           settings: {
             ...layer.raster,
+            // minp: layer.minp,
+            // maxp: layer.maxp,
           },
           name: layer.name,
           groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
@@ -4272,14 +3967,24 @@ function BaseMap(props) {
     setTreeStructure(data);
     //--------check last ortho-----
     rasters.forEach((element) => {
+      //console.log(element)
       if (element.raster.name === "ORTHO") {
+        //console.log(element);
         const cl: any = [];
         cl.push(`2-${element._id}`);
-
+        //console.log(cl);
         setCheckedKeys(cl);
         return;
       }
     });
+  };
+
+  const onFinish = (values: any) => {
+    //console.log("Success:", values);
+  };
+
+  const onFinish1 = (values: any) => {
+    //console.log("Success:", values);
   };
 
   const options: any = [
@@ -4371,7 +4076,7 @@ function BaseMap(props) {
 
     filteredOptions[0].label = filteredOptions[0].title;
     delete filteredOptions[0].title;
-
+    console.log(filteredOptions[0].children);
     if (filteredOptions[0].children.length > 0 && layerType.length > 0) {
       filteredOptions[0].children = filteredOptions[0].children.filter(
         (child) => child.value.toUpperCase() == layerType[1]
@@ -4396,6 +4101,7 @@ function BaseMap(props) {
       setFileList([]);
     },
     beforeUpload: (file) => {
+      //console.log(file);
       setFileList([file]);
       return false;
     },
@@ -4436,6 +4142,14 @@ function BaseMap(props) {
       setPanes(panes);
       setActiveKey(id);
     } else setActiveKey(id);
+
+    // const newPanes = [...panes];
+    // newPanes.push({ title: name, content: 'Content of new Tab', key: id,id:id, type: type == "Raster" ? "raster" : "vector", });
+    // setPanes(newPanes);
+    // setActiveKey(id)
+    //setNewTabIndex(newTabIndex + 1);
+    //const activeKey = `newTab${newTabIndex}`;
+    //const newPanes = [...panes];
   };
 
   useEffect(() => {
@@ -4550,6 +4264,9 @@ function BaseMap(props) {
           err.response?.data.message === "Package has expired! Please renew!"
         ) {
           setExpiryModal(true);
+          // window.setTimeout(function () {
+          //   AxiosErrorHandler(err, VideoProps.logout); //needs to be connected with redux
+          // }, 5000);
         } else {
           setLimitModal(true);
           console.log(err.response);
@@ -4618,6 +4335,8 @@ function BaseMap(props) {
             type: layer.raster.name,
             settings: {
               ...layer.raster,
+              // minp: layer.minp,
+              // maxp: layer.maxp,
             },
             name: layer.name,
             id: layer._id,
@@ -4680,7 +4399,7 @@ function BaseMap(props) {
       });
       if (editType === "addFeature") {
         //event to fire up infowindow for registering new vector layer/shape
-
+        //console.log("New Shape Created!", updatedData);
         const { featureIndexes } = editContext;
         updatedSelectedFeatureIndexes = [
           ...selectedFeatureIndexes,
@@ -4784,6 +4503,36 @@ function BaseMap(props) {
     pointRadiusScale: 1,
     pointRadiusMinPixels: 8,
   });
+  // ++++++++++++++++++++++++++++++++++++++++++++++ Edit Layer +++++++++++++++++++++++++++++++++++++++++++++++
+  // const editLayer = () => {
+  //   let data = {
+  //     name: layerName,
+  //     captureDate: captureDate,
+  //   };
+
+  //   // change color
+  //   if(selectedLayerType=='vector'){
+  //     http
+  //     .patch(API_URL + apis.CHANGE_COLOR_BY_ID, {
+  //       id: selectedLayerId,
+  //       color: layerColor,
+  //     })
+  //     .then((res) => {
+  //       console.log(res);
+  //       if (res.data.status) {
+  //         console.log(res.data.status);
+  //         updateLayerDataAfterEditing(res.data.data[0]);
+  //         message.success(res.data.message);
+  //       } else {
+  //         message.error('Color not updated: '+res.data.message);
+  //       }
+  //     })
+  //     .catch((err) => message.error('Error updating color: '+err.message))
+  //     .finally(() => {
+  //       setLayerColor("");
+  //     });
+  //   }
+  // }
 
   const editLayer = () => {
     props.loading(true);
@@ -4846,7 +4595,7 @@ function BaseMap(props) {
       .then((res) => {
         if (res.data.data) {
           message.success(res.data.message);
-
+          //console.log(res.data.data);
           // --update layer
           updateLayerDataAfterEditing(res.data.data[0], null, null);
           props.loading(false);
@@ -4960,6 +4709,8 @@ function BaseMap(props) {
               type: data.raster.name,
               settings: {
                 ...data.raster,
+                // minp: layer.minp,
+                // maxp: layer.maxp,
               },
               name: data.name,
               id: data._id,
@@ -5033,6 +4784,7 @@ function BaseMap(props) {
         );
 
         socket.current.on("IMAGE_UPLOADED", (data) => {
+          //console.log("Image upload successful!!", data);
           forceUpdateLayers(data.layerId);
         });
 
@@ -5048,7 +4800,7 @@ function BaseMap(props) {
           if (data.result) {
             message.success("Layer Created Successfully!");
             console.log(data.result);
-
+            //addLayer(data.result);
             setPic2Mapv2Data(data);
             setPic2Mapv2Status(true);
           }
@@ -5056,6 +4808,23 @@ function BaseMap(props) {
       }
     }
   }, [id]);
+  // const rowSelection = {
+  //   onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
+  //     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+  //   },
+  //   getCheckboxProps: (record: DataType) => ({
+  //     disabled: record.name === 'Disabled User', // Column configuration not to be checked
+  //     name: record.name,
+  //   }),
+  // };
+
+  useEffect(() => {
+    console.log(
+      selectedRasterProps,
+      selectedVectorPropsType,
+      selectedVectorProps
+    );
+  }, [selectedRasterProps, selectedVectorPropsType, selectedVectorProps]);
 
   const onToggleSelectRasterProps = (item) => {
     let newArr = [...selectedRasterProps];
@@ -5098,83 +4867,132 @@ function BaseMap(props) {
     setValid(true);
     setSelectedVectorProps(newArr);
   };
+  const toolMenu: MenuProps["items"] = () => {
+    const items: MenuProps["items"] = [
+      {
+        key: "0",
+        label: "Line Tool",
+      },
+      {
+        key: "1",
+        label: "Polygon Tool",
+      },
+      {
+        key: "2",
+        label: "Marker Tool",
+      },
+    ];
+    if (showMarkerSizeTool) {
+      items.push({
+        key: "3",
+        label: (
+          <Tooltip placement="bottom" title="Marker Size">
+            <Slider
+              min={0.3}
+              max={1}
+              onChange={onChangeSizeSlider}
+              step={0.1}
+              defaultValue={1}
+              value={pointMarkerSize}
+              tooltip={{ placement: "right" }}
+              style={{ margin: 0, padding: "5px 4px" }}
+            />
+          </Tooltip>
+        ),
+      });
+    }
+    return items;
+  };
+  const toolMenuOnClick = (e) => {
+    if (e.key === "0") {
+      startDrawing("DrawLine", "Line");
+    }
+    if (e.key === "1") {
+      startDrawing("DrawPolygon", "Polygon");
+    }
+    if (e.key === "2") {
+      startDrawing("DrawPoint", "Marker");
+    }
+  };
+  const filterMenu: MenuProps["items"] = [
+    {
+      key: "vector",
+      label: "Vector",
+      children: [
+        {
+          key: "Point",
+          label: "Point",
+          onTitleClick: () => onToggleSelectVectorPropsType("Point"),
+          children: options[1].children[2].children.map((i) => {
+            return {
+              key: `${i.title}-Point`,
+              label: i.title,
+            };
+          }),
+        },
+        {
+          key: "MultiLineString",
+          label: "MultiLineString",
+          onTitleClick: () => onToggleSelectVectorPropsType("MultiLineString"),
+          children: options[1].children[0].children.map((i) => {
+            return {
+              key: `${i.title}-MultiLineString`,
+              label: i.title,
+            };
+          }),
+        },
+        {
+          key: "MultiPolygon",
+          label: "MultiPolygon",
+          onTitleClick: () => onToggleSelectVectorPropsType("MultiPolygon"),
+          children: options[1].children[1].children.map((i) => {
+            return {
+              key: `${i.title}-MultiPolygon`,
+              label: i.title,
+            };
+          }),
+        },
+      ],
+    },
+    {
+      key: "raster",
+      label: "Raster",
+      children: rasterProps.map((i) => {
+        return {
+          key: `${i.name}-Raster`,
+          label: i.name,
+        };
+      }),
+    },
+  ];
+  const filterMenuOnClick = (e) => {
+    const [name, type] = e.key.split("-");
+    if (type === "Raster") {
+      onToggleSelectRasterProps(name);
+    } else {
+      onToggleSelectVectorProps(name, type);
+    }
+  };
 
-  const filterMenu = (
-    <Menu>
-      <SubMenu title="Vector">
-        <SubMenu
-          title="Point"
-          onTitleClick={() => onToggleSelectVectorPropsType("Point")}
-        >
-          <div style={{ height: "300px", overflow: "auto" }}>
-            {options[1].children[2].children.map((i) => (
-              <Menu.Item
-                key={i.title}
-                onClick={(e) => onToggleSelectVectorProps(i.title, "Point")}
-              >
-                {i.title}
-              </Menu.Item>
-            ))}
-          </div>
-        </SubMenu>
-        <SubMenu
-          title="MultiLineString"
-          onTitleClick={() => onToggleSelectVectorPropsType("MultiLineString")}
-        >
-          <div style={{ height: "300px", overflow: "auto" }}>
-            {options[1].children[0].children.map((i) => (
-              <Menu.Item
-                key={i.title}
-                onClick={(e) =>
-                  onToggleSelectVectorProps(i.title, "MultiLineString")
-                }
-              >
-                {i.title}
-              </Menu.Item>
-            ))}
-          </div>
-        </SubMenu>
-        <SubMenu
-          title="MultiPolygon"
-          onTitleClick={() => onToggleSelectVectorPropsType("MultiPolygon")}
-        >
-          <div style={{ height: "300px", overflow: "auto" }}>
-            {options[1].children[1].children.map((i) => (
-              <Menu.Item
-                key={i.title}
-                onClick={(e) =>
-                  onToggleSelectVectorProps(i.title, "MultiPolygon")
-                }
-              >
-                {i.title}
-              </Menu.Item>
-            ))}
-          </div>
-        </SubMenu>
-      </SubMenu>
-      <SubMenu title="Raster">
-        {rasterProps.map((i) => (
-          <Menu.Item
-            onClick={(e) => onToggleSelectRasterProps(e.key)}
-            key={i.name}
-          >
-            {i.name}
-          </Menu.Item>
-        ))}
-      </SubMenu>
-    </Menu>
-  );
   //----------sorting menu
-  const menu1 = (
-    <Menu>
-      <Menu.Item key="0" onClick={() => setSortType("name")}>
-        Name
-      </Menu.Item>
-      <Menu.Item key="1" onClick={() => setSortType("createdAt")}>
-        Time
-      </Menu.Item>
-    </Menu>
-  );
+  const sortMenu = [
+    {
+      key: "0",
+      label: "Name",
+    },
+    {
+      key: "1",
+      label: "Time",
+    },
+  ];
+  const sortMenuOnClick = (e) => {
+    if (e.key === "1") {
+      setSortType("name");
+    }
+    if (e.key === "2") {
+      setSortType("createdAt");
+    }
+  };
 
   // Set Active Layer Type
   useEffect(() => {
@@ -5185,6 +5003,7 @@ function BaseMap(props) {
         setActiveID(pane.id);
       }
       if (pane.id === activeKey) setActiveType(pane.type === "vector");
+      //console.log(pane.type);
     });
   }, [activeKey]);
 
@@ -5230,7 +5049,7 @@ function BaseMap(props) {
   const changeGroupOfLayer = async (groupid, layerids, keys) => {
     const al = { ...allLayers };
     props.loading(true);
-
+    //console.log(groupid);
     try {
       const res = await http.patch(`${apis.EDIT_LAYER_GROUP}`, {
         _id: groupid,
@@ -5377,6 +5196,7 @@ function BaseMap(props) {
   };
 
   const onDrop = async (info) => {
+    //console.log(info);
     const dropKey = info.node.key;
     const dragKey = info.dragNode.key;
     const dropPos = info.node.pos.split("-");
@@ -5443,6 +5263,7 @@ function BaseMap(props) {
         } else if (info.dragNode.layer) {
           const layerid = info.dragNode.layer._id;
           const key = info.dragNode.key;
+          //console.log(layerid, groupid);
           await changeGroupOfLayer(groupid, [layerid], [key]);
         }
       }
@@ -5569,11 +5390,21 @@ function BaseMap(props) {
       });
       setOsmState(true);
     } else {
+      // let currenViewPort:any = INITIAL_VIEW_STATE;
+      // setViewport({
+      //   longitude: INITIAL_VIEW_STATE.longitude,
+      //   latitude: INITIAL_VIEW_STATE.latitude,
+      //   zoom: INITIAL_VIEW_STATE.zoom,
+      //   pitch: INITIAL_VIEW_STATE.pitch,
+      //   minZoom: 0,
+      //   maxZoom: 22,
+      // });
       setOsmState(false);
       setMapMode(`mapbox://styles/mapbox/${value}-v8`);
     }
   }
   function onChangeInherit(checked) {
+    //console.log(`switch to ${checked}`);
     if (checked) {
       setInheritColor(true);
       setshowColorPicker(false);
@@ -5763,6 +5594,7 @@ function BaseMap(props) {
   };
 
   const moveLayers = async (data) => {
+    // props.loading(true)
     try {
       const layersToMove = [];
 
@@ -5893,6 +5725,7 @@ function BaseMap(props) {
           status="500"
           title="Oops! You have reached your limit of creating layers!"
           subTitle="Please contact your admin."
+          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
@@ -5945,6 +5778,9 @@ function BaseMap(props) {
           setShowDrawingTools(false);
           if (event.rightButton) {
             if (!info.layer) {
+              // setMode({
+              //   mode: ViewMode,
+              // });
               setToolSelected("");
               setShowDrawingTools(false);
               settoolCoordinates([
@@ -5958,6 +5794,7 @@ function BaseMap(props) {
             setShowDrawingTools(false);
           }
         }}
+        //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         {osmState ? (
           <>
@@ -6040,6 +5877,7 @@ function BaseMap(props) {
         )}
       </DeckGL>
 
+      {/* {showDrawingTools && ( */}
       <div
         className="drawing-tools"
         style={{
@@ -6048,44 +5886,8 @@ function BaseMap(props) {
         }}
       >
         <Dropdown
-          overlay={() => (
-            <Menu>
-              <Menu.Item
-                key="0"
-                onClick={() => startDrawing("DrawLine", "Line")}
-              >
-                Line Tool
-              </Menu.Item>
-              <Menu.Item
-                key="1"
-                onClick={() => startDrawing("DrawPolygon", "Polygon")}
-              >
-                Polygon Tool
-              </Menu.Item>
-              <Menu.Item
-                key="2"
-                onClick={() => startDrawing("DrawPoint", "Marker")}
-              >
-                Marker Tool
-              </Menu.Item>
-              {showMarkerSizeTool && (
-                <Tooltip placement="bottom" title="Marker Size">
-                  <Menu.Item>
-                    <Slider
-                      min={0.3}
-                      max={1}
-                      onChange={onChangeSizeSlider}
-                      step={0.1}
-                      defaultValue={1}
-                      value={pointMarkerSize}
-                      tooltip={{ placement: "right" }}
-                      style={{ margin: 0, padding: "5px 4px" }}
-                    />
-                  </Menu.Item>
-                </Tooltip>
-              )}
-            </Menu>
-          )}
+          menu={{ items: toolMenu(), onClick: toolMenuOnClick }}
+          // ref={drawingMenuRef}
           placement="bottom"
           trigger={["click"]}
         >
@@ -6095,6 +5897,7 @@ function BaseMap(props) {
           ></Button>
         </Dropdown>
       </div>
+      {/* )} */}
 
       <div className="map-header-toolbar">
         <Row>
@@ -6112,6 +5915,10 @@ function BaseMap(props) {
                 <Option value="dark">Dark mode</Option>
               </Select>
             </div>
+            {/* <div className='streelabel-toggle'>
+              <Text className='text-1'>Street labels</Text>
+              <Switch className='switch-1' defaultChecked />
+            </div> */}
           </Col>
           <Col md={12}>
             <div className="toolbar">
@@ -6149,6 +5956,7 @@ function BaseMap(props) {
                 >
                   <div
                     style={{
+                      //backgroundColor: "gold",
                       marginTop: "-4px",
                     }}
                   >
@@ -6328,6 +6136,7 @@ function BaseMap(props) {
                       fontSize: "1.2rem",
                       marginTop: "0.5rem",
                       marginBottom: "0.5rem",
+                      //marginRight: "0.4rem",
                     }}
                   />
                   <SortDescendingOutlined
@@ -6341,12 +6150,20 @@ function BaseMap(props) {
                   />
                 </div>
               )}
-              <Dropdown overlay={menu1} trigger={["click"]}>
+              <Dropdown
+                menu={{ items: sortMenu, onClick: sortMenuOnClick }}
+                trigger={["click"]}
+              >
                 <Button style={{ float: "right" }} type="link">
                   Sort
                 </Button>
               </Dropdown>
-              <Dropdown overlay={filterMenu} disabled={chipsLoading}>
+              <Dropdown
+                menu={{ items: filterMenu, onClick: filterMenuOnClick }}
+                //overlay={filterMenu}
+                disabled={chipsLoading}
+                //overlayStyle={{}}
+              >
                 <Button style={{ float: "right" }} type="link">
                   Filter <DownOutlined />
                 </Button>
@@ -6363,6 +6180,7 @@ function BaseMap(props) {
             >
               <Tag
                 style={{ display: timeEnabled ? "inline" : "none" }}
+                // color='#108ee9'
                 icon={
                   chipsLoading ? <SyncOutlined spin /> : <CheckCircleOutlined />
                 }
@@ -6441,6 +6259,7 @@ function BaseMap(props) {
                         ? "create-mission-extended-card-selected"
                         : ""
                     }`}
+                    // loading={isLoading}
                     hoverable
                   >
                     <Meta
@@ -6466,6 +6285,7 @@ function BaseMap(props) {
                         ? "create-mission-extended-card-selected"
                         : ""
                     }`}
+                    // loading={isLoading}
                     hoverable
                   >
                     <Meta
@@ -6487,6 +6307,7 @@ function BaseMap(props) {
                   <Button
                     className="create-mission-proceed-button"
                     type="primary"
+                    // onClick={() => nextStage()}
                     onClick={() => {
                       handleCancel2();
                       if (selectedKey == 1) showModal();
@@ -6638,6 +6459,7 @@ function BaseMap(props) {
             />
             <CreateBaseLayer
               isModalVisible={isModalVisible4}
+              // handleCancel={() => setIsModalVisible4(false)}
               isUpdate={isUpdate}
               updateType={updateType}
               BaseLayerId={updateId}
@@ -6677,6 +6499,7 @@ function BaseMap(props) {
                           />
                         </Form.Item>
 
+                        {/* <Form.Item label="Layer Type" name="type"> */}
                         <Cascader
                           style={{ width: "100%" }}
                           defaultValue={defaultLayerType}
@@ -6690,6 +6513,7 @@ function BaseMap(props) {
                             setLayerTypeId(updatedTypeId);
                           }}
                         />
+                        {/* </Form.Item> */}
 
                         <Form.Item label="Capture Date" name="date">
                           <DatePicker
@@ -6725,6 +6549,17 @@ function BaseMap(props) {
                               setLayerColor(color.hex)
                             }
                           />
+                          {/* <Button
+                          style={{
+                            marginTop: "10px",
+                            float: "right",
+                            marginRight: "10px",
+                          }}
+                          type="primary"
+                          size="small"
+                          onClick={changeColor}>
+                          Change Color
+                        </Button> */}
                         </Col>
                       ) : null}
                     </Row>
@@ -6740,6 +6575,7 @@ function BaseMap(props) {
           <div className="body-content">
             <Tree
               virtual={false}
+              //height={250}
               showIcon
               checkable
               onExpand={onExpand}
@@ -6764,6 +6600,7 @@ function BaseMap(props) {
               blockNode
             />
           </div>
+          {/* <Button onClick={() => setIsModalVisible4(true)}>new</Button> */}
         </div>
       )}
       <div
@@ -6787,6 +6624,52 @@ function BaseMap(props) {
             setSelectedIndexes([]);
             setDefaultKeys([]);
           }}
+          items={panes.length>0&&panes.map((pane) =>{
+            return {
+              key: pane.key,
+              label: (<span>
+                {pane?.title}{" "}
+                <Badge
+                  size="small"
+                  count={pane.count}
+                  overflowCount={overflowCount(pane.count)}
+                  style={{
+                    backgroundColor: "#52c41a",
+                    marginLeft: "2px",
+                    display: pane.type == "vector" ? "inherit" : "none",
+                  }}
+                />
+              </span>),
+              children: <MapAttributes
+              type={pane.type}
+              id={pane.id}
+              path={pane.path}
+              bottomBarHeight={bottomBarHeight}
+              featureCount={pane.count}
+              setViewport={setViewport}
+              setColorMap={SetColorMap}
+              setSelectedIndexes={setSelectedIndexes}
+              setshowSelectedIndexes={setshowSelectedIndexes}
+              selectedIndexes={selectedIndexes}
+              setKey={setKey}
+              defaultKeys={defaultKeys}
+              setShouldAttributeTableReload={setShouldAttributeTableReload}
+              shouldAttributeTableReload={shouldAttributeTableReload}
+              canEditGeojson={perms.canEditGeojson}
+              canDeleteFeature={perms.canDeleteFeature}
+              updateFeatureCountInLayers={updateFeatureCountInLayers}
+              flaggedFilter={flaggedFilter}
+              unflaggedFilter={unflaggedFilter}
+              allLayers={allLayers}
+              refreshLayer={refreshLayer}
+              setRefreshLayer={setRefreshLayer}
+              invertColor={invertColor}
+            />,
+              closeable: true
+            }
+          })} 
+          //onEdit={(targetKey) => remove(targetKey)}
+          //onClick={() => console.log(activeKey)}
           hideAdd
           tabBarExtraContent={
             <div>
@@ -6892,54 +6775,6 @@ function BaseMap(props) {
             </div>
           }
         >
-          {panes.length &&
-            panes.map((pane) => (
-              <TabPane
-                tab={
-                  <span>
-                    {pane?.title}{" "}
-                    <Badge
-                      size="small"
-                      count={pane.count}
-                      overflowCount={overflowCount(pane.count)}
-                      style={{
-                        backgroundColor: "#52c41a",
-                        marginLeft: "2px",
-                        display: pane.type == "vector" ? "inherit" : "none",
-                      }}
-                    />
-                  </span>
-                }
-                key={pane.key}
-                closable={true}
-              >
-                <MapAttributes
-                  type={pane.type}
-                  id={pane.id}
-                  path={pane.path}
-                  bottomBarHeight={bottomBarHeight}
-                  featureCount={pane.count}
-                  setViewport={setViewport}
-                  setColorMap={SetColorMap}
-                  setSelectedIndexes={setSelectedIndexes}
-                  setshowSelectedIndexes={setshowSelectedIndexes}
-                  selectedIndexes={selectedIndexes}
-                  setKey={setKey}
-                  defaultKeys={defaultKeys}
-                  setShouldAttributeTableReload={setShouldAttributeTableReload}
-                  shouldAttributeTableReload={shouldAttributeTableReload}
-                  canEditGeojson={perms.canEditGeojson}
-                  canDeleteFeature={perms.canDeleteFeature}
-                  updateFeatureCountInLayers={updateFeatureCountInLayers}
-                  flaggedFilter={flaggedFilter}
-                  unflaggedFilter={unflaggedFilter}
-                  allLayers={allLayers}
-                  refreshLayer={refreshLayer}
-                  setRefreshLayer={setRefreshLayer}
-                  invertColor={invertColor}
-                />
-              </TabPane>
-            ))}
         </Tabs>
       </div>
       {showForm && (

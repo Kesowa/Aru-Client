@@ -16,7 +16,6 @@ import {
   Skeleton,
   message,
   Dropdown,
-  Menu,
   Badge,
 } from "antd";
 import {
@@ -59,7 +58,7 @@ type OutcomeProps = {
   userType: any;
 };
 function Outcomes(props) {
-  const [outcomeData, setOutcomeData] = useState<any>(null);
+  const [outcomeData, setOutcomeData] = useState<unknown>([]);
   const [loading, setLoading] = useState(true);
   const [isAscending, setIsAscending] = useState(false);
   const [sortType, setSortType] = useState("timeStamp");
@@ -87,7 +86,75 @@ function Outcomes(props) {
   const [activateSelection, setActivateSelection] = useState(false);
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
-
+  const [selectedOutcome, setSelectedOutcome] = useState({});
+  const outcomeMenu: MenuProps["items"] = (data) => {
+    const item = [
+      {
+        key: "1",
+        label: "Download",
+        icon: <DownloadOutlined />,
+      },
+      {
+        key: "2",
+        label: "Thermal View",
+        icon: <FireOutlined />,
+      },
+      {
+        key: "3",
+        label: "Open Thread",
+        icon: <MessageOutlined />,
+      },
+      {
+        key: "4",
+        label: !data.isFlagged ? "Flag" : "Unflag",
+        icon: <FlagOutlined />,
+      },
+      {
+        key: "5",
+        label: "Delete",
+        icon: <DeleteOutlined />,
+      },
+    ];
+    return item;
+  };
+  const outcomeMenuOnClick: MenuProps["onClick"] = (e) => {
+    switch (e.key) {
+      case "1":
+        downloadImage(STATIC_URL + selectedOutcome.thumb);
+        break;
+      case "2":
+        setThermalPayload({
+          id: selectedOutcome._id,
+          doc: "alerts",
+          filePath: selectedOutcome.image,
+        });
+        break;
+      case "3":
+        setThumbnail(thumbnailComponent(selectedOutcome));
+        props.thread(true, {
+          docType: "alert",
+          docId: selectedOutcome._id,
+        });
+        break;
+      case "4":
+        toggleFlag(selectedOutcome);
+        break;
+      case "5":
+        Modal.confirm({
+          title: "Delete outcome?",
+          icon: <ExclamationCircleOutlined />,
+          content: "Are you sure you want to delete this outcome?",
+          okText: "Yes",
+          cancelText: "No",
+          onOk: () => {
+            deleteOutcome(selectedOutcome);
+          },
+        });
+        break;
+      default:
+        break;
+    }
+  };
   const getFlaggedFilter = () => {
     if (flaggedFilter) {
       return flaggedFilter;
@@ -115,7 +182,7 @@ function Outcomes(props) {
     else sortOrder = "desc";
     const query = {
       sortBy: `${sortBy}:${sortOrder}`,
-      id: props.id,
+      id: props.id.split("-")[1],
       page,
       limit,
       alertType,
@@ -804,7 +871,7 @@ function Outcomes(props) {
     <React.Fragment>
       <Modal
         title="Upload Outcomes"
-        visible={uploadModall}
+        open={uploadModall}
         onOk={() => {
           if (isUploading) {
             message.warning("Cannot exit during an ongoing process!");
@@ -920,78 +987,11 @@ function Outcomes(props) {
                       {outcomeData.map((outcome, ind) => (
                         <Dropdown
                           trigger={["contextMenu"]}
-                          overlay={
-                            <Menu>
-                              <Menu.Item key="1">
-                                <span
-                                  onClick={() =>
-                                    downloadImage(STATIC_URL + outcome.thumb)
-                                  }
-                                >
-                                  <DownloadOutlined /> Download{" "}
-                                </span>
-                              </Menu.Item>
-                              <Menu.Item
-                                key="5"
-                                onClick={() =>
-                                  setThermalPayload({
-                                    id: outcome._id,
-                                    doc: "alerts",
-                                    filePath: outcome.image,
-                                  })
-                                }
-                              >
-                                <FireOutlined /> Thermal View
-                              </Menu.Item>
-                              <Menu.Item
-                                key="2"
-                                onClick={() => {
-                                  setThumbnail(thumbnailComponent(outcome));
-                                  props.thread(true, {
-                                    docType: "alert",
-                                    docId: outcome._id,
-                                  });
-                                }}
-                              >
-                                <MessageOutlined /> Open Thread{" "}
-                              </Menu.Item>
-                              <Menu.Item
-                                key="3"
-                                onClick={() => {
-                                  toggleFlag(outcome);
-                                }}
-                              >
-                                {!outcome.isFlagged ? (
-                                  <>
-                                    <FlagOutlined /> Flag
-                                  </>
-                                ) : (
-                                  <>
-                                    <FlagOutlined /> Unflag
-                                  </>
-                                )}
-                              </Menu.Item>
-                              <Menu.Item key="4">
-                                <span
-                                  onClick={() => {
-                                    Modal.confirm({
-                                      title: "Delete outcome?",
-                                      icon: <ExclamationCircleOutlined />,
-                                      content:
-                                        "Are you sure you want to delete this outcome?",
-                                      okText: "Yes",
-                                      cancelText: "No",
-                                      onOk: () => {
-                                        deleteOutcome(outcome);
-                                      },
-                                    });
-                                  }}
-                                >
-                                  <DeleteOutlined /> Delete
-                                </span>
-                              </Menu.Item>
-                            </Menu>
-                          }
+                          onOpenChange={() => setSelectedOutcome(outcome)}
+                          menu={{
+                            items: outcomeMenu(outcome),
+                            onClick: outcomeMenuOnClick,
+                          }}
                         >
                           <Row
                             className="listview-outcomes"
@@ -1117,80 +1117,11 @@ function Outcomes(props) {
                           >
                             <Dropdown
                               trigger={["contextMenu"]}
-                              overlay={
-                                <Menu>
-                                  <Menu.Item key="1">
-                                    <span
-                                      onClick={() =>
-                                        downloadImage(
-                                          STATIC_URL + outcome.thumb
-                                        )
-                                      }
-                                    >
-                                      <DownloadOutlined /> Download{" "}
-                                    </span>
-                                  </Menu.Item>
-                                  <Menu.Item
-                                    key="5"
-                                    onClick={() =>
-                                      setThermalPayload({
-                                        id: outcome._id,
-                                        doc: "alerts",
-                                        filePath: outcome.image,
-                                      })
-                                    }
-                                  >
-                                    <FireOutlined /> Thermal View
-                                  </Menu.Item>
-                                  <Menu.Item
-                                    key="2"
-                                    onClick={() => {
-                                      setThumbnail(thumbnailComponent(outcome));
-                                      props.thread(true, {
-                                        docType: "alert",
-                                        docId: outcome._id,
-                                      });
-                                    }}
-                                  >
-                                    <MessageOutlined /> Open Thread{" "}
-                                  </Menu.Item>
-                                  <Menu.Item
-                                    key="3"
-                                    onClick={() => {
-                                      toggleFlag(outcome);
-                                    }}
-                                  >
-                                    {!outcome.isFlagged ? (
-                                      <>
-                                        <FlagOutlined /> Flag
-                                      </>
-                                    ) : (
-                                      <>
-                                        <FlagOutlined /> Unflag
-                                      </>
-                                    )}
-                                  </Menu.Item>
-                                  <Menu.Item key="4">
-                                    <span
-                                      onClick={() => {
-                                        Modal.confirm({
-                                          title: "Delete outcome?",
-                                          icon: <ExclamationCircleOutlined />,
-                                          content:
-                                            "Are you sure you want to delete this outcome?",
-                                          okText: "Yes",
-                                          cancelText: "No",
-                                          onOk: () => {
-                                            deleteOutcome(outcome);
-                                          },
-                                        });
-                                      }}
-                                    >
-                                      <DeleteOutlined /> Delete
-                                    </span>
-                                  </Menu.Item>
-                                </Menu>
-                              }
+                              onOpenChange={() => setSelectedOutcome(outcome)}
+                              menu={{
+                                items: outcomeMenu(outcome),
+                                onClick: outcomeMenuOnClick,
+                              }}
                             >
                               <div
                                 style={{

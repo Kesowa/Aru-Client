@@ -656,7 +656,7 @@ function ModelCard(props) {
 
         <Modal
           title="Model Information"
-          visible={isModalVisible}
+          open={isModalVisible}
           onOk={handleOk}
           onCancel={handleCancel}
           footer={null}
@@ -709,7 +709,7 @@ function ModelCard(props) {
 
         <Modal
           title="Add New Asset"
-          visible={isModalVisible2}
+          open={isModalVisible2}
           onOk={handleOk2}
           onCancel={handleCancel2}
           footer={null}

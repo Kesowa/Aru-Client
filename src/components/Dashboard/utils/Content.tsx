@@ -73,7 +73,7 @@ function DashboardContent(props: any) {
       <Modal
         title="Connect To App"
         centered
-        visible={visible}
+        open={visible}
         onCancel={() => setVisible(false)}
         footer={null}
         width={1000}

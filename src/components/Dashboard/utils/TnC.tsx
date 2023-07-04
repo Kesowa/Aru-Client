@@ -32,7 +32,7 @@ const TermsAndCondition = (props: any) => {
   }
   return (
     <Modal
-      visible={termsModal}
+      open={termsModal}
       centered={true}
       title="Terms and Conditions"
       onOk={() => {}}

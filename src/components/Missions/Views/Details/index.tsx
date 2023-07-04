@@ -5,7 +5,6 @@ import EmptyGraphics from "../../../../static/Alone-rafiki.svg";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
 
 import {
-  PageHeader,
   Tag,
   Button,
   Descriptions,
@@ -23,12 +22,12 @@ import {
   Input,
   Timeline,
   Dropdown,
-  Menu,
   Badge,
   notification,
   Empty,
 } from "antd";
-
+import { PageHeader } from "@ant-design/pro-layout";
+import type { MenuProps, TabsProps } from "antd";
 import {
   UserOutlined,
   ShareAltOutlined,
@@ -229,6 +228,7 @@ function MissionView(props) {
         const finalArray: any = [];
         mission.clientId.map((item: any) => {
           const obj = {
+            key: item._id,
             id: item._id,
             name: item.name,
             avatar: item.avatar,
@@ -335,192 +335,120 @@ function MissionView(props) {
     setEditModalVisible(false);
   };
 
-  const { TabPane } = Tabs;
   const { Title, Text, Link } = Typography;
   const [activeKey, setactiveKey] = useState("1");
   // ++++++++++++++++++++++++++++++++++++++++++++++ E4 Data Card tabs +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  const returnTabPaneItem = () => {
+    const items: TabsProps["items"] = [
+      {
+        key: "1",
+        label: <span>Map</span>,
+        children: <Map id={id} mission={MissionDetails} />,
+      },
+      {
+        key: "2",
+        label: (
+          <span>
+            Documents{" "}
+            <Badge
+              style={{ backgroundColor: "#3D85FC" }}
+              count={totalDocs}
+            ></Badge>
+          </span>
+        ),
+        children: (
+          <Documents
+            missionName={MissionDetails.missionName}
+            missionId={MissionDetails.missionId}
+            missionDetails={MissionDetails}
+            userDetails={props.userDetails}
+            userType={props.userType}
+            refreshDoc={docRefresh}
+            setRefreshDoc={setDocRefresh}
+          />
+        ),
+      },
+      {
+        key: "3",
+        label: (
+          <span>
+            Videos{" "}
+            <Badge
+              style={{ backgroundColor: "#3D85FC" }}
+              count={totalVOD}
+            ></Badge>
+          </span>
+        ),
+        children: (
+          <Videos
+            missionDetails={MissionDetails}
+            userType={props.userType}
+            userDetails={props.userDetails}
+            setCount={setTotalVOD}
+            totalVOD={totalVOD}
+          />
+        ),
+      },
+      {
+        key: "4",
+        label: (
+          <span>
+            Outcomes{" "}
+            <Badge
+              style={{ backgroundColor: "#3D85FC" }}
+              count={totalAlerts}
+            ></Badge>
+          </span>
+        ),
+        children: (
+          <Outcomes
+            id={id}
+            count={totalAlerts}
+            missionDetails={MissionDetails}
+            userType={props.userType}
+            userDetails={props.userDetails}
+          />
+        ),
+      },
+      {
+        key: "5",
+        label: (
+          <span>
+            Images{" "}
+            <Badge
+              style={{ backgroundColor: "#3D85FC" }}
+              count={totalImages}
+            ></Badge>
+          </span>
+        ),
+        children: (
+          <ImageDoc
+            missionName={MissionDetails.missionName}
+            missionId={MissionDetails.missionId}
+            missionDetails={MissionDetails}
+            userType={props.userType}
+            userDetails={props.userDetails}
+          />
+        ),
+      },
+    ];
+    if (MissionDetails.missionType === "Mapping") {
+      return items;
+    } else {
+      return items.filter((item) => item.key !== "1" && item.key !== "2");
+    }
+  };
 
   const DataTabs = ({ id }) => {
-    if (MissionDetails.missionType === "Mapping") {
-      return (
-        <>
-          <Tabs defaultActiveKey={activeKey} onChange={callback}>
-            <TabPane tab={<span>Map</span>} key="1">
-              <Map id={id} mission={MissionDetails} />
-            </TabPane>
-            <TabPane
-              tab={
-                <span>
-                  Documents{" "}
-                  <Badge
-                    style={{ backgroundColor: "#3D85FC" }}
-                    count={totalDocs}
-                  ></Badge>
-                </span>
-              }
-              key="2"
-            >
-              <Documents
-                missionName={MissionDetails.missionName}
-                missionId={MissionDetails.missionId}
-                missionDetails={MissionDetails}
-                userDetails={props.userDetails}
-                userType={props.userType}
-                refreshDoc={docRefresh}
-                setRefreshDoc={setDocRefresh}
-              />
-            </TabPane>
-            <TabPane
-              tab={
-                <span>
-                  Videos{" "}
-                  <Badge
-                    style={{ backgroundColor: "#3D85FC" }}
-                    count={totalVOD}
-                  ></Badge>
-                </span>
-              }
-              key="3"
-            >
-              <Videos
-                missionDetails={MissionDetails}
-                userType={props.userType}
-                userDetails={props.userDetails}
-                setCount={setTotalVOD}
-                totalVOD={totalVOD}
-              />
-            </TabPane>
-            <TabPane
-              tab={
-                <span>
-                  Outcomes{" "}
-                  <Badge
-                    style={{ backgroundColor: "#3D85FC" }}
-                    count={totalAlerts}
-                  ></Badge>
-                </span>
-              }
-              key="4"
-            >
-              <Outcomes
-                id={id}
-                count={totalAlerts}
-                missionDetails={MissionDetails}
-                userType={props.userType}
-                userDetails={props.userDetails}
-              />
-            </TabPane>
-            <TabPane
-              tab={
-                <span>
-                  Images{" "}
-                  <Badge
-                    style={{ backgroundColor: "#3D85FC" }}
-                    count={totalImages}
-                  ></Badge>
-                </span>
-              }
-              key="5"
-            >
-              <ImageDoc
-                missionName={MissionDetails.missionName}
-                missionId={MissionDetails.missionId}
-                missionDetails={MissionDetails}
-                userType={props.userType}
-                userDetails={props.userDetails}
-              />
-            </TabPane>
-          </Tabs>
-        </>
-      );
-    } else {
-      return (
-        <Tabs defaultActiveKey={activeKey} onChange={callback}>
-          <TabPane
-            tab={
-              <span>
-                Videos{" "}
-                <Badge
-                  style={{ backgroundColor: "#3D85FC" }}
-                  count={totalVOD}
-                ></Badge>
-              </span>
-            }
-            key="1"
-          >
-            <Videos
-              missionDetails={MissionDetails}
-              userType={props.userType}
-              userDetails={props.userDetails}
-              setCount={setTotalVOD}
-              totalVOD={totalVOD}
-            />
-          </TabPane>
-          <TabPane
-            tab={
-              <span>
-                Outcomes{" "}
-                <Badge
-                  style={{ backgroundColor: "#3D85FC" }}
-                  count={totalAlerts}
-                ></Badge>
-              </span>
-            }
-            key="2"
-          >
-            <Outcomes
-              id={id}
-              count={totalAlerts}
-              missionDetails={MissionDetails}
-              userType={props.userType}
-              userDetails={props.userDetails}
-            />
-          </TabPane>
-          <TabPane
-            tab={
-              <span>
-                Documents{" "}
-                <Badge
-                  style={{ backgroundColor: "#3D85FC" }}
-                  count={totalDocs}
-                ></Badge>
-              </span>
-            }
-            key="3"
-          >
-            <Documents
-              missionName={MissionDetails.missionName}
-              missionId={MissionDetails.missionId}
-              missionDetails={MissionDetails}
-              userDetails={props.userDetails}
-              userType={props.userType}
-              refreshDoc={docRefresh}
-              setRefreshDoc={setDocRefresh}
-            />
-          </TabPane>
-          <TabPane
-            tab={
-              <span>
-                Images{" "}
-                <Badge
-                  style={{ backgroundColor: "#3D85FC" }}
-                  count={totalImages}
-                ></Badge>
-              </span>
-            }
-            key="4"
-          >
-            <ImageDoc
-              missionName={MissionDetails.missionName}
-              missionId={MissionDetails.missionId}
-              missionDetails={MissionDetails}
-              userType={props.userType}
-              userDetails={props.userDetails}
-            />
-          </TabPane>
-        </Tabs>
-      );
-    }
+    return (
+      <>
+        <Tabs
+          defaultActiveKey={activeKey}
+          onChange={callback}
+          items={returnTabPaneItem()}
+        />
+      </>
+    );
   };
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++ E5 Rendering Mission Status tags ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -946,48 +874,33 @@ function MissionView(props) {
       );
     }
   }
-
-  //----------------Render Edit Flight Button---------------------
-
-  function renderEditFlightBtn() {
-    if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
-    ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_update"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
-        return (
-          <Menu.Item
-            onClick={() => {
-              history.push(
-                `/dashboard/flight/edit/${MissionDetails.missionId}`
-              );
-            }}
-            key="1"
-          >
-            <EditOutlined /> Edit Flight
-          </Menu.Item>
-        );
-      }
-    } else {
-      return (
-        <Menu.Item
-          onClick={() => {
-            history.push(`/dashboard/flight/edit/${MissionDetails.missionId}`);
-          }}
-          key="1"
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <a
+          rel="noopener noreferrer"
+          href={`/dashboard/flight/edit/${MissionDetails.missionId}`}
         >
-          <EditOutlined /> Edit Flight
-        </Menu.Item>
-      );
-    }
-  }
+          Edit Flight
+        </a>
+      ),
+      icon: <EditOutlined />,
+    },
+    {
+      key: "2",
+      label: (
+        <a
+          rel="noopener noreferrer"
+          href={`/dashboard/flight/view/${MissionDetails.missionId}`}
+        >
+          View Flight
+        </a>
+      ),
+      icon: <EyeOutlined />,
+    },
+  ];
+  //----------------Render Edit Flight Button---------------------
 
   //----------------Render Assign Pilot Button---------------------
 
@@ -1064,7 +977,8 @@ function MissionView(props) {
   }
 
   /*------------------Handel Actions -------------------------*/
-  const handleAction = (e) => {
+
+  const handleAction: MenuProps["onClick"] = (e) => {
     console.log(e);
     const i = parseInt(e.key) - 1;
     setMissType(missionTypes[i].name);
@@ -1074,22 +988,26 @@ function MissionView(props) {
     });
   };
   /*--------------------Mission Type--------------------*/
-
-  const menu = (
-    <Menu
-      onClick={(e) => handleAction(e)}
-      items={missionTypes.map((mType: any, index: any) => {
+  const menu: MenuProps["items"] = () => {
+    const items: MenuProps["items"] = missionTypes.map(
+      (mType: any, index: any) => {
         return {
           label: mType.name,
           key: (index + 1).toString(),
           icon: <VideoCameraOutlined />,
         };
-      })}
-    />
-  );
+      }
+    );
+    console.log("items", items);
+    return items;
+  };
   // +++++++++++++++ E9 Rendering Mission Deliverables and Pilot badge ++++++++++++++++++++++++
   function MissionDeliverables(items: any[]) {
-    return items.map((item) => <Tag color="green">{item}</Tag>);
+    return items.map((item, idx: number) => (
+      <Tag color="green" key={(idx + 1).toString()}>
+        {item}
+      </Tag>
+    ));
   }
 
   function assignPilot() {
@@ -1147,7 +1065,6 @@ function MissionView(props) {
       <Modal
         title="Assign Pilot"
         open={isPilotModalVisible}
-        onOk={() => {}}
         onCancel={cancelAssigningPilot}
         footer={[
           <Button key="back" onClick={cancelAssigningPilot}>
@@ -1175,8 +1092,9 @@ function MissionView(props) {
         >
           {pilots.length > 0 ? (
             <>
-              {pilots.map((pilot) => (
+              {pilots.map((pilot: unknown, idx: number) => (
                 <Row
+                  key={(idx + 1).toString()}
                   className={`pilot ${
                     pilot.name === pilotToAssign.name ? "pilot-selected" : ""
                   }`}
@@ -1428,24 +1346,7 @@ function MissionView(props) {
 
               <Row>
                 <Card title="Flights" bordered={false} className="flight-card">
-                  <Dropdown
-                    overlay={
-                      <Menu>
-                        {renderEditFlightBtn()}
-                        <Menu.Item
-                          onClick={() => {
-                            history.push(
-                              `/dashboard/flight/view/${MissionDetails.missionId}`
-                            );
-                          }}
-                          key="1"
-                        >
-                          <EyeOutlined /> View Flight
-                        </Menu.Item>
-                      </Menu>
-                    }
-                    trigger={["contextMenu"]}
-                  >
+                  <Dropdown menu={{ items }} trigger={["contextMenu"]}>
                     <Tooltip
                       placement="bottom"
                       title="Right click to view/edit flight"
@@ -1503,7 +1404,7 @@ function MissionView(props) {
                 &nbsp;&nbsp;&nbsp;Share mission card
               </Title>,
             ]}
-            visible={isModalVisible}
+            open={isModalVisible}
             onOk={handleOk}
             onCancel={handleCancel}
           >
@@ -1539,7 +1440,7 @@ function MissionView(props) {
                 &nbsp;&nbsp;&nbsp;Edit Mission and flight details
               </Title>,
             ]}
-            visible={EditModalVisible}
+            open={EditModalVisible}
             onOk={EditSubmit}
             onCancel={EditCancel}
             footer={[
@@ -1603,7 +1504,10 @@ function MissionView(props) {
                 />
               </Form.Item>
               <Form.Item label="Mission Type:" name="missionname">
-                <Dropdown overlay={menu} placement="bottomLeft">
+                <Dropdown
+                  menu={{ items: menu(), onClick: handleAction }}
+                  placement="bottomLeft"
+                >
                   <Button type="primary" block>
                     {missType == "" ? MissionDetails.missionType : missType}
 

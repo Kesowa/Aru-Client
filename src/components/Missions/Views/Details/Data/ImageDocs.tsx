@@ -8,7 +8,6 @@ import {
   Image,
   Col,
   Dropdown,
-  Menu,
   Button,
   Typography,
   Empty,
@@ -75,6 +74,103 @@ function ImageDocs(props) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+  const [selectedImg, setSelectedImg] = useState({});
+  const imgMenu: MenuProps["items"] = (data) => {
+    const item = [
+      {
+        key: "1",
+        label: "Download",
+        icon: <DownloadOutlined />,
+      },
+      {
+        key: "2",
+        label: "Thermal View",
+        icon: <FireOutlined />,
+      },
+      {
+        key: "3",
+        label: "Open Thread",
+        icon: <MessageOutlined />,
+      },
+      {
+        key: "4",
+        label: !data.isFlagged ? "Flag" : "Unflag",
+        icon: <FlagOutlined />,
+      },
+    ];
+    const deleteItem = {
+      key: "5",
+      label: "Delete video",
+      icon: <DeleteOutlined />,
+    };
+    if (
+      props.missionDetails.userType === "tenant-staff" ||
+      props.missionDetails.userType === "tenant-client"
+    ) {
+      let permissions: any = [];
+      props.missionDetails.currentUserDetails.customPermissions.forEach((p) => {
+        const filteredPermissions = p.permissions.filter(
+          (d) => d.name === "vod_delete"
+        );
+        permissions = [...filteredPermissions, ...permissions];
+      });
+      if (permissions.length > 0) {
+        item.push(deleteItem);
+      }
+    } else {
+      item.push(deleteItem);
+    }
+    return item;
+  };
+  const imgMenuOnClick: MenuProps["onClick"] = (e) => {
+    switch (e.key) {
+      case "1":
+        window.open(`${STATIC_URL}${selectedImg.filePath}`);
+        break;
+      case "2":
+        setThermalPayload({
+          id: selectedImg._id,
+          doc: "documents",
+          filePath: selectedImg.image,
+        });
+        break;
+      case "3":
+        setThumbnail(
+          ImageComponent(
+            selectedImg,
+            false,
+            {
+              width: "100%",
+              height: "auto",
+              minHeight: "200px",
+            },
+            true
+          )
+        );
+        props.thread(true, {
+          docType: "document",
+          docId: selectedImg._id,
+        });
+        break;
+      case "4":
+        toggleFlag(selectedImg);
+        break;
+      case "5":
+        Modal.confirm({
+          title: "Delete Image?",
+          icon: <ExclamationCircleOutlined />,
+          content: "Are you sure you want to delete this Image?",
+          okText: "Yes",
+          cancelText: "No",
+          onOk: () => {
+            deleteSingleFile(selectedImg._id);
+          },
+        });
+        break;
+      default:
+        break;
+    }
+  };
   useEffect(() => {
     if (images.length < 1) {
       setActivateSelection(false);
@@ -567,63 +663,6 @@ function ImageDocs(props) {
   }
 
   //--------render delete button-------------------
-  function renderDeleteBtn(item: any) {
-    if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
-    ) {
-      // Add type info
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "delete_document"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
-        return (
-          <Menu.Item
-            key="4"
-            onClick={() => {
-              Modal.confirm({
-                title: "Delete Image?",
-                icon: <ExclamationCircleOutlined />,
-                content: "Are you sure you want to delete this Image?",
-                okText: "Yes",
-                cancelText: "No",
-                onOk: () => {
-                  deleteSingleFile(item._id);
-                },
-              });
-            }}
-          >
-            <DeleteOutlined /> Delete
-          </Menu.Item>
-        );
-      }
-    } else {
-      return (
-        <Menu.Item
-          key="4"
-          onClick={() => {
-            Modal.confirm({
-              title: "Delete Image?",
-              icon: <ExclamationCircleOutlined />,
-              content: "Are you sure you want to delete this Image?",
-              okText: "Yes",
-              cancelText: "No",
-              onOk: () => {
-                deleteSingleFile(item._id);
-              },
-            });
-          }}
-        >
-          <DeleteOutlined /> Delete
-        </Menu.Item>
-      );
-    }
-  }
-
   const onChange = (list) => {
     setCheckedList(list);
   };
@@ -741,72 +780,11 @@ function ImageDocs(props) {
                               >
                                 <Col md={8} style={{ padding: "10px" }}>
                                   <Dropdown
-                                    overlay={
-                                      <Menu>
-                                        <Menu.Item
-                                          key="1"
-                                          onClick={() =>
-                                            window.open(
-                                              `${STATIC_URL}${item.filePath}`
-                                            )
-                                          }
-                                        >
-                                          <DownloadOutlined /> Download
-                                        </Menu.Item>
-                                        <Menu.Item
-                                          key="5"
-                                          onClick={() =>
-                                            setThermalPayload({
-                                              id: item._id,
-                                              doc: "documents",
-                                              filePath: item.filePath,
-                                            })
-                                          }
-                                        >
-                                          <FireOutlined /> Thermal View
-                                        </Menu.Item>
-                                        <Menu.Item
-                                          key="2"
-                                          onClick={() => {
-                                            setThumbnail(
-                                              ImageComponent(
-                                                item,
-                                                false,
-                                                {
-                                                  width: "100%",
-                                                  height: "auto",
-                                                  minHeight: "200px",
-                                                },
-                                                true
-                                              )
-                                            );
-                                            props.thread(true, {
-                                              docType: "document",
-                                              docId: item._id,
-                                            });
-                                          }}
-                                        >
-                                          <MessageOutlined /> Open Thread{" "}
-                                        </Menu.Item>
-                                        <Menu.Item
-                                          key="3"
-                                          onClick={() => {
-                                            toggleFlag(item);
-                                          }}
-                                        >
-                                          {!item.isFlagged ? (
-                                            <>
-                                              <FlagOutlined /> Flag
-                                            </>
-                                          ) : (
-                                            <>
-                                              <FlagOutlined /> Unflag
-                                            </>
-                                          )}
-                                        </Menu.Item>
-                                        {renderDeleteBtn(item)}
-                                      </Menu>
-                                    }
+                                    onOpenChange={() => setSelectedImg(item)}
+                                    menu={{
+                                      items: imgMenu(item),
+                                      onClick: imgMenuOnClick,
+                                    }}
                                     trigger={["contextMenu"]}
                                   >
                                     {ImageComponent(item, true, {
@@ -936,72 +914,11 @@ function ImageDocs(props) {
                           return (
                             <>
                               <Dropdown
-                                overlay={
-                                  <Menu>
-                                    <Menu.Item
-                                      key="1"
-                                      onClick={() =>
-                                        window.open(
-                                          `${STATIC_URL}${item.filePath}`
-                                        )
-                                      }
-                                    >
-                                      <DownloadOutlined /> Download
-                                    </Menu.Item>
-                                    <Menu.Item
-                                      key="5"
-                                      onClick={() =>
-                                        setThermalPayload({
-                                          id: item._id,
-                                          doc: "documents",
-                                          filePath: item.filePath,
-                                        })
-                                      }
-                                    >
-                                      <FireOutlined /> Thermal View
-                                    </Menu.Item>
-                                    <Menu.Item
-                                      key="2"
-                                      onClick={() => {
-                                        setThumbnail(
-                                          ImageComponent(
-                                            item,
-                                            false,
-                                            {
-                                              width: "100%",
-                                              height: "auto",
-                                              minHeight: "200px",
-                                            },
-                                            true
-                                          )
-                                        );
-                                        props.thread(true, {
-                                          docType: "document",
-                                          docId: item._id,
-                                        });
-                                      }}
-                                    >
-                                      <MessageOutlined /> Open Thread{" "}
-                                    </Menu.Item>
-                                    <Menu.Item
-                                      key="3"
-                                      onClick={() => {
-                                        toggleFlag(item);
-                                      }}
-                                    >
-                                      {!item.isFlagged ? (
-                                        <>
-                                          <FlagOutlined /> Flag
-                                        </>
-                                      ) : (
-                                        <>
-                                          <FlagOutlined /> Unflag
-                                        </>
-                                      )}
-                                    </Menu.Item>
-                                    {renderDeleteBtn(item)}
-                                  </Menu>
-                                }
+                                onOpenChange={() => setSelectedImg(item)}
+                                menu={{
+                                  items: imgMenu(item),
+                                  onClick: imgMenuOnClick,
+                                }}
                                 trigger={["contextMenu"]}
                               >
                                 {ImageComponent(item, true, {
@@ -1040,7 +957,7 @@ function ImageDocs(props) {
       )}
       <Modal
         title="Storage Exceeded!"
-        visible={storageModal}
+        open={storageModal}
         onOk={() => setStorageModal(false)}
         onCancel={() => setStorageModal(false)}
       >

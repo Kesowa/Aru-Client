@@ -1187,15 +1187,13 @@ function VideoPlayer(props: any) {
       )}
     </Menu>
   );
-
-  const menu = (
-    <Menu>
-      <Menu.Item key="1" onClick={() => setShowHotkeys(true)}>
-        {" "}
-        <InfoCircleOutlined /> Help
-      </Menu.Item>
-    </Menu>
-  );
+  const menu = [
+    {
+      key: "1",
+      label: "Help",
+      icon: <InfoCircleOutlined />,
+    },
+  ];
 
   const handleCancel = () => {
     setIsModalVisible(false);
@@ -1211,7 +1209,7 @@ function VideoPlayer(props: any) {
     >
       {isAlertEnabled ? (
         <Modal
-          visible={isModalVisible}
+          open={isModalVisible}
           title="Snapshot Captured!"
           onOk={() => {}}
           width={1200}
@@ -1731,7 +1729,7 @@ function VideoPlayer(props: any) {
       )}
 
       <Dropdown
-        overlay={menu}
+        menu={{ items: menu, onClick: () => setShowHotkeys(true) }}
         trigger={["contextMenu"]}
         getPopupContainer={() =>
           document.getElementById("area22") as HTMLElement
@@ -2270,7 +2268,7 @@ function VideoPlayer(props: any) {
       <canvas ref={canvasRef} />
       <Modal
         title="Storage Exceeded!"
-        visible={storageModal}
+        open={storageModal}
         onOk={() => setStorageModal(false)}
         onCancel={() => setStorageModal(false)}
       >

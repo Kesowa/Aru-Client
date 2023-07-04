@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
-import { message, Typography, Row, Col, PageHeader } from "antd";
+import { message, Typography, Row, Col } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import ManufacturerCard from "../utils/ManufacturerCard";
 import ModelCard from "../utils/ModelCard";
 import { connect } from "react-redux";
 import { loading } from "../../../actions/loadingAction";
 import moment from "moment";
-
 
 const { Title, Text } = Typography;
 
@@ -42,7 +42,6 @@ function AssetView(props) {
     setData(asset);
     props.loading(false);
     setIsLoading(false);
-    
   };
 
   return (

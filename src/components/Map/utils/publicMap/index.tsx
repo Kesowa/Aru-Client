@@ -14,13 +14,13 @@ import {
   Spin,
   message,
   Tree,
-  Menu,
   Dropdown,
   Modal,
   Input,
   Select,
   Space,
   Popover,
+  MenuProps,
 } from "antd";
 import {
   DoubleRightOutlined,
@@ -1165,56 +1165,58 @@ function PublicMap(props) {
   const [groupName, setgroupName] = useState("");
 
   const getGroupTitle = (value, id) => {
+    const menuOnClick: MenuProps["onClick"] = (e) => {
+      switch (e.key) {
+        case "1":
+          setgroupName(value.name);
+          setgroupToEdit({
+            id: id,
+            name: value.name,
+          });
+          setVisibleEditModal(true);
+          break;
+        case "2":
+          Modal.confirm({
+            title: "Delete Group?",
+            icon: <ExclamationCircleOutlined />,
+            content: (
+              <>
+                <p>Are You Sure To Want To Delete This Group</p>
+                <b>These Layers Will be deleted along with this group</b>
+                <>
+                  {value.children.map((layer) => {
+                    return <p>{layer.name}</p>;
+                  })}
+                </>
+              </>
+            ),
+            okText: "Yes",
+            cancelText: "No",
+            onOk: () => {
+              deleteGroup(id);
+            },
+          });
+          break;
+        default:
+          console.log("Incorrect selection");
+          break;
+      }
+    };
+    const menuItem: MenuProps["items"] = [
+      {
+        key: "1",
+        label: "Rename",
+      },
+      {
+        key: "2",
+        label: "Delete",
+      },
+    ];
     return {
       title: (
         <>
           <Dropdown
-            overlay={
-              <Menu>
-                <Menu.Item
-                  key="1"
-                  onClick={() => {
-                    setgroupName(value.name);
-                    setgroupToEdit({
-                      id: id,
-                      name: value.name,
-                    });
-                    setVisibleEditModal(true);
-                  }}
-                >
-                  Rename
-                </Menu.Item>
-                <Menu.Item
-                  key="2"
-                  onClick={() => {
-                    Modal.confirm({
-                      title: "Delete Group?",
-                      icon: <ExclamationCircleOutlined />,
-                      content: (
-                        <>
-                          <p>Are You Sure To Want To Delete This Group</p>
-                          <b>
-                            These Layers Will be deleted along with this group
-                          </b>
-                          <>
-                            {value.children.map((layer) => {
-                              return <p>{layer.name}</p>;
-                            })}
-                          </>
-                        </>
-                      ),
-                      okText: "Yes",
-                      cancelText: "No",
-                      onOk: () => {
-                        deleteGroup(id);
-                      },
-                    });
-                  }}
-                >
-                  <span> Delete</span>
-                </Menu.Item>
-              </Menu>
-            }
+            menu={{ items: menuItem, onClick: menuOnClick }}
             trigger={["contextMenu"]}
           >
             <Text style={{ width: "160px" }} ellipsis={true}>
@@ -1782,16 +1784,28 @@ function PublicMap(props) {
   });
 
   //----------sorting menu
-  const menu1 = (
-    <Menu>
-      <Menu.Item key="0" onClick={() => setSortType("name")}>
-        Name
-      </Menu.Item>
-      <Menu.Item key="1" onClick={() => setSortType("createdAt")}>
-        Time
-      </Menu.Item>
-    </Menu>
-  );
+  const menu = [
+    {
+      key: "0",
+      label: "Name",
+    },
+    {
+      key: "1",
+      label: "Time",
+    },
+  ];
+  const menuOnClick: MenuProps["onClick"] = (e) => {
+    switch (e.key) {
+      case "0":
+        setSortType("name");
+        break;
+      case "1":
+        setSortType("createdAt");
+        break;
+      default:
+        break;
+    }
+  };
 
   // Set Active Layer Type
   useEffect(() => {
@@ -2190,7 +2204,7 @@ function PublicMap(props) {
                         </>
                       }
                       trigger="click"
-                      visible={showPopup}
+                      open={showPopup}
                       style={{ position: "relative" }}
                       onVisibleChange={() => handleClose(false)}
                     />
@@ -2320,7 +2334,10 @@ function PublicMap(props) {
                             />
                           </div>
                         )}
-                        <Dropdown overlay={menu1} trigger={["click"]}>
+                        <Dropdown
+                          menu={{ items: menu, onClick: menuOnClick }}
+                          trigger={["click"]}
+                        >
                           <Button style={{ float: "right" }} type="link">
                             Sort
                           </Button>

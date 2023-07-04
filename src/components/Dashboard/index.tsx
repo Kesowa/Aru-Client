@@ -52,7 +52,7 @@ function Dashboard(props: any) {
                 }
               >
                 <ProfileDrawer
-                  visible={showProfile}
+                  open={showProfile}
                   userDetails={props.Auth}
                   showProfile={setShowProfile}
                 />

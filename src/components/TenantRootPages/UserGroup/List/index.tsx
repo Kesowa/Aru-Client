@@ -8,7 +8,6 @@ import {
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import {
-  PageHeader,
   Row,
   Col,
   message,
@@ -19,6 +18,7 @@ import {
   Typography,
   Popconfirm,
 } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";

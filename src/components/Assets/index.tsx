@@ -4,7 +4,6 @@ import { useHistory } from "react-router-dom";
 import {
   Typography,
   Button,
-  PageHeader,
   Modal,
   Select,
   Cascader,
@@ -17,6 +16,7 @@ import {
   Tabs,
   Space,
 } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import {
   MinusCircleOutlined,
   PlusOutlined,
@@ -34,8 +34,6 @@ import apis from "../../services/apis";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { logout } from "../../actions/authAction";
 import "./index.less";
-
-const { TabPane } = Tabs;
 
 type optionType = {
   value: any;
@@ -392,7 +390,7 @@ function AssetBase(props: any) {
       website: values.website,
       contacts: values.contacts,
     };
-  
+
     http
       .post(`${apis.CREATE_MANUFACTURER}`, manufacturer)
       .then((result) => {
@@ -980,17 +978,27 @@ function AssetBase(props: any) {
         </Form>
       </Modal>
 
-      <Tabs defaultActiveKey="1" onTabClick={onTabClick}>
-        <TabPane tab="My Assets" key="1">
-          <AssetList filter="all"></AssetList>
-        </TabPane>
-        <TabPane tab="Models" key="2">
-          <ModelList />
-        </TabPane>
-        <TabPane tab="Manufacturers" key="3">
-          <ManufacturerList />
-        </TabPane>
-      </Tabs>
+      <Tabs
+        defaultActiveKey="1"
+        onTabClick={onTabClick}
+        items={[
+          {
+            key: "1",
+            label: "My Assets",
+            children: <AssetList filter="all"></AssetList>,
+          },
+          {
+            key: "2",
+            label: "Models",
+            children: <ModelList />,
+          },
+          {
+            key: "3",
+            label: "Manufacturers",
+            children: <ManufacturerList />,
+          },
+        ]}
+      />
     </div>
   );
 }

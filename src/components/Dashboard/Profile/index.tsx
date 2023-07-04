@@ -19,7 +19,7 @@ function Profile(props: any) {
       title="My Profile"
       placement="right"
       onClose={() => props.showProfile(false)}
-      visible={props.visible}
+      open={props.visible}
       width={380}
       footer={
         <div>

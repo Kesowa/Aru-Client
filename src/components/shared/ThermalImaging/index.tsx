@@ -20,6 +20,7 @@ const ThermalImaging = (props) => {
       console.log("thermal", thermalData.data.rawFilePath, rawArray);
     } catch (err) {
       message.info("Selected image does not have a thermal view.");
+      props.setThermalPayload({});
     }
   };
   useEffect(() => {

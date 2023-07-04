@@ -12,8 +12,6 @@ import GoogleMap from "../GoogleMap";
 import { logout } from "../../../actions/authAction";
 import { connect } from "react-redux";
 
-const { Step } = Steps;
-
 function CreateMissionBase(props: any) {
   const [currentStage, setCurrentStage] = useState(0);
   const [formData, setFormData] = useState<any>({
@@ -120,11 +118,12 @@ function CreateMissionBase(props: any) {
             }
             setCurrentStage(current);
           }}
-        >
-          {steps.map((item) => (
-            <Step key={item.title} description={item.title} />
-          ))}
-        </Steps>
+          items={steps.map((item) => {
+            return {
+              title: item.title,
+            };
+          })}
+        ></Steps>
       </div>
 
       <div className="steps-content">{steps[currentStage].content}</div>

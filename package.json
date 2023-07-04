@@ -129,6 +129,7 @@
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
     "@playwright/test": "^1.31.1",
+    "@types/downloadjs": "^1.4.3",
     "@types/jest": "^29.4.0",
     "@types/node": "^18.11.18",
     "@types/react": "^18.0.27",

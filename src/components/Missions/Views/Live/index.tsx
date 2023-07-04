@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { Tabs, Row, Col, message, Typography } from "antd";
+import type { TabsProps } from "antd";
 import { loading } from "../../../../actions/loadingAction";
 import "./index.less";
 import io from "socket.io-client";
@@ -19,7 +20,6 @@ import Weather from "../../../shared/Weather";
 import { LIVE_URL, API_URL } from "src/constants";
 
 function LiveViewBase(props: any) {
-  const { TabPane } = Tabs;
   const { id } = useParams<any>();
   const [missionDetails, setMissionDetails] = useState<any>();
   const [missionId, setMissionId] = useState(0);
@@ -38,7 +38,18 @@ function LiveViewBase(props: any) {
 
   //socket connectino variable
   const socket: any = useRef();
-
+  const items: TabsProps["items"] = [
+    {
+      key: "1",
+      label: "About",
+      children: <About mission={missionDetails} />,
+    },
+    {
+      key: "2",
+      label: "Outcomes",
+      children: <Outcomes missionId={missionId} tenantId={tenantId._id} />,
+    },
+  ];
   const fetchStreams = async () => {
     try {
       const result = await http.get(`${apis.FETCH_ALL_STREAM_KEYS}`, {
@@ -224,14 +235,7 @@ function LiveViewBase(props: any) {
         </div>
         <Row gutter={[8, 8]}>
           <Col className="info-wrapper" span={16}>
-            <Tabs defaultActiveKey="1">
-              <TabPane tab="About" key="1">
-                <About mission={missionDetails} />
-              </TabPane>
-              <TabPane tab="Outcomes" key="2">
-                <Outcomes missionId={missionId} tenantId={tenantId._id} />
-              </TabPane>
-            </Tabs>
+            <Tabs defaultActiveKey="1" items={items} />
           </Col>
           <Col span={8}>
             <Weather
