@@ -47,7 +47,7 @@ import Videos from "./Data/Videos";
 import Outcomes from "./Data/Outcomes";
 import Map from "./Data/map";
 import Documents from "./Data/Documents";
-import "./index.less";
+import "./../../index.less";
 import moment from "moment";
 import { loading } from "../../../../actions/loadingAction";
 import TextArea from "antd/lib/input/TextArea";

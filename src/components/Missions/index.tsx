@@ -11,6 +11,7 @@ import apis from "../../services/apis";
 import { connect } from "react-redux";
 import { setMissionsToState } from "../../actions/missionActions";
 import { logout } from "../../actions/authAction";
+import "./index.less";
 
 function MissionList(props) {
   const location = useLocation<any>();

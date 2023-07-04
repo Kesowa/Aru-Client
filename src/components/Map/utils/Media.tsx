@@ -38,7 +38,7 @@ import {
   FlagOutlined,
   MessageOutlined,
 } from "@ant-design/icons";
-import "../index.less";
+import "./../index.less";
 import apis from "../../../services/apis";
 import Dragger from "antd/lib/upload/Dragger";
 import moment from "moment";
