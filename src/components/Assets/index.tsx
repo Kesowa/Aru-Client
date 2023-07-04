@@ -592,7 +592,7 @@ function AssetBase(props: any) {
       />
       <Modal
         title="Add New Asset"
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
         footer={null}
@@ -696,7 +696,7 @@ function AssetBase(props: any) {
 
       <Modal
         title="Add New Model"
-        visible={isModalVisible2}
+        open={isModalVisible2}
         onOk={handleOk2}
         onCancel={handleCancel2}
         footer={null}
@@ -830,7 +830,7 @@ function AssetBase(props: any) {
 
       <Modal
         title="Add New Manufacturer"
-        visible={isModalVisible3}
+        open={isModalVisible3}
         onOk={handleOk3}
         onCancel={handleCancel3}
         footer={null}

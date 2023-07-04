@@ -1571,7 +1571,7 @@ function LayerDocs(props) {
         placement="right"
         closable={true}
         onClose={onClose}
-        visible={props.visible}
+        open={props.visible}
         footer={
           <>
             {props.isBaseMap ? (

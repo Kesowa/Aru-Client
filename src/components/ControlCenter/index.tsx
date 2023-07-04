@@ -474,7 +474,7 @@ function GridLive(props: any) {
       <Layout hasSider>
         <Sider className="right-sider">
           <div className="sider-header-div">
-            <Dropdown menu={menu} placement="bottomCenter">
+            <Dropdown menu={menu} placement="bottom">
               <Button
                 size="large"
                 shape="circle"
