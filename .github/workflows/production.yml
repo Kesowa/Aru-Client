@@ -25,14 +25,23 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Create .env file
-        uses: ozaytsev86/create-env-file@v1
-        with:
-          INPUT_ENV_CLIENT_URL: ${{ secrets.CLIENT_URL }}
-          INPUT_ENV_VITE_MAPBOX_API_KEY: ${{ secrets.VITE_MAPBOX_API_KEY }}
-          INPUT_ENV_VITE_SECRET_KEY: ${{ secrets.VITE_SECRET_KEY }}
-          INPUT_ENV_VITE_SITE_KEY: ${{ secrets.VITE_SITE_KEY }}
-          INPUT_ENV_VITE_VERSION: ${{ secrets.VITE_VERSION }}
+      # - name: Create .env file
+      #   uses: ozaytsev86/create-env-file@v1
+      #   with:
+      #     INPUT_ENV_CLIENT_URL: ${{ secrets.CLIENT_URL }}
+      #     INPUT_ENV_VITE_MAPBOX_API_KEY: ${{ secrets.VITE_MAPBOX_API_KEY }}
+      #     INPUT_ENV_VITE_SECRET_KEY: ${{ secrets.VITE_SECRET_KEY }}
+      #     INPUT_ENV_VITE_SITE_KEY: ${{ secrets.VITE_SITE_KEY }}
+      #     INPUT_ENV_VITE_VERSION: ${{ secrets.VITE_VERSION }}
+
+      - name: Set up environment variables
+        run: |
+          echo "CLIENT_URL=${{ secrets.CLIENT_URL }}" >> .env
+          echo "VITE_MAPBOX_API_KEY=${{ secrets.VITE_MAPBOX_API_KEY }}" >> .env
+          echo "VITE_SECRET_KEY=${{ secrets.VITE_SECRET_KEY }}" >> .env
+          echo "VITE_SITE_KEY=${{ secrets.VITE_SITE_KEY }}" >> .env
+          echo "VITE_VERSION=${{ secrets.VITE_VERSION }}" >> .env
+
 
       - name: Build React app
         run: npm run build
