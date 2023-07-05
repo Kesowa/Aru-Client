@@ -16,7 +16,7 @@ import { logout } from "../../../../actions/authAction";
 import NoMap from "../../../../static/no-map.svg";
 import streamEnd from "../../../../static/streamended.svg";
 import Weather from "../../../shared/Weather";
-import { LIVE_URL, API_URL, STATIC_URL } from "src/constants";
+import { API_URL, STATIC_URL } from "src/constants";
 
 function LiveViewBase(props: any) {
   const { TabPane } = Tabs;

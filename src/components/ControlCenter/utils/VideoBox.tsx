@@ -4,7 +4,7 @@ import { Button, Avatar, Tag, Typography } from "antd";
 import { DeleteOutlined, SwapOutlined, UserOutlined } from "@ant-design/icons";
 import ReactHlsPlayer from "react-hls-player";
 import "./videoBox.less";
-import { LIVE_URL, STATIC_URL } from "src/constants";
+import { STATIC_URL } from "src/constants";
 const { Title, Text } = Typography;
 const VideoBox = (props: any) => {
   const [streamURL, setstreamURL] = useState("");
