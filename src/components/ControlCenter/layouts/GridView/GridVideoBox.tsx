@@ -7,7 +7,7 @@ import GridMap from "./GridMap";
 import classNames from "classnames";
 
 import "../../utils/videoBox.less";
-import { LIVE_URL, STATIC_URL } from "src/constants";
+import { STATIC_URL } from "src/constants";
 
 const { Title, Text } = Typography;
 const GridVideoBox = (props: any) => {
