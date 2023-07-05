@@ -38,11 +38,11 @@ jobs:
           aws cloudfront create-invalidation --distribution-id ${{ env.DISTRIBUTION_ID }} --paths "/*"
           echo "Cloudfront cache invalidated for ${{ env.DISTRIBUTION_URL }}"
 
-      - name: Configure S3 bucket
-        run: |
-          aws s3api put-bucket-policy --bucket ${{ env.S3_BUCKET_NAME }} --policy file://bucket-policy.json
-          aws s3api put-bucket-website --bucket ${{ env.S3_BUCKET_NAME }} --website-configuration file://website-config.json
+      # - name: Configure S3 bucket
+      #   run: |
+      #     aws s3api put-bucket-policy --bucket ${{ env.S3_BUCKET_NAME }} --policy file://bucket-policy.json
+      #     aws s3api put-bucket-website --bucket ${{ env.S3_BUCKET_NAME }} --website-configuration file://website-config.json
 
-      - name: Configure Cloudfront distribution
-        run: |
-          aws cloudfront update-distribution --id ${{ env.DISTRIBUTION_ID }} --distribution-config file://distribution-config.json
+      # - name: Configure Cloudfront distribution
+      #   run: |
+      #     aws cloudfront update-distribution --id ${{ env.DISTRIBUTION_ID }} --distribution-config file://distribution-config.json
