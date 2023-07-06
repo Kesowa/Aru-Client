@@ -11,8 +11,8 @@ env:
   AWS_REGION: ap-south-1
   S3_BUCKET_NAME: aws.kesowa.com
   S3_ENDPOINT_URL: http://aws.kesowa.com.s3-website.ap-south-1.amazonaws.com
-  DISTRIBUTION_ID: E11284CPOQHLHM
-  DISTRIBUTION_URL: https://d25g9bq6hvfa5.cloudfront.net
+  DISTRIBUTION_ID: EL0DFQDR0NR6
+  DISTRIBUTION_URL: https://https://d1j7ps9a5gypl0.cloudfront.net
 
 jobs:
   build-and-deploy:
