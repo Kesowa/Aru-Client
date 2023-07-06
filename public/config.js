@@ -6,7 +6,7 @@ const config = {
   VITE_ENV: "development",
   VITE_TITILER_STATIC: "https://kesowa-static.s3.ap-south-1.amazonaws.com",
   VITE_INSTANCE: "aru",
-  VITE_STATIC_URL: "https://kesowa-static.s3.ap-south-1.amazonaws.com",
+  VITE_STATIC_URL: "https://d25g9bq6hvfa5.cloudfront.net",
   VITE_API_URL: "https://api-aws.kesowa.com",
 };
 
