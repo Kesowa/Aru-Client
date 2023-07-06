@@ -9,10 +9,10 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: ap-south-1
-  S3_BUCKET_NAME: www.aws.kesowa.com
-  S3_ENDPOINT_URL: http://my-s3-bucket.s3-website-us-west-2.amazonaws.com
-  DISTRIBUTION_ID: E3224NE0OBE28S
-  DISTRIBUTION_URL: https://d146v68elagblp.cloudfront.net/
+  S3_BUCKET_NAME: aws.kesowa.com
+  S3_ENDPOINT_URL: http://aws.kesowa.com.s3-website.ap-south-1.amazonaws.com
+  DISTRIBUTION_ID: E11284CPOQHLHM
+  DISTRIBUTION_URL: https://d25g9bq6hvfa5.cloudfront.net
 
 jobs:
   build-and-deploy:
@@ -25,15 +25,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # - name: Create .env file
-      #   uses: ozaytsev86/create-env-file@v1
-      #   with:
-      #     INPUT_ENV_CLIENT_URL: ${{ secrets.CLIENT_URL }}
-      #     INPUT_ENV_VITE_MAPBOX_API_KEY: ${{ secrets.VITE_MAPBOX_API_KEY }}
-      #     INPUT_ENV_VITE_SECRET_KEY: ${{ secrets.VITE_SECRET_KEY }}
-      #     INPUT_ENV_VITE_SITE_KEY: ${{ secrets.VITE_SITE_KEY }}
-      #     INPUT_ENV_VITE_VERSION: ${{ secrets.VITE_VERSION }}
-
       - name: Set up environment variables
         run: |
           echo "CLIENT_URL=${{ secrets.CLIENT_URL }}" >> .env
@@ -41,7 +32,6 @@ jobs:
           echo "VITE_SECRET_KEY=${{ secrets.VITE_SECRET_KEY }}" >> .env
           echo "VITE_SITE_KEY=${{ secrets.VITE_SITE_KEY }}" >> .env
           echo "VITE_VERSION=${{ secrets.VITE_VERSION }}" >> .env
-
 
       - name: Build React app
         run: npm run build
