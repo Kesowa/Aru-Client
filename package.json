@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "env-cmd -f .env vite",
-    "build": "env-cmd -f .env vite build",
+    "start": "vite",
+    "build": "vite build",
     "serve": "vite preview",
     "lock": "npm i --package-lock-only",
     "eject": "react-scripts eject",
@@ -19,6 +19,7 @@
     "prettier:fix": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\""
   },
   "dependencies": {
+    "@ant-design/pro-layout": "^7.16.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.2.0",
@@ -44,7 +45,6 @@
     "date-fns": "^2.21.3",
     "deck.gl": "^8.8.23",
     "downloadjs": "^1.4.7",
-    "env-cmd": "^10.1.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "exifreader": "^4.5.0",
