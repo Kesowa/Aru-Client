@@ -18,14 +18,10 @@ const PrivateRoute = lazy(
 );
 const PublicMap = lazy(() => import("./components/Map/utils/publicMap"));
 
-const App = (props: any) => {
-  //auth check if token exist
-
-  // document.body.oncontextmenu = () => false;
-
+const App = (props) => {
   const Token = localStorage.getItem("Token");
   const UserId = localStorage.getItem("UserId");
-  //console.log(Token, UserId);
+
   if (
     Token &&
     UserId &&
@@ -43,69 +39,49 @@ const App = (props: any) => {
       <Gmap>
         <Loader />
         <BrowserRouter>
-          <Switch>
-            <Route exact path="/">
-              <Redirect to={{ pathname: "/dashboard" }} />
-            </Route>
-            <Route exact path="/map/:id">
-              <Suspense
-                fallback={
-                  <div className="example">
-                    <Space size="middle">
-                      <Spin size="large" />
-                    </Space>
-                  </div>
-                }
-              >
+          <Suspense
+            fallback={
+              <div className="example">
+                <Space size="middle">
+                  <Spin size="large" />
+                </Space>
+              </div>
+            }
+          >
+            <Switch>
+              <Route exact path="/">
+                <Redirect to={{ pathname: "/dashboard" }} />
+              </Route>
+              <Route exact path="/map/:id">
                 <PublicMap isBaseMap={true} />
-              </Suspense>
-            </Route>
-            <Route exact path="/map/:tenantId/:missionId">
-              <Suspense
-                fallback={
-                  <div className="example">
-                    <Space size="middle">
-                      <Spin size="large" />
-                    </Space>
-                  </div>
-                }
-              >
+              </Route>
+              <Route exact path="/map/:tenantId/:missionId">
                 <PublicMap isMissionMap={true} isBaseMap={true} />
-              </Suspense>
-            </Route>
-            <Route exact path="/forgot-password">
-              <ForgotPassword />
-            </Route>
-            <LoginWrapper exact={true} path="/login">
-              <Login />
-            </LoginWrapper>
-            <LoginWrapper exact={true} path="/sign-up">
-              <Register />
-            </LoginWrapper>
-            <Suspense
-              fallback={
-                <div className="example">
-                  <Space size="middle">
-                    <Spin size="large" />
-                  </Space>
-                </div>
-              }
-            >
+              </Route>
+              <Route exact path="/forgot-password">
+                <ForgotPassword />
+              </Route>
+              <LoginWrapper exact={true} path="/login">
+                <Login />
+              </LoginWrapper>
+              <LoginWrapper exact={true} path="/sign-up">
+                <Register />
+              </LoginWrapper>
               <PrivateRoute path="/dashboard">
                 <DashboardWrapper />
               </PrivateRoute>
-            </Suspense>
-            <Route>
-              <Redirect to="/" />
-            </Route>
-          </Switch>
+              <Route>
+                <Redirect to="/" />
+              </Route>
+            </Switch>
+          </Suspense>
         </BrowserRouter>
       </Gmap>
     </React.Fragment>
   );
 };
 
-const mapStateToProps = (state: any) => ({});
+const mapStateToProps = (state) => ({});
 export default connect(mapStateToProps, {
   login,
 })(App);
