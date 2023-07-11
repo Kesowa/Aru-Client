@@ -21,6 +21,7 @@ const PublicMap = lazy(() => import("./components/Map/utils/publicMap"));
 const App = (props) => {
   const Token = localStorage.getItem("Token");
   const UserId = localStorage.getItem("UserId");
+
   if (
     Token &&
     UserId &&
