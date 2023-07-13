@@ -14,7 +14,7 @@ import DashboardWrapper from "./components/shared/Wrappers/DashboardWrapper";
 const ForgotPassword = lazy(() => import("./components/Login/ForgotPassword"));
 const Register = lazy(() => import("./components/SignUp"));
 const PrivateRoute = lazy(
-  () => import("./components/shared/Wrappers/PrivateWrapper"),
+  () => import("./components/shared/Wrappers/PrivateWrapper")
 );
 const PublicMap = lazy(() => import("./components/Map/utils/publicMap"));
 
