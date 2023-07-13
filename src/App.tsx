@@ -1,7 +1,7 @@
-import React, { Suspense, lazy } from "react";
+import React, { lazy, Suspense } from "react";
 import Loader from "./components/shared/Loader";
 import { connect } from "react-redux";
-import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
+import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import { Space, Spin } from "antd";
 import "./index.less";
 import { login } from "./actions/authAction";
