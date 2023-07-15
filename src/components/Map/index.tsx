@@ -77,7 +77,7 @@ import "./index.less";
 import LineIcon from "../../static/line.svg";
 import PolygonIcon from "../../static/polygon.svg";
 import DeckGL from "@deck.gl/react";
-import { FlyToInterpolator } from "deck.gl";
+import { FlyToInterpolator, TransitionInterpolator } from "deck.gl";
 import {
   BitmapLayer,
   GeoJsonLayer,
@@ -501,7 +501,7 @@ function BaseMap(props) {
                   maxZoom: 22,
                   bearing: 0,
                   transitionDuration: 1000,
-                  transitionInterpolator: new FlyToInterpolator(),
+                  transitionInterpolator: new TransitionInterpolator(),
                 });
               });
             } else if (result.state === "prompt") {
