@@ -457,7 +457,7 @@ function DataLocation(props) {
   );
 }
 
-export default connect(() => {}, {
+export default connect(() => ({}), {
   setEditLocation,
   loading,
   logout,

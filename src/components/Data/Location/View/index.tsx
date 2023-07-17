@@ -508,7 +508,7 @@ function LocationCard(props) {
   );
 }
 
-const mapStateToProps = () => {};
+const mapStateToProps = () => ({});
 
 export default connect(mapStateToProps, {
   loading,

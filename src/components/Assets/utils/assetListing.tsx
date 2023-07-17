@@ -40,33 +40,7 @@ interface TableProps {
   deleteAsset: any;
   assets: any;
 }
-const actionMenu = (record: any) => [
-  {
-    key: "1",
-    label: "Edit Asset",
-    icon: <EditOutlined />,
-  },
-  {
-    key: "2",
-    label: (
-      <Popconfirm
-        title="Are you sure to delete the asset"
-        okText="Yes"
-        cancelText="No"
-        onConfirm={() => {
-          deleteAsset(record.assetName, record._id);
-        }}
-      >
-        <DeleteOutlined /> Delete Asset
-      </Popconfirm>
-    ),
-  },
-  {
-    key: "3",
-    label: "Block Asset",
-    icon: <StopOutlined />,
-  },
-];
+
 function AssetListing(props: TableProps) {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -148,7 +122,33 @@ function AssetListing(props: TableProps) {
         setIsTableLoading(false);
       });
   };
-
+  const actionMenu = (record: any) => [
+    {
+      key: "1",
+      label: "Edit Asset",
+      icon: <EditOutlined />,
+    },
+    {
+      key: "2",
+      label: (
+        <Popconfirm
+          title="Are you sure to delete the asset"
+          okText="Yes"
+          cancelText="No"
+          onConfirm={() => {
+            deleteAsset(record.assetName, record._id);
+          }}
+        >
+          <DeleteOutlined /> Delete Asset
+        </Popconfirm>
+      ),
+    },
+    {
+      key: "3",
+      label: "Block Asset",
+      icon: <StopOutlined />,
+    },
+  ];
   let searchInput: any;
   const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
     confirm();
