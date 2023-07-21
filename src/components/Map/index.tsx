@@ -1850,19 +1850,23 @@ function BaseMap(props) {
   };
   //geojson to json
   async function parseGeoJson(layerId, file) {
-    try {
-      const response = await fetch(file);
-      if (!response.ok) {
-        throw new Error("Failed to fetch GeoJSON data");
-      }
-      const data = await response.json();
-      const features = data.features;
-      const filteredFeatures = filterFeatures(layerId, features);
-      return filteredFeatures;
-    } catch (error) {
-      console.error("Error:", error);
-      return []; // Return an empty array or handle the error according to your requirements
-    }
+    return new Promise((resolve, reject) => {
+      fetch(file)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch GeoJSON data");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          const features = data.features;
+          const filteredFeatures = filterFeatures(layerId, features);
+          resolve(filteredFeatures);
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
   }
 
   //-------------on layer check-------------------------------
@@ -2311,35 +2315,43 @@ function BaseMap(props) {
               element,
               STATIC_URL + allLayers[element]?.layerPath
             );
+
+            console.log("filteredFeatures", filteredFeatures);
+
+            if (Array.isArray(filteredFeatures)) {
+              const pointFeatures = filteredFeatures.filter(
+                (feature) => feature.geometry.type === "Point"
+              );
+
+              console.log("pointFeatures", pointFeatures);
+
+              if (pointFeatures.length > 0) {
+                const bounds = [];
+                pointFeatures.forEach((feature) => {
+                  const coordinates: number[] = feature.geometry.coordinates;
+                  bounds.push([coordinates[0], coordinates[1]]);
+                });
         
-            const pointFeatures = filteredFeatures?.filter(
-              (feature) => feature.geometry.type === "Point"
-            );
+                const allBounds = turf.multiPoint(bounds);
+                const bbox = turf.bbox(allBounds);
+                console.log("Bounds:", bbox);
         
-            if (pointFeatures && pointFeatures.length > 0) {
-              const bounds = [];
-              pointFeatures.forEach((feature) => {
-                const coordinates = feature.geometry.coordinates;
-                bounds.concat(coordinates[0], coordinates[1]);
-              });
-        
-              const allBounds = turf.multiPoint(bounds);
-              const bbox = turf.bbox(allBounds);
-              console.log("Bounds:", bbox);
-        
-              setViewport({
-                longitude: bbox[0],
-                latitude: bbox[1],
-                zoom: 13,
-                pitch: 0,
-                minZoom: 0,
-                maxZoom: 22,
-                bearing: 0,
-                transitionDuration: 8000,
-                transitionInterpolator: new FlyToInterpolator(),
-              });
+                setViewport({
+                  longitude: bbox[0],
+                  latitude: bbox[1],
+                  zoom: 13,
+                  pitch: 0,
+                  minZoom: 0,
+                  maxZoom: 22,
+                  bearing: 0,
+                  transitionDuration: 8000,
+                  transitionInterpolator: new FlyToInterpolator(),
+                });
+              } else {
+                console.log("No point features found.");
+              }
             } else {
-              console.log("No point features found.");
+              console.log("Filtered features is not an array.");
             }
           } catch (error) {
             console.error("Error:", error);
