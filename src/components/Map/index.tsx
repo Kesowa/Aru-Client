@@ -1849,12 +1849,20 @@ function BaseMap(props) {
     }
   };
   //geojson to json
-  async function parseGeoJson(layerId: any, file: any) {
-    const GeoJson: any = await fetch(file);
-    const data = await GeoJson.json();
-    const features = data.features;
-    const filterdFeatures = filterFeatures(layerId, features);
-    return filterdFeatures;
+  async function parseGeoJson(layerId, file) {
+    try {
+      const response = await fetch(file);
+      if (!response.ok) {
+        throw new Error("Failed to fetch GeoJSON data");
+      }
+      const data = await response.json();
+      const features = data.features;
+      const filteredFeatures = filterFeatures(layerId, features);
+      return filteredFeatures;
+    } catch (error) {
+      console.error("Error:", error);
+      return []; // Return an empty array or handle the error according to your requirements
+    }
   }
 
   //-------------on layer check-------------------------------
@@ -2296,6 +2304,47 @@ function BaseMap(props) {
             );
             break;
         }
+
+        (async () => {
+          try {
+            const filteredFeatures = await parseGeoJson(
+              element,
+              STATIC_URL + allLayers[element]?.layerPath
+            );
+        
+            const pointFeatures = filteredFeatures?.filter(
+              (feature) => feature.geometry.type === "Point"
+            );
+        
+            if (pointFeatures && pointFeatures.length > 0) {
+              const bounds = [];
+              pointFeatures.forEach((feature) => {
+                const coordinates = feature.geometry.coordinates;
+                bounds.concat(coordinates[0], coordinates[1]);
+              });
+        
+              const allBounds = turf.multiPoint(bounds);
+              const bbox = turf.bbox(allBounds);
+              console.log("Bounds:", bbox);
+        
+              setViewport({
+                longitude: bbox[0],
+                latitude: bbox[1],
+                zoom: 13,
+                pitch: 0,
+                minZoom: 0,
+                maxZoom: 22,
+                bearing: 0,
+                transitionDuration: 8000,
+                transitionInterpolator: new FlyToInterpolator(),
+              });
+            } else {
+              console.log("No point features found.");
+            }
+          } catch (error) {
+            console.error("Error:", error);
+          }
+        })();
       } else if (element.split("-")[0] === "3" && element !== "3") {
         setShowMarkerSizeTool(true);
         if (element.split("-")[1] === "2") {
@@ -2416,37 +2465,37 @@ function BaseMap(props) {
           );
         }
       }
-      console.log("Missions", vlayers, allLayers, geoJsonVOD.features);
+      console.log("Missions", vlayers);
     });
-    // vlayers.push(
-    //   new TileLayer({
-    //     id: "BASE_LAYER-123123123",
-    //     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-    //     data: `${COG_URL}` +
-    //     `/cog/tiles` +
-    //     `/{z}/{x}/{y}@1x?url=${import.meta.env.VITE_BASE_URL}` +
-    //     `/raster/1642486263367_20_DEM_10cm.tif` +
-    //     `&resampling_method=nearest&bidx=1&rescale=17.799230575561523%2C93.64027404785156&colormap_name=plasma`,
+    /* vlayers.push(
+       new TileLayer({
+         id: "BASE_LAYER-123123123",
+         // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
+         data: `${COG_URL}` +
+         `/cog/tiles` +
+         `/{z}/{x}/{y}@1x?url=${import.meta.env.VITE_BASE_URL}` +
+         `/raster/1642486263367_20_DEM_10cm.tif` +
+         `&resampling_method=nearest&bidx=1&rescale=17.799230575561523%2C93.64027404785156&colormap_name=plasma`,
 
-    //     minZoom: 0,
-    //     maxZoom: 24,
-    //     tileSize: 256,
-    //     // onDataLoad: () => {
-    //     //   setLayerLoading(false);
-    //     // },
-    //     renderSubLayers: (props) => {
-    //       const {
-    //         bbox: { west, south, east, north },
-    //       } = props.tile;
+         minZoom: 0,
+         maxZoom: 24,
+         tileSize: 256,
+          onDataLoad: () => {
+            setLayerLoading(false);
+          },
+         renderSubLayers: (props) => {
+           const {
+             bbox: { west, south, east, north },
+           } = props.tile;
 
-    //       return new BitmapLayer(props, {
-    //         data: null,
-    //         image: props.data,
-    //         bounds: [west, south, east, north],
-    //       });
-    //     },
-    //   })
-    // )
+           return new BitmapLayer(props, {
+             data: null,
+             image: props.data,
+             bounds: [west, south, east, north],
+           });
+         },
+       })
+     )*/
     setVisibleLayers(vlayers);
   };
 
