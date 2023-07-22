@@ -1953,6 +1953,52 @@ function BaseMap(props) {
     }
   };
 
+  const calculateViewport = (bbox) => {
+    const [minLon, minLat, maxLon, maxLat] = bbox;
+  
+    // Calculate the center of the bounds
+    const longitude = (minLon + maxLon) / 2;
+    const latitude = (minLat + maxLat) / 2;
+  
+    // Calculate the zoom level based on the bounds and the map window size
+    const latRatio = Math.abs(maxLat - minLat);
+    const lonRatio = Math.abs(maxLon - minLon);
+  
+    const zoom = calculateZoom(latRatio, lonRatio);
+  
+    return {
+      longitude,
+      latitude,
+      zoom,
+    };
+  };
+  
+  // Helper function to calculate the zoom level based on the latitude and longitude ratios
+  const calculateZoom = (latRatio, lonRatio) => {
+    const mapWidth = 800;
+    const mapHeight = 600;
+    const maxZoom = 17; 
+
+  
+    // Calculate the distance between the latitude and longitude extents
+    const latDistance = Math.abs(latRatio);
+    const lonDistance = Math.abs(lonRatio);
+  
+    // Calculate the zoom level based on the latitude and longitude ratios and the map window size
+    const latZoom = Math.log2(mapHeight / (latDistance * 360)) + 1;
+    const lonZoom = Math.log2(mapWidth / (lonDistance * 360)) + 1;
+  
+    // Use the minimum zoom level between latitude and longitude zoom levels
+    let zoom = Math.max(latZoom, lonZoom);
+
+    // Cap the zoom level at the maximum value
+    zoom = Math.max(zoom, maxZoom);
+  
+    console.log("Zoom: ", zoom);
+    
+    return zoom;
+  };
+
   const drawLayers = (checkedKeysValue: any) => {
     const vlayers: any = [];
     setShowMarkerSizeTool(false);
@@ -2335,16 +2381,18 @@ function BaseMap(props) {
                 const allBounds = turf.multiPoint(bounds);
                 const bbox = turf.bbox(allBounds);
                 console.log("Bounds:", bbox);
+
+                const { longitude, latitude, zoom } = calculateViewport(bbox);
         
                 setViewport({
-                  longitude: bbox[0],
-                  latitude: bbox[1],
-                  zoom: 13,
+                  longitude,
+                  latitude,
+                  zoom,
                   pitch: 0,
                   minZoom: 0,
                   maxZoom: 22,
                   bearing: 0,
-                  transitionDuration: 8000,
+                  transitionDuration: 2000,
                   transitionInterpolator: new FlyToInterpolator(),
                 });
               } else {
