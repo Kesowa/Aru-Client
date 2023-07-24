@@ -1,36 +1,28 @@
 @import "../../shared/global_var.css";
+// Define reusable variables
 @darkShadow: var(--shadow-dark);
 @primary: var(--primary-color);
-@accent: var(--accent-color);
-@secondary: var(--secondary-color);
 
-.create-mission-base-title {
-  margin-top: 40px;
+// Common styles
+.text-center {
   text-align: center !important;
-  font-size: 2.3rem;
 }
 
-.create-mission-steps-card-holder {
-  width: 40%;
-  max-width: 700px;
-  margin: 60px auto;
-  outline-width: 20px;
-  position: absolute;
-  padding: 10px;
+.card-base {
   border-radius: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  padding: 10px;
   background: #ffffff;
+  box-shadow: @darkShadow;
 }
 
-.create-mission-extended-card {
+.card-secondary {
   background-color: #e9e9e9;
   margin-top: 16px;
   transition: background-color 0.2s ease-in-out;
   * {
     transition: color 0.2s ease-in-out;
   }
-  &.create-mission-extended-card-selected {
+  &.selected {
     background-color: #1890ff;
     * {
       color: white;
@@ -38,20 +30,22 @@
   }
 }
 
-.create-mission-proceed-button {
+.button-block {
   display: block;
   width: 100%;
   margin-top: 16px;
   margin-bottom: 32px;
 }
 
-.create-mission-container {
+.container-full {
   height: 100vh;
   position: absolute;
-  top: 0px;
+  top: 0;
   left: 0;
   right: 0;
 }
+
+// Styling for specific sections
 
 .stage_one {
   position: relative;
@@ -108,6 +102,7 @@
   margin-top: 10px;
   color: #a5a4bf;
 }
+
 .flight-table-content {
   width: 1000px;
   margin: auto;
@@ -117,7 +112,6 @@
   margin-left: 15px;
   position: relative;
   top: 4px;
-  color: #a5a4bf;
 }
 
 .accordian-panel {
@@ -185,10 +179,7 @@
   height: 24px;
 }
 
-.previous_job_data:hover {
-  background: #ffffff !important;
-}
-
+.previous_job_data:hover,
 .previous_job_data:focus {
   background: #ffffff !important;
 }
@@ -243,32 +234,32 @@
   padding: 0 10px;
   justify-content: space-between;
   align-items: center;
-}
 
-.location_details h2,
-.location_details p {
-  margin: 0;
-  padding: 0px;
-}
+  h2,
+  p {
+    margin: 0;
+    padding: 0;
+  }
 
-.location_details img {
-  height: 42px;
-}
+  img {
+    height: 42px;
+  }
 
-.location_details img + div {
-  padding-left: 10px;
+  img + div {
+    padding-left: 10px;
+  }
 }
 
 .mission_creation_buttons {
   display: flex;
   justify-content: space-between;
-}
 
-.mission_creation_buttons .ant-btn {
-  width: 100%;
-  margin: 5px;
-  outline: none;
-  border: none;
+  .ant-btn {
+    width: 100%;
+    margin: 5px;
+    outline: none;
+    border: none;
+  }
 }
 
 .scheduled_dates {
@@ -276,29 +267,29 @@
   display: flex;
   justify-content: space-around;
   padding: 0 0 10px 0;
-}
 
-.scheduled_dates input {
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
+  input {
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
 
-.scheduled_dates label {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  background-color: #ccc;
-  color: #ffffff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-}
+  label {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #ccc;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
 
-.scheduled_dates label span {
-  position: absolute;
+    span {
+      position: absolute;
+    }
+  }
 }
 
 .drawing_manager_tools {
@@ -370,6 +361,7 @@
 .location_search::placeholder {
   font-size: 1.1rem;
 }
+
 .panel-title {
   color: @primary;
 }
@@ -379,6 +371,7 @@
   top: 10px;
   right: 20px;
   display: flex;
+
   .control-icons {
     height: 40px;
     background-color: #fff;
@@ -388,6 +381,7 @@
     box-shadow: 2px 2px 8px -2px rgba(0, 0, 0, 0.75);
     border-radius: 5px;
   }
+
   .control-clear-button {
     background-color: #fff;
     height: 40px;
@@ -398,9 +392,11 @@
     box-sizing: border-box;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.75);
     border-radius: 5px;
+
     &:hover {
       transform: scale(1);
     }
+
     p {
       margin-bottom: 0;
       margin-top: 3px;

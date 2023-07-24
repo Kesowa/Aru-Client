@@ -35,86 +35,53 @@ import moment from "moment";
 
 const { Text } = Typography;
 
-
-
 interface Item {
-  id: any;
-  key: any;
-  value: any;
+  id: number;
+  key: string;
+  value: string;
 }
 
-const originData = [
+const originData: Item[] = [
   {
-    id: "0",
+    id: 0,
     key: "tshirt-size",
     value: "",
   },
   {
-    id: "1",
+    id: 1,
     key: "key12",
     value: "",
   },
   {
-    id: "2",
+    id: 2,
     key: "imageURL",
     value: "",
   },
 ];
 
-interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
-  editing: boolean;
-  dataIndex: string;
-  title: any;
-  inputType: "text";
-  record: Item;
-  index: number;
-  children: React.ReactNode;
+interface ManufacturerCardProps {
+  id: string;
+  showDate: boolean;
+  manufacturers: any[];
+  logout: () => void;
 }
 
-const EditableCell: React.FC<EditableCellProps> = ({
-  editing,
-  dataIndex,
-  title,
-  inputType,
-  record,
-  index,
-  children,
-  ...restProps
+const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
+  id,
+  showDate,
+  manufacturers,
+  logout,
 }) => {
-  return (
-    <td {...restProps}>
-      {editing ? (
-        <Form.Item
-          name={dataIndex}
-          style={{ margin: 0 }}
-          rules={[
-            {
-              required: true,
-              message: `Please Input ${dataIndex}!`,
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-      ) : (
-        children
-      )}
-    </td>
-  );
-};
-
-function ManufacturerCard(props) {
-  const [selectedID, setSelectedID] = useState(null);
+  const [selectedID, setSelectedID] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
   const [isCardLoading, setIsCardLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [count, setCount] = useState(3);
-  const [tableData, setTableData] = useState(originData);
-  const [editingKey, setEditingKey] = useState("");
-  const [manufacturers, setManufacturers] = useState<any>([]);
-  const [assetClasses, setAssetClasses] = useState<any>([]);
+  const [tableData, setTableData] = useState<Item[]>(originData);
+  const [editingKey, setEditingKey] = useState<string>("");
 
   const [form] = Form.useForm();
+  const [assetClasses, setAssetClasses] = useState<any>([]);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -140,7 +107,7 @@ function ManufacturerCard(props) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -156,10 +123,9 @@ function ManufacturerCard(props) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
-
 
   useEffect(() => {
     getManufacturer();
@@ -168,12 +134,12 @@ function ManufacturerCard(props) {
 
   useEffect(() => {
     setIsCardLoading(true);
-    setSelectedID(props.id);
-    if (props.id) {
+    setSelectedID(id);
+    if (id) {
       http
         .get(`${apis.GET_MANUFACTURER_BY_ID}`, {
           params: {
-            _id: props.id,
+            _id: id,
           },
         })
         .then((result) => {
@@ -185,13 +151,13 @@ function ManufacturerCard(props) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsCardLoading(false);
         });
     }
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     if (selectedID === null) {
@@ -205,10 +171,11 @@ function ManufacturerCard(props) {
     for (let i = 0; i < tableData.length; ++i) {
       props2[tableData[i].key] = tableData[i].value;
     }
-    const dimensions = {};
-    dimensions["length"] = values.length;
-    dimensions["breadth"] = values.breadth;
-    dimensions["height"] = values.height;
+    const dimensions = {
+      length: values.length,
+      breadth: values.breadth,
+      height: values.height,
+    };
     const model = {
       modelName: values.name,
       modelNumber: values.number,
@@ -228,7 +195,7 @@ function ManufacturerCard(props) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         handleCancel();
@@ -268,6 +235,22 @@ function ManufacturerCard(props) {
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
+  };
+
+  const handleDelete = (key: React.Key) => {
+    const newData = tableData.filter((item) => item.key !== key);
+    setTableData(newData);
+    setCount(count - 1);
+  };
+
+  const handleAdd = () => {
+    const newData: Item = {
+      id: count,
+      key: `Key ${count + 1}`,
+      value: "",
+    };
+    setTableData([...tableData, newData]);
+    setCount(count + 1);
   };
 
   const columns = [
@@ -325,22 +308,6 @@ function ManufacturerCard(props) {
     },
   ];
 
-  const handleDelete = (key: React.Key) => {
-    const newData = tableData.filter((item) => item.key !== key);
-    setTableData(newData);
-    setCount(count - 1);
-  };
-
-  const handleAdd = () => {
-    const newData: Item = {
-      id: count,
-      key: `Key ${count + 1}`,
-      value: "",
-    };
-    setTableData([...tableData, newData]);
-    setCount(count + 1);
-  };
-
   const mergedColumns = columns.map((col) => {
     if (!col.editable) {
       return col;
@@ -392,7 +359,7 @@ function ManufacturerCard(props) {
               {data.name}
             </Text>
           </Col>
-          {props.showDate && (
+          {showDate && (
             <Col span={12} style={{ display: "flex" }}>
               <Text
                 type="secondary"
@@ -560,7 +527,7 @@ function ManufacturerCard(props) {
               );
             })}
         </Row>
-        {props.showDate && (
+        {showDate && (
           <Row style={{ position: "absolute", bottom: "20px" }}>
             <Col span={12}>
               <Button
@@ -725,9 +692,9 @@ function ManufacturerCard(props) {
   }
 
   return <div style={{ margin: "0 10px" }}>{card}</div>;
-}
+};
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: any) => {
   return {
     manufacturers: state.Manufacturers.manufacturers,
   };

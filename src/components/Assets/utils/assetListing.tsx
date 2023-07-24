@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import {
@@ -10,7 +10,6 @@ import {
   Table,
   Dropdown,
   message,
-  MenuProps,
 } from "antd";
 import {
   SearchOutlined,
@@ -30,22 +29,38 @@ import { setAssetsToState, deleteAsset } from "../../../actions/assetAction";
 
 const { Title } = Typography;
 
+interface Asset {
+  assetName: string;
+  modelID: {
+    assetClassID: {
+      typeName: string;
+    };
+    modelName: string;
+  };
+  createdAt: string;
+  _id: string;
+  createdBy: {
+    name: string;
+  };
+  isActive: string;
+}
+
 interface TableProps {
-  filter: any;
-  userType: any;
-  tenantId: any;
-  userId: any;
-  logout: any;
-  setAssetsToState: any;
-  deleteAsset: any;
-  assets: any;
+  filter: string;
+  userType: string;
+  tenantId: string;
+  userId: string;
+  logout: () => void;
+  setAssetsToState: (assets: Asset[]) => void;
+  deleteAsset: (id: string) => void;
+  assets: Asset[];
 }
 
 function AssetListing(props: TableProps) {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [isTableLoading, setIsTableLoading] = useState(true);
-  const [assetTableData, setAssetTableData] = useState<any>([]);
+  const [assetTableData, setAssetTableData] = useState<Asset[]>([]);
 
   const history = useHistory();
 
@@ -61,7 +76,6 @@ function AssetListing(props: TableProps) {
       .then((result) => {
         if (result.data.status) {
           props.setAssetsToState(result.data.data.gotDoc);
-          //console.log(result.data.data);
         } else {
           message.error(
             "Unable to fetch assets. API response: " + result.data.message
@@ -87,7 +101,7 @@ function AssetListing(props: TableProps) {
         setAssetTableData(props.assets);
       } else {
         const data = props.assets.filter((row) => {
-          return row.status === props.filter;
+          return row.isActive === props.filter;
         });
         setAssetTableData(data);
       }
@@ -96,7 +110,7 @@ function AssetListing(props: TableProps) {
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++ Delete Assets +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  const deleteAsset = (name, id) => {
+  const handleDeleteAsset = (name: string, id: string) => {
     setIsTableLoading(true);
     http
       .delete(`${apis.DELETE_ASSET_BY_ID}`, {
@@ -104,9 +118,9 @@ function AssetListing(props: TableProps) {
       })
       .then((result) => {
         if (result.data.status) {
-          const newTableData = assetTableData.filter((asset: any) => {
-            return asset._id.toString() != id.toString();
-          });
+          const newTableData = assetTableData.filter(
+            (asset: Asset) => asset._id !== id
+          );
           setAssetTableData(newTableData);
           props.deleteAsset(id);
           message.success(`Asset "${name}" deleted`);
@@ -122,7 +136,8 @@ function AssetListing(props: TableProps) {
         setIsTableLoading(false);
       });
   };
-  const actionMenu = (record: any) => [
+
+  const actionMenu = (record: Asset) => [
     {
       key: "1",
       label: "Edit Asset",
@@ -136,7 +151,7 @@ function AssetListing(props: TableProps) {
           okText="Yes"
           cancelText="No"
           onConfirm={() => {
-            deleteAsset(record.assetName, record._id);
+            handleDeleteAsset(record.assetName, record._id);
           }}
         >
           <DeleteOutlined /> Delete Asset
@@ -149,17 +164,22 @@ function AssetListing(props: TableProps) {
       icon: <StopOutlined />,
     },
   ];
+
   let searchInput: any;
-  const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: () => void,
+    dataIndex: string
+  ) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
-  const handleReset = (clearFilters: any) => {
+  const handleReset = (clearFilters: () => void) => {
     clearFilters();
     setSearchText("");
   };
-  const getColumnSearchProps = (dataIndex: any) => ({
+  const getColumnSearchProps = (dataIndex: string) => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
@@ -196,17 +216,17 @@ function AssetListing(props: TableProps) {
         </Button>
       </div>
     ),
-    filterIcon: (filtered: any) => (
+    filterIcon: (filtered: boolean) => (
       <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
     ),
-    onFilter: (value: any, record: any) =>
+    onFilter: (value: string, record: Asset) =>
       record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownOpenChange: (visible: any) => {
+    onFilterDropdownOpenChange: (visible: boolean) => {
       if (visible) {
         setTimeout(() => searchInput.select());
       }
     },
-    render: (text: any) =>
+    render: (text: string) =>
       searchedColumn === dataIndex ? (
         <Highlighter
           highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
@@ -218,16 +238,17 @@ function AssetListing(props: TableProps) {
         text
       ),
   });
+
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++Columns++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
   const columns: any[] = [
     {
       title: "ASSET",
       dataIndex: "assetName",
-      sorter: (a: any, b: any) => a.assetName.length - b.assetName.length,
+      sorter: (a: Asset, b: Asset) => a.assetName.length - b.assetName.length,
       sortDirections: ["ascend", "descend"],
       ...getColumnSearchProps("name"),
-      render: (assetName: any, record) => {
+      render: (assetName: string) => {
         return (
           <>
             <span onClick={() => {}}>
@@ -245,24 +266,26 @@ function AssetListing(props: TableProps) {
     {
       title: "TYPE",
       dataIndex: "modelID",
-      sorter: (a: any, b: any) => a.type.length - b.type.length,
+      sorter: (a: Asset, b: Asset) =>
+        a.modelID.assetClassID.typeName.length -
+        b.modelID.assetClassID.typeName.length,
       sortDirections: ["ascend", "descend"],
       ...getColumnSearchProps("type"),
-      render: (typeName: any) => typeName.assetClassID.typeName,
+      render: (modelID: Asset["modelID"]) => modelID.assetClassID.typeName,
     },
     {
       title: "MODEL",
       dataIndex: "modelID",
-      sorter: (a: any, b: any) => a.modelID.length - b.modelID.length,
+      sorter: (a: Asset, b: Asset) =>
+        a.modelID.modelName.length - b.modelID.modelName.length,
       sortDirections: ["ascend", "descend"],
       ...getColumnSearchProps("model"),
-      render: (modelID: any) => modelID.modelName,
+      render: (modelID: Asset["modelID"]) => modelID.modelName,
     },
-
     {
       title: "CREATED AT",
       dataIndex: "createdAt",
-      sorter: (a: any, b: any) =>
+      sorter: (a: Asset, b: Asset) =>
         moment(a.createdAt).unix() - moment(b.createdAt).unix(),
       sortDirections: ["descend", "ascend"],
       ...getColumnSearchProps("createdAt"),
@@ -272,7 +295,7 @@ function AssetListing(props: TableProps) {
       title: "ASSET ID",
       dataIndex: "_id",
       ...getColumnSearchProps("_id"),
-      render: (text, record) => (
+      render: (text: string, record: Asset) => (
         <>
           <span onClick={() => {}}>{record._id}</span>
         </>
@@ -281,30 +304,20 @@ function AssetListing(props: TableProps) {
     {
       title: "CREATED BY",
       dataIndex: "createdBy",
-      sorter: (a: any, b: any) => a.createdBy.length - b.createdBy.length,
+      sorter: (a: Asset, b: Asset) =>
+        a.createdBy.name.length - b.createdBy.name.length,
       sortDirections: ["descend", "ascend"],
       ...getColumnSearchProps("user"),
-      render: (createdBy: any) => createdBy.name,
+      render: (createdBy: Asset["createdBy"]) => createdBy.name,
     },
     {
       title: "STATUS",
       dataIndex: "isActive",
-      sorter: (a: any, b: any) => a.isActive.length - b.isActive.length,
+      sorter: (a: Asset, b: Asset) => a.isActive.length - b.isActive.length,
       sortDirections: ["ascend", "descend"],
-      render: (tags: any) => {
-        let color;
-        let status;
-
-        switch (tags) {
-          case "true":
-            status = "Active";
-            color = "geekblue";
-            break;
-
-          default:
-            status = "Inactive";
-            color = "red";
-        }
+      render: (isActive: string) => {
+        const color = isActive === "true" ? "geekblue" : "red";
+        const status = isActive === "true" ? "Active" : "Inactive";
         return (
           <Tag color={color} key={status}>
             {status.toUpperCase()}
@@ -315,7 +328,7 @@ function AssetListing(props: TableProps) {
     {
       title: "ACTIONS",
       dataIndex: "actions",
-      render: (text, record) => (
+      render: (text: string, record: Asset) => (
         <>
           <Dropdown.Button
             onClick={() => {
@@ -331,36 +344,6 @@ function AssetListing(props: TableProps) {
     },
   ];
 
-  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++SAMPLE DATA++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-  const data = [
-    {
-      name: "Kingshuk's Drone",
-      type: "Drone",
-      model: "Phantom 4 v2",
-      createdAt: "2021-01-07T10:05:24.153+00:00",
-      _id: "5ff6dce41b8f451580f059df",
-      user: "kingshuk",
-      isActive: "Active",
-    },
-    {
-      name: "Neel's Drone",
-      type: "Drone",
-      model: "Mavic Mini",
-      createdAt: "2021-01-07T10:05:24.153+00:00",
-      _id: "5ff6dce41b8f451580f059df",
-      user: "root",
-      isActive: "Inactive",
-    },
-    {
-      name: "Krishanu's Drone",
-      type: "Drone",
-      model: "Pantom Paibh",
-      createdAt: "2021-01-07T10:05:24.153+00:00",
-      _id: "5ff6dce41b8f451580f059df",
-      user: "root",
-      isActive: "Blocked",
-    },
-  ];
   return (
     <div>
       <Table
@@ -374,7 +357,7 @@ function AssetListing(props: TableProps) {
   );
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: any) => {
   return {
     userType: state.Auth.userdetails.userType,
     tenantId: state.Auth.userdetails.tenantId._id,

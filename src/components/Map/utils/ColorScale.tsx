@@ -1,6 +1,12 @@
 import "./scale.less";
 
-const ShowColorscale = (props) => {
+interface ShowColorscaleProps {
+  settings: { minp: number; maxp: number };
+  name: string;
+  colorMap: string;
+}
+
+const ShowColorscale: React.FC<ShowColorscaleProps> = (props) => {
   return (
     <div id="Scale">
       <svg className="Rectangle_1877">
@@ -26,7 +32,6 @@ const ShowColorscale = (props) => {
       <div id="layer_name">
         <span>{props.name}</span>
       </div>
-
       <div id="img">
         <img
           style={{ height: "20px", width: "282px" }}
@@ -34,7 +39,6 @@ const ShowColorscale = (props) => {
           alt=""
         />
       </div>
-
       <svg className="Path_10644" viewBox="-183 -10135.605 281.358 7.617">
         <path
           id="Path_10644"

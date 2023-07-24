@@ -8,14 +8,7 @@ import {
   DeleteOutlined,
   LockOutlined,
 } from "@ant-design/icons";
-import {
-  message,
-  Input,
-  Button,
-  Tag,
-  Table,
-  Popconfirm,
-} from "antd";
+import { message, Input, Button, Tag, Table, Popconfirm } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
 import { setClientToEdit } from "../../../../actions/cliantActions";

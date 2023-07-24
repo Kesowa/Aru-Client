@@ -30,40 +30,41 @@ import { logout } from "../../../actions/authAction";
 import AloneLogo from "../../../static/Alone-rafiki.svg";
 import moment from "moment";
 import { connect } from "react-redux";
-
+import { FormInstance } from "antd/lib/form";
 
 const { Text } = Typography;
+const { Option } = Select;
 
-type optionType = {
+type OptionType = {
   value: any;
   label: any;
 };
 
-type optionType1 = {
+type OptionType1 = {
   value: any;
   label: any;
-  children: optionType[];
+  children: OptionType[];
 };
 
 interface Item {
-  id: any;
-  key: any;
+  id: number;
+  key: string;
   value: any;
 }
 
-const originData = [
+const originData: Item[] = [
   {
-    id: "0",
+    id: 0,
     key: "UIN",
     value: "",
   },
   {
-    id: "1",
+    id: 1,
     key: "FCID",
     value: "",
   },
   {
-    id: "2",
+    id: 2,
     key: "serialNo",
     value: "",
   },
@@ -111,19 +112,26 @@ const EditableCell: React.FC<EditableCellProps> = ({
   );
 };
 
-function ModelCard(props) {
-  const [selectedID, setSelectedID] = useState(null);
+interface ModelCardProps {
+  id: any;
+  models: any[]; // Adjust the type accordingly
+  showDate: boolean;
+  logout: () => void;
+}
+
+const ModelCard: React.FC<ModelCardProps> = (props) => {
+  const [selectedID, setSelectedID] = useState<any>(null);
   const [data, setData] = useState<any>(null);
-  const [isCardLoading, setIsCardLoading] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isModalVisible2, setIsModalVisible2] = useState(false);
-  const [count, setCount] = useState(0);
+  const [isCardLoading, setIsCardLoading] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isModalVisible2, setIsModalVisible2] = useState<boolean>(false);
+  const [count, setCount] = useState<number>(0);
   const [users, setUsers] = useState<any>([]);
   const [manufacturers, setManufacturers] = useState<any>([]);
   const [models, setModels] = useState<any>([]);
   const [manufacturingDate, setManufacturingDate] = useState<any>("");
-  const [tableData, setTableData] = useState<any>("");
-  const [modelInfo, setModelInfo] = useState<any>([]);
+  const [tableData, setTableData] = useState<Item[]>([]);
+  const [modelInfo, setModelInfo] = useState<Item[]>([]);
 
   const [form] = Form.useForm();
 
@@ -155,8 +163,8 @@ function ModelCard(props) {
     setCount(0);
   };
 
-  const getModelDetails = (id) => {
-    let model = props.models.filter((model) => {
+  const getModelDetails = (id: any) => {
+    let model = props.models.filter((model: any) => {
       return model._id === id;
     });
     model = model[0];
@@ -197,7 +205,7 @@ function ModelCard(props) {
   }, [selectedID]);
 
   useEffect(() => {
-    const obj: Array<any> = [];
+    const obj: Item[] = [];
     if (data) {
       setCount(0);
       Object.keys(data.props).map((key) => {
@@ -213,9 +221,9 @@ function ModelCard(props) {
     setTableData(obj);
   }, [data]);
 
-  const filter = (inputValue, path) => {
+  const filter = (inputValue: string, path: any) => {
     return path.some(
-      (option) =>
+      (option: any) =>
         option.label.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
     );
   };
@@ -226,7 +234,7 @@ function ModelCard(props) {
     getModel();
   }, []);
 
-  const modelOptions: Array<any> = [];
+  const modelOptions: OptionType1[] = [];
 
   const getOwner = () => {
     http
@@ -278,13 +286,13 @@ function ModelCard(props) {
 
   const getModelOptions = () => {
     manufacturers.map((manufacturer: any) => {
-      const obj1 = {} as optionType1;
+      const obj1 = {} as OptionType1;
       obj1.value = manufacturer._id;
       obj1.label = manufacturer.name;
       obj1.children = [];
       models.map((model: any) => {
         if (model.manufacturerID._id == obj1.value) {
-          const obj = {} as optionType;
+          const obj = {} as OptionType;
           obj.value = model._id;
           obj.label = model.modelName;
           obj1.children.push(obj);
@@ -338,7 +346,7 @@ function ModelCard(props) {
 
   const onFinish = async (values: any) => {
     form.resetFields();
-    const modelProps = {};
+    const modelProps: { [key: string]: any } = {};
     for (let i = 0; i < tableData.length; ++i) {
       modelProps[tableData[i].key] = tableData[i].value;
     }
@@ -377,13 +385,13 @@ function ModelCard(props) {
       manufacturingDate === "" ||
       manufacturingDate === " "
     ) {
-      message.error("Please select valid date");
+      message.error("Please select a valid date");
       return;
     }
 
     form.resetFields();
 
-    const assetInfo = {};
+    const assetInfo: { [key: string]: any } = {};
     for (let i = 0; i < tableData.length; ++i) {
       assetInfo[tableData[i].key] = tableData[i].value;
     }
@@ -504,322 +512,308 @@ function ModelCard(props) {
     };
   });
 
-  let card = (
-    <Card
-      bordered={true}
-      style={{ background: "#eceaea", padding: "20px", minHeight: "500px" }}
-    >
-      <img src={AloneLogo} alt="" />
-      <p style={{ textAlign: "center" }}>Please Select a Model to View</p>
-    </Card>
-  );
-
-  if (data) {
-    card = (
+  return (
+    <div>
       <Card
-        loading={isCardLoading}
+        title="MODEL INFO"
         style={{
-          background: "#eceaea",
-          padding: "10px",
-          minHeight: "500px",
-          position: "relative",
+          borderRadius: "8px",
+          overflow: "hidden",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          marginBottom: "30px",
         }}
+        loading={isCardLoading}
       >
         <Row>
-          <Col span={12}>
-            <Text
-              style={{
-                fontSize: "18px",
-                marginTop: "20px",
-                fontWeight: "bold",
-              }}
-            >
-              {data.modelName}
-            </Text>
+          <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+            {data ? (
+              <Row>
+                <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                  <Text type="secondary">Model Name</Text>
+                </Col>
+                <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                  <Text>{data.modelName}</Text>
+                </Col>
+                <Divider
+                  style={{
+                    margin: "12px 0",
+                    border: "1px solid #d9d9d9",
+                  }}
+                />
+                <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                  <Text type="secondary">Manufacturer</Text>
+                </Col>
+                <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                  <Text>{data.manufacturerID.name}</Text>
+                </Col>
+                <Divider
+                  style={{
+                    margin: "12px 0",
+                    border: "1px solid #d9d9d9",
+                  }}
+                />
+                <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                  <Text type="secondary">Manufacturer Part No</Text>
+                </Col>
+                <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                  <Text>{data.manufacturerPartNumber}</Text>
+                </Col>
+                <Divider
+                  style={{
+                    margin: "12px 0",
+                    border: "1px solid #d9d9d9",
+                  }}
+                />
+                <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                  <Text type="secondary">Description</Text>
+                </Col>
+                <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                  <Text>{data.description}</Text>
+                </Col>
+                <Divider
+                  style={{
+                    margin: "12px 0",
+                    border: "1px solid #d9d9d9",
+                  }}
+                />
+                <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                  <Text type="secondary">Images</Text>
+                </Col>
+                <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                  {data.images && data.images.length > 0 ? (
+                    <img
+                      src={data.images[0]}
+                      alt="Asset"
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        borderRadius: "8px",
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={AloneLogo}
+                      alt="Asset"
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        borderRadius: "8px",
+                      }}
+                    />
+                  )}
+                </Col>
+              </Row>
+            ) : (
+              <Text type="secondary">Select a model from the table</Text>
+            )}
           </Col>
-          {props.showDate && (
-            <Col span={12} style={{ display: "flex" }}>
-              <Text
-                type="secondary"
-                style={{ fontSize: "12px", alignSelf: "flex-end" }}
-              >
-                created {moment(data.createdAt).format("DD/MM/YYYY")}
-              </Text>
-            </Col>
-          )}
-        </Row>
-        <Text type="secondary" style={{ fontSize: "12px" }}>
-          {data.manufacturerID.name}
-        </Text>
-        <Row style={{ marginTop: "10px" }}>
-          <Col span={12}>
-            <Text>Model No.</Text>
-            <Text
-              type="secondary"
-              style={{ display: "block", fontSize: "12px" }}
-            >
-              {data.modelNumber}
-            </Text>
-          </Col>
-          <Col span={12}>
-            <Text>Asset Class</Text>
-            <Text
-              type="secondary"
-              style={{ display: "block", fontSize: "12px" }}
-            >
-              {data.assetClassID.typeName}
-            </Text>
-          </Col>
-        </Row>
-        <Row style={{ marginTop: "10px" }}>
-          <Col span={12}>
-            <Text>Dimensions</Text>
-            <Text
-              type="secondary"
-              style={{ display: "block", fontSize: "12px" }}
-            >
-              {data.dimensions.length}cm x {data.dimensions.breadth}cm x{" "}
-              {data.dimensions.height}cm
-            </Text>
-          </Col>
-          <Col span={12}>
-            <Text>Created By</Text>
-            <Text
-              type="secondary"
-              style={{ display: "block", fontSize: "12px" }}
-            >
-              {data.createdBy.name}
-            </Text>
-          </Col>
-        </Row>
-        <Divider />
-        <Row
-          style={{
-            display: "flex",
-            flexFlow: "row",
-            justifyContent: "space-between",
-          }}
-        >
-          <Text type="secondary" style={{ fontSize: "16px" }}>
-            Model Information
-          </Text>
-          <Button type="link" size="small" onClick={showModal}>
-            View All
-          </Button>
-        </Row>
-        <Row style={{ marginTop: "15px" }}>
-          {Object.keys(data.props).map((key) => {
-            return (
-              <Col span={12} style={{ marginTop: "10px" }}>
-                <Text>{key}</Text>
-                <Text
-                  type="secondary"
-                  style={{ display: "block", fontSize: "12px" }}
+          <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
+            {data ? (
+              <div>
+                <Button
+                  type="primary"
+                  style={{
+                    margin: "20px 0",
+                    background: "#0077B5",
+                    borderColor: "#0077B5",
+                  }}
+                  onClick={showModal}
                 >
-                  {data.props[key]}
-                </Text>
-              </Col>
-            );
-          })}
+                  Edit Model
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <Text type="secondary">Create a new Asset</Text>
+                <br />
+                <br />
+                <Button
+                  type="primary"
+                  style={{
+                    margin: "20px 0",
+                    background: "#0077B5",
+                    borderColor: "#0077B5",
+                  }}
+                  onClick={showModal2}
+                >
+                  Add Asset
+                </Button>
+              </div>
+            )}
+          </Col>
         </Row>
-        {props.showDate && (
-          <Row
-            style={{
-              position: "absolute",
-              bottom: "20px",
-            }}
-          >
-            <Col span={12}>
-              <Button
-                type="link"
-                size="small"
-                onClick={() => setSelectedID(null)}
-              >
-                CANCEL
-              </Button>
-            </Col>
-            <Col span={12}>
-              <Button
-                onClick={showModal2}
-                type="primary"
-                size="middle"
-                style={{
-                  float: "right",
-                  marginLeft: "100px",
-                }}
-              >
-                Asset <PlusOutlined />
-              </Button>
-            </Col>
-          </Row>
-        )}
-
-        <Modal
-          title="Model Information"
-          open={isModalVisible}
-          onOk={handleOk}
-          onCancel={handleCancel}
-          footer={null}
-        >
-          <Form
-            form={form}
-            onFinish={onFinish}
-            layout="vertical"
-            name="update_model"
-            initialValues={{
-              remember: true,
-            }}
-            requiredMark={false}
-            id="myForm"
-          >
-            <Form.Item>
-              <Button
-                onClick={handleAdd}
-                type="primary"
-                size="small"
-                style={{ marginBottom: 8, float: "right" }}
-              >
-                <PlusOutlined />
-              </Button>
-              <Table
-                components={{
-                  body: {
-                    cell: EditableCell,
-                  },
-                }}
-                bordered
-                dataSource={modelInfo}
-                columns={mergedColumns}
-                rowClassName="editable-row"
-                pagination={false}
-              />
-            </Form.Item>
-
-            <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                style={{ marginTop: "15px" }}
-              >
-                Submit
-              </Button>
-            </Form.Item>
-          </Form>
-        </Modal>
-
-        <Modal
-          title="Add New Asset"
-          open={isModalVisible2}
-          onOk={handleOk2}
-          onCancel={handleCancel2}
-          footer={null}
-        >
-          <Form
-            form={form}
-            onFinish={onFinish2}
-            layout="vertical"
-            name="create_asset"
-            initialValues={{
-              remember: true,
-              type: [data.manufacturerID._id, data._id],
-            }}
-            requiredMark={false}
-          >
-            <Form.Item
-              label="Asset Name"
-              name="name"
-              rules={[
-                {
-                  required: true,
-                  message: "Asset Name is required",
-                },
-              ]}
-            >
-              <Input placeholder="Asset Name" />
-            </Form.Item>
-
-            <Form.Item
-              label="Asset Type"
-              name="type"
-              rules={[
-                {
-                  required: true,
-                  message: "Asset Type is required",
-                },
-              ]}
-            >
-              <Cascader
-                options={modelOptions}
-                placeholder="Choose asset model"
-                showSearch={{ filter }}
-              />
-            </Form.Item>
-            <Form.Item
-              label="Asset Owner"
-              name="owner"
-              rules={[
-                {
-                  required: true,
-                  message: "Asset Owner is required",
-                },
-              ]}
-            >
-              <Select placeholder="Choose asset owner">
-                {users.map((user: any) => (
-                  <Select.Option value={user._id}>{user.name}</Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-
-            <Form.Item label="Asset Info">
-              <Button
-                onClick={handleAdd}
-                type="primary"
-                size="small"
-                style={{ marginBottom: 8, float: "right" }}
-              >
-                <PlusOutlined />
-              </Button>
-              <Table
-                components={{
-                  body: {
-                    cell: EditableCell,
-                  },
-                }}
-                bordered
-                dataSource={tableData}
-                columns={mergedColumns}
-                rowClassName="editable-row"
-                pagination={false}
-              />
-            </Form.Item>
-
-            <Form.Item label="Date Of Manufacturing">
-              <DatePicker
-                showTime
-                onOk={(value) => setManufacturingDate(value)}
-              />
-            </Form.Item>
-
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Submit
-              </Button>
-            </Form.Item>
-          </Form>
-        </Modal>
       </Card>
-    );
-  }
+      <Modal
+        open={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        footer={null}
+        width={800}
+      >
+        <Card>
+          {data ? (
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={onFinish}
+              initialValues={data.props}
+            >
+              <Row>
+                <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                  <Table
+                    components={{
+                      body: {
+                        cell: EditableCell,
+                      },
+                    }}
+                    dataSource={tableData}
+                    columns={mergedColumns}
+                    pagination={false}
+                    bordered
+                    rowClassName="editable-row"
+                  />
+                </Col>
+                <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                  <br />
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      style={{ marginRight: "8px" }}
+                    >
+                      Save
+                    </Button>
+                    <Button onClick={handleCancel}>Cancel</Button>
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Form>
+          ) : null}
+        </Card>
+      </Modal>
+      <Modal
+        open={isModalVisible2}
+        onOk={handleOk2}
+        onCancel={handleCancel2}
+        footer={null}
+        width={800}
+      >
+        <Card>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={onFinish2}
+            initialValues={{
+              owner: "",
+              type: [],
+              name: "",
+            }}
+          >
+            <Row>
+              <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                <Form.Item
+                  label="Asset Name"
+                  name="name"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input the Asset name!",
+                    },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                <Form.Item
+                  label="Asset Owner"
+                  name="owner"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select an Asset Owner!",
+                    },
+                  ]}
+                >
+                  <Select
+                    showSearch
+                    filterOption={(input, option) =>
+                      option?.children
+                        .toLowerCase()
+                        .indexOf(input.toLowerCase()) >= 0
+                    }
+                  >
+                    {users.map((user: any) => (
+                      <Option key={user._id} value={user._id}>
+                        {user.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                <Form.Item
+                  label="Asset Type"
+                  name="type"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select an Asset Type!",
+                    },
+                  ]}
+                >
+                  <Cascader
+                    options={modelOptions}
+                    placeholder="Select"
+                    showSearch={{ filter }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                <Form.Item
+                  label="Manufacturing Date"
+                  name="manufacturingDate"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select the Manufacturing Date!",
+                    },
+                  ]}
+                >
+                  <DatePicker />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                <br />
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    style={{ marginRight: "8px" }}
+                  >
+                    Save
+                  </Button>
+                  <Button onClick={handleCancel2}>Cancel</Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </Card>
+      </Modal>
+    </div>
+  );
+};
 
-  return <div style={{ margin: "0 10px" }}>{card}</div>;
-}
-
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: any) => {
   return {
-    models: state.Models.models,
-    Auth: state.Auth,
+    Auth: state.auth,
   };
 };
 
-export default connect(mapStateToProps, { logout })(ModelCard);
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    logout: () => dispatch(logout()),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ModelCard);

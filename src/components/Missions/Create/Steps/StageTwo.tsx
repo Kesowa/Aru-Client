@@ -1,24 +1,52 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, FC } from "react";
+import { connect, ConnectedProps } from "react-redux";
 import { Card, Typography } from "antd";
 import { InfoCircleFilled } from "@ant-design/icons";
 import { Collapse } from "antd";
 import StageTwoForm from "./StageTwoForm";
 import FlightEditing from "../CreateFlight";
-import { connect } from "react-redux";
 import Weather from "../../../shared/Weather";
 import Codes from "../../../../static/weatherCodes";
 import convertDegreeToDirection from "../../../../services/convertDegreeToDirection";
 import http from "../../../../services/httpCall";
 import { logout } from "../../../../actions/authAction";
+
 const { Panel } = Collapse;
 const { Title } = Typography;
 
-function StageTwo(props: any) {
-  const [formComplete, setFormComplete] = useState(false);
-  const [weatherData, setweatherData] = useState<any>({});
-  const [isoDate, setisoDate] = useState(new Date().toISOString());
+interface WeatherData {
+  humidity: number;
+  temperature: number;
+  visibility: number;
+  weatherCode: string;
+  windDirection: string;
+  windGust: number;
+  windSpeed: number;
+}
 
-  const fetchWeatherData = (isoDate) => {
+interface StageTwoProps extends PropsFromRedux {
+  location: {
+    lat: number;
+    lng: number;
+  };
+  areaSelected: any; // Replace with the appropriate type for areaSelected
+  setAreaSelected: any; // Replace with the appropriate type for setAreaSelected
+  nextStage: () => void;
+}
+
+const StageTwo: FC<StageTwoProps> = ({
+  location,
+  areaSelected,
+  setAreaSelected,
+  nextStage,
+  isEditing,
+  logout,
+}) => {
+  const [formComplete, setFormComplete] = useState(false);
+  const [weatherData, setWeatherData] = useState<WeatherData>({});
+  const [isoDate, setIsoDate] = useState(new Date().toISOString());
+
+  const fetchWeatherData = (isoDate: string) => {
     let endTime = JSON.stringify(
       parseInt(isoDate.split("T")[1].split(":")[0]) + 1
     );
@@ -32,11 +60,11 @@ function StageTwo(props: any) {
       isoDate.split("T")[1].split(":")[2];
     http
       .get(
-        `https://api.tomorrow.io/v4/timelines?fields=temperature&fields=humidity&fields=windSpeed&fields=windDirection&fields=windGust&fields=visibility&fields=weatherCode&units=metric&apikey=cwzgSdpHOiiFQt8y8I9d2SUpAPQG7X7U&location=${props.location.lat},${props.location.lng}&startTime=${isoDate}&endTime=${endTime}`
+        `https://api.tomorrow.io/v4/timelines?fields=temperature&fields=humidity&fields=windSpeed&fields=windDirection&fields=windGust&fields=visibility&fields=weatherCode&units=metric&apikey=cwzgSdpHOiiFQt8y8I9d2SUpAPQG7X7U&location=${location.lat},${location.lng}&startTime=${isoDate}&endTime=${endTime}`
       )
       .then((result) => {
         const data = result.data.data.timelines[0].intervals[0].values;
-        const wData = {
+        const wData: WeatherData = {
           humidity: data.humidity,
           temperature: data.temperature,
           visibility: data.visibility,
@@ -45,7 +73,7 @@ function StageTwo(props: any) {
           windGust: data.windGust,
           windSpeed: data.windSpeed,
         };
-        setweatherData(wData);
+        setWeatherData(wData);
       })
       .catch((err) => {
         console.log(err.message);
@@ -53,10 +81,10 @@ function StageTwo(props: any) {
   };
 
   useEffect(() => {
-    if (props.location) {
+    if (location) {
       fetchWeatherData(isoDate);
     }
-  }, [isoDate, props.location]);
+  }, [isoDate, location]);
 
   return (
     <div className="stage_two">
@@ -86,20 +114,20 @@ function StageTwo(props: any) {
             id="nested_accordian_content"
           >
             <div>
-              {!props.isEditing ? (
+              {!isEditing ? (
                 <StageTwoForm
                   setFormComplete={setFormComplete}
-                  nextStage={props.nextStage}
-                  areaSelected={props.areaSelected}
-                  setAreaSelected={props.setAreaSelected}
-                  setisoDate={setisoDate}
+                  nextStage={nextStage}
+                  areaSelected={areaSelected}
+                  setAreaSelected={setAreaSelected}
+                  setIsoDate={setIsoDate}
                 />
               ) : (
                 <FlightEditing
                   setFormComplete={setFormComplete}
-                  nextStage={props.nextStage}
-                  areaSelected={props.areaSelected}
-                  setAreaSelected={props.setAreaSelected}
+                  nextStage={nextStage}
+                  areaSelected={areaSelected}
+                  setAreaSelected={setAreaSelected}
                 />
               )}
             </div>
@@ -107,20 +135,18 @@ function StageTwo(props: any) {
         </Panel>
       </Collapse>
       <div style={{ marginLeft: "10px" }}>
-        <Weather
-          data={weatherData}
-          isoDate={isoDate}
-          location={props.location}
-        />
+        <Weather data={weatherData} isoDate={isoDate} location={location} />
       </div>
     </div>
   );
-}
-
-const mapStateToProps = (state) => {
-  return {
-    isEditing: state.MissionCreation.isEditing,
-  };
 };
 
-export default connect(mapStateToProps, { logout })(StageTwo);
+const mapStateToProps = (state: any) => ({
+  isEditing: state.MissionCreation.isEditing,
+});
+
+const connector = connect(mapStateToProps, { logout });
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export default connector(StageTwo);

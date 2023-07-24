@@ -35,15 +35,20 @@ import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { logout } from "../../actions/authAction";
 import "./index.less";
 
-type optionType = {
+const { Text, Title } = Typography;
+const { Option } = Select;
+const { TextArea } = Input;
+const { TabPane } = Tabs;
+
+type OptionType = {
   value: any;
   label: any;
 };
 
-type optionType1 = {
+type OptionType1 = {
   value: any;
   label: any;
-  children: optionType[];
+  children: OptionType[];
 };
 
 interface Item {
@@ -267,13 +272,13 @@ function AssetBase(props: any) {
 
   const getModelOptions = () => {
     manufacturers.map((manufacturer: any) => {
-      const obj1 = {} as optionType1;
+      const obj1 = {} as OptionType1;
       obj1.value = manufacturer._id;
       obj1.label = manufacturer.name;
       obj1.children = [];
       models.map((model: any) => {
         if (model.manufacturerID._id == obj1.value) {
-          const obj = {} as optionType;
+          const obj = {} as OptionType;
           obj.value = model._id;
           obj.label = model.modelName;
           obj1.children.push(obj);
@@ -373,14 +378,11 @@ function AssetBase(props: any) {
   };
 
   const onFinish3 = async (values: any) => {
-    if (!values.contacts) {
-      message.error("Please enter atleast 1 client");
+    if (!values.contacts || values.contacts.length === 0) {
+      message.error("Please enter at least 1 client");
       return;
     }
-    if (values.contacts.length === 0) {
-      message.error("Please enter atleast 1 client");
-      return;
-    }
+
     form.resetFields();
 
     const manufacturer = {
@@ -536,17 +538,15 @@ function AssetBase(props: any) {
   });
 
   const onTabClick = (key) => {
-    if (key == 1) {
+    if (key == "1") {
       setAssetButton(true);
       setModelButton(true);
       setManufacturerButton(true);
-    }
-    if (key == 2) {
+    } else if (key == "2") {
       setAssetButton(false);
       setModelButton(true);
       setManufacturerButton(false);
-    }
-    if (key == 3) {
+    } else if (key == "3") {
       setAssetButton(false);
       setModelButton(false);
       setManufacturerButton(true);
@@ -636,7 +636,7 @@ function AssetBase(props: any) {
               options={modelOptions}
               placeholder="Choose asset model"
               showSearch={{ filter }}
-              displayRender={(label) => label}
+              displayRender={(label) => label.join(" > ")}
             />
           </Form.Item>
           <Form.Item
@@ -784,15 +784,7 @@ function AssetBase(props: any) {
             </Form.Item>
           </div>
 
-          <Button
-            onClick={handleAdd}
-            type="primary"
-            size="small"
-            style={{ marginBottom: 8, float: "right", cursor: "pointer" }}
-          >
-            <PlusOutlined />
-          </Button>
-          <Form.Item label="Model Props">
+          <Form.Item label="Properties">
             <Table
               components={{
                 body: {
@@ -806,7 +798,6 @@ function AssetBase(props: any) {
               pagination={false}
             />
           </Form.Item>
-
           <Form.Item
             label="Website"
             name="website"
@@ -817,9 +808,8 @@ function AssetBase(props: any) {
               },
             ]}
           >
-            <Input placeholder="Website Link" />
+            <Input placeholder="Website" />
           </Form.Item>
-
           <Form.Item>
             <Button type="primary" htmlType="submit">
               Submit
@@ -846,17 +836,18 @@ function AssetBase(props: any) {
           requiredMark={false}
         >
           <Form.Item
-            label="Name"
+            label="Manufacturer Name"
             name="name"
             rules={[
               {
                 required: true,
-                message: "Name is required",
+                message: "Manufacturer Name is required",
               },
             ]}
           >
-            <Input placeholder="Name" />
+            <Input placeholder="Manufacturer Name" />
           </Form.Item>
+
           <Form.Item
             label="Address"
             name="address"
@@ -867,8 +858,9 @@ function AssetBase(props: any) {
               },
             ]}
           >
-            <Input placeholder="Address" />
+            <TextArea rows={4} placeholder="Address" />
           </Form.Item>
+
           <Form.Item
             label="Nationality"
             name="nationality"
@@ -881,6 +873,62 @@ function AssetBase(props: any) {
           >
             <Input placeholder="Nationality" />
           </Form.Item>
+
+          <Form.List name="contacts">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map((field) => (
+                  <Space
+                    key={field.key}
+                    style={{ display: "flex", marginBottom: 8 }}
+                    align="baseline"
+                  >
+                    <Form.Item
+                      {...field}
+                      name={[field.name, "name"]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Contact Name is required",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="Contact Name" />
+                    </Form.Item>
+                    <Form.Item
+                      {...field}
+                      name={[field.name, "email"]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Contact Email is required",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="Contact Email" />
+                    </Form.Item>
+                    <MinusCircleOutlined
+                      onClick={() => {
+                        remove(field.name);
+                      }}
+                    />
+                  </Space>
+                ))}
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => {
+                      add();
+                    }}
+                    block
+                  >
+                    Add Contact
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+
           <Form.Item
             label="Website"
             name="website"
@@ -891,85 +939,8 @@ function AssetBase(props: any) {
               },
             ]}
           >
-            <Input placeholder="Website Link" />
+            <Input placeholder="Website" />
           </Form.Item>
-
-          <Form.Item
-            label="Contacts"
-            style={{ marginBottom: "-15px" }}
-          ></Form.Item>
-
-          <Form.List
-            name="contacts"
-            rules={[
-              {
-                validator: async (_, contacts) => {
-                  if (!contacts || contacts.length < 1) {
-                    return new Error("Please enter atleast 1 contact");
-                  }
-                },
-              },
-            ]}
-          >
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map(({ key, name, fieldKey, ...restField }) => (
-                  <Space
-                    key={key}
-                    style={{ display: "flex", marginBottom: 8 }}
-                    align="baseline"
-                  >
-                    <Form.Item
-                      {...restField}
-                      name={[name, "name"]}
-                      fieldKey={[fieldKey, "name"]}
-                      rules={[{ required: true, message: "Missing Name" }]}
-                    >
-                      <Input placeholder="Name" />
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, "designation"]}
-                      fieldKey={[fieldKey, "designation"]}
-                      rules={[
-                        { required: true, message: "Missing Designation" },
-                      ]}
-                    >
-                      <Input placeholder="Designation" />
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, "Mobile"]}
-                      fieldKey={[fieldKey, "Mobile"]}
-                      rules={[{ required: true, message: "Missing Mobile" }]}
-                    >
-                      <Input placeholder="Mobile" />
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, "email"]}
-                      fieldKey={[fieldKey, "email"]}
-                      rules={[{ required: true, message: "Missing Email" }]}
-                    >
-                      <Input placeholder="Email" />
-                    </Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(name)} />
-                  </Space>
-                ))}
-                <Form.Item>
-                  <Button
-                    type="dashed"
-                    onClick={() => add()}
-                    block
-                    icon={<PlusOutlined />}
-                  >
-                    Add Contact
-                  </Button>
-                </Form.Item>
-              </>
-            )}
-          </Form.List>
-
           <Form.Item>
             <Button type="primary" htmlType="submit">
               Submit
@@ -978,33 +949,27 @@ function AssetBase(props: any) {
         </Form>
       </Modal>
 
-      <Tabs
-        defaultActiveKey="1"
-        onTabClick={onTabClick}
-        items={[
-          {
-            key: "1",
-            label: "My Assets",
-            children: <AssetList filter="all"></AssetList>,
-          },
-          {
-            key: "2",
-            label: "Models",
-            children: <ModelList />,
-          },
-          {
-            key: "3",
-            label: "Manufacturers",
-            children: <ManufacturerList />,
-          },
-        ]}
-      />
+      <Tabs defaultActiveKey="1" onTabClick={onTabClick}>
+        <TabPane tab="Assets" key="1">
+          <AssetList />
+        </TabPane>
+        <TabPane tab="Models" key="2">
+          <ModelList />
+        </TabPane>
+        <TabPane tab="Manufacturers" key="3">
+          <ManufacturerList />
+        </TabPane>
+      </Tabs>
     </div>
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
+const mapStateToProps = (state) => ({
+  Auth: state.auth,
 });
 
-export default connect(mapStateToProps, { logout })(AssetBase);
+const mapDispatchToProps = {
+  logout,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(AssetBase);

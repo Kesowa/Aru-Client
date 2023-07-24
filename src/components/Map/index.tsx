@@ -6624,50 +6624,59 @@ function BaseMap(props) {
             setSelectedIndexes([]);
             setDefaultKeys([]);
           }}
-          items={panes.length>0&&panes.map((pane) =>{
-            return {
-              key: pane.key,
-              label: (<span>
-                {pane?.title}{" "}
-                <Badge
-                  size="small"
-                  count={pane.count}
-                  overflowCount={overflowCount(pane.count)}
-                  style={{
-                    backgroundColor: "#52c41a",
-                    marginLeft: "2px",
-                    display: pane.type == "vector" ? "inherit" : "none",
-                  }}
-                />
-              </span>),
-              children: <MapAttributes
-              type={pane.type}
-              id={pane.id}
-              path={pane.path}
-              bottomBarHeight={bottomBarHeight}
-              featureCount={pane.count}
-              setViewport={setViewport}
-              setColorMap={SetColorMap}
-              setSelectedIndexes={setSelectedIndexes}
-              setshowSelectedIndexes={setshowSelectedIndexes}
-              selectedIndexes={selectedIndexes}
-              setKey={setKey}
-              defaultKeys={defaultKeys}
-              setShouldAttributeTableReload={setShouldAttributeTableReload}
-              shouldAttributeTableReload={shouldAttributeTableReload}
-              canEditGeojson={perms.canEditGeojson}
-              canDeleteFeature={perms.canDeleteFeature}
-              updateFeatureCountInLayers={updateFeatureCountInLayers}
-              flaggedFilter={flaggedFilter}
-              unflaggedFilter={unflaggedFilter}
-              allLayers={allLayers}
-              refreshLayer={refreshLayer}
-              setRefreshLayer={setRefreshLayer}
-              invertColor={invertColor}
-            />,
-              closeable: true
-            }
-          })} 
+          items={
+            panes.length > 0 &&
+            panes.map((pane) => {
+              return {
+                key: pane.key,
+                label: (
+                  <span>
+                    {pane?.title}{" "}
+                    <Badge
+                      size="small"
+                      count={pane.count}
+                      overflowCount={overflowCount(pane.count)}
+                      style={{
+                        backgroundColor: "#52c41a",
+                        marginLeft: "2px",
+                        display: pane.type == "vector" ? "inherit" : "none",
+                      }}
+                    />
+                  </span>
+                ),
+                children: (
+                  <MapAttributes
+                    type={pane.type}
+                    id={pane.id}
+                    path={pane.path}
+                    bottomBarHeight={bottomBarHeight}
+                    featureCount={pane.count}
+                    setViewport={setViewport}
+                    setColorMap={SetColorMap}
+                    setSelectedIndexes={setSelectedIndexes}
+                    setshowSelectedIndexes={setshowSelectedIndexes}
+                    selectedIndexes={selectedIndexes}
+                    setKey={setKey}
+                    defaultKeys={defaultKeys}
+                    setShouldAttributeTableReload={
+                      setShouldAttributeTableReload
+                    }
+                    shouldAttributeTableReload={shouldAttributeTableReload}
+                    canEditGeojson={perms.canEditGeojson}
+                    canDeleteFeature={perms.canDeleteFeature}
+                    updateFeatureCountInLayers={updateFeatureCountInLayers}
+                    flaggedFilter={flaggedFilter}
+                    unflaggedFilter={unflaggedFilter}
+                    allLayers={allLayers}
+                    refreshLayer={refreshLayer}
+                    setRefreshLayer={setRefreshLayer}
+                    invertColor={invertColor}
+                  />
+                ),
+                closeable: true,
+              };
+            })
+          }
           //onEdit={(targetKey) => remove(targetKey)}
           //onClick={() => console.log(activeKey)}
           hideAdd
@@ -6774,8 +6783,7 @@ function BaseMap(props) {
               />
             </div>
           }
-        >
-        </Tabs>
+        ></Tabs>
       </div>
       {showForm && (
         <VectorForm

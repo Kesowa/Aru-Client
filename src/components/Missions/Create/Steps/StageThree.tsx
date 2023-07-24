@@ -1,6 +1,6 @@
 // @ts-nocheck
-import React, { useEffect, useState } from "react";
-import { connect } from "react-redux";
+import React, { useEffect, useState, FC } from "react";
+import { connect, ConnectedProps } from "react-redux";
 import { useHistory } from "react-router-dom";
 import {
   Button,
@@ -42,7 +42,69 @@ import {
 const { TextArea } = Input;
 const { Option } = Select;
 
-function StageThree(props: any) {
+interface FlightData {
+  flightName: string;
+  date: string;
+  time: string;
+  duration: string;
+}
+
+interface GeoFenceCircle {
+  center: {
+    lat: number;
+    lng: number;
+  };
+  radius: number;
+  area: number;
+}
+
+interface GeoFencePolygon {
+  points: Array<any>;
+  area: number;
+}
+
+interface Flight {
+  geoFence: {
+    circle?: GeoFenceCircle;
+    polygon?: GeoFencePolygon;
+  };
+  flightDetails: FlightData;
+}
+
+interface Asset {
+  _id: string;
+  assetName: string;
+}
+
+interface Client {
+  _id: string;
+  name: string;
+}
+
+interface StageThreeProps extends PropsFromRedux {
+  jobTypeName: string; // Replace with the appropriate type for jobTypeName
+  missionType: string; // Replace with the appropriate type for missionType
+  missionCreationData: {
+    flights: Flight[];
+    weather?: {
+      temperature: number;
+      description: string;
+    };
+  };
+}
+
+const StageThree: FC<StageThreeProps> = ({
+  missionType,
+  missionCreationData,
+  jobTypeName,
+  loading,
+  logout,
+  clearMissionCreationState,
+  enableFlightEditing,
+  setPolygonMeasurements,
+  setCircleMeasurements,
+  setGeolocation,
+}) => {
   // Form control states
   const [data, setData] = useState<any>([]);
   const [missionName, setMissionName] = useState("");
@@ -489,13 +551,13 @@ function StageThree(props: any) {
       </React.Fragment>
     </div>
   );
-}
+};
 
 const mapStateToProps = (state: any) => ({
   missionCreationData: state.MissionCreation,
 });
 
-export default connect(mapStateToProps, {
+const connector = connect(mapStateToProps, {
   loading,
   logout,
   clearMissionCreationState,
@@ -503,4 +565,8 @@ export default connect(mapStateToProps, {
   setPolygonMeasurements,
   setCircleMeasurements,
   setGeolocation,
-})(StageThree);
+});
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export default connector(StageThree);

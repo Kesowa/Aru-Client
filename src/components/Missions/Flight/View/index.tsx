@@ -1,34 +1,35 @@
-import React, { useRef, useState } from "react";
-import { connect } from "react-redux";
+import React, { useRef, useState, useEffect, FC } from "react";
+import { connect, ConnectedProps } from "react-redux";
 import { message } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import FlightDetails from "./Details";
 import "./index.less";
-import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 
-const ViewFlight = (props) => {
+const ViewFlight: FC<ViewFlightProps> = (props) => {
   const [flightDetails, setFlightDetails] = useState<any>(null);
 
-  const googleMapRef: any = React.createRef<HTMLDivElement>();
-  const googleSearchRef: any = React.createRef<HTMLInputElement>();
-  const googleMap: any = useRef();
-  const drawingManager: any = useRef();
-  const searchAutoComplete: any = useRef();
+  const googleMapRef: React.RefObject<HTMLDivElement> =
+    useRef<HTMLDivElement>(null);
+  const googleSearchRef: React.RefObject<HTMLInputElement> =
+    useRef<HTMLInputElement>(null);
+  const googleMap: React.MutableRefObject<any> = useRef();
+  const drawingManager: React.MutableRefObject<any> = useRef();
+  const searchAutoComplete: React.MutableRefObject<any> = useRef();
 
-  const { id } = useParams<any>();
+  const { id } = useParams<{ id: string }>();
 
-  const getMissionDetails = async (id) => {
+  const getMissionDetails = async (id: string) => {
     let mission = props.missions.filter((mission) => {
       return mission._id === id;
     });
 
-    if (mission.length != 0) {
+    if (mission.length !== 0) {
       mission = mission[0];
     } else {
       try {
@@ -68,8 +69,8 @@ const ViewFlight = (props) => {
   }, [props.mission]);
 
   // Intialize Google Map
-  const createGoogleMap = ({ lat, lng }) => {
-    return new window.google.maps.Map(googleMapRef.current, {
+  const createGoogleMap = ({ lat, lng }: { lat: number; lng: number }) => {
+    return new window.google.maps.Map(googleMapRef.current!, {
       zoom: 16,
       center: {
         lat,
@@ -101,15 +102,16 @@ const ViewFlight = (props) => {
     });
 
   // Create Marker
-  const createMarker = (lat, lng) => {
+  const createMarker = (lat: number, lng: number) => {
     return new window.google.maps.Marker({
-      position: { lat: lat, lng: lng },
+      position: { lat, lng },
       map: googleMap.current,
     });
   };
+
   //initialize search bar
   const createSearchBar = () =>
-    new window.google.maps.places.Autocomplete(googleSearchRef.current, {
+    new window.google.maps.places.Autocomplete(googleSearchRef.current!, {
       types: ["establishment"],
       fields: ["place_id", "name", "geometry"],
       componentRestrictions: { country: ["IN"] },
@@ -135,7 +137,7 @@ const ViewFlight = (props) => {
     });
   };
 
-  const findPolygonCenter = (points) => {
+  const findPolygonCenter = (points: { lat: number; lng: number }[]) => {
     const bounds = new window.google.maps.LatLngBounds();
 
     const polygonCoords: google.maps.LatLng[] = [];
@@ -154,11 +156,11 @@ const ViewFlight = (props) => {
     return [centerOfPolygon.lat(), centerOfPolygon.lng()];
   };
 
-  const createMeasurements = (geofence) => {
+  const createMeasurements = (geofence: any) => {
     let obj;
     switch (geofence.shape) {
       case "Polygon":
-        const geoPoints = geofence.points.map((point) => {
+        const geoPoints = geofence.points.map((point: any) => {
           return {
             lat: point.lat,
             lng: point.lng,
@@ -218,10 +220,14 @@ const ViewFlight = (props) => {
   );
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: any) => {
   return {
     missions: state.Missions.missions,
   };
 };
 
-export default connect(mapStateToProps, { logout })(ViewFlight);
+const connector = connect(mapStateToProps, { logout });
+
+type ViewFlightProps = ConnectedProps<typeof connector>;
+
+export default connector(ViewFlight);

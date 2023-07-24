@@ -1,14 +1,6 @@
 import { useState } from "react";
 import { connect } from "react-redux";
-import {
-  Form,
-  Input,
-  Row,
-  Col,
-  message,
-  Button,
-  Checkbox,
-} from "antd";
+import { Form, Input, Row, Col, message, Button, Checkbox } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { UnorderedListOutlined } from "@ant-design/icons";
 import "../Permission.less";

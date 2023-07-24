@@ -2,15 +2,7 @@ import { useState, useEffect } from "react";
 import { UnorderedListOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import {
-  Row,
-  Col,
-  message,
-  Transfer,
-  Form,
-  Input,
-  Button,
-} from "antd";
+import { Row, Col, message, Transfer, Form, Input, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";

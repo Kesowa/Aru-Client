@@ -1626,8 +1626,7 @@ function LayerDocs(props) {
               style={{ width: "100%" }}
               onTabClick={onClickForTab}
               items={tabItem()}
-            >
-            </Tabs>
+            ></Tabs>
           ) : (
             <></>
           )}

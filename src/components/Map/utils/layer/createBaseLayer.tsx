@@ -1,3 +1,13 @@
+import { ImportLayerSteps } from "./importLayerSteps";
+import { UploadRasterData, UpdateRasterData } from "./rasterLayerSteps";
+import {
+  UploadVectorData,
+  UpdateVectorData,
+  AttrSelection,
+  AttrMapping,
+  LayerCreated,
+  LayerUpdated,
+} from "./vectorLayerSteps";
 import React, { useState, useEffect } from "react";
 import { v4 as uuid } from "uuid";
 import {
@@ -10,32 +20,18 @@ import {
   Row,
   Col,
   Form,
-  Alert,
-  Input,
-  TreeSelect,
-  DatePicker,
-  Progress,
-  Switch,
   Avatar,
   Card,
   Typography,
-  Table,
-  Empty,
   Select,
   Collapse,
-  Divider,
 } from "antd";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { connect } from "react-redux";
-import {
-  InboxOutlined,
-  UploadOutlined,
-  ImportOutlined,
-} from "@ant-design/icons";
-import { SketchPicker } from "react-color";
+import { UploadOutlined, ImportOutlined } from "@ant-design/icons";
 import "../../index.less";
 import MarkerIcon from "../../../../static/MarkerIcon.png";
 import TankIcon from "../../../../static/TankIcon.png";
@@ -1256,155 +1252,37 @@ const CreateBaseLayer = (props) => {
     {
       title: "Upload Data",
       content: (
-        <>
-          <Form
-            name="upload2"
-            layout="vertical"
-            style={{ width: "700px", margin: "20px auto" }}
-            form={form}
-          >
-            <Row style={{ paddingLeft: "10px", paddingRight: "5px" }}>
-              <Alert
-                style={{ width: "100%" }}
-                message="Please note!"
-                description={`Make sure that your geojson file has the "color" attribute in each feature, in order to inherit colors`}
-                type="info"
-                banner
-                showIcon
-              />
-            </Row>
-            <Row>
-              <Col span={14} style={{ padding: "10px" }}>
-                <Form.Item label="Name" name="name">
-                  <Input
-                    placeholder="Layer's Name"
-                    onChange={(e) => {
-                      setLayerName(e.target.value);
-                    }}
-                    value={layerName}
-                  />
-                </Form.Item>
-                <Form.Item label="Layer Type" name="type">
-                  <TreeSelect
-                    showSearch
-                    style={{ width: "100%" }}
-                    dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-                    placeholder="Select Layer Type"
-                    allowClear
-                    treeData={props.options}
-                    onChange={changeLayerType}
-                  />
-                </Form.Item>
-                <Row>
-                  <Form.Item label="Capture Date" name="date">
-                    <DatePicker
-                      format={"YYYY/MM/DD HH:mm"}
-                      onChange={(value: unknown) => {
-                        if (value) {
-                          setCaptureDate(value.toISOString(true));
-                        } else setCaptureDate("");
-                      }}
-                    />
-                  </Form.Item>
-                </Row>
-                <Row>
-                  <Form.Item label="Icon" name="icon">
-                    <TreeSelect
-                      showSearch
-                      style={{ width: "150%" }}
-                      dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-                      placeholder="Select Icon"
-                      placement="bottomLeft"
-                      defaultValue={"MarkerIcon"}
-                      treeData={iconOptions}
-                      onChange={(value) => setIcon(value)}
-                      treeIcon={true}
-                    />
-                  </Form.Item>
-                </Row>
-                <Row>
-                  <Alert
-                    style={{ width: "100%" }}
-                    message={`Only .geojson files support for type "Vector" and .tif for type "Raster"`}
-                    type="info"
-                    showIcon
-                  />
-                  <Form.Item label="Upload File" name="file">
-                    <Upload {...uploadProps}>
-                      <Button icon={<UploadOutlined />}>Select File</Button>
-                    </Upload>
-
-                    {uploading ? (
-                      <Progress strokeLinecap="square" percent={progress} />
-                    ) : null}
-                  </Form.Item>
-                </Row>
-              </Col>
-              <Col span={10} style={{ padding: "5px" }}>
-                {showColorPicker && (
-                  <Row>
-                    <SketchPicker
-                      color={layerColor}
-                      onChangeComplete={(color) => setLayerColor(color.hex)}
-                    />
-                  </Row>
-                )}
-                <Row style={{ paddingLeft: "2rem" }}>
-                  <p>
-                    Inherit color&nbsp;&nbsp;&nbsp;
-                    <Switch onChange={onChangeInherit} />
-                  </p>
-                </Row>
-              </Col>
-            </Row>
-          </Form>
-        </>
+        <UploadVectorData
+          form={form}
+          setLayerName={setLayerName}
+          layerName={layerName}
+          changeLayerType={changeLayerType}
+          setCaptureDate={setCaptureDate}
+          iconOptions={iconOptions}
+          setIcon={setIcon}
+          uploadProps={uploadProps}
+          uploading={uploading}
+          progress={progress}
+          showColorPicker={showColorPicker}
+          layerColor={layerColor}
+          setLayerColor={setLayerColor}
+          onChangeInherit={onChangeInherit}
+        />
       ),
     },
     {
       title: "Attribute Selection",
       content: (
-        <>
-          <div
-            style={{
-              height: "500px",
-            }}
-          >
-            <Title level={5} style={{ marginTop: "1rem" }}>
-              <span style={{ color: "red" }}>*</span> Choose attributes to
-              inherit in layer.
-            </Title>
-            <Table
-              rowSelection={{
-                ...rowSelection,
-              }}
-              style={{ height: "200px", width: "100%" }}
-              columns={columns}
-              dataSource={tableData}
-              scroll={{ y: "400px" }}
-              pagination={false}
-            />
-          </div>
-        </>
+        <AttrSelection
+          rowSelection={rowSelection}
+          columns={columns}
+          tableData={tableData}
+        />
       ),
     },
     {
       title: "Layer Created!",
-      content: (
-        <>
-          <div
-            style={{
-              marginTop: "100px",
-            }}
-          >
-            <Result
-              status="success"
-              title="Successfully created layer!"
-              subTitle="You can now view the layer in the map."
-            />
-          </div>
-        </>
-      ),
+      content: <LayerCreated />,
     },
   ];
 
@@ -1414,117 +1292,28 @@ const CreateBaseLayer = (props) => {
     {
       title: "Upload Data",
       content: (
-        <>
-          <Row>
-            <div
-              style={{
-                width: "500px",
-                padding: "1rem",
-                margin: "auto",
-              }}
-            >
-              <Dragger {...uploadProps}>
-                <p className="ant-upload-drag-icon">
-                  <InboxOutlined />
-                </p>
-                <p className="ant-upload-text">Upload a vector file</p>
-                <p className="ant-upload-hint">
-                  only .geojson files are supported
-                </p>
-              </Dragger>
-
-              {uploading ? (
-                <Progress strokeLinecap="square" percent={progress} />
-              ) : null}
-            </div>
-          </Row>
-        </>
+        <UpdateVectorData
+          uploadProps={uploadProps}
+          uploading={uploading}
+          progress={progress}
+        />
       ),
     },
     {
       title: "Attribute Mapping",
       content: (
-        <>
-          <Title level={4} style={{ marginTop: "8px" }}>
-            Map attributes to existing
-          </Title>
-          <Text>
-            Select the attributes of you existing layer, to map against
-            attributes from the file. Remaining un-mapped attribute information
-            will not be lost as it will be still stored in your layer.
-          </Text>
-          <div style={{ padding: "20px" }} key={uuid()}>
-            <Row>
-              <Col span={12}>
-                <Title level={5}>Attribute name</Title>
-              </Col>
-              <Col span={12}>
-                <Title level={5}>Map to field</Title>
-              </Col>
-            </Row>
-            <div style={{ height: "400px", overflow: "auto" }}>
-              {/* -ROW------------------- */}
-              {fields.map((f: unknown) => {
-                if (
-                  f.attr !== "sys_id" &&
-                  f.attr !== "icon" &&
-                  f.attr !== "color"
-                ) {
-                  return (
-                    <>
-                      <Row style={{ padding: "5px" }} key={uuid()}>
-                        <Col span={12}>
-                          <Text>{f.attr}</Text>
-                          <br />
-                          <Text type="secondary">Sample: {f.value}</Text>
-                        </Col>
-                        <Col span={12}>
-                          <Select
-                            key={`${f.attr}-${uuid()}`}
-                            style={{ width: "200px" }}
-                            defaultValue={
-                              selectedAttr[f.attr] ? selectedAttr[f.attr] : null
-                            }
-                            onSelect={(e) =>
-                              handleAttributeMapping2(e, f, null)
-                            }
-                            placeholder="Map the attribute selected"
-                          >
-                            {primeAttributes.map((item, index) => (
-                              <Option key={`${uuid()}-${item}`} value={item}>
-                                {item}
-                              </Option>
-                            ))}
-                          </Select>
-                        </Col>
-                      </Row>
-                      <Divider />
-                    </>
-                  );
-                }
-              })}
-            </div>
-          </div>
-        </>
+        <AttrMapping
+          uuid={uuid}
+          handleAttributeMapping2={handleAttributeMapping2}
+          fields={fields}
+          selectedAttr={selectedAttr}
+          primeAttributes={primeAttributes}
+        />
       ),
     },
     {
       title: "Layer Updated!",
-      content: (
-        <>
-          <div
-            style={{
-              marginTop: "100px",
-            }}
-          >
-            <Result
-              status="success"
-              title="Successfully updated layer!"
-              subTitle="You can now view the layer in the map."
-            />
-          </div>
-        </>
-      ),
+      content: <LayerUpdated />,
     },
   ];
 
@@ -1533,114 +1322,23 @@ const CreateBaseLayer = (props) => {
     {
       title: "Upload Data",
       content: (
-        <>
-          <Form
-            name="upload2"
-            layout="vertical"
-            style={{ width: "700px", margin: "20px auto" }}
-            form={form}
-          >
-            <Col span={24}>
-              <Row>
-                <Form.Item label="Name" name="name" style={{ width: "100%" }}>
-                  <Input
-                    placeholder="Layer's Name"
-                    onChange={(e) => {
-                      setLayerName(e.target.value);
-                    }}
-                    value={layerName}
-                  />
-                </Form.Item>
-              </Row>
-
-              <Row>
-                <Form.Item
-                  label="Layer Type"
-                  name="type"
-                  style={{ width: "100%" }}
-                >
-                  <TreeSelect
-                    showSearch
-                    style={{ width: "100%" }}
-                    dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-                    placeholder="Select Layer Type"
-                    allowClear
-                    treeData={props.options}
-                    onChange={changeLayerType}
-                  />
-                </Form.Item>
-              </Row>
-
-              <Row>
-                <Form.Item
-                  label="Capture Date"
-                  name="date"
-                  style={{ width: "100%" }}
-                >
-                  <DatePicker
-                    format={"YYYY/MM/DD HH:mm"}
-                    onChange={(value: unknown) => {
-                      if (value) {
-                        setCaptureDate(value.toISOString(true));
-                      } else setCaptureDate("");
-                    }}
-                  />
-                </Form.Item>
-              </Row>
-              <Row>
-                <Form.Item label="Icon" name="icon">
-                  <TreeSelect
-                    showSearch
-                    style={{ width: "150%" }}
-                    dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-                    placeholder="Select Icon"
-                    placement="bottomLeft"
-                    defaultValue={"MarkerIcon"}
-                    treeData={iconOptions}
-                    onChange={(value) => setIcon(value)}
-                    treeIcon={true}
-                  />
-                </Form.Item>
-              </Row>
-              <Row>
-                <Alert
-                  style={{ width: "100%" }}
-                  message={`Only .tif for type "Raster"`}
-                  type="info"
-                  showIcon
-                />
-                <Form.Item label="Upload File" name="file">
-                  <Upload {...uploadProps}>
-                    <Button icon={<UploadOutlined />}>Select File</Button>
-                  </Upload>
-
-                  {uploading ? (
-                    <Progress strokeLinecap="square" percent={progress} />
-                  ) : null}
-                </Form.Item>
-              </Row>
-            </Col>
-          </Form>
-        </>
+        <UploadRasterData
+          form={form}
+          setLayerName={setLayerName}
+          layerName={layerName}
+          changeLayerType={changeLayerType}
+          setCaptureDate={setCaptureDate}
+          iconOptions={iconOptions}
+          setIcon={setIcon}
+          uploadProps={uploadProps}
+          uploading={uploading}
+          progress={progress}
+        />
       ),
     },
     {
       title: "Layer Created!",
-      content: (
-        <>
-          <div
-            style={{
-              marginTop: "100px",
-            }}
-          >
-            <Result
-              status="success"
-              title="Successfully created layer!"
-              subTitle="You can now view the layer in the map."
-            />
-          </div>
-        </>
-      ),
+      content: <LayerCreated />,
     },
   ];
 
@@ -1649,69 +1347,17 @@ const CreateBaseLayer = (props) => {
     {
       title: "Upload Data",
       content: (
-        <>
-          <Form
-            name="upload2"
-            layout="vertical"
-            style={{ width: "700px", margin: "20px auto" }}
-            form={form}
-          >
-            <Col span={24}>
-              <Row>
-                <Alert
-                  style={{ width: "100%" }}
-                  message="Update layer by uploading a raster file!"
-                  description={`Only .tif for type "Raster"`}
-                  type="info"
-                  showIcon
-                />
-                <div
-                  style={{
-                    width: "500px",
-                    height: "300px",
-                    margin: "auto",
-                    padding: "2rem",
-                  }}
-                >
-                  <Form.Item
-                    name="file"
-                    style={{
-                      margin: "auto",
-                      textAlign: "center",
-                    }}
-                  >
-                    <Upload {...uploadProps}>
-                      <Button icon={<UploadOutlined />}>Select File</Button>
-                    </Upload>
-
-                    {uploading ? (
-                      <Progress strokeLinecap="square" percent={progress} />
-                    ) : null}
-                  </Form.Item>
-                </div>
-              </Row>
-            </Col>
-          </Form>
-        </>
+        <UpdateRasterData
+          form={form}
+          uploadProps={uploadProps}
+          uploading={uploading}
+          progress={progress}
+        />
       ),
     },
     {
       title: "Layer Updated!",
-      content: (
-        <>
-          <div
-            style={{
-              marginTop: "100px",
-            }}
-          >
-            <Result
-              status="success"
-              title="Successfully updated layer!"
-              subTitle="You can now view the layer in the map."
-            />
-          </div>
-        </>
-      ),
+      content: <LayerUpdated />,
     },
   ];
 
@@ -1829,740 +1475,6 @@ const CreateBaseLayer = (props) => {
       setResponseArray(finalArray);
     }
   }
-
-  const steps2 = [
-    {
-      title: "Import Data",
-      content: (
-        <>
-          {!showAddMissions ? (
-            <div
-              style={{
-                width: "500px",
-                margin: "100px auto",
-                border: "1px solid #d9d9d9",
-                padding: "1rem",
-                borderRadius: "4px",
-              }}
-            >
-              <Empty description="Add new mission to select layers from which to import data" />
-              <Button
-                type="default"
-                onClick={() => setShowAddMissions(true)}
-                style={{ position: "relative", left: "40%", marginTop: "20px" }}
-              >
-                Add Mission
-              </Button>
-            </div>
-          ) : (
-            <div style={{ margin: "10px auto", height: "100%" }}>
-              <div
-                className="vertical-center"
-                style={{
-                  height: "500px",
-                  overflow: "auto",
-                }}
-              >
-                <Row>
-                  <Col span={12}>
-                    <h4>
-                      <span style={{ color: "red" }}>*</span> Choose mission to
-                      import data from
-                    </h4>
-                    <Select
-                      placeholder="Select Mission(s)"
-                      showSearch
-                      loading={missionsLoading}
-                      onSearch={handleSearch}
-                      showArrow
-                      allowClear
-                      onChange={(e) => setSelectedMissions([e])}
-                      style={{ width: "200px" }}
-                      onPopupScroll={onScroll}
-                      onFocus={() => {
-                        setPage(1);
-                        setMissionOptions([]);
-                        setMissionSearchValue("");
-                        setFetch(true);
-                      }}
-                      notFoundContent={null}
-                      filterOption={false}
-                    >
-                      {missionOptions.map((mission) => (
-                        <Option key={mission._id} value={mission._id}>
-                          {mission.name}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Col>
-                  <Col span={12}>
-                    <h4>
-                      <span style={{ color: "red" }}>*</span> Choose layer(s)
-                      from mission
-                    </h4>
-                    <Select
-                      placeholder="Select Layers(s)"
-                      showSearch
-                      loading={layersLoading}
-                      optionFilterProp="label"
-                      showArrow
-                      allowClear={false}
-                      onDeselect={(e) => {
-                        console.log(e);
-                        const filtered: unknown = selectedLayers.filter(
-                          (i) => i !== e && i !== undefined
-                        );
-                        setSelectedLayers(filtered);
-                        setApiCall(true);
-                      }}
-                      onChange={(e) => {
-                        const value: unknown = e;
-                        const array: unknown = [...selectedLayers];
-                        if (value.length > 1) {
-                          console.log(array.includes(value.at(-1)));
-                          array.push(value.at(-1));
-                        } else {
-                          console.log(array.includes(value[0]));
-                          array.push(value[0]);
-                        }
-                        setSelectedLayers(array);
-                      }}
-                      mode="tags"
-                      style={{ minWidth: "200px", maxWidth: "500px" }}
-                    >
-                      {selectedMissions &&
-                        layerOptions.map((layer) => (
-                          <Option key={layer._id} value={layer._id}>
-                            {layer.name}
-                          </Option>
-                        ))}
-                    </Select>
-                  </Col>
-                </Row>
-                {uiElement.map((id: unknown) => {
-                  return (
-                    <Row style={{ marginTop: "12px" }}>
-                      <Col span={12}>
-                        <h4>
-                          <span style={{ color: "red" }}>*</span> Choose mission
-                          to import data from
-                        </h4>
-                        <Select
-                          placeholder="Select Mission(s)"
-                          showSearch
-                          loading={missionsLoading}
-                          onSearch={handleSearch}
-                          showArrow
-                          allowClear
-                          onChange={(e) => setSelectedMissions([e])}
-                          style={{ width: "200px" }}
-                          onPopupScroll={onScroll}
-                          onFocus={() => {
-                            setPage(1);
-                            setMissionOptions([]);
-                            setMissionSearchValue("");
-                            setFetch(true);
-                          }}
-                          notFoundContent={null}
-                          filterOption={false}
-                        >
-                          {missionOptions.map((mission) => (
-                            <Option key={mission._id} value={mission._id}>
-                              {mission.name}
-                            </Option>
-                          ))}
-                        </Select>
-                      </Col>
-                      <Col span={12}>
-                        <h4>
-                          <span style={{ color: "red" }}>*</span> Choose
-                          layer(s) from mission
-                        </h4>
-                        <Select
-                          placeholder="Select Layers(s)"
-                          showSearch
-                          loading={layersLoading}
-                          optionFilterProp="label"
-                          showArrow
-                          allowClear={false}
-                          onDeselect={(e) => {
-                            console.log(e);
-                            const filtered: unknown = selectedLayers.filter(
-                              (i) => i !== e && i !== undefined
-                            );
-                            setSelectedLayers(filtered);
-                            setApiCall(true);
-                          }}
-                          onChange={(e) => {
-                            const value: unknown = e;
-                            const array: unknown = [...selectedLayers];
-                            if (value.length > 1) {
-                              console.log(array.includes(value.at(-1)));
-                              array.push(value.at(-1));
-                            } else {
-                              console.log(array.includes(value[0]));
-                              array.push(value[0]);
-                            }
-                            setSelectedLayers(array);
-                          }}
-                          mode="tags"
-                          style={{ minWidth: "200px", maxWidth: "500px" }}
-                        >
-                          {selectedMissions &&
-                            layerOptions.map((layer) => (
-                              <Option key={layer._id} value={layer._id}>
-                                {layer.name}
-                              </Option>
-                            ))}
-                        </Select>
-                      </Col>
-                    </Row>
-                  );
-                })}
-
-                <Button
-                  type="primary"
-                  style={{ marginTop: "10px" }}
-                  onClick={() => addMore()}
-                >
-                  Add more missions
-                </Button>
-              </div>
-            </div>
-          )}
-        </>
-      ),
-    },
-    {
-      title: "Attribute Selection",
-      content: (
-        <>
-          <Title level={4} style={{ marginTop: "8px" }}>
-            Select Attributes to inherit in layer
-          </Title>
-          <Text>
-            Select the attributes that you want as to be the base attribute
-            structure of your layer.
-          </Text>
-
-          <Table
-            rowSelection={{
-              ...rowSelection,
-            }}
-            columns={columns2}
-            dataSource={tableData}
-            style={{ height: "400px", width: "100%", margin: "10px auto" }}
-            scroll={{ y: "390px" }}
-            pagination={false}
-          />
-        </>
-      ),
-    },
-    {
-      title: "Attribute Mapping",
-      content: (
-        <>
-          <Title level={4} style={{ marginTop: "8px" }}>
-            Map attributes to existing
-          </Title>
-          <Text>
-            Select the attributes imported from your missions, to map against
-            existing attributes of the layer. Remaining un-mapped attribute
-            information will not be lost as it will be still stored in your
-            layer.
-          </Text>
-
-          <Collapse
-            defaultActiveKey={activeTab}
-            onChange={(e) => setActiveTab(e)}
-            style={{
-              width: "100%",
-              overflow: "auto",
-              maxHeight: "400px",
-              marginTop: "12px",
-            }}
-            //accordion
-          >
-            {metadata.map((missions: unknown) => {
-              return (
-                <>
-                  {missions.layers.map((layers: unknown, i) => {
-                    return (
-                      <Panel
-                        header={`${layers.name} (${missions.missionName})`}
-                        key={i}
-                      >
-                        <div style={{ padding: "20px" }} key={uuid()}>
-                          <Row>
-                            <Col span={12}>
-                              <Title level={5}>Attribute name</Title>
-                            </Col>
-                            <Col span={12}>
-                              <Title level={5}>Map to field</Title>
-                            </Col>
-                          </Row>
-                          {/* -ROW------------------- */}
-                          {layers.fields.map((fields: unknown) => {
-                            if (
-                              fields.key !== "sys_id" &&
-                              fields.key !== "icon" &&
-                              fields.key !== "color"
-                            ) {
-                              return (
-                                <>
-                                  <Row style={{ padding: "5px" }} key={uuid()}>
-                                    <Col span={12}>
-                                      <Text>{fields.key}</Text>
-                                      <br />
-                                      <Text type="secondary">
-                                        Sample: {fields.value}
-                                      </Text>
-                                    </Col>
-                                    <Col span={12}>
-                                      <Select
-                                        key={`${fields.key}-${uuid()}`}
-                                        style={{ width: "200px" }}
-                                        defaultValue={
-                                          selectedAttr[layers._id]
-                                            ? selectedAttr[layers._id][
-                                                fields.key
-                                              ]
-                                              ? selectedAttr[layers._id][
-                                                  fields.key
-                                                ]
-                                              : null
-                                            : null
-                                        }
-                                        onSelect={(e) =>
-                                          handleAttributeMapping(
-                                            e,
-                                            fields,
-                                            layers
-                                          )
-                                        }
-                                        placeholder="Map the attribute selected"
-                                      >
-                                        {primeAttributes.map((item, index) => (
-                                          <Option
-                                            key={`${uuid()}-${item.key}`}
-                                            value={item.attribute}
-                                          >
-                                            {item.attribute}
-                                          </Option>
-                                        ))}
-                                      </Select>
-                                    </Col>
-                                  </Row>
-                                  <Divider />
-                                </>
-                              );
-                            }
-                          })}
-                        </div>
-                      </Panel>
-                    );
-                  })}
-                </>
-              );
-            })}
-          </Collapse>
-        </>
-      ),
-    },
-    {
-      title: "Layer Details",
-      content: (
-        <>
-          <Form
-            layout="vertical"
-            style={{ height: "390px", marginTop: "10px" }}
-            form={form}
-          >
-            <Row>
-              <Col span={14} style={{ padding: "10px" }}>
-                <Item label="Name" name="name">
-                  <Input
-                    placeholder="Layer's Name"
-                    onChange={(e) => {
-                      setLayerName(e.target.value);
-                    }}
-                  />
-                </Item>
-                {layerType1 == "Vector" && (
-                  <Item label="Layer Type" name="layertype">
-                    <TreeSelect
-                      showSearch
-                      style={{ width: "100%" }}
-                      dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-                      placeholder="Select Layer Type"
-                      allowClear
-                      treeData={props.options[1].children[2].children}
-                      onChange={changeLayerType}
-                    />
-                  </Item>
-                )}
-                <Item label="Capture Date" name="date">
-                  <DatePicker
-                    format={"YYYY/MM/DD HH:mm"}
-                    onChange={(value: unknown) => {
-                      if (value) {
-                        setCaptureDate(value.toISOString(true));
-                      } else setCaptureDate("");
-                    }}
-                  />
-                </Item>
-              </Col>
-              <Col span={10} style={{ padding: "5px" }}>
-                <Row>
-                  {layerType1 == "Vector" && (
-                    <SketchPicker
-                      color={layerColor}
-                      onChangeComplete={(color) => setLayerColor(color.hex)}
-                    />
-                  )}
-                </Row>
-              </Col>
-            </Row>
-          </Form>
-        </>
-      ),
-    },
-  ];
-
-  // For updating layers
-  const steps2Update = [
-    {
-      title: "Import Data",
-      content: (
-        <>
-          {!showAddMissions ? (
-            <div
-              style={{
-                width: "500px",
-                margin: "100px auto",
-                border: "1px solid #d9d9d9",
-                padding: "1rem",
-                borderRadius: "4px",
-              }}
-            >
-              <Empty description="Add new mission to select layers from which to import data" />
-              <Button
-                type="default"
-                onClick={() => setShowAddMissions(true)}
-                style={{ position: "relative", left: "40%", marginTop: "20px" }}
-              >
-                Add Mission
-              </Button>
-            </div>
-          ) : (
-            <div style={{ margin: "10px auto", height: "100%" }}>
-              <div
-                className="vertical-center"
-                style={{
-                  height: "500px",
-                  overflow: "auto",
-                }}
-              >
-                <Row>
-                  <Col span={12}>
-                    <h4>
-                      <span style={{ color: "red" }}>*</span> Choose mission to
-                      import data from
-                    </h4>
-                    <Select
-                      placeholder="Select Mission(s)"
-                      showSearch
-                      loading={missionsLoading}
-                      onSearch={handleSearch}
-                      showArrow
-                      allowClear
-                      onChange={(e) => setSelectedMissions([e])}
-                      style={{ width: "200px" }}
-                      onPopupScroll={onScroll}
-                      onFocus={() => {
-                        setPage(1);
-                        setMissionOptions([]);
-                        setMissionSearchValue("");
-                        setFetch(true);
-                      }}
-                      notFoundContent={null}
-                      filterOption={false}
-                    >
-                      {missionOptions.map((mission) => (
-                        <Option key={mission._id} value={mission._id}>
-                          {mission.name}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Col>
-                  <Col span={12}>
-                    <h4>
-                      <span style={{ color: "red" }}>*</span> Choose layer(s)
-                      from mission
-                    </h4>
-                    <Select
-                      placeholder="Select Layers(s)"
-                      showSearch
-                      loading={layersLoading}
-                      optionFilterProp="label"
-                      showArrow
-                      allowClear={false}
-                      onDeselect={(e) => {
-                        console.log(e);
-                        const filtered: unknown = selectedLayers.filter(
-                          (i) => i !== e && i !== undefined
-                        );
-                        setSelectedLayers(filtered);
-                        setApiCall(true);
-                      }}
-                      onChange={(e) => {
-                        const value: unknown = e;
-                        const array: unknown = [...selectedLayers];
-                        if (value.length > 1) {
-                          console.log(array.includes(value.at(-1)));
-                          array.push(value.at(-1));
-                        } else {
-                          console.log(array.includes(value[0]));
-                          array.push(value[0]);
-                        }
-                        setSelectedLayers(array);
-                      }}
-                      mode="tags"
-                      style={{ minWidth: "200px", maxWidth: "500px" }}
-                    >
-                      {selectedMissions &&
-                        layerOptions.map((layer) => (
-                          <Option key={layer._id} value={layer._id}>
-                            {layer.name}
-                          </Option>
-                        ))}
-                    </Select>
-                  </Col>
-                </Row>
-                {uiElement.map((id: unknown) => {
-                  return (
-                    <Row style={{ marginTop: "12px" }}>
-                      <Col span={12}>
-                        <h4>
-                          <span style={{ color: "red" }}>*</span> Choose mission
-                          to import data from
-                        </h4>
-                        <Select
-                          placeholder="Select Mission(s)"
-                          showSearch
-                          loading={missionsLoading}
-                          onSearch={handleSearch}
-                          showArrow
-                          allowClear
-                          onChange={(e) => setSelectedMissions([e])}
-                          style={{ width: "200px" }}
-                          onPopupScroll={onScroll}
-                          onFocus={() => {
-                            setPage(1);
-                            setMissionOptions([]);
-                            setMissionSearchValue("");
-                            setFetch(true);
-                          }}
-                          notFoundContent={null}
-                          filterOption={false}
-                        >
-                          {missionOptions.map((mission) => (
-                            <Option key={mission._id} value={mission._id}>
-                              {mission.name}
-                            </Option>
-                          ))}
-                        </Select>
-                      </Col>
-                      <Col span={12}>
-                        <h4>
-                          <span style={{ color: "red" }}>*</span> Choose
-                          layer(s) from mission
-                        </h4>
-                        <Select
-                          placeholder="Select Layers(s)"
-                          showSearch
-                          loading={layersLoading}
-                          optionFilterProp="label"
-                          showArrow
-                          allowClear={false}
-                          onDeselect={(e) => {
-                            console.log(e);
-                            const filtered: unknown = selectedLayers.filter(
-                              (i) => i !== e && i !== undefined
-                            );
-                            setSelectedLayers(filtered);
-                            setApiCall(true);
-                          }}
-                          onChange={(e) => {
-                            const value: unknown = e;
-                            const array: unknown = [...selectedLayers];
-                            if (value.length > 1) {
-                              console.log(array.includes(value.at(-1)));
-                              array.push(value.at(-1));
-                            } else {
-                              console.log(array.includes(value[0]));
-                              array.push(value[0]);
-                            }
-                            setSelectedLayers(array);
-                          }}
-                          mode="tags"
-                          style={{ minWidth: "200px", maxWidth: "500px" }}
-                        >
-                          {selectedMissions &&
-                            layerOptions.map((layer) => (
-                              <Option key={layer._id} value={layer._id}>
-                                {layer.name}
-                              </Option>
-                            ))}
-                        </Select>
-                      </Col>
-                    </Row>
-                  );
-                })}
-
-                <Button
-                  type="primary"
-                  style={{ marginTop: "10px" }}
-                  onClick={() => addMore()}
-                >
-                  Add more missions
-                </Button>
-              </div>
-            </div>
-          )}
-        </>
-      ),
-    },
-    {
-      title: "Attribute Mapping",
-      content: (
-        <>
-          <Title level={4} style={{ marginTop: "8px" }}>
-            Map attributes to existing
-          </Title>
-          <Text>
-            Select the attributes imported from your missions, to map against
-            existing attributes of the layer. Remaining un-mapped attribute
-            information will not be lost as it will be still stored in your
-            layer.
-          </Text>
-
-          <Collapse
-            defaultActiveKey={activeTab}
-            onChange={(e) => setActiveTab(e)}
-            style={{
-              width: "100%",
-              overflow: "auto",
-              maxHeight: "400px",
-              marginTop: "12px",
-            }}
-            //accordion
-          >
-            {metadata.map((missions: unknown) => {
-              return (
-                <>
-                  {missions.layers.map((layers: unknown, i) => {
-                    return (
-                      <Panel
-                        header={`${layers.name} (${missions.missionName})`}
-                        key={i}
-                      >
-                        <div style={{ padding: "20px" }} key={uuid()}>
-                          <Row>
-                            <Col span={12}>
-                              <Title level={5}>Attribute name</Title>
-                            </Col>
-                            <Col span={12}>
-                              <Title level={5}>Map to field</Title>
-                            </Col>
-                          </Row>
-                          {/* -ROW------------------- */}
-                          {layers.fields.map((fields: unknown) => {
-                            if (
-                              fields.key !== "sys_id" &&
-                              fields.key !== "icon" &&
-                              fields.key !== "color"
-                            ) {
-                              return (
-                                <>
-                                  <Row style={{ padding: "5px" }} key={uuid()}>
-                                    <Col span={12}>
-                                      <Text>{fields.key}</Text>
-                                      <br />
-                                      <Text type="secondary">
-                                        Sample: {fields.value}
-                                      </Text>
-                                    </Col>
-                                    <Col span={12}>
-                                      <Select
-                                        key={`${fields.key}-${uuid()}`}
-                                        style={{ width: "200px" }}
-                                        defaultValue={
-                                          selectedAttr[layers._id]
-                                            ? selectedAttr[layers._id][
-                                                fields.key
-                                              ]
-                                              ? selectedAttr[layers._id][
-                                                  fields.key
-                                                ]
-                                              : null
-                                            : null
-                                        }
-                                        onSelect={(e) =>
-                                          handleAttributeMapping(
-                                            e,
-                                            fields,
-                                            layers
-                                          )
-                                        }
-                                        placeholder="Map the attribute selected"
-                                      >
-                                        {primeAttributes.map((item, index) => (
-                                          <Option
-                                            key={`${uuid()}-${item.key}`}
-                                            value={item.attribute}
-                                          >
-                                            {item.attribute}
-                                          </Option>
-                                        ))}
-                                      </Select>
-                                    </Col>
-                                  </Row>
-                                  <Divider />
-                                </>
-                              );
-                            }
-                          })}
-                        </div>
-                      </Panel>
-                    );
-                  })}
-                </>
-              );
-            })}
-          </Collapse>
-        </>
-      ),
-    },
-    {
-      title: "Layer Updated!",
-      content: (
-        <>
-          <div
-            style={{
-              marginTop: "100px",
-            }}
-          >
-            <Result
-              status="success"
-              title="Successfully Updated Layer!"
-              subTitle="You can now view the layer in the map."
-            />
-          </div>
-        </>
-      ),
-    },
-  ];
 
   useEffect(
     () => console.log(layerName, captureDate, layerType, layerTypeId, fileList),
@@ -2715,24 +1627,28 @@ const CreateBaseLayer = (props) => {
           <>
             {props.updateType == "Raster" ? (
               <>
-                <Steps current={current1} items={steps1RasterUpdate.map((item)=>{
-                  return {
-                    title: item.title
-                  }
-                })}>
-                </Steps>
+                <Steps
+                  current={current1}
+                  items={steps1RasterUpdate.map((item) => {
+                    return {
+                      title: item.title,
+                    };
+                  })}
+                ></Steps>
                 <div className="steps-content">
                   {steps1RasterUpdate[current1].content}
                 </div>
               </>
             ) : (
               <>
-                <Steps current={current1} items={steps1Update.map((item)=>{
-                  return {
-                    title: item.title
-                  }
-                })}>
-                </Steps>
+                <Steps
+                  current={current1}
+                  items={steps1Update.map((item) => {
+                    return {
+                      title: item.title,
+                    };
+                  })}
+                ></Steps>
                 <div className="steps-content">
                   {steps1Update[current1].content}
                 </div>
@@ -2743,24 +1659,28 @@ const CreateBaseLayer = (props) => {
           <>
             {layerType == "Raster" ? (
               <>
-                <Steps current={current1} items={steps1Raster.map((item)=>{
-                  return {
-                    title: item.title
-                  }
-                })}>
-                </Steps>
+                <Steps
+                  current={current1}
+                  items={steps1Raster.map((item) => {
+                    return {
+                      title: item.title,
+                    };
+                  })}
+                ></Steps>
                 <div className="steps-content">
                   {steps1Raster[current1].content}
                 </div>
               </>
             ) : (
               <>
-                <Steps current={current1} items={steps1.map((item)=>{
-                  return {
-                    title: item.title
-                  }
-                })}>
-                </Steps>
+                <Steps
+                  current={current1}
+                  items={steps1.map((item) => {
+                    return {
+                      title: item.title,
+                    };
+                  })}
+                ></Steps>
                 <div className="steps-content">{steps1[current1].content}</div>
               </>
             )}
@@ -2799,21 +1719,45 @@ const CreateBaseLayer = (props) => {
         width={1150}
         centered={true}
       >
-        <Steps current={current2} items={props.isUpdate?steps2Update.map((item)=>{
-                  return {
-                    title: item.title
-                  }
-                }):steps2.map((item)=>{
-                  return {
-                    title: item.title
-                  }
-                })}>
-        </Steps>
-        {props.isUpdate ? (
-          <div className="steps-content">{steps2Update[current2].content}</div>
-        ) : (
-          <div className="steps-content">{steps2[current2].content}</div>
-        )}
+        <ImportLayerSteps
+          setLayerColor={setLayerColor}
+          layerColor={layerColor}
+          setCaptureDate={setCaptureDate}
+          changeLayerType={changeLayerType}
+          options={props.options}
+          layerType1={layerType1}
+          setLayerName={setLayerName}
+          primeAttributes={primeAttributes}
+          handleAttributeMapping={handleAttributeMapping}
+          selectedAttr={selectedAttr}
+          metadata={metadata}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          tableData={tableData}
+          setPrimeAttributes={setPrimeAttributes}
+          addMore={addMore}
+          layerOptions={layerOptions}
+          uiElement={uiElement}
+          onScroll={onScroll}
+          layerOptions={layerOptions}
+          current2={current2}
+          showAddMissions={showAddMissions}
+          setShowAddMissions={setShowAddMissions}
+          missionsLoading={missionsLoading}
+          handleSearch={handleSearch}
+          isUpdate={props.isUpdate}
+          selectedMissions={selectedMissions}
+          setSelectedMissions={setSelectedMissions}
+          setPage={setPage}
+          setMissionOptions={setMissionOptions}
+          setMissionSearchValue={setMissionSearchValue}
+          setFetch={setFetch}
+          missionOptions={missionOptions}
+          layersLoading={layersLoading}
+          selectedLayers={selectedLayers}
+          setSelectedLayers={setSelectedLayers}
+          setApiCall={setApiCall}
+        />
       </Modal>
       <Modal
         title="Storage Exceeded!"

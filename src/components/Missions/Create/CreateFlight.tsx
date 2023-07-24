@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, FC } from "react";
 import {
   Form,
   Input,
@@ -8,6 +8,8 @@ import {
   TimePicker,
   message,
 } from "antd";
+import moment, { Moment } from "moment";
+import { connect, ConnectedProps } from "react-redux";
 import s_m from "../../../Icons/start_measurement.svg";
 import l_a from "../../../Icons/location_add.svg";
 import {
@@ -17,41 +19,59 @@ import {
   enableFlightEditing,
 } from "../../../actions/missionCreation";
 import { showDrawing } from "../../../actions/gmapActions";
-import { connect } from "react-redux";
-import moment from "moment";
 
 const { Option } = Select;
 
-const FlightEditing = (props: any) => {
+// Define types for the props
+interface FlightEditingProps extends PropsFromRedux {
+  geofenceType: string;
+  polygonData: any; // Replace with the appropriate type for polygonData
+  circleData: any; // Replace with the appropriate type for circleData
+  location: string;
+}
+
+// Define the FlightEditing component
+const FlightEditing: FC<FlightEditingProps> = ({
+  geofenceType,
+  polygonData,
+  circleData,
+  location,
+  setFlightDetails,
+  clearMissionCreationState,
+  addFlight,
+  enableFlightEditing,
+  showDrawing,
+  flightDetails,
+  nextStage,
+}) => {
   const [formState, setFormState] = useState<any>({
     locationId: "none",
   });
-  const [area, setArea] = useState(0);
-  const [selectedPoints, setSelectedPoints] = useState(0);
-  const [location, setLocation] = useState("");
+  const [area, setArea] = useState<number>(0);
+  const [selectedPoints, setSelectedPoints] = useState<number>(0);
 
   const [form] = Form.useForm();
 
+  // Update form fields when geofence type or data changes
   useEffect(() => {
-    if (props.geofenceType) {
-      if (props.geofenceType === "polygon" && props.polygonData) {
-        setSelectedPoints(props.polygonData.points.length);
+    if (geofenceType) {
+      if (geofenceType === "polygon" && polygonData) {
+        setSelectedPoints(polygonData.points.length);
       }
 
-      if (props.polygonData) {
-        setArea(props.polygonData.area);
-      } else if (props.circleData) {
-        setArea(props.circleData.area);
+      if (polygonData) {
+        setArea(polygonData.area);
+      } else if (circleData) {
+        setArea(circleData.area);
       }
-
-      setLocation(props.location);
 
       setFormState({
-        ...props.flightDetails,
+        ...flightDetails,
       });
     }
-  }, [props]);
+  }, [geofenceType, polygonData, circleData, flightDetails]);
 
+  // Handle flight name change
   const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormState({
       ...formState,
@@ -59,6 +79,7 @@ const FlightEditing = (props: any) => {
     });
   };
 
+  // Handle form submission
   const handleFormSubmit = () => {
     if (
       formState.flightName &&
@@ -67,19 +88,19 @@ const FlightEditing = (props: any) => {
       formState.duration
     ) {
       props.setFormComplete(true);
-      props.clearMissionCreationState();
-      props.setFlightDetails(formState);
-      props.addFlight();
+      clearMissionCreationState();
+      setFlightDetails(formState);
+      addFlight();
       form.resetFields();
       props.setAreaSelected(false);
-      props.enableFlightEditing(false);
+      enableFlightEditing(false);
       message.success("Flight Edited");
-      props.nextStage();
+      nextStage();
     }
   };
 
   return (
-    props.geofenceType && (
+    geofenceType && (
       <div style={{ marginTop: "15px" }}>
         <Form
           form={form}
@@ -103,7 +124,7 @@ const FlightEditing = (props: any) => {
             <Input
               className="locationBox"
               onChange={onNameChange}
-              defaultValue={props.flightDetails.flightName}
+              defaultValue={flightDetails.flightName}
             />
           </Form.Item>
 
@@ -117,8 +138,8 @@ const FlightEditing = (props: any) => {
             ]}
           >
             <DatePicker
-              defaultValue={moment(props.flightDetails.date, "YYYY-MM-DD")}
-              onChange={(e: moment.Moment | null) => {
+              defaultValue={moment(flightDetails.date, "YYYY-MM-DD") as Moment}
+              onChange={(e: Moment | null) => {
                 setFormState({
                   ...formState,
                   date: e?.format("YYYY-MM-DD").toString(),
@@ -137,7 +158,7 @@ const FlightEditing = (props: any) => {
             ]}
           >
             <TimePicker
-              defaultValue={moment(props.flightDetails.time, "HH:mm A")}
+              defaultValue={moment(flightDetails.time, "HH:mm A") as Moment}
               use12Hours={true}
               onChange={(value) => {
                 setFormState({
@@ -158,10 +179,10 @@ const FlightEditing = (props: any) => {
             ]}
           >
             <Select
-              defaultValue={props.flightDetails.duration}
+              defaultValue={flightDetails.duration}
               className="selectBox"
               placeholder="Flight Duration"
-              onChange={(value) => {
+              onChange={(value: any) => {
                 setFormState({
                   ...formState,
                   duration: value.toString(),
@@ -189,12 +210,17 @@ const FlightEditing = (props: any) => {
               <Option value="none">none</Option>
             </Select>
           </Form.Item>
-          {(props.circleData || props.polygonData) && (
+
+          {(circleData || polygonData) && (
             <div>
               <div className="data_selected">
-                <img style={{ height: "40px", marginTop: "-20px" }} src={s_m} />
+                <img
+                  style={{ height: "40px", marginTop: "-20px" }}
+                  src={s_m}
+                  alt=""
+                />
                 <div className="data_selected_inner">
-                  {props.geofenceType === "polygon" ? (
+                  {geofenceType === "polygon" ? (
                     <div>
                       <p>
                         <strong>Geofence Selected</strong>
@@ -202,7 +228,6 @@ const FlightEditing = (props: any) => {
                       <p>
                         <span>{selectedPoints} Points Selected</span>{" "}
                         <span>
-                          {" "}
                           {`${(area * 0.000247105).toFixed(2)} acres`}
                         </span>
                       </p>
@@ -249,8 +274,8 @@ const FlightEditing = (props: any) => {
                 onClick={() => {
                   form.resetFields();
                   props.setAreaSelected(false);
-                  props.showDrawing();
-                  props.nextStage();
+                  showDrawing();
+                  nextStage();
                 }}
               >
                 Cancel
@@ -272,31 +297,35 @@ const FlightEditing = (props: any) => {
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    geofenceType: state.MissionCreation.geoFence.circle ? "circle" : "polygon",
-    polygonData: state.MissionCreation.geoFence.polygon
-      ? state.MissionCreation.geoFence.polygon
-      : null,
+// Map state to props
+const mapStateToProps = (state: any) => ({
+  geofenceType: state.MissionCreation.geoFence.circle ? "circle" : "polygon",
+  polygonData: state.MissionCreation.geoFence.polygon
+    ? state.MissionCreation.geoFence.polygon
+    : null,
+  circleData: state.MissionCreation.geoFence.circle
+    ? state.MissionCreation.geoFence.circle
+    : null,
+  location: state.MissionCreation.flightDetails.geoLocation,
+  flightDetails:
+    state.MissionCreation.flights.length !== 0
+      ? {
+          ...state.MissionCreation.flights[0].flightDetails,
+        }
+      : {},
+});
 
-    circleData: state.MissionCreation.geoFence.circle
-      ? state.MissionCreation.geoFence.circle
-      : null,
-
-    location: state.MissionCreation.flightDetails.geoLocation,
-    flightDetails:
-      state.MissionCreation.flights.length !== 0
-        ? {
-            ...state.MissionCreation.flights[0].flightDetails,
-          }
-        : {},
-  };
-};
-
-export default connect(mapStateToProps, {
+// Connect component to Redux store
+const connector = connect(mapStateToProps, {
   clearMissionCreationState,
   setFlightDetails,
   addFlight,
   enableFlightEditing,
   showDrawing,
-})(FlightEditing);
+});
+
+// Define type for props received from redux
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+// Export the connected component
+export default connector(FlightEditing);

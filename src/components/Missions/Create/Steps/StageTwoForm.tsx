@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, FC } from "react";
 import {
   Form,
   Input,
@@ -8,6 +8,12 @@ import {
   TimePicker,
   message,
 } from "antd";
+import moment, { Moment } from "moment";
+import http from "../../../../services/httpCall";
+import apis from "../../../../services/apis";
+import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
+import { logout } from "../../../../actions/authAction";
+import { connect, ConnectedProps } from "react-redux";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
 import {
@@ -16,45 +22,64 @@ import {
   clearMissionCreationStateWithGeoFence,
 } from "../../../../actions/missionCreation";
 import { showDrawing } from "../../../../actions/gmapActions";
-import { connect } from "react-redux";
-import moment from "moment";
-import http from "../../../../services/httpCall";
-import apis from "../../../../services/apis";
-import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 
 const { Option } = Select;
-const StageTwoForm = (props: any) => {
+
+interface StageTwoFormProps extends PropsFromRedux {
+  geofenceType: string;
+  polygonData: any; // Replace with the appropriate type for polygonData
+  circleData: any; // Replace with the appropriate type for circleData
+  location: string;
+  setisoDate: (isoDate: string) => void;
+  setFormComplete: (formComplete: boolean) => void;
+  setAreaSelected: () => void;
+  nextStage: () => void;
+}
+
+const StageTwoForm: FC<StageTwoFormProps> = ({
+  geofenceType,
+  polygonData,
+  circleData,
+  location,
+  setisoDate,
+  setFormComplete,
+  nextStage,
+  setFlightDetails,
+  addFlight,
+  clearMissionCreationStateWithGeoFence,
+  showDrawing,
+  setAreaSelected,
+  logout,
+}) => {
   const [formState, setFormState] = useState<any>({
     locationId: "none",
     date: moment(new Date()).format("YYYY-MM-DD"),
     time: moment(new Date()).format("hh:mm:ss A"),
     flightName: "MyFlight1",
   });
-  const [area, setArea] = useState(0);
-  const [selectedPoints, setSelectedPoints] = useState(0);
-  const [location, setLocation] = useState("");
+  const [area, setArea] = useState<number>(0);
+  const [selectedPoints, setSelectedPoints] = useState<number>(0);
   const [locations, setLocations] = useState<any>(null);
 
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if (props.geofenceType) {
-      if (props.geofenceType === "polygon" && props.polygonData) {
-        setSelectedPoints(props.polygonData.points.length);
+    if (geofenceType) {
+      if (geofenceType === "polygon" && polygonData) {
+        setSelectedPoints(polygonData.points.length);
       }
 
-      if (props.polygonData) {
-        setArea(props.polygonData.area);
-      } else if (props.circleData) {
-        setArea(props.circleData.area);
+      if (polygonData) {
+        setArea(polygonData.area);
+      } else if (circleData) {
+        setArea(circleData.area);
       }
 
-      setLocation(props.location);
+      setLocation(location);
     }
-  }, [props]);
+  }, [geofenceType, polygonData, circleData, location]);
 
-  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Get All Locations +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Get All Locations +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const getAllLocations = () => {
     http
       .get(`${apis.GET_ALL_LOCATIONS}`)
@@ -65,7 +90,7 @@ const StageTwoForm = (props: any) => {
       })
       .catch((err) => {
         message.error("Locations could not be fetched");
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -80,25 +105,27 @@ const StageTwoForm = (props: any) => {
     });
   };
 
-  const handleFormSubmit = (values) => {
+  const handleFormSubmit = (values: any) => {
     if (
       formState.flightName &&
       formState.date &&
       formState.time &&
       formState.duration
     ) {
-      props.setFormComplete(true);
-      props.setFlightDetails(formState);
-      props.addFlight();
+      setFormComplete(true);
+      setFlightDetails(formState);
+      addFlight();
       form.resetFields();
-      props.setAreaSelected(false);
+      showDrawing(false);
+      clearMissionCreationStateWithGeoFence();
+      setAreaSelected(false);
       message.success("Flight Added");
-      props.nextStage();
+      nextStage();
     }
   };
 
   return (
-    props.geofenceType && (
+    geofenceType && (
       <div className="stage-two-form" style={{ marginTop: "5px" }}>
         <Form
           form={form}
@@ -106,8 +133,8 @@ const StageTwoForm = (props: any) => {
           name="create_mission"
           initialValues={{
             flight: "MyFlight1",
-            date: moment(new Date()),
-            time: moment(new Date()),
+            date: moment(new Date()) as Moment,
+            time: moment(new Date()) as Moment,
           }}
           size="small"
           onFinish={handleFormSubmit}
@@ -148,7 +175,7 @@ const StageTwoForm = (props: any) => {
                   date: e?.format("YYYY-MM-DD").toString(),
                 });
 
-                props.setisoDate(
+                setisoDate(
                   e?.format("YYYY-MM-DD").toString() +
                     "T" +
                     formState.time.split(" ")[0] +
@@ -177,7 +204,7 @@ const StageTwoForm = (props: any) => {
                   time: value?.format("hh:mm A").toString(),
                 });
 
-                props.setisoDate(
+                setisoDate(
                   formState.date +
                     "T" +
                     value?.format("HH:mm:ss A").split(" ")[0] +
@@ -242,9 +269,13 @@ const StageTwoForm = (props: any) => {
           {props.areaSelected && (
             <div>
               <div className="data_selected">
-                <img style={{ height: "20px", marginTop: "-15px" }} src={s_m} />
+                <img
+                  style={{ height: "20px", marginTop: "-15px" }}
+                  src={s_m}
+                  alt=""
+                />
                 <div className="data_selected_inner">
-                  {props.geofenceType === "polygon" ? (
+                  {geofenceType === "polygon" ? (
                     <div>
                       <p>
                         <strong>Geofence Selected</strong>
@@ -252,7 +283,6 @@ const StageTwoForm = (props: any) => {
                       <p>
                         <span>{selectedPoints} Points Selected</span>{" "}
                         <span>
-                          {" "}
                           {`${(area * 0.000247105).toFixed(2)} acres`}
                         </span>
                       </p>
@@ -292,7 +322,7 @@ const StageTwoForm = (props: any) => {
             </div>
           )}
 
-          {(props.polygonData !== null || props.circleData !== null) && (
+          {(polygonData !== null || circleData !== null) && (
             <Form.Item>
               <div className="mission_creation_buttons">
                 <Button
@@ -301,9 +331,9 @@ const StageTwoForm = (props: any) => {
                   style={{ background: "red" }}
                   onClick={() => {
                     form.resetFields();
-                    props.setAreaSelected(false);
-                    props.showDrawing(false);
-                    props.clearMissionCreationStateWithGeoFence();
+                    setAreaSelected(false);
+                    showDrawing(false);
+                    clearMissionCreationStateWithGeoFence();
                   }}
                 >
                   Cancel
@@ -320,25 +350,25 @@ const StageTwoForm = (props: any) => {
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    geofenceType: state.MissionCreation.geoFence.circle ? "circle" : "polygon",
-    polygonData: state.MissionCreation.geoFence.polygon
-      ? state.MissionCreation.geoFence.polygon
-      : null,
+const mapStateToProps = (state: any) => ({
+  geofenceType: state.MissionCreation.geoFence.circle ? "circle" : "polygon",
+  polygonData: state.MissionCreation.geoFence.polygon
+    ? state.MissionCreation.geoFence.polygon
+    : null,
+  circleData: state.MissionCreation.geoFence.circle
+    ? state.MissionCreation.geoFence.circle
+    : null,
+  location: state.MissionCreation.flightDetails.geoLocation,
+});
 
-    circleData: state.MissionCreation.geoFence.circle
-      ? state.MissionCreation.geoFence.circle
-      : null,
-
-    location: state.MissionCreation.flightDetails.geoLocation,
-  };
-};
-
-export default connect(mapStateToProps, {
+const connector = connect(mapStateToProps, {
   setFlightDetails,
   addFlight,
   clearMissionCreationStateWithGeoFence,
   showDrawing,
   logout,
-})(StageTwoForm);
+});
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export default connector(StageTwoForm);
