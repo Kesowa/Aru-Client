@@ -4,14 +4,8 @@ import { useParams } from "react-router-dom";
 import GoogleMap from "../../GoogleMap";
 import EditFlightForm from "./Form";
 import "../../Views/Details/Data/data.less";
-import { message } from "antd";
 import Weather from "../../../shared/Weather";
-import http from "../../../../services/httpCall";
-import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
-import Codes from "../../../../static/weatherCodes";
-import convertDegreeToDirection from "../../../../services/convertDegreeToDirection";
-import apis from "../../../../services/apis";
 
 const EditFlight: FC<EditFlightProps> = (props) => {
   const [areaSelected, setAreaSelected] = useState(false);

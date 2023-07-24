@@ -138,7 +138,7 @@ const FlightEditing: FC<FlightEditingProps> = ({
             ]}
           >
             <DatePicker
-              defaultValue={moment(flightDetails.date, "YYYY-MM-DD") as Moment}
+              defaultValue={moment(flightDetails.date, "YYYY-MM-DD")}
               onChange={(e: Moment | null) => {
                 setFormState({
                   ...formState,
@@ -158,7 +158,7 @@ const FlightEditing: FC<FlightEditingProps> = ({
             ]}
           >
             <TimePicker
-              defaultValue={moment(flightDetails.time, "HH:mm A") as Moment}
+              defaultValue={moment(flightDetails.time, "HH:mm A")}
               use12Hours={true}
               onChange={(value) => {
                 setFormState({

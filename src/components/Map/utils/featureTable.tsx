@@ -7,7 +7,6 @@ import {
   Form,
   Input,
   Popconfirm,
-  Pagination,
   Space,
   message,
   InputNumber,

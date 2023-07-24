@@ -1,7 +1,7 @@
 // MapAttributes.tsx
 
 import React, { useState, useEffect } from "react";
-import { Typography, Spin, Form, Input, Select } from "antd";
+import { Typography, Spin, Select } from "antd";
 import ReactJson from "react-json-view";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";

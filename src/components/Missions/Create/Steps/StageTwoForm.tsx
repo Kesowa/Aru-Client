@@ -8,7 +8,7 @@ import {
   TimePicker,
   message,
 } from "antd";
-import moment, { Moment } from "moment";
+import moment from "moment";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -133,8 +133,8 @@ const StageTwoForm: FC<StageTwoFormProps> = ({
           name="create_mission"
           initialValues={{
             flight: "MyFlight1",
-            date: moment(new Date()) as Moment,
-            time: moment(new Date()) as Moment,
+            date: moment(new Date()),
+            time: moment(new Date()),
           }}
           size="small"
           onFinish={handleFormSubmit}
