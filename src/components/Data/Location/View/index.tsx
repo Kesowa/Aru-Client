@@ -8,9 +8,9 @@ import {
   Collapse,
   message,
   Spin,
-  PageHeader,
   Typography,
 } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import "./index.less";
 import { ClockCircleOutlined } from "@ant-design/icons";
 import LocationCardMap from "./Map";
@@ -30,8 +30,6 @@ import moment from "moment";
 import { connect } from "react-redux";
 import { loading } from "../../../../actions/loadingAction";
 import { STATIC_URL } from "src/constants";
-
-const { TabPane } = Tabs;
 const { Panel } = Collapse;
 const { Text, Title } = Typography;
 
@@ -104,7 +102,6 @@ function LocationCard(props) {
       });
 
       if (location.data.status) {
-        //console.log(location.data)
         const points = location.data.data.geometry.coordinates[0].map(
           (point) => {
             return {
@@ -174,7 +171,6 @@ function LocationCard(props) {
       })
       .then((result) => {
         if (result.data.status) {
-          //console.log(result.data.data[0]);
           setSelectedMissionDetails(result.data.data[0]);
           setCenterPoints(result.data.data[0].centerPoints);
         } else {
@@ -288,7 +284,6 @@ function LocationCard(props) {
   return (
     <div>
       <PageHeader
-        //style={{ margin: "-24px", marginBottom: 0 }}
         ghost={false}
         onBack={() => window.history.back()}
         title={locationName}
@@ -305,20 +300,12 @@ function LocationCard(props) {
               <Text>18 June, 2020</Text>
             </Col>
           </Row>,
-          // <EditOutlined/>,
-          // <DeleteOutlined/>
         ]}
-        // footer={
-        //   <div>
-        //     <EditOutlined /> <DeleteOutlined />
-        //   </div>
-        // }
       ></PageHeader>
       <Row className="location_card_data">
         <Col
           span={16}
           style={{
-            //marginLeft:'-24px',
             minHeight: "450px",
             height: "100%",
           }}
@@ -345,67 +332,80 @@ function LocationCard(props) {
           span={8}
           style={{
             padding: "10px",
-            //width : "300px"
           }}
           className="mission-tab"
         >
-          <Tabs defaultActiveKey="1">
-            <TabPane tab="Missions" key="1" className="mission_tab">
-              {isMissionsLoading && (
-                <div className="mission-loading">
-                  <Spin size="large" />
-                </div>
-              )}
-              {!isMissionsLoading && (
-                <React.Fragment>
-                  {missions.map((mis) => (
-                    <div
-                      className={`mission_tab_mission_content ${
-                        selectedMission.missionID === mis.missionID
-                          ? "mission_tab_mission_content-selected"
-                          : ""
-                      }`}
-                      key={mis.missionID}
-                      onClick={() => {
-                        setSelectedMission(mis);
-                        getMissionDetails(mis.missionID);
-                        setIsChecked(false);
-                      }}
-                    >
-                      <Row
-                        className="mission-tab-card"
-                        style={{ padding: "15px 10px" }}
-                      >
-                        <Col span={4}>
-                          {selectedMission.missionID === mis.missionID ? (
-                            <img
-                              src={mib}
-                              alt=""
-                              style={{ margin: "0 auto" }}
-                            />
-                          ) : (
-                            <img src={mi} alt="" style={{ margin: "0 auto" }} />
-                          )}
-                        </Col>
-                        <Col span={20} style={{ paddingLeft: "10px" }}>
-                          <Text
-                            className="mission-name"
-                            strong
-                            style={{ display: "block", fontSize: "16px" }}
+          <Tabs
+            defaultActiveKey="1"
+            className="mission_tab"
+            items={[
+              {
+                key: "1",
+                label: "Missions",
+                children: (
+                  <>
+                    {isMissionsLoading ? (
+                      <div className="mission-loading">
+                        <Spin size="large" />
+                      </div>
+                    ) : (
+                      <React.Fragment>
+                        {missions.map((mis) => (
+                          <div
+                            className={`mission_tab_mission_content ${
+                              selectedMission.missionID === mis.missionID
+                                ? "mission_tab_mission_content-selected"
+                                : ""
+                            }`}
+                            key={mis.missionID}
+                            onClick={() => {
+                              setSelectedMission(mis);
+                              getMissionDetails(mis.missionID);
+                              setIsChecked(false);
+                            }}
                           >
-                            {mis.MissionName}
-                          </Text>
-                          <Text type="secondary">
-                            {getTimeAgo(mis.orderDate)}
-                          </Text>
-                        </Col>
-                      </Row>
-                    </div>
-                  ))}
-                </React.Fragment>
-              )}
-            </TabPane>
-          </Tabs>
+                            <Row
+                              className="mission-tab-card"
+                              style={{ padding: "15px 10px" }}
+                            >
+                              <Col span={4}>
+                                {selectedMission.missionID === mis.missionID ? (
+                                  <img
+                                    src={mib}
+                                    alt=""
+                                    style={{ margin: "0 auto" }}
+                                  />
+                                ) : (
+                                  <img
+                                    src={mi}
+                                    alt=""
+                                    style={{ margin: "0 auto" }}
+                                  />
+                                )}
+                              </Col>
+                              <Col span={20} style={{ paddingLeft: "10px" }}>
+                                <Text
+                                  className="mission-name"
+                                  strong
+                                  style={{ display: "block", fontSize: "16px" }}
+                                >
+                                  {mis.MissionName}
+                                </Text>
+                                <Text type="secondary">
+                                  {getTimeAgo(mis.orderDate)}
+                                </Text>
+                              </Col>
+                            </Row>
+                          </div>
+                        ))}
+                      </React.Fragment>
+                    )}
+                  </>
+                ),
+              },
+            ]}
+          ></Tabs>
+
           {selectedMissionDetails && !selectedLoading ? (
             <div className="mission_details" style={{ padding: "10px" }}>
               <Title level={4}>Mission Details</Title>
@@ -508,7 +508,7 @@ function LocationCard(props) {
   );
 }
 
-const mapStateToProps = () => {};
+const mapStateToProps = () => ({});
 
 export default connect(mapStateToProps, {
   loading,

@@ -4,6 +4,7 @@ import {
   Col,
   Layout,
   Menu,
+  MenuProps,
   Popconfirm,
   Row,
   Tooltip,
@@ -25,7 +26,43 @@ function SideBar(props: any) {
   const [r, setR] = useState(true);
   const { switcher, themes, currentTheme, status } = useThemeSwitcher();
   const history = useHistory();
-
+  const menu: MenuProps["items"] = () => {
+    const items: MenuProps["items"] = [];
+    props.Auth.userdetails.sideBar.map((ele: any, i: number) => {
+      if (ele.type === "sub_menu") {
+        const submenu = {
+          key: `sub_menu${i}`,
+          icon: decideIcon(ele.icon),
+          label: ele.text,
+        };
+        const children: MenuProps["items"] = [];
+        ele.sub_menu.map((subEle: any, j: number) => {
+          children.push({
+            key: subEle.link,
+            label: (
+              <Link to={subEle.link}>
+                {decideIcon(subEle.icon)}
+                <span>{subEle.text}</span>
+              </Link>
+            ),
+          });
+        });
+        submenu["children"] = children;
+        items.push(submenu);
+      } else if (ele.type === "menu") {
+        items.push({
+          key: ele.link,
+          label: (
+            <Link to={ele.link}>
+              {decideIcon(ele.icon)}
+              <span>{ele.text}</span>
+            </Link>
+          ),
+        });
+      }
+    });
+    return items;
+  };
   useEffect(() => {
     history.listen((location) => {
       const loc = location.pathname.split("/");
@@ -41,7 +78,6 @@ function SideBar(props: any) {
   useEffect(() => {
     const l = window.location.pathname;
     const loc = l.split("/");
-    //console.log(loc);
     if (loc[3] === "live") {
       setHref("/dashboard/missions");
     } else {
@@ -139,7 +175,6 @@ function SideBar(props: any) {
                 <Col span={8}>
                   <Avatar
                     className="user-avatar"
-                    // icon={<UserOutlined />}
                     src={STATIC_URL + props.UserDetails.avatar}
                   >
                     {getInitials(props.UserDetails.name)}
@@ -208,75 +243,8 @@ function SideBar(props: any) {
               theme="dark"
               mode="inline"
               selectedKeys={[href]}
-            >
-              {props.Auth.userdetails.sideBar.map((ele: any, i: number) => {
-                //console.log(ele, i);
-                if (ele.type === "sub_menu") {
-                  return (
-                    <Menu.SubMenu
-                      key={`sub_menu${i}`}
-                      icon={decideIcon(ele.icon)}
-                      title={ele.text}
-                    >
-                      {ele.sub_menu.map((subEle: any, j: number) => {
-                        return (
-                          <Menu.Item key={subEle.link} onClick={() => setR(!r)}>
-                            <Link to={subEle.link}>
-                              {decideIcon(subEle.icon)}
-                              <span>{subEle.text}</span>
-                            </Link>
-                          </Menu.Item>
-                        );
-                      })}
-                    </Menu.SubMenu>
-                  );
-                } else if (ele.type === "menu") {
-                  return (
-                    <Menu.Item key={`${ele.link}`} onClick={() => setR(!r)}>
-                      <Link to={ele.link}>
-                        {decideIcon(ele.icon)}
-                        <span>{ele.text}</span>
-                      </Link>
-                    </Menu.Item>
-                  );
-                }
-              })}
-              {/* <Menu.Item key={`global-map-12123123`} onClick={() => setR(!r)}>
-                <Link to="/dashboard/basemap">
-                  {decideIcon("CompassOutlined")}
-                  <span>Map</span>
-                </Link>
-              </Menu.Item> */}
-
-              {/* <Menu.SubMenu key="main-1" icon={<UserOutlined />} title="Tenant">
-                    <Menu.Item  key="sub-1">
-                        <Link to="/dashboard/admin/tenant/list">
-                            <UnorderedListOutlined />
-                            <span>Tenat List</span>
-                        </Link>
-                    </Menu.Item>
-                    <Menu.Item  key="sub-2">
-                        <Link to="/dashboard/admin/tenant/create">
-                            <PlusCircleOutlined />
-                            <span>Add Tenat</span>
-                        </Link>
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.SubMenu key="main-2" icon={<ShoppingCartOutlined />} title="Package">
-                    <Menu.Item  key="sub-3">
-                        <Link to="/dashboard/admin/package/list">
-                            <UnorderedListOutlined />
-                            <span>Package List</span>
-                        </Link>
-                    </Menu.Item>
-                    <Menu.Item  key="sub-4">
-                        <Link to="/dashboard/admin/package/create">
-                            <PlusCircleOutlined />
-                            <span>Add Package</span>
-                        </Link>
-                    </Menu.Item>
-                </Menu.SubMenu> */}
-            </Menu>
+              items={menu()}
+            />
           </Sider>
           <div className="logo-container">
             <Logo className="brand-logo" alt="kiv-logo" />

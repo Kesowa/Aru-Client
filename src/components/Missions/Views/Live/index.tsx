@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { Tabs, Row, Col, message, Typography } from "antd";
+import type { TabsProps } from "antd";
 import { loading } from "../../../../actions/loadingAction";
 import "./index.less";
 import io from "socket.io-client";
@@ -19,7 +20,6 @@ import Weather from "../../../shared/Weather";
 import { LIVE_URL, API_URL } from "src/constants";
 
 function LiveViewBase(props: any) {
-  const { TabPane } = Tabs;
   const { id } = useParams<any>();
   const [missionDetails, setMissionDetails] = useState<any>();
   const [missionId, setMissionId] = useState(0);
@@ -29,41 +29,27 @@ function LiveViewBase(props: any) {
   const [streamKey, setStreamKey] = useState("");
   const [streamURL, setstreamURL] = useState("");
   const [isoDate, setisoDate] = useState("");
-  const [weatherData, setweatherData] = useState<any>({});
   const [geoFence, setGeoFence] = useState<any>({});
   const [location, setLocation] = useState({ lat: 0, lng: 0 });
 
-  const { Title, Text } = Typography;
+  const { Title } = Typography;
   const { tenantId } = props;
   const { userDetails } = props;
 
   //socket connectino variable
   const socket: any = useRef();
-  const days = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
+  const items: TabsProps["items"] = [
+    {
+      key: "1",
+      label: "About",
+      children: <About mission={missionDetails} />,
+    },
+    {
+      key: "2",
+      label: "Outcomes",
+      children: <Outcomes missionId={missionId} tenantId={tenantId._id} />,
+    },
   ];
-
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
   const fetchStreams = async () => {
     try {
       const result = await http.get(`${apis.FETCH_ALL_STREAM_KEYS}`, {
@@ -120,7 +106,6 @@ function LiveViewBase(props: any) {
       cr = currMission[0];
     }
 
-    //console.log(currMission[0]);
     setMissionDetails(cr);
     setGeoFence({
       geoFence: cr.flight.geoFence,
@@ -178,8 +163,7 @@ function LiveViewBase(props: any) {
           socket.current.on("STREAM_REMOVED", (streamKey) => {
             const temp = Buffer.from(streamKey, "base64").toString();
             const [mID, fID, lID] = temp.split("-");
-            //  console.log("flightID from streamkey"+fID);
-            //  console.log("flightId from state"+missionDetails.flight._id);
+
             if (fID.toString() === missionDetails.flight._id.toString()) {
               message.success("Stream complete!");
               setStreamKey("");
@@ -235,7 +219,6 @@ function LiveViewBase(props: any) {
               className="live-map-wrapper"
               span={theater ? 0 : pip ? 24 : 8}
               onDoubleClick={handlePip}
-              //style={{ transition: "0.2s"}}
             >
               {streamKey ? (
                 <DroneMap streamKey={streamKey} geoFence={geoFence.geoFence} />
@@ -252,14 +235,7 @@ function LiveViewBase(props: any) {
         </div>
         <Row gutter={[8, 8]}>
           <Col className="info-wrapper" span={16}>
-            <Tabs defaultActiveKey="1">
-              <TabPane tab="About" key="1">
-                <About mission={missionDetails} />
-              </TabPane>
-              <TabPane tab="Outcomes" key="2">
-                <Outcomes missionId={missionId} tenantId={tenantId._id} />
-              </TabPane>
-            </Tabs>
+            <Tabs defaultActiveKey="1" items={items} />
           </Col>
           <Col span={8}>
             <Weather

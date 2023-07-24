@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { PageHeader, message, Button, Tabs } from "antd";
+import { message, Button, Tabs } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import {
   UnorderedListOutlined,
   UserOutlined,
@@ -68,33 +69,42 @@ function TenantDetails(props: any) {
           loadingTenantDetails={loadingTenantDetails}
           tenantDetails={tenantDetails}
         />
-        <Tabs defaultActiveKey="1" type="card">
-          <Tabs.TabPane
-            tab={
-              <span>
-                <UserOutlined />
-                Root User Info
-              </span>
-            }
-            key="1"
-          >
-            <RootUser
-              isLoading={loadingTenantDetails}
-              userData={tenantDetails}
-            />
-          </Tabs.TabPane>
-          <Tabs.TabPane
-            tab={
-              <span>
-                <CreditCardOutlined />
-                Organisation Stats
-              </span>
-            }
-            key="2"
-          >
-            <Stats isLoading={loadingTenantDetails} userData={tenantDetails} />
-          </Tabs.TabPane>
-        </Tabs>
+        <Tabs
+          defaultActiveKey="1"
+          type="card"
+          items={[
+            {
+              key: "1",
+              label: (
+                <span>
+                  <UserOutlined />
+                  Root User Info
+                </span>
+              ),
+              children: (
+                <RootUser
+                  isLoading={loadingTenantDetails}
+                  userData={tenantDetails}
+                />
+              ),
+            },
+            {
+              key: "2",
+              label: (
+                <span>
+                  <CreditCardOutlined />
+                  Organisation Stats
+                </span>
+              ),
+              children: (
+                <Stats
+                  isLoading={loadingTenantDetails}
+                  userData={tenantDetails}
+                />
+              ),
+            },
+          ]}
+        ></Tabs>
       </div>
     </div>
   );

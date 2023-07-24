@@ -1,8 +1,6 @@
-import React from "react";
 import { Button, Result } from "antd";
 
 function Restrictions(props) {
-  //console.log(props.content);
   return (
     <Result
       status="500"

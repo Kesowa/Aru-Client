@@ -26,7 +26,6 @@ import { STATIC_URL } from "src/constants";
 const today = moment();
 
 function OrganisationPackageDetails(props: any) {
-  //console.log("Every detail",props.tenantData)
   const [loader, setLoader] = useState(false);
   const [storage, setStorage] = useState<any>({});
   const [packageInfo, setPackageInfo] = useState<any>({});
@@ -107,7 +106,6 @@ function OrganisationPackageDetails(props: any) {
               <Typography.Title
                 level={4}
               >{`Package name : ${packageInfo.name}`}</Typography.Title>
-              {/* <Typography.Title level={4}>{`Total Bandwith : ${props.tenantData.activePackage.bandwidth}`}</Typography.Title> */}
               <Typography.Title level={4}>{`Total Storage : ${
                 packageInfo.storage / 1000
               } GB`}</Typography.Title>
@@ -162,10 +160,6 @@ function OrganisationPackageDetails(props: any) {
               ).toFixed(3)} GB`}</Col>
             </Row>
             <Progress
-              // strokeColor={{
-              //     '0%': '#108ee9',
-              //     '100%': '#87d068',
-              // }}
               strokeWidth={12}
               showInfo={false}
               percent={Math.round(
@@ -182,10 +176,6 @@ function OrganisationPackageDetails(props: any) {
               ).toFixed(3)} GB`}</Col>
             </Row>
             <Progress
-              // strokeColor={{
-              //     '0%': '#108ee9',
-              //     '100%': '#87d068',
-              // }}
               strokeWidth={12}
               showInfo={false}
               percent={Math.round(
@@ -202,10 +192,6 @@ function OrganisationPackageDetails(props: any) {
               ).toFixed(3)} GB`}</Col>
             </Row>
             <Progress
-              // strokeColor={{
-              //     '0%': '#108ee9',
-              //     '100%': '#87d068',
-              // }}
               strokeWidth={12}
               showInfo={false}
               percent={Math.round(
@@ -222,10 +208,6 @@ function OrganisationPackageDetails(props: any) {
               ).toFixed(3)} GB`}</Col>
             </Row>
             <Progress
-              // strokeColor={{
-              //     '0%': '#108ee9',
-              //     '100%': '#87d068',
-              // }}
               strokeWidth={12}
               showInfo={false}
               percent={Math.round(
@@ -239,10 +221,6 @@ function OrganisationPackageDetails(props: any) {
               <Col>{`${storage.actualUserCount} / ${packageInfo.userCount}`}</Col>
             </Row>
             <Progress
-              // strokeColor={{
-              //     '0%': '#108ee9',
-              //     '100%': '#87d068',
-              // }}
               strokeWidth={12}
               showInfo={false}
               percent={Math.round(
@@ -254,10 +232,6 @@ function OrganisationPackageDetails(props: any) {
               <Col>{`${storage.actualUserGroupCount} / ${packageInfo.userGroupCount}`}</Col>
             </Row>
             <Progress
-              // strokeColor={{
-              //     '0%': '#108ee9',
-              //     '100%': '#87d068',
-              // }}
               strokeWidth={12}
               showInfo={false}
               percent={Math.round(
@@ -270,10 +244,6 @@ function OrganisationPackageDetails(props: any) {
               <Col>{`${storage.actualAlertCount} / ${packageInfo.alertCount}`}</Col>
             </Row>
             <Progress
-              // strokeColor={{
-              //     '0%': '#108ee9',
-              //     '100%': '#87d068',
-              // }}
               strokeWidth={12}
               showInfo={false}
               percent={Math.round(
@@ -286,10 +256,6 @@ function OrganisationPackageDetails(props: any) {
               <Col>{`${storage.actualClientCount} / ${packageInfo.clientCount}`}</Col>
             </Row>
             <Progress
-              // strokeColor={{
-              //     '0%': '#108ee9',
-              //     '100%': '#87d068',
-              // }}
               strokeWidth={12}
               showInfo={false}
               percent={Math.round(
@@ -302,10 +268,6 @@ function OrganisationPackageDetails(props: any) {
               <Col>{`${storage.actualLayerCount} / ${packageInfo.layerCount}`}</Col>
             </Row>
             <Progress
-              // strokeColor={{
-              //     '0%': '#108ee9',
-              //     '100%': '#87d068',
-              // }}
               strokeWidth={12}
               showInfo={false}
               percent={Math.round(
@@ -318,10 +280,6 @@ function OrganisationPackageDetails(props: any) {
               <Col>{`${storage.actualLocationCount} / ${packageInfo.locationCount}`}</Col>
             </Row>
             <Progress
-              // strokeColor={{
-              //     '0%': '#108ee9',
-              //     '100%': '#87d068',
-              // }}
               strokeWidth={12}
               showInfo={false}
               percent={Math.round(
@@ -334,10 +292,6 @@ function OrganisationPackageDetails(props: any) {
               <Col>{`${storage.actualMissionCount} / ${packageInfo.missionCount}`}</Col>
             </Row>
             <Progress
-              // strokeColor={{
-              //     '0%': '#108ee9',
-              //     '100%': '#87d068',
-              // }}
               strokeWidth={12}
               showInfo={false}
               percent={Math.round(
@@ -350,10 +304,6 @@ function OrganisationPackageDetails(props: any) {
               <Col>{`${storage.actualVodCount} / ${packageInfo.vodCount}`}</Col>
             </Row>
             <Progress
-              // strokeColor={{
-              //     '0%': '#108ee9',
-              //     '100%': '#87d068',
-              // }}
               strokeWidth={12}
               showInfo={false}
               percent={Math.round(

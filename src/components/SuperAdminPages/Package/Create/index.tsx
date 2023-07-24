@@ -1,15 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { connect } from "react-redux";
-import {
-  PageHeader,
-  Form,
-  Input,
-  Upload,
-  Row,
-  Col,
-  message,
-  Button,
-} from "antd";
+import { Form, Input, Upload, Row, Col, message, Button } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import {
   UnorderedListOutlined,
   PlusOutlined,

@@ -1,38 +1,51 @@
-import React, { useEffect } from "react";
+import React, { useEffect, FC } from "react";
+import { connect, ConnectedProps } from "react-redux";
 import { Button, Row, Col, Card, Avatar } from "antd";
 import { VideoCameraOutlined } from "@ant-design/icons";
-import { connect } from "react-redux";
 import { clearMissionCreationStateWithGeoFence } from "../../../../actions/missionCreation";
 import "../index.less";
 
 const { Meta } = Card;
 
-function StageOne(props: any) {
-  const { formData, setFormData } = props;
+interface MissionType {
+  _id: string;
+  name: string;
+  description: string;
+}
 
-  const { isLoading } = props;
-  const { missionTypes } = props;
+interface StageOneProps extends PropsFromRedux {
+  formData: any; // Replace with the appropriate type for formData
+  setFormData: (data: any) => void; // Replace with the appropriate type for setFormData
+}
 
-  const { nextStage } = props;
-
+const StageOne: FC<StageOneProps> = ({
+  formData,
+  setFormData,
+  isLoading,
+  missionTypes,
+  nextStage,
+  clearMissionCreationStateWithGeoFence,
+}) => {
   const updateSelectedJobType = (jobType: string, name: string) => {
     setFormData((oldData: any) => ({ ...oldData, typeName: name, jobType }));
   };
 
   useEffect(() => {
-    props.clearMissionCreationStateWithGeoFence();
+    clearMissionCreationStateWithGeoFence();
   }, []);
 
   return (
     <div className="stage_one">
       <Row align="middle" justify="center">
         <Col>
-          {missionTypes.map((d: any) => (
+          {missionTypes.map((missionType: MissionType) => (
             <Card
-              key={d._id}
-              onClick={() => updateSelectedJobType(d._id, d.name)}
+              key={missionType._id}
+              onClick={() =>
+                updateSelectedJobType(missionType._id, missionType.name)
+              }
               className={`create-mission-extended-card ${
-                formData.jobType === d._id
+                formData.jobType === missionType._id
                   ? "create-mission-extended-card-selected"
                   : ""
               }`}
@@ -47,8 +60,8 @@ function StageOne(props: any) {
                     style={{ backgroundColor: "transparent", color: "black" }}
                   />
                 }
-                title={d.name}
-                description={d.description}
+                title={missionType.name}
+                description={missionType.description}
               />
             </Card>
           ))}
@@ -65,8 +78,18 @@ function StageOne(props: any) {
       </Row>
     </div>
   );
-}
+};
 
-export default connect(() => {}, {
+const mapStateToProps = (state: any) => ({
+  // Replace with appropriate mapping for isLoading, missionTypes, formData, etc.
+  isLoading: state.isLoading,
+  missionTypes: state.missionTypes,
+});
+
+const connector = connect(mapStateToProps, {
   clearMissionCreationStateWithGeoFence,
-})(StageOne);
+});
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export default connector(StageOne);

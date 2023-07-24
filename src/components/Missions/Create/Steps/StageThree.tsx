@@ -1,6 +1,6 @@
 // @ts-nocheck
-import React, { useEffect, useState } from "react";
-import { connect } from "react-redux";
+import React, { useEffect, useState, FC } from "react";
+import { connect, ConnectedProps } from "react-redux";
 import { useHistory } from "react-router-dom";
 import {
   Button,
@@ -13,7 +13,6 @@ import {
   Tag,
   Select,
   Modal,
-  Typography,
   Popconfirm,
   Result,
 } from "antd";
@@ -42,9 +41,70 @@ import {
 
 const { TextArea } = Input;
 const { Option } = Select;
-const { Text } = Typography;
 
-function StageThree(props: any) {
+interface FlightData {
+  flightName: string;
+  date: string;
+  time: string;
+  duration: string;
+}
+
+interface GeoFenceCircle {
+  center: {
+    lat: number;
+    lng: number;
+  };
+  radius: number;
+  area: number;
+}
+
+interface GeoFencePolygon {
+  points: Array<any>;
+  area: number;
+}
+
+interface Flight {
+  geoFence: {
+    circle?: GeoFenceCircle;
+    polygon?: GeoFencePolygon;
+  };
+  flightDetails: FlightData;
+}
+
+interface Asset {
+  _id: string;
+  assetName: string;
+}
+
+interface Client {
+  _id: string;
+  name: string;
+}
+
+interface StageThreeProps extends PropsFromRedux {
+  jobTypeName: string; // Replace with the appropriate type for jobTypeName
+  missionType: string; // Replace with the appropriate type for missionType
+  missionCreationData: {
+    flights: Flight[];
+    weather?: {
+      temperature: number;
+      description: string;
+    };
+  };
+}
+
+const StageThree: FC<StageThreeProps> = ({
+  missionType,
+  missionCreationData,
+  jobTypeName,
+  loading,
+  logout,
+  clearMissionCreationState,
+  enableFlightEditing,
+  setPolygonMeasurements,
+  setCircleMeasurements,
+  setGeolocation,
+}) => {
   // Form control states
   const [data, setData] = useState<any>([]);
   const [missionName, setMissionName] = useState("");
@@ -57,8 +117,6 @@ function StageThree(props: any) {
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [clients, setClients] = useState([]);
   const [client, setClient] = useState("");
-  const [errorState, setErrorState] = useState("");
-  const [weatherData, setweatherData] = useState();
 
   const history = useHistory();
 
@@ -138,8 +196,6 @@ function StageThree(props: any) {
           console.log(err);
           AxiosErrorHandler(err, props.logout);
         }
-
-        //message.error(err.message);
       });
   }, []);
 
@@ -147,7 +203,6 @@ function StageThree(props: any) {
     http
       .get(`${apis.GET_CLIENT_LIST}?page=1&limit=100`)
       .then((result) => {
-        //console.log(result.data);
         if (result.data.status) {
           setClients(result.data.data);
         } else {
@@ -173,10 +228,6 @@ function StageThree(props: any) {
       return;
     }
 
-    // if (!client) {
-    //   message.error("Please Select client");
-    //   return;
-    // }
     props.loading(true);
     let data;
     console.log("Hiiii");
@@ -192,7 +243,6 @@ function StageThree(props: any) {
           ...props.missionCreationData.flights,
           assetID: asset,
         },
-        //clientId: client,
       };
     } else {
       data = {
@@ -232,7 +282,6 @@ function StageThree(props: any) {
         }
       }
       AxiosErrorHandler(err, props.logout);
-      //message.error("Something went wrong");
     } finally {
       props.loading(false);
     }
@@ -304,7 +353,7 @@ function StageThree(props: any) {
     <div className="stage_three">
       <Modal
         title="Maximum Limit reached!"
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={handleCancel}
         onCancel={handleCancel}
       >
@@ -312,12 +361,11 @@ function StageThree(props: any) {
           status="500"
           title="Oops! You have reached your organisation mission limit!"
           subTitle="Please contact your admin."
-          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
         title="Tenant Expired!"
-        visible={isModalVisible2}
+        open={isModalVisible2}
         onOk={handleCancel2}
         onCancel={handleCancel2}
       >
@@ -501,20 +549,15 @@ function StageThree(props: any) {
 
         <Row justify="center" className="step_buttons"></Row>
       </React.Fragment>
-      {/* <Weather setweatherData={setweatherData} isoDate={data.date}   /> */}
-      {/* <Modal visible={isModalVisible} onOk={()=> history.push('/dashboard/missions')} onCancel={()=>setIsModalVisible(false)} 
-           okText='YES' cancelText='NO'  >
-       <ExclamationCircleOutlined /> <Text> Confirm</Text>
-      </Modal> */}
     </div>
   );
-}
+};
 
 const mapStateToProps = (state: any) => ({
   missionCreationData: state.MissionCreation,
 });
 
-export default connect(mapStateToProps, {
+const connector = connect(mapStateToProps, {
   loading,
   logout,
   clearMissionCreationState,
@@ -522,6 +565,8 @@ export default connect(mapStateToProps, {
   setPolygonMeasurements,
   setCircleMeasurements,
   setGeolocation,
-})(StageThree);
+});
 
-// href="/dashboard/missions"
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export default connector(StageThree);

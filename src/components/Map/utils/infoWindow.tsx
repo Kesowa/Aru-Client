@@ -32,32 +32,13 @@ import { STATIC_URL } from "src/constants";
 import { BsFlagFill } from "react-icons/bs";
 import { thread } from "src/actions/threadAction";
 
-const { Title, Text, Link, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 const { Option } = Select;
-
-const originData = [
-  {
-    id: "0",
-    key: "Attr 1",
-    value: "",
-  },
-  {
-    id: "1",
-    key: "Attr 2",
-    value: "",
-  },
-  {
-    id: "2",
-    key: "Attr 3",
-    value: "",
-  },
-];
 
 function InfoWindow(props) {
   const [properties, setProperties] = useState({});
   const [address, setAddress] = useState("");
   const [loader, setLoader] = useState(false);
-  const [id, setId] = useState("");
   const [area, setArea] = React.useState<any>(
     turf.area(props.feature).toFixed(2)
   );
@@ -66,8 +47,7 @@ function InfoWindow(props) {
   );
   const [areaUnit, setAreaUnit] = useState("sq. m");
   const [lengthUnit, setLenghtUnit] = useState("km");
-  const [featureProperties, setFeatureProperties] = useState({});
-  const [refresh, setRefresh] = useState(false);
+
   const [fileCount, setFileCount] = useState(0);
   const [imageToShow, setImageToshow] = useState<any>([]);
   const [imageLoader, setImageLoader] = useState(false);
@@ -75,8 +55,6 @@ function InfoWindow(props) {
     props.setImagesDrawer(true);
     props.togglePopup(false);
   }
-
-  //console.log(props.feature);
 
   function reverseGeocoder(coordinates: any) {
     setLoader(true);
@@ -180,8 +158,6 @@ function InfoWindow(props) {
     const featureData = Object.keys(props.feature.properties).filter(
       (key: any, i: any) => key !== "Id" && key !== "color"
     );
-    //props.feature.properties.forEach(p=>)
-    //console.log(featureData);
   }, []);
 
   const saveDrawingButton = () => {
@@ -260,7 +236,6 @@ function InfoWindow(props) {
         })
         .catch((err) => {
           console.log(err);
-          // AxiosErrorHandler(err, this.props.logout);
         });
     } else if (props.missionLayer === "Vector" && props.mode === "PointView") {
       if (
@@ -421,7 +396,6 @@ function InfoWindow(props) {
                 return moment(b.createdAt).diff(moment(a.createdAt));
               });
               setImageToshow(toshow);
-              //console.log(`1x_${images[0].filePath.split('/')[3]}`, images[0].filePath)
               setFileCount(res.data.data.length);
             } else {
               console.log(res.data.message);
@@ -745,18 +719,6 @@ function InfoWindow(props) {
                     </Option>
                   </Select>
                 </Text>
-                {/* <div
-                  style={{
-                    width: "14px",
-                    height: "14px",
-                    backgroundColor: props.feature.properties.color,
-                    float: "right",
-                    marginTop: "4px",
-                    borderRadius: "2px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {}}
-                /> */}
               </span>
               <span>
                 {!props.isPublic && (
@@ -903,18 +865,6 @@ function InfoWindow(props) {
                     </Option>
                   </Select>
                 </Text>
-                {/* <div
-                  style={{
-                    width: "14px",
-                    height: "14px",
-                    backgroundColor: props.feature.properties.color,
-                    float: "right",
-                    marginTop: "4px",
-                    borderRadius: "2px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {}}
-                /> */}
               </span>
               <span>
                 {!props.isPublic && (

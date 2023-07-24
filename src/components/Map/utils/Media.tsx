@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { default as Shimmer } from "react-loading-skeleton";
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
@@ -11,7 +11,6 @@ import {
   Spin,
   message,
   Dropdown,
-  Menu,
   Drawer,
   Empty,
   Tabs,
@@ -22,6 +21,7 @@ import {
   Carousel,
   Badge,
   Space,
+  MenuProps,
 } from "antd";
 import {
   InboxOutlined,
@@ -38,7 +38,7 @@ import {
   FlagOutlined,
   MessageOutlined,
 } from "@ant-design/icons";
-import "../index.less";
+import "./../index.less";
 import apis from "../../../services/apis";
 import Dragger from "antd/lib/upload/Dragger";
 import moment from "moment";
@@ -47,13 +47,11 @@ import VideoPlayer from "src/components/shared/VideoPlayer";
 import { BsFlagFill } from "react-icons/bs";
 import { thread } from "../../../actions/threadAction";
 
-const { TabPane } = Tabs;
-
 function Media(props) {
   const [files, populateFiles] = useState<any>([]);
   const [defaultFileList, setDefaultFileList] = useState<any>([]);
   const [progress, setProgress] = useState(0);
-  const socket: any = useRef();
+
   const [multiDelete, setMultiDelete] = useState(false);
   const [checkedList, setCheckedList] = useState<any>([]);
   const [loader, setLoader] = useState(true);
@@ -61,6 +59,185 @@ function Media(props) {
   const [coverPhoto, setCoverPhoto] = useState<any>([]);
   const [coverLoaded, setCoverLoaded] = useState(false);
   const [storageModal, setStorageModal] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState("");
+  const [selectedMedia, setSelectedMedia] = useState("");
+  const tabPaneRender = () => {
+    const items = [
+      {
+        key: "1",
+        label: (
+          <span>
+            <FileImageOutlined />
+            Media
+          </span>
+        ),
+        children: (
+          <>
+            {loader ? (
+              <Row>
+                <Col span={8} md={8}>
+                  <div style={{ padding: "8px" }}>
+                    <Shimmer height={172} width={172} />
+                  </div>
+                </Col>
+                <Col span={8} md={8}>
+                  <div style={{ padding: "8px" }}>
+                    <Shimmer height={172} width={172} />
+                  </div>
+                </Col>
+                <Col span={8} md={8}>
+                  <div style={{ padding: "8px" }}>
+                    <Shimmer height={172} width={172} />
+                  </div>
+                </Col>
+              </Row>
+            ) : props.videoToShow.length > 0 ? (
+              <Row gutter={[16, 16]}>{renderVideo()}</Row>
+            ) : (
+              <Row>{renderMedia()}</Row>
+            )}
+          </>
+        ),
+      },
+    ];
+    if (!(props.videoToShow.length > 0)) {
+      items.push({
+        key: "2",
+        label: (
+          <span>
+            <FileTextOutlined />
+            Documents
+          </span>
+        ),
+        children: (
+          <Spin size="large" spinning={loader} tip="Loading documents...">
+            <Row>{renderDocuments()}</Row>
+          </Spin>
+        ),
+      });
+    }
+    return items;
+  };
+  const vodMenu: MenuProps["items"] = (data) => {
+    const items = [
+      {
+        key: "1",
+        label: (
+          <a
+            href={
+              STATIC_URL + data.videoPath.toString().replace(".m3u8", ".flv")
+            }
+            download
+          >
+            Download
+          </a>
+        ),
+        icon: <DownloadOutlined />,
+      },
+      {
+        key: "2",
+        label: !data.isFlagged ? "Flag" : "Unflag",
+        icon: <FlagOutlined />,
+      },
+      {
+        key: "3",
+        label: "Open Thread",
+        icon: <MessageOutlined />,
+      },
+    ];
+    if (data.isSRT) {
+      items.push({
+        key: "4",
+        label: "Show Flight Path",
+        icon: <NodeIndexOutlined />,
+      });
+    }
+    return items;
+  };
+  const vodMenuOnClick: MenuProps["onClick"] = (e) => {
+    const { data, idx } = selectedVideo;
+    switch (e.key) {
+      case "1":
+        break;
+      case "2":
+        toggleFlag(data);
+        break;
+      case "3":
+        props.thread(true, {
+          docType: "vod",
+          docId: data._id,
+          tags: data.bookmarks
+            ? {
+                bookmarks: generateTags(data.bookmarks),
+              }
+            : {},
+        });
+        props.setThumbnail(vodThumbnail(data, idx));
+        break;
+      case "4":
+        showFlightPath(data);
+        break;
+    }
+  };
+  const mediaMenu: MenuProps["items"] = () => {
+    const items = [
+      {
+        key: "1",
+        label: "Download",
+        icon: <DownloadOutlined />,
+      },
+      {
+        key: "2",
+        label: "Open Thread",
+        icon: <MessageOutlined />,
+      },
+    ];
+    if (props.canDelete) {
+      items.push({
+        key: "3",
+        label: "Delete",
+        icon: <DeleteOutlined />,
+      });
+    }
+    if (props.canSetCoverPhoto) {
+      items.push({
+        key: "4",
+        label: "Set Cover Photo",
+        icon: <FileImageOutlined />,
+      });
+    }
+    return items;
+  };
+  const mediaMenuOnClick: MenuProps["onClick"] = (e) => {
+    switch (e.key) {
+      case "1":
+        window.open(`${PUBLIC_URL}${selectedMedia.filePath}`);
+        break;
+      case "2":
+        props.thread(true, {
+          docType: "layerfile",
+          docId: selectedMedia._id,
+        });
+        break;
+      case "3":
+        Modal.confirm({
+          title: "Delete Image?",
+          icon: <ExclamationCircleOutlined />,
+          content: "Are you sure you want to delete this Image?",
+          okText: "Yes",
+          cancelText: "No",
+          onOk: () => {
+            deleteFile(selectedMedia._id);
+          },
+        });
+        break;
+      case "4":
+        addCover(selectedMedia._id, props.layerId);
+        break;
+      default:
+        break;
+    }
+  };
   //-------------Handle Drawer Close------------------------
   const onClose = () => {
     props.setVisibility(false);
@@ -68,7 +245,6 @@ function Media(props) {
 
   //---------------------File validator----------------
   function validateFile(file: any) {
-    const extension = file.name.split(".")[1];
     switch (file.type) {
       case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         return true;
@@ -86,21 +262,29 @@ function Media(props) {
         return false;
     }
   }
-  const actionMenu = (
-    <Menu onClick={(e) => handleAction(e)}>
-      <Menu.Item key={0}>Toggle Selection</Menu.Item>
-      <Menu.Item key={1} disabled={checkedList.length > 0 ? false : true}>
-        Clear Selection
-      </Menu.Item>
-      <Menu.Item key={2} disabled={files?.length > 0 ? false : true}>
-        Select all files
-      </Menu.Item>
-      <Menu.Item key={3} disabled={checkedList.length > 0 ? false : true}>
-        Delete files
-      </Menu.Item>
-    </Menu>
-  );
-  const handleAction = (e) => {
+  const actionMenu: MenuProps["items"] = [
+    {
+      key: 0,
+      label: "Toggle Selection",
+    },
+    {
+      key: 1,
+      label: "Clear Selection",
+      disabled: checkedList.length > 0 ? false : true,
+    },
+    {
+      key: 2,
+      label: "Select all files",
+      disabled: files.length > 0 ? false : true,
+    },
+    {
+      key: 3,
+      label: "Delete files",
+      disabled: checkedList.length > 0 ? false : true,
+    },
+  ];
+
+  const handleAction: MenuProps["onClick"] = (e) => {
     if (e.key == 0) {
       setMultiDelete(!multiDelete);
       setCheckedList([]);
@@ -174,7 +358,6 @@ function Media(props) {
   //-----------extract images------------------------
   function extractImages(files: any) {
     const images: any = [];
-    //console.log("Uploaded files here",files)
     files.map((item: any) => {
       if (item.fileType === "image/png" || item.fileType === "image/jpeg") {
         images.push(item);
@@ -206,7 +389,6 @@ function Media(props) {
     multiple: true,
     action: `${apis.UPLOAD_FILE_TO_FEATURE}`,
     customRequest: (options: any) => {
-      //console.log(options.file)
       if (props.layerLabel === "No label selected") {
         message.warning(
           "Please select a layer label before uploading to a node!"
@@ -214,7 +396,6 @@ function Media(props) {
         options.onError("File not Supported!");
       } else {
         if (validateFile(options.file)) {
-          //console.log(options.file);
           const fData = new FormData();
           fData.append("file", options.file);
           fData.append("layerId", props.layerId);
@@ -310,7 +491,6 @@ function Media(props) {
           })
           .then((res) => {
             if (res.data.status) {
-              //console.log(res.data.data);
               res.data.data.map((item: any) => {
                 newdata.push(item);
               });
@@ -346,7 +526,6 @@ function Media(props) {
       })
       .then((res) => {
         if (res.data.status) {
-          //console.log("FIle detelted",res.data)
           message.success("File Deleted!");
           const filteredArray = files.filter(function (obj) {
             return obj._id !== res.data.data._id;
@@ -374,7 +553,6 @@ function Media(props) {
       })
       .then((res) => {
         if (res.data.status) {
-          //console.log("FIle detelted",res.data)
           message.success("Files Deleted!");
           const filteredArray = files.filter(function (obj) {
             return !ids.include(obj._id);
@@ -465,7 +643,6 @@ function Media(props) {
       display: data[key],
     }));
   };
-  //console.log("data from props:",props.visible, props.layerId, props.featureIndex, props.properties);
   const renderVideo = () => {
     console.log("videoToShow", props.videoToShow);
     return (
@@ -481,69 +658,8 @@ function Media(props) {
             return (
               <>
                 <Dropdown
-                  overlay={
-                    <Menu>
-                      <Menu.Item key="1">
-                        <span>
-                          <a
-                            href={
-                              STATIC_URL +
-                              item.videoPath.toString().replace(".m3u8", ".flv")
-                            }
-                            // target='_blank'
-                            download
-                          >
-                            <DownloadOutlined /> Download{" "}
-                          </a>
-                        </span>
-                      </Menu.Item>
-                      <Menu.Item
-                        key="2"
-                        onClick={() => {
-                          toggleFlag(item);
-                        }}
-                      >
-                        {!item.isFlagged ? (
-                          <>
-                            <FlagOutlined /> Flag
-                          </>
-                        ) : (
-                          <>
-                            <FlagOutlined /> Unflag
-                          </>
-                        )}
-                      </Menu.Item>
-                      <Menu.Item
-                        key="3"
-                        onClick={() => {
-                          props.thread(true, {
-                            docType: "vod",
-                            docId: item._id,
-                            tags: item.bookmarks
-                              ? {
-                                  bookmarks: generateTags(item.bookmarks),
-                                }
-                              : {},
-                          });
-                          props.setThumbnail(vodThumbnail(item, idx));
-                        }}
-                      >
-                        <MessageOutlined /> Open Thread{" "}
-                      </Menu.Item>
-                      {item.isSRT ? (
-                        <Menu.Item
-                          key="4"
-                          onClick={() => {
-                            showFlightPath(item);
-                          }}
-                        >
-                          <NodeIndexOutlined /> Show Flight Path
-                        </Menu.Item>
-                      ) : (
-                        ""
-                      )}
-                    </Menu>
-                  }
+                  onOpenChange={() => setSelectedVideo({ data: item, idx })}
+                  menu={{ items: vodMenu(item), onClick: vodMenuOnClick }}
                   trigger={["contextMenu"]}
                 >
                   <Col span={8} md={8}>
@@ -655,61 +771,8 @@ function Media(props) {
                   style={{ padding: "8px" }}
                 >
                   <Dropdown
-                    overlay={
-                      <Menu>
-                        <Menu.Item
-                          key={`1.${item._id}`}
-                          onClick={() =>
-                            window.open(`${PUBLIC_URL}${item.filePath}`)
-                          }
-                        >
-                          <DownloadOutlined /> Download
-                        </Menu.Item>
-                        <Menu.Item
-                          key="5"
-                          onClick={() => {
-                            props.thread(true, {
-                              docType: "layerfile",
-                              docId: item._id,
-                            });
-                          }}
-                        >
-                          <MessageOutlined /> Open Thread{" "}
-                        </Menu.Item>
-                        {props.canDelete ? (
-                          <Menu.Item
-                            key={`2.${item._id}`}
-                            onClick={() => {
-                              Modal.confirm({
-                                title: "Delete Image?",
-                                icon: <ExclamationCircleOutlined />,
-                                content:
-                                  "Are you sure you want to delete this Image?",
-                                okText: "Yes",
-                                cancelText: "No",
-                                onOk: () => {
-                                  deleteFile(item._id);
-                                },
-                              });
-                            }}
-                          >
-                            <DeleteOutlined /> Delete
-                          </Menu.Item>
-                        ) : (
-                          <></>
-                        )}
-                        {props.canSetCoverPhoto ? (
-                          <Menu.Item
-                            key={`4.${item._id}`}
-                            onClick={() => addCover(item._id, props.layerId)}
-                          >
-                            <FileImageOutlined /> Set Cover Photo
-                          </Menu.Item>
-                        ) : (
-                          <></>
-                        )}
-                      </Menu>
-                    }
+                    onOpenChange={() => setSelectedMedia(item)}
+                    menu={{ items: mediaMenu(), onClick: mediaMenuOnClick }}
                     trigger={["contextMenu"]}
                   >
                     <Badge
@@ -808,9 +871,7 @@ function Media(props) {
             </List.Item>
           )}
         />
-        {/* {data.map((item:any)=>{
-            return(<p>{item.name}</p>)
-          })} */}
+        {}
       </>
     );
   }
@@ -840,7 +901,7 @@ function Media(props) {
 
   useEffect(() => {
     const media: any = files.filter((i) => i.coverPhoto === true);
-    //console.log("Filtered",media, "files", files);
+
     setCoverPhoto(media);
   }, [files, props.visible]);
 
@@ -850,10 +911,8 @@ function Media(props) {
     let images: any = [];
     if (cover.length > 0) {
       images = cover;
-      //console.log("COver photo present")
     } else {
       images = media;
-      //console.log("No cover photo")
     }
 
     images.sort((a, b) => {
@@ -863,15 +922,13 @@ function Media(props) {
     return images[0];
   }
 
-  useEffect(() => {
-    //console.log("selected prop:", props.properties.properties ? props.properties.properties[props.layerLabel] : "null");
-  }, [props.videoDetails]);
+  useEffect(() => {}, [props.videoDetails]);
 
   return (
     <>
       <Modal
         title="Storage Exceeded!"
-        visible={storageModal}
+        open={storageModal}
         onOk={() => setStorageModal(false)}
         onCancel={() => setStorageModal(false)}
       >
@@ -899,7 +956,6 @@ function Media(props) {
                   STATIC_URL +
                   props.videoDetails.link.toString().replace(".m3u8", ".flv")
                 }
-                // target='_blank'
                 download
               >
                 <DownloadOutlined className="btn-icon" />
@@ -976,7 +1032,7 @@ function Media(props) {
         placement="right"
         closable={true}
         onClose={onClose}
-        visible={props.visible}
+        open={props.visible}
         footer={
           <>
             {!(props.videoToShow.length > 0) ? (
@@ -1128,7 +1184,10 @@ function Media(props) {
                 style={{ width: "100%" }}
                 tabBarExtraContent={{
                   right: (
-                    <Dropdown overlay={actionMenu} trigger={["click"]}>
+                    <Dropdown
+                      menu={{ items: actionMenu, onClick: handleAction }}
+                      trigger={["click"]}
+                    >
                       <a onClick={(e) => e.preventDefault()}>
                         <Space>
                           Actions
@@ -1138,62 +1197,8 @@ function Media(props) {
                     </Dropdown>
                   ),
                 }}
-              >
-                <TabPane
-                  tab={
-                    <span>
-                      <FileImageOutlined />
-                      Media
-                    </span>
-                  }
-                  key="1"
-                >
-                  {loader ? (
-                    <Row>
-                      <Col span={8} md={8}>
-                        <div style={{ padding: "8px" }}>
-                          <Shimmer height={172} width={172} />
-                        </div>
-                      </Col>
-                      <Col span={8} md={8}>
-                        <div style={{ padding: "8px" }}>
-                          <Shimmer height={172} width={172} />
-                        </div>
-                      </Col>
-                      <Col span={8} md={8}>
-                        <div style={{ padding: "8px" }}>
-                          <Shimmer height={172} width={172} />
-                        </div>
-                      </Col>
-                    </Row>
-                  ) : props.videoToShow.length > 0 ? (
-                    <Row gutter={[16, 16]}>{renderVideo()}</Row>
-                  ) : (
-                    <Row>{renderMedia()}</Row>
-                  )}
-                </TabPane>
-                {!(props.videoToShow.length > 0) ? (
-                  <TabPane
-                    tab={
-                      <span>
-                        <FileTextOutlined />
-                        Documents
-                      </span>
-                    }
-                    key="2"
-                  >
-                    <Spin
-                      size="large"
-                      spinning={loader}
-                      tip="Loading documents..."
-                    >
-                      <Row>{renderDocuments()}</Row>
-                    </Spin>
-                  </TabPane>
-                ) : (
-                  ""
-                )}
-              </Tabs>
+                items={tabPaneRender()}
+              ></Tabs>
             </Row>
           </>
         ) : (
