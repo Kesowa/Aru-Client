@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "env-cmd -f .env vite",
-    "build": "env-cmd -f .env vite build",
+    "start": "vite",
+    "build": "vite build",
     "serve": "vite preview",
     "lock": "npm i --package-lock-only",
     "eject": "react-scripts eject",
