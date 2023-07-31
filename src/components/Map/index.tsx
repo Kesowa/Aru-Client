@@ -4,6 +4,7 @@ import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
 import { DataFilterExtension } from "@deck.gl/extensions";
 import download from "downloadjs";
+import { WebMercatorViewport } from "viewport-mercator-project";
 import {
   Row,
   Col,
@@ -1955,9 +1956,28 @@ function BaseMap(props) {
 
   const calculateViewport = (bbox) => {
     const [minLon, minLat, maxLon, maxLat] = bbox;
-  
+ 
+    const mapWidth = 800; // Replace with the actual width of your map container
+    const mapHeight = 600; // Replace with the actual height of your map container
+    
+    // Calculate the new viewport using getViewState
+    const viewport = new WebMercatorViewport({
+      width: mapWidth,
+      height: mapHeight,
+    });
+    
+    // Get the new zoom and center to fit the layer on the screen
+    const { longitude, latitude, zoom } = viewport.fitBounds(
+      [
+        [minLon, minLat],
+        [maxLon, maxLat],
+      ], {
+      padding: 10,
+      offset: [0, 0], // You can adjust the padding as needed
+    });
+    
     // Calculate the center of the bounds
-    const longitude = (minLon + maxLon) / 2;
+    /* const longitude = (minLon + maxLon) / 2;
     const latitude = (minLat + maxLat) / 2;
   
     // Calculate the zoom level based on the bounds and the map window size
@@ -1965,7 +1985,7 @@ function BaseMap(props) {
     const lonRatio = Math.abs(maxLon - minLon);
   
     const zoom = calculateZoom(latRatio, lonRatio);
-  
+   */
     return {
       longitude,
       latitude,
@@ -2383,10 +2403,11 @@ function BaseMap(props) {
                 console.log("Bounds:", bbox);
 
                 const { longitude, latitude, zoom } = calculateViewport(bbox);
+                console.log(longitude, latitude, zoom);
         
                 setViewport({
-                  longitude,
-                  latitude,
+                  longitude/* : (bounds[0][0] + bounds[1][0]) / 2 */,
+                  latitude/* : (bounds[0][1] + bounds[1][1]) / 2 */,
                   zoom,
                   pitch: 0,
                   minZoom: 0,
