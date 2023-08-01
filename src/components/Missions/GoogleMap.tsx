@@ -78,13 +78,7 @@ class GoogleMap extends Component<mapProps, mapState> {
     this.googleMap = this.createGoogleMap(loc);
     this.props.setlocation(loc);
 
-    if (this.props.isEditing) {
-      this.props.setlocation(this.props.location);
-    }
-
-    if (!this.props.isEditing) {
-      this.setCurrentLocation();
-    }
+    this.setCurrentLocation();
 
     this.drawingManager = this.createDrawingManager();
     this.searchAutoComplete = this.createSearchBar();

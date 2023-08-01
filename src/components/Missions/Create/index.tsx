@@ -75,6 +75,7 @@ const CreateMissionBase: FC<CreateMissionBaseProps> = (props) => {
           nextStage={() => setCurrentStage(2)}
           prevStage={() => setCurrentStage(0)}
           location={location}
+          setlocation={setlocation}
         />
       ),
     },
@@ -91,14 +92,14 @@ const CreateMissionBase: FC<CreateMissionBaseProps> = (props) => {
   ];
 
   return (
-    <div className="create-mission-container">
+    <div className="container-full">
       {currentStage === 0 ? (
-        <h1 className="create-mission-base-title">Create a Mission</h1>
+        <h1 className="text-center">Create a Mission</h1>
       ) : null}
 
       {currentStage === 1 && <GoogleMap {...mapProps} />}
       <div
-        className="create-mission-steps-card-holder"
+        className="card-base"
         style={{
           top: currentStage === 1 ? "-40px" : "50px",
           boxShadow:

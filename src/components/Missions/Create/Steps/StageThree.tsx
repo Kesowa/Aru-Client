@@ -32,11 +32,11 @@ import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import {
-  clearMissionCreationState,
   enableFlightEditing,
   setPolygonMeasurements,
   setCircleMeasurements,
   setGeolocation,
+  clearMissionCreationStateWithGeoFence,
 } from "../../../../actions/missionCreation";
 
 const { TextArea } = Input;
@@ -91,6 +91,7 @@ interface StageThreeProps extends PropsFromRedux {
       description: string;
     };
   };
+  prevStage: Function;
 }
 
 const StageThree: FC<StageThreeProps> = ({
@@ -99,11 +100,8 @@ const StageThree: FC<StageThreeProps> = ({
   jobTypeName,
   loading,
   logout,
-  clearMissionCreationState,
   enableFlightEditing,
-  setPolygonMeasurements,
-  setCircleMeasurements,
-  setGeolocation,
+  prevStage,
 }) => {
   // Form control states
   const [data, setData] = useState<any>([]);
@@ -122,30 +120,26 @@ const StageThree: FC<StageThreeProps> = ({
 
   useEffect(() => {
     // fetch the google map static image
-    if (!props.missionCreationData.flights[0]) {
+    if (!missionCreationData.flights[0]) {
       message.error("Please select the geofence");
-      props.prevStage();
+      prevStage();
       return;
     }
 
     let mapUrl = "";
-    if (props.missionCreationData.flights[0].geoFence.circle) {
-      const lat =
-        props.missionCreationData.flights[0].geoFence.circle.center.lat;
-      const lng =
-        props.missionCreationData.flights[0].geoFence.circle.center.lng;
-      const radius =
-        props.missionCreationData.flights[0].geoFence.circle.radius;
+    if (missionCreationData.flights[0].geoFence.circle) {
+      const lat = missionCreationData.flights[0].geoFence.circle.center.lat;
+      const lng = missionCreationData.flights[0].geoFence.circle.center.lng;
+      const radius = missionCreationData.flights[0].geoFence.circle.radius;
       mapUrl = getImageForCircle(lat, lng, radius);
-    } else if (props.missionCreationData.flights[0].geoFence.polygon) {
-      const points =
-        props.missionCreationData.flights[0].geoFence.polygon.points;
+    } else if (missionCreationData.flights[0].geoFence.polygon) {
+      const points = missionCreationData.flights[0].geoFence.polygon.points;
       mapUrl = getImageForPolygon(points);
     }
     setMapImage(mapUrl);
 
     // flight details table data
-    const flights = props.missionCreationData.flights;
+    const flights = missionCreationData.flights;
     let tableData: any = [];
 
     flights.forEach((flightData, index) => {
@@ -154,14 +148,14 @@ const StageThree: FC<StageThreeProps> = ({
       const flight = {};
       flight["key"] = index;
       Object.keys(flightDetails).forEach((x) => {
-        if (x == "flightName") {
+        if (x === "flightName") {
           flight["flight"] = flightDetails["flightName"];
           setMissionName(flightDetails["flightName"]);
-        } else if (x == "date") {
+        } else if (x === "date") {
           flight["date"] = flightDetails["date"];
-        } else if (x == "time") {
+        } else if (x === "time") {
           flight["time"] = flightDetails["time"];
-        } else if (x == "duration") {
+        } else if (x === "duration") {
           flight["duration"] = flightDetails["duration"];
         }
 
@@ -181,7 +175,7 @@ const StageThree: FC<StageThreeProps> = ({
     });
     console.log("tavle", tableData, flights);
     setData(tableData);
-  }, [props.missionCreationData]);
+  }, [missionCreationData]);
 
   useEffect(() => {
     http
@@ -192,9 +186,10 @@ const StageThree: FC<StageThreeProps> = ({
       })
       .catch((err) => {
         if (err.response.status === 404) {
+          setAssets([]);
         } else {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         }
       });
   }, []);
@@ -213,7 +208,7 @@ const StageThree: FC<StageThreeProps> = ({
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -228,19 +223,19 @@ const StageThree: FC<StageThreeProps> = ({
       return;
     }
 
-    props.loading(true);
+    loading(true);
     let data;
     console.log("Hiiii");
-    console.log(props.missionCreationData.flights);
+    console.log(missionCreationData.flights);
     if (!client) {
       data = {
         name: missionName,
         deliverables,
         description: missionDescription,
         assetID: asset,
-        missionType: props.missionType,
+        missionType: missionType,
         flights: {
-          ...props.missionCreationData.flights,
+          ...missionCreationData.flights,
           assetID: asset,
         },
       };
@@ -250,9 +245,9 @@ const StageThree: FC<StageThreeProps> = ({
         deliverables,
         description: missionDescription,
         assetID: asset,
-        missionType: props.missionType,
+        missionType: missionType,
         flights: {
-          ...props.missionCreationData.flights,
+          ...missionCreationData.flights,
           assetID: asset,
         },
         clientId: [client],
@@ -265,7 +260,7 @@ const StageThree: FC<StageThreeProps> = ({
       } else {
         history.push("/dashboard/missions");
         message.success("Mission Created Successfuly");
-        props.clearMissionCreationState();
+        clearMissionCreationStateWithGeoFence();
       }
     } catch (err: any) {
       console.log(err);
@@ -275,15 +270,15 @@ const StageThree: FC<StageThreeProps> = ({
         ) {
           setIsModalVisible2(true);
           window.setTimeout(function () {
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
           }, 5000);
         } else {
           setIsModalVisible(true);
         }
       }
-      AxiosErrorHandler(err, props.logout);
+      AxiosErrorHandler(err, logout);
     } finally {
-      props.loading(false);
+      loading(false);
     }
   };
 
@@ -310,9 +305,8 @@ const StageThree: FC<StageThreeProps> = ({
       render: () => {
         return (
           <>
-            {props.missionCreationData.weather?.temperature} <sup>o</sup> C,
-            &nbsp;
-            {props.missionCreationData.weather?.description}
+            {missionCreationData.weather?.temperature} <sup>o</sup> C, &nbsp;
+            {missionCreationData.weather?.description}
           </>
         );
       },
@@ -395,7 +389,7 @@ const StageThree: FC<StageThreeProps> = ({
             </div>
             <h3>
               <span style={{ fontWeight: "bold" }}>Mission type :</span>{" "}
-              <Tag color="green">{props.jobTypeName}</Tag>
+              <Tag color="green">{jobTypeName}</Tag>
             </h3>
             <TextArea
               rows={6}
@@ -525,8 +519,8 @@ const StageThree: FC<StageThreeProps> = ({
                 type="primary"
                 icon={<EditOutlined />}
                 onClick={() => {
-                  props.enableFlightEditing(true);
-                  props.prevStage();
+                  enableFlightEditing(true);
+                  prevStage();
                 }}
                 style={{
                   float: "right",
@@ -560,7 +554,6 @@ const mapStateToProps = (state: any) => ({
 const connector = connect(mapStateToProps, {
   loading,
   logout,
-  clearMissionCreationState,
   enableFlightEditing,
   setPolygonMeasurements,
   setCircleMeasurements,

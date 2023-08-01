@@ -30,10 +30,12 @@ interface StageTwoFormProps extends PropsFromRedux {
   polygonData: any; // Replace with the appropriate type for polygonData
   circleData: any; // Replace with the appropriate type for circleData
   location: string;
-  setisoDate: (isoDate: string) => void;
+  setlocation: Function;
+  setIsoDate: (isoDate: string) => void;
   setFormComplete: (formComplete: boolean) => void;
-  setAreaSelected: () => void;
-  nextStage: () => void;
+  areaSelected: boolean;
+  setAreaSelected: Function;
+  nextStage: Function;
 }
 
 const StageTwoForm: FC<StageTwoFormProps> = ({
@@ -41,13 +43,15 @@ const StageTwoForm: FC<StageTwoFormProps> = ({
   polygonData,
   circleData,
   location,
-  setisoDate,
+  setlocation,
+  setIsoDate,
   setFormComplete,
   nextStage,
   setFlightDetails,
   addFlight,
   clearMissionCreationStateWithGeoFence,
   showDrawing,
+  areaSelected,
   setAreaSelected,
   logout,
 }) => {
@@ -75,7 +79,9 @@ const StageTwoForm: FC<StageTwoFormProps> = ({
         setArea(circleData.area);
       }
 
-      setLocation(location);
+      if (location) {
+        setlocation(location);
+      }
     }
   }, [geofenceType, polygonData, circleData, location]);
 
@@ -105,7 +111,7 @@ const StageTwoForm: FC<StageTwoFormProps> = ({
     });
   };
 
-  const handleFormSubmit = (values: any) => {
+  const handleFormSubmit = () => {
     if (
       formState.flightName &&
       formState.date &&
@@ -117,7 +123,6 @@ const StageTwoForm: FC<StageTwoFormProps> = ({
       addFlight();
       form.resetFields();
       showDrawing(false);
-      clearMissionCreationStateWithGeoFence();
       setAreaSelected(false);
       message.success("Flight Added");
       nextStage();
@@ -137,7 +142,9 @@ const StageTwoForm: FC<StageTwoFormProps> = ({
             time: moment(new Date()),
           }}
           size="small"
-          onFinish={handleFormSubmit}
+          onFinish={(e) => {
+            handleFormSubmit();
+          }}
           requiredMark={false}
         >
           <Form.Item
@@ -175,7 +182,7 @@ const StageTwoForm: FC<StageTwoFormProps> = ({
                   date: e?.format("YYYY-MM-DD").toString(),
                 });
 
-                setisoDate(
+                setIsoDate(
                   e?.format("YYYY-MM-DD").toString() +
                     "T" +
                     formState.time.split(" ")[0] +
@@ -204,7 +211,7 @@ const StageTwoForm: FC<StageTwoFormProps> = ({
                   time: value?.format("hh:mm A").toString(),
                 });
 
-                setisoDate(
+                setIsoDate(
                   formState.date +
                     "T" +
                     value?.format("HH:mm:ss A").split(" ")[0] +
@@ -266,7 +273,7 @@ const StageTwoForm: FC<StageTwoFormProps> = ({
               )}
             </Select>
           </Form.Item>
-          {props.areaSelected && (
+          {areaSelected && (
             <div>
               <div className="data_selected">
                 <img

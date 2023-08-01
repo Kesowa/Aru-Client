@@ -1,13 +1,13 @@
 const config = {
-  VITE_COG_URL: "https://cog-nk.kesowa.com",
-  VITE_LIVE_URL: "https://live-dev.kesowa.com",
-  VITE_RTMP_URL: "rtmp://live-dev.kesowa.com:1935/stream",
+  VITE_COG_URL: "http://localhost:8000",
+  VITE_LIVE_URL: "http://localhost:8080",
+  VITE_RTMP_URL: "rtmp://localhost:1935/stream",
   VITE_PUBLIC_URL: "http://localhost:3000",
   VITE_ENV: "development",
-  VITE_TITILER_STATIC: "http://172.17.0.1:5151",
+  VITE_TITILER_STATIC: "http://server:5011",
   VITE_INSTANCE: "aru",
-  VITE_STATIC_URL: "https://cdn-dev.kesowa.com",
-  VITE_API_URL: "https://api-dev.kesowa.com",
+  VITE_STATIC_URL: "http://localhost:5011",
+  VITE_API_URL: "http://localhost:5011",
 };
 
 window.config = config;

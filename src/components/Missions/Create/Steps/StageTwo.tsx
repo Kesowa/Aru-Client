@@ -10,6 +10,7 @@ import Codes from "../../../../static/weatherCodes";
 import convertDegreeToDirection from "../../../../services/convertDegreeToDirection";
 import http from "../../../../services/httpCall";
 import { logout } from "../../../../actions/authAction";
+import "../index.less";
 
 const { Panel } = Collapse;
 const { Title } = Typography;
@@ -31,11 +32,13 @@ interface StageTwoProps extends PropsFromRedux {
   };
   areaSelected: any; // Replace with the appropriate type for areaSelected
   setAreaSelected: any; // Replace with the appropriate type for setAreaSelected
+  setlocation: Function;
   nextStage: () => void;
 }
 
 const StageTwo: FC<StageTwoProps> = ({
   location,
+  setlocation,
   areaSelected,
   setAreaSelected,
   nextStage,
@@ -121,6 +124,7 @@ const StageTwo: FC<StageTwoProps> = ({
                   areaSelected={areaSelected}
                   setAreaSelected={setAreaSelected}
                   setIsoDate={setIsoDate}
+                  setlocation={setlocation}
                 />
               ) : (
                 <FlightEditing

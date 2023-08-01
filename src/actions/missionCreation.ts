@@ -12,10 +12,10 @@ export const setPolygonMeasurements = (payload) => {
   };
 };
 
-export const setFlightDetails = (flightDetails) => {
+export const setFlightDetails = (payload) => {
   return {
     type: "SET_FLIGHT_DETAILS",
-    payload: flightDetails,
+    payload,
   };
 };
 

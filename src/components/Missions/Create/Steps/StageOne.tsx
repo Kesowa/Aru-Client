@@ -16,6 +16,9 @@ interface MissionType {
 interface StageOneProps extends PropsFromRedux {
   formData: any; // Replace with the appropriate type for formData
   setFormData: (data: any) => void; // Replace with the appropriate type for setFormData
+  isLoading: boolean;
+  missionTypes: MissionType[];
+  nextStage: Function;
 }
 
 const StageOne: FC<StageOneProps> = ({
@@ -44,10 +47,8 @@ const StageOne: FC<StageOneProps> = ({
               onClick={() =>
                 updateSelectedJobType(missionType._id, missionType.name)
               }
-              className={`create-mission-extended-card ${
-                formData.jobType === missionType._id
-                  ? "create-mission-extended-card-selected"
-                  : ""
+              className={`card-secondary ${
+                formData.jobType === missionType._id ? "selected" : ""
               }`}
               loading={isLoading}
               hoverable
@@ -67,7 +68,7 @@ const StageOne: FC<StageOneProps> = ({
           ))}
 
           <Button
-            className="create-mission-proceed-button"
+            className="button-block"
             type="primary"
             onClick={() => nextStage()}
             disabled={formData.jobType === ""}
@@ -81,12 +82,10 @@ const StageOne: FC<StageOneProps> = ({
 };
 
 const mapStateToProps = (state: any) => ({
-  // Replace with appropriate mapping for isLoading, missionTypes, formData, etc.
-  isLoading: state.isLoading,
-  missionTypes: state.missionTypes,
+  isLoading: state.Loader.loading_active,
 });
 
-const connector = connect(mapStateToProps, {
+const connector = connect(() => ({}), {
   clearMissionCreationStateWithGeoFence,
 });
 

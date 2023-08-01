@@ -28,6 +28,9 @@ interface FlightEditingProps extends PropsFromRedux {
   polygonData: any; // Replace with the appropriate type for polygonData
   circleData: any; // Replace with the appropriate type for circleData
   location: string;
+  setAreaSelected: Function;
+  setFormComplete: Function;
+  nextStage: Function;
 }
 
 // Define the FlightEditing component
@@ -43,6 +46,8 @@ const FlightEditing: FC<FlightEditingProps> = ({
   showDrawing,
   flightDetails,
   nextStage,
+  setAreaSelected,
+  setFormComplete,
 }) => {
   const [formState, setFormState] = useState<any>({
     locationId: "none",
@@ -87,12 +92,12 @@ const FlightEditing: FC<FlightEditingProps> = ({
       formState.time &&
       formState.duration
     ) {
-      props.setFormComplete(true);
+      setFormComplete(true);
       clearMissionCreationState();
       setFlightDetails(formState);
       addFlight();
       form.resetFields();
-      props.setAreaSelected(false);
+      setAreaSelected(false);
       enableFlightEditing(false);
       message.success("Flight Edited");
       nextStage();
@@ -273,7 +278,7 @@ const FlightEditing: FC<FlightEditingProps> = ({
                 style={{ background: "red" }}
                 onClick={() => {
                   form.resetFields();
-                  props.setAreaSelected(false);
+                  setAreaSelected(false);
                   showDrawing();
                   nextStage();
                 }}
