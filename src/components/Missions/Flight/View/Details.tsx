@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { Button, Card, Typography } from "antd";
+import React, { useState, useEffect, FC } from "react";
+import { Button, Card, Typography, Collapse } from "antd";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
 import { InfoCircleFilled } from "@ant-design/icons";
-import { Collapse } from "antd";
-import { connect } from "react-redux";
+import { connect, ConnectedProps } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 const { Panel } = Collapse;
 const { Title, Text } = Typography;
 
-const FlightDetails = (props: any) => {
+const FlightDetails: FC<FlightDetailsProps> = (props) => {
   const [area, setArea] = useState(0);
   const [areaType, setAreaType] = useState("");
-
   const history = useHistory();
 
   useEffect(() => {
@@ -26,7 +24,7 @@ const FlightDetails = (props: any) => {
         setAreaType("Center");
       }
     }
-  }, [props]);
+  }, [props.flightDetails]);
 
   return (
     <React.Fragment>
@@ -61,10 +59,7 @@ const FlightDetails = (props: any) => {
                 <Text className="heading">{props.flightDetails.time}</Text>
                 <Text className="heading">{props.flightDetails.duration}</Text>
                 <Text className="heading">
-                  {props.flightDetails.locationID &&
-                  props.flightDetails.locationID.properties
-                    ? props.flightDetails.locationID.properties.name
-                    : "none"}
+                  {props.flightDetails.locationID?.properties?.name || "none"}
                 </Text>
                 <Text className="heading">
                   {props.flightDetails.pilotID?.name
@@ -153,4 +148,12 @@ const FlightDetails = (props: any) => {
   );
 };
 
-export default connect()(FlightDetails);
+const mapStateToProps = (state: any) => ({
+  flightDetails: state.MissionCreation.flightDetails,
+});
+
+const connector = connect(mapStateToProps);
+
+type FlightDetailsProps = ConnectedProps<typeof connector>;
+
+export default connector(FlightDetails);

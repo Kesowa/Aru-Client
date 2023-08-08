@@ -1,69 +1,79 @@
+// Define reusable variables
+@primaryColor: #383CC1;
+@searchBoxWidth: 350px;
+@defaultFontSize: 1.1rem;
+
+// Common styles
 .map_container {
-    position: relative;
+  position: relative;
 }
 
+// Location Search Styles
 .location_search_container {
-    position: absolute;
-    top: 60px;
-    left: 11px;
-  }
-  
-  .search_marker {
-    position: absolute;
-    left: 8px;
-    top: 9px;
-  }
-  
-  .location_search {
-    max-width: 350px;
-    border: none;
-    outline: none;
-    padding: 8px 20px 8px 40px;  
-    font-size: 1.1rem;
-    border-radius: 8px;
-  }
-  
-  .location_search::placeholder {
-    font-size: 1.1rem;
-  }
+  position: absolute;
+  top: 60px;
+  left: 11px;
+}
 
-  .flight_details {
-      position: relative;
-      right : 50px;
-      bottom : 17px;
+.search_marker {
+  position: absolute;
+  left: 8px;
+  top: 9px;
+}
+
+.location_search {
+  max-width: @searchBoxWidth;
+  border: none;
+  outline: none;
+  padding: 8px 20px 8px 40px;
+  font-size: @defaultFontSize;
+  border-radius: 8px;
+}
+
+.location_search::placeholder {
+  font-size: @defaultFontSize;
+}
+
+// Flight Details Styles
+.flight_details {
+  position: relative;
+  right: 50px;
+  bottom: 17px;
+}
+
+.flight_details_card {
+  .ant-card-body {
+    margin: 0;
+    padding: 10px;
+
+    .heading {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 10px;
+      font-size: 15px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid @primaryColor;
+    }
   }
+}
 
-  .flight_details_card {
-     .ant-card-body {
-        margin : 0;
-        padding : 10px;
+// Area Details Styles
+.area_details {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 
-        .heading {
-            font-weight: bold;
-            display : block;
-            margin-bottom : 10px;
-            font-size: 15px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #383CC1;
-        }
-     }
+  .area_details_inner {
+    margin-left: 20px;
   }
+}
 
-  .area_details {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
+// Flight Location Styles
+.flight_location {
+  display: flex;
+  align-items: center;
 
-      .area_details_inner {
-          margin-left : 20px
-      }
+  .flight_location_inner {
+    margin-left: 20px;
   }
-
-  .flight_location {
-      display: flex;
-      align-items: center;
-
-      .flight_location_inner {
-          margin-left: 20px;
-      }
-  }
+}

@@ -1,17 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { UnorderedListOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
 import { Link, useHistory, useParams } from "react-router-dom";
-import {
-  PageHeader,
-  Row,
-  Col,
-  message,
-  Transfer,
-  Form,
-  Input,
-  Button,
-} from "antd";
+import { Row, Col, message, Transfer, Form, Input, Button } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";

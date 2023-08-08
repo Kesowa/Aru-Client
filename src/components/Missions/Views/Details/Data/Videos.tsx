@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { default as Shimmer } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import {
@@ -10,7 +10,6 @@ import {
   Modal,
   Empty,
   Tooltip,
-  Menu,
   Dropdown,
   Button,
   Alert,
@@ -18,10 +17,9 @@ import {
   Carousel,
   Input,
   Skeleton,
-  Checkbox,
-  Select,
   Badge,
   Pagination,
+  MenuProps,
 } from "antd";
 import {
   ExclamationCircleOutlined,
@@ -55,10 +53,6 @@ import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
 import axios from "axios";
-declare let require: any;
-
-//import { Replay } from "vimond-replay";
-//import "vimond-replay/index.css";
 
 type props = {
   missionDetails: any;
@@ -67,10 +61,7 @@ type props = {
   logout: any;
   thread: any;
 };
-const { next, prev } = Carousel;
 const { Text } = Typography;
-const { Option } = Select;
-const plainOptions = new Array<any>();
 function Videos(props) {
   const [VodData, setVodData] = useState([]);
   const [loader, setLoader] = useState(true);
@@ -85,48 +76,140 @@ function Videos(props) {
   const [thumbnail, setThumbnail] = useState("");
   const [gridCount, setGridCount] = useState(0);
   const [videoNameLoader, setVideoNameLoader] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState(0);
-  const [refreshState, setRefreshState] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState({});
   const [listView, setListView] = useState(false);
-  const [Video, setVideo] = useState([]);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [storageModal, setStorageModal] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(4);
   const [totalCount, setTotalCount] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
   const [threadDetails, setThreadDetails] = useState({});
   const [isUploading, setUploading] = useState(false);
-  const [uploadModall, setUploadModal] = useState(false);
   const socket: any = useRef();
-  const [updatedVideo, setUpdatedVideo] = useState("");
   const [activateSelection, setActivateSelection] = useState(false);
   const [isAscending, setIsAscending] = useState(false);
   const [sortType, setSortType] = useState("timeStamp");
   const [flag, setFlag] = useState(false);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
-  const CheckboxGroup = Checkbox.Group;
-  const carouselRef = useRef();
 
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
-
-  function truncateText(str) {
-    return str.length > 15 ? str.substring(0, 15) + "..." : str;
-  }
+  const vodMenu: MenuProps["items"] = (data) => {
+    const item = [
+      {
+        key: "1",
+        label: (
+          <span>
+            <a
+              href={
+                STATIC_URL + data.videoPath.toString().replace(".m3u8", ".flv")
+              }
+              download
+            >
+              Download
+            </a>
+          </span>
+        ),
+        icon: <DownloadOutlined />,
+      },
+      {
+        key: "2",
+        label: "Open Thread",
+        icon: <MessageOutlined />,
+      },
+      {
+        key: "3",
+        label: !data.isFlagged ? "Flag" : "Unflag",
+        icon: <FlagOutlined />,
+      },
+      {
+        key: "4",
+        label: "Rename",
+        icon: <EditOutlined />,
+      },
+    ];
+    const deleteItem = {
+      key: "5",
+      label: "Delete video",
+      icon: <DeleteOutlined />,
+    };
+    if (
+      props.missionDetails.userType === "tenant-staff" ||
+      props.missionDetails.userType === "tenant-client"
+    ) {
+      let permissions: any = [];
+      props.missionDetails.currentUserDetails.customPermissions.forEach((p) => {
+        const filteredPermissions = p.permissions.filter(
+          (d) => d.name === "vod_delete"
+        );
+        permissions = [...filteredPermissions, ...permissions];
+      });
+      if (permissions.length > 0) {
+        item.push(deleteItem);
+      }
+    } else {
+      item.push(deleteItem);
+    }
+    return item;
+  };
+  const vodMenuOnClick: MenuProps["onClick"] = (e) => {
+    console.log(e);
+    switch (e.key) {
+      case "1":
+        break;
+      case "2":
+        props.thread(true, {
+          docType: "vod",
+          docId: selectedVideo?.data._id,
+          tags: selectedVideo?.data.bookmarks
+            ? {
+                bookmarks: generateTags(),
+              }
+            : {},
+        });
+        setThumbnail(vodThumbnail());
+        break;
+      case "3":
+        toggleFlag();
+        break;
+      case "4":
+        setEditVideoName({
+          id: selectedVideo?.data._id,
+          name: selectedVideo?.data.videoName,
+        });
+        showModal3();
+        break;
+      case "5":
+        Modal.confirm({
+          title: "Delete video?",
+          icon: <ExclamationCircleOutlined />,
+          content: "Are you sure you want to delete this video?",
+          okText: "Yes",
+          cancelText: "No",
+          onOk: () => {
+            deleteVideo(selectedVideo?.data._id);
+          },
+        });
+        break;
+      default:
+        break;
+    }
+  };
   const updateVODAttr = (body, action = null) => {
     http
       .patch(`${apis.UPDATE_VOD}`, body)
       .then((res) => {
         if (res.data.status) {
           if ("isFlagged" in body.update) {
+            setRefresh(true);
             message.success(
               `Video ${
                 !body.update.isFlagged ? "un-flagged" : "flagged"
               } successfully!`
             );
           } else if ("bookmarks" in body.update) {
+            setRefresh(true);
             message.success(
               `Bookmark ${action === "add" ? "added" : "removed"} successfully!`
             );
@@ -137,10 +220,11 @@ function Videos(props) {
         console.error(err.message);
       });
   };
-  const toggleFlag = (vod) => {
+  const toggleFlag = () => {
+    const { data } = selectedVideo;
     const body = {
-      id: vod._id,
-      update: { isFlagged: !vod.isFlagged },
+      id: data._id,
+      update: { isFlagged: !data.isFlagged },
     };
     updateVODAttr(body);
   };
@@ -207,8 +291,6 @@ function Videos(props) {
                     objectFit: "cover",
                     objectPosition: "0 0",
                   }}
-                  // className='card-img-size'
-
                   onError={(e: any) => (e.target.src = `/icons/fallback.png`)}
                 />
               }
@@ -291,7 +373,6 @@ function Videos(props) {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       console.log("here");
-      // console.log(props.missionDetails.locationId);
       setUploading(true);
       const fData = new FormData();
       fData.append("video", options.file);
@@ -450,12 +531,10 @@ function Videos(props) {
       );
 
       socket.current.on("PROCESS_VIDEO_FINISHED", (data) => {
-        // console.log("New video uploaded");
         setRefresh(true);
       });
 
       socket.current.on("VOD_REMOVED", (data) => {
-        // console.log("Video Deleted");
         setRefresh(true);
       });
     }
@@ -544,7 +623,8 @@ function Videos(props) {
     fetchVODByMission();
   }, [page, limit]);
 
-  const vodThumbnail = (data: any, idx: any) => {
+  const vodThumbnail = () => {
+    const { data, idx } = selectedVideo;
     let vodDetails = {};
     if (idx < VodData.length && VodData[idx].videoPath && VodData[idx].isSRT) {
       vodDetails = {
@@ -606,7 +686,6 @@ function Videos(props) {
     );
   };
   const updateSelectedVOD = (data, idx: number) => {
-    setSelectedVideo(data._id);
     fetchVODByMission(); // re-fetch
 
     // set current vod details
@@ -630,7 +709,6 @@ function Videos(props) {
   const deleteVideo = (id: any) => {
     console.log(id);
     message.loading("Deleting video...");
-    // if (checkedList.length > 0) {
     if (id !== undefined || id.length !== 0) {
       http
         .delete(
@@ -649,47 +727,14 @@ function Videos(props) {
         .catch((err) => {
           message.error("ERROR" + err);
         });
-    }
-    // }
-    else {
+    } else {
       message.info("Please select some videos to delete!");
     }
   };
 
-  //----------Video Player Modal-------------------------------------
-  // function openVideoPlayer(link: any, name: any, missionDetails: any[]) {
-  //   Modal.info({
-  //     // title: "Flight Name: " + name,
-  //     content: (
-  //       <div
-  //         style={{ height: "400px", backgroundColor: "#0000", padding: "0" }}
-  //       >
-  //         <VideoPlayer // NEED TO PASS MISSION DETAILS AND LIVE TAG CHECK
-  //           url={STATIC_URL + link}
-  //           map={true}
-  //           // handleTheater=''
-  //           // theater=''
-  //           // handlePip=''
-  //           // pip=''
-  //           // streamKey=''
-  //           mission={missionDetails}
-  //           alertBtnStatus=''
-  //           theatreModeStatus='none'
-  //           liveTagStatus='none'
-  //         />
-  //       </div>
-  //     ),
-  //     centered: true,
-  //     // width: 1000,
-  //     // closable: true,
-  //     onOk() {},
-  //   });
-  // }
-
   //-------- Upload Modal ------------------------
 
   function uploadModal() {
-    // setUploadModal(true);
     Modal.info({
       title: "Upload video files!",
       content: (
@@ -715,8 +760,6 @@ function Videos(props) {
       ),
       centered: true,
       width: 640,
-      //closable: true,
-      //cancelText: "Cancel",
       okText: "Close",
       onOk() {},
       onCancel() {},
@@ -729,65 +772,6 @@ function Videos(props) {
     console.log(isUploading);
   }, [isUploading]);
   //-------------------------render delete vod button based on permission--------------
-  function renderDeleteBtn(id: any) {
-    if (
-      props.missionDetails.userType === "tenant-staff" ||
-      props.missionDetails.userType === "tenant-client"
-    ) {
-      let permissions: any = [];
-      //console.log(props.missionDetails.currentUserDetails);
-      props.missionDetails.currentUserDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "vod_delete"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
-        return (
-          <Menu.Item key="4">
-            <span
-              onClick={() => {
-                Modal.confirm({
-                  title: "Delete video?",
-                  icon: <ExclamationCircleOutlined />,
-                  content: "Are you sure you want to delete this video?",
-                  okText: "Yes",
-                  cancelText: "No",
-                  onOk: () => {
-                    deleteVideo(id);
-                  },
-                });
-              }}
-            >
-              <DeleteOutlined /> Delete video{" "}
-            </span>
-          </Menu.Item>
-        );
-      }
-    } else {
-      return (
-        <Menu.Item key="4">
-          <span
-            onClick={() => {
-              Modal.confirm({
-                title: "Delete video?",
-                icon: <ExclamationCircleOutlined />,
-                content: "Are you sure you want to delete this video?",
-                okText: "Yes",
-                cancelText: "No",
-                onOk: () => {
-                  deleteVideo(id);
-                },
-              });
-            }}
-          >
-            <DeleteOutlined /> Delete video{" "}
-          </span>
-        </Menu.Item>
-      );
-    }
-  }
-
   /* Action Button*/
 
   const onChange = (list) => {
@@ -805,33 +789,10 @@ function Videos(props) {
     setRefresh(!refresh);
   }, [isAscending]);
 
-  // function UrlExists(url) {
-  //   var http = new XMLHttpRequest();
-  //   http.open("HEAD", url, false);
-  //   http.send();
-  //   return http.status;
-  // }
-
-  // useEffect(() => {
-  //   if (videoDetails.link) {
-  //     console.log(
-  //       UrlExists(
-  //         STATIC_URL +
-  //           videoDetails.link.toString().replace(".m3u8", ".flv")
-  //       )
-  //     );
-  //     console.log(
-  //       UrlExists(
-  //         STATIC_URL +
-  //           videoDetails.link.toString().replace(".m3u8", ".mp43")
-  //       )
-  //     );
-  //   }
-  // }, [videoDetails.link]);
-  const generateTags = (data: any) => {
-    return Object.keys(data).map((key) => ({
+  const generateTags = () => {
+    return Object.keys(selectedVideo?.data).map((key) => ({
       id: Number(key),
-      display: data[key],
+      display: selectedVideo?.data[key],
     }));
   };
   useEffect(() => {
@@ -840,7 +801,6 @@ function Videos(props) {
     }
 
     const flaggedArray = VodData.map((data: any) => {
-      //console.log('toggleFlag', checkedList, data._id);
       if (checkedList.includes(data._id)) {
         return data.isFlagged;
       }
@@ -903,7 +863,6 @@ function Videos(props) {
                                   .toString()
                                   .replace(".m3u8", ".flv")
                               }
-                              // target='_blank'
                               download
                             >
                               <DownloadOutlined className="btn-icon" />
@@ -991,74 +950,12 @@ function Videos(props) {
                             key={`${dataa._id}`}
                           >
                             <Dropdown
-                              overlay={
-                                <Menu>
-                                  <Menu.Item key="1">
-                                    <span>
-                                      <a
-                                        href={
-                                          STATIC_URL +
-                                          dataa.videoPath
-                                            .toString()
-                                            .replace(".m3u8", ".flv")
-                                        }
-                                        // target='_blank'
-                                        download
-                                      >
-                                        <DownloadOutlined /> Download{" "}
-                                      </a>
-                                    </span>
-                                  </Menu.Item>
-                                  <Menu.Item
-                                    key="2"
-                                    onClick={() => {
-                                      props.thread(true, {
-                                        docType: "vod",
-                                        docId: dataa._id,
-                                        tags: dataa.bookmarks
-                                          ? {
-                                              bookmarks: generateTags(
-                                                dataa.bookmarks
-                                              ),
-                                            }
-                                          : {},
-                                      });
-                                      setThumbnail(vodThumbnail(dataa, idx));
-                                    }}
-                                  >
-                                    <MessageOutlined /> Open Thread{" "}
-                                  </Menu.Item>
-                                  <Menu.Item
-                                    key="3"
-                                    onClick={() => {
-                                      toggleFlag(dataa);
-                                    }}
-                                  >
-                                    {!dataa.isFlagged ? (
-                                      <>
-                                        <FlagOutlined /> Flag
-                                      </>
-                                    ) : (
-                                      <>
-                                        <FlagOutlined /> Unflag
-                                      </>
-                                    )}
-                                  </Menu.Item>
-                                  {renderDeleteBtn(dataa._id)}
-                                  <Menu.Item key="5">
-                                    <span
-                                      onClick={() => {
-                                        setEditVideoName({
-                                          id: dataa._id,
-                                          name: dataa.videoName,
-                                        });
-                                        showModal3();
-                                      }}
-                                    >
-                                      <EditOutlined /> Rename
-                                    </span>
-                                  </Menu.Item>
-                                </Menu>
+                              menu={{
+                                items: vodMenu(dataa),
+                                onClick: vodMenuOnClick,
+                              }}
+                              onOpenChange={() =>
+                                setSelectedVideo({ data: dataa, idx })
                               }
                               trigger={["contextMenu"]}
                             >
@@ -1134,75 +1031,12 @@ function Videos(props) {
                             key={`${dataa._id}`}
                           >
                             <Dropdown
-                              overlay={
-                                <Menu>
-                                  <Menu.Item key="1">
-                                    <span>
-                                      <a
-                                        href={
-                                          STATIC_URL +
-                                          dataa.videoPath
-                                            .toString()
-                                            .replace(".m3u8", ".flv")
-                                        }
-                                        // target='_blank'
-                                        download
-                                      >
-                                        <DownloadOutlined /> Download{" "}
-                                      </a>
-                                    </span>
-                                  </Menu.Item>
-                                  <Menu.Item
-                                    key="2"
-                                    onClick={() => {
-                                      props.thread(true, {
-                                        docType: "vod",
-                                        docId: dataa._id,
-                                        tags: dataa.bookmarks
-                                          ? {
-                                              bookmarks: generateTags(
-                                                dataa.bookmarks
-                                              ),
-                                            }
-                                          : {},
-                                      });
-                                      setThumbnail(vodThumbnail(dataa, idx));
-                                    }}
-                                  >
-                                    <MessageOutlined /> Open Thread{" "}
-                                  </Menu.Item>
-                                  <Menu.Item
-                                    key="3"
-                                    onClick={() => {
-                                      toggleFlag(dataa);
-                                      setRefresh(true);
-                                    }}
-                                  >
-                                    {!dataa.isFlagged ? (
-                                      <>
-                                        <FlagOutlined /> Flag
-                                      </>
-                                    ) : (
-                                      <>
-                                        <FlagOutlined /> Unflag
-                                      </>
-                                    )}
-                                  </Menu.Item>
-                                  {renderDeleteBtn(dataa._id)}
-                                  <Menu.Item key="5">
-                                    <span
-                                      onClick={() => {
-                                        setEditVideoName({
-                                          id: dataa._id,
-                                          name: dataa.videoName,
-                                        });
-                                        showModal3();
-                                      }}
-                                    >
-                                      <EditOutlined /> Rename
-                                    </span>
-                                  </Menu.Item>
-                                </Menu>
+                              menu={{
+                                items: vodMenu(dataa),
+                                onClick: vodMenuOnClick,
+                              }}
+                              onOpenChange={() =>
+                                setSelectedVideo({ data: dataa, idx })
                               }
                               trigger={["contextMenu"]}
                             >
@@ -1257,7 +1091,6 @@ function Videos(props) {
                                               objectPosition: "0 0",
                                             }}
                                             src={STATIC_URL + dataa.thumbnail}
-                                            // className='card-img-size'
                                             onClick={() => {
                                               updateSelectedVOD(dataa, idx);
                                             }}
@@ -1329,7 +1162,6 @@ function Videos(props) {
                               .toString()
                               .replace(".m3u8", ".flv")
                           }
-                          // target='_blank'
                           download
                         >
                           <DownloadOutlined className="btn-icon" />
@@ -1400,55 +1232,11 @@ function Videos(props) {
 
                 {data.map((dataa, idx) => (
                   <Dropdown
-                    overlay={
-                      <Menu>
-                        <Menu.Item key="1">
-                          <span>
-                            <a
-                              href={
-                                STATIC_URL +
-                                dataa.videoPath
-                                  .toString()
-                                  .replace(".m3u8", ".flv")
-                              }
-                              // target='_blank'
-                              download
-                            >
-                              <DownloadOutlined /> Download{" "}
-                            </a>
-                          </span>
-                        </Menu.Item>
-                        <Menu.Item
-                          key="2"
-                          onClick={() => {
-                            props.thread(true, {
-                              docType: "vod",
-                              docId: dataa._id,
-                              tags: dataa.bookmarks
-                                ? { bookmarks: generateTags(dataa.bookmarks) }
-                                : {},
-                            });
-                            setThumbnail(vodThumbnail(dataa, idx));
-                          }}
-                        >
-                          <MessageOutlined /> Open Thread{" "}
-                        </Menu.Item>
-                        {renderDeleteBtn(dataa._id)}
-                        <Menu.Item>
-                          <span
-                            onClick={() => {
-                              setEditVideoName({
-                                id: dataa._id,
-                                name: dataa.videoName,
-                              });
-                              showModal3();
-                            }}
-                          >
-                            <EditOutlined /> Rename
-                          </span>
-                        </Menu.Item>
-                      </Menu>
-                    }
+                    menu={{
+                      items: vodMenu(dataa),
+                      onClick: vodMenuOnClick,
+                    }}
+                    onOpenChange={() => setSelectedVideo({ data: dataa, idx })}
                     trigger={["contextMenu"]}
                   >
                     <Row
@@ -1635,7 +1423,7 @@ function Videos(props) {
     <>
       <Modal
         title="Maximum Limit reached!"
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={handleCancel}
         onCancel={handleCancel}
       >
@@ -1643,12 +1431,11 @@ function Videos(props) {
           status="500"
           title="Oops! You have reached your limit of uploading videos!"
           subTitle="Please contact your admin."
-          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
         title="Tenant Expired!"
-        visible={isModalVisible2}
+        open={isModalVisible2}
         onOk={handleCancel2}
         onCancel={handleCancel2}
       >
@@ -1660,7 +1447,7 @@ function Videos(props) {
       </Modal>
       <Modal
         title="Storage Exceeded!"
-        visible={storageModal}
+        open={storageModal}
         onOk={() => setStorageModal(false)}
         onCancel={() => setStorageModal(false)}
       >
@@ -1672,8 +1459,7 @@ function Videos(props) {
       </Modal>
       <Modal
         title="Edit Video Name"
-        visible={isEditModalVisible}
-        // onOk={handleOk3}
+        open={isEditModalVisible}
         onCancel={handleCancel3}
         footer={[
           <Button onClick={handleCancel3} disabled={videoNameLoader}>
@@ -1726,9 +1512,6 @@ function Videos(props) {
         delete={deleteVideo}
       />
       {loader ? (
-        // <div style={{ margin: "auto", marginTop: "5%" }}>
-        //   <Spin size='large' />
-        // </div>
         <>
           {!listView ? (
             <>

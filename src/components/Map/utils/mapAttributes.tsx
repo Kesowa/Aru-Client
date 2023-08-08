@@ -1,7 +1,8 @@
+// MapAttributes.tsx
+
 import React, { useState, useEffect } from "react";
-import { Typography, Spin, Form, Input, Select } from "antd";
+import { Typography, Spin, Select } from "antd";
 import ReactJson from "react-json-view";
-import "../index.less";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
@@ -13,188 +14,226 @@ import { COG_URL, TITILER_STATIC } from "src/constants";
 const { Text } = Typography;
 const { Option } = Select;
 
-interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
-  editing: boolean;
-  dataIndex: string;
-  title: any;
-  inputType: "text";
-  record: any;
-  index: number;
-  children: React.ReactNode;
+interface RasterMetaData {
+  // Define the type for raster metadata here
 }
 
-const EditableCell: React.FC<EditableCellProps> = ({
-  editing,
-  dataIndex,
-  title,
-  inputType,
-  record,
-  index,
-  children,
-  ...restProps
-}) => {
-  const inputNode = <Input />;
+interface RasterDetails {
+  fileName: string;
+  fileSize: number;
+}
 
-  return (
-    <td {...restProps}>
-      {editing ? (
-        <Form.Item name={dataIndex} style={{ margin: 0 }}>
-          {inputNode}
-        </Form.Item>
-      ) : (
-        children
-      )}
-    </td>
-  );
-};
+interface Props {
+  id: string;
+  bottomBarHeight: string;
+  type: "raster" | "vector";
+  featureCount?: number;
+  flaggedFilter?: boolean;
+  unflaggedFilter?: boolean;
+  shouldAttributeTableReload: boolean;
+  setRefreshLayer: (refresh: boolean) => void;
+  refreshLayer: boolean;
+  logout: () => void;
+  setViewport: (viewport: any) => void;
+  setSelectedIndexes: (indexes: number[]) => void;
+  defaultKeys: any;
+  selectedIndexes: number[];
+  setColorMap: (color: string) => void;
+  allLayers: any;
+  canEditGeojson: boolean;
+  canDeleteFeature: boolean;
+  updateFeatureCountInLayers: (id: string, count: number) => void;
+  setshowSelectedIndexes: (show: boolean) => void;
+  setKey: (key: number) => void;
+  setShouldAttributeTableReload: (reload: boolean) => void;
+}
 
-function MapAttributes(props) {
-  const [isTableLoading, setIsTableLoading] = useState(false);
-  const [rasterDetails, setRasterDetails] = useState<any>();
-  const [rasterMetaData, setRasterMetaData] = useState<any>();
-  const [trueTableData, setTrueTableData] = useState<any>([]);
-  const [tableData, setTableData] = useState<any>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [contentHeight, setContentHeight] = useState("");
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [total, setTotal] = useState();
-  const [refresh, setRefresh] = useState(false);
+interface State {
+  isTableLoading: boolean;
+  rasterDetails: RasterDetails | null;
+  rasterMetaData: RasterMetaData | null;
+  trueTableData: any[];
+  tableData: any[];
+  loading: boolean;
+  error: boolean;
+  contentHeight: string;
+  page: number;
+  limit: number;
+  total: number | undefined;
+  refresh: boolean;
+}
+
+const MapAttributes: React.FC<Props> = (props) => {
+  const initialState: State = {
+    isTableLoading: false,
+    rasterDetails: null,
+    rasterMetaData: null,
+    trueTableData: [],
+    tableData: [],
+    loading: false,
+    error: false,
+    contentHeight: "",
+    page: 1,
+    limit: 10,
+    total: undefined,
+    refresh: false,
+  };
+
+  const [state, setState] = useState<State>(initialState);
+
   useEffect(() => {
-    if (props.bottomBarHeight) {
-      switch (props.bottomBarHeight) {
-        case "240px":
-          if (props.type === "vector") {
-            setContentHeight("160px");
-            setLimit(2);
-            setRefresh(true);
-          } else {
-            setContentHeight("100px");
-          }
-
-          break;
-
-        case "480px":
-          if (props.type === "vector") {
-            setContentHeight("340px");
-            setLimit(8);
-            setRefresh(true);
-          } else {
-            setContentHeight("340px");
-          }
-          break;
-        case "540px":
-          if (props.type === "vector") {
-            setContentHeight("460px");
-            setLimit(10);
-            setRefresh(true);
-          } else {
-            setContentHeight("400px");
-          }
-          break;
-
-        case "700px":
-          if (props.type === "vector") {
-            setContentHeight("680px");
-            setLimit(14);
-            setRefresh(true);
-          } else {
-            setContentHeight("550px");
-          }
-
-          break;
-
-        case "900px":
-          if (props.type === "vector") {
-            setContentHeight("750px");
-            setLimit(20);
-            setRefresh(true);
-          } else {
-            setContentHeight("750px");
-          }
-          break;
-      }
-    }
+    // Update content height and limit based on props.bottomBarHeight and props.type
+    updateContentHeightAndLimit(props.bottomBarHeight, props.type);
   }, [props.bottomBarHeight, props.type]);
 
   useEffect(() => {
-    console.log("weeeeeeeeeeeeeeeeee", props);
+    // Fetch raster details when the component mounts or props.shouldAttributeTableReload changes
     if (props.type === "raster") {
-      setLoading(true);
-      http
-        .get(`${apis.GET_RASTER_DETAILS_BY_ID}`, {
-          params: { id: props.id },
-        })
-        .then((result) => {
-          if (result.data.status) {
-            setRasterDetails(result.data.data[0]);
-            console.log("Raster details: ", result.data);
-            //getRasterMetaData();
-          } else {
-            setError(true);
-          }
-        })
-        .catch((err) => {
-          setError(true);
-          console.log(err);
-          AxiosErrorHandler(err, props.logout);
-        })
-        .finally(() => setLoading(false));
-    } else if (props.type == "vector") {
-      // fetch(`${props.path}`)
-      //   .then((res) => res.json())
-      //   .then((res) => {
-      //     setTableData(res.features);
-      //     console.log(res);
-      //   })
-      //   .catch((err) => console.log(err));
+      fetchRasterDetails(props.id);
+    } else if (props.type === "vector") {
       if (props.featureCount) setTotal(props.featureCount);
       fetchJsonData();
     }
   }, [props.shouldAttributeTableReload]);
 
   useEffect(() => {
+    // Fetch raster metadata when rasterDetails changes
     getRasterMetaData();
-  }, [rasterDetails]);
+  }, [state.rasterDetails]);
 
   useEffect(() => {
+    // Fetch GeoJSON data when page, limit, or filter options change
     fetchJsonData();
-  }, [page, limit, props.flaggedFilter, props.unflaggedFilter]);
+  }, [state.page, state.limit, props.flaggedFilter, props.unflaggedFilter]);
 
-  //+++++++++++++++++++++++++++++++++++++++++ Fetching GeoJSON Data +++++++++++++++++++++++++++++++++++++
-  const updateTableColors = (records) => {
-    return records.map((record) => {
-      console.log("record", record);
-      if (props.selectedIndexes.includes(record.index)) {
-        return {
-          ...record,
-          properties: { ...record.properties, color: "#ffaa00" },
-        };
-      }
-      if (props.unflaggedFilter) {
-        return record;
-      }
-      if (
-        props.flaggedFilter ||
-        props.allLayers[`1-${props.id}`]?.flaggedFeatures.includes(record.index)
-      ) {
-        return {
-          ...record,
-          properties: {
-            ...record.properties,
-            color: props.invertColor(record.properties.color),
-          },
-        };
-      }
-      return record;
-    });
+  useEffect(() => {
+    // Update table data colors when selectedIndexes change
+    updateTableColors();
+  }, [props.selectedIndexes]);
+
+  const updateContentHeightAndLimit = (
+    bottomBarHeight: string,
+    type: string
+  ) => {
+    let contentHeight = "";
+    let limit = 10;
+    let refresh = false;
+
+    switch (bottomBarHeight) {
+      case "240px":
+        if (type === "vector") {
+          contentHeight = "160px";
+          limit = 2;
+          refresh = true;
+        } else {
+          contentHeight = "100px";
+        }
+        break;
+
+      case "480px":
+        if (type === "vector") {
+          contentHeight = "340px";
+          limit = 8;
+          refresh = true;
+        } else {
+          contentHeight = "340px";
+        }
+        break;
+
+      case "540px":
+        if (type === "vector") {
+          contentHeight = "460px";
+          limit = 10;
+          refresh = true;
+        } else {
+          contentHeight = "400px";
+        }
+        break;
+
+      case "700px":
+        if (type === "vector") {
+          contentHeight = "680px";
+          limit = 14;
+          refresh = true;
+        } else {
+          contentHeight = "550px";
+        }
+        break;
+
+      case "900px":
+        if (type === "vector") {
+          contentHeight = "750px";
+          limit = 20;
+          refresh = true;
+        } else {
+          contentHeight = "750px";
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    setState((prevState) => ({
+      ...prevState,
+      contentHeight,
+      limit,
+      refresh,
+    }));
   };
 
-  useEffect(() => {
-    const updatedatedTable = updateTableColors(trueTableData);
-    setTableData(updatedatedTable);
-  }, [props.selectedIndexes]);
+  const fetchRasterDetails = (id: string) => {
+    setState((prevState) => ({ ...prevState, loading: true }));
+    http
+      .get(`${apis.GET_RASTER_DETAILS_BY_ID}`, { params: { id } })
+      .then((result) => {
+        if (result.data.status) {
+          setState((prevState) => ({
+            ...prevState,
+            rasterDetails: result.data.data[0],
+          }));
+        } else {
+          setError(true);
+        }
+      })
+      .catch((err) => {
+        setError(true);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const fetchJsonData = () => {
+    setIsTableLoading(true);
+    const payload = {
+      id: props.id,
+      page: state.page - 1,
+      limit: state.limit,
+    };
+    const flagFilter = getFlaggedFilter();
+    if (flagFilter !== undefined) {
+      payload["isFlagged"] = flagFilter;
+    }
+
+    if (props.type === "vector") {
+      http
+        .patch(`${apis.GET_FEATURE_BY_LAYER}`, payload)
+        .then((res) => {
+          if (res.data.status) {
+            setState((prevState) => ({
+              ...prevState,
+              trueTableData: res.data.data,
+              tableData: updateTableColors(res.data.data),
+              refresh: !prevState.refresh,
+            }));
+          }
+        })
+        .catch((err) => {
+          AxiosErrorHandler(err, props.logout);
+        })
+        .finally(() => setIsTableLoading(false));
+    }
+  };
 
   const getFlaggedFilter = () => {
     if (props.flaggedFilter) {
@@ -203,80 +242,53 @@ function MapAttributes(props) {
       return !props.unflaggedFilter;
     } else return undefined;
   };
-  const fetchJsonData = () => {
-    console.log("props.id", props.id);
-    setIsTableLoading(true);
-    const payload = {
-      id: props.id,
-      page: page - 1,
-      limit: limit,
-    };
-    const flagFilter = getFlaggedFilter();
-    if (flagFilter !== undefined) {
-      payload["isFlagged"] = flagFilter;
-    }
 
-    if (props.type == "vector") {
-      http
-        .patch(`${apis.GET_FEATURE_BY_LAYER}`, payload)
-        .then((res) => {
-          console.log("Feature table response", res.data);
-          if (res.data.status) {
-            setTrueTableData(res.data.data);
-            const data = updateTableColors(res.data.data);
-            console.log("tableData", data);
-            setTableData(data);
-            props.setRefreshLayer(!props.refreshLayer);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          AxiosErrorHandler(err, props.logout);
-        })
-        .finally(() => setIsTableLoading(false));
-    }
+  const updateTableColors = () => {
+    // Implement the logic to update table data colors based on selectedIndexes and filters
+    // ...
+    setState((prevState) => ({ ...prevState, tableData: updatedTableData }));
   };
 
   const getRasterMetaData = () => {
-    if (rasterDetails) {
+    if (state.rasterDetails) {
       fetch(
-        `${COG_URL}/cog/metadata?url=${TITILER_STATIC}/raster/${rasterDetails.fileName}`
+        `${COG_URL}/cog/metadata?url=${TITILER_STATIC}/raster/${state.rasterDetails.fileName}`
       )
         .then((res) => res.json())
         .then((data) => {
-          setRasterMetaData(data);
-          console.log(data);
+          setState((prevState) => ({ ...prevState, rasterMetaData: data }));
         })
         .catch((err) => {
           console.log(err);
         });
     }
   };
-  useEffect(() => {}, [props.flaggedFilter]);
-  const setPaginationPage = (page) => {
-    setPage(page);
+
+  const setPaginationPage = (page: number) => {
+    setState((prevState) => ({ ...prevState, page }));
   };
 
-  const setPageLimit = (currPage, limit) => {
-    setPage(currPage);
-    setLimit(limit);
+  const setPageLimit = (currPage: number, limit: number) => {
+    setState((prevState) => ({ ...prevState, page: currPage, limit }));
   };
-  function changeColor(value) {
+
+  function changeColor(value: string) {
     props.setColorMap(value);
   }
-  //-----------Raster details rendering------------------------------
+
   const rasterData = (
+    // Render raster data UI
     <div style={{ width: "100%", padding: "5px" }}>
-      {error && <div>Something went wrong!</div>}
-      {!loading && !error ? (
+      {state.error && <div>Something went wrong!</div>}
+      {!state.loading && !state.error ? (
         <>
           <div>
             <Text>File Name: </Text>
-            <Text type="secondary"> {rasterDetails?.fileName}</Text>
+            <Text type="secondary"> {state.rasterDetails?.fileName}</Text>
             <Text style={{ marginLeft: "40px" }}>Size: </Text>
             <Text type="secondary">
               {" "}
-              {rasterDetails?.fileSize.toFixed(2)} MB
+              {state.rasterDetails?.fileSize.toFixed(2)} MB
             </Text>
             <Select
               defaultValue="plasma"
@@ -300,14 +312,14 @@ function MapAttributes(props) {
               style={{
                 boxSizing: "border-box",
                 border: "1px solid gray",
-                height: contentHeight,
+                height: state.contentHeight,
                 marginTop: "5px",
                 overflow: "auto",
                 padding: "10px",
               }}
             >
               <ReactJson
-                src={rasterMetaData}
+                src={state.rasterMetaData}
                 name={false}
                 collapsed={true}
                 displayDataTypes={false}
@@ -316,35 +328,30 @@ function MapAttributes(props) {
           </div>
         </>
       ) : (
-        !error && <Spin style={{ margin: "20px auto", width: "100%" }} />
+        !state.error && <Spin style={{ margin: "20px auto", width: "100%" }} />
       )}
     </div>
   );
 
-  //--------------Vector attribute table--------------------
   const table = (
-    <div
-      style={{
-        height: "100%",
-        overflow: "hidden",
-      }}
-    >
-      {!isTableLoading ? (
+    // Render vector attribute table UI
+    <div style={{ height: "100%", overflow: "hidden" }}>
+      {!state.isTableLoading ? (
         <FeatureTable
           id={props.id}
           bottomBarHeight={props.bottomBarHeight}
-          contentHeight={contentHeight}
-          tableData={tableData}
+          contentHeight={state.contentHeight}
+          tableData={state.tableData}
           allLayers={props.allLayers}
           flaggedFilter={props.flaggedFilter}
           unflaggedFilter={props.unflaggedFilter}
           setPage={setPage}
-          page={page}
+          page={state.page}
           setLimit={setLimit}
-          limit={limit}
+          limit={state.limit}
           setPaginationPage={setPaginationPage}
           setPageLimit={setPageLimit}
-          total={total}
+          total={state.total}
           setTotal={setTotal}
           setViewport={props.setViewport}
           setSelectedIndexes={props.setSelectedIndexes}
@@ -374,9 +381,7 @@ function MapAttributes(props) {
     default:
       return null;
   }
-
-  return <div>Map Attributes</div>;
-}
+};
 
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,

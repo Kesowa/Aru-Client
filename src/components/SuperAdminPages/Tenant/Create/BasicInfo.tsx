@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Form, Input, Upload, Row, Col, message, Button } from "antd";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
@@ -47,7 +47,6 @@ function BasicInfo(props: any) {
   };
 
   const onFinish = (data: any) => {
-    //console.log(data);
     const image = avatar ? avatar : undefined;
     props.goToNextFromBasic({ ...data, avatar: image });
   };

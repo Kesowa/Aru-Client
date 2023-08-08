@@ -1,10 +1,8 @@
-@import "../../../shared/global_var.css";
+@import "../shared/global_var.css";
 @darkShadow: var(--shadow-dark);
 @primary: var(--primary-color);
 @accent: var(--accent-color);
 @secondary: var(--secondary-color);
-//initial resolutions
-//@mq-768p: "max-width: 768px";
 
 .mission-list-wrapper {
   padding: 24px;
@@ -81,7 +79,6 @@
   border-radius: 4px;
   transition: 0.1s;
   box-sizing: border-box;
-  // justify-content: space-between;
   .flight-list-item {
     padding: 5px;
   }
@@ -129,28 +126,24 @@
 .tableMissionName {
   font-size: 34px;
   display: block;
-  // width: 210px;
   width: fit-content;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   @media (-webkit-min-device-pixel-ratio: 1.5) {
     width: 200px;
-    // width: fit-content;
   }
 }
 
 .mission-id {
   font-size: 14px;
   display: block;
-  // width: 200px;
   width: fit-content;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   @media (-webkit-min-device-pixel-ratio: 1.5) {
     width: 100px;
-    // width: fit-content;
   }
 }
 
@@ -167,7 +160,4 @@
   .tableMissionName {
     font-size: 24px;
   }
-  // .vod-timestamp {
-  //   font-size: 10px;
-  // }
 }

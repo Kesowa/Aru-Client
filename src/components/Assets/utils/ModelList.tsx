@@ -1,26 +1,17 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import {
   Row,
   Col,
   Table,
-  Card,
   message,
   Input,
   Button,
-  Tag,
-  Dropdown,
-  Menu,
-  Popconfirm,
-  Typography,
+  Typography
 } from "antd";
 import {
   SearchOutlined,
-  ShakeOutlined,
-  EyeOutlined,
-  DeleteOutlined,
-  StopOutlined,
-  EditOutlined,
+  ShakeOutlined
 } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
@@ -32,10 +23,9 @@ import { logout } from "../../../actions/authAction";
 import { setModelsToState, deleteModel } from "../../../actions/modelAction";
 import ModelCard from "./ModelCard";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 interface TableProps {
-  //filter: any;
   userType: any;
   tenantId: any;
   userId: any;
@@ -60,10 +50,8 @@ function ModelList(props: TableProps) {
     http
       .get(`${apis.GET_MODELS}`)
       .then((result) => {
-        //console.log(result.data);
         if (result.data.status) {
           props.setModelsToState(result.data.data);
-          //console.log(result.data.data);
         } else {
           message.error(result.data.message);
         }
@@ -80,14 +68,6 @@ function ModelList(props: TableProps) {
   useEffect(() => {
     if (props.models.length) {
       setModelTableData(props.models);
-      //   if (props.filter === "all") {
-      //     setAssetTableData(props.models);
-      //   } else {
-      //     let data = props.models.filter((row) => {
-      //       return row.status === props.filter;
-      //     });
-      //     setAssetTableData(data);
-      //   }
     }
   }, [props.models]);
 
@@ -120,7 +100,6 @@ function ModelList(props: TableProps) {
           }
           onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
           style={{
-            //width: 90,
             marginBottom: 8,
             display: "block",
           }}
@@ -129,18 +108,12 @@ function ModelList(props: TableProps) {
           type="primary"
           onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
           size="small"
-          style={
-            {
-              //width: 90, marginRight: 8
-            }
-          }
         >
           Search
         </Button>
         <Button
           onClick={() => handleReset(clearFilters)}
           size="small"
-          //style={{ width: 90 }}
         >
           Reset
         </Button>
@@ -151,7 +124,7 @@ function ModelList(props: TableProps) {
     ),
     onFilter: (value: any, record: any) =>
       record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownVisibleChange: (visible: any) => {
+    onFilterDropdownOpenChange: (visible: any) => {
       if (visible) {
         setTimeout(() => searchInput.select());
       }
@@ -248,13 +221,7 @@ function ModelList(props: TableProps) {
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
-      // console.log(
-      //   `selectedRowKeys: ${selectedRowKeys}`,
-      //   "selectedRows: ",
-      //   selectedRows[0]._id
-      // );
       setSelectedModelID(selectedRows[0]._id);
-      // console.log(selectedModelID);
     },
   };
 

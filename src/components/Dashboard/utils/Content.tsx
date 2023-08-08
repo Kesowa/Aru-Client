@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
@@ -73,7 +73,7 @@ function DashboardContent(props: any) {
       <Modal
         title="Connect To App"
         centered
-        visible={visible}
+        open={visible}
         onCancel={() => setVisible(false)}
         footer={null}
         width={1000}
@@ -121,22 +121,6 @@ function DashboardContent(props: any) {
     );
   };
 
-  function getInterPolatedValue(
-    u1: any,
-    l1: any,
-    u2: any,
-    l2: any,
-    value: any
-  ) {
-    const lerp = (x: any, y: any, a: any) => x * (1 - a) + y * a;
-    const clamp = (a: any, min = 0, max = 1) => Math.min(max, Math.max(min, a));
-    const invlerp = (x: any, y: any, a: any) => clamp((a - x) / (y - x));
-    const range = (x1: any, y1: any, x2: any, y2: any, a: any) =>
-      lerp(x2, y2, invlerp(x1, y1, a));
-
-    const final = range(u1, l1, u2, l2, value);
-    return final;
-  }
   //----------storage stats-------------------------------------
 
   function fetchTenantStats() {
@@ -162,7 +146,6 @@ function DashboardContent(props: any) {
   }
 
   useEffect(() => fetchTenantStats(), [props.UserDetails]);
-  //useEffect(()=> console.log(storage),[storage])
   const renderStorageStats = () => {
     console.log("Fetched stats", storage);
     const storageRes = storage;
@@ -418,7 +401,6 @@ function DashboardContent(props: any) {
             limit: 10,
             filter: "all",
             sort: "name:descend",
-            //searchFilters: "",
           },
         })
         .then((result) => {
@@ -485,7 +467,6 @@ function DashboardContent(props: any) {
                 <Statistic
                   title="Live Missions"
                   value={liveMissions}
-                  //precision={2}
                   valueStyle={{ color: "#3b86ff" }}
                 />
               )}
@@ -499,7 +480,6 @@ function DashboardContent(props: any) {
                 <Statistic
                   title="Upcoming Missions"
                   value={UpcomingMissions}
-                  //precision={2}
                   valueStyle={{ color: "#ff6565" }}
                 />
               )}
@@ -513,7 +493,6 @@ function DashboardContent(props: any) {
                 <Statistic
                   title="Completed Missions"
                   value={CompletedMissions}
-                  //precision={2}
                   valueStyle={{ color: "#36a556" }}
                 />
               )}
@@ -596,17 +575,6 @@ function DashboardContent(props: any) {
     );
   }
 
-  //conditional render based on availibility of tenantId, whether only tenantId, or tenantId._id, or super admin dashboard
-  // if (props.UserDetails?.tenantId?._id) {
-  //   //fetchFilterMissions(props.UserDetails.tenantId._id);
-  //   return <>{renderDashboardContents()}</>;
-  // } else if (props.UserDetails?.tenantId) {
-  //   //fetchFilterMissions(props.UserDetails.tenantId);
-  //   return <>{renderDashboardContents()}</>;
-  // } else {
-  //   return <>{renderSuperAdminDashboard()}</>;
-  // }
-
   if (
     props.UserDetails.userType === "tenant-staff" ||
     props.UserDetails.userType === "tenant-root"
@@ -626,6 +594,5 @@ const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
   Theme: state.Theme,
   UserDetails: state.Auth.userdetails,
-  //User: state.Auth,
 });
 export default connect(mapStateToProps, { logout })(DashboardContent);

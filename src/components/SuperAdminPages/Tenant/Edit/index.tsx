@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import {
-  PageHeader,
   Button,
   Upload,
   message,
@@ -12,6 +11,7 @@ import {
   Typography,
   Select,
 } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import {
   UnorderedListOutlined,
   PlusOutlined,
@@ -27,7 +27,7 @@ import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { STATIC_URL } from "src/constants";
 
-const { Text, Title } = Typography;
+const { Title } = Typography;
 const { Option } = Select;
 
 function EditTenant(props: any) {

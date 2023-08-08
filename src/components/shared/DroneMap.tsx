@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import connectSocket from "../../services/socketConnect";
 import DeckGL, { FlyToInterpolator } from "deck.gl";
@@ -80,18 +80,9 @@ function DroneMap(props: any) {
         maxZoom: 17,
         pitch: 0,
         bearing: 0,
-        // transitionDuration: 1000,
-        // transitionInterpolator: new FlyToInterpolator(),
       });
     }
   }, [dPosition]);
-
-  //--------consoling props received-------------------
-  useEffect(() => {
-    if (props.streamKey && props.geoFence) {
-      //console.log("streamkey: ", props.streamKey, "geofence: ", props.geoFence);
-    }
-  }, [props.streamKey, props.geoFence]);
 
   const markerData = [
     {
@@ -111,7 +102,6 @@ function DroneMap(props: any) {
       widthMinPixels: 1,
       capRounded: true,
       jointRounded: true,
-      //billboard: true,
       getPath: (d) => d.path,
       getColor: (d) => [0, 195, 255],
       getWidth: (d) => 3,
@@ -144,9 +134,6 @@ function DroneMap(props: any) {
             initialViewState={INITIAL_VIEW_STATE}
             controller={true}
             layers={layers}
-            // getTooltip={({ object }) =>
-            //   object && `${object.name}\n${object.address}`
-            // }
             getTooltip={({ object }) => object && object.name}
           >
             <StaticMap

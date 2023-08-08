@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { PageHeader, message, Button, Table, Tag } from "antd";
+import { message, Button, Table, Tag } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import "../Permission.less";
 import { loading } from "../../../../actions/loadingAction";

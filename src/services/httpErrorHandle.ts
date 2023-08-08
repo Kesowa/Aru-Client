@@ -1,5 +1,4 @@
 import { message } from "antd";
-//import Modal from "antd/lib/modal/Modal";
 
 export const AxiosErrorHandler = (error: any, cb: any) => {
   if (error.response?.status === 401) {

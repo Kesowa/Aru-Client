@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Row, Col, Typography, Avatar, Tooltip, Divider, Tag } from "antd";
 import { CalendarOutlined, UserOutlined } from "@ant-design/icons";
 import { STATIC_URL } from "src/constants";
@@ -74,7 +74,6 @@ function About(props) {
             </div>
           </div>
         </Col>
-        {/* <Col span={6}><Tooltip placement="bottom" title="Click to call pilot"><Button type="primary" style={{position: "absolute", right: "0"}}><PhoneOutlined />+91-{missionData.pilotMobileNumber}</Button></Tooltip></Col> */}
       </Row>
 
       <Row style={{ marginTop: "12px" }}>

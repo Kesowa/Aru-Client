@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Row,
   Col,
@@ -33,7 +33,7 @@ import { API_URL, STATIC_URL } from "src/constants";
 
 setChonkyDefaults({ iconComponent: ChonkyIconFA });
 
-const { Text, Title } = Typography;
+const { Title } = Typography;
 function Map(props) {
   const history = useHistory();
   const [files2, setFiles] = useState([]);
@@ -63,10 +63,8 @@ function Map(props) {
         },
       })
       .then((res) => {
-        // console.log(res);
         if (res.data.status) {
           const url = `${STATIC_URL}/${res.data.link}`;
-          //window.open(url, "_blank");
         }
       })
       .catch((err) => {
@@ -87,15 +85,11 @@ function Map(props) {
           `${API_URL}/stream/mission-specific?missionID=${props.id}`
         );
         socket.current.on("LAYER_ZIP_START", (data) => {
-          //console.log("RECC",data);
           message.success(
             "Preparing your data for download, this may take some time!"
           );
-          // setRefreshState(true);
-          // fetchDocuments();
         });
         socket.current.on("LAYER_ZIP_COMPLETED", (data) => {
-          // console.log("RECC2",data);
           const key = `open${Date.now()}`;
           const btn = (
             <a href={`${STATIC_URL}/${data}`} target="_blank" rel="noreferrer">
@@ -112,14 +106,10 @@ function Map(props) {
             placement: "bottomRight",
             duration: null,
           });
-          // setRefreshState(true);
-          // fetchDocuments();
         });
         socket.current.on("LAYER_ZIP_FAILED", (data) => {
           console.log("ERROR! Could not compress mission layers!", data);
           message.error("Oops! Failed to compress files. Please try again!");
-          // setRefreshState(true);
-          // fetchDocuments();
         });
       }
     }
@@ -131,7 +121,6 @@ function Map(props) {
       .get(`${apis.GET_ALL_LAYERS_FOR_MISSION}?missionId=${props.id}`)
       .then((res) => {
         if (res.data.status) {
-          // console.log(res.data.data);
           if (res.data.data !== undefined) {
             const filtered: any = res.data.data.layers;
             filtered.sort((a, b) => {
@@ -166,12 +155,6 @@ function Map(props) {
                       backgroundSize: "contain",
                     }}
                   >
-                    {/* <img
-                      // style={{width : "15vw" , height:"15vw"}}
-                      className="map-image"
-                      src={mapImage}
-                      alt='Mapimage is not fetched'
-                    /> */}
                     <div className="overlay-content">
                       <div className="inner-content">
                         <Row>

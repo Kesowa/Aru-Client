@@ -18,7 +18,6 @@ import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { connect } from "react-redux";
 import moment from "moment";
-// import getVideoDurationInSeconds from 'get-video-duration';
 import VideoPlayer from "../../../shared/VideoPlayer";
 import { STATIC_URL } from "src/constants";
 
@@ -42,7 +41,6 @@ function Videos(VideoProps) {
         })
         .then((res) => {
           setVodData(res.data.data);
-          //console.log(res.data)
           setTotal(res.data.total);
           setLoading(false);
         })
@@ -67,7 +65,6 @@ function Videos(VideoProps) {
       title: "Flight Name: " + name,
       content: (
         <div style={{ height: "510px", backgroundColor: "#0000" }}>
-          {/* {console.log(missionDetails) // checking structure of missionDetails passed to VideoPlayer } */}
           <VideoPlayer // NEED TO PASS MISSION DETAILS AND LIVE TAG CHECK
             url={STATIC_URL + link}
             handleTheater=""
@@ -84,7 +81,6 @@ function Videos(VideoProps) {
       ),
       centered: true,
       width: 1000,
-      // closable: true,
       onOk() {},
     });
   }

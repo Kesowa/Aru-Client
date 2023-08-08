@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
@@ -6,7 +6,6 @@ import { PlusCircleOutlined } from "@ant-design/icons";
 import {
   List,
   Typography,
-  PageHeader,
   Row,
   Col,
   message,
@@ -18,6 +17,7 @@ import {
   DatePicker,
   Collapse,
 } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
@@ -72,15 +72,6 @@ function UserCreatePage(props: any) {
         });
     });
     return false;
-  };
-
-  //auto generate password
-  const autoGeneratePassword = () => {
-    const password = Math.random().toString(36).slice(-8);
-    form.setFieldsValue({
-      password: password,
-      ConfirmPassword: password,
-    });
   };
 
   //change user group
@@ -160,7 +151,6 @@ function UserCreatePage(props: any) {
   const onFinish = (data: any) => {
     const password = Math.random().toString(36).slice(-8);
     data = { ...data, password };
-    //console.log(data);
     createUserAccount(data);
   };
 
@@ -360,53 +350,7 @@ function UserCreatePage(props: any) {
                   </Form.Item>
                 </Col>
               </Row>
-              {/* <Row gutter={16} align="bottom">
-                <Col span="8">
-                  <Form.Item
-                    label="Password"
-                    name="password"
-                    rules={[
-                      { required: true, message: "Please enter the password!" },
-                      {
-                        min: 6,
-                        message: "Password must be atleast 6 character long!",
-                      },
-                    ]}>
-                    <Input.Password type="password" placeholder="Password" />
-                  </Form.Item>
-                </Col>
-                <Col span="8">
-                  <Form.Item
-                    label="Confirm Password"
-                    name="ConfirmPassword"
-                    dependencies={["password"]}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please enter the password again!",
-                      },
-                      ({ getFieldValue }) => ({
-                        validator(rule, value) {
-                          if (!value || getFieldValue("password") === value) {
-                            return Promise.resolve();
-                          }
-                          return Promise.reject(
-                            "The two passwords that you entered do not match!",
-                          );
-                        },
-                      }),
-                    ]}>
-                    <Input.Password type="password" placeholder="Password" />
-                  </Form.Item>
-                </Col>
-                <Col span="8">
-                  <Form.Item>
-                    <Button htmlType="button" onClick={autoGeneratePassword}>
-                      Auto Generate
-                    </Button>
-                  </Form.Item>
-                </Col>
-              </Row> */}
+
               <Row gutter={16}>
                 <Col span="8">
                   <Form.Item label="Date of Birth" name="dob">

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   Alert,
   message,
@@ -8,13 +8,11 @@ import {
   Image,
   Col,
   Dropdown,
-  Menu,
   Button,
   Typography,
   Empty,
   Result,
   Checkbox,
-  Select,
   Badge,
   Pagination,
 } from "antd";
@@ -50,7 +48,6 @@ import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
 
-const { Option } = Select;
 let plainOptions = new Array<any>();
 function ImageDocs(props) {
   const [defaultFileList, setDefaultFileList] = useState([]);
@@ -67,7 +64,6 @@ function ImageDocs(props) {
   const [thermalPayload, setThermalPayload] = useState({});
   // This is a comment
   const [flag, setFlag] = useState(false);
-  const [isFlagged, setIsFlagged] = useState(false);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
   const [thumbnail, setThumbnail] = useState("");
@@ -78,6 +74,103 @@ function ImageDocs(props) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+  const [selectedImg, setSelectedImg] = useState({});
+  const imgMenu: MenuProps["items"] = (data) => {
+    const item = [
+      {
+        key: "1",
+        label: "Download",
+        icon: <DownloadOutlined />,
+      },
+      {
+        key: "2",
+        label: "Thermal View",
+        icon: <FireOutlined />,
+      },
+      {
+        key: "3",
+        label: "Open Thread",
+        icon: <MessageOutlined />,
+      },
+      {
+        key: "4",
+        label: !data.isFlagged ? "Flag" : "Unflag",
+        icon: <FlagOutlined />,
+      },
+    ];
+    const deleteItem = {
+      key: "5",
+      label: "Delete video",
+      icon: <DeleteOutlined />,
+    };
+    if (
+      props.missionDetails.userType === "tenant-staff" ||
+      props.missionDetails.userType === "tenant-client"
+    ) {
+      let permissions: any = [];
+      props.missionDetails.currentUserDetails.customPermissions.forEach((p) => {
+        const filteredPermissions = p.permissions.filter(
+          (d) => d.name === "vod_delete"
+        );
+        permissions = [...filteredPermissions, ...permissions];
+      });
+      if (permissions.length > 0) {
+        item.push(deleteItem);
+      }
+    } else {
+      item.push(deleteItem);
+    }
+    return item;
+  };
+  const imgMenuOnClick: MenuProps["onClick"] = (e) => {
+    switch (e.key) {
+      case "1":
+        window.open(`${STATIC_URL}${selectedImg.filePath}`);
+        break;
+      case "2":
+        setThermalPayload({
+          id: selectedImg._id,
+          doc: "documents",
+          filePath: selectedImg.image,
+        });
+        break;
+      case "3":
+        setThumbnail(
+          ImageComponent(
+            selectedImg,
+            false,
+            {
+              width: "100%",
+              height: "auto",
+              minHeight: "200px",
+            },
+            true
+          )
+        );
+        props.thread(true, {
+          docType: "document",
+          docId: selectedImg._id,
+        });
+        break;
+      case "4":
+        toggleFlag(selectedImg);
+        break;
+      case "5":
+        Modal.confirm({
+          title: "Delete Image?",
+          icon: <ExclamationCircleOutlined />,
+          content: "Are you sure you want to delete this Image?",
+          okText: "Yes",
+          cancelText: "No",
+          onOk: () => {
+            deleteSingleFile(selectedImg._id);
+          },
+        });
+        break;
+      default:
+        break;
+    }
+  };
   useEffect(() => {
     if (images.length < 1) {
       setActivateSelection(false);
@@ -194,7 +287,6 @@ function ImageDocs(props) {
               .post(options.action, fData, config)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
-                //console.log("Upload successful! ",res.data);
                 message.success(
                   "File " + options.file.name + " uploaded successfully"
                 );
@@ -228,7 +320,6 @@ function ImageDocs(props) {
               .post(options.action, fData, config)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
-                //console.log("Upload successful! ",res.data);
                 message.success(
                   "File " + options.file.name + " uploaded successfully"
                 );
@@ -299,7 +390,6 @@ function ImageDocs(props) {
       ),
       centered: true,
       width: 640,
-      // closable: true,
       cancelText: "Cancel",
       onOk() {},
       onCancel() {},
@@ -477,13 +567,11 @@ function ImageDocs(props) {
         .then((res) => {
           if (res.data.status) {
             message.success("Files deleted succesfully!");
-            // console.log(res);
             setRefreshState(true);
             fetchDocuments();
             setCheckedList([]);
           } else {
             message.error(res.data.message);
-            //console.log(res);
           }
         })
         .catch((err) => {
@@ -495,7 +583,6 @@ function ImageDocs(props) {
     }
   }
 
-  // Delete single file
   function deleteSingleFile(id: any) {
     http
       .delete(`${apis.DELETE_DOCUMENT_MULTIPLE}`, {
@@ -506,12 +593,10 @@ function ImageDocs(props) {
       .then((res) => {
         if (res.data.status) {
           message.success("File deleted succesfully!");
-          // console.log(res);
           setRefreshState(true);
           fetchDocuments();
         } else {
           message.error(res.data.message);
-          //console.log(res);
         }
       })
       .catch((err) => {
@@ -530,7 +615,6 @@ function ImageDocs(props) {
         );
 
         socket.current.on("DOCUMENT_CREATED", () => {
-          //console.log("Document uploaded",data);
           setRefreshState(true);
           fetchDocuments();
         });
@@ -579,63 +663,6 @@ function ImageDocs(props) {
   }
 
   //--------render delete button-------------------
-  function renderDeleteBtn(item: any) {
-    if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
-    ) {
-      // Add type info
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "delete_document"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
-        return (
-          <Menu.Item
-            key="4"
-            onClick={() => {
-              Modal.confirm({
-                title: "Delete Image?",
-                icon: <ExclamationCircleOutlined />,
-                content: "Are you sure you want to delete this Image?",
-                okText: "Yes",
-                cancelText: "No",
-                onOk: () => {
-                  deleteSingleFile(item._id);
-                },
-              });
-            }}
-          >
-            <DeleteOutlined /> Delete
-          </Menu.Item>
-        );
-      }
-    } else {
-      return (
-        <Menu.Item
-          key="4"
-          onClick={() => {
-            Modal.confirm({
-              title: "Delete Image?",
-              icon: <ExclamationCircleOutlined />,
-              content: "Are you sure you want to delete this Image?",
-              okText: "Yes",
-              cancelText: "No",
-              onOk: () => {
-                deleteSingleFile(item._id);
-              },
-            });
-          }}
-        >
-          <DeleteOutlined /> Delete
-        </Menu.Item>
-      );
-    }
-  }
-
   const onChange = (list) => {
     setCheckedList(list);
   };
@@ -655,7 +682,6 @@ function ImageDocs(props) {
 
     const flaggedArray = images
       .map((data: any) => {
-        //console.log('toggleFlag', checkedList, data._id);
         if (checkedList.includes(data._id)) {
           return data.isFlagged;
         }
@@ -754,72 +780,11 @@ function ImageDocs(props) {
                               >
                                 <Col md={8} style={{ padding: "10px" }}>
                                   <Dropdown
-                                    overlay={
-                                      <Menu>
-                                        <Menu.Item
-                                          key="1"
-                                          onClick={() =>
-                                            window.open(
-                                              `${STATIC_URL}${item.filePath}`
-                                            )
-                                          }
-                                        >
-                                          <DownloadOutlined /> Download
-                                        </Menu.Item>
-                                        <Menu.Item
-                                          key="5"
-                                          onClick={() =>
-                                            setThermalPayload({
-                                              id: item._id,
-                                              doc: "documents",
-                                              filePath: item.filePath,
-                                            })
-                                          }
-                                        >
-                                          <FireOutlined /> Thermal View
-                                        </Menu.Item>
-                                        <Menu.Item
-                                          key="2"
-                                          onClick={() => {
-                                            setThumbnail(
-                                              ImageComponent(
-                                                item,
-                                                false,
-                                                {
-                                                  width: "100%",
-                                                  height: "auto",
-                                                  minHeight: "200px",
-                                                },
-                                                true
-                                              )
-                                            );
-                                            props.thread(true, {
-                                              docType: "document",
-                                              docId: item._id,
-                                            });
-                                          }}
-                                        >
-                                          <MessageOutlined /> Open Thread{" "}
-                                        </Menu.Item>
-                                        <Menu.Item
-                                          key="3"
-                                          onClick={() => {
-                                            toggleFlag(item);
-                                          }}
-                                        >
-                                          {!item.isFlagged ? (
-                                            <>
-                                              <FlagOutlined /> Flag
-                                            </>
-                                          ) : (
-                                            <>
-                                              <FlagOutlined /> Unflag
-                                            </>
-                                          )}
-                                        </Menu.Item>
-                                        {renderDeleteBtn(item)}
-                                      </Menu>
-                                    }
+                                    onOpenChange={() => setSelectedImg(item)}
+                                    menu={{
+                                      items: imgMenu(item),
+                                      onClick: imgMenuOnClick,
+                                    }}
                                     trigger={["contextMenu"]}
                                   >
                                     {ImageComponent(item, true, {
@@ -939,42 +904,6 @@ function ImageDocs(props) {
                               }}
                             ></Image>
                           </Badge>
-                          /**<Col span={6}>
-                            <img
-                              alt={`${item._id}`}
-                              className="imageMain"
-                              key={`${item._id}`}
-                              style={
-                                checkedList.includes(item._id)
-                                  ? {
-                                      border: "4px solid #3b86ff",
-                                      cursor: "pointer",
-                                      aspectRatio: "16/9",
-                                    }
-                                  : {
-                                      cursor: "pointer",
-                                      aspectRatio: "16/9",
-                                    }
-                              }
-                              width={320}
-                              height={180}
-                              src={
-                                STATIC_URL +
-                                "/documents/2x_" +
-                                item.filePath.split("/")[2]
-                              }
-                              onClick={() => {
-                                if (checkedList.includes(item._id)) {
-                                  const filtered: any = checkedList.filter(
-                                    (i: any) => i !== item._id
-                                  );
-                                  setCheckedList(filtered);
-                                } else {
-                                  setCheckedList([...checkedList, item._id]);
-                                }
-                              }}
-                            />
-                          </Col>**/
                         );
                       })}
                     </Row>
@@ -985,72 +914,11 @@ function ImageDocs(props) {
                           return (
                             <>
                               <Dropdown
-                                overlay={
-                                  <Menu>
-                                    <Menu.Item
-                                      key="1"
-                                      onClick={() =>
-                                        window.open(
-                                          `${STATIC_URL}${item.filePath}`
-                                        )
-                                      }
-                                    >
-                                      <DownloadOutlined /> Download
-                                    </Menu.Item>
-                                    <Menu.Item
-                                      key="5"
-                                      onClick={() =>
-                                        setThermalPayload({
-                                          id: item._id,
-                                          doc: "documents",
-                                          filePath: item.filePath,
-                                        })
-                                      }
-                                    >
-                                      <FireOutlined /> Thermal View
-                                    </Menu.Item>
-                                    <Menu.Item
-                                      key="2"
-                                      onClick={() => {
-                                        setThumbnail(
-                                          ImageComponent(
-                                            item,
-                                            false,
-                                            {
-                                              width: "100%",
-                                              height: "auto",
-                                              minHeight: "200px",
-                                            },
-                                            true
-                                          )
-                                        );
-                                        props.thread(true, {
-                                          docType: "document",
-                                          docId: item._id,
-                                        });
-                                      }}
-                                    >
-                                      <MessageOutlined /> Open Thread{" "}
-                                    </Menu.Item>
-                                    <Menu.Item
-                                      key="3"
-                                      onClick={() => {
-                                        toggleFlag(item);
-                                      }}
-                                    >
-                                      {!item.isFlagged ? (
-                                        <>
-                                          <FlagOutlined /> Flag
-                                        </>
-                                      ) : (
-                                        <>
-                                          <FlagOutlined /> Unflag
-                                        </>
-                                      )}
-                                    </Menu.Item>
-                                    {renderDeleteBtn(item)}
-                                  </Menu>
-                                }
+                                onOpenChange={() => setSelectedImg(item)}
+                                menu={{
+                                  items: imgMenu(item),
+                                  onClick: imgMenuOnClick,
+                                }}
                                 trigger={["contextMenu"]}
                               >
                                 {ImageComponent(item, true, {
@@ -1089,7 +957,7 @@ function ImageDocs(props) {
       )}
       <Modal
         title="Storage Exceeded!"
-        visible={storageModal}
+        open={storageModal}
         onOk={() => setStorageModal(false)}
         onCancel={() => setStorageModal(false)}
       >

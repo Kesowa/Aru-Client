@@ -24,7 +24,6 @@ import { connect } from "react-redux";
 import { InboxOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
 
-const { Step } = Steps;
 const { Dragger } = Upload;
 const { Text, Paragraph } = Typography;
 const { Item } = Form;
@@ -54,14 +53,6 @@ const CreateLayer = (props: any) => {
       }
     }
   }, [props.status, current]);
-
-  const next = () => {
-    setCurrent(current + 1);
-  };
-
-  const prev = () => {
-    setCurrent(current - 1);
-  };
 
   const handleChangeFiles = ({ fileList, file }) => {
     setFileList([...fileList]);
@@ -125,7 +116,6 @@ const CreateLayer = (props: any) => {
           fData.append("file", file.originFileObj);
         } else {
           message.warning("Please upload a jpeg/jpg or png file!");
-          //setFileList([]);
           setIsUploading(false);
           form.resetFields();
           return;
@@ -195,13 +185,6 @@ const CreateLayer = (props: any) => {
           }
         },
       };
-
-      // for (var value of fData.values()) {
-      //   console.log(value);
-      // }
-      // for (var pair of fData.entries()) {
-      //   console.log(pair[0] + ", " + pair[1]);
-      // }
 
       http
         .post(`${apis.CREATE_LAYER_FROM_IMAGES}`, fData, config)
@@ -421,7 +404,7 @@ const CreateLayer = (props: any) => {
     <div>
       <Modal
         title="Create Layer From Images"
-        visible={props.isModalVisible}
+        open={props.isModalVisible}
         onCancel={() => {
           props.setVisbible(false);
           setCurrent(0);
@@ -436,40 +419,20 @@ const CreateLayer = (props: any) => {
         width={1000}
         centered={true}
       >
-        <Steps current={current}>
-          {steps.map((item) => (
-            <Step
-              key={item.title}
-              title={item.title}
-              description={item.description}
-            />
-          ))}
-        </Steps>
+        <Steps
+          current={current}
+          items={steps.map((item) => {
+            return {
+              title: item.title,
+              description: item.description,
+            };
+          })}
+        ></Steps>
         <div className="steps-content">{steps[current].content}</div>
-        {/* <div className='steps-action'>
-          {current < steps.length - 1 && (
-            <Button type='primary' onClick={() => next()}>
-              Next
-            </Button>
-          )}
-          {current === steps.length - 1 && (
-            <Button
-              type='primary'
-              onClick={() => message.success("Processing complete!")}
-            >
-              Done
-            </Button>
-          )}
-          {current > 0 && (
-            <Button style={{ margin: "0 8px" }} onClick={() => prev()}>
-              Previous
-            </Button>
-          )}
-        </div> */}
       </Modal>
       <Modal
         title="Storage Exceeded!"
-        visible={storageModal}
+        open={storageModal}
         onOk={() => setStorageModal(false)}
         onCancel={() => setStorageModal(false)}
       >
