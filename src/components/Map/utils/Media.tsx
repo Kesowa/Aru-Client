@@ -413,7 +413,7 @@ function Media(props) {
         isSRT: data.isSRT,
       };
     }
-    console.log("vodThumbnail", vodDetails);
+    props.setThreadDetails(vodDetails);
     return (
       <Badge
         style={{
@@ -458,6 +458,12 @@ function Media(props) {
         </div>
       </Badge>
     );
+  };
+  const generateTags = (data: any) => {
+    return Object.keys(data).map((key) => ({
+      id: Number(key),
+      display: data[key],
+    }));
   };
   //console.log("data from props:",props.visible, props.layerId, props.featureIndex, props.properties);
   const renderVideo = () => {
@@ -510,11 +516,16 @@ function Media(props) {
                       <Menu.Item
                         key="3"
                         onClick={() => {
-                          props.setThumbnail(vodThumbnail(item, idx));
                           props.thread(true, {
                             docType: "vod",
                             docId: item._id,
+                            tags: item.bookmarks
+                              ? {
+                                  bookmarks: generateTags(item.bookmarks),
+                                }
+                              : {},
                           });
+                          props.setThumbnail(vodThumbnail(item, idx));
                         }}
                       >
                         <MessageOutlined /> Open Thread{" "}

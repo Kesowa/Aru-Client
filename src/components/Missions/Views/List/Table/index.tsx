@@ -423,6 +423,25 @@ function MissionTable(props: TableProps) {
       },
     },
     {
+      //----------- Size column ---------
+      title: "Size",
+      dataIndex: "size",
+      sorter: true,
+      sortDirections: ["ascend", "descend"],
+      render: (text) => {
+        let missionSize;
+        if (text < 1) {
+          missionSize = (text * 1000).toFixed(1) + "KB";
+        } else if (text >= 1 && text <= 999) {
+          missionSize = text.toFixed(1) + "MB";
+        } else {
+          missionSize = (text / 1000).toFixed(1) + "GB";
+        }
+
+        return <div>{missionSize}</div>;
+      },
+    },
+    {
       title: "Actions",
       dataIndex: "actions",
       className: "mission-actions",
