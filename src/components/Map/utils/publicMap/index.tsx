@@ -620,7 +620,7 @@ function PublicMap(props) {
     const vlayers: any = [];
     checkedKeysValue.forEach((element) => {
       if (element.split("-")[0] === "2" && element !== "2") {
-        if (props.isBaseMap) {
+        if (props.isBaseMap && !props.isMissionMap) {
           const layer: any = allLayers[element];
           layer?.layerPath.map((layerr: any) => {
             const settings: any = {
@@ -657,6 +657,7 @@ function PublicMap(props) {
             );
           });
         } else {
+          console.debug("RENDERING RASTER LAYERS!!!");
           vlayers.push(
             new TileLayer({
               id: element,
@@ -1271,11 +1272,17 @@ function PublicMap(props) {
   const refreshLayers = () => {
     const td: any = [...treeStructure];
     let newTreeDataVector: any = [];
+    let newTreeDataRaster: any = [];
 
     const data: any = [
       {
-        title: `${props.isMissionMap ? "Mission" : "City"} Data`,
+        title: `${props.isMissionMap ? "Mission" : "City"} Vector`,
         key: "1",
+        children: [],
+      },
+      {
+        title: `${props.isMissionMap ? "Mission" : "City"} Raster`,
+        key: "2",
         children: [],
       },
     ];
@@ -1297,6 +1304,23 @@ function PublicMap(props) {
       }
     });
     data[0].children = [...newTreeDataVector];
+
+    newTreeDataRaster = td[1].children.map((layer) => {
+      if (layer.group) {
+        let groupLayers = [];
+        let value = {
+          ...layer.value,
+        };
+        groupLayers = layer.value.children.map((l) => {
+          return getTreeData(l, "raster", td[1]["key"]);
+        });
+        value.children = [...groupLayers];
+        return getGroupTitle(value, layer.id);
+      } else {
+        return getTreeData(layer, "raster", td[1]["key"]);
+      }
+    });
+    data[1].children = [...newTreeDataRaster];
 
     setTreeDataa(data);
   };
@@ -1359,7 +1383,7 @@ function PublicMap(props) {
       }
 
       const l = {};
-      if (props.isBaseMap) {
+      if (props.isBaseMap && !props.isMissionMap) {
         // -----to merge all rasters paths------------------
         l[data[1]["key"] + "-" + layer._id] = {
           layerPath: layer.layerdataArr,
