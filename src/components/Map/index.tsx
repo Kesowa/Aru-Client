@@ -2385,25 +2385,10 @@ function BaseMap(props) {
             console.log("filteredFeatures", filteredFeatures);
 
             if (Array.isArray(filteredFeatures)) {
-              const pointFeatures = filteredFeatures.filter(
-                (feature) => feature.geometry.type === "Point"
-              );
-
-              console.log("pointFeatures", pointFeatures);
-
-              if (pointFeatures.length > 0) {
-                const bounds = [];
-                pointFeatures.forEach((feature) => {
-                  const coordinates: number[] = feature.geometry.coordinates;
-                  bounds.push([coordinates[0], coordinates[1]]);
-                });
-        
-                const allBounds = turf.multiPoint(bounds);
-                const bbox = turf.bbox(allBounds);
-                console.log("Bounds:", bbox);
-
-                const { longitude, latitude, zoom } = calculateViewport(bbox);
-                console.log(longitude, latitude, zoom);
+             
+              const bound = turf.bbox(turf.featureCollection(filteredFeatures));
+              const { longitude, latitude, zoom } = calculateViewport(bound);
+              console.log("longitude, latitude, zoom",longitude, latitude, zoom);
         
                 setViewport({
                   longitude/* : (bounds[0][0] + bounds[1][0]) / 2 */,
@@ -2416,9 +2401,6 @@ function BaseMap(props) {
                   transitionDuration: 2000,
                   transitionInterpolator: new FlyToInterpolator(),
                 });
-              } else {
-                console.log("No point features found.");
-              }
             } else {
               console.log("Filtered features is not an array.");
             }
