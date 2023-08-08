@@ -1308,7 +1308,7 @@ function PublicMap(props) {
     newTreeDataRaster = td[1].children.map((layer) => {
       if (layer.group) {
         let groupLayers = [];
-        let value = {
+        const value = {
           ...layer.value,
         };
         groupLayers = layer.value.children.map((l) => {
