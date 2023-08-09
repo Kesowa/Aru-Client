@@ -1956,9 +1956,10 @@ function BaseMap(props) {
 
   const calculateViewport = (bbox) => {
     const [minLon, minLat, maxLon, maxLat] = bbox;
- 
-    const mapWidth = 800; // Replace with the actual width of your map container
-    const mapHeight = 600; // Replace with the actual height of your map container
+    const mapContainer = document.getElementById("view-default-view");
+    const mapWidth = mapContainer.clientWidth; // Get the actual width of the map container
+    const mapHeight = mapContainer.clientHeight; 
+  // Replace with the actual height of your map container
     
     // Calculate the new viewport using getViewState
     const viewport = new WebMercatorViewport({
