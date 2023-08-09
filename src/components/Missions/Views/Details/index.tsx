@@ -124,14 +124,9 @@ function MissionView(props) {
     }
   };
 
-  const fetchMissionTypes = async (id) => {
-    const [userType, missionId] = id.split("-");
+  const fetchMissionTypes = async () => {
     try {
-      const result = await http.get(
-        userType === "staff"
-          ? `${apis.GET_MISSION_TYPES}`
-          : `${apis.GET_MISSION_TYPES_CLIENT}`
-      );
+      const result = await http.get(apis.GET_ALL_MISSION_TYPES);
       if (result.data.status) {
         setMissionTypes(result.data.data);
         console.info("Successfully fetched mission types");
@@ -263,7 +258,7 @@ function MissionView(props) {
       setMissionDetails(details);
 
       // Get all available mission types from backend
-      await fetchMissionTypes(id);
+      await fetchMissionTypes();
 
       // Set loading status to false
       props.loading(false);
