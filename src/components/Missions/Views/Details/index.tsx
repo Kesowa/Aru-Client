@@ -100,6 +100,7 @@ function MissionView(props) {
     props.loading(true);
     props.clearMissionCreationState();
     getInitialData(id);
+
   }, []);
 
   const options = [
@@ -119,31 +120,36 @@ function MissionView(props) {
     const result = await http.get(`${apis.FETCH_ALL_PILOTS}`);
     if (result.data.data !== undefined) {
       setPilots(result.data.data);
-      console.log(result.data.data);
+      console.log("PIOLET",result.data.data);//here all are staff members
     }
   };
 
   const fetchMissionTypes = async () => {
-    const result = await http.get(apis.GET_ALL_MISSION_TYPES);
-    if (result.data.status) {
-      setMissionTypes(result.data.data);
-      console.info("Successfully fetched mission types");
-      console.log(result.data.data);
-    } else {
-      message.error(result.data.message);
-      console.log(`Error while fetching mission types: ${result.data.message}`);
+    try {
+      const result = await http.get(apis.GET_ALL_MISSION_TYPES);
+      if (result.data.status) {
+        setMissionTypes(result.data.data);
+        console.info("Successfully fetched mission types");
+      } else {
+        message.error(result.data.message);
+        console.log(`Error while fetching mission types: ${result.data.message}`);
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
+  
+  
 
   const getInitialData = async (id) => {
     const [userType, missionId] = id.split("-");
-
+    console.log("ID,MISSIONID", userType, missionId);
     try {
-      const result = await http.get(`${apis.GET_MISSION_DOC_COUNT}`, {
-        params: {
-          missionId: missionId,
-        },
-      });
+      const result = await http.get(
+        userType === "staff"
+          ? `${apis.GET_MISSION_BY_ID}${missionId}`
+          : `${apis.GET_MISSION_ID_CLIENT}${missionId}`
+      );
 
       if (result.data.status) {
         console.log(result.data.data);
@@ -161,9 +167,10 @@ function MissionView(props) {
         try {
           const result = await http.get(
             userType === "staff"
-              ? `${apis.GET_MISSION_BY_ID}${missionId}`
+              ? `${apis.GET_MISSION_BY_ID}${missionId}` 
               : `${apis.GET_MISSION_ID_CLIENT}${missionId}`
           );
+          console.log("MISSION ID CHECK",missionId);
           mission = result.data.data;
           console.log("from api call", mission);
         } catch (err) {
@@ -173,7 +180,7 @@ function MissionView(props) {
           return;
         }
       }
-
+      console.log("STAFF ERROR",result);
       const details = {
         missionName: mission.name,
         missionId: mission._id,
@@ -262,6 +269,8 @@ function MissionView(props) {
       props.loading(false);
     }
   };
+
+  
 
   // ++++++++++++++++++++++++++++++++++++ E2 share Modal states ++++++++++++++++++++++++++++++++++++++++++++
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -444,6 +453,7 @@ function MissionView(props) {
       return items.filter((item) => item.key !== "1" && item.key !== "2");
     }
   };
+  
 
   const DataTabs = ({ id }) => {
     return (
@@ -483,6 +493,7 @@ function MissionView(props) {
       </Tag>
     );
   }
+  
 
   // ++++++++++++++++++++ E6 Mission Status Card +++++++++++++++++++++++++++++++++++++++++++++++++
   function MissionStatusCard(status: any) {
@@ -545,6 +556,7 @@ function MissionView(props) {
                   `/dashboard/data/live/${MissionDetails.missionId}`
                 );
               }}
+              
             >
               Click to Watch!
             </Button>
@@ -625,6 +637,7 @@ function MissionView(props) {
 
   function renderDataCard(status: any) {
     const [userType, missionId] = id.split("-");
+    console.log("LOGIS",missionId);
     switch (status) {
       case "Review":
         return <DataTabs id={missionId} />;
@@ -700,7 +713,7 @@ function MissionView(props) {
         });
     }
   };
-
+  
   const reviewMission = () => {
     if (MissionDetails.pilotAssigned === "no-pilot") {
       message.warning(
@@ -737,6 +750,8 @@ function MissionView(props) {
   //----------------Render edit mission details Button---------------------
 
   function renderMissionDetailsBtn() {
+    console.log("User Type:", props.userType);
+    console.log("Custom Permissions:", props.userDetails.customPermissions);
     if (
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
@@ -748,6 +763,9 @@ function MissionView(props) {
         );
         permissions = [...filteredPermissions, ...permissions];
       });
+      
+    console.log("Filtered Permissions:", permissions);
+
       if (permissions.length > 0) {
         return (
           <Button
@@ -909,6 +927,7 @@ function MissionView(props) {
   //----------------Render Edit Flight Button---------------------
 
   //----------------Render Assign Pilot Button---------------------
+  
 
   function renderAssignPilotBtn(buttonText: string) {
     if (
@@ -951,6 +970,7 @@ function MissionView(props) {
       );
     }
   }
+  
 
   function headerButtons(status: any) {
     switch (status) {
@@ -993,6 +1013,7 @@ function MissionView(props) {
       missionType: missionTypes[i]._id,
     });
   };
+  console.log("HORRAY",id);
   /*--------------------Mission Type--------------------*/
   const menu: MenuProps["items"] = () => {
     const items: MenuProps["items"] = missionTypes.map(
@@ -1206,6 +1227,7 @@ function MissionView(props) {
     console.log("Failed:", errorInfo);
   };
 
+
   //socket event listeners here
   useEffect(() => {
     if (MissionDetails.missionId) {
@@ -1254,6 +1276,7 @@ function MissionView(props) {
     }
   }, [MissionDetails.missionId]);
   console.log(location.state);
+  
   return (
     <div className="mission-view-wrapper">
       {/* +++++++++++++++++++ E11 HEADER++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
@@ -1549,10 +1572,12 @@ function MissionView(props) {
 const mapStateToProps = (state) => {
   return {
     userType: state.Auth.userdetails.userType,
-    missions: state.Missions.missions,
-    userDetails: state.Auth.userdetails,
     tenantId:
       state.Auth.userdetails.tenantId._id || state.Auth.userdetails.tenantId,
+    userId: state.Auth.userdetails._id,
+    missions: state.Missions.missions,
+    userDetails: state.Auth.userdetails,
+    refresh: state.Missions.refresh,
   };
 };
 
