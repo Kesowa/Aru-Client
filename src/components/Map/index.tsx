@@ -1974,19 +1974,9 @@ function BaseMap(props) {
         [maxLon, maxLat],
       ], {
       padding: 10,
-      offset: [0, 0], // You can adjust the padding as needed
+      offset: [0, 0], 
     });
     
-    // Calculate the center of the bounds
-    /* const longitude = (minLon + maxLon) / 2;
-    const latitude = (minLat + maxLat) / 2;
-  
-    // Calculate the zoom level based on the bounds and the map window size
-    const latRatio = Math.abs(maxLat - minLat);
-    const lonRatio = Math.abs(maxLon - minLon);
-  
-    const zoom = calculateZoom(latRatio, lonRatio);
-   */
     return {
       longitude,
       latitude,
@@ -1994,31 +1984,7 @@ function BaseMap(props) {
     };
   };
   
-  // Helper function to calculate the zoom level based on the latitude and longitude ratios
-  const calculateZoom = (latRatio, lonRatio) => {
-    const mapWidth = 800;
-    const mapHeight = 600;
-    const maxZoom = 17; 
 
-  
-    // Calculate the distance between the latitude and longitude extents
-    const latDistance = Math.abs(latRatio);
-    const lonDistance = Math.abs(lonRatio);
-  
-    // Calculate the zoom level based on the latitude and longitude ratios and the map window size
-    const latZoom = Math.log2(mapHeight / (latDistance * 360)) + 1;
-    const lonZoom = Math.log2(mapWidth / (lonDistance * 360)) + 1;
-  
-    // Use the minimum zoom level between latitude and longitude zoom levels
-    let zoom = Math.max(latZoom, lonZoom);
-
-    // Cap the zoom level at the maximum value
-    zoom = Math.max(zoom, maxZoom);
-  
-    console.log("Zoom: ", zoom);
-    
-    return zoom;
-  };
 
   const drawLayers = (checkedKeysValue: any) => {
     const vlayers: any = [];
@@ -2026,6 +1992,7 @@ function BaseMap(props) {
     checkedKeysValue.forEach((element) => {
       if (element.split("-")[0] === "2" && element !== "2") {
         if (props.isBaseMap) {
+          console.log("Raster");
           //console.log("all the layers being drawn",allLayers[element]);
           const layer: any = allLayers[element];
           layer?.layerPath.map((layerr: any) => {
@@ -2036,6 +2003,7 @@ function BaseMap(props) {
               bidx: layer.settings.bidx,
             };
             // ---pushing tiler layers
+        
             vlayers.push(
               new TileLayer({
                 id: `${element}-${uuid()}`,
@@ -2048,11 +2016,27 @@ function BaseMap(props) {
                 onDataLoad: () => {
                   setLayerLoading(false);
                 },
+                
                 renderSubLayers: (props) => {
                   const {
                     bbox: { west, south, east, north },
                   } = props.tile;
 
+                console.log("Bbox",[west, south, east, north]);
+                const { longitude, latitude, zoom } = calculateViewport([west, south, east, north]);
+                 console.log("longitude, latitude, zoom",longitude, latitude, zoom);
+                 setViewport({
+                  longitude,
+                  latitude,
+                  zoom,
+                  pitch: 0,
+                  minZoom: 0,
+                  maxZoom: 22,
+                  bearing: 0,
+                  transitionDuration: 2000,
+                  transitionInterpolator: new FlyToInterpolator(),
+                });          
+              
                   return new BitmapLayer(props, {
                     data: null,
                     image: props.data,
@@ -2060,7 +2044,8 @@ function BaseMap(props) {
                   });
                 },
               })
-            );
+              );
+              
           });
         } else {
           vlayers.push(
@@ -2388,6 +2373,7 @@ function BaseMap(props) {
             if (Array.isArray(filteredFeatures)) {
              
               const bound = turf.bbox(turf.featureCollection(filteredFeatures));
+              console.log("Bbox",bound);
               const { longitude, latitude, zoom } = calculateViewport(bound);
               console.log("longitude, latitude, zoom",longitude, latitude, zoom);
         
