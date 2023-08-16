@@ -1037,8 +1037,8 @@ function BaseMap(props) {
 
   const [scaleVisible, setScaleVisible] = useState(false);
 
-  const { id: rawId } = useParams<{id: string}>();
-  const [id, userType] = rawId.split("-").reverse(); 
+  const { id: rawId } = useParams<{ id: string }>();
+  const [id, userType] = rawId.split("-").reverse();
 
   const [form] = Form.useForm();
 
