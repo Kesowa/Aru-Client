@@ -182,7 +182,7 @@ function Outcomes(props) {
     else sortOrder = "desc";
     const query = {
       sortBy: `${sortBy}:${sortOrder}`,
-      id: props.id.split("-")[1],
+      id: props.id.split("-").reverse()[0],
       page,
       limit,
       alertType,
