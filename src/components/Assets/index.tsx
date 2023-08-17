@@ -951,7 +951,7 @@ function AssetBase(props: any) {
 
       <Tabs defaultActiveKey="1" onTabClick={onTabClick}>
         <TabPane tab="Assets" key="1">
-          <AssetList />
+        <AssetList filter="all"/>
         </TabPane>
         <TabPane tab="Models" key="2">
           <ModelList />

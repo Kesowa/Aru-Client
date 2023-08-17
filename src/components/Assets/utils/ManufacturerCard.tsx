@@ -59,10 +59,53 @@ const originData: Item[] = [
   },
 ];
 
+interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
+  editing: boolean;
+  dataIndex: string;
+  title: any;
+  inputType: "text";
+  record: Item;
+  index: number;
+  children: React.ReactNode;
+}
+
+const EditableCell: React.FC<EditableCellProps> = ({
+  editing,
+  dataIndex,
+  title,
+  inputType,
+  record,
+  index,
+  children,
+  ...restProps
+}) => {
+  return (
+    <td {...restProps}>
+      {editing ? (
+        <Form.Item
+          name={dataIndex}
+          style={{ margin: 0 }}
+          rules={[
+            {
+              required: true,
+              message: `Please Input ${dataIndex}!`,
+            },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+      ) : (
+        children
+      )}
+    </td>
+  );
+};
+
 interface ManufacturerCardProps {
   id: string;
   showDate: boolean;
   manufacturers: any[];
+  setManufacturers: (data: any[]) => void;
   logout: () => void;
 }
 
@@ -70,6 +113,7 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
   id,
   showDate,
   manufacturers,
+  setManufacturers,
   logout,
 }) => {
   const [selectedID, setSelectedID] = useState<string | null>(null);
