@@ -350,7 +350,7 @@ function MissionView(props) {
   const { Title, Text, Link } = Typography;
   const [activeKey, setactiveKey] = useState("1");
   // ++++++++++++++++++++++++++++++++++++++++++++++ E4 Data Card tabs +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  const returnTabPaneItem = () => {
+  const returnTabPaneItem = (id) => {
     const items: TabsProps["items"] = [
       {
         key: "1",
@@ -457,7 +457,7 @@ function MissionView(props) {
         <Tabs
           defaultActiveKey={activeKey}
           onChange={callback}
-          items={returnTabPaneItem()}
+          items={returnTabPaneItem(id)}
         />
       </>
     );

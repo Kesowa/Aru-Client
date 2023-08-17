@@ -2901,7 +2901,7 @@ function BaseMap(props) {
       } catch (error) {
         console.log(error);
         message.error("Layers Could Not Be Loaded");
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(error, props.logout);
       } finally {
         props.loading(false);
       }
