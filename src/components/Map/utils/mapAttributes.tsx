@@ -46,6 +46,7 @@ interface Props {
   setshowSelectedIndexes: (show: boolean) => void;
   setKey: (key: number) => void;
   setShouldAttributeTableReload: (reload: boolean) => void;
+  invertColor: any;
 }
 
 interface State {
@@ -80,6 +81,12 @@ const MapAttributes: React.FC<Props> = (props) => {
   };
 
   const [state, setState] = useState<State>(initialState);
+  const [page, setPage] = useState<State>(initialState);
+  const [limit, setLimit] = useState<State>(initialState);
+  const [total, setTotal] = useState<State>(initialState);
+  const [isTableLoading, setIsTableLoading] = useState<State>(initialState);
+  const [tableData, setTableData] = useState<State>(initialState);
+
 
   useEffect(() => {
     // Update content height and limit based on props.bottomBarHeight and props.type
@@ -107,8 +114,8 @@ const MapAttributes: React.FC<Props> = (props) => {
   }, [state.page, state.limit, props.flaggedFilter, props.unflaggedFilter]);
 
   useEffect(() => {
-    // Update table data colors when selectedIndexes change
-    updateTableColors();
+    const updatedatedTable = updateTableColors(initialState.trueTableData);
+    setTableData(updatedatedTable);
   }, [props.selectedIndexes]);
 
   const updateContentHeightAndLimit = (
@@ -243,10 +250,32 @@ const MapAttributes: React.FC<Props> = (props) => {
     } else return undefined;
   };
 
-  const updateTableColors = () => {
-    // Implement the logic to update table data colors based on selectedIndexes and filters
-    // ...
-    setState((prevState) => ({ ...prevState, tableData: updatedTableData }));
+  const updateTableColors = (records) => {
+    return records.map((record) => {
+      console.log("record", record);
+      if (props.selectedIndexes.includes(record.index)) {
+        return {
+          ...record,
+          properties: { ...record.properties, color: "#ffaa00" },
+        };
+      }
+      if (props.unflaggedFilter) {
+        return record;
+      }
+      if (
+        props.flaggedFilter ||
+        props.allLayers[`1-${props.id}`]?.flaggedFeatures.includes(record.index)
+      ) {
+        return {
+          ...record,
+          properties: {
+            ...record.properties,
+            color: props.invertColor(record.properties.color),
+          },
+        };
+      }
+      return record;
+    });
   };
 
   const getRasterMetaData = () => {
