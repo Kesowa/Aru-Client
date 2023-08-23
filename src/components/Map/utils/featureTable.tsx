@@ -787,7 +787,22 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
   );
 };
 
-const mapStateToProps = (state: { app: { tableData: any; total: any; page: any; limit: any; pointMarkerColour: any; canEditGeojson: any; canDeleteFeature: any; flaggedFilter: any; unflaggedFilter: any; allLayers: any; refreshLayer: any; shouldAttributeTableReload: any; }; }) => {
+const mapStateToProps = (state: {
+  app: {
+    tableData: any;
+    total: any;
+    page: any;
+    limit: any;
+    pointMarkerColour: any;
+    canEditGeojson: any;
+    canDeleteFeature: any;
+    flaggedFilter: any;
+    unflaggedFilter: any;
+    allLayers: any;
+    refreshLayer: any;
+    shouldAttributeTableReload: any;
+  };
+}) => {
   if (!state || !state.app) {
     // Handle the case where state or state.app is undefined or null
     return {};
@@ -808,7 +823,6 @@ const mapStateToProps = (state: { app: { tableData: any; total: any; page: any; 
     shouldAttributeTableReload: state.app.shouldAttributeTableReload,
   };
 };
-
 
 const mapDispatchToProps = {
   logout,

@@ -87,7 +87,6 @@ const MapAttributes: React.FC<Props> = (props) => {
   const [isTableLoading, setIsTableLoading] = useState<State>(initialState);
   const [tableData, setTableData] = useState<State>(initialState);
 
-
   useEffect(() => {
     // Update content height and limit based on props.bottomBarHeight and props.type
     updateContentHeightAndLimit(props.bottomBarHeight, props.type);
