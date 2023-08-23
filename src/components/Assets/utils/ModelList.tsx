@@ -221,7 +221,8 @@ function ModelList(props: TableProps) {
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
-      setSelectedModelID(selectedRows[0]._id);
+      const newSelectedModelID = selectedRows[0]?._id;
+      setSelectedModelID(newSelectedModelID);
     },
   };
 
@@ -241,7 +242,7 @@ function ModelList(props: TableProps) {
         </Col>
         <Col span={8}>
           <div>
-            <ModelCard id={selectedModelID} showDate={true} />
+            <ModelCard id={selectedModelID} showDate={true} key={selectedModelID}/>
           </div>
         </Col>
       </Row>
