@@ -787,20 +787,42 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
   );
 };
 
-const mapStateToProps = (state) => ({
-  tableData: state.app.tableData,
-  total: state.app.total,
-  page: state.app.page,
-  limit: state.app.limit,
-  pointMarkerColour: state.app.pointMarkerColour,
-  canEditGeojson: state.app.canEditGeojson,
-  canDeleteFeature: state.app.canDeleteFeature,
-  flaggedFilter: state.app.flaggedFilter,
-  unflaggedFilter: state.app.unflaggedFilter,
-  allLayers: state.app.allLayers,
-  refreshLayer: state.app.refreshLayer,
-  shouldAttributeTableReload: state.app.shouldAttributeTableReload,
-});
+const mapStateToProps = (state: {
+  app: {
+    tableData: any;
+    total: any;
+    page: any;
+    limit: any;
+    pointMarkerColour: any;
+    canEditGeojson: any;
+    canDeleteFeature: any;
+    flaggedFilter: any;
+    unflaggedFilter: any;
+    allLayers: any;
+    refreshLayer: any;
+    shouldAttributeTableReload: any;
+  };
+}) => {
+  if (!state || !state.app) {
+    // Handle the case where state or state.app is undefined or null
+    return {};
+  }
+
+  return {
+    tableData: state.app.tableData,
+    total: state.app.total,
+    page: state.app.page,
+    limit: state.app.limit,
+    pointMarkerColour: state.app.pointMarkerColour,
+    canEditGeojson: state.app.canEditGeojson,
+    canDeleteFeature: state.app.canDeleteFeature,
+    flaggedFilter: state.app.flaggedFilter,
+    unflaggedFilter: state.app.unflaggedFilter,
+    allLayers: state.app.allLayers,
+    refreshLayer: state.app.refreshLayer,
+    shouldAttributeTableReload: state.app.shouldAttributeTableReload,
+  };
+};
 
 const mapDispatchToProps = {
   logout,
