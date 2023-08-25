@@ -51,26 +51,30 @@ const StageTwoForm = (props: any) => {
     }
   }, [props]);
 
-  const editLocation = () => {
+  const editLocation = (props, actionPayload: any) => {
     props.loading(true);
+    const {id , formState} = actionPayload;
     const data = {
       id: id,
-      type: "Polygon",
-      coordinates: [
-        props.polygonData
+      geometry:{
+        coordinates: [
+          props.polygonData
           ? props.polygonData.points.map((point) => {
-              return [point.lng, point.lat];
-            })
+            return [point.lng, point.lat];
+          })
           : props.locationToEdit.geofence.map((point) => {
-              return [point.long, point.lat];
-            }),
-      ],
+            return [point.long, point.lat];
+          }),
+        ],
+        type: "Polygon",
+      },
       properties: {
         name: formState.locationName,
       },
     };
 
-    data.coordinates[0].push(data.coordinates[0][0]);
+    data.geometry.coordinates[0].push(data.geometry.coordinates[0][0]);
+    console.log("Data: ", data);
 
     http
       .patch(`${apis.EDIT_LOCATION}`, data)
@@ -102,7 +106,7 @@ const StageTwoForm = (props: any) => {
       props.setFormComplete(true);
       form.resetFields();
       props.setAreaSelected(false);
-      editLocation();
+      editLocation(props, {id, formState});
     }
   };
 
