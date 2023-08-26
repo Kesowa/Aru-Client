@@ -612,9 +612,7 @@ function VectorForm(props) {
         width={600}
         onClose={onClose}
         open={props.visible}
-        bodyStyle={{ paddingBottom: 80,
-        overflow: "auto" 
-        }}
+        bodyStyle={{ paddingBottom: 80, overflow: "auto" }}
         mask={false}
         footer={
           <div
