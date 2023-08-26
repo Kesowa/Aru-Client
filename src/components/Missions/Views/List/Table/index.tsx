@@ -47,8 +47,6 @@ interface TableProps {
   page: any;
   limit: any;
   setLimit: any;
-  setPaginationPage: any;
-  setPageLimit: any;
   total: any;
   setTotal: any;
   usedFilter: any;
@@ -77,9 +75,13 @@ function MissionTable(props: TableProps) {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
-  const handleReset = (clearFilters: any) => {
+  const handleReset = (clearFilters: any, confirm: any, close: any) => {
     clearFilters();
+    confirm();
+    close();
     setSearchText("");
+    setSearchedColumn("");
+    props.setFilters("");
   };
   const getColumnSearchProps = (dataIndex: any) => ({
     filterDropdown: ({
@@ -87,7 +89,8 @@ function MissionTable(props: TableProps) {
       selectedKeys,
       confirm,
       clearFilters,
-    }: any) => (
+      close,
+    }) => (
       <div style={{ padding: 8 }}>
         <Input
           ref={(node) => {
@@ -110,7 +113,7 @@ function MissionTable(props: TableProps) {
           Search
         </Button>
         <Button
-          onClick={() => handleReset(clearFilters)}
+          onClick={() => handleReset(clearFilters, confirm, close)}
           size="small"
           style={{ width: 90 }}
         >
@@ -483,6 +486,9 @@ function MissionTable(props: TableProps) {
   };
 
   const handleTableChange = (pagination, filter, sorter) => {
+    props.setPage(pagination.current);
+    props.setLimit(pagination.pageSize);
+
     let filterString = "";
     Object.entries(filter).forEach((f: any) => {
       if (f[1]) {
@@ -509,9 +515,7 @@ function MissionTable(props: TableProps) {
             pagination={{
               total: props.total,
               pageSize: props.limit,
-              onShowSizeChange: props.setPageLimit,
               current: props.page,
-              onChange: props.setPaginationPage,
             }}
             onChange={handleTableChange}
           />
