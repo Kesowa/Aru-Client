@@ -612,7 +612,7 @@ function VectorForm(props) {
         width={600}
         onClose={onClose}
         open={props.visible}
-        bodyStyle={{ paddingBottom: 80 }}
+        bodyStyle={{ paddingBottom: 80, overflow: "auto" }}
         mask={false}
         footer={
           <div
@@ -641,7 +641,7 @@ function VectorForm(props) {
           {defaultVectorType.length && !id && (
             <Row>
               <Col span={4}>
-                <h2>Save as</h2>
+                <h2>Save As</h2>
               </Col>
               <Col span={18}>
                 <Cascader
