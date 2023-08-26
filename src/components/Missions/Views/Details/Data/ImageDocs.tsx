@@ -100,7 +100,7 @@ function ImageDocs(props) {
     ];
     const deleteItem = {
       key: "5",
-      label: "Delete video",
+      label: "Delete Image",
       icon: <DeleteOutlined />,
     };
     if (
