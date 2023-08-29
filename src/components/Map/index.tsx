@@ -2056,6 +2056,27 @@ function BaseMap(props) {
 
           });
         } else {
+
+          const rasterpath = `${TITILER_STATIC}` + allLayers[element]?.layerPath;
+            const metaDataURL = `${COG_URL}/cog/info?url=${rasterpath}`;
+            const response = await fetch(metaDataURL, {
+              method: "GET",
+            });
+            const metadata = await response.json();
+            const bounds = [metadata["bounds"][0], metadata["bounds"][1], metadata["bounds"][2], metadata["bounds"][3]];
+            const { longitude, latitude, zoom } = calculateViewport(bounds);
+            setViewport({
+              longitude/* : (bounds[0][0] + bounds[1][0]) / 2 */,
+              latitude/* : (bounds[0][1] + bounds[1][1]) / 2 */,
+              zoom,
+              pitch: 0,
+              minZoom: 0,
+              maxZoom: 22,
+              bearing: 0,
+              transitionDuration: 2000,
+              transitionInterpolator: new FlyToInterpolator(),
+            });
+
           vlayers.push(
             new TileLayer({
               id: element,
