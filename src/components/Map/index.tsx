@@ -845,22 +845,22 @@ function BaseMap(props) {
             bounds: [west, south, east, north],
           }),
           showBorder &&
-          new PathLayer({
-            id: `${props.id}-border`,
-            visible: props.visible,
-            data: [
-              [
-                [west, north],
-                [west, south],
-                [east, south],
-                [east, north],
-                [west, north],
+            new PathLayer({
+              id: `${props.id}-border`,
+              visible: props.visible,
+              data: [
+                [
+                  [west, north],
+                  [west, south],
+                  [east, south],
+                  [east, north],
+                  [west, north],
+                ],
               ],
-            ],
-            getPath: (d) => d,
-            getColor: [255, 0, 0],
-            widthMinPixels: 4,
-          }),
+              getPath: (d) => d,
+              getColor: [255, 0, 0],
+              widthMinPixels: 4,
+            }),
         ];
       },
     }),
@@ -1309,15 +1309,15 @@ function BaseMap(props) {
         data[0].children.map((item) =>
           item?.group
             ? item.children.sort((a, b) =>
-              moment(a.captureDate).diff(moment(b.captureDate))
-            )
+                moment(a.captureDate).diff(moment(b.captureDate))
+              )
             : null
         );
         data[1].children.map((item) =>
           item?.group
             ? item.children.sort((a, b) =>
-              moment(a.captureDate).diff(moment(b.captureDate))
-            )
+                moment(a.captureDate).diff(moment(b.captureDate))
+              )
             : null
         );
       } else {
@@ -1331,15 +1331,15 @@ function BaseMap(props) {
         data[0].children.map((item) =>
           item?.group
             ? item.children.sort((a, b) =>
-              moment(b.captureDate).diff(moment(a.captureDate))
-            )
+                moment(b.captureDate).diff(moment(a.captureDate))
+              )
             : null
         );
         data[1].children.map((item) =>
           item?.group
             ? item.children.sort((a, b) =>
-              moment(b.captureDate).diff(moment(a.captureDate))
-            )
+                moment(b.captureDate).diff(moment(a.captureDate))
+              )
             : null
         );
       }
@@ -1936,11 +1936,11 @@ function BaseMap(props) {
     const opacity = o ? 150 : 50;
     return result
       ? [
-        parseInt(result[1], 16),
-        parseInt(result[2], 16),
-        parseInt(result[3], 16),
-        opacity,
-      ]
+          parseInt(result[1], 16),
+          parseInt(result[2], 16),
+          parseInt(result[3], 16),
+          opacity,
+        ]
       : null;
   }
 
@@ -1954,10 +1954,10 @@ function BaseMap(props) {
     const opacity = o ? 150 : 50;
     return result
       ? [
-        parseInt(result[1], 16),
-        parseInt(result[2], 16),
-        parseInt(result[3], 16),
-      ]
+          parseInt(result[1], 16),
+          parseInt(result[2], 16),
+          parseInt(result[3], 16),
+        ]
       : null;
   }
   function invertColor(hex) {
@@ -1994,10 +1994,10 @@ function BaseMap(props) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
       ? [
-        parseInt(result[1], 16),
-        parseInt(result[2], 16),
-        parseInt(result[3], 16),
-      ]
+          parseInt(result[1], 16),
+          parseInt(result[2], 16),
+          parseInt(result[3], 16),
+        ]
       : null;
   }
 
@@ -2011,10 +2011,10 @@ function BaseMap(props) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
       ? [
-        parseInt(result[1], 16),
-        parseInt(result[2], 16),
-        parseInt(result[3], 16),
-      ]
+          parseInt(result[1], 16),
+          parseInt(result[2], 16),
+          parseInt(result[3], 16),
+        ]
       : null;
   }
 
@@ -2224,10 +2224,12 @@ function BaseMap(props) {
       [
         [minLon, minLat],
         [maxLon, maxLat],
-      ], {
-      padding: 10,
-      offset: [0, 0],
-    });
+      ],
+      {
+        padding: 10,
+        offset: [0, 0],
+      }
+    );
 
     return {
       longitude,
@@ -2235,8 +2237,6 @@ function BaseMap(props) {
       zoom,
     };
   };
-
-
 
   const drawLayers = async (checkedKeysValue: any) => {
     const vlayers: any = [];
@@ -2259,11 +2259,16 @@ function BaseMap(props) {
               method: "GET",
             });
             const metadata = await response.json();
-            const bounds = [metadata["bounds"][0], metadata["bounds"][1], metadata["bounds"][2], metadata["bounds"][3]];
+            const bounds = [
+              metadata["bounds"][0],
+              metadata["bounds"][1],
+              metadata["bounds"][2],
+              metadata["bounds"][3],
+            ];
             const { longitude, latitude, zoom } = calculateViewport(bounds);
             setViewport({
-              longitude/* : (bounds[0][0] + bounds[1][0]) / 2 */,
-              latitude/* : (bounds[0][1] + bounds[1][1]) / 2 */,
+              longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+              latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
               zoom,
               pitch: 0,
               minZoom: 0,
@@ -2272,7 +2277,6 @@ function BaseMap(props) {
               transitionDuration: 2000,
               transitionInterpolator: new FlyToInterpolator(),
             });
-
 
             // ---pushing tiler layers
 
@@ -2294,8 +2298,6 @@ function BaseMap(props) {
                     bbox: { west, south, east, north },
                   } = props.tile;
 
-
-
                   return new BitmapLayer(props, {
                     data: null,
                     image: props.data,
@@ -2304,30 +2306,33 @@ function BaseMap(props) {
                 },
               })
             );
-
-
           });
         } else {
-
-          const rasterpath = `${TITILER_STATIC}` + allLayers[element]?.layerPath;
-            const metaDataURL = `${COG_URL}/cog/info?url=${rasterpath}`;
-            const response = await fetch(metaDataURL, {
-              method: "GET",
-            });
-            const metadata = await response.json();
-            const bounds = [metadata["bounds"][0], metadata["bounds"][1], metadata["bounds"][2], metadata["bounds"][3]];
-            const { longitude, latitude, zoom } = calculateViewport(bounds);
-            setViewport({
-              longitude/* : (bounds[0][0] + bounds[1][0]) / 2 */,
-              latitude/* : (bounds[0][1] + bounds[1][1]) / 2 */,
-              zoom,
-              pitch: 0,
-              minZoom: 0,
-              maxZoom: 22,
-              bearing: 0,
-              transitionDuration: 2000,
-              transitionInterpolator: new FlyToInterpolator(),
-            });
+          const rasterpath =
+            `${TITILER_STATIC}` + allLayers[element]?.layerPath;
+          const metaDataURL = `${COG_URL}/cog/info?url=${rasterpath}`;
+          const response = await fetch(metaDataURL, {
+            method: "GET",
+          });
+          const metadata = await response.json();
+          const bounds = [
+            metadata["bounds"][0],
+            metadata["bounds"][1],
+            metadata["bounds"][2],
+            metadata["bounds"][3],
+          ];
+          const { longitude, latitude, zoom } = calculateViewport(bounds);
+          setViewport({
+            longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+            latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
+            zoom,
+            pitch: 0,
+            minZoom: 0,
+            maxZoom: 22,
+            bearing: 0,
+            transitionDuration: 2000,
+            transitionInterpolator: new FlyToInterpolator(),
+          });
 
           vlayers.push(
             new TileLayer({
@@ -2652,15 +2657,19 @@ function BaseMap(props) {
             console.log("filteredFeatures", filteredFeatures);
 
             if (Array.isArray(filteredFeatures)) {
-
               const bound = turf.bbox(turf.featureCollection(filteredFeatures));
               console.log("Bbox", bound);
               const { longitude, latitude, zoom } = calculateViewport(bound);
-              console.log("longitude, latitude, zoom", longitude, latitude, zoom);
+              console.log(
+                "longitude, latitude, zoom",
+                longitude,
+                latitude,
+                zoom
+              );
 
               setViewport({
-                longitude/* : (bounds[0][0] + bounds[1][0]) / 2 */,
-                latitude/* : (bounds[0][1] + bounds[1][1]) / 2 */,
+                longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+                latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
                 zoom,
                 pitch: 0,
                 minZoom: 0,
@@ -5857,7 +5866,7 @@ function BaseMap(props) {
           status="500"
           title="Oops! You have reached your limit of creating layers!"
           subTitle="Please contact your admin."
-        //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
+          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
@@ -5886,8 +5895,8 @@ function BaseMap(props) {
               ? [osm, visibleLayers, drawPolygonTool]
               : [visibleLayers, drawPolygonTool]
             : osmState
-              ? [osm, visibleLayers]
-              : [visibleLayers]
+            ? [osm, visibleLayers]
+            : [visibleLayers]
         }
         style={{ height: "100vh", width: "100%" }}
         getCursor={() => {
@@ -5926,7 +5935,7 @@ function BaseMap(props) {
             setShowDrawingTools(false);
           }
         }}
-      //getTooltip={({object}) => object && (object.properties.Block_Nm)}
+        //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         {osmState ? (
           <>
@@ -6294,7 +6303,7 @@ function BaseMap(props) {
                 menu={{ items: filterMenu, onClick: filterMenuOnClick }}
                 //overlay={filterMenu}
                 disabled={chipsLoading}
-              //overlayStyle={{}}
+                //overlayStyle={{}}
               >
                 <Button style={{ float: "right" }} type="link">
                   Filter <DownOutlined />
@@ -6386,10 +6395,11 @@ function BaseMap(props) {
                   <Card
                     key="1"
                     onClick={() => setSelectedKey(1)}
-                    className={`create-mission-extended-card ${selectedKey == 1
+                    className={`create-mission-extended-card ${
+                      selectedKey == 1
                         ? "create-mission-extended-card-selected"
                         : ""
-                      }`}
+                    }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -6411,10 +6421,11 @@ function BaseMap(props) {
                   <Card
                     key="2"
                     onClick={() => setSelectedKey(2)}
-                    className={`create-mission-extended-card ${selectedKey == 2
+                    className={`create-mission-extended-card ${
+                      selectedKey == 2
                         ? "create-mission-extended-card-selected"
                         : ""
-                      }`}
+                    }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -7036,7 +7047,7 @@ function BaseMap(props) {
         <Modal
           title="Edit Group"
           open={visibleEditModal}
-          onOk={() => { }}
+          onOk={() => {}}
           onCancel={() => {
             setVisibleEditModal(false);
           }}
