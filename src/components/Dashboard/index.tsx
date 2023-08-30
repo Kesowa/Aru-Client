@@ -4,11 +4,8 @@ import { Layout, Row, Col, Typography, Space, Spin } from "antd";
 import { useHistory } from "react-router-dom";
 
 import { logout } from "../../actions/authAction";
-/* import SideBar from "./SideBar"; */
 import "./index.less";
-/* import ProfileDrawer from "./Profile"; */
 import TermsAndCondition from "./utils/TnC";
-/* import FallbackComponent from "./utils/Fallback"; */
 import SideBar from "./SideBar";
 const ProfileDrawer = lazy(() => import("./Profile"));
 const FallbackComponent = lazy(() => import("./utils/Fallback"));
@@ -23,11 +20,8 @@ function Dashboard(props: any) {
     setSideBarCollapsed(!sideBarCollapsed);
   };
 
-  //console.log(sideBarCollapsed);
-
   return (
     <Layout className="dashboard-container">
-      {/* <Header toggleSideBar={toggleSideBar} /> */}
       <Row className="dashboard-content-container">
         <TermsAndCondition {...props} />
         <Col>
@@ -58,7 +52,7 @@ function Dashboard(props: any) {
                 }
               >
                 <ProfileDrawer
-                  visible={showProfile}
+                  open={showProfile}
                   userDetails={props.Auth}
                   showProfile={setShowProfile}
                 />

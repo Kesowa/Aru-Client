@@ -1,15 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
-import {
-  PageHeader,
-  message,
-  Button,
-  Table,
-  Tag,
-  Input,
-  Popconfirm,
-} from "antd";
+import { message, Button, Table, Tag, Input, Popconfirm } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import {
   PlusCircleOutlined,
   SearchOutlined,
@@ -88,7 +81,7 @@ function ListAllTanents(props: any) {
     ),
     onFilter: (value: any, record: any) =>
       record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownVisibleChange: (visible: any) => {
+    onFilterDropdownOpenChange: (visible: any) => {
       if (visible) {
         setTimeout(() => searchInput.select());
       }

@@ -30,10 +30,8 @@ import Logo from "../shared/Logo";
 
 const { Meta } = Card;
 const { Title, Text } = Typography;
-const { Step } = Steps;
 
 function Registration(props: any) {
-  const [captcha, setCaptcha] = useState("");
   const [otpError, setOtpError] = useState(false);
   const [invalidOtp, setInvalidOtp] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState("");
@@ -49,7 +47,6 @@ function Registration(props: any) {
   const [ppassword, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordIsValid, setPasswordValidity] = useState(false);
-  const recaptchaRef: any = React.createRef();
   const history = useHistory();
 
   const [tenantId, setTenantId] = useState(
@@ -61,7 +58,6 @@ function Registration(props: any) {
     console.log(total);
     const seconds = Math.floor((total / 1000) % 60);
     const minutes = Math.floor((total / 1000 / 60) % 60);
-    const hours = Math.floor(((total / 1000) * 60 * 60) % 24);
     return {
       total,
       minutes,
@@ -103,10 +99,6 @@ function Registration(props: any) {
     deadline.setSeconds(deadline.getSeconds() + 30);
     return deadline;
   };
-
-  // useEffect(() => {
-  //     clearTimer(getDeadTime());
-  // }, []);
 
   const onClickReset = () => {
     clearTimer(getDeadTime());
@@ -197,9 +189,6 @@ function Registration(props: any) {
 
   const onFinish = async (data: any) => {
     if (passwordIsValid) {
-      // recaptchaRef.current.execute();
-      // const token:any = await recaptchaRef.current.executeAsync();
-      // console.log("token: ",token);
       setLoader(true);
       setEmail(data.email);
       const payload: any = {
@@ -227,7 +216,6 @@ function Registration(props: any) {
           if (res.data.status) {
             message.success("OTP sent!");
             setStage(1);
-            //form.resetFields();
             clearTimer(getDeadTime());
           } else {
             message.warning(res.data.message);
@@ -240,11 +228,6 @@ function Registration(props: any) {
         .finally(() => {
           setLoader(false);
         });
-      // if(token !== undefined || token !== ""){
-
-      // }else{
-      //   message.warning("Captcha has detected a suspicious entry. Please try again!");
-      // }
     } else {
       message.warning("Please set your password correctly!");
     }
@@ -568,11 +551,6 @@ function Registration(props: any) {
                 </Form.Item>
               </Col>
             </Row>
-            {/* <ReCAPTCHA
-                    ref={recaptchaRef}
-                    size="invisible"
-                    sitekey={import.meta.env.VITE_SITE_KEY}
-                  /> */}
           </Form>
         </div>
       </>
@@ -630,7 +608,6 @@ function Registration(props: any) {
                 marginRight: "16px",
                 width: "50px",
               }}
-              //focusStyle={{ border: "2px solid #a5a4bf" }}
               hasErrored={otpError}
               isInputNum
               errorStyle={{ border: "1px solid #ff6565" }}
@@ -712,70 +689,6 @@ function Registration(props: any) {
       <>
         <div className="plan-div">
           <Row gutter={8}>
-            {/* <Col md={8} style={{ margin: "auto" }}>
-              <Card
-                hoverable
-                title={
-                  <>
-                    <Text>Free</Text>{" "}
-                    <Tag color="green" style={{ fontSize: "10px" }}>
-                      EARLY ACCESS
-                    </Tag>
-                  </>
-                }
-                className="plan-card"
-              >
-                <Meta description="Start flying, mapping, and ARU will help you visualise!" />
-                <Row>
-                  <div className="price">
-                    <Title className="title">
-                      <sup className="super">&#x20B9;</sup>0
-                    </Title>
-                  </div>
-                </Row>
-                <Row>
-                  <Text>Valid till 15th August, 2022!</Text>
-                  { /* <Text>&#x20B9;15 Per user/month, billed monthly</Text>
-                </Row>
-                <Row>
-                  <Button
-                    className="button-signup"
-                    onClick={() => {
-                      setSelectedPackage("61f56f46f5aa8db83be587a0");
-                      setStage(1);
-                    }}
-                    type="primary"
-                    block
-                  >
-                    {" "}
-                    Sign Up
-                  </Button>
-                </Row>
-                { /* <Divider style={{marginTop: "8px", marginBottom: "8px"}}/>
-                <Row>
-                  <div className="plan-details">
-                    <Space direction="vertical">
-                      <Text>
-                        <CheckOutlined style={{ color: "#36a556" }} />
-                        &nbsp;&nbsp;20 Missions
-                      </Text>
-                      <Text>
-                        <CheckOutlined style={{ color: "#36a556" }} />
-                        &nbsp;&nbsp;16GB Storage
-                      </Text>
-                      <Text>
-                        <CheckOutlined style={{ color: "#36a556" }} />
-                        &nbsp;&nbsp;2 users
-                      </Text>
-                      <Text>
-                        <CheckOutlined style={{ color: "#36a556" }} />
-                        &nbsp;&nbsp;3 Clients
-                      </Text>
-                    </Space>
-                  </div>
-                </Row>
-              </Card>
-            </Col> */}
             {loading ? (
               renderSkeleton()
             ) : (
@@ -904,14 +817,6 @@ function Registration(props: any) {
   return (
     <div className="signup-page-container login-bg">
       <div className="signup-section-wrapper">
-        {/* {errMessage && (<Alert style={{marginBottom : "15px"}} message={errMessage} type="error" closeText="Close Now" onClose={() => setTimeout(() => setErrMessage(""), 500)} />)} */}
-        {/* <Typography.Title level={1}>Aru</Typography.Title>
-        <img src={AryaLogo} className="brand-logo" alt="brand-logo" />
-        <p className="brand-sub-name">By Kesowa</p> */}
-
-        {/* <div className="forgot-pas">
-          <Link to="/forgot-password">Forgot Password</Link>
-        </div> */}
         <Row>
           <Col md={2}>
             <Link to="/login">
@@ -919,16 +824,14 @@ function Registration(props: any) {
             </Link>
           </Col>
           <Col md={22}>
-            <Steps current={stage}>
-              {steps.map((item, idx) => (
-                <Step
-                  key={item.title}
-                  title={item.title}
-                  style={{ cursor: "pointer" }}
-                  //description={item.description}
-                />
-              ))}
-            </Steps>
+            <Steps
+              current={stage}
+              items={steps.map((item) => {
+                return {
+                  title: item.title,
+                };
+              })}
+            ></Steps>
           </Col>
         </Row>
 

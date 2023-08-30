@@ -98,7 +98,6 @@ class LocationMap extends Component<mapProps, mapState> {
     });
 
     if (this.props.isEditing) {
-      //console.log(this.props.missionData);
       const obj = this.createMeasurements(
         this.props.missionData.flights[0].geoFence
       );

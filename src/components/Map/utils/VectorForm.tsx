@@ -53,12 +53,10 @@ const layerTypes: any = [
 ];
 
 function VectorForm(props) {
-  const [isAttTableVisible, setIsAttrTableVisible] = useState(false);
   const [data, setData] = useState<any>(originData);
   const [count, setCount] = useState(0);
   const [editingKey, setEditingKey] = useState("");
-  const [layerType, setLayerType] = useState("");
-  const [layerTypeId, setLayerTypeId] = useState("");
+
   const [layerName, setLayerName] = useState("");
   const [id, setId] = useState("");
   const [description, setDescription] = useState("");
@@ -613,8 +611,8 @@ function VectorForm(props) {
         title={null}
         width={600}
         onClose={onClose}
-        visible={props.visible}
-        bodyStyle={{ paddingBottom: 80 }}
+        open={props.visible}
+        bodyStyle={{ paddingBottom: 80, overflow: "auto" }}
         mask={false}
         footer={
           <div
@@ -643,7 +641,7 @@ function VectorForm(props) {
           {defaultVectorType.length && !id && (
             <Row>
               <Col span={4}>
-                <h2>Save as</h2>
+                <h2>Save As</h2>
               </Col>
               <Col span={18}>
                 <Cascader

@@ -32,41 +32,28 @@ import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { logout } from "../../../actions/authAction";
 import AloneLogo from "../../../static/Alone-rafiki.svg";
 import moment from "moment";
-import { loading } from "../../../actions/loadingAction";
-import { components } from "src/handlers/schema";
 
-const { Title, Text } = Typography;
-
-type optionType = {
-  value: any;
-  label: any;
-};
-
-type optionType1 = {
-  value: any;
-  label: any;
-  children: optionType[];
-};
+const { Text } = Typography;
 
 interface Item {
-  id: any;
-  key: any;
-  value: any;
+  id: number;
+  key: string;
+  value: string;
 }
 
-const originData = [
+const originData: Item[] = [
   {
-    id: "0",
+    id: 0,
     key: "tshirt-size",
     value: "",
   },
   {
-    id: "1",
+    id: 1,
     key: "key12",
     value: "",
   },
   {
-    id: "2",
+    id: 2,
     key: "imageURL",
     value: "",
   },
@@ -114,18 +101,31 @@ const EditableCell: React.FC<EditableCellProps> = ({
   );
 };
 
-function ManufacturerCard(props) {
-  const [selectedID, setSelectedID] = useState(null);
+interface ManufacturerCardProps {
+  id: string;
+  showDate: boolean;
+  manufacturers: any[];
+  setManufacturers: (data: any[]) => void;
+  logout: () => void;
+}
+
+const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
+  id,
+  showDate,
+  manufacturers,
+  setManufacturers,
+  logout,
+}) => {
+  const [selectedID, setSelectedID] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
   const [isCardLoading, setIsCardLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [count, setCount] = useState(3);
-  const [tableData, setTableData] = useState(originData);
-  const [editingKey, setEditingKey] = useState("");
-  const [manufacturers, setManufacturers] = useState<any>([]);
-  const [assetClasses, setAssetClasses] = useState<any>([]);
+  const [tableData, setTableData] = useState<Item[]>(originData);
+  const [editingKey, setEditingKey] = useState<string>("");
 
   const [form] = Form.useForm();
+  const [assetClasses, setAssetClasses] = useState<any>([]);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -151,7 +151,7 @@ function ManufacturerCard(props) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -167,16 +167,8 @@ function ManufacturerCard(props) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
-  };
-
-  const getManufacturerDetails = (id) => {
-    let manufacturer = props.manufacturers.filter((manufacturer) => {
-      return manufacturer._id === id;
-    });
-    manufacturer = manufacturer[0];
-    setData(manufacturer);
   };
 
   useEffect(() => {
@@ -185,18 +177,16 @@ function ManufacturerCard(props) {
   }, []);
 
   useEffect(() => {
-    //console.log(props);
     setIsCardLoading(true);
-    setSelectedID(props.id);
-    if (props.id) {
+    setSelectedID(id);
+    if (id) {
       http
         .get(`${apis.GET_MANUFACTURER_BY_ID}`, {
           params: {
-            _id: props.id,
+            _id: id,
           },
         })
         .then((result) => {
-          //console.log(result.data);
           if (result.data.status) {
             setData(result.data.data[0]);
           } else {
@@ -205,15 +195,13 @@ function ManufacturerCard(props) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsCardLoading(false);
         });
     }
-    //getManufacturerDetails(selectedID);
-    //setIsCardLoading(false);
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     if (selectedID === null) {
@@ -223,15 +211,15 @@ function ManufacturerCard(props) {
 
   const onFinish = async (values: any) => {
     form.resetFields();
-    //console.log("model form", values);
     const props2 = {};
     for (let i = 0; i < tableData.length; ++i) {
       props2[tableData[i].key] = tableData[i].value;
     }
-    const dimensions = {};
-    dimensions["length"] = values.length;
-    dimensions["breadth"] = values.breadth;
-    dimensions["height"] = values.height;
+    const dimensions = {
+      length: values.length,
+      breadth: values.breadth,
+      height: values.height,
+    };
     const model = {
       modelName: values.name,
       modelNumber: values.number,
@@ -241,7 +229,6 @@ function ManufacturerCard(props) {
       dimensions: dimensions,
       props: props2,
     };
-    //console.log(model);
     http
       .post(`${apis.CREATE_MODEL}`, model)
       .then((result) => {
@@ -252,7 +239,7 @@ function ManufacturerCard(props) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         handleCancel();
@@ -292,6 +279,22 @@ function ManufacturerCard(props) {
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
+  };
+
+  const handleDelete = (key: React.Key) => {
+    const newData = tableData.filter((item) => item.key !== key);
+    setTableData(newData);
+    setCount(count - 1);
+  };
+
+  const handleAdd = () => {
+    const newData: Item = {
+      id: count,
+      key: `Key ${count + 1}`,
+      value: "",
+    };
+    setTableData([...tableData, newData]);
+    setCount(count + 1);
   };
 
   const columns = [
@@ -349,22 +352,6 @@ function ManufacturerCard(props) {
     },
   ];
 
-  const handleDelete = (key: React.Key) => {
-    const newData = tableData.filter((item) => item.key !== key);
-    setTableData(newData);
-    setCount(count - 1);
-  };
-
-  const handleAdd = () => {
-    const newData: Item = {
-      id: count,
-      key: `Key ${count + 1}`,
-      value: "",
-    };
-    setTableData([...tableData, newData]);
-    setCount(count + 1);
-  };
-
   const mergedColumns = columns.map((col) => {
     if (!col.editable) {
       return col;
@@ -416,7 +403,7 @@ function ManufacturerCard(props) {
               {data.name}
             </Text>
           </Col>
-          {props.showDate && (
+          {showDate && (
             <Col span={12} style={{ display: "flex" }}>
               <Text
                 type="secondary"
@@ -584,7 +571,7 @@ function ManufacturerCard(props) {
               );
             })}
         </Row>
-        {props.showDate && (
+        {showDate && (
           <Row style={{ position: "absolute", bottom: "20px" }}>
             <Col span={12}>
               <Button
@@ -612,7 +599,7 @@ function ManufacturerCard(props) {
         )}
         <Modal
           title="Add New Model"
-          visible={isModalVisible}
+          open={isModalVisible}
           onOk={handleOk}
           onCancel={handleCancel}
           footer={null}
@@ -749,9 +736,9 @@ function ManufacturerCard(props) {
   }
 
   return <div style={{ margin: "0 10px" }}>{card}</div>;
-}
+};
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: any) => {
   return {
     manufacturers: state.Manufacturers.manufacturers,
   };

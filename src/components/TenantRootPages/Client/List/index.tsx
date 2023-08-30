@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
 import {
@@ -8,17 +8,8 @@ import {
   DeleteOutlined,
   LockOutlined,
 } from "@ant-design/icons";
-import {
-  PageHeader,
-  message,
-  Tabs,
-  Input,
-  Button,
-  Tag,
-  Table,
-  Typography,
-  Popconfirm,
-} from "antd";
+import { message, Input, Button, Tag, Table, Popconfirm } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
 import { setClientToEdit } from "../../../../actions/cliantActions";
 import { logout } from "../../../../actions/authAction";
@@ -34,8 +25,6 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
-const { TabPane } = Tabs;
-const { Title } = Typography;
 function UserListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
   const [tenantUserTableData, setTenantUserTableData] = useState([]);
@@ -103,7 +92,7 @@ function UserListPage(props: any) {
     ),
     onFilter: (value: any, record: any) =>
       record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownVisibleChange: (visible: any) => {
+    onFilterDropdownOpenChange: (visible: any) => {
       if (visible) {
         setTimeout(() => searchInput.select());
       }

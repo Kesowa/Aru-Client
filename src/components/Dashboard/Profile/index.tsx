@@ -1,5 +1,5 @@
 import { Avatar, Drawer, Skeleton, Typography } from "antd";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./index.less";
 import { UserOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import Link from "antd/lib/typography/Link";
@@ -11,7 +11,6 @@ function Profile(props: any) {
   const [loader, setLoader] = useState(true);
   useEffect(() => {
     if (props.userDetails !== undefined) {
-      //console.log("inDrawer",props.userDetails.userdetails);
       setLoader(false);
     }
   }, [props.userDetails]);
@@ -20,22 +19,10 @@ function Profile(props: any) {
       title="My Profile"
       placement="right"
       onClose={() => props.showProfile(false)}
-      visible={props.visible}
+      open={props.visible}
       width={380}
       footer={
-        <div
-          style={
-            {
-              // width: "100%",
-              // height: "50px",
-              // //textAlign: "center",
-              // backgroundColor: "#e9e9f0",
-              // padding: "12px",
-              // position: "fixed",
-              // bottom: "0"
-            }
-          }
-        >
+        <div>
           <Text type="secondary">{VERSION}</Text>
           <Link
             href="https://kesowa.atlassian.net/servicedesk/customer/portals"

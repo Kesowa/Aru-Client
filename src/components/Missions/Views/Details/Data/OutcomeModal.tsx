@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Row,
   Col,
@@ -8,8 +8,6 @@ import {
   Tooltip,
   Button,
   Avatar,
-  Select,
-  Input,
 } from "antd";
 import {
   UserOutlined,
@@ -23,8 +21,6 @@ import * as htmlToImage from "html-to-image";
 import "./data.less";
 import { STATIC_URL } from "src/constants";
 
-const { Search } = Input;
-const { Option } = Select;
 const { Text, Title } = Typography;
 
 function OutcomeModal(props) {
@@ -44,7 +40,6 @@ function OutcomeModal(props) {
         setLocationNull(false);
       } else setLocationNull(true);
     } else setLocationNull(true);
-    // setLocationNull(props.data && props.data[currIndex]?.location?.lat === 0 ? true : false);
   }, [currIndex]);
 
   const nextIndex = () => {
@@ -56,17 +51,13 @@ function OutcomeModal(props) {
     setcurrIndex(ind < 0 ? props.data.length - 1 : ind);
   };
 
-  function truncateText(str) {
-    return str.length > 15 ? str.substring(0, 15) + "..." : str;
-  }
-
   return (
     <>
       {dataa && (
         <Modal
           title={"Outcome ID: " + dataa._id}
           centered={true}
-          visible={props.visible}
+          open={props.visible}
           width={1200}
           closable={true}
           onOk={() => {}}
@@ -76,7 +67,6 @@ function OutcomeModal(props) {
           <div>
             <Row style={{ marginTop: 16 }}>
               <Col span={17}>
-                {/* <img src={thumb} style={{ width: "100%", height: "auto" }} /> */}
                 <div id="image" className="outcome-view">
                   <Image
                     style={{ width: "100%", height: "auto", cursor: "pointer" }}
@@ -142,14 +132,6 @@ function OutcomeModal(props) {
                 <Row>
                   &nbsp;&nbsp;&nbsp;&nbsp;
                   {/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++TO BE MADE++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
-                  {/* <Tooltip placement="bottom" title="share via email">
-                      <Button
-                        type="primary"
-                        shape="round"
-                        icon={<MailOutlined />}
-                        size="large"
-                      />
-                    </Tooltip> */}
                   &nbsp;&nbsp;
                   <Tooltip placement="bottom" title="download image">
                     <Button
@@ -210,12 +192,7 @@ function OutcomeModal(props) {
                   <Row>
                     <Text strong>{props.missionId}</Text>
                   </Row>
-                  {/* <Row style={{ marginTop: 8 }}>
-                    <Text type="secondary">Location</Text>
-                  </Row> */}
-                  {/* <Row>
-                    <Text strong>{truncateText(dataa.locationName)}</Text>
-                  </Row> */}
+
                   {!locationNull && (
                     <>
                       <Row style={{ marginTop: 8 }}>

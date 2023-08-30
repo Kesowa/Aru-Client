@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   EyeOutlined,
   EditOutlined,
   PlusCircleOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import {
-  PageHeader,
   Row,
   Col,
   message,
@@ -19,6 +18,7 @@ import {
   Typography,
   Popconfirm,
 } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
@@ -36,7 +36,6 @@ function UserGroupListPage(props: any) {
   const [userGroupTableData, setUserGroupTableData] = useState([]);
   const [activeUserGroup, setActiveUserGroup]: [any, any] = useState();
   const [errorState, setErrorState] = useState("");
-  const history = useHistory();
 
   const deleteUsergroup = (id) => {
     props.loading(true);

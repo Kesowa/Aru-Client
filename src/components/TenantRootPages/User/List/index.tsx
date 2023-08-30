@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
 import {
@@ -9,9 +9,7 @@ import {
   LockOutlined,
 } from "@ant-design/icons";
 import {
-  PageHeader,
   message,
-  Tabs,
   Input,
   Button,
   Tag,
@@ -19,6 +17,7 @@ import {
   Typography,
   Popconfirm,
 } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";
 import { setUserToEdit } from "../../../../actions/userAction";
@@ -34,7 +33,6 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
-const { TabPane } = Tabs;
 const { Title } = Typography;
 function UserListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
@@ -98,7 +96,7 @@ function UserListPage(props: any) {
     ),
     onFilter: (value: any, record: any) =>
       record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownVisibleChange: (visible: any) => {
+    onFilterDropdownOpenChange: (visible: any) => {
       if (visible) {
         setTimeout(() => searchInput.select());
       }
@@ -327,18 +325,6 @@ function UserListPage(props: any) {
             renderActionButtonsIfRoot(record)}
           {props.userDetails.userType === "tenant-staff" &&
             renderActionButtonsIfStaff(record)}
-          {/* {renderEditBtn(record)}
-          {renderDeleteBtn(record)}
-          <Button
-            style={{ marginLeft: "10px" }}
-            onClick={() => {
-              history.push(
-                `/dashboard/tenant/user/change-password/${record._id}`,
-              );
-              props.setUserToEdit(record);
-            }}>
-            <LockOutlined />
-          </Button> */}
         </>
       ),
     },
