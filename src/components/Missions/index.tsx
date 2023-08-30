@@ -26,14 +26,6 @@ function MissionList(props) {
   const [totalMissions, settotalMissions] = useState(0);
   const [sortOrder, setSortOrder] = useState("createdAt:descend");
   const [searchFilters, setSearchFilters] = useState("");
-  const setPaginationPage = (p) => {
-    setPage(p);
-  };
-
-  const setPageLimit = (currPage, limit) => {
-    setPage(currPage);
-    setLimit(limit);
-  };
 
   const renderMissionTable = (filter: unknown) => {
     return (
@@ -47,8 +39,6 @@ function MissionList(props) {
         page={page}
         setLimit={setLimit}
         limit={limit}
-        setPaginationPage={setPaginationPage}
-        setPageLimit={setPageLimit}
         total={total}
         setTotal={setTotal}
         usedFilter={usedFilter}
