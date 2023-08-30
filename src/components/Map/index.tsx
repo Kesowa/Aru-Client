@@ -4,6 +4,7 @@ import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
 import { DataFilterExtension } from "@deck.gl/extensions";
 import download from "downloadjs";
+import { WebMercatorViewport } from "viewport-mercator-project";
 import {
   Row,
   Col,
@@ -78,7 +79,7 @@ import "./index.less";
 import LineIcon from "../../static/line.svg";
 import PolygonIcon from "../../static/polygon.svg";
 import DeckGL from "@deck.gl/react";
-import { FlyToInterpolator } from "deck.gl";
+import { FlyToInterpolator, TransitionInterpolator } from "deck.gl";
 import {
   BitmapLayer,
   GeoJsonLayer,
@@ -748,7 +749,7 @@ function BaseMap(props) {
                   maxZoom: 22,
                   bearing: 0,
                   transitionDuration: 1000,
-                  transitionInterpolator: new FlyToInterpolator(),
+                  transitionInterpolator: new TransitionInterpolator(),
                 });
               });
             } else if (result.state === "prompt") {
@@ -2101,12 +2102,24 @@ function BaseMap(props) {
     }
   };
   //geojson to json
-  async function parseGeoJson(layerId: any, file: any) {
-    const GeoJson: any = await fetch(file);
-    const data = await GeoJson.json();
-    const features = data.features;
-    const filterdFeatures = filterFeatures(layerId, features);
-    return filterdFeatures;
+  async function parseGeoJson(layerId, file) {
+    return new Promise((resolve, reject) => {
+      fetch(file)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch GeoJSON data");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          const features = data.features;
+          const filteredFeatures = filterFeatures(layerId, features);
+          resolve(filteredFeatures);
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
   }
 
   //-------------on layer check-------------------------------
@@ -2193,22 +2206,80 @@ function BaseMap(props) {
     }
   };
 
-  const drawLayers = (checkedKeysValue: any) => {
+  const calculateViewport = (bbox) => {
+    const [minLon, minLat, maxLon, maxLat] = bbox;
+    const mapContainer = document.getElementById("view-default-view");
+    const mapWidth = mapContainer.clientWidth; // Get the actual width of the map container
+    const mapHeight = mapContainer.clientHeight;
+    // Replace with the actual height of your map container
+
+    // Calculate the new viewport using getViewState
+    const viewport = new WebMercatorViewport({
+      width: mapWidth,
+      height: mapHeight,
+    });
+
+    // Get the new zoom and center to fit the layer on the screen
+    const { longitude, latitude, zoom } = viewport.fitBounds(
+      [
+        [minLon, minLat],
+        [maxLon, maxLat],
+      ],
+      {
+        padding: 10,
+        offset: [0, 0],
+      }
+    );
+
+    return {
+      longitude,
+      latitude,
+      zoom,
+    };
+  };
+
+  const drawLayers = async (checkedKeysValue: any) => {
     const vlayers: any = [];
     setShowMarkerSizeTool(false);
-    checkedKeysValue.forEach((element) => {
+    await checkedKeysValue.forEach(async (element) => {
       if (element.split("-")[0] === "2" && element !== "2") {
         if (props.isBaseMap) {
-          //console.log("all the layers being drawn",allLayers[element]);
+          console.log("Raster");
           const layer: any = allLayers[element];
-          layer?.layerPath.map((layerr: any) => {
+          await layer?.layerPath.map(async (layerr: any) => {
             const settings: any = {
               minp: layerr[0].minp,
               maxp: layerr[0].maxp,
               resamplingMethod: layer.settings.resamplingMethod,
               bidx: layer.settings.bidx,
             };
+            const rasterpath = `${TITILER_STATIC}` + layerr[0].path;
+            const metaDataURL = `${COG_URL}/cog/info?url=${rasterpath}`;
+            const response = await fetch(metaDataURL, {
+              method: "GET",
+            });
+            const metadata = await response.json();
+            const bounds = [
+              metadata["bounds"][0],
+              metadata["bounds"][1],
+              metadata["bounds"][2],
+              metadata["bounds"][3],
+            ];
+            const { longitude, latitude, zoom } = calculateViewport(bounds);
+            setViewport({
+              longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+              latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
+              zoom,
+              pitch: 0,
+              minZoom: 0,
+              maxZoom: 22,
+              bearing: 0,
+              transitionDuration: 2000,
+              transitionInterpolator: new FlyToInterpolator(),
+            });
+
             // ---pushing tiler layers
+
             vlayers.push(
               new TileLayer({
                 id: `${element}-${uuid()}`,
@@ -2221,6 +2292,7 @@ function BaseMap(props) {
                 onDataLoad: () => {
                   setLayerLoading(false);
                 },
+
                 renderSubLayers: (props) => {
                   const {
                     bbox: { west, south, east, north },
@@ -2236,6 +2308,32 @@ function BaseMap(props) {
             );
           });
         } else {
+          const rasterpath =
+            `${TITILER_STATIC}` + allLayers[element]?.layerPath;
+          const metaDataURL = `${COG_URL}/cog/info?url=${rasterpath}`;
+          const response = await fetch(metaDataURL, {
+            method: "GET",
+          });
+          const metadata = await response.json();
+          const bounds = [
+            metadata["bounds"][0],
+            metadata["bounds"][1],
+            metadata["bounds"][2],
+            metadata["bounds"][3],
+          ];
+          const { longitude, latitude, zoom } = calculateViewport(bounds);
+          setViewport({
+            longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+            latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
+            zoom,
+            pitch: 0,
+            minZoom: 0,
+            maxZoom: 22,
+            bearing: 0,
+            transitionDuration: 2000,
+            transitionInterpolator: new FlyToInterpolator(),
+          });
+
           vlayers.push(
             new TileLayer({
               id: element,
@@ -2548,6 +2646,45 @@ function BaseMap(props) {
             );
             break;
         }
+
+        (async () => {
+          try {
+            const filteredFeatures = await parseGeoJson(
+              element,
+              STATIC_URL + allLayers[element]?.layerPath
+            );
+
+            console.log("filteredFeatures", filteredFeatures);
+
+            if (Array.isArray(filteredFeatures)) {
+              const bound = turf.bbox(turf.featureCollection(filteredFeatures));
+              console.log("Bbox", bound);
+              const { longitude, latitude, zoom } = calculateViewport(bound);
+              console.log(
+                "longitude, latitude, zoom",
+                longitude,
+                latitude,
+                zoom
+              );
+
+              setViewport({
+                longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+                latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
+                zoom,
+                pitch: 0,
+                minZoom: 0,
+                maxZoom: 22,
+                bearing: 0,
+                transitionDuration: 2000,
+                transitionInterpolator: new FlyToInterpolator(),
+              });
+            } else {
+              console.log("Filtered features is not an array.");
+            }
+          } catch (error) {
+            console.error("Error:", error);
+          }
+        })();
       } else if (element.split("-")[0] === "3" && element !== "3") {
         setShowMarkerSizeTool(true);
         if (element.split("-")[1] === "2") {
@@ -2668,37 +2805,37 @@ function BaseMap(props) {
           );
         }
       }
-      console.log("Missions", vlayers, allLayers, geoJsonVOD.features);
+      console.log("Missions", vlayers);
     });
-    // vlayers.push(
-    //   new TileLayer({
-    //     id: "BASE_LAYER-123123123",
-    //     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-    //     data: `${COG_URL}` +
-    //     `/cog/tiles` +
-    //     `/{z}/{x}/{y}@1x?url=${import.meta.env.VITE_BASE_URL}` +
-    //     `/raster/1642486263367_20_DEM_10cm.tif` +
-    //     `&resampling_method=nearest&bidx=1&rescale=17.799230575561523%2C93.64027404785156&colormap_name=plasma`,
+    /* vlayers.push(
+       new TileLayer({
+         id: "BASE_LAYER-123123123",
+         // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
+         data: `${COG_URL}` +
+         `/cog/tiles` +
+         `/{z}/{x}/{y}@1x?url=${import.meta.env.VITE_BASE_URL}` +
+         `/raster/1642486263367_20_DEM_10cm.tif` +
+         `&resampling_method=nearest&bidx=1&rescale=17.799230575561523%2C93.64027404785156&colormap_name=plasma`,
 
-    //     minZoom: 0,
-    //     maxZoom: 24,
-    //     tileSize: 256,
-    //     // onDataLoad: () => {
-    //     //   setLayerLoading(false);
-    //     // },
-    //     renderSubLayers: (props) => {
-    //       const {
-    //         bbox: { west, south, east, north },
-    //       } = props.tile;
+         minZoom: 0,
+         maxZoom: 24,
+         tileSize: 256,
+          onDataLoad: () => {
+            setLayerLoading(false);
+          },
+         renderSubLayers: (props) => {
+           const {
+             bbox: { west, south, east, north },
+           } = props.tile;
 
-    //       return new BitmapLayer(props, {
-    //         data: null,
-    //         image: props.data,
-    //         bounds: [west, south, east, north],
-    //       });
-    //     },
-    //   })
-    // )
+           return new BitmapLayer(props, {
+             data: null,
+             image: props.data,
+             bounds: [west, south, east, north],
+           });
+         },
+       })
+     )*/
     setVisibleLayers(vlayers);
   };
 
