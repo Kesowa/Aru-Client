@@ -20,7 +20,7 @@ import {
   Badge,
   Pagination,
   MenuProps,
-  notification
+  notification,
 } from "antd";
 import {
   ExclamationCircleOutlined,
@@ -535,17 +535,17 @@ function Videos(props) {
 
   useEffect(() => {
     let socketInstance = null;
-  
+
     if (props?.missionDetails?.missionId) {
       if (socket.current) {
         // Close the existing socket connection
         socket.current.disconnect();
       }
-  
+
       socketInstance = io(
         `${API_URL}/stream/mission-specific?missionID=${props.missionDetails.missionId}`
       );
-  
+
       socketInstance.on("PROCESS_VIDEO_FINISHED", (data) => {
         console.log("Video processing finished: ", data);
         openNotification(
@@ -555,12 +555,12 @@ function Videos(props) {
         );
         setRefresh(true);
       });
-  
+
       socketInstance.on("VOD_REMOVED", (data) => {
         setRefresh(true);
       });
     }
-  
+
     // Cleanup function to close the socket connection
     return () => {
       if (socketInstance) {
@@ -568,7 +568,6 @@ function Videos(props) {
       }
     };
   }, [props?.missionDetails?.missionId]);
-  
 
   //----------- Fetching video data for mission --------------------
   const getFlaggedFilter = () => {
