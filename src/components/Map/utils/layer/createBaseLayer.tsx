@@ -1267,6 +1267,7 @@ const CreateBaseLayer = (props) => {
           layerColor={layerColor}
           setLayerColor={setLayerColor}
           onChangeInherit={onChangeInherit}
+          options={props.options}
         />
       ),
     },
