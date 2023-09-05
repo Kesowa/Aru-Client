@@ -351,7 +351,7 @@ function BaseMap(props) {
           okText: "Yes",
           cancelText: "No",
           onOk: () => {
-            deleteLayer(selectedLayer._id, selectedLayer.type);
+            deleteLayer(checkedKeys, type === "Raster" ? "2" : "1");
           },
         });
         break;
@@ -3120,23 +3120,30 @@ function BaseMap(props) {
     }
   };
 
-  const deleteLayer = (id, type) => {
+  const deleteLayer = (keys, type) => {
     props.loading(true);
+    
+    const layers = keys
+    .filter((key) => key.split("-")[0] == type)
+    .map((key) => key.split("-")[1]);
+
+    console.log("layers: ", layers);
+
     if (props.isBaseMap) {
       const payload: any = {
-        layer: id,
+        layer: layers,
       };
 
       console.log("payload", payload);
       http
         .delete(`${apis.DELETE_BASE_LAYER}`, {
           data: {
-            layers: [id],
+            layers: [layers],
           },
         })
         .then((res) => {
           if (res.data.status) {
-            removeLayerFromTree([id]);
+            removeLayerFromTree([layers]);
 
             // remove layer from vector create form
             const vectors = vectorLayers.filter((layer) => layer._id !== id);
