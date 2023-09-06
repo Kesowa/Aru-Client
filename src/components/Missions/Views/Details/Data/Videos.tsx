@@ -20,6 +20,7 @@ import {
   Badge,
   Pagination,
   MenuProps,
+  notification,
 } from "antd";
 import {
   ExclamationCircleOutlined,
@@ -95,6 +96,14 @@ function Videos(props) {
 
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
+
+  const openNotification = (title, description, type) => {
+    notification[type]({
+      message: title,
+      description: description,
+    });
+  };
+
   const vodMenu: MenuProps["items"] = (data) => {
     const item = [
       {
@@ -528,20 +537,40 @@ function Videos(props) {
   };
 
   useEffect(() => {
+    let socketInstance = null;
+
     if (props?.missionDetails?.missionId) {
-      socket.current = io(
+      if (socket.current) {
+        // Close the existing socket connection
+        socket.current.disconnect();
+      }
+
+      socketInstance = io(
         `${API_URL}/stream/mission-specific?missionID=${props.missionDetails.missionId}`
       );
 
-      socket.current.on("PROCESS_VIDEO_FINISHED", (data) => {
+      socketInstance.on("PROCESS_VIDEO_FINISHED", (data) => {
+        console.log("Video processing finished: ", data);
+        openNotification(
+          "Finished Processing!",
+          `Processing ${data.originalName} has been complete!`,
+          "success"
+        );
         setRefresh(true);
       });
 
-      socket.current.on("VOD_REMOVED", (data) => {
+      socketInstance.on("VOD_REMOVED", (data) => {
         setRefresh(true);
       });
     }
-  }, []);
+
+    // Cleanup function to close the socket connection
+    return () => {
+      if (socketInstance) {
+        socketInstance.disconnect();
+      }
+    };
+  }, [props?.missionDetails?.missionId]);
 
   //----------- Fetching video data for mission --------------------
   const getFlaggedFilter = () => {

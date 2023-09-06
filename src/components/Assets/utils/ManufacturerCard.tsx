@@ -32,6 +32,7 @@ import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { logout } from "../../../actions/authAction";
 import AloneLogo from "../../../static/Alone-rafiki.svg";
 import moment from "moment";
+import { setManufacturersToState } from "src/actions/manufacturerAction";
 
 const { Text } = Typography;
 
@@ -105,7 +106,6 @@ interface ManufacturerCardProps {
   id: string;
   showDate: boolean;
   manufacturers: any[];
-  setManufacturers: (data: any[]) => void;
   logout: () => void;
 }
 
@@ -113,7 +113,6 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
   id,
   showDate,
   manufacturers,
-  setManufacturers,
   logout,
 }) => {
   const [selectedID, setSelectedID] = useState<string | null>(null);
@@ -160,7 +159,7 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
       .get(`${apis.GET_MANUFACTURERS}`)
       .then((result) => {
         if (result.data.status) {
-          setManufacturers(result.data.data);
+          setManufacturersToState(result.data.data);
         } else {
           message.error(result.data.message);
         }

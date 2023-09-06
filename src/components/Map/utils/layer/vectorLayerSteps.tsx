@@ -41,6 +41,7 @@ export const UploadVectorData = ({
   layerColor,
   setLayerColor,
   onChangeInherit,
+  options,
 }) => {
   return (
     <>
@@ -98,7 +99,7 @@ export const UploadVectorData = ({
                 }}
                 placeholder="Select Layer Type"
                 allowClear
-                treeData={props.options}
+                treeData={options}
                 onChange={changeLayerType}
               />
             </Form.Item>
