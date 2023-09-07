@@ -81,15 +81,15 @@ function VectorForm(props) {
       switch (props.mode) {
         case "PolygonView":
           setDefaultVectorType(["Area", "Measurement"]);
-          coptions = JSON.parse(JSON.stringify(layerTypes[1]));
+          coptions = structuredClone(layerTypes[1]);
           break;
         case "LineView":
           setDefaultVectorType(["Line", "Boundary Wall"]);
-          coptions = JSON.parse(JSON.stringify(layerTypes[0]));
+          coptions = structuredClone(layerTypes[0])
           break;
         default:
           setDefaultVectorType(["Marker", "Electric Pole"]);
-          coptions = JSON.parse(JSON.stringify(layerTypes[2]));
+          coptions = structuredClone(layerTypes[2])
           break;
       }
 
