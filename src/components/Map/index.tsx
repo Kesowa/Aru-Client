@@ -4455,7 +4455,11 @@ function BaseMap(props) {
           type: layer.vector.type,
           name: layer.name,
           id: layer._id,
-          isPublic: layer.isPublic, // #public
+          T3DTranspose: false,
+          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
+          layerLabel: layer.layerLabel,
+          layerPopupLabel: layer.layerPopupLabel,
+          isPublic: layer.isPublic,
           flaggedFeatures: layer.flaggedFeatures,
         };
 
