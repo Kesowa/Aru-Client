@@ -3122,10 +3122,10 @@ function BaseMap(props) {
 
   const deleteLayer = (keys, type) => {
     props.loading(true);
-    
+
     const layers = keys
-    .filter((key) => key.split("-")[0] == type)
-    .map((key) => key.split("-")[1]);
+      .filter((key) => key.split("-")[0] == type)
+      .map((key) => key.split("-")[1]);
 
     console.log("layers: ", layers);
 

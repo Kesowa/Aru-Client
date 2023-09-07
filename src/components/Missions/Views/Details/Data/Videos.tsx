@@ -173,8 +173,8 @@ function Videos(props) {
           docId: selectedVideo?.data._id,
           tags: selectedVideo?.data.bookmarks
             ? {
-              bookmarks: generateTags(),
-            }
+                bookmarks: generateTags(),
+              }
             : {},
         });
         setThumbnail(vodThumbnail());
@@ -213,7 +213,8 @@ function Videos(props) {
           if ("isFlagged" in body.update) {
             setRefresh(true);
             message.success(
-              `Video ${!body.update.isFlagged ? "un-flagged" : "flagged"
+              `Video ${
+                !body.update.isFlagged ? "un-flagged" : "flagged"
               } successfully!`
             );
           } else if ("bookmarks" in body.update) {
@@ -283,12 +284,12 @@ function Videos(props) {
               style={
                 checkedList.includes(item._id)
                   ? {
-                    border: "4px solid #3b86ff",
-                    cursor: "pointer",
-                  }
+                      border: "4px solid #3b86ff",
+                      cursor: "pointer",
+                    }
                   : {
-                    cursor: "pointer",
-                  }
+                      cursor: "pointer",
+                    }
               }
               cover={
                 <img
@@ -407,14 +408,12 @@ function Videos(props) {
       };
 
       switch (
-      props.missionDetails.userType //upload priviledge checks
+        props.missionDetails.userType //upload priviledge checks
       ) {
         case "tenant-root": //when user is a tenant root
           console.log(options.file.name.split(".")[1]);
-          const parts = options.file.name.split('.');
-          const isValidExtension = checkExtension(
-              parts[parts.length - 1]
-          );
+          const parts = options.file.name.split(".");
+          const isValidExtension = checkExtension(parts[parts.length - 1]);
           console.log("isvalid", isValidExtension);
           if (isValidExtension) {
             http
@@ -469,11 +468,8 @@ function Videos(props) {
           break;
 
         case "tenant-staff": // when user is tenant staff
-
-          const parts2 = options.file.name.split('.');
-          const isValidExtension2 = checkExtension(
-              parts2[parts2.length - 1]
-          );
+          const parts2 = options.file.name.split(".");
+          const isValidExtension2 = checkExtension(parts2[parts2.length - 1]);
           if (isValidExtension2) {
             http
               .post(options.action, fData, config)
@@ -793,8 +789,8 @@ function Videos(props) {
       centered: true,
       width: 640,
       okText: "Close",
-      onOk() { },
-      onCancel() { },
+      onOk() {},
+      onCancel() {},
     });
   }
   useEffect(() => {
@@ -972,12 +968,12 @@ function Videos(props) {
                               window.devicePixelRatio == 1.5
                                 ? 8
                                 : window.screen.width == 1920
-                                  ? 4
-                                  : window.screen.width == 1366
-                                    ? 8
-                                    : window.screen.width == 2560
-                                      ? 4
-                                      : 8
+                                ? 4
+                                : window.screen.width == 1366
+                                ? 8
+                                : window.screen.width == 2560
+                                ? 4
+                                : 8
                             }
                             key={`${dataa._id}`}
                           >
@@ -1289,10 +1285,10 @@ function Videos(props) {
                       style={
                         activateSelection && checkedList.includes(dataa._id)
                           ? {
-                            border: "4px solid #3b86ff",
-                            cursor: "pointer",
-                            padding: "6px",
-                          }
+                              border: "4px solid #3b86ff",
+                              cursor: "pointer",
+                              padding: "6px",
+                            }
                           : {}
                       }
                     >
