@@ -85,11 +85,11 @@ function VectorForm(props) {
           break;
         case "LineView":
           setDefaultVectorType(["Line", "Boundary Wall"]);
-          coptions = structuredClone(layerTypes[0])
+          coptions = structuredClone(layerTypes[0]);
           break;
         default:
           setDefaultVectorType(["Marker", "Electric Pole"]);
-          coptions = structuredClone(layerTypes[2])
+          coptions = structuredClone(layerTypes[2]);
           break;
       }
 
