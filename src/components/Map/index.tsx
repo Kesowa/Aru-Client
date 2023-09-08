@@ -3143,7 +3143,7 @@ function BaseMap(props) {
         })
         .then((res) => {
           if (res.data.status) {
-            removeLayerFromTree([layers]);
+            removeLayerFromTree(layers);
 
             // remove layer from vector create form
             const vectors = vectorLayers.filter((layer) => layer._id !== id);
