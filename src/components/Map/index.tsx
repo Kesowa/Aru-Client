@@ -2241,6 +2241,20 @@ function BaseMap(props) {
   const drawLayers = async (checkedKeysValue: any) => {
     const vlayers: any = [];
     setShowMarkerSizeTool(false);
+    if(checkedKeysValue.length === 0) {
+    
+      setViewport({
+        longitude: defaultLocation.lng,
+        latitude: defaultLocation.lat,
+        zoom: 13,
+        pitch: 0,
+        minZoom: 0,
+        maxZoom: 22,
+        bearing: 0,
+        transitionDuration: 2000,
+        transitionInterpolator: new FlyToInterpolator(),
+      });
+    }
     await checkedKeysValue.forEach(async (element) => {
       if (element.split("-")[0] === "2" && element !== "2") {
         if (props.isBaseMap) {
