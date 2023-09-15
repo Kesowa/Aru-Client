@@ -17,6 +17,7 @@ import {
 import React from "react";
 import { LayerUpdated } from "./vectorLayerSteps";
 import { SketchPicker } from "react-color";
+import { v4 as uuid } from "uuid";
 const { Item } = Form;
 const { Option } = Select;
 const { Text, Title } = Typography;
@@ -58,6 +59,7 @@ export const ImportLayerSteps = ({
   setLayerName,
   primeAttributes,
   handleAttributeMapping,
+  form,
 }) => {
   const columns2 = [
     {
@@ -461,7 +463,7 @@ export const ImportLayerSteps = ({
                       dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
                       placeholder="Select Layer Type"
                       allowClear
-                      treeData={options[1].children[2].children}
+                      treeData={options[1].children}
                       onChange={changeLayerType}
                     />
                   </Item>

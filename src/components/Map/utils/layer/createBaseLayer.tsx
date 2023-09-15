@@ -1758,6 +1758,7 @@ const CreateBaseLayer = (props) => {
           selectedLayers={selectedLayers}
           setSelectedLayers={setSelectedLayers}
           setApiCall={setApiCall}
+          form={form}
         />
       </Modal>
       <Modal
