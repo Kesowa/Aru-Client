@@ -2288,16 +2288,28 @@ function BaseMap(props) {
                 // data: getRasterURL(layer?.type, layerr[0].path, settings),
                 getTileData: (tile) => {
                   const { index } = tile;
-                  const rasterUrl = getRasterURL(layer?.type, layerr[0].path, settings, index.x, index.y, index.z);
+                  const rasterUrl = getRasterURL(
+                    layer?.type,
+                    layerr[0].path,
+                    settings,
+                    index.x,
+                    index.y,
+                    index.z
+                  );
                   const mapBounds = mapRef.current.getMap().getBounds();
                   // console.log("Map Bounds: ", mapBounds);
                   // console.log("Raster Bounds: ", bounds);
-                  const [minLong,minLat,maxLong,maxLat] = bounds;
+                  const [minLong, minLat, maxLong, maxLat] = bounds;
                   const minLongMap = mapBounds._sw.lng;
                   const minLatMap = mapBounds._sw.lat;
                   const maxLongMap = mapBounds._ne.lng;
                   const maxLatMap = mapBounds._ne.lat;
-                  if((minLongMap>maxLong) || (maxLongMap<minLong) || (minLatMap>maxLat) || (maxLatMap<minLat)) {
+                  if (
+                    minLongMap > maxLong ||
+                    maxLongMap < minLong ||
+                    minLatMap > maxLat ||
+                    maxLatMap < minLat
+                  ) {
                     console.log("Not loading new data");
                     return tile;
                   } else {
@@ -2364,16 +2376,28 @@ function BaseMap(props) {
               // ),
               getTileData: async (tile) => {
                 const { index } = tile;
-                const rasterUrl = getRasterURL(allLayers[element]?.type, allLayers[element]?.layerPath, allLayers[element]?.settings, index.x, index.y, index.z);
+                const rasterUrl = getRasterURL(
+                  allLayers[element]?.type,
+                  allLayers[element]?.layerPath,
+                  allLayers[element]?.settings,
+                  index.x,
+                  index.y,
+                  index.z
+                );
                 const mapBounds = mapRef.current.getMap().getBounds();
                 // console.log("Map Bounds: ", mapBounds);
                 // console.log("Raster Bounds: ", bounds);
-                const [minLong,minLat,maxLong,maxLat] = bounds;
+                const [minLong, minLat, maxLong, maxLat] = bounds;
                 const minLongMap = mapBounds._sw.lng;
                 const minLatMap = mapBounds._sw.lat;
                 const maxLongMap = mapBounds._ne.lng;
                 const maxLatMap = mapBounds._ne.lat;
-                if((minLongMap>maxLong) || (maxLongMap<minLong) || (minLatMap>maxLat) || (maxLatMap<minLat)) {
+                if (
+                  minLongMap > maxLong ||
+                  maxLongMap < minLong ||
+                  minLatMap > maxLat ||
+                  maxLatMap < minLat
+                ) {
                   // console.log("Not loading new data");
                   return tile;
                 } else {
@@ -5999,7 +6023,11 @@ function BaseMap(props) {
             </div>
           </>
         ) : (
-          <StaticMap mapboxApiAccessToken={MAPBOX_API_KEY} mapStyle={mapMode} ref={mapRef} />
+          <StaticMap
+            mapboxApiAccessToken={MAPBOX_API_KEY}
+            mapStyle={mapMode}
+            ref={mapRef}
+          />
         )}
 
         {showPopup && (
