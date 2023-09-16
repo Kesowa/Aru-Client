@@ -128,7 +128,7 @@ import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
 // import { JSONLoader } from "@loaders.gl/json";
 // import { LASLoader } from "@loaders.gl/las";
-// import { load } from "@loaders.gl/core";
+import { load } from "@loaders.gl/core";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -725,6 +725,7 @@ function BaseMap(props) {
     // transitionDuration: 8000,
     // transitionInterpolator: new FlyToInterpolator(),
   });
+  const mapRef = useRef(null);
 
   // ---- setting map location -----------------
   useEffect(() => {
@@ -2045,14 +2046,14 @@ function BaseMap(props) {
     //console.log("onclick", index);
   }
   //-----------------------Fetch Raster URL----------------------------------
-  const getRasterURL = (rasterType, path, settings) => {
+  const getRasterURL = (rasterType, path, settings, x, y, z) => {
     //SetColorMap(settings.color);
     switch (rasterType) {
       case "NDVI":
         return (
           `${COG_URL}` +
           `/cog/tiles` +
-          `/{z}/{x}/{y}%401x?url=${TITILER_STATIC}` +
+          `/${z}/${x}/${y}%401x?url=${TITILER_STATIC}` +
           path
         );
 
@@ -2060,7 +2061,7 @@ function BaseMap(props) {
         return (
           `${COG_URL}` +
           `/cog/tiles` +
-          `/{z}/{x}/{y}%401x?url=${TITILER_STATIC}` +
+          `/${z}/${x}/${y}%401x?url=${TITILER_STATIC}` +
           path +
           `&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}`
         );
@@ -2069,7 +2070,7 @@ function BaseMap(props) {
         return (
           `${COG_URL}` +
           `/cog/tiles` +
-          `/{z}/{x}/{y}@1x?url=${TITILER_STATIC}` +
+          `/${z}/${x}/${y}@1x?url=${TITILER_STATIC}` +
           path +
           `&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
         );
@@ -2078,7 +2079,7 @@ function BaseMap(props) {
         return (
           `${COG_URL}` +
           `/cog/tiles` +
-          `/{z}/{x}/{y}.png?url=${TITILER_STATIC}` +
+          `/${z}/${x}/${y}.png?url=${TITILER_STATIC}` +
           path
         );
     }
@@ -2284,8 +2285,38 @@ function BaseMap(props) {
               new TileLayer({
                 id: `${element}-${uuid()}`,
                 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-                data: getRasterURL(layer?.type, layerr[0].path, settings),
-
+                // data: getRasterURL(layer?.type, layerr[0].path, settings),
+                getTileData: (tile) => {
+                  const { index } = tile;
+                  const rasterUrl = getRasterURL(
+                    layer?.type,
+                    layerr[0].path,
+                    settings,
+                    index.x,
+                    index.y,
+                    index.z
+                  );
+                  const mapBounds = mapRef.current.getMap().getBounds();
+                  // console.log("Map Bounds: ", mapBounds);
+                  // console.log("Raster Bounds: ", bounds);
+                  const [minLong, minLat, maxLong, maxLat] = bounds;
+                  const minLongMap = mapBounds._sw.lng;
+                  const minLatMap = mapBounds._sw.lat;
+                  const maxLongMap = mapBounds._ne.lng;
+                  const maxLatMap = mapBounds._ne.lat;
+                  if (
+                    minLongMap > maxLong ||
+                    maxLongMap < minLong ||
+                    minLatMap > maxLat ||
+                    maxLatMap < minLat
+                  ) {
+                    console.log("Not loading new data");
+                    return tile;
+                  } else {
+                    console.log("Loading new data");
+                    return load(rasterUrl);
+                  }
+                },
                 minZoom: 0,
                 maxZoom: 24,
                 tileSize: 256,
@@ -2338,12 +2369,42 @@ function BaseMap(props) {
             new TileLayer({
               id: element,
               // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-              data: getRasterURL(
-                allLayers[element]?.type,
-                allLayers[element]?.layerPath,
-                allLayers[element]?.settings
-              ),
-
+              // data: getRasterURL(
+              //   allLayers[element]?.type,
+              //   allLayers[element]?.layerPath,
+              //   allLayers[element]?.settings
+              // ),
+              getTileData: async (tile) => {
+                const { index } = tile;
+                const rasterUrl = getRasterURL(
+                  allLayers[element]?.type,
+                  allLayers[element]?.layerPath,
+                  allLayers[element]?.settings,
+                  index.x,
+                  index.y,
+                  index.z
+                );
+                const mapBounds = mapRef.current.getMap().getBounds();
+                // console.log("Map Bounds: ", mapBounds);
+                // console.log("Raster Bounds: ", bounds);
+                const [minLong, minLat, maxLong, maxLat] = bounds;
+                const minLongMap = mapBounds._sw.lng;
+                const minLatMap = mapBounds._sw.lat;
+                const maxLongMap = mapBounds._ne.lng;
+                const maxLatMap = mapBounds._ne.lat;
+                if (
+                  minLongMap > maxLong ||
+                  maxLongMap < minLong ||
+                  minLatMap > maxLat ||
+                  maxLatMap < minLat
+                ) {
+                  // console.log("Not loading new data");
+                  return tile;
+                } else {
+                  // console.log("Loading new data");
+                  return load(rasterUrl);
+                }
+              },
               minZoom: 0,
               maxZoom: 24,
               tileSize: 256,
@@ -5962,7 +6023,11 @@ function BaseMap(props) {
             </div>
           </>
         ) : (
-          <StaticMap mapboxApiAccessToken={MAPBOX_API_KEY} mapStyle={mapMode} />
+          <StaticMap
+            mapboxApiAccessToken={MAPBOX_API_KEY}
+            mapStyle={mapMode}
+            ref={mapRef}
+          />
         )}
 
         {showPopup && (
