@@ -33,6 +33,7 @@ export const UploadRasterData = ({
   uploadProps,
   uploading,
   progress,
+  options,
 }) => {
   return (
     <>
@@ -83,7 +84,7 @@ export const UploadRasterData = ({
                 }}
                 placeholder="Select Layer Type"
                 allowClear
-                treeData={props.options}
+                treeData={options}
                 onChange={changeLayerType}
               />
             </Form.Item>

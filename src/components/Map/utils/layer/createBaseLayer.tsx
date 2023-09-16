@@ -1334,6 +1334,7 @@ const CreateBaseLayer = (props) => {
           uploadProps={uploadProps}
           uploading={uploading}
           progress={progress}
+          options={props.options}
         />
       ),
     },
