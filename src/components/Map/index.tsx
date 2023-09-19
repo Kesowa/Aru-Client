@@ -308,149 +308,7 @@ function BaseMap(props) {
     return items;
   };
 
-  const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
-    const type = selectedLayer.type;
-    switch (e.key) {
-      case "1":
-        showModal1();
-        setSelectedLayerId(selectedLayer._id);
-        setCaptureDate(selectedLayer.captureDate);
-        setLayerName(selectedLayer.name);
-        type === "Raster"
-          ? setDefaultLayerType([
-              type.toUpperCase(),
-              selectedLayer.raster.name.toUpperCase(),
-            ])
-          : setDefaultLayerType([
-              type.toUpperCase(),
-              selectedLayer.vector.type.toUpperCase(),
-              selectedLayer.vector.name.toUpperCase(),
-            ]);
-        setSelectedLayerType(type.toLowerCase());
-        break;
-      case "2":
-        props.thread(true, {
-          docType: "layer",
-          docId: selectedLayer._id,
-        });
-        break;
-      case "3":
-        download(STATIC_URL + selectedLayer.layerpath);
-        break;
-      case "4":
-        setUpdate(true);
-        setUpdateType(type);
-        setUpdateId(selectedLayer._id);
-        setIsModalVisible4(true);
-        break;
-      case "5":
-        Modal.confirm({
-          title: "Delete Layer?",
-          icon: <ExclamationCircleOutlined />,
-          content: "Are you sure you want to delete this layer?",
-          okText: "Yes",
-          cancelText: "No",
-          onOk: () => {
-            deleteLayer(checkedKeys, type === "Raster" ? "2" : "1");
-          },
-        });
-        break;
-      case "6":
-        const idOfLayerGroup =
-          typeof selectedLayer.layerGroupId === "object"
-            ? selectedLayer.layerGroupId._id
-            : selectedLayer.layerGroupId;
-        await removeLayerFromGroup(
-          idOfLayerGroup,
-          selectedLayer._id,
-          `1-${selectedLayer._id}`
-        );
-        updateTreeDataAfterSingleLayerRemovalFromGroup(selectedLayer._id);
-        break;
-      case "7":
-        setVisibleGroupCreateModal(!visibleGroupCreateModal);
-        type === "Raster" ? setMoveType(2) : setMoveType(1);
-        break;
-      case "8":
-        Modal.confirm({
-          title: "Delete Selected Layers?",
-          icon: <ExclamationCircleOutlined />,
-          content: "Are you sure you want to delete selected layers?",
-          okText: "Yes",
-          cancelText: "No",
-          onOk: () => {
-            deleteMultipleLayers(checkedKeys, type === "Raster" ? "2" : "1");
-          },
-        });
-        break;
-      case "9":
-        setMoveToOtherGroupModal(true);
-        type === "Raster" ? setMoveType(2) : setMoveType(1);
-        break;
-      case "10":
-        http
-          .get(`${apis.DOWNLOAD_KML}?id=${selectedLayer._id}`)
-          .then((res: any) => {
-            if (res.data.status) {
-              //download(API_URL + res.data.link);
-              window.open(PUBLIC_URL + res.data.link);
-            } else {
-              console.log(res.data.message);
-            }
-          })
-          .catch((err: any) => {
-            console.log(err);
-            AxiosErrorHandler(err, props.logout);
-          });
-        break;
-      case "11":
-        Modal.confirm({
-          title: "Flag Layer?",
-          icon: <ExclamationCircleOutlined />,
-          content: "Are you sure you want to flag the entire layer?",
-          okText: "Yes",
-          cancelText: "No",
-          onOk: () => {
-            toggleLayerFlag(selectedLayer._id, true);
-          },
-        });
-        break;
-      case "12":
-        Modal.confirm({
-          title: "Un-flag Layer?",
-          icon: <ExclamationCircleOutlined />,
-          content:
-            "Are you sure you want to un-flag the entire layer? This will un-flag all flagged features as well.",
-          okText: "Yes",
-          cancelText: "No",
-          onOk: () => {
-            toggleLayerFlag(selectedLayer._id, false);
-          },
-        });
-        break;
-      case "13":
-        console.log("selectedLayer", selectedLayer);
-        setViewDocs(true);
-        setSelectedLayerInfo(selectedLayer);
-        setFeatureLayer(selectedLayer._id);
-        setFeatureLayerPath(selectedLayer.layerpath);
-        setWindowTitle(selectedLayer.name);
-        setSelectedLayerLabel(
-          selectedLayer.layerLabel
-            ? selectedLayer.layerLabel
-            : "No label selected"
-        );
-        setSelectedLayerPopupLabel(
-          selectedLayer.layerPopupLabel
-            ? selectedLayer.layerPopupLabel
-            : "No label selected"
-        );
-        setIsLayerDocs(true);
-        break;
-      default:
-        break;
-    }
-  };
+  
   //---------Notifications--------------------------------------
   const openNotification = (layerName) => {
     notification.success({
@@ -914,7 +772,6 @@ function BaseMap(props) {
   const [formDrawerVisible, setformDrawerVisible] = useState(false);
   const [viewMedia, setViewMedia] = useState(false);
   const [selectedLayerInfo, setSelectedLayerInfo] = useState({});
-  const [selectedLayer, setSelectedLayer] = useState({});
   const [viewDocs, setViewDocs] = useState(false);
   const [vectorLayers, setvectorLayers] = useState<any>([]);
   const [saveButtonShow, setSaveButtonShow] = useState(false);
@@ -3396,13 +3253,154 @@ function BaseMap(props) {
   };
 
   const getTreeData = (layer, type, keyPrefix) => {
+    const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
+      const type = layer.type;
+      switch (e.key) {
+        case "1":
+          showModal1();
+          setSelectedLayerId(layer._id);
+          setCaptureDate(layer.captureDate);
+          setLayerName(layer.name);
+          type === "Raster"
+            ? setDefaultLayerType([
+                type.toUpperCase(),
+                layer.raster.name.toUpperCase(),
+              ])
+            : setDefaultLayerType([
+                type.toUpperCase(),
+                layer.vector.type.toUpperCase(),
+                layer.vector.name.toUpperCase(),
+              ]);
+          setSelectedLayerType(type.toLowerCase());
+          break;
+        case "2":
+          props.thread(true, {
+            docType: "layer",
+            docId: layer._id,
+          });
+          break;
+        case "3":
+          download(STATIC_URL + layer.layerpath);
+          break;
+        case "4":
+          setUpdate(true);
+          setUpdateType(type);
+          setUpdateId(layer._id);
+          setIsModalVisible4(true);
+          break;
+        case "5":
+          Modal.confirm({
+            title: "Delete Layer?",
+            icon: <ExclamationCircleOutlined />,
+            content: "Are you sure you want to delete this layer?",
+            okText: "Yes",
+            cancelText: "No",
+            onOk: () => {
+              deleteLayer(checkedKeys, type === "Raster" ? "2" : "1");
+            },
+          });
+          break;
+        case "6":
+          const idOfLayerGroup =
+            typeof layer.layerGroupId === "object"
+              ? layer.layerGroupId._id
+              : layer.layerGroupId;
+          await removeLayerFromGroup(
+            idOfLayerGroup,
+            layer._id,
+            `1-${layer._id}`
+          );
+          updateTreeDataAfterSingleLayerRemovalFromGroup(layer._id);
+          break;
+        case "7":
+          setVisibleGroupCreateModal(!visibleGroupCreateModal);
+          type === "Raster" ? setMoveType(2) : setMoveType(1);
+          break;
+        case "8":
+          Modal.confirm({
+            title: "Delete Selected Layers?",
+            icon: <ExclamationCircleOutlined />,
+            content: "Are you sure you want to delete selected layers?",
+            okText: "Yes",
+            cancelText: "No",
+            onOk: () => {
+              deleteMultipleLayers(checkedKeys, type === "Raster" ? "2" : "1");
+            },
+          });
+          break;
+        case "9":
+          setMoveToOtherGroupModal(true);
+          type === "Raster" ? setMoveType(2) : setMoveType(1);
+          break;
+        case "10":
+          http
+            .get(`${apis.DOWNLOAD_KML}?id=${layer._id}`)
+            .then((res: any) => {
+              if (res.data.status) {
+                //download(API_URL + res.data.link);
+                window.open(PUBLIC_URL + res.data.link);
+              } else {
+                console.log(res.data.message);
+              }
+            })
+            .catch((err: any) => {
+              console.log(err);
+              AxiosErrorHandler(err, props.logout);
+            });
+          break;
+        case "11":
+          Modal.confirm({
+            title: "Flag Layer?",
+            icon: <ExclamationCircleOutlined />,
+            content: "Are you sure you want to flag the entire layer?",
+            okText: "Yes",
+            cancelText: "No",
+            onOk: () => {
+              toggleLayerFlag(layer._id, true);
+            },
+          });
+          break;
+        case "12":
+          Modal.confirm({
+            title: "Un-flag Layer?",
+            icon: <ExclamationCircleOutlined />,
+            content:
+              "Are you sure you want to un-flag the entire layer? This will un-flag all flagged features as well.",
+            okText: "Yes",
+            cancelText: "No",
+            onOk: () => {
+              toggleLayerFlag(layer._id, false);
+            },
+          });
+          break;
+        case "13":
+          setViewDocs(true);
+          setSelectedLayerInfo(layer);
+          setFeatureLayer(layer._id);
+          setFeatureLayerPath(layer.layerpath);
+          setWindowTitle(layer.name);
+          setSelectedLayerLabel(
+            layer.layerLabel
+              ? layer.layerLabel
+              : "No label selected"
+          );
+          setSelectedLayerPopupLabel(
+            layer.layerPopupLabel
+              ? layer.layerPopupLabel
+              : "No label selected"
+          );
+          setIsLayerDocs(true);
+          break;
+        default:
+          break;
+      }
+    };
     switch (type) {
       case "raster":
         return {
           title: (
             <>
               <Dropdown
-                onOpenChange={() => setSelectedLayer(layer)}
                 menu={{ items: treeMenu(layer), onClick: treeMenuOnClick }}
                 trigger={["contextMenu"]}
               >
@@ -3465,7 +3463,6 @@ function BaseMap(props) {
           title: (
             <>
               <Dropdown
-                onOpenChange={() => setSelectedLayer(layer)}
                 menu={{ items: treeMenu(layer), onClick: treeMenuOnClick }}
                 trigger={["contextMenu"]}
               >
