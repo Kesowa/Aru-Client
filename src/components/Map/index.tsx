@@ -308,7 +308,6 @@ function BaseMap(props) {
     return items;
   };
 
-  
   //---------Notifications--------------------------------------
   const openNotification = (layerName) => {
     notification.success({
@@ -3380,14 +3379,10 @@ function BaseMap(props) {
           setFeatureLayerPath(layer.layerpath);
           setWindowTitle(layer.name);
           setSelectedLayerLabel(
-            layer.layerLabel
-              ? layer.layerLabel
-              : "No label selected"
+            layer.layerLabel ? layer.layerLabel : "No label selected"
           );
           setSelectedLayerPopupLabel(
-            layer.layerPopupLabel
-              ? layer.layerPopupLabel
-              : "No label selected"
+            layer.layerPopupLabel ? layer.layerPopupLabel : "No label selected"
           );
           setIsLayerDocs(true);
           break;
