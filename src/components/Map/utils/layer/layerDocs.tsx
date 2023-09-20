@@ -1469,19 +1469,21 @@ function LayerDocs(props) {
 
   //---Get properties keys ---
 
-  function fetchJSON() {
+  async function fetchJSON() {
     console.log("props.layerPath", props.layerPath);
-    return fetch(`${STATIC_URL}${props.layerPath}`)
-      .then(function (res) {
-        return res.json();
-      })
-      .catch((err) => console.error(err));
+    try {
+      const res = await fetch(`${STATIC_URL}${props.layerPath}`);
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   useEffect(() => {
     if (props.visible) {
       setAttLoading(true);
-      const data = fetchJSON()
+      fetchJSON()
         .then((data) => {
           // let filteredObjectArray:any = [];
           // data.features.map((feature: any)=>{
