@@ -4543,6 +4543,11 @@ function BaseMap(props) {
         cl.push(data[0]["key"] + "-" + layer._id);
         setCheckedKeys(cl);
       }
+      else{
+        const cl = [...checkedKeys];
+        cl.push(data[1]["key"] + "-" + layer._id);
+        setCheckedKeys(cl);
+      }
     } catch (error) {
       message.error(error.message);
     }
