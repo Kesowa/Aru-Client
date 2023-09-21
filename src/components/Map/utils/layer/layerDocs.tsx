@@ -79,19 +79,19 @@ function LayerDocs(props) {
   const [documents, fillDocuments] = useState<any>([]);
   const [subHeading, setSubHeading] = useState("");
   const menuItem1 = () => {
-    const item = [
+    const items = [
       {
         key: "1",
         label: "Unassign Group",
       },
     ];
     reviewOptions.map((item) => {
-      item.push({
+      items.push({
         key: `2-${item.index}-${item.label}`,
         label: item.label,
       });
     });
-    return item;
+    return items;
   };
   const onClickMenu1 = (e) => {
     if (e.key === "1") {
