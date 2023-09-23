@@ -79,19 +79,19 @@ function LayerDocs(props) {
   const [documents, fillDocuments] = useState<any>([]);
   const [subHeading, setSubHeading] = useState("");
   const menuItem1 = () => {
-    const item = [
+    const items = [
       {
         key: "1",
         label: "Unassign Group",
       },
     ];
     reviewOptions.map((item) => {
-      item.push({
+      items.push({
         key: `2-${item.index}-${item.label}`,
         label: item.label,
       });
     });
-    return item;
+    return items;
   };
   const onClickMenu1 = (e) => {
     if (e.key === "1") {
@@ -1469,19 +1469,21 @@ function LayerDocs(props) {
 
   //---Get properties keys ---
 
-  function fetchJSON() {
+  async function fetchJSON() {
     console.log("props.layerPath", props.layerPath);
-    return fetch(`${STATIC_URL}${props.layerPath}`)
-      .then(function (res) {
-        return res.json();
-      })
-      .catch((err) => console.error(err));
+    try {
+      const res = await fetch(`${STATIC_URL}${props.layerPath}`);
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   useEffect(() => {
     if (props.visible) {
       setAttLoading(true);
-      const data = fetchJSON()
+      fetchJSON()
         .then((data) => {
           // let filteredObjectArray:any = [];
           // data.features.map((feature: any)=>{
