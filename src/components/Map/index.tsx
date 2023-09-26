@@ -2098,6 +2098,7 @@ function BaseMap(props) {
   const drawLayers = async (checkedKeysValue: any) => {
     const vlayers: any = [];
     setShowMarkerSizeTool(false);
+    
     await checkedKeysValue.forEach(async (element) => {
       if (element.split("-")[0] === "2" && element !== "2") {
         if (props.isBaseMap) {
@@ -4573,6 +4574,11 @@ function BaseMap(props) {
       if (layer.type === "Vector") {
         const cl = [...checkedKeys];
         cl.push(data[0]["key"] + "-" + layer._id);
+        setCheckedKeys(cl);
+      }
+      else{
+        const cl = [...checkedKeys];
+        cl.push(data[1]["key"] + "-" + layer._id);
         setCheckedKeys(cl);
       }
     } catch (error) {

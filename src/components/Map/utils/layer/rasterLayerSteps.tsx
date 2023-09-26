@@ -33,7 +33,7 @@ export const UploadRasterData = ({
   uploadProps,
   uploading,
   progress,
-  options,
+  options
 }) => {
   return (
     <>
