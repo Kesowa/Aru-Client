@@ -81,15 +81,15 @@ function VectorForm(props) {
       switch (props.mode) {
         case "PolygonView":
           setDefaultVectorType(["Area", "Measurement"]);
-          coptions = { ...layerTypes[1] };
+          coptions = structuredClone(layerTypes[1]);
           break;
         case "LineView":
           setDefaultVectorType(["Line", "Boundary Wall"]);
-          coptions = { ...layerTypes[0] };
+          coptions = structuredClone(layerTypes[0]);
           break;
         default:
           setDefaultVectorType(["Marker", "Electric Pole"]);
-          coptions = { ...layerTypes[2] };
+          coptions = structuredClone(layerTypes[2]);
           break;
       }
 
@@ -397,7 +397,6 @@ function VectorForm(props) {
       message.error("Please fill all fields");
       return;
     }
-    props.loading(true);
 
     const featureData = { ...props.features };
 
@@ -487,6 +486,7 @@ function VectorForm(props) {
           geoJSON: featureData.data,
         };
       }
+      props.loading(true);
       http
         .post<components["schemas"]["CreateBaseVectorLayerResponse"]>(
           props.isBaseMap
@@ -573,7 +573,7 @@ function VectorForm(props) {
         id: id,
         feature: featureData.data.features[0],
       };
-
+      props.loading(true);
       http
         .patch(`${apis.ADD_FEATURE_TO_GEOJSON}`, reqData)
         .then((data) => {
