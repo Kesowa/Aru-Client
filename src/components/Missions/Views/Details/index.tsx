@@ -964,6 +964,44 @@ function MissionView(props) {
     }
   }
 
+  //--------------Render Generate Report Button-----------
+  function generateReport() {
+    props.loading(true);
+    http
+      .post(`${apis.CREATE_REPORT}`, {
+        missionId: MissionDetails.missionId,
+      })
+      .then((result) => {
+        console.log(result.data.message);
+        if (result.data.status) {
+          message.success(result.data.message);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        message.error(err.message);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => {
+        props.loading(false);
+      });
+  }
+  function renderGenerateReportButton() {
+    if (["Completed", "Review"].includes(MissionDetails.missionStatus)) {
+      return (
+        <Button
+          type="primary"
+          style={{ marginLeft: "10px" }}
+          onClick={generateReport}
+        >
+          Generate Report
+        </Button>
+      );
+    } else return <></>;
+  }
+
   function headerButtons(status: any) {
     switch (status) {
       case "Upcoming":
@@ -1161,6 +1199,7 @@ function MissionView(props) {
           </div>
           <div className="pilot-assign-btn">
             {renderAssignPilotBtn("Re-Assign Pilot")}
+            {renderGenerateReportButton()}
             {renderPilotAssignButton()}
           </div>
         </>
@@ -1172,6 +1211,7 @@ function MissionView(props) {
       return (
         <div>
           {renderAssignPilotBtn("Assign Pilot")}
+          {renderGenerateReportButton()}
           {renderPilotAssignButton()}
         </div>
       );
@@ -1192,6 +1232,7 @@ function MissionView(props) {
           </div>
           <div className="pilot-assign-btn">
             {renderAssignPilotBtn("Re-Assign Pilot")}
+            {renderGenerateReportButton()}
             {renderPilotAssignButton()}
           </div>
         </>
@@ -1261,6 +1302,25 @@ function MissionView(props) {
             "Extraction Complete!.",
             `The point cloud has been extracted.`,
             "success"
+          );
+        });
+
+        socket.current.on("REPORT_GENERATION_COMPLETE", (data) => {
+          setDocRefresh(true);
+          console.log("Report successfully generated!", data);
+          openNotification(
+            "Report Generated!.",
+            "Report generation successful",
+            "success"
+          );
+        });
+
+        socket.current.on("REPORT_GENERATION_FAILED", (data) => {
+          console.log("Report generation failed!", data);
+          openNotification(
+            "Failed to generate Report!",
+            "Report generation failed",
+            "error"
           );
         });
       }
