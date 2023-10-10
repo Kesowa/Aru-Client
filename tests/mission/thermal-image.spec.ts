@@ -53,11 +53,13 @@ test("thermal view for non-thermal images", async ({ page }) => {
     `File ${filename} uploaded successfully`
   );
   expect(imageCreationNotification).toBeDefined();
-  
-  await page.locator('.ant-image-mask').first().click({
-    button: 'right'
+
+  await page.locator(".ant-image-mask").first().click({
+    button: "right",
   });
-  await page.getByText('Thermal View').click();
-  const nonThermalImageNotification = page.getByText('Selected image does not have a thermal view.');
+  await page.getByText("Thermal View").click();
+  const nonThermalImageNotification = page.getByText(
+    "Selected image does not have a thermal view."
+  );
   expect(nonThermalImageNotification).toBeDefined();
 });
