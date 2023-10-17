@@ -25,6 +25,9 @@ const ThermalImaging = (props) => {
   const [thermalData, setThermalData] = useState<any>([]);
   const [tableData, setTableData] = useState([]);
   const tableDataRef = useRef([]);
+  const [isLoading, setMissionsLoading] = useState(false);
+  const [isFetching, setFetch] = useState(false);
+
   const thermalImagingData = async ({ id, doc }) => {
     try {
       const thermalData = await http.post(apis.THERMAL_DATA, { id, doc });
@@ -36,6 +39,22 @@ const ThermalImaging = (props) => {
     } catch (err) {
       message.info("Selected image does not have a thermal view.");
     }
+  };
+
+  const sendPixelDataToDatabase = async (dataToAdd) => {
+    http
+      .post(`${apis.CREATE_THERMALPOINT}`, dataToAdd)
+      .then((result) => {
+        if (result.data.status) {
+          message.success("Data point added Successfully");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        message.error(err.message);
+        AxiosErrorHandler(err, props.logout);
+      });
+      
   };
   
   const fetchTableData = () => {
@@ -78,12 +97,13 @@ const ThermalImaging = (props) => {
     props.setThermalPayload({});
   };
   const handlePixelClick = (dataToAdd) => {
-
+    sendPixelDataToDatabase(dataToAdd);
     tableDataRef.current.push(dataToAdd); 
     setTableData([...tableDataRef.current]);
   };
   const handleDelete = (record) => {
     // Filter out the record to be deleted from the tableDataRef
+  
     tableDataRef.current = tableDataRef.current.filter((item) => item.index !== record.index);
     setTableData([...tableDataRef.current]);
   };
