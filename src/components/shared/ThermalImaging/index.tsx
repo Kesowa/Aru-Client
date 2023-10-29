@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Modal, message } from "antd";
+import { Button, Modal, message } from "antd";
 import ReactCursorPosition, { INTERACTIONS } from "react-cursor-position";
 import ThermalImage from "./thermalImage";
 import "./index.less";
@@ -41,9 +41,16 @@ const ThermalImaging = (props) => {
     }
   };
 
-  const sendPixelDataToDatabase = async (dataToAdd) => {
+  const sendPixelDataToDatabase = async () => {
+    
+    const dataToAdd = {
+      id: props.thermalPayload.id,
+      file: props.thermalPayload.doc,
+      table: tableDataRef.current,
+    };
+
     http
-      .post(`${apis.CREATE_THERMALPOINT}`, dataToAdd)
+      .post(`${apis.CREATE_THERMALTABLE}`, dataToAdd)
       .then((result) => {
         if (result.data.status) {
           message.success("Data point added Successfully");
@@ -54,14 +61,13 @@ const ThermalImaging = (props) => {
         message.error(err.message);
         AxiosErrorHandler(err, props.logout);
       });
-      
   };
   
-  const fetchTableData = () => {
+  const fetchTableData = ({ id, doc }) => {
     setMissionsLoading(true);
 
     http
-      .get(apis.GET_ALL_THERMALPOINT)
+      .get(apis.GET_THERMALPOINT, { id, doc })
       .then((res) => {
         console.log(res.data);
         const tableDataResponse = res.data; // Assuming the response data matches your table data format
@@ -81,7 +87,7 @@ const ThermalImaging = (props) => {
   useEffect(() => {
     if (Object.keys(props.thermalPayload).length > 0) {
       thermalImagingData(props.thermalPayload);
-      fetchTableData();
+      fetchTableData(props.thermalPayload);
     } else {
       setThermalData([]);
     }
@@ -97,7 +103,7 @@ const ThermalImaging = (props) => {
     props.setThermalPayload({});
   };
   const handlePixelClick = (dataToAdd) => {
-    sendPixelDataToDatabase(dataToAdd);
+   /*  sendPixelDataToDatabase(dataToAdd); */
     tableDataRef.current.push(dataToAdd); 
     setTableData([...tableDataRef.current]);
   };
@@ -179,7 +185,10 @@ const ThermalImaging = (props) => {
              
           </ReactCursorPosition>
            <div className="widget" style={{ marginRight: "10px", padding: "1rem" }}>
-           <Table columns={columns} dataSource={tableData} size="small" /> {/* Use tableData as the data source */}
+           <Table columns={columns} dataSource={tableData} size="small"  style={{ cursor: "pointer", minHeight: "450px" }}/>
+           <Button type="primary" size={'large'} onClick={sendPixelDataToDatabase}>
+            Submit
+          </Button> {/* Use tableData as the data source */}
          </div>
          </div>
         )}

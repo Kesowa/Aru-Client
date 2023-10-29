@@ -69,10 +69,11 @@ const ThermalImage = (props) => {
       // Call the function to handle pixel click
       const pixelData = {
         index: tableDataRef.current.length + 1,
-        posX: offsetX,
-        posY:offsetY,
+        x: offsetX,
+        y:offsetY,
+        temp: props.data[(offsetX) + width * (offsetY)],
         color: hexCode,
-        temperature: props.data[(offsetX) + width * (offsetY)],
+        label:'',
       };
       // Call the parent component's function to add data to the table
       tableDataRef.current.push(pixelData);
