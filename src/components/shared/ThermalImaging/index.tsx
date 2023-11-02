@@ -30,13 +30,14 @@ const ThermalImaging = (props) => {
 
   const thermalImagingData = async ({ id, doc }) => {
     try {
-      const thermalData = await http.post(apis.THERMAL_DATA, { id, doc });
-      const rawFile = await fetch(STATIC_URL + thermalData.data.rawFilePath);
+      const thermalData = await http.get(apis.THERMAL_DATA, {params: { id, doc }});
+      const rawFile = await fetch(STATIC_URL + thermalData.data.data.data.file);
       const rawBlob = await rawFile.blob();
       const rawArray = new Float32Array(await rawBlob.arrayBuffer());
       setThermalData(rawArray);
       console.log("thermal", thermalData.data.rawFilePath, rawArray);
     } catch (err) {
+      console.error(err);
       message.info("Selected image does not have a thermal view.");
     }
   };
@@ -67,10 +68,10 @@ const ThermalImaging = (props) => {
     setMissionsLoading(true);
 
     await http
-      .get(apis.GET_THERMALPOINT, { id, doc })
+      .get(apis.GET_THERMALPOINT, {params: { id, doc }})
       .then((res) => {
         console.log(res.data);
-        const tableDataResponse = res.data; // Assuming the response data matches your table data format
+        const tableDataResponse = res.data.data.table; // Assuming the response data matches your table data format
         tableDataRef.current = tableDataResponse;
         setTableData([...tableDataRef.current]);
       })
