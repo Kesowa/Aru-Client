@@ -49,7 +49,7 @@ const ThermalImaging = (props) => {
       table: tableDataRef.current,
     };
 
-    http
+    await http
       .post(`${apis.CREATE_THERMALTABLE}`, dataToAdd)
       .then((result) => {
         if (result.data.status) {
@@ -63,10 +63,10 @@ const ThermalImaging = (props) => {
       });
   };
   
-  const fetchTableData = ({ id, doc }) => {
+  const fetchTableData = async ({ id, doc }) => {
     setMissionsLoading(true);
 
-    http
+    await http
       .get(apis.GET_THERMALPOINT, { id, doc })
       .then((res) => {
         console.log(res.data);
@@ -198,3 +198,4 @@ const ThermalImaging = (props) => {
 };
 
 export default ThermalImaging;
+//Screen -D -r code-changes
