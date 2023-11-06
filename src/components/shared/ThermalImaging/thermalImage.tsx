@@ -28,7 +28,7 @@ const ThermalImage = (props) => {
   useEffect(() => {
     if (!isPositionOutside) {
       const temperature = props.data[x + width * y];
-      console.log("tyemp",x,y)
+    
       setTemperature(temperature);
     } else {
       setTemperature("");
@@ -62,23 +62,22 @@ const ThermalImage = (props) => {
       const { offsetX, offsetY } = ev;
       // Call the method to get the r,g,b,a values for the current pixel
       const c = extractPixelColor(dataRef.current, cols, offsetY, offsetX);
-      console.log(cols);
       const hexCode = `#${[c.red, c.green, c.blue]
         .map((x) => x.toString(16).padStart(2, "0"))
         .join("")}`;
       // Call the function to handle pixel click
       const pixelData = {
-        index: tableDataRef.current.length + 1,
+        // index: tableDataRef.current.length + 1,
         x: offsetX,
         y:offsetY,
         temp: props.data[(offsetX) + width * (offsetY)],
         color: hexCode,
-        label:'',
+        label:'gg',
       };
       // Call the parent component's function to add data to the table
       tableDataRef.current.push(pixelData);
-      console.log(pixelData);
-      console.log(props.data[(offsetX + 16) + canvas.width * (offsetY + 16)]);
+      // console.log(pixelData);
+      // console.log(props.data[(offsetX + 16) + canvas.width * (offsetY + 16)]);
       props.onPixelClick(pixelData);
     });
   }

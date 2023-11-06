@@ -12,7 +12,7 @@ import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 
 interface DataType {
-  index: number;
+  // index: number;
   pixel_position: string;
   color: string;
   temperature: number;
@@ -24,7 +24,7 @@ const ThermalImaging = (props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [thermalData, setThermalData] = useState<any>([]);
   const [tableData, setTableData] = useState([]);
-  const tableDataRef = useRef([]);
+  const tableDataRef = useRef([]); // Initialize with an empty array
   const [isLoading, setMissionsLoading] = useState(false);
   const [isFetching, setFetch] = useState(false);
 
@@ -44,11 +44,13 @@ const ThermalImaging = (props) => {
 
   const sendPixelDataToDatabase = async () => {
     
+    
     const dataToAdd = {
-      id: props.thermalPayload.id,
-      file: props.thermalPayload.doc,
-      table: tableDataRef.current,
+      id:props.thermalPayload.id,
+      doc: props.thermalPayload.doc,
+      table: tableData,
     };
+    
 
     await http
       .post(`${apis.CREATE_THERMALTABLE}`, dataToAdd)
@@ -66,14 +68,14 @@ const ThermalImaging = (props) => {
   
   const fetchTableData = async ({ id, doc }) => {
     setMissionsLoading(true);
-
+    
     await http
       .get(apis.GET_THERMALPOINT, {params: { id, doc }})
       .then((res) => {
         console.log(res.data);
         const tableDataResponse = res.data.data.table; // Assuming the response data matches your table data format
-        tableDataRef.current = tableDataResponse;
-        setTableData([...tableDataRef.current]);
+        // tableDataRef.current = tableDataResponse;
+        // setTableData([...tableDataRef.current]);
       })
       .catch((err) => {
         console.log(err);
@@ -105,6 +107,7 @@ const ThermalImaging = (props) => {
   };
   const handlePixelClick = (dataToAdd) => {
    /*  sendPixelDataToDatabase(dataToAdd); */
+    console.log(tableDataRef.current)
     tableDataRef.current.push(dataToAdd); 
     setTableData([...tableDataRef.current]);
   };
@@ -116,12 +119,12 @@ const ThermalImaging = (props) => {
   };
 
   const columns: ColumnsType<DataType> = [
-    {
-      title: 'Index',
-      dataIndex: 'index',
-      key: 'index',
-    /*   render: (text) => <a>{text}</a>, */
-    },
+    // {
+    //   title: 'Index',
+    //   dataIndex: 'index',
+    //   key: 'index',
+    // /*   render: (text) => <a>{text}</a>, */
+    // },
     {
       title: 'Pixel Position',
       dataIndex: 'pixel_position',
