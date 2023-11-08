@@ -143,13 +143,12 @@ function MissionView(props) {
 
   const getInitialData = async (id) => {
     const [userType, missionId] = id.split("-");
-    console.log("ID,MISSIONID", userType, missionId);
     try {
-      const result = await http.get(
-        userType === "staff"
-          ? `${apis.GET_MISSION_BY_ID}${missionId}`
-          : `${apis.GET_MISSION_ID_CLIENT}${missionId}`
-      );
+      const result = await http.get(`${apis.GET_MISSION_DOC_COUNT}`, {
+        params: {
+          missionId: missionId,
+        }
+      });
 
       if (result.data.status) {
         console.log(result.data.data);
@@ -170,9 +169,8 @@ function MissionView(props) {
               ? `${apis.GET_MISSION_BY_ID}${missionId}` 
               : `${apis.GET_MISSION_ID_CLIENT}${missionId}`
           );
-          console.log("MISSION ID CHECK",missionId);
+          
           mission = result.data.data;
-          console.log("from api call", mission);
         } catch (err) {
           message.error("Something went wrong");
           AxiosErrorHandler(err, props.logout);
