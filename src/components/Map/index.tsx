@@ -305,6 +305,13 @@ function BaseMap(props) {
         label: "More",
       });
     }
+    if(props.isBaseMap)
+    {
+      items.push({
+        key: "7",
+        label: "Mask Layer"
+      });
+    }
     return items;
   };
 
