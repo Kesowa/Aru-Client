@@ -305,13 +305,12 @@ function BaseMap(props) {
         label: "More",
       });
     }
-    if(props.isBaseMap)
-    {
-      items.push({
+
+    items.push({
         key: "7",
         label: "Mask Layer"
-      });
-    }
+    });
+
     return items;
   };
 
@@ -3249,6 +3248,16 @@ function BaseMap(props) {
   };
 
   const getTreeData = (layer, type, keyPrefix) => {
+    const getMaskLayer = (lat, lng) => {
+      const maskPolygon = getPolygon(lat, lng, 1);
+      return new SolidPolygonLayer({
+        id: `maskLayer-${layer._id}`,
+        operation: "mask",
+        data: [maskPolygon],
+        getPolygon: (d) => d,
+        getColor: [255, 0, 0],
+      });
+    };
     const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
       const type = layer.type;
       switch (e.key) {
@@ -3383,6 +3392,15 @@ function BaseMap(props) {
           );
           setIsLayerDocs(true);
           break;
+        case "14":
+           // Logic for adding a mask layer
+          const maskLayer = getMaskLayer(layer.latitude, layer.longitude);
+          const combinedLayers = [layer, maskLayer];
+          
+          addLayer(combinedLayers);
+          break;
+
+
         default:
           break;
       }
