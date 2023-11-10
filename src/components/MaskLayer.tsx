@@ -14,7 +14,7 @@ const INITIAL_VIEW_STATE = {
   pitch: 0,
   bearing: 0,
 };
-const getPolygon = (lat: number, lng: number, size: number) => [
+export const getPolygon = (lat: number, lng: number, size: number) => [
   [lat - size * 0.5, lng - size * 0.5],
   [lat + size * 0.5, lng - size * 0.5],
   [lat + size * 0.5, lng + size * 0.5],

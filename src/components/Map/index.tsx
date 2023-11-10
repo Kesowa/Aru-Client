@@ -86,6 +86,7 @@ import {
   IconLayer,
   PathLayer,
 } from "@deck.gl/layers";
+import { SolidPolygonLayer } from "@deck.gl/layers/typed";
 import { TileLayer } from "@deck.gl/geo-layers";
 import { HtmlOverlayItem, HtmlOverlay } from "@nebula.gl/overlays";
 import { EditableGeoJsonLayer } from "@nebula.gl/layers";
@@ -129,6 +130,7 @@ import NavIcon from "../../static/nav_icon.png";
 // import { JSONLoader } from "@loaders.gl/json";
 // import { LASLoader } from "@loaders.gl/las";
 import { load } from "@loaders.gl/core";
+import { getPolygon } from "../MaskLayer";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -307,7 +309,7 @@ function BaseMap(props) {
     }
 
     items.push({
-        key: "7",
+        key: "14",
         label: "Mask Layer"
     });
 
@@ -3396,7 +3398,7 @@ function BaseMap(props) {
            // Logic for adding a mask layer
           const maskLayer = getMaskLayer(layer.latitude, layer.longitude);
           const combinedLayers = [layer, maskLayer];
-          
+          //console.log("Mask Layer");
           addLayer(combinedLayers);
           break;
 
