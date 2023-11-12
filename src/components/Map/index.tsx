@@ -130,7 +130,7 @@ import NavIcon from "../../static/nav_icon.png";
 // import { JSONLoader } from "@loaders.gl/json";
 // import { LASLoader } from "@loaders.gl/las";
 import { load } from "@loaders.gl/core";
-import { getPolygon } from "../MaskLayer";
+import MaskLayer from "../MaskLayer";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -184,6 +184,7 @@ function BaseMap(props) {
     ).format(),
   ]);
   const [featureIdx, setFeatureIdx] = useState(null);
+  const [isMaskLayerClicked, setIsMaskLayerClicked] = useState(false);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
   const [flag, setFlag] = useState(false);
@@ -310,7 +311,10 @@ function BaseMap(props) {
 
     items.push({
         key: "14",
-        label: "Mask Layer"
+        label: "Mask Layer",
+        onClick: () => {
+          setIsMaskLayerClicked(true);
+        },
     });
 
     return items;
@@ -6042,6 +6046,7 @@ function BaseMap(props) {
             ref={mapRef}
           />
         )}
+        {isMaskLayerClicked && <MaskLayer/>}
 
         {showPopup && (
           <HtmlOverlay>

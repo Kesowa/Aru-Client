@@ -1,11 +1,13 @@
 import DeckGL from "@deck.gl/react/typed";
 import { ScatterplotLayer, SolidPolygonLayer } from "@deck.gl/layers/typed";
-const MAPBOX_ACCESS_TOKEN =
-  "pk.eyJ1IjoibmVlbGR1dHRhMTkiLCJhIjoiY2tweG9mN3F4MThrNTJ4cDk0enVjcTN4dCJ9.uxa_h0rjqumTxFMI1QELKQ";
 
 import { MVTLayer } from "@deck.gl/geo-layers/typed";
 import { MaskExtension } from "@deck.gl/extensions/typed";
 import { useState } from "react";
+import { MAPBOX_API_KEY } from "src/constants";
+
+// const MAPBOX_ACCESS_TOKEN =
+//   "pk.eyJ1IjoibmVlbGR1dHRhMTkiLCJhIjoiY2tweG9mN3F4MThrNTJ4cDk0enVjcTN4dCJ9.uxa_h0rjqumTxFMI1QELKQ";
 
 const INITIAL_VIEW_STATE = {
   longitude: 88,
@@ -20,7 +22,7 @@ export const getPolygon = (lat: number, lng: number, size: number) => [
   [lat + size * 0.5, lng + size * 0.5],
   [lat - size * 0.5, lng + size * 0.5],
 ];
-function App() {
+function MaskLayer() {
   const myLayer = new ScatterplotLayer({
     id: "myLayer",
     data: [
@@ -40,7 +42,7 @@ function App() {
     getColor: [255, 0, 0],
   });
   const myLayer2 = new MVTLayer({
-    data: `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf?access_token=${MAPBOX_ACCESS_TOKEN}`,
+    data: `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf?access_token=${MAPBOX_API_KEY}`,
     minZoom: 0,
     maxZoom: 23,
     getLineColor: [192, 192, 192],
@@ -67,4 +69,4 @@ function App() {
   );
 }
 
-export default App;
+export default MaskLayer;
