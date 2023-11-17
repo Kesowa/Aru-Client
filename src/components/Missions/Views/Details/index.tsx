@@ -146,7 +146,7 @@ function MissionView(props) {
       const result = await http.get(`${apis.GET_MISSION_DOC_COUNT}`, {
         params: {
           missionId: missionId,
-        }
+        },
       });
 
       if (result.data.status) {
