@@ -508,7 +508,10 @@ function LocationCard(props) {
   );
 }
 
-const mapStateToProps = () => ({});
+const mapStateToProps = (state) => ({
+  loading: state.loading,
+  logout: state.logout,
+});
 
 export default connect(mapStateToProps, {
   loading,

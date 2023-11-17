@@ -512,8 +512,32 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
     };
   });
 
-  return (
-    <div>
+  let card: React.ReactElement = (
+    <Card
+      bordered={true}
+      style={{ background: "#eceaea", padding: "20px", minHeight: "500px" }}
+    >
+      <img src={AloneLogo} alt="" />
+      <p style={{ textAlign: "center" }}>Please Select a Model to View</p>
+    </Card>
+  );
+
+if (data) {
+  if (isCardLoading) {
+    card = (
+      <Card
+        title="MODEL INFO"
+        style={{
+          borderRadius: "8px",
+          overflow: "hidden",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          marginBottom: "30px",
+        }}
+        loading={isCardLoading}
+      />
+    );
+  } else {
+    card = (
       <Card
         title="MODEL INFO"
         style={{
@@ -643,6 +667,13 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
           </Col>
         </Row>
       </Card>
+    );
+  }
+}
+
+  return (
+    <div>
+      {card}
       <Modal
         open={isModalVisible}
         onOk={handleOk}

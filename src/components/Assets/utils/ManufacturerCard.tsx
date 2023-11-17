@@ -32,6 +32,7 @@ import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { logout } from "../../../actions/authAction";
 import AloneLogo from "../../../static/Alone-rafiki.svg";
 import moment from "moment";
+import { setManufacturersToState } from "src/actions/manufacturerAction";
 
 const { Text } = Typography;
 
@@ -58,6 +59,48 @@ const originData: Item[] = [
     value: "",
   },
 ];
+
+interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
+  editing: boolean;
+  dataIndex: string;
+  title: any;
+  inputType: "text";
+  record: Item;
+  index: number;
+  children: React.ReactNode;
+}
+
+const EditableCell: React.FC<EditableCellProps> = ({
+  editing,
+  dataIndex,
+  title,
+  inputType,
+  record,
+  index,
+  children,
+  ...restProps
+}) => {
+  return (
+    <td {...restProps}>
+      {editing ? (
+        <Form.Item
+          name={dataIndex}
+          style={{ margin: 0 }}
+          rules={[
+            {
+              required: true,
+              message: `Please Input ${dataIndex}!`,
+            },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+      ) : (
+        children
+      )}
+    </td>
+  );
+};
 
 interface ManufacturerCardProps {
   id: string;
@@ -116,7 +159,7 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
       .get(`${apis.GET_MANUFACTURERS}`)
       .then((result) => {
         if (result.data.status) {
-          setManufacturers(result.data.data);
+          setManufacturersToState(result.data.data);
         } else {
           message.error(result.data.message);
         }

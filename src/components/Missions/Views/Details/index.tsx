@@ -100,7 +100,6 @@ function MissionView(props) {
     props.loading(true);
     props.clearMissionCreationState();
     getInitialData(id);
-
   }, []);
 
   const options = [
@@ -120,7 +119,7 @@ function MissionView(props) {
     const result = await http.get(`${apis.FETCH_ALL_PILOTS}`);
     if (result.data.data !== undefined) {
       setPilots(result.data.data);
-      console.log("PIOLET",result.data.data);//here all are staff members
+      console.log("PIOLET", result.data.data); //here all are staff members
     }
   };
 
@@ -132,14 +131,14 @@ function MissionView(props) {
         console.info("Successfully fetched mission types");
       } else {
         message.error(result.data.message);
-        console.log(`Error while fetching mission types: ${result.data.message}`);
+        console.log(
+          `Error while fetching mission types: ${result.data.message}`
+        );
       }
     } catch (error) {
       console.error(error);
     }
   };
-  
-  
 
   const getInitialData = async (id) => {
     const [userType, missionId] = id.split("-");
@@ -166,10 +165,9 @@ function MissionView(props) {
         try {
           const result = await http.get(
             userType === "staff"
-              ? `${apis.GET_MISSION_BY_ID}${missionId}` 
+              ? `${apis.GET_MISSION_BY_ID}${missionId}`
               : `${apis.GET_MISSION_ID_CLIENT}${missionId}`
           );
-          
           mission = result.data.data;
         } catch (err) {
           message.error("Something went wrong");
@@ -178,7 +176,7 @@ function MissionView(props) {
           return;
         }
       }
-      console.log("STAFF ERROR",result);
+      console.log("STAFF ERROR", result);
       const details = {
         missionName: mission.name,
         missionId: mission._id,
@@ -268,8 +266,6 @@ function MissionView(props) {
     }
   };
 
-  
-
   // ++++++++++++++++++++++++++++++++++++ E2 share Modal states ++++++++++++++++++++++++++++++++++++++++++++
   const [isModalVisible, setIsModalVisible] = useState(false);
   const showModal = () => {
@@ -351,7 +347,7 @@ function MissionView(props) {
   const { Title, Text, Link } = Typography;
   const [activeKey, setactiveKey] = useState("1");
   // ++++++++++++++++++++++++++++++++++++++++++++++ E4 Data Card tabs +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  const returnTabPaneItem = () => {
+  const returnTabPaneItem = (id) => {
     const items: TabsProps["items"] = [
       {
         key: "1",
@@ -451,7 +447,6 @@ function MissionView(props) {
       return items.filter((item) => item.key !== "1" && item.key !== "2");
     }
   };
-  
 
   const DataTabs = ({ id }) => {
     return (
@@ -459,7 +454,7 @@ function MissionView(props) {
         <Tabs
           defaultActiveKey={activeKey}
           onChange={callback}
-          items={returnTabPaneItem()}
+          items={returnTabPaneItem(id)}
         />
       </>
     );
@@ -491,7 +486,6 @@ function MissionView(props) {
       </Tag>
     );
   }
-  
 
   // ++++++++++++++++++++ E6 Mission Status Card +++++++++++++++++++++++++++++++++++++++++++++++++
   function MissionStatusCard(status: any) {
@@ -554,7 +548,6 @@ function MissionView(props) {
                   `/dashboard/data/live/${MissionDetails.missionId}`
                 );
               }}
-              
             >
               Click to Watch!
             </Button>
@@ -635,7 +628,7 @@ function MissionView(props) {
 
   function renderDataCard(status: any) {
     const [userType, missionId] = id.split("-");
-    console.log("LOGIS",missionId);
+    console.log("LOGIS", missionId);
     switch (status) {
       case "Review":
         return <DataTabs id={missionId} />;
@@ -711,7 +704,7 @@ function MissionView(props) {
         });
     }
   };
-  
+
   const reviewMission = () => {
     if (MissionDetails.pilotAssigned === "no-pilot") {
       message.warning(
@@ -761,8 +754,8 @@ function MissionView(props) {
         );
         permissions = [...filteredPermissions, ...permissions];
       });
-      
-    console.log("Filtered Permissions:", permissions);
+
+      console.log("Filtered Permissions:", permissions);
 
       if (permissions.length > 0) {
         return (
@@ -925,7 +918,6 @@ function MissionView(props) {
   //----------------Render Edit Flight Button---------------------
 
   //----------------Render Assign Pilot Button---------------------
-  
 
   function renderAssignPilotBtn(buttonText: string) {
     if (
@@ -968,7 +960,44 @@ function MissionView(props) {
       );
     }
   }
-  
+
+  //--------------Render Generate Report Button-----------
+  function generateReport() {
+    props.loading(true);
+    http
+      .post(`${apis.CREATE_REPORT}`, {
+        missionId: MissionDetails.missionId,
+      })
+      .then((result) => {
+        console.log(result.data.message);
+        if (result.data.status) {
+          message.success(result.data.message);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        message.error(err.message);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => {
+        props.loading(false);
+      });
+  }
+  function renderGenerateReportButton() {
+    if (["Completed", "Review"].includes(MissionDetails.missionStatus)) {
+      return (
+        <Button
+          type="primary"
+          style={{ marginLeft: "10px" }}
+          onClick={generateReport}
+        >
+          Generate Report
+        </Button>
+      );
+    } else return <></>;
+  }
 
   function headerButtons(status: any) {
     switch (status) {
@@ -1011,7 +1040,7 @@ function MissionView(props) {
       missionType: missionTypes[i]._id,
     });
   };
-  console.log("HORRAY",id);
+  console.log("HORRAY", id);
   /*--------------------Mission Type--------------------*/
   const menu: MenuProps["items"] = () => {
     const items: MenuProps["items"] = missionTypes.map(
@@ -1167,6 +1196,7 @@ function MissionView(props) {
           </div>
           <div className="pilot-assign-btn">
             {renderAssignPilotBtn("Re-Assign Pilot")}
+            {renderGenerateReportButton()}
             {renderPilotAssignButton()}
           </div>
         </>
@@ -1178,6 +1208,7 @@ function MissionView(props) {
       return (
         <div>
           {renderAssignPilotBtn("Assign Pilot")}
+          {renderGenerateReportButton()}
           {renderPilotAssignButton()}
         </div>
       );
@@ -1198,6 +1229,7 @@ function MissionView(props) {
           </div>
           <div className="pilot-assign-btn">
             {renderAssignPilotBtn("Re-Assign Pilot")}
+            {renderGenerateReportButton()}
             {renderPilotAssignButton()}
           </div>
         </>
@@ -1224,7 +1256,6 @@ function MissionView(props) {
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
-
 
   //socket event listeners here
   useEffect(() => {
@@ -1270,11 +1301,30 @@ function MissionView(props) {
             "success"
           );
         });
+
+        socket.current.on("REPORT_GENERATION_COMPLETE", (data) => {
+          setDocRefresh(true);
+          console.log("Report successfully generated!", data);
+          openNotification(
+            "Report Generated!.",
+            "Report generation successful",
+            "success"
+          );
+        });
+
+        socket.current.on("REPORT_GENERATION_FAILED", (data) => {
+          console.log("Report generation failed!", data);
+          openNotification(
+            "Failed to generate Report!",
+            "Report generation failed",
+            "error"
+          );
+        });
       }
     }
   }, [MissionDetails.missionId]);
   console.log(location.state);
-  
+
   return (
     <div className="mission-view-wrapper">
       {/* +++++++++++++++++++ E11 HEADER++++++++++++++++++++++++++++++++++++++++++++++++++++ */}

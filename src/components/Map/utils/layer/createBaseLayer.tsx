@@ -1267,6 +1267,7 @@ const CreateBaseLayer = (props) => {
           layerColor={layerColor}
           setLayerColor={setLayerColor}
           onChangeInherit={onChangeInherit}
+          options={props.options}
         />
       ),
     },
@@ -1333,6 +1334,7 @@ const CreateBaseLayer = (props) => {
           uploadProps={uploadProps}
           uploading={uploading}
           progress={progress}
+          options={props.options}
         />
       ),
     },
@@ -1757,6 +1759,7 @@ const CreateBaseLayer = (props) => {
           selectedLayers={selectedLayers}
           setSelectedLayers={setSelectedLayers}
           setApiCall={setApiCall}
+          form={form}
         />
       </Modal>
       <Modal

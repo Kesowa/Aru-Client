@@ -20,6 +20,7 @@ import {
   Badge,
   Pagination,
   MenuProps,
+  notification,
 } from "antd";
 import {
   ExclamationCircleOutlined,
@@ -95,6 +96,14 @@ function Videos(props) {
 
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
+
+  const openNotification = (title, description, type) => {
+    notification[type]({
+      message: title,
+      description: description,
+    });
+  };
+
   const vodMenu: MenuProps["items"] = (data) => {
     const item = [
       {
@@ -352,7 +361,8 @@ function Videos(props) {
   };
 
   function checkExtension(videoFile) {
-    if (videoFile === "mp4" || videoFile === "MP4") {
+    const videoExtensions = ["mp4", "mkv", "avi", "mov", "wmv", "flv"];
+    if (videoExtensions.includes(videoFile.toLowerCase())) {
       return true;
     } else {
       return false;
@@ -402,9 +412,9 @@ function Videos(props) {
       ) {
         case "tenant-root": //when user is a tenant root
           console.log(options.file.name.split(".")[1]);
-          const isValidExtension = checkExtension(
-            options.file.name.split(".")[1]
-          );
+          const parts = options.file.name.split(".");
+          const isValidExtension = checkExtension(parts[parts.length - 1]);
+          console.log("isvalid", isValidExtension);
           if (isValidExtension) {
             http
               .post(options.action, fData, config)
@@ -458,10 +468,8 @@ function Videos(props) {
           break;
 
         case "tenant-staff": // when user is tenant staff
-          console.log(options.file.name.split(".")[1]);
-          const isValidExtension2 = checkExtension(
-            options.file.name.split(".")[1]
-          );
+          const parts2 = options.file.name.split(".");
+          const isValidExtension2 = checkExtension(parts2[parts2.length - 1]);
           if (isValidExtension2) {
             http
               .post(options.action, fData, config)
@@ -525,20 +533,40 @@ function Videos(props) {
   };
 
   useEffect(() => {
+    let socketInstance = null;
+
     if (props?.missionDetails?.missionId) {
-      socket.current = io(
+      if (socket.current) {
+        // Close the existing socket connection
+        socket.current.disconnect();
+      }
+
+      socketInstance = io(
         `${API_URL}/stream/mission-specific?missionID=${props.missionDetails.missionId}`
       );
 
-      socket.current.on("PROCESS_VIDEO_FINISHED", (data) => {
+      socketInstance.on("PROCESS_VIDEO_FINISHED", (data) => {
+        console.log("Video processing finished: ", data);
+        openNotification(
+          "Finished Processing!",
+          `Processing ${data.originalName} has been complete!`,
+          "success"
+        );
         setRefresh(true);
       });
 
-      socket.current.on("VOD_REMOVED", (data) => {
+      socketInstance.on("VOD_REMOVED", (data) => {
         setRefresh(true);
       });
     }
-  }, []);
+
+    // Cleanup function to close the socket connection
+    return () => {
+      if (socketInstance) {
+        socketInstance.disconnect();
+      }
+    };
+  }, [props?.missionDetails?.missionId]);
 
   //----------- Fetching video data for mission --------------------
   const getFlaggedFilter = () => {

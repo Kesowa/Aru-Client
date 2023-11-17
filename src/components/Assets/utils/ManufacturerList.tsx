@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Row, Col, Typography, Table, message, Button, Input } from "antd";
 import { SearchOutlined, ShakeOutlined } from "@ant-design/icons";
@@ -22,6 +22,33 @@ const ManufacturerList = (props) => {
   const [isTableLoading, setIsTableLoading] = useState(true);
   const [selectedManufacturerID, setSelectedManufacturerID] = useState();
 
+  useEffect(() => {
+    fetchManufacturers();
+  }, []);
+  const fetchManufacturers = () => {
+    const { userType } = props;
+    const { tenantId } = props;
+
+    http
+      .get(`${apis.GET_MANUFACTURERS}`)
+      .then((result) => {
+        //console.log(result.data);
+        if (result.data.status) {
+          props.setManufacturersToState(result.data.data);
+          console.log(result.data.data);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => {
+        setIsTableLoading(false);
+      });
+  };
+  
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -117,7 +144,7 @@ const ManufacturerList = (props) => {
       });
   };
 
-  const columns = [
+  const columns: any [] = [
     {
       title: "MANUFACTURER",
       dataIndex: "name",

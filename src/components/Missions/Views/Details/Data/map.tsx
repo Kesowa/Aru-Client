@@ -84,7 +84,7 @@ function Map(props) {
         socket.current = io(
           `${API_URL}/stream/mission-specific?missionID=${props.id}`
         );
-        console.log("PROP DATA",props.id);
+        console.log("PROP DATA", props.id);
         socket.current.on("LAYER_ZIP_START", (data) => {
           message.success(
             "Preparing your data for download, this may take some time!"
@@ -119,7 +119,9 @@ function Map(props) {
   useEffect(() => {
     setLoader(true);
     http
-      .get(`${apis.GET_ALL_LAYERS_FOR_MISSION}?missionId=${props.mission.missionId}`)
+      .get(
+        `${apis.GET_ALL_LAYERS_FOR_MISSION}?missionId=${props.mission.missionId}`
+      )
       .then((res) => {
         if (res.data.status) {
           if (res.data.data !== undefined) {
@@ -136,7 +138,7 @@ function Map(props) {
       .catch((err) => {
         message.error(err.message);
         AxiosErrorHandler(err, props.logout);
-      })      
+      })
       .finally(() => setLoader(false));
   }, []);
 
