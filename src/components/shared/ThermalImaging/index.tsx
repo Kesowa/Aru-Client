@@ -15,7 +15,7 @@ interface DataType {
   // index: number;
   pixel_position: string;
   color: string;
-  temperature: number;
+  temp: number;
 }
 
 
@@ -72,10 +72,13 @@ const ThermalImaging = (props) => {
     await http
       .get(apis.GET_THERMALPOINT, {params: { id, doc }})
       .then((res) => {
-        console.log(res.data);
-        const tableDataResponse = res.data.data.table; // Assuming the response data matches your table data format
+        // console.log(res.data.data.data);
+        const tableDataResponse = res.data.data.data.table;
+        console.log("tableDataResponse", tableDataResponse);// Assuming the response data matches your table data format
         // tableDataRef.current = tableDataResponse;
-        // setTableData([...tableDataRef.current]);
+        setTableData(tableDataResponse);
+        console.log(tableData)
+
       })
       .catch((err) => {
         console.log(err);
@@ -108,14 +111,14 @@ const ThermalImaging = (props) => {
   const handlePixelClick = (dataToAdd) => {
    /*  sendPixelDataToDatabase(dataToAdd); */
     console.log(tableDataRef.current)
-    tableDataRef.current.push(dataToAdd); 
-    setTableData([...tableDataRef.current]);
+    setTableData(tableData => [...tableData, dataToAdd]);
   };
   const handleDelete = (record) => {
     // Filter out the record to be deleted from the tableDataRef
   
-    tableDataRef.current = tableDataRef.current.filter((item) => item.index !== record.index);
-    setTableData([...tableDataRef.current]);
+    const updatedTableData = tableData.filter((item) => item.temp !== record.temp);
+    setTableData(updatedTableData);
+
   };
 
   const columns: ColumnsType<DataType> = [
@@ -131,7 +134,7 @@ const ThermalImaging = (props) => {
       key: 'pixel_position',
       render: (text, record) => (
         <div>
-          {record.posX} x {record.posY}
+          {record.x} x {record.y}
         </div>
       ),
     },
@@ -148,8 +151,8 @@ const ThermalImaging = (props) => {
     },
     {
       title: 'Temperature',
-      key: 'temperature',
-      dataIndex: 'temperature',
+      key: 'temp',
+      dataIndex: 'temp',
       render: (text) => <div>{parseFloat(text).toFixed(2)}°C</div>
     },
     {
