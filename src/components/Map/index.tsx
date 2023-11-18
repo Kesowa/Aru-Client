@@ -5,6 +5,7 @@ import Colorscale from "./utils/ColorScale";
 import { DataFilterExtension } from "@deck.gl/extensions";
 import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
+import { MaskExtension } from "@deck.gl/extensions/typed";
 import {
   Row,
   Col,
@@ -130,7 +131,13 @@ import NavIcon from "../../static/nav_icon.png";
 // import { JSONLoader } from "@loaders.gl/json";
 // import { LASLoader } from "@loaders.gl/las";
 import { load } from "@loaders.gl/core";
-import MaskLayer from "../MaskLayer";
+
+export const getPolygon = (lat: number, lng: number, size: number) => [
+  [lat - size * 0.5, lng - size * 0.5],
+  [lat + size * 0.5, lng - size * 0.5],
+  [lat + size * 0.5, lng + size * 0.5],
+  [lat - size * 0.5, lng + size * 0.5],
+];
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -184,7 +191,6 @@ function BaseMap(props) {
     ).format(),
   ]);
   const [featureIdx, setFeatureIdx] = useState(null);
-  const [isMaskLayerClicked, setIsMaskLayerClicked] = useState(false);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
   const [flag, setFlag] = useState(false);
@@ -206,6 +212,14 @@ function BaseMap(props) {
     canDeleteBaseLayer: false,
     canUploadToBaseLayer: false,
   });
+  const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
+  const maskLayer = new SolidPolygonLayer({
+  id: "geofence",
+  operation: "mask",
+  data: [getPolygon(88.472470, 22.571947, 1)],
+  getPolygon: (d) => d,
+  getColor: [255, 0, 0],
+});
   const treeMenu: MenuProps["items"] = (layer) => {
     const items: MenuProps["items"] = [];
     if ((props.isBaseMap && perms.canEditBaseLayer) || !props.isBaseMap) {
@@ -311,10 +325,7 @@ function BaseMap(props) {
 
     items.push({
         key: "14",
-        label: "Mask Layer",
-        onClick: () => {
-          setIsMaskLayerClicked(true);
-        },
+        label: "Mask Layer"
     });
 
     return items;
@@ -2233,7 +2244,6 @@ function BaseMap(props) {
             transitionDuration: 2000,
             transitionInterpolator: new FlyToInterpolator(),
           });
-
           vlayers.push(
             new TileLayer({
               id: element,
@@ -2291,6 +2301,8 @@ function BaseMap(props) {
                   bounds: [west, south, east, north],
                 });
               },
+              extensions: [new MaskExtension()],
+              maskId: maskLayer.id,
             })
           );
         }
@@ -3254,16 +3266,6 @@ function BaseMap(props) {
   };
 
   const getTreeData = (layer, type, keyPrefix) => {
-    const getMaskLayer = (lat, lng) => {
-      const maskPolygon = getPolygon(lat, lng, 1);
-      return new SolidPolygonLayer({
-        id: `maskLayer-${layer._id}`,
-        operation: "mask",
-        data: [maskPolygon],
-        getPolygon: (d) => d,
-        getColor: [255, 0, 0],
-      });
-    };
     const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
       const type = layer.type;
       switch (e.key) {
@@ -3400,10 +3402,6 @@ function BaseMap(props) {
           break;
         case "14":
            // Logic for adding a mask layer
-          const maskLayer = getMaskLayer(layer.latitude, layer.longitude);
-          const combinedLayers = [layer, maskLayer];
-          //console.log("Mask Layer");
-          addLayer(combinedLayers);
           break;
 
 
@@ -5977,15 +5975,22 @@ function BaseMap(props) {
       )}
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
+        // onHover={(info) => {
+        //   const coords = getPolygon(info.x, info.y, 150);
+        //   const mapCoords = coords.map((coord) =>
+        //     info.viewport?.unproject(coord)
+        //   );
+        //   setPolygon(mapCoords);
+        // }}
         controller={true}
-        layers={
+        layers={[
           isDrawing
             ? osmState
               ? [osm, visibleLayers, drawPolygonTool]
               : [visibleLayers, drawPolygonTool]
             : osmState
-            ? [osm, visibleLayers]
-            : [visibleLayers]
+            ? [osm, visibleLayers, [            maskLayer,]]
+            : [visibleLayers, [            maskLayer,]]]
         }
         style={{ height: "100vh", width: "100%" }}
         getCursor={() => {
@@ -6046,7 +6051,6 @@ function BaseMap(props) {
             ref={mapRef}
           />
         )}
-        {isMaskLayerClicked && <MaskLayer/>}
 
         {showPopup && (
           <HtmlOverlay>
