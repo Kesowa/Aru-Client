@@ -72,7 +72,7 @@ const ThermalImage = (props) => {
         y:offsetY,
         temp: props.data[(offsetX) + width * (offsetY)],
         color: hexCode,
-        label:'gg',
+        label:'',
       };
       // Call the parent component's function to add data to the table
       tableDataRef.current.push(pixelData);
