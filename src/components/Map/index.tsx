@@ -212,14 +212,7 @@ function BaseMap(props) {
     canDeleteBaseLayer: false,
     canUploadToBaseLayer: false,
   });
-  const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
-  const maskLayer = new SolidPolygonLayer({
-  id: "geofence",
-  operation: "mask",
-  data: [getPolygon(88.472470, 22.571947, 1)],
-  getPolygon: (d) => d,
-  getColor: [255, 0, 0],
-});
+
   const treeMenu: MenuProps["items"] = (layer) => {
     const items: MenuProps["items"] = [];
     if ((props.isBaseMap && perms.canEditBaseLayer) || !props.isBaseMap) {
@@ -325,7 +318,7 @@ function BaseMap(props) {
 
     items.push({
         key: "14",
-        label: "Mask Layer"
+        label: "Mask Layer",
     });
 
     return items;
@@ -696,6 +689,15 @@ function BaseMap(props) {
   const [selectedKey, setSelectedKey] = useState<any>();
 
   //---------------------Open Stree Maps Layer ----------------------------------------------------
+  const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
+  const maskLayer = new SolidPolygonLayer({
+    id: "geofence",
+    operation: "mask",
+    data: [polygon],
+    getPolygon: (d) => d,
+    getColor: [255, 0, 0],
+  });
+  
   const osm = [
     new TileLayer({
       // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
@@ -718,7 +720,7 @@ function BaseMap(props) {
         const {
           bbox: { west, south, east, north },
         } = props.tile;
-
+        console.log('props.data:', props.data);
         return [
           new BitmapLayer(props, {
             data: null,
@@ -2208,6 +2210,7 @@ function BaseMap(props) {
                   const {
                     bbox: { west, south, east, north },
                   } = props.tile;
+                  console.log('props.data 2:', props.data);
 
                   return new BitmapLayer(props, {
                     data: null,
@@ -2232,6 +2235,8 @@ function BaseMap(props) {
             metadata["bounds"][2],
             metadata["bounds"][3],
           ];
+          console.log('props.data 3:', bounds);
+
           const { longitude, latitude, zoom } = calculateViewport(bounds);
           setViewport({
             longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
@@ -2294,15 +2299,16 @@ function BaseMap(props) {
                 const {
                   bbox: { west, south, east, north },
                 } = props.tile;
+                console.log('props.data 4:', props.data,maskLayer.id);
 
                 return new BitmapLayer(props, {
                   data: null,
                   image: props.data,
                   bounds: [west, south, east, north],
+                  extensions: [new MaskExtension()],
+                  maskId: maskLayer.id,
                 });
               },
-              extensions: [new MaskExtension()],
-              maskId: maskLayer.id,
             })
           );
         }
@@ -5982,6 +5988,13 @@ function BaseMap(props) {
         //   );
         //   setPolygon(mapCoords);
         // }}
+        onHover={(info) => {
+          const coords = getPolygon(info.x, info.y, 150);
+          const mapCoords = coords.map((coord) =>
+            info.viewport?.unproject(coord)
+          );
+          setPolygon(mapCoords);
+        }}
         controller={true}
         layers={[
           isDrawing
@@ -5989,10 +6002,17 @@ function BaseMap(props) {
               ? [osm, visibleLayers, drawPolygonTool]
               : [visibleLayers, drawPolygonTool]
             : osmState
-            ? [osm, visibleLayers, [            maskLayer,]]
-            : [visibleLayers, [            maskLayer,]]]
+            ? [osm, visibleLayers, [            maskLayer]]
+            : [visibleLayers, [            maskLayer]]]
         }
         style={{ height: "100vh", width: "100%" }}
+        // onHover={(info) => {
+        //   const coords = getPolygon(info.x, info.y, 150);
+        //   const mapCoords = coords.map((coord) =>
+        //     info.viewport?.unproject(coord)
+        //   );
+        //   setPolygon(mapCoords);
+        // }}
         getCursor={() => {
           return isDrawing ? "crosshair" : "grab";
         }}
