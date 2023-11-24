@@ -13,7 +13,6 @@ const ThermalImage = (props) => {
   const [clickPending, setClickPending] = useState(false);
   const dataRef = useRef(null);
 
- 
   const {
     detectedEnvironment: {
       isMouseDetected = false,
@@ -28,7 +27,7 @@ const ThermalImage = (props) => {
   useEffect(() => {
     if (!isPositionOutside) {
       const temperature = props.data[x + width * y];
-    
+
       setTemperature(temperature);
     } else {
       setTemperature("");
@@ -50,41 +49,25 @@ const ThermalImage = (props) => {
     };
   };
 
-
-  const handleCanvasClick = () => {
-     // Adjust the debounce delay as needed (1 second in this example)
-     if (!isPositionOutside && !clickPending) {
-      
-      // Prevent further clicks until the debounce period is over
-      setClickPending(true);
-     canvas.addEventListener("click", (ev) => {
-      const cols = canvas.width;
-      const { offsetX, offsetY } = ev;
-      // Call the method to get the r,g,b,a values for the current pixel
-      const c = extractPixelColor(dataRef.current, cols, offsetY, offsetX);
-      const hexCode = `#${[c.red, c.green, c.blue]
-        .map((x) => x.toString(16).padStart(2, "0"))
-        .join("")}`;
-      // Call the function to handle pixel click
-      const pixelData = {
-        // index: tableDataRef.current.length + 1,
-        x: offsetX,
-        y:offsetY,
-        temp: props.data[(offsetX) + width * (offsetY)],
-        color: hexCode,
-        label:'',
-      };
-      // Call the parent component's function to add data to the table
-      tableDataRef.current.push(pixelData);
-      // console.log(pixelData);
-      // console.log(props.data[(offsetX + 16) + canvas.width * (offsetY + 16)]);
-      props.onPixelClick(pixelData);
-    });
-  }
-    
+  const handleCanvasClick = (ev) => {
+    const cols = canvas.width;
+    const { offsetX, offsetY } = ev;
+    const c = extractPixelColor(dataRef.current, cols, offsetY, offsetX);
+    const hexCode = `#${[c.red, c.green, c.blue]
+      .map((x) => x.toString(16).padStart(2, "0"))
+      .join("")}`;
+    const pixelData = {
+      x: offsetX,
+      y: offsetY,
+      temp: props.data[offsetX + width * offsetY],
+      color: hexCode,
+      label: '',
+    };
+    // Call the parent component's function to add data to the table
+    tableDataRef.current.push(pixelData);
+    props.onPixelClick(pixelData);
   };
-
-
+  
 
   useEffect(() => {
     function imageLoaded() {
@@ -109,13 +92,17 @@ const ThermalImage = (props) => {
         setPixelColor(hexCode);
       });
       dataRef.current = data;
-     
-      
     }
     var img = new Image();
     img.crossOrigin = "Anonymous";
     img.onload = imageLoaded;
     img.src = STATIC_URL + props.filePath;
+    canvas.addEventListener("click", handleCanvasClick);
+
+  // Cleanup the event listener on component unmount
+  return () => {
+    canvas.removeEventListener("click", handleCanvasClick);
+  };
   }, [props.filePath, x, y]);
 
   const handleDelete = (index) => {
@@ -126,10 +113,7 @@ const ThermalImage = (props) => {
 
   return (
     <div id="container__canvas" style={{ display: "flex" }}>
-      <div
-        id="canvas-container"
-        
-      >
+      <div id="canvas-container">
         <Whisper
           followCursor
           open={temperature ? true : false}

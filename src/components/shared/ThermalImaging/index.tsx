@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { Button, Modal, message, Input } from "antd";
+import { Button, Modal, message, Input, Form,Alert } from "antd";
 import ReactCursorPosition, { INTERACTIONS } from "react-cursor-position";
 import ThermalImage from "./thermalImage";
 import "./index.less";
 import { STATIC_URL } from "src/constants";
+import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
 /* import http from "src/services/httpCall";
 import apis from "src/services/apis"; */
 import { Space, Table, Tag } from "antd";
@@ -28,6 +29,8 @@ const ThermalImaging = (props) => {
   const [isFetching, setFetch] = useState(false);
   const [xValues, setXValues] = useState([]);
   const [latestData, setLatestData] = useState(null);
+  const [labelInput, setLabelInput] = useState("");
+  const [form] = Form.useForm();
 
   const thermalImagingData = async ({ id, doc }) => {
     try {
@@ -135,12 +138,24 @@ const ThermalImaging = (props) => {
 
   const handleDelete = (record) => {
     // Filter out the record to be deleted from the tableDataRef
-
     const updatedTableData = tableData.filter(
-      (item) => item.x !== record.x && item.y !== record.y
+      (item) => item.x !== record.x || item.y !== record.y
     );
     setTableData(updatedTableData);
   };
+  const onFinish = (value) => {
+    const updatedTableData = tableData.map((item) => {
+      if (item.x === value.x && item.y === value.y) {
+        return { ...item, label: labelInput };
+      }
+      return item;
+    });
+  
+    setTableData(updatedTableData);
+    message.success(`Label updated Successfully for ${value.x} x ${value.y}`);
+  };
+
+ 
 
   const columns: ColumnsType<DataType> = [
     {
@@ -173,15 +188,18 @@ const ThermalImaging = (props) => {
     },
     {
       title: "Label",
+      editable: true,
       render: (text, record) => (
-        <Input
-          style={{ width: "100%" }}
-          // value={tableData[record.label]}
-          // onChange={(e) => {
-          //   const updatedLabels = { ...tableData, [record.label]: e.target.value };
-          //   setTableData(updatedLabels);
-          // }}
-        />
+       <div>
+            <Input 
+              style={{ width: "60%" }} 
+      
+              onChange={(e) => setLabelInput(e.target.value)}
+              defaultValue={record.label}
+            />
+            <Button htmlType="submit" icon={<PlusOutlined />} onClick={() => onFinish(record)}/>
+          
+        </div>
       ),
     },
     {
@@ -221,6 +239,7 @@ const ThermalImaging = (props) => {
               className="widget"
               style={{ marginRight: "10px", padding: "1rem" }}
             >
+              {/* <Alert message="Warning" type="warning" showIcon closable /> */}
               <Table
                 columns={columns}
                 dataSource={tableData}
