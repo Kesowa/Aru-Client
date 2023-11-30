@@ -176,6 +176,7 @@ function BaseMap(props) {
   const [showFlightPath, setShowFlightPath] = useState(false);
   const [marker, setMarker] = useState([]);
   const [bearing, setBearing] = useState(0);
+  const [isMaskLayerVisible,setisMaskLayerVisible] = useState(false);
   const [flightPath, setFlightPath] = useState<any>([]);
   const [missionLayer, setMissionLayer] = useState("");
   const [videoDetails, setVideoDetails] = useState<any>({});
@@ -323,6 +324,9 @@ function BaseMap(props) {
 
     return items;
   };
+  useEffect(() => {
+    console.log("isMaskLayerVisible updated:", isMaskLayerVisible);
+  }, [isMaskLayerVisible]);
 
   //---------Notifications--------------------------------------
   const openNotification = (layerName) => {
@@ -689,6 +693,13 @@ function BaseMap(props) {
   const [selectedKey, setSelectedKey] = useState<any>();
 
   //---------------------Open Stree Maps Layer ----------------------------------------------------
+  const [polygonSize, setPolygonSize] = useState(150);
+
+  const changePolygonSize = (value) => {
+    setPolygonSize(value);
+    // Update the polygon size or any other logic based on the slider value
+  };
+
   const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
   const maskLayer = new SolidPolygonLayer({
     id: "geofence",
@@ -696,6 +707,8 @@ function BaseMap(props) {
     data: [polygon],
     getPolygon: (d) => d,
     getColor: [255, 0, 0],
+    visible: isMaskLayerVisible,
+    zIndex: 9999,
   });
   
   const osm = [
@@ -3271,6 +3284,11 @@ function BaseMap(props) {
     }
   };
 
+  const handleMaskLayerOption = () => {
+    setisMaskLayerVisible((prevValue) => !prevValue);
+    console.log("isMaskLayerVisible:", isMaskLayerVisible);
+  };
+
   const getTreeData = (layer, type, keyPrefix) => {
     const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
       const type = layer.type;
@@ -3407,8 +3425,9 @@ function BaseMap(props) {
           setIsLayerDocs(true);
           break;
         case "14":
-           // Logic for adding a mask layer
-          break;
+          handleMaskLayerOption();
+
+        break;
 
 
         default:
@@ -5135,6 +5154,25 @@ function BaseMap(props) {
         ),
       });
     }
+    if (isMaskLayerVisible) {
+      items.push({
+        key: "3",
+        label: (
+          <Tooltip placement="bottom" title="Mask Layer Size">
+            <Slider
+              min={150}
+              max={400}
+              onChange={changePolygonSize}
+              step={0.1}
+              defaultValue={1}
+              value={polygonSize}
+              tooltip={{ placement: "right" }}
+              style={{ margin: 0, padding: "5px 4px" }}
+            />
+          </Tooltip>
+        ),
+      });
+    }
     return items;
   };
   const toolMenuOnClick = (e) => {
@@ -5932,6 +5970,10 @@ function BaseMap(props) {
     );
   };
 
+  const handleShowMaskLayer = () => {
+    setisMaskLayerVisible(false);
+  };
+
   const resetGroupFormFields = () => {
     groupForm.resetFields();
   };
@@ -5989,7 +6031,7 @@ function BaseMap(props) {
         //   setPolygon(mapCoords);
         // }}
         onHover={(info) => {
-          const coords = getPolygon(info.x, info.y, 150);
+          const coords = getPolygon(info.x, info.y, polygonSize);
           const mapCoords = coords.map((coord) =>
             info.viewport?.unproject(coord)
           );
@@ -6002,9 +6044,9 @@ function BaseMap(props) {
               ? [osm, visibleLayers, drawPolygonTool]
               : [visibleLayers, drawPolygonTool]
             : osmState
-            ? [osm, visibleLayers, [            maskLayer]]
-            : [visibleLayers, [            maskLayer]]]
-        }
+            ? [maskLayer, osm, visibleLayers]
+            : [maskLayer, visibleLayers],
+        ]}
         style={{ height: "100vh", width: "100%" }}
         // onHover={(info) => {
         //   const coords = getPolygon(info.x, info.y, 150);
@@ -6193,21 +6235,34 @@ function BaseMap(props) {
                   />
                 </Tooltip>
               )}
-              {showMarkerSizeTool && (
-                <Tooltip placement="bottom" title="Marker Size">
-                  <div className="marker-size-tool">
+              {isMaskLayerVisible && (
+                <div
+                  style={{
+                    background: "white",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    marginRight: "20px",
+                  }}
+                >
+                  <Tooltip placement="bottom" title="Polygon Size">
                     <Slider
-                      min={0.3}
-                      max={1}
-                      onChange={onChangeSizeSlider}
-                      value={pointMarkerSize}
+                      min={150}
+                      max={350}
+                      onChange={changePolygonSize}
                       step={0.1}
                       defaultValue={1}
+                      value={polygonSize}
                       tooltip={{ placement: "right" }}
+                      style={{
+                        width: "250px",
+                        margin: "5px 0",
+                        padding: "5px 4px",
+                      }}
                     />
-                  </div>
-                </Tooltip>
+                  </Tooltip>
+                </div>
               )}
+
               <Tooltip title="Time" placement="bottom">
                 <div
                   className="time-filter-tool"
@@ -6270,6 +6325,16 @@ function BaseMap(props) {
                 <Tooltip placement="bottom" title="Clear Selection">
                   <div className="cancel-tool" onClick={() => cancelDrawing()}>
                     <span className="cancel-icon">Cancel</span>
+                  </div>
+                </Tooltip>
+              )}
+              {isMaskLayerVisible && (
+                <Tooltip placement="bottom" title="Disable Mask Layer">
+                  <div
+                    className="cancel-tool"
+                    onClick={() => handleShowMaskLayer()}
+                  >
+                    <span className="cancel-icon">Disable</span>
                   </div>
                 </Tooltip>
               )}
