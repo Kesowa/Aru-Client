@@ -61,13 +61,12 @@ const ThermalImage = (props) => {
       y: offsetY,
       temp: props.data[offsetX + width * offsetY],
       color: hexCode,
-      label: '',
+      label: "",
     };
     // Call the parent component's function to add data to the table
     tableDataRef.current.push(pixelData);
     props.onPixelClick(pixelData);
   };
-  
 
   useEffect(() => {
     function imageLoaded() {
@@ -99,10 +98,10 @@ const ThermalImage = (props) => {
     img.src = STATIC_URL + props.filePath;
     canvas.addEventListener("click", handleCanvasClick);
 
-  // Cleanup the event listener on component unmount
-  return () => {
-    canvas.removeEventListener("click", handleCanvasClick);
-  };
+    // Cleanup the event listener on component unmount
+    return () => {
+      canvas.removeEventListener("click", handleCanvasClick);
+    };
   }, [props.filePath, x, y]);
 
   const handleDelete = (index) => {

@@ -153,7 +153,7 @@ const apis = {
   GET_ASSET_BY_ID: "/apis/v1/asset/get",
   CREATE_THERMALTABLE: "/apis/v1/data/thermal/table",
   GET_THERMALPOINT: "/apis/v1/data/thermal",
-  
+
   //LAYERS
   GET_ALL_LAYERS_FOR_MISSION: "/apis/v1/layer/getbymissionId",
   CREATE_LAYER: "/apis/v1/layer/create",

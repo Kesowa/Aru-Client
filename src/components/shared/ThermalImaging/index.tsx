@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { Button, Modal, message, Input, Form,Alert } from "antd";
+import { Button, Modal, message, Input, Form } from "antd";
 import ReactCursorPosition, { INTERACTIONS } from "react-cursor-position";
 import ThermalImage from "./thermalImage";
 import "./index.less";
 import { STATIC_URL } from "src/constants";
-import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 /* import http from "src/services/httpCall";
 import apis from "src/services/apis"; */
-import { Space, Table, Tag } from "antd";
+import { Space, Table } from "antd";
 import apis from "../../../services/apis";
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
@@ -150,12 +150,10 @@ const ThermalImaging = (props) => {
       }
       return item;
     });
-  
+
     setTableData(updatedTableData);
     message.success(`Label updated Successfully for ${value.x} x ${value.y}`);
   };
-
- 
 
   const columns: ColumnsType<DataType> = [
     {
@@ -190,15 +188,17 @@ const ThermalImaging = (props) => {
       title: "Label",
       editable: true,
       render: (text, record) => (
-       <div>
-            <Input 
-              style={{ width: "60%" }} 
-      
-              onChange={(e) => setLabelInput(e.target.value)}
-              defaultValue={record.label}
-            />
-            <Button htmlType="submit" icon={<PlusOutlined />} onClick={() => onFinish(record)}/>
-          
+        <div>
+          <Input
+            style={{ width: "60%" }}
+            onChange={(e) => setLabelInput(e.target.value)}
+            defaultValue={record.label}
+          />
+          <Button
+            htmlType="submit"
+            icon={<PlusOutlined />}
+            onClick={() => onFinish(record)}
+          />
         </div>
       ),
     },
