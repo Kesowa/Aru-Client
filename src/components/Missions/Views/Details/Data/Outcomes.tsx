@@ -125,7 +125,7 @@ function Outcomes(props) {
       case "2":
         setThermalPayload({
           id: selectedOutcome._id,
-          doc: "alerts",
+          doc: "alert",
           filePath: selectedOutcome.image,
         });
         break;
