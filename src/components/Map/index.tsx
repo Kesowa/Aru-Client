@@ -6005,7 +6005,11 @@ function BaseMap(props) {
   };
 
   return (
-    <div className="map_wrapper" onKeyDown={handleKeyDown} onMouseMove={handleMouseMove}>
+    <div
+      className="map_wrapper"
+      onKeyDown={handleKeyDown}
+      onMouseMove={handleMouseMove}
+    >
       <Thread
         thumbnail={thumbnail}
         setThumbnail={setThumbnail}
@@ -6258,13 +6262,15 @@ function BaseMap(props) {
               {isMaskLayerVisible && (
                 <div
                   style={{
-                    position: 'absolute',
-                    left: cursorPosition.x,
-                    top: cursorPosition.y,
-                    width: '50px',
-                    height: '50px',
-                    border: '2px solid red',
-                    pointerEvents: 'none', // Ensure the bounding box doesn't interfere with mouse events
+                    position: "fixed",
+                    left: cursorPosition.x - polygonSize / 2,
+                    top: cursorPosition.y - polygonSize / 2,
+                    width: `${polygonSize}px`,
+                    height: `${polygonSize}px`,
+                    border: "2.6px solid rgba(0, 255, 255, 0.5)",
+                    borderRadius: "4px",
+                    pointerEvents: "none",
+                    zIndex: 9999,
                   }}
                 ></div>
               )}
