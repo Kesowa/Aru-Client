@@ -750,6 +750,9 @@ function BaseMap(props) {
             data: null,
             image: props.data,
             bounds: [west, south, east, north],
+            extensions: [new MaskExtension()],
+            maskId: maskLayer.id,
+            opacity: opcity,
           }),
           showBorder &&
             new PathLayer({
@@ -2242,6 +2245,9 @@ function BaseMap(props) {
                     data: null,
                     image: props.data,
                     bounds: [west, south, east, north],
+                    extensions: [new MaskExtension()],
+                    maskId: maskLayer.id,
+                    opacity: opcity, 
                   });
                 },
               })
@@ -6275,12 +6281,14 @@ function BaseMap(props) {
                 ></div>
               )}
               {isMaskLayerVisible && (
-                <div
+                <Tooltip placement="bottom" title="Polygon Size">
+                  <div
                   style={{
                     background: "white",
                     borderRadius: "8px",
-                    padding: "10px",
+                    padding: "12px",
                     marginRight: "20px",
+                    marginBottom: '10px', 
                   }}
                 >
                   <Tooltip placement="bottom" title="Polygon Size">
@@ -6293,24 +6301,27 @@ function BaseMap(props) {
                       value={polygonSize}
                       tooltip={{ placement: "right" }}
                       style={{
-                        width: "250px",
+                        width: "100px",
                         margin: "5px 0",
-                        padding: "5px 4px",
+                        padding: "1px 1px",
                       }}
                     />
                   </Tooltip>
                 </div>
+                </Tooltip>
               )}
               {isMaskLayerVisible && (
+              <Tooltip placement="bottom" title="Opacity">
                 <div
                   style={{
                     background: "white",
                     borderRadius: "8px",
-                    padding: "10px",
+                    padding: "12px",
                     marginRight: "20px",
+                    marginBottom: '10px', 
                   }}
-                >
-                  <Tooltip placement="bottom" title="Polygon Size">
+                >                 
+                  <Tooltip placement="bottom" title="Opacity">
                     <Slider
                       min={0.1}
                       max={1}
@@ -6318,15 +6329,17 @@ function BaseMap(props) {
                       step={0.1}
                       defaultValue={1}
                       value={opcity}
-                      tooltip={{ placement: "right" }}
+                      tooltip={{ placement: 'right' }}
                       style={{
-                        width: "250px",
-                        margin: "5px 0",
-                        padding: "5px 4px",
+                        width: '100px',
+                        margin: '5px 0',
+                        padding: '1px 1px',
                       }}
                     />
                   </Tooltip>
                 </div>
+                
+              </Tooltip>
               )}
 
               <Tooltip title="Time" placement="bottom">
