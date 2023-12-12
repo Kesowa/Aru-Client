@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef,useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { v4 as uuid } from "uuid";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
@@ -176,7 +176,7 @@ function BaseMap(props) {
   const [showFlightPath, setShowFlightPath] = useState(false);
   const [marker, setMarker] = useState([]);
   const [bearing, setBearing] = useState(0);
-  const [isMaskLayerVisible,setisMaskLayerVisible] = useState(false);
+  const [isMaskLayerVisible, setisMaskLayerVisible] = useState(false);
   const [flightPath, setFlightPath] = useState<any>([]);
   const [missionLayer, setMissionLayer] = useState("");
   const [videoDetails, setVideoDetails] = useState<any>({});
@@ -318,8 +318,8 @@ function BaseMap(props) {
     }
 
     items.push({
-        key: "14",
-        label: "Mask Layer",
+      key: "14",
+      label: "Mask Layer",
     });
 
     return items;
@@ -711,8 +711,8 @@ function BaseMap(props) {
 
   const maskLayer = useMemo(() => {
     return new SolidPolygonLayer({
-      id: 'geofence',
-      operation: 'mask',
+      id: "geofence",
+      operation: "mask",
       data: [polygon],
       getPolygon: (d) => d,
       getColor: [255, 0, 0],
@@ -720,7 +720,6 @@ function BaseMap(props) {
       zIndex: 9999,
     });
   }, [polygon, isMaskLayerVisible]);
-
 
   const osm = [
     new TileLayer({
@@ -744,7 +743,7 @@ function BaseMap(props) {
         const {
           bbox: { west, south, east, north },
         } = props.tile;
-        console.log('props.data:', props.data);
+        console.log("props.data:", props.data);
         return [
           new BitmapLayer(props, {
             data: null,
@@ -2036,7 +2035,7 @@ function BaseMap(props) {
   useEffect(() => {
     setScaleData(checkedKeys);
     drawLayers(checkedKeys);
-    console.log("lost")
+    console.log("lost");
   }, [
     checkedKeys,
     allLayers,
@@ -2239,7 +2238,7 @@ function BaseMap(props) {
                   const {
                     bbox: { west, south, east, north },
                   } = props.tile;
-                  console.log('props.data 2:', props.data);
+                  console.log("props.data 2:", props.data);
 
                   return new BitmapLayer(props, {
                     data: null,
@@ -2247,7 +2246,7 @@ function BaseMap(props) {
                     bounds: [west, south, east, north],
                     extensions: [new MaskExtension()],
                     maskId: maskLayer.id,
-                    opacity: opcity, 
+                    opacity: opcity,
                   });
                 },
               })
@@ -2267,7 +2266,7 @@ function BaseMap(props) {
             metadata["bounds"][2],
             metadata["bounds"][3],
           ];
-          console.log('props.data 3:', bounds);
+          console.log("props.data 3:", bounds);
 
           const { longitude, latitude, zoom } = calculateViewport(bounds);
           setViewport({
@@ -2331,7 +2330,7 @@ function BaseMap(props) {
                 const {
                   bbox: { west, south, east, north },
                 } = props.tile;
-                console.log('props.data 4:', props.data,maskLayer.id);
+                console.log("props.data 4:", props.data, maskLayer.id);
                 return new BitmapLayer(props, {
                   data: null,
                   image: props.data,
@@ -3446,8 +3445,7 @@ function BaseMap(props) {
         case "14":
           handleMaskLayerOption();
 
-        break;
-
+          break;
 
         default:
           break;
@@ -6283,63 +6281,62 @@ function BaseMap(props) {
               {isMaskLayerVisible && (
                 <Tooltip placement="bottom" title="Polygon Size">
                   <div
-                  style={{
-                    background: "white",
-                    borderRadius: "8px",
-                    padding: "12px",
-                    marginRight: "20px",
-                    marginBottom: '10px', 
-                  }}
-                >
-                  <Tooltip placement="bottom" title="Polygon Size">
-                    <Slider
-                      min={150}
-                      max={350}
-                      onChange={changePolygonSize}
-                      step={0.1}
-                      defaultValue={1}
-                      value={polygonSize}
-                      tooltip={{ placement: "right" }}
-                      style={{
-                        width: "100px",
-                        margin: "5px 0",
-                        padding: "1px 1px",
-                      }}
-                    />
-                  </Tooltip>
-                </div>
+                    style={{
+                      background: "white",
+                      borderRadius: "8px",
+                      padding: "12px",
+                      marginRight: "20px",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <Tooltip placement="bottom" title="Polygon Size">
+                      <Slider
+                        min={150}
+                        max={350}
+                        onChange={changePolygonSize}
+                        step={0.1}
+                        defaultValue={1}
+                        value={polygonSize}
+                        tooltip={{ placement: "right" }}
+                        style={{
+                          width: "100px",
+                          margin: "5px 0",
+                          padding: "1px 1px",
+                        }}
+                      />
+                    </Tooltip>
+                  </div>
                 </Tooltip>
               )}
               {isMaskLayerVisible && (
-              <Tooltip placement="bottom" title="Opacity">
-                <div
-                  style={{
-                    background: "white",
-                    borderRadius: "8px",
-                    padding: "12px",
-                    marginRight: "20px",
-                    marginBottom: '10px', 
-                  }}
-                >                 
-                  <Tooltip placement="bottom" title="Opacity">
-                    <Slider
-                      min={0.1}
-                      max={1}
-                      onChange={changeOpacity}
-                      step={0.1}
-                      defaultValue={1}
-                      value={opcity}
-                      tooltip={{ placement: 'right' }}
-                      style={{
-                        width: '100px',
-                        margin: '5px 0',
-                        padding: '1px 1px',
-                      }}
-                    />
-                  </Tooltip>
-                </div>
-                
-              </Tooltip>
+                <Tooltip placement="bottom" title="Opacity">
+                  <div
+                    style={{
+                      background: "white",
+                      borderRadius: "8px",
+                      padding: "12px",
+                      marginRight: "20px",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <Tooltip placement="bottom" title="Opacity">
+                      <Slider
+                        min={0.1}
+                        max={1}
+                        onChange={changeOpacity}
+                        step={0.1}
+                        defaultValue={1}
+                        value={opcity}
+                        tooltip={{ placement: "right" }}
+                        style={{
+                          width: "100px",
+                          margin: "5px 0",
+                          padding: "1px 1px",
+                        }}
+                      />
+                    </Tooltip>
+                  </div>
+                </Tooltip>
               )}
 
               <Tooltip title="Time" placement="bottom">
