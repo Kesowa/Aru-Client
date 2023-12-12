@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef,useMemo } from "react";
 import { v4 as uuid } from "uuid";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
 import { DataFilterExtension } from "@deck.gl/extensions";
 import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
+import { MaskExtension } from "@deck.gl/extensions/typed";
 import {
   Row,
   Col,
@@ -86,6 +87,7 @@ import {
   IconLayer,
   PathLayer,
 } from "@deck.gl/layers";
+import { SolidPolygonLayer } from "@deck.gl/layers/typed";
 import { TileLayer } from "@deck.gl/geo-layers";
 import { HtmlOverlayItem, HtmlOverlay } from "@nebula.gl/overlays";
 import { EditableGeoJsonLayer } from "@nebula.gl/layers";
@@ -130,6 +132,13 @@ import NavIcon from "../../static/nav_icon.png";
 // import { LASLoader } from "@loaders.gl/las";
 import { load } from "@loaders.gl/core";
 
+export const getPolygon = (lat: number, lng: number, size: number) => [
+  [lat - size * 0.5, lng - size * 0.5],
+  [lat + size * 0.5, lng - size * 0.5],
+  [lat + size * 0.5, lng + size * 0.5],
+  [lat - size * 0.5, lng + size * 0.5],
+];
+
 interface Config {
   mode: typeof GeoJsonEditMode;
 }
@@ -167,6 +176,7 @@ function BaseMap(props) {
   const [showFlightPath, setShowFlightPath] = useState(false);
   const [marker, setMarker] = useState([]);
   const [bearing, setBearing] = useState(0);
+  const [isMaskLayerVisible,setisMaskLayerVisible] = useState(false);
   const [flightPath, setFlightPath] = useState<any>([]);
   const [missionLayer, setMissionLayer] = useState("");
   const [videoDetails, setVideoDetails] = useState<any>({});
@@ -203,6 +213,7 @@ function BaseMap(props) {
     canDeleteBaseLayer: false,
     canUploadToBaseLayer: false,
   });
+
   const treeMenu: MenuProps["items"] = (layer) => {
     const items: MenuProps["items"] = [];
     if ((props.isBaseMap && perms.canEditBaseLayer) || !props.isBaseMap) {
@@ -305,8 +316,17 @@ function BaseMap(props) {
         label: "More",
       });
     }
+
+    items.push({
+        key: "14",
+        label: "Mask Layer",
+    });
+
     return items;
   };
+  useEffect(() => {
+    console.log("isMaskLayerVisible updated:", isMaskLayerVisible);
+  }, [isMaskLayerVisible]);
 
   //---------Notifications--------------------------------------
   const openNotification = (layerName) => {
@@ -673,6 +693,35 @@ function BaseMap(props) {
   const [selectedKey, setSelectedKey] = useState<any>();
 
   //---------------------Open Stree Maps Layer ----------------------------------------------------
+  const [polygonSize, setPolygonSize] = useState(150);
+  const [opcity, setOpcity] = useState(1);
+  useEffect(() => {
+    console.log("Opacity is :", opcity);
+  }, [opcity]);
+
+  const changePolygonSize = (value) => {
+    setPolygonSize(value);
+    // Update the polygon size or any other logic based on the slider value
+  };
+  const changeOpacity = (value) => {
+    setOpcity(value);
+  };
+
+  const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
+
+  const maskLayer = useMemo(() => {
+    return new SolidPolygonLayer({
+      id: 'geofence',
+      operation: 'mask',
+      data: [polygon],
+      getPolygon: (d) => d,
+      getColor: [255, 0, 0],
+      visible: isMaskLayerVisible,
+      zIndex: 9999,
+    });
+  }, [polygon, isMaskLayerVisible]);
+
+
   const osm = [
     new TileLayer({
       // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
@@ -695,12 +744,15 @@ function BaseMap(props) {
         const {
           bbox: { west, south, east, north },
         } = props.tile;
-
+        console.log('props.data:', props.data);
         return [
           new BitmapLayer(props, {
             data: null,
             image: props.data,
             bounds: [west, south, east, north],
+            extensions: [new MaskExtension()],
+            maskId: maskLayer.id,
+            opacity: opcity,
           }),
           showBorder &&
             new PathLayer({
@@ -1984,6 +2036,7 @@ function BaseMap(props) {
   useEffect(() => {
     setScaleData(checkedKeys);
     drawLayers(checkedKeys);
+    console.log("lost")
   }, [
     checkedKeys,
     allLayers,
@@ -1993,6 +2046,7 @@ function BaseMap(props) {
     unflaggedFilter,
     flag,
     pointMarkerSize,
+    opcity,
   ]);
 
   useEffect(() => {
@@ -2185,11 +2239,15 @@ function BaseMap(props) {
                   const {
                     bbox: { west, south, east, north },
                   } = props.tile;
+                  console.log('props.data 2:', props.data);
 
                   return new BitmapLayer(props, {
                     data: null,
                     image: props.data,
                     bounds: [west, south, east, north],
+                    extensions: [new MaskExtension()],
+                    maskId: maskLayer.id,
+                    opacity: opcity, 
                   });
                 },
               })
@@ -2209,6 +2267,8 @@ function BaseMap(props) {
             metadata["bounds"][2],
             metadata["bounds"][3],
           ];
+          console.log('props.data 3:', bounds);
+
           const { longitude, latitude, zoom } = calculateViewport(bounds);
           setViewport({
             longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
@@ -2221,7 +2281,6 @@ function BaseMap(props) {
             transitionDuration: 2000,
             transitionInterpolator: new FlyToInterpolator(),
           });
-
           vlayers.push(
             new TileLayer({
               id: element,
@@ -2272,11 +2331,14 @@ function BaseMap(props) {
                 const {
                   bbox: { west, south, east, north },
                 } = props.tile;
-
+                console.log('props.data 4:', props.data,maskLayer.id);
                 return new BitmapLayer(props, {
                   data: null,
                   image: props.data,
                   bounds: [west, south, east, north],
+                  extensions: [new MaskExtension()],
+                  maskId: maskLayer.id,
+                  opacity: opcity, // Set the desired opacity value (0 to 1)
                 });
               },
             })
@@ -3241,6 +3303,11 @@ function BaseMap(props) {
     }
   };
 
+  const handleMaskLayerOption = () => {
+    setisMaskLayerVisible((prevValue) => !prevValue);
+    console.log("isMaskLayerVisible:", isMaskLayerVisible);
+  };
+
   const getTreeData = (layer, type, keyPrefix) => {
     const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
       const type = layer.type;
@@ -3376,6 +3443,12 @@ function BaseMap(props) {
           );
           setIsLayerDocs(true);
           break;
+        case "14":
+          handleMaskLayerOption();
+
+        break;
+
+
         default:
           break;
       }
@@ -5100,6 +5173,25 @@ function BaseMap(props) {
         ),
       });
     }
+    if (isMaskLayerVisible) {
+      items.push({
+        key: "3",
+        label: (
+          <Tooltip placement="bottom" title="Mask Layer Size">
+            <Slider
+              min={150}
+              max={400}
+              onChange={changePolygonSize}
+              step={0.1}
+              defaultValue={1}
+              value={polygonSize}
+              tooltip={{ placement: "right" }}
+              style={{ margin: 0, padding: "5px 4px" }}
+            />
+          </Tooltip>
+        ),
+      });
+    }
     return items;
   };
   const toolMenuOnClick = (e) => {
@@ -5897,6 +5989,13 @@ function BaseMap(props) {
     );
   };
 
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+
+  const handleShowMaskLayer = () => {
+    setisMaskLayerVisible(false);
+    setOpcity(1);
+  };
+
   const resetGroupFormFields = () => {
     groupForm.resetFields();
   };
@@ -5907,8 +6006,16 @@ function BaseMap(props) {
     }
   };
 
+  const handleMouseMove = (e) => {
+    setCursorPosition({ x: e.clientX, y: e.clientY });
+  };
+
   return (
-    <div className="map_wrapper" onKeyDown={handleKeyDown}>
+    <div
+      className="map_wrapper"
+      onKeyDown={handleKeyDown}
+      onMouseMove={handleMouseMove}
+    >
       <Thread
         thumbnail={thumbnail}
         setThumbnail={setThumbnail}
@@ -5946,17 +6053,38 @@ function BaseMap(props) {
       )}
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
+        // onHover={(info) => {
+        //   const coords = getPolygon(info.x, info.y, 150);
+        //   const mapCoords = coords.map((coord) =>
+        //     info.viewport?.unproject(coord)
+        //   );
+        //   setPolygon(mapCoords);
+        // }}
+        onHover={(info) => {
+          const coords = getPolygon(info.x, info.y, polygonSize);
+          const mapCoords = coords.map((coord) =>
+            info.viewport?.unproject(coord)
+          );
+          setPolygon(mapCoords);
+        }}
         controller={true}
-        layers={
+        layers={[
           isDrawing
             ? osmState
               ? [osm, visibleLayers, drawPolygonTool]
               : [visibleLayers, drawPolygonTool]
             : osmState
-            ? [osm, visibleLayers]
-            : [visibleLayers]
-        }
+            ? [osm, visibleLayers, maskLayer]
+            : [visibleLayers, maskLayer],
+        ]}
         style={{ height: "100vh", width: "100%" }}
+        // onHover={(info) => {
+        //   const coords = getPolygon(info.x, info.y, 150);
+        //   const mapCoords = coords.map((coord) =>
+        //     info.viewport?.unproject(coord)
+        //   );
+        //   setPolygon(mapCoords);
+        // }}
         getCursor={() => {
           return isDrawing ? "crosshair" : "grab";
         }}
@@ -6137,21 +6265,83 @@ function BaseMap(props) {
                   />
                 </Tooltip>
               )}
-              {showMarkerSizeTool && (
-                <Tooltip placement="bottom" title="Marker Size">
-                  <div className="marker-size-tool">
+              {isMaskLayerVisible && (
+                <div
+                  style={{
+                    position: "fixed",
+                    left: cursorPosition.x - polygonSize / 2,
+                    top: cursorPosition.y - polygonSize / 2,
+                    width: `${polygonSize}px`,
+                    height: `${polygonSize}px`,
+                    border: "2.6px solid rgba(0, 255, 255, 0.5)",
+                    borderRadius: "4px",
+                    pointerEvents: "none",
+                    zIndex: 9999,
+                  }}
+                ></div>
+              )}
+              {isMaskLayerVisible && (
+                <Tooltip placement="bottom" title="Polygon Size">
+                  <div
+                  style={{
+                    background: "white",
+                    borderRadius: "8px",
+                    padding: "12px",
+                    marginRight: "20px",
+                    marginBottom: '10px', 
+                  }}
+                >
+                  <Tooltip placement="bottom" title="Polygon Size">
                     <Slider
-                      min={0.3}
-                      max={1}
-                      onChange={onChangeSizeSlider}
-                      value={pointMarkerSize}
+                      min={150}
+                      max={350}
+                      onChange={changePolygonSize}
                       step={0.1}
                       defaultValue={1}
+                      value={polygonSize}
                       tooltip={{ placement: "right" }}
+                      style={{
+                        width: "100px",
+                        margin: "5px 0",
+                        padding: "1px 1px",
+                      }}
                     />
-                  </div>
+                  </Tooltip>
+                </div>
                 </Tooltip>
               )}
+              {isMaskLayerVisible && (
+              <Tooltip placement="bottom" title="Opacity">
+                <div
+                  style={{
+                    background: "white",
+                    borderRadius: "8px",
+                    padding: "12px",
+                    marginRight: "20px",
+                    marginBottom: '10px', 
+                  }}
+                >                 
+                  <Tooltip placement="bottom" title="Opacity">
+                    <Slider
+                      min={0.1}
+                      max={1}
+                      onChange={changeOpacity}
+                      step={0.1}
+                      defaultValue={1}
+                      value={opcity}
+                      tooltip={{ placement: 'right' }}
+                      style={{
+                        width: '100px',
+                        margin: '5px 0',
+                        padding: '1px 1px',
+                      }}
+                    />
+                  </Tooltip>
+                </div>
+                
+              </Tooltip>
+              )}
+
               <Tooltip title="Time" placement="bottom">
                 <div
                   className="time-filter-tool"
@@ -6214,6 +6404,16 @@ function BaseMap(props) {
                 <Tooltip placement="bottom" title="Clear Selection">
                   <div className="cancel-tool" onClick={() => cancelDrawing()}>
                     <span className="cancel-icon">Cancel</span>
+                  </div>
+                </Tooltip>
+              )}
+              {isMaskLayerVisible && (
+                <Tooltip placement="bottom" title="Disable Mask Layer">
+                  <div
+                    className="cancel-tool"
+                    onClick={() => handleShowMaskLayer()}
+                  >
+                    <span className="cancel-icon">Disable</span>
                   </div>
                 </Tooltip>
               )}
