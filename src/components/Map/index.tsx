@@ -4299,21 +4299,8 @@ function BaseMap(props) {
         {
           value: "Other",
           title: "Other",
-          children:[
-            {
-              value: "air_pollution",
-              title: "Air Pollution",
-              children: [],
-              selectable: true,
-            },
-            {
-              value: "wind_direction",
-              title: "Wind Direction",
-              children: [],
-              selectable: true,
-            }
-          ],
-          selectable: false,
+          children:[],
+          selectable: true,
         }
       ],
     },
@@ -4333,6 +4320,7 @@ function BaseMap(props) {
   }
 
   if (vectorProps) {
+    console.log(vectorProps);
     vectorProps.map((vectorProp) => {
       if (vectorProp.type == "MultiLineString") {
         options[1].children[0].children.push({
@@ -4352,10 +4340,10 @@ function BaseMap(props) {
           value: "1-2-" + vectorProp._id + "-" + vectorProp.name,
         });
       }
-      if (vectorProp.type == "Other") {
-        options[1].children[2].children.push({
+      if (vectorProp.type == "air_pollution") {
+        options[1].children[3].children.push({
           title: vectorProp.name,
-          value: "1-2-" + vectorProp._id + "-" + vectorProp.name,
+          value: "1-3-" + vectorProp._id + "-" + vectorProp.name,
         });
       }
     });
@@ -5285,12 +5273,12 @@ function BaseMap(props) {
           }),
         },
         {
-          key: "air_pollution",
-          label: "air_pollution",
-          onTitleClick: () => onToggleSelectVectorPropsType("air_pollution"),
-          children: options[1].children[1].children.map((i) => {
+          key: "Other",
+          label: "Other",
+          onTitleClick: () => onToggleSelectVectorPropsType("Other"),
+          children: options[1].children[3].children.map((i) => {
             return {
-              key: `${i.title}-air_pollution`,
+              key: `${i.title}-Other`,
               label: i.title,
             };
           }),
