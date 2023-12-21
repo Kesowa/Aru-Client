@@ -80,7 +80,7 @@ import "./index.less";
 import LineIcon from "../../static/line.svg";
 import PolygonIcon from "../../static/polygon.svg";
 import DeckGL from "@deck.gl/react";
-import { FlyToInterpolator, TransitionInterpolator } from "deck.gl";
+import { FlyToInterpolator, HeatmapLayer, TransitionInterpolator } from "deck.gl";
 import {
   BitmapLayer,
   GeoJsonLayer,
@@ -2345,6 +2345,7 @@ function BaseMap(props) {
         }
       } else if (element.split("-")[0] === "1" && element !== "1") {
         console.log("vector");
+        console.log("All Layers: ", allLayers);
         switch (allLayers[element]?.type) {
           case "MultiLineString":
             vlayers.push(
@@ -2624,7 +2625,23 @@ function BaseMap(props) {
               })
             );
             break;
-        }
+          case "air_pollution":
+            vlayers.push(
+              new HeatmapLayer({
+                id: element,
+                data: parseGeoJson(
+                  element,
+                  STATIC_URL + allLayers[element]?.layerPath
+                ),
+                getPosition: (d: any) => d.geometry.coordinates,
+                getWeight: (d: any) => d.properties.aqi,
+                aggregation: "SUM",
+                pickable: true,
+                pickingRadius: 20,
+              })
+            );
+            break;
+          }
 
         (async () => {
           try {
@@ -4279,6 +4296,25 @@ function BaseMap(props) {
           children: [],
           selectable: false,
         },
+        {
+          value: "Other",
+          title: "Other",
+          children:[
+            {
+              value: "air_pollution",
+              title: "Air Pollution",
+              children: [],
+              selectable: true,
+            },
+            {
+              value: "wind_direction",
+              title: "Wind Direction",
+              children: [],
+              selectable: true,
+            }
+          ],
+          selectable: false,
+        }
       ],
     },
   ];
@@ -4316,10 +4352,17 @@ function BaseMap(props) {
           value: "1-2-" + vectorProp._id + "-" + vectorProp.name,
         });
       }
+      if (vectorProp.type == "Other") {
+        options[1].children[2].children.push({
+          title: vectorProp.name,
+          value: "1-2-" + vectorProp._id + "-" + vectorProp.name,
+        });
+      }
     });
     options[1].children[0].children.sort(sortAlphabetically);
     options[1].children[1].children.sort(sortAlphabetically);
     options[1].children[2].children.sort(sortAlphabetically);
+    options[1].children[3].children.sort(sortAlphabetically);
   }
 
   function sortAlphabetically(a, b) {
@@ -5237,6 +5280,17 @@ function BaseMap(props) {
           children: options[1].children[1].children.map((i) => {
             return {
               key: `${i.title}-MultiPolygon`,
+              label: i.title,
+            };
+          }),
+        },
+        {
+          key: "air_pollution",
+          label: "air_pollution",
+          onTitleClick: () => onToggleSelectVectorPropsType("air_pollution"),
+          children: options[1].children[1].children.map((i) => {
+            return {
+              key: `${i.title}-air_pollution`,
               label: i.title,
             };
           }),
