@@ -80,7 +80,7 @@ import "./index.less";
 import LineIcon from "../../static/line.svg";
 import PolygonIcon from "../../static/polygon.svg";
 import DeckGL from "@deck.gl/react";
-import { FlyToInterpolator, HeatmapLayer, TransitionInterpolator } from "deck.gl";
+import { FlyToInterpolator, HeatmapLayer, TextLayer, TransitionInterpolator } from "deck.gl";
 import {
   BitmapLayer,
   GeoJsonLayer,
@@ -2638,6 +2638,28 @@ function BaseMap(props) {
                 aggregation: "SUM",
                 pickable: true,
                 pickingRadius: 20,
+              })
+            );
+            vlayers.push(
+              new TextLayer({
+                id: element + "-1",
+                data: parseGeoJson(
+                  element,
+                  STATIC_URL + allLayers[element]?.layerPath
+                ),
+                getPosition: (d: any) => d.geometry.coordinates,
+                getText: (d: any) => {
+                  return `${d.properties.aqi}`;
+                },
+                getSize: 32,
+                getColor: [59, 43, 82],
+                pickable: true,
+                sizeable: 2,
+                sizeMinPixels: 6,
+                sizeMaxPixels: 25,
+                getBorderColor: [255, 255, 255, 255],
+                getTextOutlineWidth: 2,
+                getTextOutlineColor: [255, 255, 255, 255],
               })
             );
             break;
