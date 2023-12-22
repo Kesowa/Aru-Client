@@ -4320,7 +4320,6 @@ function BaseMap(props) {
   }
 
   if (vectorProps) {
-    console.log(vectorProps);
     vectorProps.map((vectorProp) => {
       if (vectorProp.type == "MultiLineString") {
         options[1].children[0].children.push({
@@ -4328,19 +4327,19 @@ function BaseMap(props) {
           value: "1-0-" + vectorProp._id + "-" + vectorProp.name,
         });
       }
-      if (vectorProp.type == "MultiPolygon") {
+      else if (vectorProp.type == "MultiPolygon") {
         options[1].children[1].children.push({
           title: vectorProp.name,
           value: "1-1-" + vectorProp._id + "-" + vectorProp.name,
         });
       }
-      if (vectorProp.type == "Point") {
+      else if (vectorProp.type == "Point") {
         options[1].children[2].children.push({
           title: vectorProp.name,
           value: "1-2-" + vectorProp._id + "-" + vectorProp.name,
         });
       }
-      if (vectorProp.type == "air_pollution") {
+      else if (vectorProp.type) {
         options[1].children[3].children.push({
           title: vectorProp.name,
           value: "1-3-" + vectorProp._id + "-" + vectorProp.name,
