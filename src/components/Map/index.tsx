@@ -2147,6 +2147,17 @@ function BaseMap(props) {
       zoom,
     };
   };
+  const [hoveredPoint, setHoveredPoint] = useState(null);
+  
+  const onHover = ({ x, y, object }) => {
+    if (object) {
+      const [longitude, latitude] = object.coordinates; // Adjust based on your data structure
+      const temperature = queryRasterData(longitude, latitude); // Implement your method to query temperature
+      setHoveredPoint({ longitude, latitude, temperature });
+    } else {
+      setHoveredPoint(null);
+    }
+  };
 
   const drawLayers = async (checkedKeysValue: any) => {
     const vlayers: any = [];
@@ -6121,6 +6132,16 @@ function BaseMap(props) {
         }}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
+        {hoveredPoint && (
+          <div>
+          <p>Latitude: {hoveredPoint.latitude}</p>
+          <p>Longitude: {hoveredPoint.longitude}</p>
+          <p>Temperature: {hoveredPoint.temperature} °C</p>
+           </div>
+           )}
+          </div>
+         );
+        };
         {osmState ? (
           <>
             <div style={COPYRIGHT_LICENSE_STYLE}>
