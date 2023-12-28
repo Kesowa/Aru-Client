@@ -62,6 +62,7 @@ import io from "socket.io-client";
 import ImageDoc from "./Data/ImageDocs";
 import ManageClients from "./Data/ManageClient";
 import { API_URL, PUBLIC_URL, STATIC_URL } from "src/constants";
+import Report_genration from "./Data/report_genration";
 
 const { Paragraph } = Typography;
 function MissionView(props) {
@@ -437,6 +438,24 @@ function MissionView(props) {
             missionDetails={MissionDetails}
             userType={props.userType}
             userDetails={props.userDetails}
+          />
+        ),
+      },
+      {
+        key: "6",
+        label: (
+          <span>
+            Report Generation{" "}
+            {/* <Badge
+              style={{ backgroundColor: "#3D85FC" }}
+              count={totalImages}
+            ></Badge> */}
+          </span>
+        ),
+        children: (
+          <Report_genration
+            missionId={MissionDetails.missionId}
+            missionDetails={MissionDetails}
           />
         ),
       },
