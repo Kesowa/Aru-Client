@@ -80,7 +80,12 @@ import "./index.less";
 import LineIcon from "../../static/line.svg";
 import PolygonIcon from "../../static/polygon.svg";
 import DeckGL from "@deck.gl/react";
-import { FlyToInterpolator, HeatmapLayer, TextLayer, TransitionInterpolator } from "deck.gl";
+import {
+  FlyToInterpolator,
+  HeatmapLayer,
+  TextLayer,
+  TransitionInterpolator,
+} from "deck.gl";
 import {
   BitmapLayer,
   GeoJsonLayer,
@@ -2167,11 +2172,16 @@ function BaseMap(props) {
     };
     
     
+    
+
+    
+
+    
 
     
     const svgToDataURL = (svg: any) => {
       return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-    }
+    };
 
     let windData: any;
 
@@ -2690,7 +2700,7 @@ function BaseMap(props) {
               STATIC_URL + allLayers[element]?.layerPath
             );
             console.log(windData);
-            
+
             vlayers.push(
               new IconLayer({
                 id: element,
@@ -2698,13 +2708,19 @@ function BaseMap(props) {
                 getPosition: (d: any) => d.geometry.coordinates,
                 getIcon: (d: any, { index }: { index: any }) => {
                   const windSpeed = d.properties.windSpeed;
-                  const maxWindSpeed = Math.max(...windData.map((d) => d.properties.windSpeed));
-                
+                  const maxWindSpeed = Math.max(
+                    ...windData.map((d) => d.properties.windSpeed)
+                  );
+
                   // Check if windSpeed is a valid number
-                  if (!isNaN(windSpeed) && !isNaN(maxWindSpeed) && maxWindSpeed !== 0) {
+                  if (
+                    !isNaN(windSpeed) &&
+                    !isNaN(maxWindSpeed) &&
+                    maxWindSpeed !== 0
+                  ) {
                     const t = windSpeed / maxWindSpeed;
                     const color = `rgb(${255 * (1 - t)}, ${255 * t}, 0)`;
-                
+
                     return {
                       url: svgToDataURL(createSVGIcon(index, color)),
                       width: 1024,
@@ -2712,7 +2728,11 @@ function BaseMap(props) {
                     };
                   } else {
                     // Handle invalid windSpeed or maxWindSpeed
-                    console.error("Invalid windSpeed or maxWindSpeed:", windSpeed, maxWindSpeed);
+                    console.error(
+                      "Invalid windSpeed or maxWindSpeed:",
+                      windSpeed,
+                      maxWindSpeed
+                    );
                     // You can provide a default color or take other appropriate actions here
                     return {
                       url: svgToDataURL(createSVGIcon(index, "rgb(255, 0, 0)")),
@@ -2721,13 +2741,13 @@ function BaseMap(props) {
                     };
                   }
                 },
-                
+
                 getSize: (d) => d.properties.windSpeed * 4,
                 getAngle: (d) => 90 - d.properties.windDirection,
               })
             );
             break;
-          }
+        }
 
         (async () => {
           try {
@@ -3047,7 +3067,6 @@ function BaseMap(props) {
     MultiPolygon: <GatewayOutlined />,
   };
 
-
   const AirPollutionIcon = ({ color }: { color: string }) => {
    return ( 
    <svg
@@ -3056,12 +3075,12 @@ function BaseMap(props) {
       id="Smoke"
       xmlns="http://www.w3.org/2000/svg"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      width="60"
-      height="60"
+      width="68"
+      height="68"
       viewBox="64 64 896 896"
       enable-background="new 0 0 256 256"
       xml:space="preserve"
-      style={{ padding: "3px"}}
+      style={{ padding: "0.5px" }}
     >
       <path d="M220.37,102.96c1.66-4.58,2.5-9.39,2.5-14.34c0-23.29-18.95-42.24-42.24-42.24c-2.36,0-4.71,0.19-7.01,0.58
 	c-5.67-13.22-16.76-23.52-30.54-28.11C116.59,10.02,87.85,24.39,79,50.9c-0.06,0.16-0.11,0.33-0.17,0.49
@@ -3086,11 +3105,20 @@ function BaseMap(props) {
 
   const WindDirectionIcon = ({ color }: { color: string }) => {
     return (
-      <svg xmlns="http://www.w3.org/2000/svg" height="25" width="25" viewBox="64 64 896 896" style={{ padding: "3px"}}>
-        <path fill={color} d="M288 32c0 17.7 14.3 32 32 32h32c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H352c53 0 96-43 96-96s-43-96-96-96H320c-17.7 0-32 14.3-32 32zm64 352c0 17.7 14.3 32 32 32h32c53 0 96-43 96-96s-43-96-96-96H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H384c-17.7 0-32 14.3-32 32zM128 512h32c53 0 96-43 96-96s-43-96-96-96H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H160c17.7 0 32 14.3 32 32s-14.3 32-32 32H128c-17.7 0-32 14.3-32 32s14.3 32 32 32z"/>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="28"
+        width="28"
+        viewBox="64 64 896 896"
+        style={{ padding: "1.5px" }}
+      >
+        <path
+          fill={color}
+          d="M288 32c0 17.7 14.3 32 32 32h32c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H352c53 0 96-43 96-96s-43-96-96-96H320c-17.7 0-32 14.3-32 32zm64 352c0 17.7 14.3 32 32 32h32c53 0 96-43 96-96s-43-96-96-96H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H384c-17.7 0-32 14.3-32 32zM128 512h32c53 0 96-43 96-96s-43-96-96-96H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H160c17.7 0 32 14.3 32 32s-14.3 32-32 32H128c-17.7 0-32 14.3-32 32s14.3 32 32 32z"
+        />
       </svg>
     );
-  }
+  };
 
   const generateIcon = (type: any, color: any) => {
     switch (type) {
@@ -3101,9 +3129,9 @@ function BaseMap(props) {
       case "MultiPolygon":
         return <GatewayOutlined style={{ color: color }} />;
       case "air_pollution":
-        return <AirPollutionIcon color={color}/>;
+        return <AirPollutionIcon color={color} />;
       case "wind_direction":
-        return <WindDirectionIcon color={color}/>; 
+        return <WindDirectionIcon color={color} />;
     }
   };
 
@@ -4434,9 +4462,9 @@ function BaseMap(props) {
         {
           value: "Other",
           title: "Other",
-          children:[],
+          children: [],
           selectable: true,
-        }
+        },
       ],
     },
   ];
@@ -4461,20 +4489,17 @@ function BaseMap(props) {
           title: vectorProp.name,
           value: "1-0-" + vectorProp._id + "-" + vectorProp.name,
         });
-      }
-      else if (vectorProp.type == "MultiPolygon") {
+      } else if (vectorProp.type == "MultiPolygon") {
         options[1].children[1].children.push({
           title: vectorProp.name,
           value: "1-1-" + vectorProp._id + "-" + vectorProp.name,
         });
-      }
-      else if (vectorProp.type == "Point") {
+      } else if (vectorProp.type == "Point") {
         options[1].children[2].children.push({
           title: vectorProp.name,
           value: "1-2-" + vectorProp._id + "-" + vectorProp.name,
         });
-      }
-      else if (vectorProp.type) {
+      } else if (vectorProp.type) {
         options[1].children[3].children.push({
           title: vectorProp.name,
           value: "1-3-" + vectorProp._id + "-" + vectorProp.name,
