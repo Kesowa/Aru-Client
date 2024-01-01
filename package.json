@@ -19,7 +19,7 @@
     "prettier:fix": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\""
   },
   "dependencies": {
-    "@ant-design/pro-layout": "^7.16.0",
+    "@ant-design/pro-layout": "^7.17.6",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.2.0",

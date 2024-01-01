@@ -130,7 +130,7 @@ function ImageDocs(props) {
       case "2":
         setThermalPayload({
           id: selectedImg._id,
-          doc: "documents",
+          doc: "document",
           filePath: selectedImg.filePath,
         });
         break;
