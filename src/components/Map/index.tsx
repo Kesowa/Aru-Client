@@ -6059,11 +6059,13 @@ function BaseMap(props) {
         //   setPolygon(mapCoords);
         // }}
         onHover={(info) => {
-          const coords = getPolygon(info.x, info.y, polygonSize);
-          const mapCoords = coords.map((coord) =>
-            info.viewport?.unproject(coord)
-          );
-          setPolygon(mapCoords);
+          if(isMaskLayerVisible){
+            const coords = getPolygon(info.x, info.y, polygonSize);
+            const mapCoords = coords.map((coord) =>
+              info.viewport?.unproject(coord)
+            );
+            setPolygon(mapCoords);
+          }
         }}
         controller={true}
         layers={[
