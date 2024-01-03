@@ -446,10 +446,7 @@ function MissionView(props) {
         label: (
           <span>
             Report Generation{" "}
-            {/* <Badge
-              style={{ backgroundColor: "#3D85FC" }}
-              count={totalImages}
-            ></Badge> */}
+            
           </span>
         ),
         children: (

@@ -33,18 +33,42 @@ const boxStyle: React.CSSProperties = {
 const { Text } = Typography;
 function ReportGenration(props) {
   const [activeKey, setactiveKey] = useState("1");
+  
   function callback(key) {
     setactiveKey(key);
     console.log(activeKey);
   }
-
-  function genrate_report({ missionId }) {
-    console.log("lokesh");
+  function generateReport(reportType:string) {
+    
+    http
+      .post(`${reportType == "block" ? apis.CREATE_BLOCK_REPORT : apis.CREATE_PLOT_REPORT}`, {
+        missionId: props.missionId,
+      })
+      .then((result) => {
+        console.log(result.data.message);
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, props.logout);
+      })
+     
+  }
+  
+  function onclick_genratereport(reportType: string) {
+    const generateReportHandler = () => {
+      generateReport(reportType);
+    };
+  
     return (
       <>
         <div className="center__button">
-          <Button type="primary" icon={<DownloadOutlined />} size="large">
-            Generate
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            size="large"
+            onClick={generateReportHandler}
+          >
+            Generate {reportType} Report
           </Button>
         </div>
       </>
@@ -56,12 +80,12 @@ function ReportGenration(props) {
       {
         key: "1",
         label: <span>Plot </span>,
-        children: genrate_report(props.missionId),
+        children: onclick_genratereport("Plot"),
       },
       {
         key: "2",
         label: <span>Block </span>,
-        children: <></>,
+        children: onclick_genratereport("block"),
       },
     ];
     return items;
@@ -83,4 +107,4 @@ const mapStateToProps = (state: any) => ({
   Thread: state.Thread,
 });
 
-export default connect(mapStateToProps, { logout, thread })(ReportGenration);
+export default connect(mapStateToProps, {logout, thread })(ReportGenration);
