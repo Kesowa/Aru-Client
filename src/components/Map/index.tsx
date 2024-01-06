@@ -693,8 +693,13 @@ function BaseMap(props) {
   const [selectedKey, setSelectedKey] = useState<any>();
 
   //---------------------Open Stree Maps Layer ----------------------------------------------------
+  const [hoverInfo, setHoverInfo] = useState(null);
+  const deckRef = useRef(null);
+
+
   const [polygonSize, setPolygonSize] = useState(150);
   const [opcity, setOpcity] = useState(1);
+
   useEffect(() => {
     console.log("Opacity is :", opcity);
   }, [opcity]);
@@ -752,6 +757,26 @@ function BaseMap(props) {
             extensions: [new MaskExtension()],
             maskId: maskLayer.id,
             opacity: opcity,
+            pickable: true,
+            onHover: ({ x, y, coordinate, pixel }) => {
+              console.log('DeckGL Canvas Class Name:');
+              const deckCanvas = deckRef.current.deck.gl.canvas;
+              const ctx = deckCanvas.getContext('2d');
+              const pixelData = ctx.getImageData(pixel[0], pixel[1], 1, 1).data;
+              const rgbValues = pixelData.slice(0, 3);
+      
+              // Perform linear interpolation on the RGB values
+              const interpolatedValue = linearInterpolation(rgbValues);
+      
+              // Set hover information state
+              setHoverInfo({
+                x,
+                y,
+                coordinate,
+                rgbValues,
+                interpolatedValue,
+              });
+            },
           }),
           showBorder &&
             new PathLayer({
@@ -2147,18 +2172,7 @@ function BaseMap(props) {
       zoom,
     };
   };
-  const [hoveredPoint, setHoveredPoint] = useState(null);
-  
-  const onHover = ({ x, y, object }) => {
-    if (object) {
-      const [longitude, latitude] = object.coordinates; // Adjust based on your data structure
-      const temperature = queryRasterData(longitude, latitude); // Implement your method to query temperature
-      setHoveredPoint({ longitude, latitude, temperature });
-    } else {
-      setHoveredPoint(null);
-    }
-  };
-
+ 
   const drawLayers = async (checkedKeysValue: any) => {
     const vlayers: any = [];
     setShowMarkerSizeTool(false);
@@ -2258,6 +2272,26 @@ function BaseMap(props) {
                     extensions: [new MaskExtension()],
                     maskId: maskLayer.id,
                     opacity: opcity,
+                    pickable: true,
+                    onHover: ({ x, y, coordinate, pixel }) => {
+                      console.log('DeckGL Canvas Class Name:');
+                      const deckCanvas = deckRef.current.deck.gl.canvas;
+                      const ctx = deckCanvas.getContext('2d');
+                      const pixelData = ctx.getImageData(pixel[0], pixel[1], 1, 1).data;
+                      const rgbValues = pixelData.slice(0, 3);
+              
+                      // Perform linear interpolation on the RGB values
+                      const interpolatedValue = linearInterpolation(rgbValues);
+              
+                      // Set hover information state
+                      setHoverInfo({
+                        x,
+                        y,
+                        coordinate,
+                        rgbValues,
+                        interpolatedValue,
+                      });
+                    },
                   });
                 },
               })
@@ -2349,6 +2383,26 @@ function BaseMap(props) {
                   extensions: [new MaskExtension()],
                   maskId: maskLayer.id,
                   opacity: opcity, // Set the desired opacity value (0 to 1)
+                  pickable: true,
+                  onHover: ({ x, y, coordinate, pixel }) => {
+                    console.log('DeckGL Canvas Class Name:');
+                    const deckCanvas = deckRef.current.deck.gl.canvas;
+                    const ctx = deckCanvas.getContext('2d');
+                    const pixelData = ctx.getImageData(pixel[0], pixel[1], 1, 1).data;
+                    const rgbValues = pixelData.slice(0, 3);
+            
+                    // Perform linear interpolation on the RGB values
+                    const interpolatedValue = linearInterpolation(rgbValues);
+            
+                    // Set hover information state
+                    setHoverInfo({
+                      x,
+                      y,
+                      coordinate,
+                      rgbValues,
+                      interpolatedValue,
+                    });
+                  },
                 });
               },
             })
@@ -2827,6 +2881,21 @@ function BaseMap(props) {
        })
      )*/
     setVisibleLayers(vlayers);
+  };
+
+  // useEffect(() => {
+  //   // Log the class name of the DeckGL canvas
+  //   const canvasClassName = deckRef.current.deck.gl.canvas.className;
+  //   console.log('DeckGL Canvas Class Name:', canvasClassName);
+  // }, []);
+
+  // Linear interpolation function (replace with your logic)
+  const linearInterpolation = (rgbValues) => {
+    console.log('DeckGL Canvas Class Name:');
+    // Your linear interpolation logic here
+    // For example, average of the RGB values
+    const averageValue = (rgbValues[0] + rgbValues[1] + rgbValues[2]) / 3;
+    return averageValue;
   };
 
   const [lastCount, setLastCount] = useState(0);
@@ -6062,6 +6131,7 @@ function BaseMap(props) {
       )}
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
+         ref={deckRef}
         // onHover={(info) => {
         //   const coords = getPolygon(info.x, info.y, 150);
         //   const mapCoords = coords.map((coord) =>
@@ -6132,16 +6202,12 @@ function BaseMap(props) {
         }}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
-        {hoveredPoint && (
-          <div>
-          <p>Latitude: {hoveredPoint.latitude}</p>
-          <p>Longitude: {hoveredPoint.longitude}</p>
-          <p>Temperature: {hoveredPoint.temperature} °C</p>
-           </div>
-           )}
+        {hoverInfo && (
+          <div style={{ position: 'absolute', left: hoverInfo.x, top: hoverInfo.y }}>
+            <p>RGB Values: {hoverInfo.rgbValues.join(', ')}</p>
+            <p>Interpolated Value: {hoverInfo.interpolatedValue}</p>
           </div>
-         );
-        };
+        )}
         {osmState ? (
           <>
             <div style={COPYRIGHT_LICENSE_STYLE}>
@@ -7410,3 +7476,4 @@ export default connect(mapStateToProps, {
   logout,
   thread,
 })(BaseMap);
+
