@@ -3,12 +3,13 @@ import reactRefresh from "@vitejs/plugin-react";
 import svgrPlugin from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";
+import { env } from "process";
 // import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   esbuild: {
-    drop: ["console", "debugger"],
+    drop: env.PRODUCTION ? ["console", "debugger"] : [],
   },
   // This changes the out put dir from dist to build
   // comment this out if that isn't relevant for your project

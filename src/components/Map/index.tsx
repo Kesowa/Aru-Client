@@ -696,7 +696,6 @@ function BaseMap(props) {
   const [hoverInfo, setHoverInfo] = useState(null);
   const deckRef = useRef(null);
 
-
   const [polygonSize, setPolygonSize] = useState(150);
   const [opcity, setOpcity] = useState(1);
 
@@ -744,6 +743,7 @@ function BaseMap(props) {
       tileSize: 256,
       zoomOffset: devicePixelRatio === 1 ? -1 : 0,
 
+
       renderSubLayers: (props) => {
         const {
           bbox: { west, south, east, north },
@@ -757,26 +757,6 @@ function BaseMap(props) {
             extensions: [new MaskExtension()],
             maskId: maskLayer.id,
             opacity: opcity,
-            pickable: true,
-            onHover: ({ x, y, coordinate, pixel }) => {
-              console.log('DeckGL Canvas Class Name:');
-              const deckCanvas = deckRef.current.deck.gl.canvas;
-              const ctx = deckCanvas.getContext('2d');
-              const pixelData = ctx.getImageData(pixel[0], pixel[1], 1, 1).data;
-              const rgbValues = pixelData.slice(0, 3);
-      
-              // Perform linear interpolation on the RGB values
-              const interpolatedValue = linearInterpolation(rgbValues);
-      
-              // Set hover information state
-              setHoverInfo({
-                x,
-                y,
-                coordinate,
-                rgbValues,
-                interpolatedValue,
-              });
-            },
           }),
           showBorder &&
             new PathLayer({
@@ -2259,6 +2239,29 @@ function BaseMap(props) {
                   setLayerLoading(false);
                 },
 
+                pickable: true,
+                onHover: ({ x, y, color }) => {
+                  try {
+                    const [r, g, b, a] = color;
+                
+                    console.debug("RGB values:", r, g, b);
+                    console.log(x, y);
+                
+                    const elementSettings = allLayers[element]?.settings;
+                    const minp = elementSettings?.minp;
+                    const maxp = elementSettings?.maxp;
+                    console.log(minp, maxp);
+                
+                    const elevation = minp + (maxp - minp) * (r / 255 + g / 255 + b / 255) / 3;
+                
+                    setHoverInfo({ r, g, b, x, y, elevation });
+
+                  } catch (error) {
+                    console.error("Could not found the layer please try again");
+                  }
+                },
+              
+
                 renderSubLayers: (props) => {
                   const {
                     bbox: { west, south, east, north },
@@ -2272,26 +2275,6 @@ function BaseMap(props) {
                     extensions: [new MaskExtension()],
                     maskId: maskLayer.id,
                     opacity: opcity,
-                    pickable: true,
-                    onHover: ({ x, y, coordinate, pixel }) => {
-                      console.log('DeckGL Canvas Class Name:');
-                      const deckCanvas = deckRef.current.deck.gl.canvas;
-                      const ctx = deckCanvas.getContext('2d');
-                      const pixelData = ctx.getImageData(pixel[0], pixel[1], 1, 1).data;
-                      const rgbValues = pixelData.slice(0, 3);
-              
-                      // Perform linear interpolation on the RGB values
-                      const interpolatedValue = linearInterpolation(rgbValues);
-              
-                      // Set hover information state
-                      setHoverInfo({
-                        x,
-                        y,
-                        coordinate,
-                        rgbValues,
-                        interpolatedValue,
-                      });
-                    },
                   });
                 },
               })
@@ -2334,6 +2317,29 @@ function BaseMap(props) {
               //   allLayers[element]?.layerPath,
               //   allLayers[element]?.settings
               // ),
+              pickable: true,
+              onHover: ({ x, y, color }) => {
+                try {
+                  const [r, g, b, a] = color;
+              
+                  console.debug("RGB values:", r, g, b);
+                  console.log(x, y);
+              
+                  const elementSettings = allLayers[element]?.settings;
+                  const minp = elementSettings?.minp;
+                  const maxp = elementSettings?.maxp;
+                  console.log(minp, maxp);
+              
+                  const elevation = minp + (maxp - minp) * (r / 255 + g / 255 + b / 255) / 3;
+              
+                  setHoverInfo({ r, g, b, x, y, elevation });
+                  console.log(hoverInfo);
+                } catch (error) {
+                  console.error("Could not found the layer please try again");
+                }
+              },
+              
+
               getTileData: async (tile) => {
                 const { index } = tile;
                 const rasterUrl = getRasterURL(
@@ -2383,26 +2389,6 @@ function BaseMap(props) {
                   extensions: [new MaskExtension()],
                   maskId: maskLayer.id,
                   opacity: opcity, // Set the desired opacity value (0 to 1)
-                  pickable: true,
-                  onHover: ({ x, y, coordinate, pixel }) => {
-                    console.log('DeckGL Canvas Class Name:');
-                    const deckCanvas = deckRef.current.deck.gl.canvas;
-                    const ctx = deckCanvas.getContext('2d');
-                    const pixelData = ctx.getImageData(pixel[0], pixel[1], 1, 1).data;
-                    const rgbValues = pixelData.slice(0, 3);
-            
-                    // Perform linear interpolation on the RGB values
-                    const interpolatedValue = linearInterpolation(rgbValues);
-            
-                    // Set hover information state
-                    setHoverInfo({
-                      x,
-                      y,
-                      coordinate,
-                      rgbValues,
-                      interpolatedValue,
-                    });
-                  },
                 });
               },
             })
@@ -6131,7 +6117,7 @@ function BaseMap(props) {
       )}
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
-         ref={deckRef}
+        ref={deckRef}
         // onHover={(info) => {
         //   const coords = getPolygon(info.x, info.y, 150);
         //   const mapCoords = coords.map((coord) =>
@@ -6203,11 +6189,44 @@ function BaseMap(props) {
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         {hoverInfo && (
-          <div style={{ position: 'absolute', left: hoverInfo.x, top: hoverInfo.y }}>
-            <p>RGB Values: {hoverInfo.rgbValues.join(', ')}</p>
-            <p>Interpolated Value: {hoverInfo.interpolatedValue}</p>
+          <div
+            style={{
+              position: "absolute",
+              left: hoverInfo.x+7 ,
+              top: hoverInfo.y+7,
+              background: "white",
+              padding: "4px",
+              borderRadius: "10px",
+              boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+              zIndex: 1000,
+              display: "flex", 
+              alignItems: "center",
+              justifyContent: "center", 
+              marginTop: "-15px", 
+              marginBottom: "-15px",
+            }}
+          >
+            <div
+              style={{
+                background: `rgb(${hoverInfo.r}, ${hoverInfo.g}, ${hoverInfo.b})`,
+                width: "25px",
+                height: "30px", 
+                marginRight: "8px",
+                borderRadius: "7px",
+              }}
+            ></div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "-15px", 
+              }}
+            >
+              <p>{hoverInfo.elevation.toFixed(2)} Meter</p>
+            </div>
           </div>
         )}
+
         {osmState ? (
           <>
             <div style={COPYRIGHT_LICENSE_STYLE}>
