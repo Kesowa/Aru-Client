@@ -131,6 +131,7 @@ import NavIcon from "../../static/nav_icon.png";
 // import { JSONLoader } from "@loaders.gl/json";
 // import { LASLoader } from "@loaders.gl/las";
 import { load } from "@loaders.gl/core";
+import { log } from "console";
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
   [lat - size * 0.5, lng - size * 0.5],
@@ -724,6 +725,29 @@ function BaseMap(props) {
       zIndex: 9999,
     });
   }, [polygon, isMaskLayerVisible]);
+
+  const handleHover = ({ x, y, color, allLayers, element }) => {
+    try {
+      const [r, g, b, a] = color;
+  
+      console.debug("RGB values:", r, g, b);
+      console.log(x, y);
+  
+      const elementSettings = allLayers[element]?.settings;
+      const minp = elementSettings?.minp;
+      const maxp = elementSettings?.maxp;
+      console.log(minp, maxp);
+  
+      const elevation = minp + (maxp - minp) * (r / 255 + g / 255 + b / 255) / 3;
+  
+      setHoverInfo({ r, g, b, x, y, elevation });
+
+    } catch (error) {
+      console.error("Could not found the layer, please try again");
+    }
+  };
+  
+  
 
   const osm = [
     new TileLayer({
@@ -2240,26 +2264,7 @@ function BaseMap(props) {
                 },
 
                 pickable: true,
-                onHover: ({ x, y, color }) => {
-                  try {
-                    const [r, g, b, a] = color;
-                
-                    console.debug("RGB values:", r, g, b);
-                    console.log(x, y);
-                
-                    const elementSettings = allLayers[element]?.settings;
-                    const minp = elementSettings?.minp;
-                    const maxp = elementSettings?.maxp;
-                    console.log(minp, maxp);
-                
-                    const elevation = minp + (maxp - minp) * (r / 255 + g / 255 + b / 255) / 3;
-                
-                    setHoverInfo({ r, g, b, x, y, elevation });
-
-                  } catch (error) {
-                    console.error("Could not found the layer please try again");
-                  }
-                },
+                onHover: (event) => handleHover({...event, allLayers, element }),
               
 
                 renderSubLayers: (props) => {
@@ -2318,26 +2323,7 @@ function BaseMap(props) {
               //   allLayers[element]?.settings
               // ),
               pickable: true,
-              onHover: ({ x, y, color }) => {
-                try {
-                  const [r, g, b, a] = color;
-              
-                  console.debug("RGB values:", r, g, b);
-                  console.log(x, y);
-              
-                  const elementSettings = allLayers[element]?.settings;
-                  const minp = elementSettings?.minp;
-                  const maxp = elementSettings?.maxp;
-                  console.log(minp, maxp);
-              
-                  const elevation = minp + (maxp - minp) * (r / 255 + g / 255 + b / 255) / 3;
-              
-                  setHoverInfo({ r, g, b, x, y, elevation });
-                  console.log(hoverInfo);
-                } catch (error) {
-                  console.error("Could not found the layer please try again");
-                }
-              },
+              onHover: (event) => handleHover({...event, allLayers, element }),
               
 
               getTileData: async (tile) => {
