@@ -728,24 +728,23 @@ function BaseMap(props) {
 
   const handleHover = ({ x, y, color, allLayers, element }) => {
     try {
-      const [r, g, b, a] = color;
+      const layerType = allLayers[element]?.type;
+      if (layerType === 'DEM') {
+        const [r, g, b, a] = color;
+        const elementSettings = allLayers[element]?.settings;
+        const minp = elementSettings?.minp;
+        const maxp = elementSettings?.maxp;
+        const elevation = minp + (maxp - minp) * (r / 255 + g / 255 + b / 255) / 3;
   
-      console.debug("RGB values:", r, g, b);
-      console.log(x, y);
-  
-      const elementSettings = allLayers[element]?.settings;
-      const minp = elementSettings?.minp;
-      const maxp = elementSettings?.maxp;
-      console.log(minp, maxp);
-  
-      const elevation = minp + (maxp - minp) * (r / 255 + g / 255 + b / 255) / 3;
-  
-      setHoverInfo({ r, g, b, x, y, elevation });
-
+        setHoverInfo({ r, g, b, x, y, elevation });
+      } else {
+        setHoverInfo(null);
+      }
     } catch (error) {
-      console.error("Could not found the layer, please try again");
+      console.error("Try with the dem layer insted");
     }
   };
+  
   
   
 
@@ -2235,6 +2234,7 @@ function BaseMap(props) {
                     index.y,
                     index.z
                   );
+                  
                   const mapBounds = mapRef.current.getMap().getBounds();
                   // console.log("Map Bounds: ", mapBounds);
                   // console.log("Raster Bounds: ", bounds);
@@ -2272,7 +2272,7 @@ function BaseMap(props) {
                     bbox: { west, south, east, north },
                   } = props.tile;
                   console.log("props.data 2:", props.data);
-
+                  console.log("layer type: ",   allLayers[element]?.type,);
                   return new BitmapLayer(props, {
                     data: null,
                     image: props.data,
@@ -2368,6 +2368,7 @@ function BaseMap(props) {
                   bbox: { west, south, east, north },
                 } = props.tile;
                 console.log("props.data 4:", props.data, maskLayer.id);
+                console.log("layer type: ",   allLayers[element]?.type,);
                 return new BitmapLayer(props, {
                   data: null,
                   image: props.data,
