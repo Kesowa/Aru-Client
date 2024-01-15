@@ -2184,8 +2184,8 @@ function BaseMap(props) {
           const layer: any = allLayers[element];
           await layer?.layerPath.map(async (layerr: any) => {
             const settings: any = {
-              minp: layerr[0].minp,
-              maxp: layerr[0].maxp,
+              minp: layerr[0].minP,
+              maxp: layerr[0].maxP,
               resamplingMethod: layer.settings.resamplingMethod,
               bidx: layer.settings.bidx,
             };
