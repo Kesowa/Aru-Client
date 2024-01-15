@@ -1212,7 +1212,7 @@ function MissionView(props) {
           </div>
           <div className="pilot-assign-btn">
             {renderAssignPilotBtn("Re-Assign Pilot")}
-            {renderGenerateReportButton()}
+            {/* {renderGenerateReportButton()} */}
             {renderPilotAssignButton()}
           </div>
         </>
@@ -1224,7 +1224,7 @@ function MissionView(props) {
       return (
         <div>
           {renderAssignPilotBtn("Assign Pilot")}
-          {renderGenerateReportButton()}
+          {/* {renderGenerateReportButton()} */}
           {renderPilotAssignButton()}
         </div>
       );
@@ -1245,7 +1245,7 @@ function MissionView(props) {
           </div>
           <div className="pilot-assign-btn">
             {renderAssignPilotBtn("Re-Assign Pilot")}
-            {renderGenerateReportButton()}
+            {/* {renderGenerateReportButton()} */}
             {renderPilotAssignButton()}
           </div>
         </>
