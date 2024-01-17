@@ -1,6 +1,6 @@
 # Welcome to Arya!
 
-This folder contain the client codes of the Arya streaming platform.
+This folder contain the client codes of the ARU streaming platform.
 
 # Setup
 
