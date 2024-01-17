@@ -702,23 +702,16 @@ function BaseMap(props) {
   //---------------------Open Stree Maps Layer ----------------------------------------------------
   const [hoverInfo, setHoverInfo] = useState(null);
   const deckRef = useRef(null);
-
   const [polygonSize, setPolygonSize] = useState(150);
   const [opcity, setOpcity] = useState(1);
-
-  useEffect(() => {
-    console.log("Opacity is :", opcity);
-  }, [opcity]);
+  const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
 
   const changePolygonSize = (value) => {
     setPolygonSize(value);
-    // Update the polygon size or any other logic based on the slider value
   };
   const changeOpacity = (value) => {
     setOpcity(value);
   };
-
-  const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
 
   const maskLayer = useMemo(() => {
     return new SolidPolygonLayer({
@@ -732,40 +725,8 @@ function BaseMap(props) {
     });
   }, [polygon, isMaskLayerVisible]);
 
-  // const handleHover = ({ x, y, color, allLayers, element }) => {
-  //   try {
-  //     const layerType = allLayers[element]?.type;
-  //     if (layerType === 'DEM') {
-  //       const [r, g, b, a] = color;
-  //       const elementSettings = allLayers[element]?.settings;
-  //       const minp = elementSettings?.minp;
-  //       const maxp = elementSettings?.maxp;
-  //       const elevation = minp + (maxp - minp) * (r / 255 + g / 255 + b / 255) / 3;
   
-  //       setHoverInfo({ r, g, b, x, y, elevation });
-  //     } else {
-  //       setHoverInfo(null);
-  //     }
-  //   } catch (error) {
-  //     console.error("Try with the dem layer insted");
-  //   }
-  // };
-
-  // const handleHover = ({ bitmap, sourceLayer, color }) => {
-  //   console.log("THIS works");
-  
-  //   if (bitmap) {
-  //     const pixelColor = readPixelsToArray(sourceLayer.props.image, {
-  //       sourceX: bitmap.pixel[0],
-  //       sourceY: bitmap.pixel[1],
-  //       sourceWidth: 1,
-  //       sourceHeight: 1,
-  //     });
-  //     console.log("Color at picked pixel 2:", pixelColor, color);
-  //   }
-  // };
-  
-  const handleHover = ({ x, y, color, allLayers, element, bitmap, sourceLayer }) => {
+  const handleHover = ({ x, y,allLayers, element, bitmap, sourceLayer,settings }) => {
     try {
       const layerType = allLayers[element]?.type;
   
@@ -777,9 +738,10 @@ function BaseMap(props) {
           sourceHeight: 1,
         });
         const [r, g, b, a] = pixelColor;
-        const elementSettings = allLayers[element]?.settings;
+        const elementSettings = settings || allLayers[element]?.settings;
         const minp = elementSettings?.minp;
         const maxp = elementSettings?.maxp;
+        console.log(minp,maxp);
         const elevation = minp + (maxp - minp) * (r / 255 + g / 255 + b / 255) / 3;
   
         setHoverInfo({ r, g, b, x, y, elevation });
@@ -790,9 +752,7 @@ function BaseMap(props) {
       console.error("Try with the dem layer instead");
     }
   };
-  
-  // Usage example:
-  // handleHover({ x, y, color, allLayers, element, bitmap, sourceLayer });
+
   
   
 
@@ -814,13 +774,13 @@ function BaseMap(props) {
       tileSize: 256,
       zoomOffset: devicePixelRatio === 1 ? -1 : 0,
       
-      
 
       renderSubLayers: (props) => {
         const {
           bbox: { west, south, east, north },
         } = props.tile;
         console.log("props.data:", props.data);
+
         return [
           new BitmapLayer(props, {
             data: null,
@@ -2302,7 +2262,7 @@ function BaseMap(props) {
                     index.x,
                     index.y,
                     index.z
-                  );
+                );
 
                   
                   const mapBounds = mapRef.current.getMap().getBounds();
@@ -2334,7 +2294,7 @@ function BaseMap(props) {
                 },
 
                 pickable: true,
-                onHover: (event) => handleHover({...event, allLayers, element }),
+                onHover: (event) => handleHover({...event, allLayers, element ,settings}),
               
 
                 renderSubLayers: (props) => {
@@ -2393,7 +2353,6 @@ function BaseMap(props) {
               //   allLayers[element]?.settings
               // ),
               pickable: true,
-              onHover: (event) => handleHover({...event, allLayers, element }),
               
 
               getTileData: async (tile) => {
@@ -2406,6 +2365,7 @@ function BaseMap(props) {
                   index.y,
                   index.z
                 );
+                
                 const mapBounds = mapRef.current.getMap().getBounds();
                 // console.log("Map Bounds: ", mapBounds);
                 // console.log("Raster Bounds: ", bounds);
@@ -2427,6 +2387,9 @@ function BaseMap(props) {
                   return load(rasterUrl);
                 }
               },
+
+              onHover: (event) => handleHover({...event, allLayers, element }),
+
               minZoom: 0,
               maxZoom: 24,
               tileSize: 256,
@@ -6380,7 +6343,7 @@ function BaseMap(props) {
         //   setPolygon(mapCoords);
         // }}
         getCursor={() => {
-          return isDrawing ? "crosshair" : "grab";
+          return isDrawing ? "crosshair" : "pointer";
         }}
         getTooltip={({ object }) => {
           return (
