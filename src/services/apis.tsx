@@ -226,9 +226,10 @@ const apis = {
   BULK_DOWNLOAD: "/apis/v1/document/zipbyId",
   UPDATE_DOC: "/apis/v1/document/update-doc-by-ID",
   UPDATE_MULTI_DOC: "/apis/v1/document/update-multi-docs-by-ID",
-  CREATE_REPORT: "/apis/v1/report",
+  CREATE_REPORT: "/apis/v1/report/",
   DOWNLOAD_KML: "/apis/v1/layer/download-asset-by-Id-to-kml",
-
+  CREATE_BLOCK_REPORT: "/apis/v1/report/block",
+  CREATE_PLOT_REPORT: "/apis/v1/report/plot",
   //Clients
   CREATE_CLIENT: "/apis/v1/client/create",
   GET_CLIENT_LIST: "/apis/v1/client/get-list-client",
