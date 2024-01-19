@@ -443,12 +443,7 @@ function MissionView(props) {
       },
       {
         key: "6",
-        label: (
-          <span>
-            Report Generation{" "}
-            
-          </span>
-        ),
+        label: <span>Report Generation </span>,
         children: (
           <Report_genration
             missionId={MissionDetails.missionId}

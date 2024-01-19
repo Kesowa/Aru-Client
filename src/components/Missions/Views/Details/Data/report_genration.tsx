@@ -1,26 +1,15 @@
-import { useEffect, useState, useRef } from "react";
-import { default as Shimmer } from "react-loading-skeleton";
+import { useState } from "react";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Typography, Tabs, Button } from "antd";
 
 import { DownloadOutlined } from "@ant-design/icons";
-import { BsFlagFill } from "react-icons/bs";
 import "./data.less";
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import { logout } from "../../../../../actions/authAction";
-import moment from "moment";
-import VideoPlayer from "../../../../shared/VideoPlayer";
-import Dragger from "antd/lib/upload/Dragger";
 import { connect } from "react-redux";
-import { API_URL, STATIC_URL } from "src/constants";
-import { io } from "socket.io-client";
-import FilterToolbar from "src/components/shared/Toolbar/filter";
-import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
-import Thread from "../../../../shared/Thread";
-import axios from "axios";
 
 import "./data.less";
 const boxStyle: React.CSSProperties = {
@@ -33,32 +22,37 @@ const boxStyle: React.CSSProperties = {
 const { Text } = Typography;
 function ReportGenration(props) {
   const [activeKey, setactiveKey] = useState("1");
-  
+
   function callback(key) {
     setactiveKey(key);
     console.log(activeKey);
   }
-  function generateReport(reportType:string) {
-    
+  function generateReport(reportType: string) {
     http
-      .post(`${reportType == "block" ? apis.CREATE_BLOCK_REPORT : apis.CREATE_PLOT_REPORT}`, {
-        missionId: props.missionId,
-      })
+      .post(
+        `${
+          reportType == "block"
+            ? apis.CREATE_BLOCK_REPORT
+            : apis.CREATE_PLOT_REPORT
+        }`,
+        {
+          missionId: props.missionId,
+        }
+      )
       .then((result) => {
         console.log(result.data.message);
       })
       .catch((err) => {
         console.log(err);
         AxiosErrorHandler(err, props.logout);
-      })
-     
+      });
   }
-  
+
   function onclick_genratereport(reportType: string) {
     const generateReportHandler = () => {
       generateReport(reportType);
     };
-  
+
     return (
       <>
         <div className="center__button">
@@ -107,4 +101,4 @@ const mapStateToProps = (state: any) => ({
   Thread: state.Thread,
 });
 
-export default connect(mapStateToProps, {logout, thread })(ReportGenration);
+export default connect(mapStateToProps, { logout, thread })(ReportGenration);

@@ -702,7 +702,6 @@ function ImageDocs(props) {
   // This is a list view
   return (
     <>
-    
       <ThermalImaging
         thermalPayload={thermalPayload}
         setThermalPayload={setThermalPayload}
