@@ -725,7 +725,21 @@ function BaseMap(props) {
     });
   }, [polygon, isMaskLayerVisible]);
 
-  
+  const startPixel = [161, 157, 242, 255];
+  const endPixel = [238, 248, 1, 255];
+
+  const colorToScalar = (color, startPixel, endPixel) => {
+
+    const scalar = color[0] / 255.0;
+    // const colorNormalized = color.map(c => c / 255.0);
+    // const startNormalized = startPixel.map(c => c / 255.0);
+    // const endNormalized = endPixel.map(c => c / 255.0);
+
+    // let scalar = (colorNormalized[0] - startNormalized[0]) / (endNormalized[0] - startNormalized[0]);
+     
+    return scalar;
+  };
+
   const handleHover = ({ x, y,allLayers, element, bitmap, sourceLayer,settings }) => {
     try {
       const layerType = allLayers[element]?.type;
@@ -738,18 +752,22 @@ function BaseMap(props) {
           sourceHeight: 1,
         });
         const [r, g, b, a] = pixelColor;
+        const scalarValue = colorToScalar([r, g, b, a], startPixel, endPixel);
+      
         const elementSettings = settings || allLayers[element]?.settings;
         const minp = elementSettings?.minp;
         const maxp = elementSettings?.maxp;
-        console.log(minp,maxp);
-        const elevation = minp + (maxp - minp) * (r / 255 + g / 255 + b / 255) / 3;
-  
+        // const elevation = minp + (maxp - minp) * (r / 255 + g / 255 + b / 255) / 3;
+
+        const elevation = minp + (maxp - minp) *scalarValue;
+
+
         setHoverInfo({ r, g, b, x, y, elevation });
       } else {
         setHoverInfo(null);
       }
     } catch (error) {
-      console.error("Try with the dem layer instead");
+      console.error("Try with the dem layer instead",error);
     }
   };
 
