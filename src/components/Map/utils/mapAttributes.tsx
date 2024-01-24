@@ -84,7 +84,7 @@ const MapAttributes: React.FC<Props> = (props) => {
   const [page, setPage] = useState<State>(initialState);
   const [limit, setLimit] = useState<State>(initialState);
   const [total, setTotal] = useState<State>(initialState);
-  const [isTableLoading, setIsTableLoading] = useState<State>(initialState);
+  const [isTableLoading, setIsTableLoading] = useState<boolean>(initialState.isTableLoading);
   const [tableData, setTableData] = useState<State>(initialState);
 
   useEffect(() => {
@@ -199,14 +199,15 @@ const MapAttributes: React.FC<Props> = (props) => {
             rasterDetails: result.data.data[0],
           }));
         } else {
-          setError(true);
+    setState((prevState) => ({ ...prevState, error: true }));
         }
       })
       .catch((err) => {
-        setError(true);
+    setState((prevState) => ({ ...prevState, error: true }));
         AxiosErrorHandler(err, props.logout);
       })
-      .finally(() => setLoading(false));
+      .finally(() =>
+    setState((prevState) => ({ ...prevState, loading: false})))
   };
 
   const fetchJsonData = () => {
@@ -280,7 +281,7 @@ const MapAttributes: React.FC<Props> = (props) => {
   const getRasterMetaData = () => {
     if (state.rasterDetails) {
       fetch(
-        `${COG_URL}/cog/metadata?url=${TITILER_STATIC}/raster/${state.rasterDetails.fileName}`
+        `${COG_URL}/cog/info?url=${TITILER_STATIC}/raster/${state.rasterDetails.fileName}`
       )
         .then((res) => res.json())
         .then((data) => {
@@ -347,7 +348,7 @@ const MapAttributes: React.FC<Props> = (props) => {
               }}
             >
               <ReactJson
-                src={state.rasterMetaData}
+                src={state.rasterMetaData || {}}
                 name={false}
                 collapsed={true}
                 displayDataTypes={false}
