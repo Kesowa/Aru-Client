@@ -738,7 +738,7 @@ function BaseMap(props) {
       try {
         const layerType = allLayers[element]?.type;
         console.log(isElevationEnabled);
-        if (bitmap && layerType === 'DEM') {
+        if (isElevationEnabled && bitmap && layerType === 'DEM') {
           const pixelColor = readPixelsToArray(sourceLayer.props.image, {
             sourceX: bitmap.pixel[0],
             sourceY: bitmap.pixel[1],
@@ -2303,12 +2303,7 @@ function BaseMap(props) {
                 },
 
                 pickable: true,
-                onHover: (event) => {
-                  if (isElevationEnabled) {
-                    handleHover({ ...event, allLayers, element, settings });
-                  }
-                },
-              
+                onHover: (event) => handleHover({...event, allLayers, element, settings }),
 
                 renderSubLayers: (props) => {
                   const {
@@ -2400,11 +2395,7 @@ function BaseMap(props) {
                 }
               },
 
-              onHover: (event) => {
-                if (isElevationEnabled) {
-                  handleHover({ ...event, allLayers, element, settings });
-                }
-              },
+              onHover: (event) => handleHover({...event, allLayers, element, settings }),
 
               minZoom: 0,
               maxZoom: 24,
@@ -6735,7 +6726,7 @@ function BaseMap(props) {
                   </div>
                 </Tooltip>
               )}
-               {isMaskLayerVisible && (
+               {isElevationEnabled && (
                 <Tooltip placement="bottom" title="Disable Elevation">
                   <div
                     className="cancel-tool"
