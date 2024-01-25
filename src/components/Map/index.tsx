@@ -6,7 +6,7 @@ import { DataFilterExtension } from "@deck.gl/extensions";
 import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
 import { MaskExtension } from "@deck.gl/extensions/typed";
-import { readPixelsToArray } from '@luma.gl/webgl';
+import { readPixelsToArray } from "@luma.gl/webgl";
 import {
   Row,
   Col,
@@ -137,7 +137,6 @@ import NavIcon from "../../static/nav_icon.png";
 // import { JSONLoader } from "@loaders.gl/json";
 // import { LASLoader } from "@loaders.gl/las";
 import { load } from "@loaders.gl/core";
-import { log } from "console";
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
   [lat - size * 0.5, lng - size * 0.5],
@@ -329,7 +328,7 @@ function BaseMap(props) {
       key: "14",
       label: "Mask Layer",
     });
-      items.push({
+    items.push({
       key: "15",
       label: "Elevation",
     });
@@ -734,36 +733,41 @@ function BaseMap(props) {
     });
   }, [polygon, isMaskLayerVisible]);
 
-  const handleHover = ({ x, y, allLayers, element, bitmap, sourceLayer, settings }) => {
-      try {
-        const layerType = allLayers[element]?.type;
-        console.log(isElevationEnabled);
-        if (isElevationEnabled && bitmap && layerType === 'DEM') {
-          const pixelColor = readPixelsToArray(sourceLayer.props.image, {
-            sourceX: bitmap.pixel[0],
-            sourceY: bitmap.pixel[1],
-            sourceWidth: 1,
-            sourceHeight: 1,
-          });
-          const [r, g, b, a] = pixelColor;
-          const scalarValue = pixelColor[0] / 255.0;
+  const handleHover = ({
+    x,
+    y,
+    allLayers,
+    element,
+    bitmap,
+    sourceLayer,
+    settings,
+  }) => {
+    try {
+      const layerType = allLayers[element]?.type;
+      console.log(isElevationEnabled);
+      if (isElevationEnabled && bitmap && layerType === "DEM") {
+        const pixelColor = readPixelsToArray(sourceLayer.props.image, {
+          sourceX: bitmap.pixel[0],
+          sourceY: bitmap.pixel[1],
+          sourceWidth: 1,
+          sourceHeight: 1,
+        });
+        const [r, g, b, a] = pixelColor;
+        const scalarValue = pixelColor[0] / 255.0;
 
-          const elementSettings = settings || allLayers[element]?.settings;
-          const minp = elementSettings?.minp;
-          const maxp = elementSettings?.maxp;
-          const elevation = minp + (maxp - minp) * scalarValue;
+        const elementSettings = settings || allLayers[element]?.settings;
+        const minp = elementSettings?.minp;
+        const maxp = elementSettings?.maxp;
+        const elevation = minp + (maxp - minp) * scalarValue;
 
-          setHoverInfo({ r, g, b, x, y, elevation });
-        } else {
-          setHoverInfo(null);
-        }
-      } catch (error) {
-        console.error("Try with the dem layer instead", error);
+        setHoverInfo({ r, g, b, x, y, elevation });
+      } else {
+        setHoverInfo(null);
       }
-    };
-
-  
-  
+    } catch (error) {
+      console.error("Try with the dem layer instead", error);
+    }
+  };
 
   const osm = [
     new TileLayer({
@@ -782,7 +786,6 @@ function BaseMap(props) {
       maxZoom: 19,
       tileSize: 256,
       zoomOffset: devicePixelRatio === 1 ? -1 : 0,
-      
 
       renderSubLayers: (props) => {
         const {
@@ -2193,7 +2196,7 @@ function BaseMap(props) {
       zoom,
     };
   };
- 
+
   const drawLayers = async (checkedKeysValue: any) => {
     const vlayers: any = [];
     setShowMarkerSizeTool(false);
@@ -2271,9 +2274,8 @@ function BaseMap(props) {
                     index.x,
                     index.y,
                     index.z
-                );
+                  );
 
-                  
                   const mapBounds = mapRef.current.getMap().getBounds();
                   // console.log("Map Bounds: ", mapBounds);
                   // console.log("Raster Bounds: ", bounds);
@@ -2303,14 +2305,15 @@ function BaseMap(props) {
                 },
 
                 pickable: true,
-                onHover: (event) => handleHover({...event, allLayers, element, settings }),
+                onHover: (event) =>
+                  handleHover({ ...event, allLayers, element, settings }),
 
                 renderSubLayers: (props) => {
                   const {
                     bbox: { west, south, east, north },
                   } = props.tile;
                   console.log("props.data 2:", props.data);
-                  console.log("layer type: ",   allLayers[element]?.type,);
+                  console.log("layer type: ", allLayers[element]?.type);
                   return new BitmapLayer(props, {
                     data: null,
                     image: props.data,
@@ -2395,7 +2398,8 @@ function BaseMap(props) {
                 }
               },
 
-              onHover: (event) => handleHover({...event, allLayers, element, settings }),
+              onHover: (event) =>
+                handleHover({ ...event, allLayers, element, settings }),
 
               minZoom: 0,
               maxZoom: 24,
@@ -2994,7 +2998,7 @@ function BaseMap(props) {
 
   // Linear interpolation function (replace with your logic)
   const linearInterpolation = (rgbValues) => {
-    console.log('DeckGL Canvas Class Name:');
+    console.log("DeckGL Canvas Class Name:");
     // Your linear interpolation logic here
     // For example, average of the RGB values
     const averageValue = (rgbValues[0] + rgbValues[1] + rgbValues[2]) / 3;
@@ -3551,7 +3555,10 @@ function BaseMap(props) {
 
   const toggleElevation = () => {
     setIsElevationEnabled((prevValue) => !prevValue);
-    console.log("Elevation toggled successfully. New state:", isElevationEnabled);
+    console.log(
+      "Elevation toggled successfully. New state:",
+      isElevationEnabled
+    );
   };
 
   const getTreeData = (layer, type, keyPrefix) => {
@@ -6397,17 +6404,17 @@ function BaseMap(props) {
           <div
             style={{
               position: "absolute",
-              left: hoverInfo.x+7 ,
-              top: hoverInfo.y+7,
+              left: hoverInfo.x + 7,
+              top: hoverInfo.y + 7,
               background: "white",
               padding: "4px",
               borderRadius: "10px",
               boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
               zIndex: 1000,
-              display: "flex", 
+              display: "flex",
               alignItems: "center",
-              justifyContent: "center", 
-              marginTop: "-15px", 
+              justifyContent: "center",
+              marginTop: "-15px",
               marginBottom: "-15px",
             }}
           >
@@ -6415,7 +6422,7 @@ function BaseMap(props) {
               style={{
                 background: `rgb(${hoverInfo.r}, ${hoverInfo.g}, ${hoverInfo.b})`,
                 width: "25px",
-                height: "30px", 
+                height: "30px",
                 marginRight: "8px",
                 borderRadius: "7px",
               }}
@@ -6424,7 +6431,7 @@ function BaseMap(props) {
               style={{
                 display: "flex",
                 alignItems: "center",
-                marginBottom: "-15px", 
+                marginBottom: "-15px",
               }}
             >
               <p>{hoverInfo.elevation.toFixed(2)} Meter</p>
@@ -6708,7 +6715,7 @@ function BaseMap(props) {
                   </div>
                 </div>
               </Tooltip>
-              
+
               {isDrawing && (
                 <Tooltip placement="bottom" title="Clear Selection">
                   <div className="cancel-tool" onClick={() => cancelDrawing()}>
@@ -6726,7 +6733,7 @@ function BaseMap(props) {
                   </div>
                 </Tooltip>
               )}
-               {isElevationEnabled && (
+              {isElevationEnabled && (
                 <Tooltip placement="bottom" title="Disable Elevation">
                   <div
                     className="cancel-tool"
@@ -7711,4 +7718,3 @@ export default connect(mapStateToProps, {
   logout,
   thread,
 })(BaseMap);
-
