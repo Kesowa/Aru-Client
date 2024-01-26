@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo,useCallback } from "react";
 import { v4 as uuid } from "uuid";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
@@ -188,6 +188,7 @@ function BaseMap(props) {
   const [videoDetails, setVideoDetails] = useState<any>({});
   const [showCarousel, setShowCarousel] = useState(false);
   const [isElevationEnabled, setIsElevationEnabled] = useState(false);
+  const isElevationEnabledRef = useRef(isElevationEnabled);
   const [dateRange, setDateRange] = useState([
     moment(
       moment().subtract(7, "d").format("YYYY-MM-DD") + " " + "00:00",
@@ -340,7 +341,7 @@ function BaseMap(props) {
   }, [isMaskLayerVisible]);
 
   useEffect(() => {
-    console.log("isElevationEnabled broo updated:", isElevationEnabled);
+    isElevationEnabledRef.current = isElevationEnabled;
   }, [isElevationEnabled]);
 
   //---------Notifications--------------------------------------
@@ -733,41 +734,35 @@ function BaseMap(props) {
     });
   }, [polygon, isMaskLayerVisible]);
 
-  const handleHover = ({
-    x,
-    y,
-    allLayers,
-    element,
-    bitmap,
-    sourceLayer,
-    settings,
-  }) => {
-    try {
-      const layerType = allLayers[element]?.type;
-      console.log(isElevationEnabled);
-      if (isElevationEnabled && bitmap && layerType === "DEM") {
-        const pixelColor = readPixelsToArray(sourceLayer.props.image, {
-          sourceX: bitmap.pixel[0],
-          sourceY: bitmap.pixel[1],
-          sourceWidth: 1,
-          sourceHeight: 1,
-        });
-        const [r, g, b, a] = pixelColor;
-        const scalarValue = pixelColor[0] / 255.0;
+  const handleHover = useCallback(({ x, y, allLayers, element, bitmap, sourceLayer,settings}) => {
+      try {
+        const layerType = allLayers[element]?.type;
 
-        const elementSettings = settings || allLayers[element]?.settings;
-        const minp = elementSettings?.minp;
-        const maxp = elementSettings?.maxp;
-        const elevation = minp + (maxp - minp) * scalarValue;
+        if (bitmap && layerType === "DEM"&& isElevationEnabledRef.current) {
+          const pixelColor = readPixelsToArray(sourceLayer.props.image, {
+            sourceX: bitmap.pixel[0],
+            sourceY: bitmap.pixel[1],
+            sourceWidth: 1,
+            sourceHeight: 1,
+          });
+          const [r, g, b, a] = pixelColor;
+          const scalarValue = pixelColor[0] / 255.0;
 
-        setHoverInfo({ r, g, b, x, y, elevation });
-      } else {
-        setHoverInfo(null);
+          const elementSettings = settings ||allLayers[element]?.settings;
+          const minp = elementSettings?.minp;
+          const maxp = elementSettings?.maxp;
+          const elevation = minp + (maxp - minp) * scalarValue;
+
+          setHoverInfo({ r, g, b, x, y, elevation });
+        } else {
+          setHoverInfo(null);
+        }
+      } catch (error) {
+        console.error("Try with the dem layer instead", error);
       }
-    } catch (error) {
-      console.error("Try with the dem layer instead", error);
-    }
-  };
+    },
+    [isElevationEnabled] // Dependency array for useCallback
+  );
 
   const osm = [
     new TileLayer({
@@ -2305,8 +2300,7 @@ function BaseMap(props) {
                 },
 
                 pickable: true,
-                onHover: (event) =>
-                  handleHover({ ...event, allLayers, element, settings }),
+                onHover: (event) => handleHover({ ...event, allLayers, element,settings}),
 
                 renderSubLayers: (props) => {
                   const {
@@ -2398,8 +2392,7 @@ function BaseMap(props) {
                 }
               },
 
-              onHover: (event) =>
-                handleHover({ ...event, allLayers, element, settings }),
+              onHover: (event) => handleHover({ ...event, allLayers, element }),
 
               minZoom: 0,
               maxZoom: 24,
