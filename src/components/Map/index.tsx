@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo,useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { v4 as uuid } from "uuid";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
@@ -734,11 +740,12 @@ function BaseMap(props) {
     });
   }, [polygon, isMaskLayerVisible]);
 
-  const handleHover = useCallback(({ x, y, allLayers, element, bitmap, sourceLayer,settings}) => {
+  const handleHover = useCallback(
+    ({ x, y, allLayers, element, bitmap, sourceLayer, settings }) => {
       try {
         const layerType = allLayers[element]?.type;
 
-        if (bitmap && layerType === "DEM"&& isElevationEnabledRef.current) {
+        if (bitmap && layerType === "DEM" && isElevationEnabledRef.current) {
           const pixelColor = readPixelsToArray(sourceLayer.props.image, {
             sourceX: bitmap.pixel[0],
             sourceY: bitmap.pixel[1],
@@ -748,7 +755,7 @@ function BaseMap(props) {
           const [r, g, b, a] = pixelColor;
           const scalarValue = pixelColor[0] / 255.0;
 
-          const elementSettings = settings ||allLayers[element]?.settings;
+          const elementSettings = settings || allLayers[element]?.settings;
           const minp = elementSettings?.minp;
           const maxp = elementSettings?.maxp;
           const elevation = minp + (maxp - minp) * scalarValue;
@@ -761,7 +768,7 @@ function BaseMap(props) {
         console.error("Try with the dem layer instead", error);
       }
     },
-    [isElevationEnabled] 
+    [isElevationEnabled]
   );
 
   const osm = [
@@ -2300,7 +2307,8 @@ function BaseMap(props) {
                 },
 
                 pickable: true,
-                onHover: (event) => handleHover({ ...event, allLayers, element,settings}),
+                onHover: (event) =>
+                  handleHover({ ...event, allLayers, element, settings }),
 
                 renderSubLayers: (props) => {
                   const {
@@ -2391,7 +2399,7 @@ function BaseMap(props) {
                   return load(rasterUrl);
                 }
               },
-              
+
               onHover: (event) => handleHover({ ...event, allLayers, element }),
 
               minZoom: 0,
