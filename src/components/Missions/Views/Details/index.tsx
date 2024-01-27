@@ -62,6 +62,7 @@ import io from "socket.io-client";
 import ImageDoc from "./Data/ImageDocs";
 import ManageClients from "./Data/ManageClient";
 import { API_URL, PUBLIC_URL, STATIC_URL } from "src/constants";
+import Report_genration from "./Data/report_genration";
 
 const { Paragraph } = Typography;
 function MissionView(props) {
@@ -437,6 +438,16 @@ function MissionView(props) {
             missionDetails={MissionDetails}
             userType={props.userType}
             userDetails={props.userDetails}
+          />
+        ),
+      },
+      {
+        key: "6",
+        label: <span>Report Generation </span>,
+        children: (
+          <Report_genration
+            missionId={MissionDetails.missionId}
+            missionDetails={MissionDetails}
           />
         ),
       },
@@ -1196,7 +1207,7 @@ function MissionView(props) {
           </div>
           <div className="pilot-assign-btn">
             {renderAssignPilotBtn("Re-Assign Pilot")}
-            {renderGenerateReportButton()}
+            {/* {renderGenerateReportButton()} */}
             {renderPilotAssignButton()}
           </div>
         </>
@@ -1208,7 +1219,7 @@ function MissionView(props) {
       return (
         <div>
           {renderAssignPilotBtn("Assign Pilot")}
-          {renderGenerateReportButton()}
+          {/* {renderGenerateReportButton()} */}
           {renderPilotAssignButton()}
         </div>
       );
@@ -1229,7 +1240,7 @@ function MissionView(props) {
           </div>
           <div className="pilot-assign-btn">
             {renderAssignPilotBtn("Re-Assign Pilot")}
-            {renderGenerateReportButton()}
+            {/* {renderGenerateReportButton()} */}
             {renderPilotAssignButton()}
           </div>
         </>

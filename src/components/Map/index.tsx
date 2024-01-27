@@ -761,7 +761,7 @@ function BaseMap(props) {
         console.error("Try with the dem layer instead", error);
       }
     },
-    [isElevationEnabled] // Dependency array for useCallback
+    [isElevationEnabled] 
   );
 
   const osm = [
@@ -2391,7 +2391,7 @@ function BaseMap(props) {
                   return load(rasterUrl);
                 }
               },
-
+              
               onHover: (event) => handleHover({ ...event, allLayers, element }),
 
               minZoom: 0,
