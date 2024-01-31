@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { PageHeader, Steps, Button, message } from "antd";
+import { Steps, Button, message } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import {
   UnorderedListOutlined,
   SolutionOutlined,
@@ -92,11 +93,12 @@ function CreateTenant(props: any) {
         type="navigation"
         className="site-navigation-steps"
         current={formState}
-      >
-        <Steps.Step title="Basic Info" icon={<SolutionOutlined />} />
-        <Steps.Step title="Billing Details" icon={<CreditCardOutlined />} />
-        <Steps.Step title="Package" icon={<ShoppingCartOutlined />} />
-      </Steps>
+        items={[
+          { title: "Basic Info", icon: <SolutionOutlined /> },
+          { title: "Billing Details", icon: <CreditCardOutlined /> },
+          { title: "Package", icon: <ShoppingCartOutlined /> },
+        ]}
+      ></Steps>
       <div className="tenant-add-form padding-after-page-header">
         {formState === 0 ? (
           <BasicInfo

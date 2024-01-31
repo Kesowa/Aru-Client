@@ -19,7 +19,6 @@ function TenantInfo(props: any) {
 
   useEffect(() => {
     if (props.tenantData) {
-      //console.log(props.tenantData);
       form.setFieldsValue(props.tenantData);
       setAvatar(props.tenantData.avatar);
     }
@@ -60,7 +59,6 @@ function TenantInfo(props: any) {
   };
 
   const onFinish = (data: any) => {
-    //console.log(data);
     const body = {
       ...data,
     };
@@ -161,14 +159,6 @@ function TenantInfo(props: any) {
           </Col>
         </Row>
         <Row gutter={16}>
-          {/* <Col span="12">
-                        <Form.Item 
-                            label="Registration Number" 
-                            name="registrationNumber"
-                        >
-                            <Input placeholder="Registration Number" disabled={isDisabled}/>
-                        </Form.Item>
-                    </Col> */}
           <Col span="12">
             <Form.Item label="Official Website" name="officialWebsite">
               <Input placeholder="Official Website" disabled={isDisabled} />
@@ -176,14 +166,6 @@ function TenantInfo(props: any) {
           </Col>
         </Row>
         <Row gutter={16}>
-          {/* <Col span="12">
-                        <Form.Item 
-                            label="Registration Number" 
-                            name="registrationNumber"
-                        >
-                            <Input placeholder="Registration Number" disabled={isDisabled}/>
-                        </Form.Item>
-                    </Col> */}
           <Col span="12">
             <Form.Item label="GST Number" name="gstNumber">
               <Input placeholder="GST Number" disabled={isDisabled} />
@@ -191,14 +173,6 @@ function TenantInfo(props: any) {
           </Col>
         </Row>
         <Row gutter={16}>
-          {/* <Col span="12">
-                        <Form.Item 
-                            label="Registration Number" 
-                            name="registrationNumber"
-                        >
-                            <Input placeholder="Registration Number" disabled={isDisabled}/>
-                        </Form.Item>
-                    </Col> */}
           <Col span="12">
             <Form.Item label="Registration Number" name="registrationNumber">
               <Input placeholder="Registration Number" disabled={isDisabled} />
@@ -208,17 +182,7 @@ function TenantInfo(props: any) {
         <Divider orientation="left" plain>
           Billing details
         </Divider>
-        <Row gutter={16}>
-          {/* <Col span="12">
-                        <Form.Item 
-                            label="GST Number" 
-                            name="gstNumber"
-                            rules={[{ required: true, message: 'Please enter the GST number!' }]}
-                        >
-                            <Input placeholder="GST Number" disabled={isDisabled}/>
-                        </Form.Item>
-                    </Col> */}
-        </Row>
+        <Row gutter={16}></Row>
         <Row gutter={16}>
           <Col span="12">
             <Form.Item

@@ -7,7 +7,6 @@ import {
   Form,
   Input,
   Popconfirm,
-  Pagination,
   Space,
   message,
   InputNumber,
@@ -30,10 +29,11 @@ import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { logout } from "../../../actions/authAction";
 import { connect } from "react-redux";
 import * as turf from "@turf/turf";
+
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   editing: boolean;
   dataIndex: string;
-  title: any;
+  title: string;
   inputType: "text";
   record: any;
   index: number;
@@ -65,9 +65,33 @@ const EditableCell: React.FC<EditableCellProps> = ({
   );
 };
 
-const { Text, Link } = Typography;
+const { Text } = Typography;
 
-function FeatureTable(props) {
+interface FeatureTableProps {
+  contentHeight?: string;
+  tableData: any[];
+  total: number;
+  page: number;
+  limit: number;
+  id: string;
+  pointMarkerColour: string;
+  canEditGeojson: boolean;
+  canDeleteFeature: boolean;
+  flaggedFilter: boolean;
+  unflaggedFilter: boolean;
+  allLayers: any;
+  updateFeatureCountInLayers: (count: number, id: string) => void;
+  setshowSelectedIndexes: (values: number[]) => void;
+  setKey: (key: string) => void;
+  setSelectedIndexes: (values: number[]) => void;
+  setViewport: (viewport: any) => void;
+  refreshLayer: boolean;
+  setRefreshLayer: (refresh: boolean) => void;
+  shouldAttributeTableReload: boolean;
+  setShouldAttributeTableReload: (reload: boolean) => void;
+}
+
+const FeatureTable: React.FC<FeatureTableProps> = (props) => {
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [count, setCount] = useState(0);
   const [searchText, setSearchText] = useState("");
@@ -141,15 +165,12 @@ function FeatureTable(props) {
   //-------------------------------Filter Layer By Range----------------------------------------
   const onFinish = async (values: any, key: any) => {
     console.log(values, key);
-    // form1.resetFields();
     setIsTableLoading(true);
     const range: any = [];
     range.push(values.lower);
     range.push(values.upper);
     const body = {
       id: props.id,
-      // page: page - 1,
-      // limit: limit,
       key: key,
       range: range,
     };
@@ -177,7 +198,6 @@ function FeatureTable(props) {
             props.setshowSelectedIndexes([values.lower, values.upper]);
             props.setKey(key);
             setTableData(obj);
-            //message.success(res.data.message);
           }
         } else {
           message.error(res.data.message);
@@ -200,8 +220,6 @@ function FeatureTable(props) {
       id: props.id,
       key: key,
       value: value,
-      // page: page - 1,
-      // limit: limit,
     };
     http
       .patch(`${apis.GET_FEATURE_BY_LAYER}`, payload)
@@ -224,7 +242,6 @@ function FeatureTable(props) {
             props.updateFeatureCountInLayers(res.data.count, props.id);
             console.log(obj);
             setTableData(obj);
-            //message.success(res.data.message);
           }
         } else {
           message.error(res.data.message);
@@ -293,7 +310,6 @@ function FeatureTable(props) {
       clearFilters,
     }) => (
       <>
-        {/* {isFiltering ? ( */}
         <div style={{ padding: 8 }}>
           <Input
             ref={(node) => {
@@ -325,10 +341,7 @@ function FeatureTable(props) {
               Search
             </Button>
             <Button
-              onClick={() => {
-                handleReset(clearFilters);
-                setSearch(false);
-              }}
+              onClick={() => handleReset(clearFilters)}
               size="small"
               style={{ width: 90 }}
             >
@@ -336,7 +349,6 @@ function FeatureTable(props) {
             </Button>
           </Space>
         </div>
-        {/*  ) : ( */}
         <div style={{ padding: 8 }}>
           <Form
             form={form1}
@@ -367,10 +379,7 @@ function FeatureTable(props) {
                 Filter
               </Button>
               <Button
-                onClick={() => {
-                  handleReset(clearFilters);
-                  setSearch(false);
-                }}
+                onClick={() => handleReset(clearFilters)}
                 size="small"
                 style={{ width: 90 }}
               >
@@ -379,7 +388,6 @@ function FeatureTable(props) {
             </Space>
           </Form>
         </div>
-        {/* )} */}
       </>
     ),
     filterIcon: (filtered) => (
@@ -394,24 +402,6 @@ function FeatureTable(props) {
         />
       </>
     ),
-    // onFilter: (value: any, record: any) => true,
-    // onFilterDropdownVisibleChange: (visible: any) => {
-    //   if (visible) {
-    //     setTimeout(() => searchInput.select());
-    //   }
-    // },
-    // onFilter: (value, record) =>
-    //   record[dataIndex]
-    //     ? record[dataIndex]
-    //         .toString()
-    //         .toLowerCase()
-    //         .includes(value.toLowerCase())
-    //     : "",
-    // onFilterDropdownVisibleChange: (visible) => {
-    //   if (visible) {
-    //     setTimeout(() => searchInput.select(), 100);
-    //   }
-    // },
     render: (text) =>
       searchedColumn === dataIndex ? (
         <Highlighter
@@ -531,7 +521,6 @@ function FeatureTable(props) {
           setEditingKey("");
         }
       }
-      //editGeoJsonFeature(featureIndex, key);
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
@@ -563,7 +552,6 @@ function FeatureTable(props) {
       }
     } else if (type === "Polygon") {
       const features = turf.points([...coordinates[0]]);
-      //console.log(turf.point(turf.center(features).geometry.coordinates));
       centerPoint = turf.center(features);
       centerPoint = centerPoint.geometry.coordinates;
     } else if (type === "LineString") {
@@ -682,20 +670,6 @@ function FeatureTable(props) {
           ),
         });
       }
-      // if(key == "Nth"){
-      //   columns.push({
-      //     title: key,
-      //     dataIndex: key,
-      //     editable: false,
-      //     render: (name, record) => (
-      //       <>
-      //         {Object.keys(name).map(function(key, index) {
-      //           console.log("Hose Halapino",key, index);
-      //         })}
-      //       </>
-      //     ),
-      //   });
-      // }
     }
 
     if (props.canEditGeojson || props.canDeleteFeature) {
@@ -707,44 +681,41 @@ function FeatureTable(props) {
           const editable = isEditing(record);
           return editable ? (
             <span>
-              <a
-                href="javascript:;"
-                onClick={() => {
-                  save(record.key, record.index);
-                }}
-                style={{ marginRight: 8 }}
-              >
-                <SaveOutlined style={{ color: "green" }} />
-              </a>
+              <Button
+                type="link"
+                size="small"
+                onClick={() => save(record.key, record.featureIndex)}
+                icon={<SaveOutlined />}
+              ></Button>
               <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-                <a>
-                  <CloseOutlined style={{ color: "red" }} />
-                </a>
+                <Button type="link" size="small" icon={<CloseOutlined />} />
               </Popconfirm>
             </span>
           ) : (
             <>
               {props.canEditGeojson && (
-                <Typography.Link
+                <Button
+                  type="link"
+                  size="small"
                   disabled={editingKey !== ""}
-                  onClick={() => {
-                    edit(record);
-                  }}
-                >
-                  <EditOutlined style={{ marginRight: 8 }} />
-                </Typography.Link>
+                  onClick={() => edit(record)}
+                  icon={<EditOutlined />}
+                />
               )}
               {props.canDeleteFeature && (
                 <Popconfirm
                   title="Sure to delete?"
                   onConfirm={() => {
                     handleDelete(record.key);
-                    deleteGeoJsonFeature(record.index);
+                    deleteGeoJsonFeature(record.featureIndex);
                   }}
                 >
-                  <a>
-                    <DeleteOutlined style={{ color: "red" }} />
-                  </a>
+                  <Button
+                    type="link"
+                    size="small"
+                    disabled={editingKey !== ""}
+                    icon={<DeleteOutlined />}
+                  />
                 </Popconfirm>
               )}
             </>
@@ -752,6 +723,7 @@ function FeatureTable(props) {
         },
       });
     }
+
     setColumns(columns);
   };
 
@@ -759,9 +731,10 @@ function FeatureTable(props) {
     if (!col.editable) {
       return col;
     }
+
     return {
       ...col,
-      onCell: (record) => ({
+      onCell: (record: any) => ({
         record,
         inputType: "text",
         dataIndex: col.dataIndex,
@@ -771,94 +744,88 @@ function FeatureTable(props) {
     };
   });
 
-  const table = (
-    <Form form={form} component={false}>
+  return (
+    <>
       <Table
+        size="small"
         components={{
           body: {
             cell: EditableCell,
           },
         }}
-        expandable={{
-          expandedRowRender: (record) => (
-            <div style={{ marginLeft: "60px" }}>
-              <Space direction="vertical" size={4}>
-                {Object.keys(record.Nth).map(function (key, index) {
-                  return (
-                    <Space
-                      direction="horizontal"
-                      style={{
-                        fontSize: "12px",
-                      }}
-                      wrap
-                    >
-                      <span> &#8226; </span>
-                      <Text strong>{key}:</Text>
-                      <Text>{record.Nth[key]}</Text>
-                    </Space>
-                  );
-                })}
-              </Space>
-            </div>
-          ),
-          rowExpandable: (record) => record.Nth,
-        }}
-        rowKey={(record) => {
-          //console.log(record.Nth);
-          return record.key;
-        }}
         columns={mergedColumns}
-        dataSource={search ? tableData : data}
-        loading={isTableLoading}
-        pagination={false}
         rowSelection={{
           type: "checkbox",
           ...rowSelection,
         }}
-        size="small"
-        rowClassName={(record: any) => {
-          return props.flaggedFilter
-            ? "flagged-row"
-            : props.unflaggedFilter
-            ? "unflagged-row"
-            : props?.allLayers[`1-${props.id}`]?.flaggedFeatures?.includes(
-                record.index
-              )
-            ? "flagged-row"
-            : "unflagged-row";
+        dataSource={data}
+        loading={isTableLoading}
+        pagination={{
+          total: count,
+          pageSize: limit,
+          current: page,
+          onChange: (page, pageSize) => {
+            setPage(page);
+            setLimit(pageSize);
+            props.setshowSelectedIndexes([]);
+            props.setKey("");
+            form1.resetFields();
+          },
         }}
-        //scroll={{ x: 1100, y: 355 }}
-        style={{
-          // maxHeight: props.contentHeight,
-          height: "calc(100% - 30px)",
-          marginBottom: "5px",
-          overflowY: "scroll",
+        scroll={{ y: contentHeight }}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: (event) => {
+              if (editingKey !== "") {
+                event.stopPropagation();
+              }
+            },
+          };
         }}
       />
-      <Pagination
-        style={{
-          // maxHeight: props.contentHeight,
-          display: "flex",
-          justifyContent: "end",
-          height: "30px",
-        }}
-        total={search ? tableData.length : props.total}
-        showSizeChanger={false}
-        pageSize={search ? limit : props.limit}
-        onShowSizeChange={search ? setPageLimit : props.setPageLimit}
-        current={search ? page : props.page}
-        onChange={search ? setPaginationPage : props.setPaginationPage}
-        size={"small"}
-      />
-    </Form>
+    </>
   );
+};
 
-  return table;
-}
+const mapStateToProps = (state: {
+  app: {
+    tableData: any;
+    total: any;
+    page: any;
+    limit: any;
+    pointMarkerColour: any;
+    canEditGeojson: any;
+    canDeleteFeature: any;
+    flaggedFilter: any;
+    unflaggedFilter: any;
+    allLayers: any;
+    refreshLayer: any;
+    shouldAttributeTableReload: any;
+  };
+}) => {
+  if (!state || !state.app) {
+    // Handle the case where state or state.app is undefined or null
+    return {};
+  }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
+  return {
+    tableData: state.app.tableData,
+    total: state.app.total,
+    page: state.app.page,
+    limit: state.app.limit,
+    pointMarkerColour: state.app.pointMarkerColour,
+    canEditGeojson: state.app.canEditGeojson,
+    canDeleteFeature: state.app.canDeleteFeature,
+    flaggedFilter: state.app.flaggedFilter,
+    unflaggedFilter: state.app.unflaggedFilter,
+    allLayers: state.app.allLayers,
+    refreshLayer: state.app.refreshLayer,
+    shouldAttributeTableReload: state.app.shouldAttributeTableReload,
+  };
+};
 
-export default connect(mapStateToProps, { logout })(FeatureTable);
+const mapDispatchToProps = {
+  logout,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(FeatureTable);

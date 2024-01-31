@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useHistory, useLocation } from "react-router-dom";
 import { connect } from "react-redux";
 import EmptyGraphics from "../../../../static/Alone-rafiki.svg";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
 
 import {
-  PageHeader,
   Tag,
   Button,
   Descriptions,
@@ -23,12 +22,12 @@ import {
   Input,
   Timeline,
   Dropdown,
-  Menu,
   Badge,
   notification,
   Empty,
 } from "antd";
-
+import { PageHeader } from "@ant-design/pro-layout";
+import type { MenuProps, TabsProps } from "antd";
 import {
   UserOutlined,
   ShareAltOutlined,
@@ -48,7 +47,7 @@ import Videos from "./Data/Videos";
 import Outcomes from "./Data/Outcomes";
 import Map from "./Data/map";
 import Documents from "./Data/Documents";
-import "./index.less";
+import "./../../index.less";
 import moment from "moment";
 import { loading } from "../../../../actions/loadingAction";
 import TextArea from "antd/lib/input/TextArea";
@@ -63,6 +62,7 @@ import io from "socket.io-client";
 import ImageDoc from "./Data/ImageDocs";
 import ManageClients from "./Data/ManageClient";
 import { API_URL, PUBLIC_URL, STATIC_URL } from "src/constants";
+import Report_genration from "./Data/report_genration";
 
 const { Paragraph } = Typography;
 function MissionView(props) {
@@ -72,7 +72,6 @@ function MissionView(props) {
   const history = useHistory();
   const [missionEditFormData, setMissionEditFormData] = useState<any>({});
   const [missionTypes, setMissionTypes] = useState<any>([]);
-  const [tableData, setTableData] = useState<any>({});
   const [isPilotModalVisible, setIsPilotModalVisible] = useState(false);
   const [pilots, setPilots] = useState<any>([]);
   const [pilotToAssign, setPilotToAssign] = useState<any>({});
@@ -117,81 +116,33 @@ function MissionView(props) {
     { label: "NDWI map", value: "NDWI map" },
   ];
 
-  // useEffect(() => {
-  //   try {
-  //     let fetchPilots = async () => {
-  //       let result = await http.get(
-  //         `${apis.FETCH_ALL_PILOTS}`
-  //       );
-  //       setPilots(result.data.data);
-  //     };
-
-  //     fetchPilots();
-
-  //     http
-  //       .get(`${apis.GET_ALERT_VOD_COUNT}`, {
-  //         params: {
-  //           missionId: id,
-  //         },
-  //       })
-  //       .then((result) => {
-  //         if (result.data.status) {
-  //           console.log(result.data.data);
-  //           setTotalAlerts(result.data.data.alerts);
-  //           setTotalVOD(result.data.data.vods);
-  //         }
-  //       })
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   try {
-  //     http
-  //       .get(`${apis.GET_ALERT_VOD_COUNT}`, {
-  //         params: {
-  //           missionId: id,
-  //         },
-  //       })
-  //       .then((result) => {
-  //         if (result.data.status) {
-  //           console.log(result.data.data);
-  //           setTotalAlerts(result.data.data.alerts);
-  //           setTotalVOD(result.data.data.vods);
-  //         }
-  //       })
-  //       .catch((err) => {
-  //         console.log(err);
-  //       });
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // }, []);
-
   const fetchPilots = async () => {
     const result = await http.get(`${apis.FETCH_ALL_PILOTS}`);
     if (result.data.data !== undefined) {
       setPilots(result.data.data);
-      console.log(result.data.data);
+      console.log("PIOLET", result.data.data); //here all are staff members
     }
   };
 
   const fetchMissionTypes = async () => {
-    const result = await http.get(apis.GET_ALL_MISSION_TYPES);
-    if (result.data.status) {
-      setMissionTypes(result.data.data);
-      console.info("Successfully fetched mission types");
-      console.log(result.data.data);
-    } else {
-      message.error(result.data.message);
-      console.log(`Error while fetching mission types: ${result.data.message}`);
+    try {
+      const result = await http.get(apis.GET_ALL_MISSION_TYPES);
+      if (result.data.status) {
+        setMissionTypes(result.data.data);
+        console.info("Successfully fetched mission types");
+      } else {
+        message.error(result.data.message);
+        console.log(
+          `Error while fetching mission types: ${result.data.message}`
+        );
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const getInitialData = async (id) => {
     const [userType, missionId] = id.split("-");
-    // console.log(id, userType, missionId);
     try {
       const result = await http.get(`${apis.GET_MISSION_DOC_COUNT}`, {
         params: {
@@ -210,11 +161,7 @@ function MissionView(props) {
       }
 
       let mission: any;
-      //let mission = props.missions.filter((mission) => {
-      // return mission._id === id;
-      //});
-      // mission = mission[0];
-      //console.log("MIssion details from state", mission);
+
       if (!mission) {
         try {
           const result = await http.get(
@@ -223,7 +170,6 @@ function MissionView(props) {
               : `${apis.GET_MISSION_ID_CLIENT}${missionId}`
           );
           mission = result.data.data;
-          console.log("from api call", mission);
         } catch (err) {
           message.error("Something went wrong");
           AxiosErrorHandler(err, props.logout);
@@ -231,7 +177,7 @@ function MissionView(props) {
           return;
         }
       }
-
+      console.log("STAFF ERROR", result);
       const details = {
         missionName: mission.name,
         missionId: mission._id,
@@ -292,6 +238,7 @@ function MissionView(props) {
         const finalArray: any = [];
         mission.clientId.map((item: any) => {
           const obj = {
+            key: item._id,
             id: item._id,
             name: item.name,
             avatar: item.avatar,
@@ -304,9 +251,6 @@ function MissionView(props) {
         console.log("no clients here bitches");
       }
 
-      // if (details.pilotAssigned === "no-pilot") {
-      //   await fetchPilots();
-      // }
       await fetchPilots();
       setMissionDetails(details);
 
@@ -395,199 +339,136 @@ function MissionView(props) {
       });
 
     settypeflag(1);
-    // setEditModalVisible(false);
   };
 
   const EditCancel = () => {
     setEditModalVisible(false);
   };
 
-  const { TabPane } = Tabs;
   const { Title, Text, Link } = Typography;
   const [activeKey, setactiveKey] = useState("1");
   // ++++++++++++++++++++++++++++++++++++++++++++++ E4 Data Card tabs +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  const returnTabPaneItem = (id) => {
+    const items: TabsProps["items"] = [
+      {
+        key: "1",
+        label: <span>Map</span>,
+        children: <Map id={id} mission={MissionDetails} />,
+      },
+      {
+        key: "2",
+        label: (
+          <span>
+            Documents{" "}
+            <Badge
+              style={{ backgroundColor: "#3D85FC" }}
+              count={totalDocs}
+            ></Badge>
+          </span>
+        ),
+        children: (
+          <Documents
+            missionName={MissionDetails.missionName}
+            missionId={MissionDetails.missionId}
+            missionDetails={MissionDetails}
+            userDetails={props.userDetails}
+            userType={props.userType}
+            refreshDoc={docRefresh}
+            setRefreshDoc={setDocRefresh}
+          />
+        ),
+      },
+      {
+        key: "3",
+        label: (
+          <span>
+            Videos{" "}
+            <Badge
+              style={{ backgroundColor: "#3D85FC" }}
+              count={totalVOD}
+            ></Badge>
+          </span>
+        ),
+        children: (
+          <Videos
+            missionDetails={MissionDetails}
+            userType={props.userType}
+            userDetails={props.userDetails}
+            setCount={setTotalVOD}
+            totalVOD={totalVOD}
+          />
+        ),
+      },
+      {
+        key: "4",
+        label: (
+          <span>
+            Outcomes{" "}
+            <Badge
+              style={{ backgroundColor: "#3D85FC" }}
+              count={totalAlerts}
+            ></Badge>
+          </span>
+        ),
+        children: (
+          <Outcomes
+            id={id}
+            count={totalAlerts}
+            missionDetails={MissionDetails}
+            userType={props.userType}
+            userDetails={props.userDetails}
+          />
+        ),
+      },
+      {
+        key: "5",
+        label: (
+          <span>
+            Images{" "}
+            <Badge
+              style={{ backgroundColor: "#3D85FC" }}
+              count={totalImages}
+            ></Badge>
+          </span>
+        ),
+        children: (
+          <ImageDoc
+            missionName={MissionDetails.missionName}
+            missionId={MissionDetails.missionId}
+            missionDetails={MissionDetails}
+            userType={props.userType}
+            userDetails={props.userDetails}
+          />
+        ),
+      },
+      {
+        key: "6",
+        label: <span>Report Generation </span>,
+        children: (
+          <Report_genration
+            missionId={MissionDetails.missionId}
+            missionDetails={MissionDetails}
+          />
+        ),
+      },
+    ];
+    if (MissionDetails.missionType === "Mapping") {
+      return items;
+    } else {
+      return items.filter((item) => item.key !== "1" && item.key !== "2");
+    }
+  };
 
   const DataTabs = ({ id }) => {
-    if (MissionDetails.missionType === "Mapping") {
-      return (
-        <>
-          <Tabs defaultActiveKey={activeKey} onChange={callback}>
-            <TabPane tab={<span>Map</span>} key="1">
-              <Map id={id} mission={MissionDetails} />
-            </TabPane>
-            <TabPane
-              tab={
-                <span>
-                  Documents{" "}
-                  <Badge
-                    style={{ backgroundColor: "#3D85FC" }}
-                    count={totalDocs}
-                  ></Badge>
-                </span>
-              }
-              key="2"
-            >
-              <Documents
-                missionName={MissionDetails.missionName}
-                missionId={MissionDetails.missionId}
-                missionDetails={MissionDetails}
-                userDetails={props.userDetails}
-                userType={props.userType}
-                refreshDoc={docRefresh}
-                setRefreshDoc={setDocRefresh}
-              />
-            </TabPane>
-            <TabPane
-              tab={
-                <span>
-                  Videos{" "}
-                  <Badge
-                    style={{ backgroundColor: "#3D85FC" }}
-                    count={totalVOD}
-                  ></Badge>
-                </span>
-              }
-              key="3"
-            >
-              <Videos
-                missionDetails={MissionDetails}
-                userType={props.userType}
-                userDetails={props.userDetails}
-                setCount={setTotalVOD}
-                totalVOD={totalVOD}
-              />
-            </TabPane>
-            <TabPane
-              tab={
-                <span>
-                  Outcomes{" "}
-                  <Badge
-                    style={{ backgroundColor: "#3D85FC" }}
-                    count={totalAlerts}
-                  ></Badge>
-                </span>
-              }
-              key="4"
-            >
-              <Outcomes
-                id={id}
-                count={totalAlerts}
-                missionDetails={MissionDetails}
-                userType={props.userType}
-                userDetails={props.userDetails}
-              />
-            </TabPane>
-            <TabPane
-              tab={
-                <span>
-                  Images{" "}
-                  <Badge
-                    style={{ backgroundColor: "#3D85FC" }}
-                    count={totalImages}
-                  ></Badge>
-                </span>
-              }
-              key="5"
-            >
-              <ImageDoc
-                missionName={MissionDetails.missionName}
-                missionId={MissionDetails.missionId}
-                missionDetails={MissionDetails}
-                userType={props.userType}
-                userDetails={props.userDetails}
-              />
-            </TabPane>
-          </Tabs>
-        </>
-      );
-    } else {
-      return (
-        <Tabs defaultActiveKey={activeKey} onChange={callback}>
-          <TabPane
-            tab={
-              <span>
-                Videos{" "}
-                <Badge
-                  style={{ backgroundColor: "#3D85FC" }}
-                  count={totalVOD}
-                ></Badge>
-              </span>
-            }
-            key="1"
-          >
-            <Videos
-              missionDetails={MissionDetails}
-              userType={props.userType}
-              userDetails={props.userDetails}
-              setCount={setTotalVOD}
-              totalVOD={totalVOD}
-            />
-          </TabPane>
-          <TabPane
-            tab={
-              <span>
-                Outcomes{" "}
-                <Badge
-                  style={{ backgroundColor: "#3D85FC" }}
-                  count={totalAlerts}
-                ></Badge>
-              </span>
-            }
-            key="2"
-          >
-            <Outcomes
-              id={id}
-              count={totalAlerts}
-              missionDetails={MissionDetails}
-              userType={props.userType}
-              userDetails={props.userDetails}
-            />
-          </TabPane>
-          <TabPane
-            tab={
-              <span>
-                Documents{" "}
-                <Badge
-                  style={{ backgroundColor: "#3D85FC" }}
-                  count={totalDocs}
-                ></Badge>
-              </span>
-            }
-            key="3"
-          >
-            <Documents
-              missionName={MissionDetails.missionName}
-              missionId={MissionDetails.missionId}
-              missionDetails={MissionDetails}
-              userDetails={props.userDetails}
-              userType={props.userType}
-              refreshDoc={docRefresh}
-              setRefreshDoc={setDocRefresh}
-            />
-          </TabPane>
-          <TabPane
-            tab={
-              <span>
-                Images{" "}
-                <Badge
-                  style={{ backgroundColor: "#3D85FC" }}
-                  count={totalImages}
-                ></Badge>
-              </span>
-            }
-            key="4"
-          >
-            <ImageDoc
-              missionName={MissionDetails.missionName}
-              missionId={MissionDetails.missionId}
-              missionDetails={MissionDetails}
-              userType={props.userType}
-              userDetails={props.userDetails}
-            />
-          </TabPane>
-        </Tabs>
-      );
-    }
+    return (
+      <>
+        <Tabs
+          defaultActiveKey={activeKey}
+          onChange={callback}
+          items={returnTabPaneItem(id)}
+        />
+      </>
+    );
   };
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++ E5 Rendering Mission Status tags ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -758,7 +639,7 @@ function MissionView(props) {
 
   function renderDataCard(status: any) {
     const [userType, missionId] = id.split("-");
-    //console.log(id);
+    console.log("LOGIS", missionId);
     switch (status) {
       case "Review":
         return <DataTabs id={missionId} />;
@@ -871,6 +752,8 @@ function MissionView(props) {
   //----------------Render edit mission details Button---------------------
 
   function renderMissionDetailsBtn() {
+    console.log("User Type:", props.userType);
+    console.log("Custom Permissions:", props.userDetails.customPermissions);
     if (
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
@@ -882,6 +765,9 @@ function MissionView(props) {
         );
         permissions = [...filteredPermissions, ...permissions];
       });
+
+      console.log("Filtered Permissions:", permissions);
+
       if (permissions.length > 0) {
         return (
           <Button
@@ -1014,48 +900,33 @@ function MissionView(props) {
       );
     }
   }
-
-  //----------------Render Edit Flight Button---------------------
-
-  function renderEditFlightBtn() {
-    if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
-    ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_update"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
-        return (
-          <Menu.Item
-            onClick={() => {
-              history.push(
-                `/dashboard/flight/edit/${MissionDetails.missionId}`
-              );
-            }}
-            key="1"
-          >
-            <EditOutlined /> Edit Flight
-          </Menu.Item>
-        );
-      }
-    } else {
-      return (
-        <Menu.Item
-          onClick={() => {
-            history.push(`/dashboard/flight/edit/${MissionDetails.missionId}`);
-          }}
-          key="1"
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <a
+          rel="noopener noreferrer"
+          href={`/dashboard/flight/edit/${MissionDetails.missionId}`}
         >
-          <EditOutlined /> Edit Flight
-        </Menu.Item>
-      );
-    }
-  }
+          Edit Flight
+        </a>
+      ),
+      icon: <EditOutlined />,
+    },
+    {
+      key: "2",
+      label: (
+        <a
+          rel="noopener noreferrer"
+          href={`/dashboard/flight/view/${MissionDetails.missionId}`}
+        >
+          View Flight
+        </a>
+      ),
+      icon: <EyeOutlined />,
+    },
+  ];
+  //----------------Render Edit Flight Button---------------------
 
   //----------------Render Assign Pilot Button---------------------
 
@@ -1101,6 +972,44 @@ function MissionView(props) {
     }
   }
 
+  //--------------Render Generate Report Button-----------
+  function generateReport() {
+    props.loading(true);
+    http
+      .post(`${apis.CREATE_REPORT}`, {
+        missionId: MissionDetails.missionId,
+      })
+      .then((result) => {
+        console.log(result.data.message);
+        if (result.data.status) {
+          message.success(result.data.message);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        message.error(err.message);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => {
+        props.loading(false);
+      });
+  }
+  function renderGenerateReportButton() {
+    if (["Completed", "Review"].includes(MissionDetails.missionStatus)) {
+      return (
+        <Button
+          type="primary"
+          style={{ marginLeft: "10px" }}
+          onClick={generateReport}
+        >
+          Generate Report
+        </Button>
+      );
+    } else return <></>;
+  }
+
   function headerButtons(status: any) {
     switch (status) {
       case "Upcoming":
@@ -1132,7 +1041,8 @@ function MissionView(props) {
   }
 
   /*------------------Handel Actions -------------------------*/
-  const handleAction = (e) => {
+
+  const handleAction: MenuProps["onClick"] = (e) => {
     console.log(e);
     const i = parseInt(e.key) - 1;
     setMissType(missionTypes[i].name);
@@ -1141,23 +1051,28 @@ function MissionView(props) {
       missionType: missionTypes[i]._id,
     });
   };
+  console.log("HORRAY", id);
   /*--------------------Mission Type--------------------*/
-
-  const menu = (
-    <Menu
-      onClick={(e) => handleAction(e)}
-      items={missionTypes.map((mType: any, index: any) => {
+  const menu: MenuProps["items"] = () => {
+    const items: MenuProps["items"] = missionTypes.map(
+      (mType: any, index: any) => {
         return {
           label: mType.name,
           key: (index + 1).toString(),
           icon: <VideoCameraOutlined />,
         };
-      })}
-    />
-  );
+      }
+    );
+    console.log("items", items);
+    return items;
+  };
   // +++++++++++++++ E9 Rendering Mission Deliverables and Pilot badge ++++++++++++++++++++++++
   function MissionDeliverables(items: any[]) {
-    return items.map((item) => <Tag color="green">{item}</Tag>);
+    return items.map((item, idx: number) => (
+      <Tag color="green" key={(idx + 1).toString()}>
+        {item}
+      </Tag>
+    ));
   }
 
   function assignPilot() {
@@ -1215,7 +1130,6 @@ function MissionView(props) {
       <Modal
         title="Assign Pilot"
         open={isPilotModalVisible}
-        onOk={() => {}}
         onCancel={cancelAssigningPilot}
         footer={[
           <Button key="back" onClick={cancelAssigningPilot}>
@@ -1243,8 +1157,9 @@ function MissionView(props) {
         >
           {pilots.length > 0 ? (
             <>
-              {pilots.map((pilot) => (
+              {pilots.map((pilot: unknown, idx: number) => (
                 <Row
+                  key={(idx + 1).toString()}
                   className={`pilot ${
                     pilot.name === pilotToAssign.name ? "pilot-selected" : ""
                   }`}
@@ -1292,6 +1207,7 @@ function MissionView(props) {
           </div>
           <div className="pilot-assign-btn">
             {renderAssignPilotBtn("Re-Assign Pilot")}
+            {/* {renderGenerateReportButton()} */}
             {renderPilotAssignButton()}
           </div>
         </>
@@ -1303,6 +1219,7 @@ function MissionView(props) {
       return (
         <div>
           {renderAssignPilotBtn("Assign Pilot")}
+          {/* {renderGenerateReportButton()} */}
           {renderPilotAssignButton()}
         </div>
       );
@@ -1323,6 +1240,7 @@ function MissionView(props) {
           </div>
           <div className="pilot-assign-btn">
             {renderAssignPilotBtn("Re-Assign Pilot")}
+            {/* {renderGenerateReportButton()} */}
             {renderPilotAssignButton()}
           </div>
         </>
@@ -1364,9 +1282,6 @@ function MissionView(props) {
             `Processing ${data.originalName}`,
             "info"
           );
-          // if(data.missionID === VideoProps.missionDetails.missionId) {
-          //
-          // }
         });
 
         socket.current.on("PROCESS_VIDEO_FINISHED", (data) => {
@@ -1377,10 +1292,6 @@ function MissionView(props) {
             "success"
           );
           setVodRefresh(true);
-          // if(data.missionID === VideoProps.missionDetails.missionId) {
-          //   openNotification("Video Processing Complete!", `You can now watch your video uplaoded to missionID: ${VideoProps.missionDetails.missionId}!`, 'success');
-          //   setRefresh(true);
-          // }
         });
 
         socket.current.on("POINTCLOUD_EXTRACTION_START", (data) => {
@@ -1401,10 +1312,30 @@ function MissionView(props) {
             "success"
           );
         });
+
+        socket.current.on("REPORT_GENERATION_COMPLETE", (data) => {
+          setDocRefresh(true);
+          console.log("Report successfully generated!", data);
+          openNotification(
+            "Report Generated!.",
+            "Report generation successful",
+            "success"
+          );
+        });
+
+        socket.current.on("REPORT_GENERATION_FAILED", (data) => {
+          console.log("Report generation failed!", data);
+          openNotification(
+            "Failed to generate Report!",
+            "Report generation failed",
+            "error"
+          );
+        });
       }
     }
   }, [MissionDetails.missionId]);
   console.log(location.state);
+
   return (
     <div className="mission-view-wrapper">
       {/* +++++++++++++++++++ E11 HEADER++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
@@ -1465,13 +1396,6 @@ function MissionView(props) {
                       <div className="pilot-profile-badge">
                         {renderPilotBadge()}
                       </div>
-                      {/* <div className="share-btn">
-                        <Tooltip placement="bottom" title="Share this page">
-                          <a onClick={showModal}>
-                            <ShareAltOutlined style={{ fontSize: "24px" }} />
-                          </a>
-                        </Tooltip>
-                      </div> */}
                     </>,
                   ]}
                 >
@@ -1513,24 +1437,7 @@ function MissionView(props) {
 
               <Row>
                 <Card title="Flights" bordered={false} className="flight-card">
-                  <Dropdown
-                    overlay={
-                      <Menu>
-                        {renderEditFlightBtn()}
-                        <Menu.Item
-                          onClick={() => {
-                            history.push(
-                              `/dashboard/flight/view/${MissionDetails.missionId}`
-                            );
-                          }}
-                          key="1"
-                        >
-                          <EyeOutlined /> View Flight
-                        </Menu.Item>
-                      </Menu>
-                    }
-                    trigger={["contextMenu"]}
-                  >
+                  <Dropdown menu={{ items }} trigger={["contextMenu"]}>
                     <Tooltip
                       placement="bottom"
                       title="Right click to view/edit flight"
@@ -1588,7 +1495,7 @@ function MissionView(props) {
                 &nbsp;&nbsp;&nbsp;Share mission card
               </Title>,
             ]}
-            visible={isModalVisible}
+            open={isModalVisible}
             onOk={handleOk}
             onCancel={handleCancel}
           >
@@ -1624,7 +1531,7 @@ function MissionView(props) {
                 &nbsp;&nbsp;&nbsp;Edit Mission and flight details
               </Title>,
             ]}
-            visible={EditModalVisible}
+            open={EditModalVisible}
             onOk={EditSubmit}
             onCancel={EditCancel}
             footer={[
@@ -1688,7 +1595,10 @@ function MissionView(props) {
                 />
               </Form.Item>
               <Form.Item label="Mission Type:" name="missionname">
-                <Dropdown overlay={menu} placement="bottomLeft">
+                <Dropdown
+                  menu={{ items: menu(), onClick: handleAction }}
+                  placement="bottomLeft"
+                >
                   <Button type="primary" block>
                     {missType == "" ? MissionDetails.missionType : missType}
 
@@ -1721,10 +1631,12 @@ function MissionView(props) {
 const mapStateToProps = (state) => {
   return {
     userType: state.Auth.userdetails.userType,
-    missions: state.Missions.missions,
-    userDetails: state.Auth.userdetails,
     tenantId:
       state.Auth.userdetails.tenantId._id || state.Auth.userdetails.tenantId,
+    userId: state.Auth.userdetails._id,
+    missions: state.Missions.missions,
+    userDetails: state.Auth.userdetails,
+    refresh: state.Missions.refresh,
   };
 };
 

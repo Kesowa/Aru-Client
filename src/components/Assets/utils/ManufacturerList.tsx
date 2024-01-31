@@ -1,32 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import {
-  Row,
-  Col,
-  Card,
-  Typography,
-  Avatar,
-  Button,
-  Tooltip,
-  Divider,
-  Tag,
-  PageHeader,
-  Input,
-  Popconfirm,
-  Table,
-  Dropdown,
-  Menu,
-  message,
-} from "antd";
-import {
-  SearchOutlined,
-  ShakeOutlined,
-  EyeOutlined,
-  DeleteOutlined,
-  StopOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
-
+import { Row, Col, Typography, Table, message, Button, Input } from "antd";
+import { SearchOutlined, ShakeOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import http from "../../../services/httpCall";
@@ -39,32 +14,17 @@ import {
 } from "../../../actions/manufacturerAction";
 import ManufacturerCard from "./ManufacturerCard";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
-interface TableProps {
-  //filter: any;
-  userType: any;
-  tenantId: any;
-  userId: any;
-  logout: any;
-  setManufacturersToState: any;
-  deleteManufacturer: any;
-  manufacturers: any;
-}
-
-function ManufacturerList(props: TableProps) {
+const ManufacturerList = (props) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [isTableLoading, setIsTableLoading] = useState(true);
-  const [manufacturerTableData, setManufacturerTableData] = useState<any>([]);
   const [selectedManufacturerID, setSelectedManufacturerID] = useState();
 
   useEffect(() => {
     fetchManufacturers();
   }, []);
-
-  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++ Fetch Manufacturers +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
   const fetchManufacturers = () => {
     const { userType } = props;
     const { tenantId } = props;
@@ -88,75 +48,27 @@ function ManufacturerList(props: TableProps) {
         setIsTableLoading(false);
       });
   };
-
-  useEffect(() => {
-    if (props.manufacturers.length) {
-      setManufacturerTableData(props.manufacturers);
-
-      //   if (props.filter === "all") {
-      //     setManufacturerTableData(props.manufacturers);
-      //   } else {
-      //     let data = props.manufacturers.filter((row) => {
-      //       return row.status === props.filter;
-      //     });
-      //     setManufacturerTableData(data);
-      //   }
-    }
-  }, [props.manufacturers]);
-
-  // +++++++++++++++++++++++++++++++++++++++++++++++++++ Delete Manufacturers +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-  const deleteManufacturer = (name, id) => {
-    setIsTableLoading(true);
-    http
-      .delete(`${apis.DELETE_MANUFACTURER_BY_ID}`, {
-        data: { manufacturerID: id },
-      })
-      .then((result) => {
-        if (result.data.status) {
-          const newTableData = manufacturerTableData.filter(
-            (manufacturer: any) => {
-              return manufacturer._id.toString() != id.toString();
-            }
-          );
-          setManufacturerTableData(newTableData);
-          props.deleteManufacturer(id);
-          message.success(`Manufacturer "${name}" deleted`);
-        } else {
-          message.error(result.data.message);
-        }
-      })
-      .catch((err) => {
-        message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
-      })
-      .finally(() => {
-        setIsTableLoading(false);
-      });
-  };
-
-  let searchInput: any;
-  const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
+  
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
-  const handleReset = (clearFilters: any) => {
+
+  const handleReset = (clearFilters) => {
     clearFilters();
     setSearchText("");
   };
-  const getColumnSearchProps = (dataIndex: any) => ({
+
+  const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
       confirm,
       clearFilters,
-    }: any) => (
+    }) => (
       <div style={{ padding: 8 }}>
         <Input
-          ref={(node) => {
-            searchInput = node;
-          }}
           placeholder={`Search ${dataIndex}`}
           value={selectedKeys[0]}
           onChange={(e) =>
@@ -182,17 +94,17 @@ function ManufacturerList(props: TableProps) {
         </Button>
       </div>
     ),
-    filterIcon: (filtered: any) => (
+    filterIcon: (filtered) => (
       <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
     ),
-    onFilter: (value: any, record: any) =>
+    onFilter: (value, record) =>
       record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownVisibleChange: (visible: any) => {
+    onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.select());
       }
     },
-    render: (text: any) =>
+    render: (text) =>
       searchedColumn === dataIndex ? (
         <Highlighter
           highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
@@ -204,31 +116,54 @@ function ManufacturerList(props: TableProps) {
         text
       ),
   });
-  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++Columns++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-  const columns: any[] = [
+  const handleDeleteManufacturer = (name, id) => {
+    setIsTableLoading(true);
+    http
+      .delete(`${apis.DELETE_MANUFACTURER_BY_ID}`, {
+        data: { manufacturerID: id },
+      })
+      .then((result) => {
+        if (result.data.status) {
+          const newTableData = props.manufacturers.filter(
+            (manufacturer) => manufacturer._id.toString() !== id.toString()
+          );
+          props.setManufacturersToState(newTableData);
+          props.deleteManufacturer(id);
+          message.success(`Manufacturer "${name}" deleted`);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        message.error(err.message);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => {
+        setIsTableLoading(false);
+      });
+  };
+
+  const columns: any [] = [
     {
       title: "MANUFACTURER",
       dataIndex: "name",
-      sorter: (a: any, b: any) => a.name.length - b.name.length,
+      sorter: (a, b) => a.name.length - b.name.length,
       sortDirections: ["ascend", "descend"],
       ...getColumnSearchProps("name"),
-      render: (name: any, record) => {
-        return (
-          <>
-            <span onClick={() => {}}>
-              <Title level={5}>
-                <ShakeOutlined
-                  style={{ marginRight: "1rem", color: "#a5a4bf" }}
-                />
-                {name}
-              </Title>
-            </span>
-          </>
-        );
-      },
+      render: (name, record) => (
+        <>
+          <span onClick={() => {}}>
+            <Title level={5}>
+              <ShakeOutlined
+                style={{ marginRight: "1rem", color: "#a5a4bf" }}
+              />
+              {name}
+            </Title>
+          </span>
+        </>
+      ),
     },
-
     {
       title: "NATIONALITY",
       dataIndex: "nationality",
@@ -239,7 +174,6 @@ function ManufacturerList(props: TableProps) {
         </>
       ),
     },
-
     {
       title: "WEBSITE",
       dataIndex: "website",
@@ -253,33 +187,44 @@ function ManufacturerList(props: TableProps) {
     {
       title: "CREATED BY",
       dataIndex: "createdBy",
-      sorter: (a: any, b: any) => a.createdBy.length - b.createdBy.length,
+      sorter: (a, b) => a.createdBy.length - b.createdBy.length,
       sortDirections: ["descend", "ascend"],
       ...getColumnSearchProps("user"),
-      render: (createdBy: any) => createdBy.name,
+      render: (createdBy) => createdBy.name,
     },
     {
       title: "CREATED AT",
       dataIndex: "createdAt",
-      sorter: (a: any, b: any) =>
-        moment(a.createdAt).unix() - moment(b.createdAt).unix(),
+      sorter: (a, b) => moment(a.createdAt).unix() - moment(b.createdAt).unix(),
       sortDirections: ["descend", "ascend"],
       ...getColumnSearchProps("createdAt"),
-      render: (createdAt: string) => moment(createdAt).format("DD-MM-YYYY"),
+      render: (createdAt) => moment(createdAt).format("DD-MM-YYYY"),
+    },
+    {
+      title: "ACTIONS",
+      dataIndex: "actions",
+      render: (_, record) => (
+        <Button
+          type="link"
+          onClick={() => setSelectedManufacturerID(record._id)}
+        >
+          View Details
+        </Button>
+      ),
+    },
+    {
+      title: "DELETE",
+      dataIndex: "delete",
+      render: (_, record) => (
+        <Button
+          type="link"
+          onClick={() => handleDeleteManufacturer(record.name, record._id)}
+        >
+          Delete
+        </Button>
+      ),
     },
   ];
-
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      // console.log(
-      //   `selectedRowKeys: ${selectedRowKeys}`,
-      //   "selectedRows: ",
-      //   selectedRows[0]._id
-      // );
-      // setSelectedManufacturerID(selectedRows[0]._id);
-      // console.log(selectedManufacturerID);
-    },
-  };
 
   return (
     <div>
@@ -287,11 +232,10 @@ function ManufacturerList(props: TableProps) {
         <Col span={16}>
           <Table
             columns={columns}
-            dataSource={manufacturerTableData}
+            dataSource={props.manufacturers}
             rowKey="_id"
             style={{ cursor: "pointer", width: "100%" }}
             loading={isTableLoading}
-            rowSelection={{ type: "radio", ...rowSelection }}
             scroll={{ x: "max-content" }}
           />
         </Col>
@@ -303,16 +247,14 @@ function ManufacturerList(props: TableProps) {
       </Row>
     </div>
   );
-}
-
-const mapStateToProps = (state) => {
-  return {
-    userType: state.Auth.userdetails.userType,
-    tenantId: state.Auth.userdetails.tenantId._id,
-    userId: state.Auth.userdetails._id,
-    manufacturers: state.Manufacturers.manufacturers,
-  };
 };
+
+const mapStateToProps = (state) => ({
+  userType: state.Auth.userdetails.userType,
+  tenantId: state.Auth.userdetails.tenantId._id,
+  userId: state.Auth.userdetails._id,
+  manufacturers: state.Manufacturers.manufacturers,
+});
 
 export default connect(mapStateToProps, {
   logout,

@@ -5,6 +5,7 @@ import { logout } from "../../../../actions/authAction";
 import { connect } from "react-redux";
 import { default as Shimmer } from "react-loading-skeleton";
 import { FlyToInterpolator } from "deck.gl";
+import download from "downloadjs";
 import {
   Image,
   Row,
@@ -13,7 +14,6 @@ import {
   Spin,
   message,
   Dropdown,
-  Menu,
   Select,
   Drawer,
   Empty,
@@ -22,7 +22,6 @@ import {
   Modal,
   Switch,
   Button,
-  Steps,
   Divider,
   Skeleton,
   Alert,
@@ -47,13 +46,10 @@ import apis from "../../../../services/apis";
 import moment from "moment";
 import "../locateBtn.less";
 import PictoMap from "../pic2map";
-import SubMenu from "antd/lib/menu/SubMenu";
 import Link from "antd/lib/typography/Link";
 import Paragraph from "antd/lib/typography/Paragraph";
 import { PUBLIC_URL, STATIC_URL } from "../../../../constants";
 
-const { TabPane } = Tabs;
-const { Step } = Steps;
 const { Title, Text } = Typography;
 const { Option } = Select;
 
@@ -81,7 +77,632 @@ function LayerDocs(props) {
   const [fetchReviewFiles, setFetchReviewFiles] = useState(false);
   const [confirmingFiles, setConfirmingFiles] = useState(false);
   const [documents, fillDocuments] = useState<any>([]);
-
+  const [subHeading, setSubHeading] = useState("");
+  const menuItem1 = () => {
+    const items = [
+      {
+        key: "1",
+        label: "Unassign Group",
+      },
+    ];
+    reviewOptions.map((item) => {
+      items.push({
+        key: `2-${item.index}-${item.label}`,
+        label: item.label,
+      });
+    });
+    return items;
+  };
+  const onClickMenu1 = (e) => {
+    if (e.key === "1") {
+      unAssignGroup(subHeading.label);
+    }
+    const splitKey = e.key.split("-");
+    if (splitKey[0] === "2") {
+      updateReviewList(`${splitKey[1]}-${splitKey[2]}`, subHeading.data.fIndex);
+    }
+  };
+  const menuItem2 = () => {
+    const item = [
+      {
+        key: "submenu",
+        label: "Move To",
+        children: reviewOptions.map((item) => {
+          return {
+            key: `1-${item._id}-${item.index}-${item.label}`,
+            label: item.label,
+          };
+        }),
+      },
+    ];
+    return item;
+  };
+  const onClickMenu2 = (e) => {
+    const splitKey = e.key.split("-");
+    if (splitKey[0] === "1") {
+      updateReviewListSingle(
+        splitKey[1],
+        splitKey[2],
+        subHeading.data.fIndex,
+        splitKey[3]
+      );
+    }
+  };
+  const tabItem = () => {
+    const items = [
+      {
+        key: "1",
+        label: (
+          <span>
+            <FileImageOutlined />
+            Media
+          </span>
+        ),
+        children: (
+          <>
+            {loader ? (
+              <div>
+                <Row>
+                  <Skeleton paragraph={{ rows: 1 }} />
+                </Row>
+                <Row>
+                  <Col span={8} md={8}>
+                    <div style={{ padding: "8px" }}>
+                      <Shimmer height={172} width={172} />
+                    </div>
+                  </Col>
+                  <Col span={8} md={8}>
+                    <div style={{ padding: "8px" }}>
+                      <Shimmer height={172} width={172} />
+                    </div>
+                  </Col>
+                  <Col span={8} md={8}>
+                    <div style={{ padding: "8px" }}>
+                      <Shimmer height={172} width={172} />
+                    </div>
+                  </Col>
+                </Row>
+                <Row>
+                  <Skeleton paragraph={{ rows: 1 }} />
+                </Row>
+                <Row>
+                  <Col span={8} md={8}>
+                    <div style={{ padding: "8px" }}>
+                      <Shimmer height={172} width={172} />
+                    </div>
+                  </Col>
+                  <Col span={8} md={8}>
+                    <div style={{ padding: "8px" }}>
+                      <Shimmer height={172} width={172} />
+                    </div>
+                  </Col>
+                  <Col span={8} md={8}>
+                    <div style={{ padding: "8px" }}>
+                      <Shimmer height={172} width={172} />
+                    </div>
+                  </Col>
+                </Row>
+              </div>
+            ) : (
+              renderMedia()
+            )}
+          </>
+        ),
+      },
+      {
+        key: "2",
+        label: (
+          <span>
+            <FileTextOutlined />
+            Documents
+          </span>
+        ),
+        children: (
+          <Row>
+            {loader ? (
+              <Spin
+                size="large"
+                style={{
+                  position: "relative",
+                  margin: "auto",
+                }}
+              />
+            ) : (
+              renderDocuments()
+            )}
+          </Row>
+        ),
+      },
+    ];
+    if (props.isBaseMap) {
+      if (props.canUpdateBaseLayer) {
+        items.push({
+          key: "3",
+          label: (
+            <span>
+              <SettingOutlined />
+              Layer Settings
+            </span>
+          ),
+          children: (
+            <>
+              {(props.layerData.vector
+                ? props.layerData.vector.type
+                : "null") === "MultiPolygon" ? (
+                <>
+                  <Title level={4}>Enable 3D</Title>
+                  <Alert
+                    message="How to use?"
+                    description="For this feature to work, you need to have the property ${Height} present in all the features of the layer!"
+                    type="info"
+                    showIcon
+                  />
+                  <div
+                    style={{
+                      paddingLeft: "5rem",
+                      paddingRight: "5rem",
+                      paddingTop: "1rem",
+                      //backgroundColor: "orange",
+                      display: "flex",
+                    }}
+                  >
+                    <p>Toggle 3D transpose</p>
+                    <Switch
+                      style={{ marginLeft: "5rem" }}
+                      onChange={switchHandle}
+                      checked={props.layer.T3DTranspose}
+                    />
+                  </div>
+                  <Divider />
+                  {layerLabelSelector()}
+                  {/* Make map public */}
+                  <Divider />
+                  <Title level={4}>Make layer public</Title>
+                  {!props.layer.isPublic && (
+                    <Alert
+                      message="Warning! This process is irreversible!"
+                      type="warning"
+                      showIcon
+                    />
+                  )}
+                  {madePublic && (
+                    <Alert
+                      message="Please save the map link as this won't be shared further on."
+                      type="info"
+                      showIcon
+                    />
+                  )}
+                  <div
+                    style={{
+                      paddingLeft: "5rem",
+                      paddingRight: "5rem",
+                      paddingTop: "1rem",
+                      //backgroundColor: "orange",
+                      display: "flex",
+                    }}
+                  >
+                    <p>Public Visibility</p>
+                    <span>
+                      {props.layer.isPublic ? (
+                        <Text
+                          type="secondary"
+                          style={{
+                            marginLeft: "20px",
+                          }}
+                        >
+                          {" "}
+                          Deactivate
+                        </Text>
+                      ) : (
+                        <Link
+                          href="#"
+                          onClick={() => {
+                            makePublic();
+                          }}
+                          style={{
+                            marginLeft: "20px",
+                          }}
+                        >
+                          Activate
+                        </Link>
+                      )}{" "}
+                      {publicLoading ? <LoadingOutlined /> : <></>}
+                    </span>
+                  </div>
+                  {madePublic && (
+                    <Space direction="vertical">
+                      <Title level={5}>
+                        {" "}
+                        <LinkOutlined /> Your public map link
+                      </Title>
+                      <Paragraph
+                        copyable
+                        ellipsis
+                        style={{
+                          backgroundColor: "#e9e9f0",
+                          fontSize: "16px",
+                          padding: "8px",
+                          borderRadius: "4px",
+                          width: "400px",
+                        }}
+                      >{`${PUBLIC_URL}/map/${publicMapRefId}`}</Paragraph>
+                    </Space>
+                  )}
+                </>
+              ) : (
+                <>
+                  {layerLabelSelector()}
+                  <Divider />
+                  <Title level={4}>Make layer public</Title>
+                  {!props.layer.isPublic && (
+                    <Alert
+                      message="Warning! This process is irreversible!"
+                      type="warning"
+                      showIcon
+                    />
+                  )}
+                  {madePublic && (
+                    <Alert
+                      message="Please save the map link as this won't be shared further on."
+                      type="info"
+                      showIcon
+                    />
+                  )}
+                  <div
+                    style={{
+                      paddingLeft: "5rem",
+                      paddingRight: "5rem",
+                      paddingTop: "1rem",
+                      //backgroundColor: "orange",
+                      display: "flex",
+                    }}
+                  >
+                    <p>Public Visibility</p>
+                    <span>
+                      {props.layer.isPublic ? (
+                        <Text
+                          type="secondary"
+                          style={{
+                            marginLeft: "20px",
+                          }}
+                        >
+                          {" "}
+                          Deactivate
+                        </Text>
+                      ) : (
+                        <Link
+                          href="#"
+                          onClick={() => {
+                            makePublic();
+                          }}
+                          style={{
+                            marginLeft: "20px",
+                          }}
+                        >
+                          Activate
+                        </Link>
+                      )}{" "}
+                      {publicLoading ? <LoadingOutlined /> : <></>}
+                    </span>
+                  </div>
+                  {madePublic && (
+                    <Space direction="vertical">
+                      <Title level={5}>
+                        {" "}
+                        <LinkOutlined /> Your public map link
+                      </Title>
+                      <Paragraph
+                        copyable
+                        ellipsis
+                        style={{
+                          backgroundColor: "#e9e9f0",
+                          fontSize: "16px",
+                          padding: "8px",
+                          borderRadius: "4px",
+                          width: "400px",
+                        }}
+                      >{`${PUBLIC_URL}/map/${publicMapRefId}`}</Paragraph>
+                    </Space>
+                  )}
+                </>
+              )}
+            </>
+          ),
+        });
+        items.push({
+          key: "4",
+          label: (
+            <span>
+              <AuditOutlined />
+              Review
+            </span>
+          ),
+          children: (
+            <>
+              {reviewFilesLoader ? (
+                <div>
+                  <Row>
+                    <Skeleton paragraph={{ rows: 1 }} />
+                  </Row>
+                  <Row>
+                    <Col span={8} md={8}>
+                      <div style={{ padding: "8px" }}>
+                        <Shimmer height={172} width={172} />
+                      </div>
+                    </Col>
+                    <Col span={8} md={8}>
+                      <div style={{ padding: "8px" }}>
+                        <Shimmer height={172} width={172} />
+                      </div>
+                    </Col>
+                    <Col span={8} md={8}>
+                      <div style={{ padding: "8px" }}>
+                        <Shimmer height={172} width={172} />
+                      </div>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Skeleton paragraph={{ rows: 1 }} />
+                  </Row>
+                  <Row>
+                    <Col span={8} md={8}>
+                      <div style={{ padding: "8px" }}>
+                        <Shimmer height={172} width={172} />
+                      </div>
+                    </Col>
+                    <Col span={8} md={8}>
+                      <div style={{ padding: "8px" }}>
+                        <Shimmer height={172} width={172} />
+                      </div>
+                    </Col>
+                    <Col span={8} md={8}>
+                      <div style={{ padding: "8px" }}>
+                        <Shimmer height={172} width={172} />
+                      </div>
+                    </Col>
+                  </Row>
+                </div>
+              ) : (
+                <>
+                  {reviewFiles.length > 0 ? (
+                    <div>
+                      {reviewFiles.map((subHeading: any) => {
+                        return (
+                          <>
+                            <Row>
+                              <Dropdown
+                                onOpenChange={() => setSubHeading(subHeading)}
+                                menu={{
+                                  items: menuItem1(),
+                                  onClick: onClickMenu1,
+                                }}
+                                trigger={["click"]}
+                              >
+                                <Text
+                                  onClick={(e: any) => e.preventDefault()}
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  <EnvironmentOutlined />{" "}
+                                  {subHeading.label === null
+                                    ? "Unassigned Images"
+                                    : subHeading.label}{" "}
+                                  <DownOutlined />
+                                </Text>
+                              </Dropdown>
+                            </Row>
+                            <Row>
+                              {subHeading.data.files.map((item: any) => {
+                                return (
+                                  <Col span={8} md={8}>
+                                    <div>
+                                      <Dropdown
+                                        onOpenChange={() =>
+                                          setSubHeading(subHeading)
+                                        }
+                                        menu={{
+                                          items: menuItem2(),
+                                          onClick: onClickMenu2,
+                                        }}
+                                        trigger={["contextMenu"]}
+                                      >
+                                        <Image
+                                          key={`${item._id}`}
+                                          style={{ padding: "8px" }}
+                                          width={"auto"}
+                                          height={180}
+                                          src={`${STATIC_URL}/images/geojson/1x_${
+                                            item.filePath.split("/")[3]
+                                          }`}
+                                          preview={false}
+                                          fallback="data:image/png;base64,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"
+                                        />
+                                      </Dropdown>
+                                    </div>
+                                  </Col>
+                                );
+                              })}
+                            </Row>
+                          </>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <Empty style={{ margin: "auto" }} />
+                  )}
+                </>
+              )}
+            </>
+          ),
+        });
+      }
+    } else {
+      items.push({
+        key: "3",
+        label: (
+          <span>
+            <SettingOutlined />
+            Layer Settings
+          </span>
+        ),
+        children: (
+          <>
+            {(props.layerData.vector ? props.layerData.vector.type : "null") ===
+            "MultiPolygon" ? (
+              <>
+                <Title level={3}>Enable 3D</Title>
+                <div
+                  style={{
+                    paddingLeft: "5rem",
+                    paddingRight: "5rem",
+                    paddingTop: "1rem",
+                    //backgroundColor: "orange",
+                    display: "flex",
+                  }}
+                >
+                  <p>Toggle 3D transpose</p>
+                  <Switch
+                    style={{ marginLeft: "5rem" }}
+                    onChange={switchHandle}
+                    checked={props.layer.T3DTranspose}
+                  />
+                </div>
+                <Divider />
+                {layerLabelSelector()}
+              </>
+            ) : (
+              <>{layerLabelSelector()}</>
+            )}
+          </>
+        ),
+      });
+      items.push({
+        key: "4",
+        label: (
+          <span>
+            <AuditOutlined />
+            Review
+          </span>
+        ),
+        children: (
+          <>
+            {reviewFilesLoader ? (
+              <div>
+                <Row>
+                  <Skeleton paragraph={{ rows: 1 }} />
+                </Row>
+                <Row>
+                  <Col span={8} md={8}>
+                    <div style={{ padding: "8px" }}>
+                      <Shimmer height={172} width={172} />
+                    </div>
+                  </Col>
+                  <Col span={8} md={8}>
+                    <div style={{ padding: "8px" }}>
+                      <Shimmer height={172} width={172} />
+                    </div>
+                  </Col>
+                  <Col span={8} md={8}>
+                    <div style={{ padding: "8px" }}>
+                      <Shimmer height={172} width={172} />
+                    </div>
+                  </Col>
+                </Row>
+                <Row>
+                  <Skeleton paragraph={{ rows: 1 }} />
+                </Row>
+                <Row>
+                  <Col span={8} md={8}>
+                    <div style={{ padding: "8px" }}>
+                      <Shimmer height={172} width={172} />
+                    </div>
+                  </Col>
+                  <Col span={8} md={8}>
+                    <div style={{ padding: "8px" }}>
+                      <Shimmer height={172} width={172} />
+                    </div>
+                  </Col>
+                  <Col span={8} md={8}>
+                    <div style={{ padding: "8px" }}>
+                      <Shimmer height={172} width={172} />
+                    </div>
+                  </Col>
+                </Row>
+              </div>
+            ) : (
+              <>
+                {reviewFiles.length > 0 ? (
+                  <div>
+                    {reviewFiles.map((subHeading: any) => {
+                      return (
+                        <>
+                          <Row>
+                            <Dropdown
+                              onOpenChange={() => setSubHeading(subHeading)}
+                              menu={{
+                                items: menuItem1(),
+                                onClick: onClickMenu1,
+                              }}
+                              trigger={["click"]}
+                            >
+                              <Text
+                                onClick={(e: any) => e.preventDefault()}
+                                style={{ cursor: "pointer" }}
+                              >
+                                <EnvironmentOutlined />{" "}
+                                {subHeading.label === null
+                                  ? "Unassigned Images"
+                                  : subHeading.label}{" "}
+                                <DownOutlined />
+                              </Text>
+                            </Dropdown>
+                          </Row>
+                          <Row>
+                            {subHeading.data.files.map((item: any) => {
+                              return (
+                                <Col span={8} md={8}>
+                                  <div>
+                                    <Dropdown
+                                      onOpenChange={() =>
+                                        setSubHeading(subHeading)
+                                      }
+                                      menu={{
+                                        items: menuItem2(),
+                                        onClick: onClickMenu2,
+                                      }}
+                                      trigger={["contextMenu"]}
+                                    >
+                                      <Image
+                                        key={`${item._id}`}
+                                        style={{ padding: "8px" }}
+                                        width={"auto"}
+                                        height={180}
+                                        src={`${STATIC_URL}/images/geojson/1x_${
+                                          item.filePath.split("/")[3]
+                                        }`}
+                                        preview={false}
+                                        fallback="data:image/png;base64,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"
+                                      />
+                                    </Dropdown>
+                                  </div>
+                                </Col>
+                              );
+                            })}
+                          </Row>
+                        </>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <Empty style={{ margin: "auto" }} />
+                )}
+              </>
+            )}
+          </>
+        ),
+      });
+    }
+    return items;
+  };
   //-----------extract images------------------------
   function extractImages(files: any) {
     const images: any = [];
@@ -584,6 +1205,36 @@ function LayerDocs(props) {
   //-------------- render media content --------------------
   function renderMedia() {
     const media: any = files;
+    let mediaItem: unknown;
+    const items = [
+      {
+        key: "1",
+        label: "Download",
+        icon: <DownloadOutlined />,
+      },
+      {
+        key: "2",
+        label: "Delete",
+        icon: <DeleteOutlined />,
+      },
+    ];
+    const onClick = (e: unknown) => {
+      if (e.key === "1") {
+        download(PUBLIC_URL + mediaItem.filePath);
+      }
+      if (e.key === "2") {
+        Modal.confirm({
+          title: "Delete Image?",
+          icon: <ExclamationCircleOutlined />,
+          content: "Are you sure you want to delete this Image?",
+          okText: "Yes",
+          cancelText: "No",
+          onOk: () => {
+            deleteFile(mediaItem._id);
+          },
+        });
+      }
+    };
     return (
       <div>
         {media.length > 0 ? (
@@ -620,40 +1271,8 @@ function LayerDocs(props) {
                     {subHeading.data.files.map((item: any) => {
                       return (
                         <Dropdown
-                          overlay={
-                            <Menu>
-                              <Menu.Item
-                                key={`1.${item._id}`}
-                                onClick={() =>
-                                  window.open(`${PUBLIC_URL}${item.filePath}`)
-                                }
-                              >
-                                <DownloadOutlined /> Download
-                              </Menu.Item>
-                              {props.canDelete ? (
-                                <Menu.Item
-                                  key={`2.${item._id}`}
-                                  onClick={() => {
-                                    Modal.confirm({
-                                      title: "Delete Image?",
-                                      icon: <ExclamationCircleOutlined />,
-                                      content:
-                                        "Are you sure you want to delete this Image?",
-                                      okText: "Yes",
-                                      cancelText: "No",
-                                      onOk: () => {
-                                        deleteFile(item._id);
-                                      },
-                                    });
-                                  }}
-                                >
-                                  <DeleteOutlined /> Delete
-                                </Menu.Item>
-                              ) : (
-                                <></>
-                              )}
-                            </Menu>
-                          }
+                          onOpenChange={() => (mediaItem = item)}
+                          menu={{ items, onClick }}
                           trigger={["contextMenu"]}
                         >
                           <Image
@@ -850,19 +1469,21 @@ function LayerDocs(props) {
 
   //---Get properties keys ---
 
-  function fetchJSON() {
+  async function fetchJSON() {
     console.log("props.layerPath", props.layerPath);
-    return fetch(`${STATIC_URL}${props.layerPath}`)
-      .then(function (res) {
-        return res.json();
-      })
-      .catch((err) => console.error(err));
+    try {
+      const res = await fetch(`${STATIC_URL}${props.layerPath}`);
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   useEffect(() => {
     if (props.visible) {
       setAttLoading(true);
-      const data = fetchJSON()
+      fetchJSON()
         .then((data) => {
           // let filteredObjectArray:any = [];
           // data.features.map((feature: any)=>{
@@ -952,7 +1573,7 @@ function LayerDocs(props) {
         placement="right"
         closable={true}
         onClose={onClose}
-        visible={props.visible}
+        open={props.visible}
         footer={
           <>
             {props.isBaseMap ? (
@@ -1006,715 +1627,8 @@ function LayerDocs(props) {
               centered
               style={{ width: "100%" }}
               onTabClick={onClickForTab}
-            >
-              <TabPane
-                tab={
-                  <span>
-                    <FileImageOutlined />
-                    Media
-                  </span>
-                }
-                key="1"
-              >
-                {loader ? (
-                  <div>
-                    <Row>
-                      <Skeleton paragraph={{ rows: 1 }} />
-                    </Row>
-                    <Row>
-                      <Col span={8} md={8}>
-                        <div style={{ padding: "8px" }}>
-                          <Shimmer height={172} width={172} />
-                        </div>
-                      </Col>
-                      <Col span={8} md={8}>
-                        <div style={{ padding: "8px" }}>
-                          <Shimmer height={172} width={172} />
-                        </div>
-                      </Col>
-                      <Col span={8} md={8}>
-                        <div style={{ padding: "8px" }}>
-                          <Shimmer height={172} width={172} />
-                        </div>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Skeleton paragraph={{ rows: 1 }} />
-                    </Row>
-                    <Row>
-                      <Col span={8} md={8}>
-                        <div style={{ padding: "8px" }}>
-                          <Shimmer height={172} width={172} />
-                        </div>
-                      </Col>
-                      <Col span={8} md={8}>
-                        <div style={{ padding: "8px" }}>
-                          <Shimmer height={172} width={172} />
-                        </div>
-                      </Col>
-                      <Col span={8} md={8}>
-                        <div style={{ padding: "8px" }}>
-                          <Shimmer height={172} width={172} />
-                        </div>
-                      </Col>
-                    </Row>
-                  </div>
-                ) : (
-                  renderMedia()
-                )}
-              </TabPane>
-              <TabPane
-                tab={
-                  <span>
-                    <FileTextOutlined />
-                    Documents
-                  </span>
-                }
-                key="2"
-              >
-                <Row>
-                  {loader ? (
-                    <Spin
-                      size="large"
-                      style={{
-                        position: "relative",
-                        margin: "auto",
-                      }}
-                    />
-                  ) : (
-                    renderDocuments()
-                  )}
-                </Row>
-              </TabPane>
-              {props.isBaseMap ? (
-                <>
-                  {props.canUpdateBaseLayer ? (
-                    <TabPane
-                      tab={
-                        <span>
-                          <SettingOutlined />
-                          Layer Settings
-                        </span>
-                      }
-                      key="3"
-                    >
-                      <>
-                        {(props.layerData.vector
-                          ? props.layerData.vector.type
-                          : "null") === "MultiPolygon" ? (
-                          <>
-                            <Title level={4}>Enable 3D</Title>
-                            <Alert
-                              message="How to use?"
-                              description="For this feature to work, you need to have the property ${Height} present in all the features of the layer!"
-                              type="info"
-                              showIcon
-                            />
-                            <div
-                              style={{
-                                paddingLeft: "5rem",
-                                paddingRight: "5rem",
-                                paddingTop: "1rem",
-                                //backgroundColor: "orange",
-                                display: "flex",
-                              }}
-                            >
-                              <p>Toggle 3D transpose</p>
-                              <Switch
-                                style={{ marginLeft: "5rem" }}
-                                onChange={switchHandle}
-                                checked={props.layer.T3DTranspose}
-                              />
-                            </div>
-                            <Divider />
-                            {layerLabelSelector()}
-                            {/* Make map public */}
-                            <Divider />
-                            <Title level={4}>Make layer public</Title>
-                            {!props.layer.isPublic && (
-                              <Alert
-                                message="Warning! This process is irreversible!"
-                                type="warning"
-                                showIcon
-                              />
-                            )}
-                            {madePublic && (
-                              <Alert
-                                message="Please save the map link as this won't be shared further on."
-                                type="info"
-                                showIcon
-                              />
-                            )}
-                            <div
-                              style={{
-                                paddingLeft: "5rem",
-                                paddingRight: "5rem",
-                                paddingTop: "1rem",
-                                //backgroundColor: "orange",
-                                display: "flex",
-                              }}
-                            >
-                              <p>Public Visibility</p>
-                              <span>
-                                {props.layer.isPublic ? (
-                                  <Text
-                                    type="secondary"
-                                    style={{
-                                      marginLeft: "20px",
-                                    }}
-                                  >
-                                    {" "}
-                                    Deactivate
-                                  </Text>
-                                ) : (
-                                  <Link
-                                    href="#"
-                                    onClick={() => {
-                                      makePublic();
-                                    }}
-                                    style={{
-                                      marginLeft: "20px",
-                                    }}
-                                  >
-                                    Activate
-                                  </Link>
-                                )}{" "}
-                                {publicLoading ? <LoadingOutlined /> : <></>}
-                              </span>
-                            </div>
-                            {madePublic && (
-                              <Space direction="vertical">
-                                <Title level={5}>
-                                  {" "}
-                                  <LinkOutlined /> Your public map link
-                                </Title>
-                                <Paragraph
-                                  copyable
-                                  ellipsis
-                                  style={{
-                                    backgroundColor: "#e9e9f0",
-                                    fontSize: "16px",
-                                    padding: "8px",
-                                    borderRadius: "4px",
-                                    width: "400px",
-                                  }}
-                                >{`${PUBLIC_URL}/map/${publicMapRefId}`}</Paragraph>
-                              </Space>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            {layerLabelSelector()}
-                            <Divider />
-                            <Title level={4}>Make layer public</Title>
-                            {!props.layer.isPublic && (
-                              <Alert
-                                message="Warning! This process is irreversible!"
-                                type="warning"
-                                showIcon
-                              />
-                            )}
-                            {madePublic && (
-                              <Alert
-                                message="Please save the map link as this won't be shared further on."
-                                type="info"
-                                showIcon
-                              />
-                            )}
-                            <div
-                              style={{
-                                paddingLeft: "5rem",
-                                paddingRight: "5rem",
-                                paddingTop: "1rem",
-                                //backgroundColor: "orange",
-                                display: "flex",
-                              }}
-                            >
-                              <p>Public Visibility</p>
-                              <span>
-                                {props.layer.isPublic ? (
-                                  <Text
-                                    type="secondary"
-                                    style={{
-                                      marginLeft: "20px",
-                                    }}
-                                  >
-                                    {" "}
-                                    Deactivate
-                                  </Text>
-                                ) : (
-                                  <Link
-                                    href="#"
-                                    onClick={() => {
-                                      makePublic();
-                                    }}
-                                    style={{
-                                      marginLeft: "20px",
-                                    }}
-                                  >
-                                    Activate
-                                  </Link>
-                                )}{" "}
-                                {publicLoading ? <LoadingOutlined /> : <></>}
-                              </span>
-                            </div>
-                            {madePublic && (
-                              <Space direction="vertical">
-                                <Title level={5}>
-                                  {" "}
-                                  <LinkOutlined /> Your public map link
-                                </Title>
-                                <Paragraph
-                                  copyable
-                                  ellipsis
-                                  style={{
-                                    backgroundColor: "#e9e9f0",
-                                    fontSize: "16px",
-                                    padding: "8px",
-                                    borderRadius: "4px",
-                                    width: "400px",
-                                  }}
-                                >{`${PUBLIC_URL}/map/${publicMapRefId}`}</Paragraph>
-                              </Space>
-                            )}
-                          </>
-                        )}
-                      </>
-                    </TabPane>
-                  ) : (
-                    <></>
-                  )}
-                </>
-              ) : (
-                <TabPane
-                  tab={
-                    <span>
-                      <SettingOutlined />
-                      Layer Settings
-                    </span>
-                  }
-                  key="3"
-                >
-                  <>
-                    {(props.layerData.vector
-                      ? props.layerData.vector.type
-                      : "null") === "MultiPolygon" ? (
-                      <>
-                        <Title level={3}>Enable 3D</Title>
-                        <div
-                          style={{
-                            paddingLeft: "5rem",
-                            paddingRight: "5rem",
-                            paddingTop: "1rem",
-                            //backgroundColor: "orange",
-                            display: "flex",
-                          }}
-                        >
-                          <p>Toggle 3D transpose</p>
-                          <Switch
-                            style={{ marginLeft: "5rem" }}
-                            onChange={switchHandle}
-                            checked={props.layer.T3DTranspose}
-                          />
-                        </div>
-                        <Divider />
-                        {layerLabelSelector()}
-                      </>
-                    ) : (
-                      <>{layerLabelSelector()}</>
-                    )}
-                  </>
-                </TabPane>
-              )}
-              {props.isBaseMap ? (
-                <>
-                  {props.canUpdateBaseLayer ? (
-                    <TabPane
-                      tab={
-                        <span>
-                          <AuditOutlined />
-                          Review
-                        </span>
-                      }
-                      key="4"
-                    >
-                      {reviewFilesLoader ? (
-                        <div>
-                          <Row>
-                            <Skeleton paragraph={{ rows: 1 }} />
-                          </Row>
-                          <Row>
-                            <Col span={8} md={8}>
-                              <div style={{ padding: "8px" }}>
-                                <Shimmer height={172} width={172} />
-                              </div>
-                            </Col>
-                            <Col span={8} md={8}>
-                              <div style={{ padding: "8px" }}>
-                                <Shimmer height={172} width={172} />
-                              </div>
-                            </Col>
-                            <Col span={8} md={8}>
-                              <div style={{ padding: "8px" }}>
-                                <Shimmer height={172} width={172} />
-                              </div>
-                            </Col>
-                          </Row>
-                          <Row>
-                            <Skeleton paragraph={{ rows: 1 }} />
-                          </Row>
-                          <Row>
-                            <Col span={8} md={8}>
-                              <div style={{ padding: "8px" }}>
-                                <Shimmer height={172} width={172} />
-                              </div>
-                            </Col>
-                            <Col span={8} md={8}>
-                              <div style={{ padding: "8px" }}>
-                                <Shimmer height={172} width={172} />
-                              </div>
-                            </Col>
-                            <Col span={8} md={8}>
-                              <div style={{ padding: "8px" }}>
-                                <Shimmer height={172} width={172} />
-                              </div>
-                            </Col>
-                          </Row>
-                        </div>
-                      ) : (
-                        <>
-                          {reviewFiles.length > 0 ? (
-                            <div>
-                              {reviewFiles.map((subHeading: any) => {
-                                return (
-                                  <>
-                                    <Row>
-                                      <Dropdown
-                                        overlay={
-                                          <Menu>
-                                            <div
-                                              style={{
-                                                height: "200px",
-                                                overflow: "auto",
-                                              }}
-                                            >
-                                              <Menu.Item
-                                                key="unassign-group"
-                                                onClick={() =>
-                                                  unAssignGroup(
-                                                    subHeading.label
-                                                  )
-                                                }
-                                              >
-                                                Unassign Group
-                                              </Menu.Item>
-                                              {reviewOptions.map(
-                                                (item: any) => {
-                                                  return (
-                                                    <Menu.Item
-                                                      key={`1-${item.label}-${item.index}`}
-                                                      onClick={() => {
-                                                        updateReviewList(
-                                                          `${item.index}-${item.label}`,
-                                                          subHeading.data.fIndex
-                                                        );
-                                                        //setActivateButtons(true);
-                                                      }}
-                                                    >
-                                                      {item.label}
-                                                    </Menu.Item>
-                                                  );
-                                                }
-                                              )}
-                                            </div>
-                                          </Menu>
-                                        }
-                                        trigger={["click"]}
-                                      >
-                                        <Text
-                                          onClick={(e: any) =>
-                                            e.preventDefault()
-                                          }
-                                          style={{ cursor: "pointer" }}
-                                        >
-                                          <EnvironmentOutlined />{" "}
-                                          {subHeading.label === null
-                                            ? "Unassigned Images"
-                                            : subHeading.label}{" "}
-                                          <DownOutlined />
-                                        </Text>
-                                      </Dropdown>
-                                    </Row>
-                                    <Row>
-                                      {subHeading.data.files.map(
-                                        (item: any) => {
-                                          return (
-                                            <Col span={8} md={8}>
-                                              <div>
-                                                <Dropdown
-                                                  overlay={
-                                                    <Menu>
-                                                      <SubMenu
-                                                        title="Move to"
-                                                        key="submenu"
-                                                      >
-                                                        <div
-                                                          style={{
-                                                            height: "200px",
-                                                            overflow: "auto",
-                                                          }}
-                                                        >
-                                                          {reviewOptions.map(
-                                                            (itema: any) => {
-                                                              return (
-                                                                <Menu.Item
-                                                                  key={`1-${itema.label}-${itema.index}`}
-                                                                  onClick={() => {
-                                                                    updateReviewListSingle(
-                                                                      item._id,
-                                                                      itema.index,
-                                                                      subHeading
-                                                                        .data
-                                                                        .fIndex,
-                                                                      itema.label
-                                                                    );
-                                                                    // setActivateButtons(
-                                                                    //   true
-                                                                    // );
-                                                                  }}
-                                                                >
-                                                                  {itema.label}
-                                                                </Menu.Item>
-                                                              );
-                                                            }
-                                                          )}
-                                                        </div>
-                                                      </SubMenu>
-                                                    </Menu>
-                                                  }
-                                                  trigger={["contextMenu"]}
-                                                >
-                                                  <Image
-                                                    key={`${item._id}`}
-                                                    style={{ padding: "8px" }}
-                                                    width={"auto"}
-                                                    height={180}
-                                                    src={`${STATIC_URL}/images/geojson/1x_${
-                                                      item.filePath.split(
-                                                        "/"
-                                                      )[3]
-                                                    }`}
-                                                    preview={false}
-                                                    fallback="data:image/png;base64,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"
-                                                  />
-                                                </Dropdown>
-                                              </div>
-                                            </Col>
-                                          );
-                                        }
-                                      )}
-                                    </Row>
-                                  </>
-                                );
-                              })}
-                            </div>
-                          ) : (
-                            <Empty style={{ margin: "auto" }} />
-                          )}
-                        </>
-                      )}
-                    </TabPane>
-                  ) : (
-                    <></>
-                  )}
-                </>
-              ) : (
-                <TabPane
-                  tab={
-                    <span>
-                      <AuditOutlined />
-                      Review
-                    </span>
-                  }
-                  key="4"
-                >
-                  {reviewFilesLoader ? (
-                    <div>
-                      <Row>
-                        <Skeleton paragraph={{ rows: 1 }} />
-                      </Row>
-                      <Row>
-                        <Col span={8} md={8}>
-                          <div style={{ padding: "8px" }}>
-                            <Shimmer height={172} width={172} />
-                          </div>
-                        </Col>
-                        <Col span={8} md={8}>
-                          <div style={{ padding: "8px" }}>
-                            <Shimmer height={172} width={172} />
-                          </div>
-                        </Col>
-                        <Col span={8} md={8}>
-                          <div style={{ padding: "8px" }}>
-                            <Shimmer height={172} width={172} />
-                          </div>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Skeleton paragraph={{ rows: 1 }} />
-                      </Row>
-                      <Row>
-                        <Col span={8} md={8}>
-                          <div style={{ padding: "8px" }}>
-                            <Shimmer height={172} width={172} />
-                          </div>
-                        </Col>
-                        <Col span={8} md={8}>
-                          <div style={{ padding: "8px" }}>
-                            <Shimmer height={172} width={172} />
-                          </div>
-                        </Col>
-                        <Col span={8} md={8}>
-                          <div style={{ padding: "8px" }}>
-                            <Shimmer height={172} width={172} />
-                          </div>
-                        </Col>
-                      </Row>
-                    </div>
-                  ) : (
-                    <>
-                      {reviewFiles.length > 0 ? (
-                        <div>
-                          {reviewFiles.map((subHeading: any) => {
-                            return (
-                              <>
-                                <Row>
-                                  <Dropdown
-                                    overlay={
-                                      <Menu>
-                                        <div
-                                          style={{
-                                            height: "200px",
-                                            overflow: "auto",
-                                          }}
-                                        >
-                                          <Menu.Item
-                                            key="unassign-group"
-                                            onClick={() =>
-                                              unAssignGroup(subHeading.label)
-                                            }
-                                          >
-                                            Unassign Group
-                                          </Menu.Item>
-                                          {reviewOptions.map((item: any) => {
-                                            return (
-                                              <Menu.Item
-                                                key={`1-${item.label}-${item.index}`}
-                                                onClick={() => {
-                                                  updateReviewList(
-                                                    `${item.index}-${item.label}`,
-                                                    subHeading.data.fIndex
-                                                  );
-                                                  //setActivateButtons(true);
-                                                }}
-                                              >
-                                                {item.label}
-                                              </Menu.Item>
-                                            );
-                                          })}
-                                        </div>
-                                      </Menu>
-                                    }
-                                    trigger={["click"]}
-                                  >
-                                    <Text
-                                      onClick={(e: any) => e.preventDefault()}
-                                      style={{ cursor: "pointer" }}
-                                    >
-                                      <EnvironmentOutlined />{" "}
-                                      {subHeading.label === null
-                                        ? "Unassigned Images"
-                                        : subHeading.label}{" "}
-                                      <DownOutlined />
-                                    </Text>
-                                  </Dropdown>
-                                </Row>
-                                <Row>
-                                  {subHeading.data.files.map((item: any) => {
-                                    return (
-                                      <Col span={8} md={8}>
-                                        <div>
-                                          <Dropdown
-                                            overlay={
-                                              <Menu>
-                                                <SubMenu
-                                                  title="Move to"
-                                                  key="submenu"
-                                                >
-                                                  <div
-                                                    style={{
-                                                      height: "200px",
-                                                      overflow: "auto",
-                                                    }}
-                                                  >
-                                                    {reviewOptions.map(
-                                                      (itema: any) => {
-                                                        return (
-                                                          <Menu.Item
-                                                            key={`1-${itema.label}-${itema.index}`}
-                                                            onClick={() => {
-                                                              updateReviewListSingle(
-                                                                item._id,
-                                                                itema.index,
-                                                                subHeading.data
-                                                                  .fIndex,
-                                                                itema.label
-                                                              );
-                                                              // setActivateButtons(
-                                                              //   true
-                                                              // );
-                                                            }}
-                                                          >
-                                                            {itema.label}
-                                                          </Menu.Item>
-                                                        );
-                                                      }
-                                                    )}
-                                                  </div>
-                                                </SubMenu>
-                                              </Menu>
-                                            }
-                                            trigger={["contextMenu"]}
-                                          >
-                                            <Image
-                                              key={`${item._id}`}
-                                              style={{ padding: "8px" }}
-                                              width={"auto"}
-                                              height={180}
-                                              src={`${STATIC_URL}/images/geojson/1x_${
-                                                item.filePath.split("/")[3]
-                                              }`}
-                                              preview={false}
-                                              fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/HnAAAHlklEQVR4Ae3dP3PTWBSGcbGzM6GCKqlIBRV0dHRJFarQ0eUT8LH4BnRU0NHR0UEFVdIlFRV7TzRksomPY8uykTk/zewQfKw/9znv4yvJynLv4uLiV2dBoDiBf4qP3/ARuCRABEFAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghggQAQZQKAnYEaQBAQaASKIAQJEkAEEegJmBElAoBEgghgg0Aj8i0JO4OzsrPv69Wv+hi2qPHr0qNvf39+iI97soRIh4f3z58/u7du3SXX7Xt7Z2enevHmzfQe+oSN2apSAPj09TSrb+XKI/f379+08+A0cNRE2ANkupk+ACNPvkSPcAAEibACyXUyfABGm3yNHuAECRNgAZLuYPgEirKlHu7u7XdyytGwHAd8jjNyng4OD7vnz51dbPT8/7z58+NB9+/bt6jU/TI+AGWHEnrx48eJ/EsSmHzx40L18+fLyzxF3ZVMjEyDCiEDjMYZZS5wiPXnyZFbJaxMhQIQRGzHvWR7XCyOCXsOmiDAi1HmPMMQjDpbpEiDCiL358eNHurW/5SnWdIBbXiDCiA38/Pnzrce2YyZ4//59F3ePLNMl4PbpiL2J0L979+7yDtHDhw8vtzzvdGnEXdvUigSIsCLAWavHp/+qM0BcXMd/q25n1vF57TYBp0a3mUzilePj4+7k5KSLb6gt6ydAhPUzXnoPR0dHl79WGTNCfBnn1uvSCJdegQhLI1vvCk+fPu2ePXt2tZOYEV6/fn31dz+shwAR1sP1cqvLntbEN9MxA9xcYjsxS1jWR4AIa2Ibzx0tc44fYX/16lV6NDFLXH+YL32jwiACRBiEbf5KcXoTIsQSpzXx4N28Ja4BQoK7rgXiydbHjx/P25TaQAJEGAguWy0+2Q8PD6/Ki4R8EVl+bzBOnZY95fq9rj9zAkTI2SxdidBHqG9+skdw43borCXO/ZcJdraPWdv22uIEiLA4q7nvvCug8WTqzQveOH26fodo7g6uFe/a17W3+nFBAkRYENRdb1vkkz1CH9cPsVy/jrhr27PqMYvENYNlHAIesRiBYwRy0V+8iXP8+/fvX11Mr7L7ECueb/r48eMqm7FuI2BGWDEG8cm+7G3NEOfmdcTQw4h9/55lhm7DekRYKQPZF2ArbXTAyu4kDYB2YxUzwg0gi/41ztHnfQG26HbGel/crVrm7tNY+/1btkOEAZ2M05r4FB7r9GbAIdxaZYrHdOsgJ/wCEQY0J74TmOKnbxxT9n3FgGGWWsVdowHtjt9Nnvf7yQM2aZU/TIAIAxrw6dOnAWtZZcoEnBpNuTuObWMEiLAx1HY0ZQJEmHJ3HNvGCBBhY6jtaMoEiJB0Z29vL6ls58vxPcO8/zfrdo5qvKO+d3Fx8Wu8zf1dW4p/cPzLly/dtv9Ts/EbcvGAHhHyfBIhZ6NSiIBTo0LNNtScABFyNiqFCBChULMNNSdAhJyNSiECRCjUbEPNCRAhZ6NSiAARCjXbUHMCRMjZqBQiQIRCzTbUnAARcjYqhQgQoVCzDTUnQIScjUohAkQo1GxDzQkQIWejUogAEQo121BzAkTI2agUIkCEQs021JwAEXI2KoUIEKFQsw01J0CEnI1KIQJEKNRsQ80JECFno1KIABEKNdtQcwJEyNmoFCJAhELNNtScABFyNiqFCBChULMNNSdAhJyNSiECRCjUbEPNCRAhZ6NSiAARCjXbUHMCRMjZqBQiQIRCzTbUnAARcjYqhQgQoVCzDTUnQIScjUohAkQo1GxDzQkQIWejUogAEQo121BzAkTI2agUIkCEQs021JwAEXI2KoUIEKFQsw01J0CEnI1KIQJEKNRsQ80JECFno1KIABEKNdtQcwJEyNmoFCJAhELNNtScABFyNiqFCBChULMNNSdAhJyNSiECRCjUbEPNCRAhZ6NSiAARCjXbUHMCRMjZqBQiQIRCzTbUnAARcjYqhQgQoVCzDTUnQIScjUohAkQo1GxDzQkQIWejUogAEQo121BzAkTI2agUIkCEQs021JwAEXI2KoUIEKFQsw01J0CEnI1KIQJEKNRsQ80JECFno1KIABEKNdtQcwJEyNmoFCJAhELNNtScABFyNiqFCBChULMNNSdAhJyNSiEC/wGgKKC4YMA4TAAAAABJRU5ErkJggg=="
-                                            />
-                                          </Dropdown>
-                                        </div>
-                                      </Col>
-                                    );
-                                  })}
-                                </Row>
-                              </>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <Empty style={{ margin: "auto" }} />
-                      )}
-                    </>
-                  )}
-                </TabPane>
-              )}
-            </Tabs>
+              items={tabItem()}
+            ></Tabs>
           ) : (
             <></>
           )}

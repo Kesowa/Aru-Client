@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Button, Typography, Result, Space, Spin } from "antd";
 import { Switch, Route } from "react-router-dom";
@@ -55,7 +55,7 @@ const UserEditPage = lazy(() => import("../../TenantRootPages/User/Edit"));
 const UserChangePassword = lazy(
   () => import("../../TenantRootPages/User/Edit/ChangePassword")
 );
-const MissionList = lazy(() => import("../../Missions/Views/List"));
+const MissionList = lazy(() => import("../../Missions"));
 const MissionView = lazy(() => import("../../Missions/Views/Details"));
 const DataList = lazy(() => import("../../Data"));
 const LiveViewBase = lazy(() => import("../../Missions/Views/Live"));

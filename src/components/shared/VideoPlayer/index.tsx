@@ -1,6 +1,5 @@
-/* eslint-disable */
+import "./hls.js";
 import React, { useState, useRef, useEffect } from "react";
-//import connectSocket from "../../.";
 import ReactPlayer from "react-player";
 import "./index.less";
 import "./hud.less";
@@ -11,8 +10,6 @@ import {
   Col,
   Typography,
   Slider,
-  Card,
-  Input,
   Button,
   Tag,
   notification,
@@ -20,7 +17,6 @@ import {
   Menu,
   Spin,
   Tooltip,
-  Divider,
   Switch,
   Modal,
   Image,
@@ -30,15 +26,8 @@ import {
 import {
   LoadingOutlined,
   CloseCircleOutlined,
-  StepBackwardOutlined,
-  StepForwardOutlined,
-  CaretRightOutlined,
-  PauseOutlined,
-  ForwardOutlined,
-  BackwardOutlined,
   InfoCircleOutlined,
   DownloadOutlined,
-  GoogleOutlined,
   SwapOutlined,
   CheckOutlined,
 } from "@ant-design/icons";
@@ -47,22 +36,11 @@ import {
   faVolumeUp,
   faCamera,
   faExpand,
-  faCompressArrowsAlt,
   faPlay,
   faPause,
   faVolumeMute,
   faTv,
-  faBars,
-  faTimes,
-  faShareAlt,
-  faEnvelope,
-  faDownload,
   faCog,
-  faRedo,
-  faUndo,
-  faFastBackward,
-  faFastForward,
-  faBookmark,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   BsBookmarkPlusFill,
@@ -78,12 +56,8 @@ import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { logout } from "../../../actions/authAction";
 import { connect } from "react-redux";
-import axios from "axios";
-import Draggable from "react-draggable";
 import * as turf from "@turf/turf";
-import { da } from "date-fns/locale";
 import { API_URL, LIVE_URL, STATIC_URL } from "src/constants";
-import { components } from "src/handlers/schema";
 import { FlightPath } from "src/types/FlightPath";
 import {
   Chart as ChartJS,
@@ -97,7 +71,6 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { faker } from "@faker-js/faker";
 import { io } from "socket.io-client";
 ChartJS.register(
   CategoryScale,
@@ -154,11 +127,11 @@ const b64toBlob = (b64Data, contentType) => {
   const byteCharacters = atob(b64Data);
   const byteArrays: Uint8Array[] = [];
 
-  for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
     const slice = byteCharacters.slice(offset, offset + sliceSize);
 
     const byteNumbers = new Array(slice.length);
-    for (var i = 0; i < slice.length; i++) {
+    for (let i = 0; i < slice.length; i++) {
       byteNumbers[i] = slice.charCodeAt(i);
     }
 
@@ -261,8 +234,6 @@ function VideoPlayer(props: any) {
     url,
     handleTheater,
     theater,
-    // handlePip,
-    // pip,
     streamKey,
     mission,
     isLive,
@@ -288,32 +259,12 @@ function VideoPlayer(props: any) {
   const elapsedTime = format(currentTime);
 
   let socket;
-  let aiSocket: any = useRef();
-  // function geocoder(coordinates: any) {
-  //   //setLoader(true);
-  //   http
-  //     .get(
-  //       `https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates[0]},${coordinates[1]}.json?access_token=${import.meta.env.VITE_MAPBOX_API_KEY}`
-  //     )
-  //     .then((result) => {
-  //       //console.log(result.data.features[0]);
-  //       console.log(result.data.features[0].place_name);
-  //       setCaptAddress(result.data.features[0].place_name);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     })
-  //     .finally(() => {
-  //       //etLoader(false);
-  //     });
-  // }
+  const aiSocket: any = useRef();
 
-  //useEffect(()=>console.log(captAddress),[captAddress])
   useEffect(() => {
     setIsFlagged(props.mission?.isFlagged);
     if ("bookmarks" in props.mission) setBookmark(props.mission.bookmarks);
   }, [props.mission]);
-  //---listening for drone telemetry from socket------------
   useEffect(() => {
     socket = connectSocket(streamKey);
 
@@ -387,9 +338,9 @@ function VideoPlayer(props: any) {
       const durationSteps = duration / length;
       let steps = durationSteps;
       console.log("AIML durationSteps", durationSteps, steps);
-      let label: number[] = [];
+      const label: number[] = [];
       label.push(0);
-      for (var i = 0; i < length - 1; i++) {
+      for (let i = 0; i < length - 1; i++) {
         label.push(`${Math.round((steps / 100) * 100) / 100} s`);
         steps += durationSteps;
       }
@@ -548,7 +499,6 @@ function VideoPlayer(props: any) {
       playerContainerRef.current
     ) {
       screenfull.toggle(playerContainerRef.current);
-      //setIsFullScreen(!isFullScreen);
     }
 
     if (screenfull.isEnabled) {
@@ -569,10 +519,6 @@ function VideoPlayer(props: any) {
       handleTheater();
     }
   };
-
-  // const handleDisablePip = () => {
-  //   handlepip();
-  // };
 
   const handleProgress = (changedState) => {
     if (!seeking) {
@@ -605,7 +551,6 @@ function VideoPlayer(props: any) {
 
   const handleSeekChange = (newValue) => {
     setPlayed(newValue / 100);
-    //console.log("handle seek change", newValue, newValue/100);
     setSeeking(true);
   };
 
@@ -642,16 +587,6 @@ function VideoPlayer(props: any) {
     return format(fraction * duration);
   };
 
-  const handleResolutionChange = (e) => {
-    setActiveURL(resolutionURLs[e.key]);
-    console.log("current selected URL++++++: " + activeURL);
-  };
-
-  const onInputChange = (e) => {
-    setInference(e.target.value);
-    console.log(inference);
-  };
-
   // handle snapshot button
   const handleSnapShot = () => {
     if (!isAlertEnabled && canvasRef && canvasRef.current) {
@@ -671,7 +606,6 @@ function VideoPlayer(props: any) {
 
       const imageURL = canvas.toDataURL();
       setAlertImage(imageURL);
-      //console.log(alertImage);
 
       canvas.width = 0;
       canvas.height = 0;
@@ -717,14 +651,10 @@ function VideoPlayer(props: any) {
       .post(`${apis.UPLOAD_ALERT_IMAGE}`, formDataToUpload)
       .then((res) => {
         body.image = res.data.file;
-        //console.log("Image uploaded at: " + res.data.file);
-        // setCaptAddress(geocoder([
-        //   isLive ? location.long : captLong,
-        //   isLive ? location.lat : captLat,
-        // ]));
 
         if (captLat !== undefined && captLong !== undefined) {
-          let addressLocation: any = geocoder([
+          const addressLocation: any = geocoder([
+            //Review
             isLive ? location.long : captLong,
             isLive ? location.lat : captLat,
           ])
@@ -807,7 +737,7 @@ function VideoPlayer(props: any) {
     if (playerRef.current) {
       const progress = Math.round(played * 100);
       if (!(progress in bookmark)) {
-        let allBookmark = { ...bookmark, [progress]: elapsedTime };
+        const allBookmark = { ...bookmark, [progress]: elapsedTime };
         setBookmark(allBookmark);
         updateBookmark(allBookmark, "add");
       }
@@ -818,7 +748,7 @@ function VideoPlayer(props: any) {
       const progress = Math.round(played * 100);
       if (progress in bookmark) {
         const removeKey = (key, { [key]: _, ...rest }) => rest;
-        let allBookmark = removeKey(progress, bookmark);
+        const allBookmark = removeKey(progress, bookmark);
         setBookmark((prev) => removeKey(progress, prev));
         updateBookmark(allBookmark, "remove");
       }
@@ -841,25 +771,29 @@ function VideoPlayer(props: any) {
   }
 
   function computeZoomLevel(bounds: any, padding: any) {
-    let minx = bounds[1];
-    let miny = bounds[0];
-    let maxx = bounds[3];
-    let maxy = bounds[2];
+    const minx = bounds[1];
+    const miny = bounds[0];
+    const maxx = bounds[3];
+    const maxy = bounds[2];
 
-    let ry1 = Math.log((Math.sin(deg2rad(miny)) + 1) / Math.cos(deg2rad(miny)));
-    let ry2 = Math.log((Math.sin(deg2rad(maxy)) + 1) / Math.cos(deg2rad(maxy)));
+    const ry1 = Math.log(
+      (Math.sin(deg2rad(miny)) + 1) / Math.cos(deg2rad(miny))
+    );
+    const ry2 = Math.log(
+      (Math.sin(deg2rad(maxy)) + 1) / Math.cos(deg2rad(maxy))
+    );
 
-    let ryc = (ry1 + ry2) / 2;
-    let centerY = rad2deg(Math.atan(Math.sinh(ryc)));
-    let resolutionHorizontal = Math.abs(minx - maxx) / 500;
-    let vy0 = Math.log(Math.tan(Math.PI * (0.25 + centerY / 360)));
-    let vy1 = Math.log(Math.tan(Math.PI * (0.25 + maxx / 360)));
-    let viewHeightHalf = 300 / 2;
-    let zoomFactorPowered = viewHeightHalf / (40.7436654315252 * (vy1 - vy0));
-    let resolutionVertical = 360.0 / (zoomFactorPowered * 256);
-    let resolution =
+    const ryc = (ry1 + ry2) / 2;
+    const centerY = rad2deg(Math.atan(Math.sinh(ryc)));
+    const resolutionHorizontal = Math.abs(minx - maxx) / 500;
+    const vy0 = Math.log(Math.tan(Math.PI * (0.25 + centerY / 360)));
+    const vy1 = Math.log(Math.tan(Math.PI * (0.25 + maxx / 360)));
+    const viewHeightHalf = 300 / 2;
+    const zoomFactorPowered = viewHeightHalf / (40.7436654315252 * (vy1 - vy0));
+    const resolutionVertical = 360.0 / (zoomFactorPowered * 256);
+    const resolution =
       Math.max(resolutionHorizontal, resolutionVertical) * padding;
-    let zoom = Math.log(360 / (resolution * 256));
+    const zoom = Math.log(360 / (resolution * 256));
 
     return Math.floor(zoom);
   }
@@ -870,17 +804,10 @@ function VideoPlayer(props: any) {
     endLat: any,
     endLong: any
   ) {
-    let p1 = turf.point([startLong, startLat]);
-    let p2 = turf.point([endLong, endLat]);
-    let bearing = turf.bearing(p1, p2);
+    const p1 = turf.point([startLong, startLat]);
+    const p2 = turf.point([endLong, endLat]);
+    const bearing = turf.bearing(p1, p2);
     return bearing;
-    // if(bearing > 0){
-    //   return bearing * -1
-    // } else if(bearing < 0){
-    //   return bearing * -1
-    // } else {
-    //   return 0
-    // }
   }
 
   function getInterPolatedValue(
@@ -896,26 +823,19 @@ function VideoPlayer(props: any) {
     const range = (x1: any, y1: any, x2: any, y2: any, a: any) =>
       lerp(x2, y2, invlerp(x1, y1, a));
 
-    let final = range(u1, l1, u2, l2, value);
+    const final = range(u1, l1, u2, l2, value);
     return final;
   }
   //-------------fetch flight log from srt geojson--------------------------------
   useEffect(() => {
     if (!isLive) {
-      //console.log(props.url.split('.')[0]);
       fetchJSON((props.url as string).replace(/.\w+$/, ".geojson"))
         .then((d) => {
-          let data = d as FlightPath;
+          const data = d as FlightPath;
           const lineString = data.features.pop(); // Remove linestring at the very end
-          //console.log("the obejct", pathObject)
-          let flightTelemetry = data.features;
-          // let points: [number, number, number][] = [];
-          // data.features.map((feat) => {
-          //   points.push(feat.geometry.coordinates);
-          // });
+          const flightTelemetry = data.features;
 
-          //console.log("filtered pints", points);
-          let flightpath = {
+          const flightpath = {
             type: "FeatureCollection",
             crs: {
               type: "name",
@@ -925,15 +845,14 @@ function VideoPlayer(props: any) {
             },
             features: [lineString],
           };
-          // //flightpath.push(flightTelemetry.at(-1));
-          // console.log("FLight features", flightTelemetry, "FLightpath", flightpath.features[0]);
+
           setFlightPathSrt(flightpath.features[0]); //-------need to filter out the z axis to access
           setFlightTeleSrt(flightTelemetry);
-          //console.log("test...", flightpath.features[0],turf.bbox(flightpath.features[0]), turf.centroid(flightpath.features[0]).geometry.coordinates);
-          let getBounds = turf.bbox(flightpath.features[0]);
-          //console.log("Zoom level", computeZoomLevel(getBounds, 100));
+
+          const getBounds = turf.bbox(flightpath.features[0]);
+
           setMapZoom(computeZoomLevel(getBounds, 1));
-          let reGetBounds = [
+          const reGetBounds = [
             [getBounds[0], getBounds[1]],
             [getBounds[2], getBounds[3]],
           ];
@@ -950,7 +869,7 @@ function VideoPlayer(props: any) {
   //----------fetch telemetry------------------
   useEffect(() => {
     if (played && !isLive) {
-      var x = Math.floor(played * flightTeleSrt.length);
+      const x = Math.floor(played * flightTeleSrt.length);
       if (flightTeleSrt[x]?.properties.DISTANCE) {
         console.log("Distance: ", flightTeleSrt[x]?.properties.DISTANCE);
         console.log("H.SPEED: ", flightTeleSrt[x]?.properties.SPEED_TWOD);
@@ -998,15 +917,15 @@ function VideoPlayer(props: any) {
         long: flightTeleSrt[x]?.geometry.coordinates[0],
       });
       setHeight(flightTeleSrt[x]?.geometry.coordinates[2]);
-      let startPoint: any = [
+      const startPoint: any = [
         flightTeleSrt[x]?.geometry.coordinates[0],
         flightTeleSrt[x]?.geometry.coordinates[1],
       ];
-      let endPoint: any = [
+      const endPoint: any = [
         flightTeleSrt[x + 1]?.geometry.coordinates[0],
         flightTeleSrt[x + 1]?.geometry.coordinates[1],
       ];
-      //console.log("etst----", startPoint, endPoint);
+
       if (
         startPoint[0] !== undefined &&
         endPoint[0] !== undefined &&
@@ -1032,27 +951,6 @@ function VideoPlayer(props: any) {
       zoom={mapZoom}
     />
   );
-
-  // const resolutionMenu = (
-  //   <Menu onClick={handleResolutionChange}>
-  //     <Menu.Item key='auto'>Auto</Menu.Item>
-  //     <Menu.Item key='fullDefinition'>480p</Menu.Item>
-  //     <Menu.Item key='highDefinition'>720p</Menu.Item>
-  //   </Menu>
-  // );
-
-  // const playBackMenu = (
-  //   <Menu
-  //     onClick={(e) => {
-  //       setPlaybackSpeed(e.key);
-  //     }}
-  //   >
-  //     <Menu.Item key='5'>5x</Menu.Item>
-  //     <Menu.Item key='2'>2x</Menu.Item>
-  //     <Menu.Item key='1.5'>1.5x</Menu.Item>
-  //     <Menu.Item key='1'>1x</Menu.Item>
-  //   </Menu>
-  // );
 
   const settingsMenu = (
     <Menu
@@ -1267,22 +1165,14 @@ function VideoPlayer(props: any) {
       )}
     </Menu>
   );
+  const menu = [
+    {
+      key: "1",
+      label: "Help",
+      icon: <InfoCircleOutlined />,
+    },
+  ];
 
-  const menu = (
-    <Menu>
-      <Menu.Item key="1" onClick={() => setShowHotkeys(true)}>
-        {" "}
-        <InfoCircleOutlined /> Help
-      </Menu.Item>
-    </Menu>
-  );
-
-  // const menu = (
-  //   <Menu>
-  //     <Menu.Item key="1" onClick={()=>{}}>more stats</Menu.Item>
-
-  //   </Menu>
-  // );
   const handleCancel = () => {
     setIsModalVisible(false);
     setPlaying(playingBeforeCapture);
@@ -1297,7 +1187,7 @@ function VideoPlayer(props: any) {
     >
       {isAlertEnabled ? (
         <Modal
-          visible={isModalVisible}
+          open={isModalVisible}
           title="Snapshot Captured!"
           onOk={() => {}}
           width={1200}
@@ -1346,6 +1236,7 @@ function VideoPlayer(props: any) {
                       <a
                         href={`https://www.google.com/maps/?q=${captLat},${captLong}`}
                         target="_blank"
+                        rel="noreferrer"
                       >
                         <img
                           className="static-map"
@@ -1368,7 +1259,7 @@ function VideoPlayer(props: any) {
                         htmlToImage
                           .toPng(document.getElementById("image")!)
                           .then(function (dataUrl) {
-                            var a = document.createElement("a");
+                            const a = document.createElement("a");
                             a.href = dataUrl;
                             a.download = `snapshot_3355.png`;
                             a.click();
@@ -1417,7 +1308,6 @@ function VideoPlayer(props: any) {
         pip={pip}
         volume={volume}
         onEnablePIP={handleEnablePip}
-        // onDisablePIP={handleDisablePip}
         playbackRate={playbackSpeed}
         onEnded={handlePlayPause}
         onProgress={handleProgress}
@@ -1818,7 +1708,7 @@ function VideoPlayer(props: any) {
       )}
 
       <Dropdown
-        overlay={menu}
+        menu={{ items: menu, onClick: () => setShowHotkeys(true) }}
         trigger={["contextMenu"]}
         getPopupContainer={() =>
           document.getElementById("area22") as HTMLElement
@@ -1943,7 +1833,6 @@ function VideoPlayer(props: any) {
             ) : null}
             <Col span={24}>
               {isLive ? (
-                // <Slider min={0} max={100} value={100} />
                 <div className="live-slider"></div>
               ) : (
                 <>
@@ -1993,12 +1882,7 @@ function VideoPlayer(props: any) {
                       >
                         replay_10
                       </span>
-                      {/* <FontAwesomeIcon
-                          
-                          icon={faFastBackward}
-                          className='video-control-icons'
-                          style={{ display: isLive ? "none" : "inline" }}
-                        /> */}
+
                       {playing ? (
                         <Tooltip title="Pause">
                           <FontAwesomeIcon
@@ -2016,12 +1900,6 @@ function VideoPlayer(props: any) {
                           />
                         </Tooltip>
                       )}
-                      {/* <FontAwesomeIcon
-                    onClick={fastforward}
-                    icon={faFastForward}
-                    className='video-control-icons'
-                    style={{ display: isLive ? "none" : "inline" }}
-                  /> */}
                       <span
                         onClick={fastforward}
                         className="material-icons video-control-icons"
@@ -2177,7 +2055,7 @@ function VideoPlayer(props: any) {
                                 ) {
                                   setCaptLat(dPosition.lat);
                                   setCaptLong(dPosition.long);
-                                  let address: any = geocoder([
+                                  const address: any = geocoder([
                                     dPosition.long,
                                     dPosition.lat,
                                   ]).then((res: any) => setCaptAddress(res));
@@ -2334,7 +2212,6 @@ function VideoPlayer(props: any) {
           {isFullScreen && !isLive && props.showHUD && showMap && (
             <>
               {!pip ? (
-                // <div className='full-map'>{flightlogmap}</div>
                 <div
                   className="map-box"
                   style={{ bottom: `${bottomMapHeight}px` }}
@@ -2370,7 +2247,7 @@ function VideoPlayer(props: any) {
       <canvas ref={canvasRef} />
       <Modal
         title="Storage Exceeded!"
-        visible={storageModal}
+        open={storageModal}
         onOk={() => setStorageModal(false)}
         onCancel={() => setStorageModal(false)}
       >

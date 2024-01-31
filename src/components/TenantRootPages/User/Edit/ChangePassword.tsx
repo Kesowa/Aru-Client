@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
-import { PageHeader, Row, Col, message, Form, Input, Button } from "antd";
+import { Row, Col, message, Form, Input, Button } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
@@ -83,7 +84,6 @@ function UserChangePassword(props: any) {
                 onBack={() => window.history.back()}
                 className="site-page-header-responsive"
                 title={`Change Password For User - ${props.user.name}`}
-                // subTitle={`Change password for user ${props.user.name}`}
                 extra={[
                   <Link to="/dashboard/tenant/user/list" key="1">
                     <Button

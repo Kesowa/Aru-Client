@@ -4,6 +4,8 @@ import {
   Col,
   Layout,
   Menu,
+  MenuProps,
+  Modal,
   Popconfirm,
   Row,
   Tooltip,
@@ -14,11 +16,20 @@ import { connect } from "react-redux";
 import decideIcon from "../../../services/decideIcon";
 import { MenuOutlined, UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { logout } from "../../../actions/authAction";
-import { STATIC_URL } from "src/constants";
+import {
+  API_URL,
+  COG_URL,
+  LIVE_URL,
+  PUBLIC_URL,
+  RTMP_URL,
+  STATIC_URL,
+} from "src/constants";
 import { useThemeSwitcher } from "react-css-theme-switcher";
+import QRCode from "qrcode";
 import "./index.less";
 import Logo from "../../shared/Logo";
 const { Sider } = Layout;
+const { Title } = Typography;
 
 function SideBar(props: any) {
   const [href, setHref] = useState<any>(null);
@@ -41,7 +52,6 @@ function SideBar(props: any) {
   useEffect(() => {
     const l = window.location.pathname;
     const loc = l.split("/");
-    //console.log(loc);
     if (loc[3] === "live") {
       setHref("/dashboard/missions");
     } else {
@@ -139,7 +149,6 @@ function SideBar(props: any) {
                 <Col span={8}>
                   <Avatar
                     className="user-avatar"
-                    // icon={<UserOutlined />}
                     src={STATIC_URL + props.UserDetails.avatar}
                   >
                     {getInitials(props.UserDetails.name)}
@@ -191,6 +200,132 @@ function SideBar(props: any) {
     }
   }
 
+  // Connect to app with qr code modal
+  const [visible, setVisible] = useState(false);
+  const [qrCode, setqrCode] = useState("");
+  useEffect(() => {
+    if (visible) {
+      getQrCode();
+    }
+  }, [visible]);
+
+  const getQrCode = () => {
+    const data = {
+      BASE_SERVER_URL: PUBLIC_URL,
+      BASE_STREAM_URL: LIVE_URL,
+      COG_SERVER_URL: COG_URL,
+      RTMP_URL: RTMP_URL,
+      API_URL: API_URL,
+      CDN_URL: STATIC_URL,
+    };
+    QRCode.toDataURL(JSON.stringify(data), function (err, url) {
+      setqrCode(url);
+    });
+  };
+
+  const connectToAppModal = () => {
+    return (
+      <Modal
+        title="Connect To App"
+        centered
+        open={visible}
+        onCancel={() => setVisible(false)}
+        footer={null}
+        width={1000}
+      >
+        <Row>
+          <Col span={16}>
+            <Title
+              className="card-title"
+              style={{ color: "#33324E" }}
+              level={2}
+            >
+              {"To connect the app to the platform"}
+            </Title>
+
+            <div style={{ marginLeft: "10px", marginTop: "50px" }}>
+              <Title
+                className="card-title"
+                style={{ color: "#242B2E" }}
+                level={4}
+              >
+                1. &nbsp;&nbsp;Open Aru app on your phone
+              </Title>
+              <Title
+                className="card-title"
+                style={{ color: "#242B2E" }}
+                level={4}
+              >
+                2. &nbsp;&nbsp;Tap Menu and select connect to ARU
+              </Title>
+              <Title
+                className="card-title"
+                style={{ color: "#242B2E" }}
+                level={4}
+              >
+                3. &nbsp;&nbsp;Point your phone to this screen to capture the
+                code
+              </Title>
+            </div>
+          </Col>
+          <Col span={8}>
+            <img src={qrCode} style={{ width: "100%" }} />
+          </Col>
+        </Row>
+      </Modal>
+    );
+  };
+
+  // Final menu items
+  const menu: MenuProps["items"] = () => {
+    const items: MenuProps["items"] = [];
+    props.Auth.userdetails.sideBar.map((ele: any, i: number) => {
+      if (ele.type === "sub_menu") {
+        const submenu = {
+          key: `sub_menu${i}`,
+          icon: decideIcon(ele.icon),
+          label: ele.text,
+        };
+        const children: MenuProps["items"] = [];
+        ele.sub_menu.map((subEle: any, j: number) => {
+          children.push({
+            key: subEle.link,
+            label: (
+              <Link to={subEle.link}>
+                {decideIcon(subEle.icon)}
+                <span>{subEle.text}</span>
+              </Link>
+            ),
+          });
+        });
+        submenu["children"] = children;
+        items.push(submenu);
+      } else if (ele.type === "menu") {
+        items.push({
+          key: ele.link,
+          label: (
+            <Link to={ele.link}>
+              {decideIcon(ele.icon)}
+              <span>{ele.text}</span>
+            </Link>
+          ),
+        });
+      }
+    });
+    if (props.UserDetails.userType === "tenant-client") {
+      items.push({
+        key: "connect_to_app_sidebar",
+        label: (
+          <div onClick={() => setVisible(true)}>
+            {decideIcon("MobileOutlined")}
+            <span>Connect to App</span>
+          </div>
+        ),
+      });
+    }
+    return items;
+  };
+
   return (
     <React.Fragment>
       {href && (
@@ -208,76 +343,10 @@ function SideBar(props: any) {
               theme="dark"
               mode="inline"
               selectedKeys={[href]}
-            >
-              {props.Auth.userdetails.sideBar.map((ele: any, i: number) => {
-                //console.log(ele, i);
-                if (ele.type === "sub_menu") {
-                  return (
-                    <Menu.SubMenu
-                      key={`sub_menu${i}`}
-                      icon={decideIcon(ele.icon)}
-                      title={ele.text}
-                    >
-                      {ele.sub_menu.map((subEle: any, j: number) => {
-                        return (
-                          <Menu.Item key={subEle.link} onClick={() => setR(!r)}>
-                            <Link to={subEle.link}>
-                              {decideIcon(subEle.icon)}
-                              <span>{subEle.text}</span>
-                            </Link>
-                          </Menu.Item>
-                        );
-                      })}
-                    </Menu.SubMenu>
-                  );
-                } else if (ele.type === "menu") {
-                  return (
-                    <Menu.Item key={`${ele.link}`} onClick={() => setR(!r)}>
-                      <Link to={ele.link}>
-                        {decideIcon(ele.icon)}
-                        <span>{ele.text}</span>
-                      </Link>
-                    </Menu.Item>
-                  );
-                }
-              })}
-              {/* <Menu.Item key={`global-map-12123123`} onClick={() => setR(!r)}>
-                <Link to="/dashboard/basemap">
-                  {decideIcon("CompassOutlined")}
-                  <span>Map</span>
-                </Link>
-              </Menu.Item> */}
-
-              {/* <Menu.SubMenu key="main-1" icon={<UserOutlined />} title="Tenant">
-                    <Menu.Item  key="sub-1">
-                        <Link to="/dashboard/admin/tenant/list">
-                            <UnorderedListOutlined />
-                            <span>Tenat List</span>
-                        </Link>
-                    </Menu.Item>
-                    <Menu.Item  key="sub-2">
-                        <Link to="/dashboard/admin/tenant/create">
-                            <PlusCircleOutlined />
-                            <span>Add Tenat</span>
-                        </Link>
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.SubMenu key="main-2" icon={<ShoppingCartOutlined />} title="Package">
-                    <Menu.Item  key="sub-3">
-                        <Link to="/dashboard/admin/package/list">
-                            <UnorderedListOutlined />
-                            <span>Package List</span>
-                        </Link>
-                    </Menu.Item>
-                    <Menu.Item  key="sub-4">
-                        <Link to="/dashboard/admin/package/create">
-                            <PlusCircleOutlined />
-                            <span>Add Package</span>
-                        </Link>
-                    </Menu.Item>
-                </Menu.SubMenu> */}
-            </Menu>
+              items={menu()}
+            />
           </Sider>
+          {connectToAppModal()}
           <div className="logo-container">
             <Logo className="brand-logo" alt="kiv-logo" />
           </div>

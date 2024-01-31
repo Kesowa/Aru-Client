@@ -28,7 +28,6 @@ test("create and delete user", async ({ page }) => {
   await page.getByPlaceholder("Select date").click();
   await page.getByText("Today").click();
   await page.getByRole("button", { name: "plus Upload" }).click();
-  // await page.getByRole('button', { name: 'plus Upload' }).setInputFiles('./tests/assets/image.png');
   await page.getByRole("button", { name: "OK" }).click();
   await page.getByRole("button", { name: "Create" }).click();
   const userCreateAlert = page.getByText(

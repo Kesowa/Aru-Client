@@ -1,15 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import {
-  PageHeader,
-  Form,
-  Input,
-  Upload,
-  Row,
-  Col,
-  message,
-  Button,
-} from "antd";
+import { Form, Input, Upload, Row, Col, message, Button } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import {
   UnorderedListOutlined,
   PlusOutlined,
@@ -69,7 +61,6 @@ function EditPackage(props: any) {
   }, [props.package]);
 
   const onFinish = (data: any) => {
-    //console.log("poster", data);
     if (poster) {
       props.loading(true);
       console.log(poster, data);

@@ -135,11 +135,6 @@ class LocationCardMap extends Component<mapProps, mapState> {
             lng: ele.location.long,
           },
           title: ele.name,
-          // icon: {
-          //   url: `http://maps.google.com/mapfiles/ms/icons/${
-          //     ele.color ? ele.color : "red"
-          //   }-dot.png`,
-          // },
           icon: {
             url: `${STATIC_URL}${ele.alertImage}`,
             scaledSize: new google.maps.Size(80, 50),
@@ -174,7 +169,6 @@ class LocationCardMap extends Component<mapProps, mapState> {
       })
       .then((result) => {
         if (result.data.status) {
-          //console.log(result.data.data[0])
           this.showModal(
             result.data.data[0]._id,
             result.data.data[0].missionId,
@@ -195,7 +189,6 @@ class LocationCardMap extends Component<mapProps, mapState> {
       })
       .catch((err) => {
         console.log(err);
-        // AxiosErrorHandler(err, this.props.logout);
       })
       .finally(() => {
         this.setState({
@@ -316,7 +309,6 @@ class LocationCardMap extends Component<mapProps, mapState> {
       }
     } catch (error) {
       message.error(error.message);
-      // AxiosErrorHandler(error, this.props.logout);
     }
 
     this.props.loading(false);
@@ -351,7 +343,6 @@ class LocationCardMap extends Component<mapProps, mapState> {
       }
     } catch (error) {
       message.error(error.message);
-      // AxiosErrorHandler(error, this.props.logout);
       console.log(error);
     }
 
@@ -385,7 +376,6 @@ class LocationCardMap extends Component<mapProps, mapState> {
     coor: any,
     geoCode: any,
     pcount: any
-    //fID: any
   ) {
     const self = this;
     Modal.info({
@@ -394,7 +384,6 @@ class LocationCardMap extends Component<mapProps, mapState> {
         <div>
           <Row style={{ marginTop: 16 }}>
             <Col span={17}>
-              {/* <img src={thumb} style={{ width: "100%", height: "auto" }} /> */}
               <div id="image" className="outcome-view">
                 <Image
                   style={{ width: "100%", height: "auto", cursor: "pointer" }}
@@ -445,17 +434,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
                 </Title>
               </Row>
               <Row>
-                &nbsp;&nbsp;&nbsp;&nbsp;
-                {/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++TO BE MADE++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
-                {/* <Tooltip placement="bottom" title="share via email">
-                  <Button
-                    type="primary"
-                    shape="round"
-                    icon={<MailOutlined />}
-                    size="large"
-                  />
-                </Tooltip> */}
-                &nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
                 <Tooltip placement="bottom" title="download image">
                   <Button
                     type="primary"
@@ -550,7 +529,6 @@ class LocationCardMap extends Component<mapProps, mapState> {
       ),
       centered: true,
       width: 1200,
-      // closable: true,
       onOk() {},
     });
   }

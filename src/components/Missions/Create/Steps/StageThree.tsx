@@ -1,6 +1,6 @@
 // @ts-nocheck
-import React, { useEffect, useState } from "react";
-import { connect } from "react-redux";
+import React, { useEffect, useState, FC } from "react";
+import { connect, ConnectedProps } from "react-redux";
 import { useHistory } from "react-router-dom";
 import {
   Button,
@@ -13,7 +13,6 @@ import {
   Tag,
   Select,
   Modal,
-  Typography,
   Popconfirm,
   Result,
 } from "antd";
@@ -33,18 +32,77 @@ import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import {
-  clearMissionCreationState,
   enableFlightEditing,
   setPolygonMeasurements,
   setCircleMeasurements,
   setGeolocation,
+  clearMissionCreationStateWithGeoFence,
 } from "../../../../actions/missionCreation";
 
 const { TextArea } = Input;
 const { Option } = Select;
-const { Text } = Typography;
 
-function StageThree(props: any) {
+interface FlightData {
+  flightName: string;
+  date: string;
+  time: string;
+  duration: string;
+}
+
+interface GeoFenceCircle {
+  center: {
+    lat: number;
+    lng: number;
+  };
+  radius: number;
+  area: number;
+}
+
+interface GeoFencePolygon {
+  points: Array<any>;
+  area: number;
+}
+
+interface Flight {
+  geoFence: {
+    circle?: GeoFenceCircle;
+    polygon?: GeoFencePolygon;
+  };
+  flightDetails: FlightData;
+}
+
+interface Asset {
+  _id: string;
+  assetName: string;
+}
+
+interface Client {
+  _id: string;
+  name: string;
+}
+
+interface StageThreeProps extends PropsFromRedux {
+  jobTypeName: string; // Replace with the appropriate type for jobTypeName
+  missionType: string; // Replace with the appropriate type for missionType
+  missionCreationData: {
+    flights: Flight[];
+    weather?: {
+      temperature: number;
+      description: string;
+    };
+  };
+  prevStage: Function;
+}
+
+const StageThree: FC<StageThreeProps> = ({
+  missionType,
+  missionCreationData,
+  jobTypeName,
+  loading,
+  logout,
+  enableFlightEditing,
+  prevStage,
+}) => {
   // Form control states
   const [data, setData] = useState<any>([]);
   const [missionName, setMissionName] = useState("");
@@ -57,37 +115,31 @@ function StageThree(props: any) {
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [clients, setClients] = useState([]);
   const [client, setClient] = useState("");
-  const [errorState, setErrorState] = useState("");
-  const [weatherData, setweatherData] = useState();
 
   const history = useHistory();
 
   useEffect(() => {
     // fetch the google map static image
-    if (!props.missionCreationData.flights[0]) {
+    if (!missionCreationData.flights[0]) {
       message.error("Please select the geofence");
-      props.prevStage();
+      prevStage();
       return;
     }
 
     let mapUrl = "";
-    if (props.missionCreationData.flights[0].geoFence.circle) {
-      const lat =
-        props.missionCreationData.flights[0].geoFence.circle.center.lat;
-      const lng =
-        props.missionCreationData.flights[0].geoFence.circle.center.lng;
-      const radius =
-        props.missionCreationData.flights[0].geoFence.circle.radius;
+    if (missionCreationData.flights[0].geoFence.circle) {
+      const lat = missionCreationData.flights[0].geoFence.circle.center.lat;
+      const lng = missionCreationData.flights[0].geoFence.circle.center.lng;
+      const radius = missionCreationData.flights[0].geoFence.circle.radius;
       mapUrl = getImageForCircle(lat, lng, radius);
-    } else if (props.missionCreationData.flights[0].geoFence.polygon) {
-      const points =
-        props.missionCreationData.flights[0].geoFence.polygon.points;
+    } else if (missionCreationData.flights[0].geoFence.polygon) {
+      const points = missionCreationData.flights[0].geoFence.polygon.points;
       mapUrl = getImageForPolygon(points);
     }
     setMapImage(mapUrl);
 
     // flight details table data
-    const flights = props.missionCreationData.flights;
+    const flights = missionCreationData.flights;
     let tableData: any = [];
 
     flights.forEach((flightData, index) => {
@@ -96,14 +148,14 @@ function StageThree(props: any) {
       const flight = {};
       flight["key"] = index;
       Object.keys(flightDetails).forEach((x) => {
-        if (x == "flightName") {
+        if (x === "flightName") {
           flight["flight"] = flightDetails["flightName"];
           setMissionName(flightDetails["flightName"]);
-        } else if (x == "date") {
+        } else if (x === "date") {
           flight["date"] = flightDetails["date"];
-        } else if (x == "time") {
+        } else if (x === "time") {
           flight["time"] = flightDetails["time"];
-        } else if (x == "duration") {
+        } else if (x === "duration") {
           flight["duration"] = flightDetails["duration"];
         }
 
@@ -123,7 +175,7 @@ function StageThree(props: any) {
     });
     console.log("tavle", tableData, flights);
     setData(tableData);
-  }, [props.missionCreationData]);
+  }, [missionCreationData]);
 
   useEffect(() => {
     http
@@ -134,12 +186,11 @@ function StageThree(props: any) {
       })
       .catch((err) => {
         if (err.response.status === 404) {
+          setAssets([]);
         } else {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         }
-
-        //message.error(err.message);
       });
   }, []);
 
@@ -147,7 +198,6 @@ function StageThree(props: any) {
     http
       .get(`${apis.GET_CLIENT_LIST}?page=1&limit=100`)
       .then((result) => {
-        //console.log(result.data);
         if (result.data.status) {
           setClients(result.data.data);
         } else {
@@ -158,7 +208,7 @@ function StageThree(props: any) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -173,26 +223,21 @@ function StageThree(props: any) {
       return;
     }
 
-    // if (!client) {
-    //   message.error("Please Select client");
-    //   return;
-    // }
-    props.loading(true);
+    loading(true);
     let data;
     console.log("Hiiii");
-    console.log(props.missionCreationData.flights);
+    console.log(missionCreationData.flights);
     if (!client) {
       data = {
         name: missionName,
         deliverables,
         description: missionDescription,
         assetID: asset,
-        missionType: props.missionType,
+        missionType: missionType,
         flights: {
-          ...props.missionCreationData.flights,
+          ...missionCreationData.flights,
           assetID: asset,
         },
-        //clientId: client,
       };
     } else {
       data = {
@@ -200,9 +245,9 @@ function StageThree(props: any) {
         deliverables,
         description: missionDescription,
         assetID: asset,
-        missionType: props.missionType,
+        missionType: missionType,
         flights: {
-          ...props.missionCreationData.flights,
+          ...missionCreationData.flights,
           assetID: asset,
         },
         clientId: [client],
@@ -215,7 +260,7 @@ function StageThree(props: any) {
       } else {
         history.push("/dashboard/missions");
         message.success("Mission Created Successfuly");
-        props.clearMissionCreationState();
+        clearMissionCreationStateWithGeoFence();
       }
     } catch (err: any) {
       console.log(err);
@@ -225,16 +270,15 @@ function StageThree(props: any) {
         ) {
           setIsModalVisible2(true);
           window.setTimeout(function () {
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
           }, 5000);
         } else {
           setIsModalVisible(true);
         }
       }
-      AxiosErrorHandler(err, props.logout);
-      //message.error("Something went wrong");
+      AxiosErrorHandler(err, logout);
     } finally {
-      props.loading(false);
+      loading(false);
     }
   };
 
@@ -261,9 +305,8 @@ function StageThree(props: any) {
       render: () => {
         return (
           <>
-            {props.missionCreationData.weather?.temperature} <sup>o</sup> C,
-            &nbsp;
-            {props.missionCreationData.weather?.description}
+            {missionCreationData.weather?.temperature} <sup>o</sup> C, &nbsp;
+            {missionCreationData.weather?.description}
           </>
         );
       },
@@ -304,7 +347,7 @@ function StageThree(props: any) {
     <div className="stage_three">
       <Modal
         title="Maximum Limit reached!"
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={handleCancel}
         onCancel={handleCancel}
       >
@@ -312,12 +355,11 @@ function StageThree(props: any) {
           status="500"
           title="Oops! You have reached your organisation mission limit!"
           subTitle="Please contact your admin."
-          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
         title="Tenant Expired!"
-        visible={isModalVisible2}
+        open={isModalVisible2}
         onOk={handleCancel2}
         onCancel={handleCancel2}
       >
@@ -347,7 +389,7 @@ function StageThree(props: any) {
             </div>
             <h3>
               <span style={{ fontWeight: "bold" }}>Mission type :</span>{" "}
-              <Tag color="green">{props.jobTypeName}</Tag>
+              <Tag color="green">{jobTypeName}</Tag>
             </h3>
             <TextArea
               rows={6}
@@ -477,8 +519,8 @@ function StageThree(props: any) {
                 type="primary"
                 icon={<EditOutlined />}
                 onClick={() => {
-                  props.enableFlightEditing(true);
-                  props.prevStage();
+                  enableFlightEditing(true);
+                  prevStage();
                 }}
                 style={{
                   float: "right",
@@ -501,27 +543,23 @@ function StageThree(props: any) {
 
         <Row justify="center" className="step_buttons"></Row>
       </React.Fragment>
-      {/* <Weather setweatherData={setweatherData} isoDate={data.date}   /> */}
-      {/* <Modal visible={isModalVisible} onOk={()=> history.push('/dashboard/missions')} onCancel={()=>setIsModalVisible(false)} 
-           okText='YES' cancelText='NO'  >
-       <ExclamationCircleOutlined /> <Text> Confirm</Text>
-      </Modal> */}
     </div>
   );
-}
+};
 
 const mapStateToProps = (state: any) => ({
   missionCreationData: state.MissionCreation,
 });
 
-export default connect(mapStateToProps, {
+const connector = connect(mapStateToProps, {
   loading,
   logout,
-  clearMissionCreationState,
   enableFlightEditing,
   setPolygonMeasurements,
   setCircleMeasurements,
   setGeolocation,
-})(StageThree);
+});
 
-// href="/dashboard/missions"
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export default connector(StageThree);

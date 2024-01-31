@@ -78,13 +78,7 @@ class GoogleMap extends Component<mapProps, mapState> {
     this.googleMap = this.createGoogleMap(loc);
     this.props.setlocation(loc);
 
-    if (this.props.isEditing) {
-      this.props.setlocation(this.props.location);
-    }
-
-    if (!this.props.isEditing) {
-      this.setCurrentLocation();
-    }
+    this.setCurrentLocation();
 
     this.drawingManager = this.createDrawingManager();
     this.searchAutoComplete = this.createSearchBar();
@@ -118,7 +112,6 @@ class GoogleMap extends Component<mapProps, mapState> {
     });
 
     if (this.props.isEditing) {
-      //console.log(this.props.missionData);
       const obj = this.createMeasurements(
         this.props.missionData.flights[0].geoFence
       );
@@ -137,8 +130,6 @@ class GoogleMap extends Component<mapProps, mapState> {
     const infoWin = new google.maps.InfoWindow();
     const gmap = this.googleMap;
     gmap.data.addListener("click", function (event) {
-      // console.log(event.feature);
-      // console.log(event.latLng);
       const heightLimit = event.feature.h.Elev_Allow
         ? event.feature.h.Elev_Allow
         : "None";
@@ -224,7 +215,6 @@ class GoogleMap extends Component<mapProps, mapState> {
     let lat, lng;
     if (window.navigator.geolocation) {
       window.navigator.geolocation.getCurrentPosition((position) => {
-        //console.log(position);
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
         this.googleMap.panTo({ lat, lng });
@@ -632,8 +622,6 @@ class GoogleMap extends Component<mapProps, mapState> {
   setGeojsonUploaded = (geojsonData) => {
     const {
       setAreaSelected,
-      areaSelected,
-      setCircleMeasurements,
       setPolygonMeasurements,
       setGeolocation,
       setCenterPoints,
@@ -666,15 +654,12 @@ class GoogleMap extends Component<mapProps, mapState> {
       console.log("Geometry Type: " + newGeometry.getType());
       if (newGeometry.getType() === "MultiPolygon") {
         const polygonsContained = newGeometry.getArray();
-        // console.log("Geometry contained: "+ polygonsContained[0].getType());
         polygonsContained[0].forEachLatLng((latlng) => {
-          // console.log(latlng.lat(), latlng.lng());
           coords.push({ lat: latlng.lat(), lng: latlng.lng() });
         });
       }
       if (newGeometry.getType() === "Polygon") {
         newGeometry.forEachLatLng((latlng) => {
-          // console.log(latlng.lat(), latlng.lng());
           coords.push({ lat: latlng.lat(), lng: latlng.lng() });
         });
       }
@@ -914,7 +899,6 @@ class GoogleMap extends Component<mapProps, mapState> {
                     this.oldShape.setMap(null);
                     this.oldShape = null;
                   }
-                  // console.log(this.geojsonInputRef.current)
                   this.geojsonInputRef.current.click();
                   console.log("Rendering Geojson");
                 }}

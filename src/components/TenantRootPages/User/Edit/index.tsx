@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
@@ -6,7 +6,6 @@ import { PlusCircleOutlined } from "@ant-design/icons";
 import {
   List,
   Typography,
-  PageHeader,
   Row,
   Col,
   message,
@@ -18,6 +17,7 @@ import {
   DatePicker,
   Collapse,
 } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
 import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
@@ -167,7 +167,6 @@ function UserEditPage(props: any) {
 
   //subimt form
   const onFinish = (data: any) => {
-    //console.log(data);
     if (!data.dob) delete data.dob;
     if (!data.aadhaarNo) delete data.aadhaarNo;
     if (!data.pilotLicenceNo) delete data.pilotLicenceNo;

@@ -1,5 +1,3 @@
-import React from "react";
-
 import "./videoBox.less";
 
 function EmptyFeed(props) {

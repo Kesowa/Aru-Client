@@ -1,6 +1,6 @@
 // @ts-nocheck
 //----lolo--------------------
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
@@ -13,7 +13,6 @@ import {
   Spin,
   message,
   Dropdown,
-  Menu,
   Modal,
   Button,
   Steps,
@@ -26,16 +25,11 @@ import {
   EnvironmentOutlined,
   DownOutlined,
 } from "@ant-design/icons";
-//import "./baseMap.less";
 import apis from "../../../../services/apis";
-//import "../Map/locateBtn.less";
 import Dragger from "antd/lib/upload/Dragger";
-import SubMenu from "antd/lib/menu/SubMenu";
 import { API_URL, STATIC_URL } from "src/constants";
 import io from "socket.io-client";
-//import { setModelsToState } from "../../actions/modelAction";
 
-const { Step } = Steps;
 const { Title, Text } = Typography;
 
 function Pictomap(props) {
@@ -52,12 +46,58 @@ function Pictomap(props) {
   const [reviewList, setReviewList] = useState<any>([]);
   const [reviewPending, setReviewPending] = useState(false);
   const [storageModal, setStorageModal] = useState(false);
+  const [subHeading, setSubHeading] = useState("");
+  const menuItem1 = () => {
+    const items = [
+      {
+        key: "1",
+        label: "Unassign Group",
+      },
+    ];
+    layerFeatures.map((item) => {
+      items.push({
+        key: `2-${item.index}-${item.label}`,
+        label: item.label,
+      });
+    });
+    return items;
+  };
+  const onClickMenu1 = (e) => {
+    if (e.key === "1") {
+      unAssignGroup(subHeading.label);
+    }
+    const splitKey = e.key.split("-");
+    if (splitKey[0] === "2") {
+      updateReviewList(`${splitKey[1]}-${splitKey[2]}`, subHeading.data.fIndex);
+    }
+  };
+  const menuItem2 = () => {
+    const item = [
+      {
+        key: "submenu",
+        label: "Move To",
+        children: layerFeatures.map((item) => {
+          return {
+            key: `1-${item._id}-${item.index}-${item.label}`,
+            label: item.label,
+          };
+        }),
+      },
+    ];
+    return item;
+  };
+  const onClickMenu2 = (e) => {
+    const splitKey = e.key.split("-");
+    if (splitKey[0] === "1") {
+      updateReviewListSingle(
+        splitKey[1],
+        splitKey[2],
+        subHeading.data.fIndex,
+        splitKey[3]
+      );
+    }
+  };
 
-  const [, setState] = useState<any>();
-  function handleUpdate() {
-    //passing empty object will re-render the component
-    setState({});
-  }
   //---------------------File validator----------------
   function validateFile(file: any) {
     switch (file.type) {
@@ -107,7 +147,6 @@ function Pictomap(props) {
         .patch(`${apis.PIC_TO_MAP}`, fData, config)
         .then((res: any) => {
           if (res.data.status) {
-            //message.success("Successfully Uploaded!");
             console.log(res.data.result);
             setLoader(true);
             setIsUploading(false);
@@ -145,7 +184,6 @@ function Pictomap(props) {
         return res.json();
       })
       .catch((err) => console.log(err));
-    //.finally(()=>setLoader(false));
   }
 
   //-----------------populating data-----------------------------------------------------------------
@@ -240,7 +278,6 @@ function Pictomap(props) {
       const filteredReviewList: any = layerFiles.filter(
         (i: any) => i.label !== null
       );
-      //console.log("Files that have been filtered:", filteredReviewList);
       if (filteredReviewList.length > 0) {
         filteredReviewList.map((item: any) => {
           let sampleObj: any = {};
@@ -303,7 +340,6 @@ function Pictomap(props) {
     });
 
     filteredFile.filter((i) => i.data.files.length === 0);
-    //console.log(filteredFile);
 
     if (uExists) {
       filteredFile.map((file: any) => {
@@ -322,7 +358,6 @@ function Pictomap(props) {
       filteredFile.push(x);
     }
     console.log(filteredFile);
-    //populateLayerFiles(files);
   }
 
   //-------update review list-----------------------
@@ -385,17 +420,14 @@ function Pictomap(props) {
       const originalDesitination = files.filter(
         (i: any) => i.data.fIndex === current
       ); //---filtering the current layerfile
-      //console.log(originalDesitination);
       const fileInQuestion = originalDesitination[0].data.files.filter(
         (i: any) => i._id === id
       ); //------filtering the file in question
-      //console.log(originalDesitination, fileInQuestion);
       originalDesitination[0].data.files =
         originalDesitination[0].data.files.filter((i: any) => i._id !== id); //---removing selected file from original destination
       const newDestination = files.filter(
         (i: any) => i.data.fIndex === index.toString()
       ); //-----filtering new destination for file
-      //console.log("new destination",newDestination, "original destination",originalDesitination,"file in question", fileInQuestion)
       if (newDestination.length > 0) {
         newDestination[0].data.files.push(fileInQuestion[0]);
         const filtered = files.filter(
@@ -406,7 +438,6 @@ function Pictomap(props) {
           filtered.push(originalDesitination[0]);
         }
         filtered.push(newDestination[0]);
-        //console.log(filtered);
         const UnassignedImages: any = filtered.filter((i) => i.label === null); // filtering the unassigned entry
         const filtered2Array: any = filtered.filter((i) => i.label !== null); //filtering the array to get rid of the unassigned object
         if (UnassignedImages.length > 0) {
@@ -415,7 +446,6 @@ function Pictomap(props) {
         } else {
           populateLayerFiles(filtered);
         }
-        //populateLayerFiles(filtered);
       } else {
         const object: any = {
           label: newLabel,
@@ -430,7 +460,6 @@ function Pictomap(props) {
         if (originalDesitination[0].data.files.length > 0) {
           filtered.push(originalDesitination[0]);
         }
-        //console.log(filtered);
         const UnassignedImages: any = filtered.filter((i) => i.label === null); // filtering the unassigned entry
         const filtered2Array: any = filtered.filter((i) => i.label !== null); //filtering the array to get rid of the unassigned object
         if (UnassignedImages.length > 0) {
@@ -490,7 +519,6 @@ function Pictomap(props) {
               beforeUpload: handleBeforeUpload,
               multiple: true,
               onChange: handleChangeFiles,
-              //listType: "picture",
               progress: { showInfo: true },
               data: (file) => {
                 console.log("Data:", file);
@@ -564,31 +592,11 @@ function Pictomap(props) {
                     <>
                       <Row>
                         <Dropdown
-                          overlay={
-                            <Menu>
-                              <Menu.Item
-                                key="unassign-group"
-                                onClick={() => unAssignGroup(subHeading.label)}
-                              >
-                                Unassign Group
-                              </Menu.Item>
-                              {layerFeatures.map((item: any) => {
-                                return (
-                                  <Menu.Item
-                                    key={`1-${item.label}-${item.index}`}
-                                    onClick={() => {
-                                      updateReviewList(
-                                        `${item.index}-${item.label}`,
-                                        subHeading.data.fIndex
-                                      );
-                                    }}
-                                  >
-                                    {item.label}
-                                  </Menu.Item>
-                                );
-                              })}
-                            </Menu>
-                          }
+                          onOpenChange={() => setSubHeading(subHeading)}
+                          menu={{
+                            items: menuItem1(),
+                            onClick: onClickMenu1,
+                          }}
                           trigger={["click"]}
                         >
                           <Text
@@ -609,30 +617,11 @@ function Pictomap(props) {
                             <Col span={8} md={8}>
                               <div>
                                 <Dropdown
-                                  overlay={
-                                    <Menu>
-                                      {/* <Menu.Item key='unassign-image' onClick={()=>unAssignFile(item._id)}>Unassign Image</Menu.Item> */}
-                                      <SubMenu title="Move to" key="submenu">
-                                        {layerFeatures.map((itema: any) => {
-                                          return (
-                                            <Menu.Item
-                                              key={`1-${itema.label}-${itema.index}`}
-                                              onClick={() => {
-                                                updateReviewListSingle(
-                                                  item._id,
-                                                  itema.index,
-                                                  subHeading.data.fIndex,
-                                                  itema.label
-                                                );
-                                              }}
-                                            >
-                                              {itema.label}
-                                            </Menu.Item>
-                                          );
-                                        })}
-                                      </SubMenu>
-                                    </Menu>
-                                  }
+                                  onOpenChange={() => setSubHeading(subHeading)}
+                                  menu={{
+                                    items: menuItem2(),
+                                    onClick: onClickMenu2,
+                                  }}
                                   trigger={["contextMenu"]}
                                 >
                                   <Image
@@ -644,24 +633,6 @@ function Pictomap(props) {
                                       item.filePath.split("/")[3]
                                     }`}
                                     preview={false}
-                                    // placeholder={
-                                    //   <div
-                                    //     style={{
-                                    //       width: "100%",
-                                    //       height: "100%",
-                                    //       backgroundImage: `url(${
-                                    //         API_URL
-                                    //       }/images/geojson/1x_${
-                                    //         item.filePath.split("/")[3]
-                                    //       })`,
-                                    //       filter: "blur(8px)",
-                                    //       WebkitFilter: "blur(8px)",
-                                    //       backgroundPosition: "center",
-                                    //       backgroundRepeat: "no-repeat",
-                                    //       backgroundSize: "cover",
-                                    //     }}
-                                    //   />
-                                    // }
                                     fallback="data:image/png;base64,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"
                                   />
                                 </Dropdown>
@@ -801,7 +772,7 @@ function Pictomap(props) {
     <>
       <Modal
         title="Upload images to feature"
-        visible={props.visible}
+        open={props.visible}
         onOk={() => {
           props.setVisible(false);
         }}
@@ -823,7 +794,6 @@ function Pictomap(props) {
           padding: "1rem",
           width: "800px",
           margin: "auto",
-          //minHeight: "400px"
         }}
         width={1000}
         centered={true}
@@ -836,22 +806,22 @@ function Pictomap(props) {
           />
         ) : (
           <>
-            <Steps current={currentStage}>
-              {steps.map((item) => (
-                <Step
-                  key={item.title}
-                  title={item.title}
-                  description={item.description}
-                />
-              ))}
-            </Steps>
+            <Steps
+              current={currentStage}
+              items={steps.map((item) => {
+                return {
+                  title: item.title,
+                  description: item.description,
+                };
+              })}
+            ></Steps>
             <div>{steps[currentStage].content}</div>
           </>
         )}
       </Modal>
       <Modal
         title="Storage Exceeded!"
-        visible={storageModal}
+        open={storageModal}
         onOk={() => setStorageModal(false)}
         onCancel={() => setStorageModal(false)}
       >

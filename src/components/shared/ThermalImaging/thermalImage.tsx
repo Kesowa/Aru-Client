@@ -1,11 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { STATIC_URL } from "src/constants";
 import "rsuite/dist/rsuite.min.css";
 import { Tooltip, Whisper } from "rsuite";
 
+/* import { CloseCircleIcon } from "@rsuite/icons"; */
+
 const ThermalImage = (props) => {
   const [temperature, setTemperature] = useState("");
   const [pixelColor, setPixelColor] = useState("");
+  const [isWidgetOpen, setWidgetOpen] = useState(false);
+  const tableDataRef = useRef([]);
+  const [clickPending, setClickPending] = useState(false);
+  const dataRef = useRef(null);
+
   const {
     detectedEnvironment: {
       isMouseDetected = false,
@@ -16,9 +23,11 @@ const ThermalImage = (props) => {
     isActive = false,
     isPositionOutside = false,
   } = props;
+
   useEffect(() => {
     if (!isPositionOutside) {
       const temperature = props.data[x + width * y];
+
       setTemperature(temperature);
     } else {
       setTemperature("");
@@ -39,9 +48,30 @@ const ThermalImage = (props) => {
       alpha: data[position + 3],
     };
   };
+
+  const handleCanvasClick = (ev) => {
+    const cols = canvas.width;
+    const { offsetX, offsetY } = ev;
+    const c = extractPixelColor(dataRef.current, cols, offsetY, offsetX);
+    const hexCode = `#${[c.red, c.green, c.blue]
+      .map((x) => x.toString(16).padStart(2, "0"))
+      .join("")}`;
+    const pixelData = {
+      x: offsetX,
+      y: offsetY,
+      temp: props.data[offsetX + width * offsetY],
+      color: hexCode,
+      label: "",
+    };
+    // Call the parent component's function to add data to the table
+    tableDataRef.current.push(pixelData);
+    props.onPixelClick(pixelData);
+  };
+
   useEffect(() => {
     function imageLoaded() {
       const canvas = document.getElementById("canvas");
+
       canvas.width = img.width;
       canvas.height = img.height;
       const ctx = canvas.getContext("2d");
@@ -54,43 +84,58 @@ const ThermalImage = (props) => {
         const { offsetX, offsetY } = ev;
         //call the method to get the r,g,b,a values for current pixel
         const c = extractPixelColor(data, cols, offsetY, offsetX);
-        //build a colour string for
-        const colour = `rgb(${c.red}, ${c.green}, ${c.blue})`;
+
         const hexCode = `#${[c.red, c.green, c.blue]
           .map((x) => x.toString(16).padStart(2, "0"))
           .join("")}`;
         setPixelColor(hexCode);
       });
+      dataRef.current = data;
     }
     var img = new Image();
     img.crossOrigin = "Anonymous";
     img.onload = imageLoaded;
     img.src = STATIC_URL + props.filePath;
+    canvas.addEventListener("click", handleCanvasClick);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      canvas.removeEventListener("click", handleCanvasClick);
+    };
   }, [props.filePath, x, y]);
+
+  const handleDelete = (index) => {
+    // Remove the row with the specified index from the table
+    const updatedTableData = tableData.filter((row) => row.index !== index);
+    setTableData(updatedTableData);
+  };
+
   return (
-    <>
-      <Whisper
-        followCursor
-        open={temperature ? true : false}
-        speaker={
-          <Tooltip className="pixel-tooltip">
-            {temperature && (
-              <div className="pixel-tooltip-content">
-                <div
-                  className="pixel-color"
-                  style={{ backgroundColor: pixelColor }}
-                />
-                <p>{parseFloat(temperature).toFixed(2)}°C</p>
-              </div>
-            )}
-          </Tooltip>
-        }
-        placement={x < width / 2 ? "right" : "left"}
-        trigger="hover"
-      >
-        <canvas id="canvas"></canvas>
-      </Whisper>
-    </>
+    <div id="container__canvas" style={{ display: "flex" }}>
+      <div id="canvas-container">
+        <Whisper
+          followCursor
+          open={temperature ? true : false}
+          speaker={
+            <Tooltip className="pixel-tooltip">
+              {temperature && (
+                <div className="pixel-tooltip-content">
+                  <div
+                    className="pixel-color"
+                    style={{ backgroundColor: pixelColor }}
+                  />
+                  <p>{parseFloat(temperature).toFixed(2)}°C</p>
+                </div>
+              )}
+            </Tooltip>
+          }
+          placement={x < width / 2 ? "right" : "left"}
+          trigger="hover"
+        >
+          <canvas id="canvas" onClick={handleCanvasClick}></canvas>
+        </Whisper>
+      </div>
+    </div>
   );
 };
 

@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { PageHeader, Button, Tabs, message, Badge } from "antd";
+import { Button, Tabs, message, Badge } from "antd";
+import { PageHeader } from "@ant-design/pro-layout";
+import type { TabsProps } from "antd";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import MissionTable from "./Views/List/Table";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
@@ -9,8 +11,7 @@ import apis from "../../services/apis";
 import { connect } from "react-redux";
 import { setMissionsToState } from "../../actions/missionActions";
 import { logout } from "../../actions/authAction";
-
-const { TabPane } = Tabs;
+import "./index.less";
 
 function MissionList(props) {
   const location = useLocation<any>();
@@ -26,15 +27,90 @@ function MissionList(props) {
   const [sortOrder, setSortOrder] = useState("createdAt:descend");
   const [searchFilters, setSearchFilters] = useState("");
 
-  const setPaginationPage = (p) => {
-    setPage(p);
+  const renderMissionTable = (filter: unknown) => {
+    return (
+      <MissionTable
+        filter={filter}
+        setMissionTableData={setMissionTableData}
+        setIsTableLoading={setIsTableLoading}
+        isTableLoading={isTableLoading}
+        missionTableData={missionTableData}
+        setPage={setPage}
+        page={page}
+        setLimit={setLimit}
+        limit={limit}
+        total={total}
+        setTotal={setTotal}
+        usedFilter={usedFilter}
+        setSortOrder={setSortOrder}
+        setFilters={setSearchFilters}
+      />
+    );
   };
-
-  const setPageLimit = (currPage, limit) => {
-    setPage(currPage);
-    setLimit(limit);
-  };
-
+  const items: TabsProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <span>
+          All{" "}
+          <Badge style={{ backgroundColor: "#43425d" }} count={totalMissions} />
+        </span>
+      ),
+      children: renderMissionTable("all"),
+    },
+    {
+      key: "2",
+      label: (
+        <span>
+          Upcoming{" "}
+          <Badge
+            style={{ backgroundColor: "#ffaa00" }}
+            count={missionCount["Upcoming"] ? missionCount["Upcoming"] : 0}
+          ></Badge>
+        </span>
+      ),
+      children: renderMissionTable("Upcoming"),
+    },
+    {
+      key: "3",
+      label: (
+        <span>
+          In Progress{" "}
+          <Badge
+            style={{ backgroundColor: "#3D85FC" }}
+            count={missionCount["Live"] ? missionCount["Live"] : 0}
+          ></Badge>
+        </span>
+      ),
+      children: renderMissionTable("Live"),
+    },
+    {
+      key: "4",
+      label: (
+        <span>
+          To Be Reviewed{" "}
+          <Badge
+            style={{ backgroundColor: "#E21717" }}
+            count={missionCount["Review"] ? missionCount["Review"] : 0}
+          ></Badge>
+        </span>
+      ),
+      children: renderMissionTable("Review"),
+    },
+    {
+      key: "5",
+      label: (
+        <span>
+          Completed{" "}
+          <Badge
+            style={{ backgroundColor: "#36a556" }}
+            count={missionCount["Completed"] ? missionCount["Completed"] : 0}
+          />
+        </span>
+      ),
+      children: renderMissionTable("Completed"),
+    },
+  ];
   const filters = {
     "1": "all",
     "2": "Upcoming",
@@ -65,7 +141,6 @@ function MissionList(props) {
             props.setMissionsToState(result.data.data);
             setMissionTableData(result.data.data);
             setTotal(result.data.total);
-            // console.log(result.data);
             const count = {};
             let tm = 0;
             result.data.missionCount.forEach((c) => {
@@ -156,173 +231,14 @@ function MissionList(props) {
       />
 
       <Tabs
-        // defaultActiveKey= {displayedMissionType}
         activeKey={displayedMissionType}
         onChange={(key) => {
-          // console.log(key);
           setDisplayedMissionType(key);
           setUsedFilter(filters[key]);
           setPage(1);
         }}
-      >
-        <TabPane
-          tab={
-            <span>
-              All{" "}
-              <Badge
-                style={{ backgroundColor: "#43425d" }}
-                count={totalMissions}
-              />
-            </span>
-          }
-          key="1"
-        >
-          <MissionTable
-            filter="all"
-            setMissionTableData={setMissionTableData}
-            setIsTableLoading={setIsTableLoading}
-            isTableLoading={isTableLoading}
-            missionTableData={missionTableData}
-            setPage={setPage}
-            page={page}
-            setLimit={setLimit}
-            limit={limit}
-            setPaginationPage={setPaginationPage}
-            setPageLimit={setPageLimit}
-            total={total}
-            setTotal={setTotal}
-            usedFilter={usedFilter}
-            setSortOrder={setSortOrder}
-            setFilters={setSearchFilters}
-          />
-        </TabPane>
-        <TabPane
-          tab={
-            <span>
-              Upcoming{" "}
-              <Badge
-                style={{ backgroundColor: "#ffaa00" }}
-                count={missionCount["Upcoming"] ? missionCount["Upcoming"] : 0}
-              ></Badge>
-            </span>
-          }
-          key="2"
-        >
-          <MissionTable
-            filter="Upcoming"
-            setMissionTableData={setMissionTableData}
-            setIsTableLoading={setIsTableLoading}
-            isTableLoading={isTableLoading}
-            missionTableData={missionTableData}
-            setPage={setPage}
-            page={page}
-            setLimit={setLimit}
-            limit={limit}
-            setPaginationPage={setPaginationPage}
-            setPageLimit={setPageLimit}
-            total={total}
-            setTotal={setTotal}
-            usedFilter={usedFilter}
-            setSortOrder={setSortOrder}
-            setFilters={setSearchFilters}
-          />
-        </TabPane>
-        <TabPane
-          tab={
-            <span>
-              In Progress{" "}
-              <Badge
-                style={{ backgroundColor: "#3D85FC" }}
-                count={missionCount["Live"] ? missionCount["Live"] : 0}
-              ></Badge>
-            </span>
-          }
-          key="3"
-        >
-          <MissionTable
-            filter="Live"
-            setMissionTableData={setMissionTableData}
-            setIsTableLoading={setIsTableLoading}
-            isTableLoading={isTableLoading}
-            missionTableData={missionTableData}
-            setPage={setPage}
-            page={page}
-            setLimit={setLimit}
-            limit={limit}
-            setPaginationPage={setPaginationPage}
-            setPageLimit={setPageLimit}
-            total={total}
-            setTotal={setTotal}
-            usedFilter={usedFilter}
-            setSortOrder={setSortOrder}
-            setFilters={setSearchFilters}
-          />
-        </TabPane>
-        <TabPane
-          tab={
-            <span>
-              To Be Reviewed{" "}
-              <Badge
-                style={{ backgroundColor: "#E21717" }}
-                count={missionCount["Review"] ? missionCount["Review"] : 0}
-              ></Badge>
-            </span>
-          }
-          key="4"
-        >
-          <MissionTable
-            filter="Review"
-            setMissionTableData={setMissionTableData}
-            setIsTableLoading={setIsTableLoading}
-            isTableLoading={isTableLoading}
-            missionTableData={missionTableData}
-            setPage={setPage}
-            page={page}
-            setLimit={setLimit}
-            limit={limit}
-            setPaginationPage={setPaginationPage}
-            setPageLimit={setPageLimit}
-            total={total}
-            setTotal={setTotal}
-            usedFilter={usedFilter}
-            setSortOrder={setSortOrder}
-            setFilters={setSearchFilters}
-          />
-        </TabPane>
-        <TabPane
-          tab={
-            <span>
-              Completed{" "}
-              <Badge
-                style={{ backgroundColor: "#36a556" }}
-                count={
-                  missionCount["Completed"] ? missionCount["Completed"] : 0
-                }
-              />
-            </span>
-          }
-          key="5"
-        >
-          <MissionTable
-            filter="Completed"
-            setMissionTableData={setMissionTableData}
-            setIsTableLoading={setIsTableLoading}
-            isTableLoading={isTableLoading}
-            missionTableData={missionTableData}
-            setPage={setPage}
-            page={page}
-            setLimit={setLimit}
-            limit={limit}
-            setPaginationPage={setPaginationPage}
-            setPageLimit={setPageLimit}
-            total={total}
-            setTotal={setTotal}
-            usedFilter={usedFilter}
-            setSortOrder={setSortOrder}
-            setFilters={setSearchFilters}
-          />
-        </TabPane>
-      </Tabs>
+        items={items}
+      />
     </div>
   );
 }
