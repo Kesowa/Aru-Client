@@ -640,7 +640,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       }
     );
 
-    // ===== Calculating maxWidth of each column based on lengths of content and headings of the column, 
+    // ===== Calculating maxWidth of each column based on lengths of content and headings of the column,
     // and then mapping the length to corresponding size by multiplying with a constant (experimentally determined) =====
 
     const maxWidths: { [key: string]: number } = {};
