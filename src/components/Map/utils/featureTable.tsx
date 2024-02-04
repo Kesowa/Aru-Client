@@ -100,7 +100,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
   const [data, setData] = useState<any>();
   const [editingKey, setEditingKey] = useState("");
   const [columns, setColumns] = useState<any>([]);
-  const [contentHeight, setContentHeight] = useState("160px");
+  const [contentHeight, setContentHeight] = useState(160);
   const [search, setSearch] = useState(false);
   const [selectedRowsArray, setSelectedRowsArray] = useState<React.Key[]>([]);
   const [isFiltering, setIsFiltering] = useState(false);
@@ -114,19 +114,19 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
     if (props.contentHeight) {
       switch (props.contentHeight) {
         case "160px":
-          setContentHeight("160px");
+          setContentHeight(160);
           break;
         case "460px":
-          setContentHeight("440px");
+          setContentHeight(440);
           break;
         case "340px":
-          setContentHeight("400px");
+          setContentHeight(400);
           break;
         case "610px":
-          setContentHeight("590px");
+          setContentHeight(590);
           break;
         case "750px":
-          setContentHeight("750px");
+          setContentHeight(750);
           break;
       }
     }
@@ -622,10 +622,12 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       {
         title: "F. Index",
         dataIndex: "index",
+        width: 8 * 15, // 15 is experimental constant, selected after checking for responsiveness across various bottom bar heights
       },
       {
         title: "Color",
         dataIndex: "color",
+        width: 5 * 15, // 15 is experimental constant, selected after checking for responsiveness across various bottom bar heights
         render: (color) => (
           <div
             style={{
@@ -637,6 +639,19 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
         ),
       }
     );
+
+    // ===== Calculating maxWidth of each column based on lengths of content and headings of the column, 
+    // and then mapping the length to corresponding size by multiplying with a constant (experimentally determined) =====
+
+    const maxWidths: { [key: string]: number } = {};
+
+    for (const d of data) {
+      for (const key in d) {
+        maxWidths[key] = Math.max(key.length, String(d[key]).length);
+      }
+    }
+
+    // ================================================================================================
 
     const p = data[0];
     for (const key in data[0]) {
@@ -656,6 +671,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
         columns.push({
           title: key,
           dataIndex: key,
+          width: maxWidths[key] * 15, // 15 is experimental constant, selected after checking for responsiveness across various bottom bar heights
           editable: true,
           ...getColumnSearchProps(key),
           render: (name, record) => (
@@ -676,6 +692,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       columns.push({
         title: "Actions",
         fixed: "right",
+        width: 7 * 20, // 20 is experimental constant, selected after checking for responsiveness across various bottom bar heights
         dataIndex: "operation",
         render: (_: any, record) => {
           const editable = isEditing(record);
@@ -747,7 +764,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
   return (
     <>
       <Table
-        size="small"
+        // size="small"
         components={{
           body: {
             cell: EditableCell,
@@ -772,7 +789,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
             form1.resetFields();
           },
         }}
-        scroll={{ y: contentHeight }}
+        scroll={{ x: "max-content", y: contentHeight * 0.75 }}
         onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {

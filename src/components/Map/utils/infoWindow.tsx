@@ -738,23 +738,20 @@ function InfoWindow(props) {
                               />
                             </Badge>
                           </Tooltip>
-                          {props.missionLayer === "Vector" &&
-                            props.mode === "PointView" && (
-                              <Tooltip
-                                placement="bottom"
-                                title={props.flag ? "Unflag" : "Flag"}
-                              >
-                                <BsFlagFill
-                                  style={{
-                                    color: props.flag ? "#da1c5c" : "#000",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() => {
-                                    toggleFlag();
-                                  }}
-                                />
-                              </Tooltip>
-                            )}
+                          <Tooltip
+                            placement="bottom"
+                            title={props.flag ? "Unflag" : "Flag"}
+                          >
+                            <BsFlagFill
+                              style={{
+                                color: props.flag ? "#da1c5c" : "#000",
+                                cursor: "pointer",
+                              }}
+                              onClick={() => {
+                                toggleFlag();
+                              }}
+                            />
+                          </Tooltip>
                         </Row>
                       </div>
                     )}
