@@ -374,14 +374,14 @@ const MapAttributes: React.FC<Props> = (props) => {
           allLayers={props.allLayers}
           flaggedFilter={props.flaggedFilter}
           unflaggedFilter={props.unflaggedFilter}
-          setPage={page => setState(prev => ({...prev, page}))}
+          setPage={(page) => setState((prev) => ({ ...prev, page }))}
           page={state.page}
-          setLimit={limit => setState(prev => ({...prev, limit}))}
+          setLimit={(limit) => setState((prev) => ({ ...prev, limit }))}
           limit={state.limit}
           setPaginationPage={setPaginationPage}
           setPageLimit={setPageLimit}
           total={state.total}
-          setTotal={total => setState(prev => ({...prev, total}))}
+          setTotal={(total) => setState((prev) => ({ ...prev, total }))}
           setViewport={props.setViewport}
           setSelectedIndexes={props.setSelectedIndexes}
           defaultKeys={props.defaultKeys}
