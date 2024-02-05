@@ -1,7 +1,7 @@
 // MapAttributes.tsx
 
 import React, { useState, useEffect } from "react";
-import { Typography, Spin, Select } from "antd";
+import { Typography, Spin, Select, Switch, Space } from "antd";
 import ReactJson from "react-json-view";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
@@ -39,6 +39,7 @@ interface Props {
   defaultKeys: any;
   selectedIndexes: number[];
   setColorMap: (color: string) => void;
+  setTerrainMap: (value: boolean) => void;
   allLayers: any;
   canEditGeojson: boolean;
   canDeleteFeature: boolean;
@@ -84,8 +85,18 @@ const MapAttributes: React.FC<Props> = (props) => {
   const [page, setPage] = useState<State>(initialState);
   const [limit, setLimit] = useState<State>(initialState);
   const [total, setTotal] = useState<State>(initialState);
-  const [isTableLoading, setIsTableLoading] = useState<boolean>(initialState.isTableLoading);
+  const [isTableLoading, setIsTableLoading] = useState<boolean>(
+    initialState.isTableLoading
+  );
   const [tableData, setTableData] = useState<State>(initialState);
+  const filteredLayers = Object.values(props.allLayers).filter(
+    (layer) => layer.type === "DEM" || layer.type === "ortho"
+  );
+
+  const onChange = (checked: boolean) => {
+    props.setTerrainMap(checked);
+    console.log(`switch to ${JSON.stringify(filteredLayers)}`);
+  };
 
   useEffect(() => {
     // Update content height and limit based on props.bottomBarHeight and props.type
@@ -199,15 +210,16 @@ const MapAttributes: React.FC<Props> = (props) => {
             rasterDetails: result.data.data[0],
           }));
         } else {
-    setState((prevState) => ({ ...prevState, error: true }));
+          setState((prevState) => ({ ...prevState, error: true }));
         }
       })
       .catch((err) => {
-    setState((prevState) => ({ ...prevState, error: true }));
+        setState((prevState) => ({ ...prevState, error: true }));
         AxiosErrorHandler(err, props.logout);
       })
       .finally(() =>
-    setState((prevState) => ({ ...prevState, loading: false})))
+        setState((prevState) => ({ ...prevState, loading: false }))
+      );
   };
 
   const fetchJsonData = () => {
@@ -310,52 +322,84 @@ const MapAttributes: React.FC<Props> = (props) => {
     <div style={{ width: "100%", padding: "5px" }}>
       {state.error && <div>Something went wrong!</div>}
       {!state.loading && !state.error ? (
-        <>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+          }}
+        >
           <div>
-            <Text>File Name: </Text>
-            <Text type="secondary"> {state.rasterDetails?.fileName}</Text>
-            <Text style={{ marginLeft: "40px" }}>Size: </Text>
-            <Text type="secondary">
-              {" "}
-              {state.rasterDetails?.fileSize.toFixed(2)} MB
-            </Text>
-            <Select
-              defaultValue="plasma"
-              style={{ width: 120, float: "right" }}
-              onChange={changeColor}
-            >
-              <Option value="plasma">plasma</Option>
-              <Option value="cfastie">cfastie</Option>
-              <Option value="rplumbo">rplumbo</Option>
-              <Option value="schwarzwald">schwarzwald</Option>
-              <Option value="viridis">viridis</Option>
-              <Option value="inferno">inferno</Option>
-              <Option value="magma">magma</Option>
-              <Option value="cividis">cividis</Option>
-              <Option value="hsv">hsv</Option>
-            </Select>
-          </div>
-          <div style={{ marginTop: "5px" }}>
-            <Text>MetaData:</Text>
-            <div
-              style={{
-                boxSizing: "border-box",
-                border: "1px solid gray",
-                height: state.contentHeight,
-                marginTop: "5px",
-                overflow: "auto",
-                padding: "10px",
-              }}
-            >
-              <ReactJson
-                src={state.rasterMetaData || {}}
-                name={false}
-                collapsed={true}
-                displayDataTypes={false}
-              />
+            <div>
+              <Text>File Name: </Text>
+              <Text type="secondary"> {state.rasterDetails?.fileName}</Text>
+              <Text style={{ marginLeft: "40px" }}>Size: </Text>
+              <Text type="secondary">
+                {" "}
+                {state.rasterDetails?.fileSize.toFixed(2)} MB
+              </Text>
+              <Select
+                defaultValue="plasma"
+                style={{ width: 120, float: "right" }}
+                onChange={changeColor}
+              >
+                <Option value="plasma">plasma</Option>
+                <Option value="cfastie">cfastie</Option>
+                <Option value="rplumbo">rplumbo</Option>
+                <Option value="schwarzwald">schwarzwald</Option>
+                <Option value="viridis">viridis</Option>
+                <Option value="inferno">inferno</Option>
+                <Option value="magma">magma</Option>
+                <Option value="cividis">cividis</Option>
+                <Option value="hsv">hsv</Option>
+              </Select>
+            </div>
+            <div style={{ marginTop: "5px" }}>
+              <Text>MetaData:</Text>
+              <div
+                style={{
+                  boxSizing: "border-box",
+                  border: "1px solid gray",
+                  height: state.contentHeight,
+                  marginTop: "5px",
+                  overflow: "auto",
+                  padding: "10px",
+                }}
+              >
+                <ReactJson
+                  src={state.rasterMetaData || {}}
+                  name={false}
+                  collapsed={true}
+                  displayDataTypes={false}
+                />
+              </div>
             </div>
           </div>
-        </>
+          <div style={{ marginRight: "20rem" }}>
+            <div>
+              <Space size="large">
+                <Text>Terrian: </Text>
+                <Switch onChange={onChange} />
+              </Space>
+            </div>
+            <div style={{ marginTop: "1.5rem" }}>
+              <Space size="large">
+                <Text>Overlay: </Text>
+                <Select
+                  defaultValue="Select"
+                  style={{ width: 120, float: "right" }}
+                  // onChange={changeColor}
+                >
+                  {filteredLayers.map((layer) => (
+                    <Option key={layer.name} value={layer.name}>
+                      {layer.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Space>
+            </div>
+          </div>
+        </div>
       ) : (
         !state.error && <Spin style={{ margin: "20px auto", width: "100%" }} />
       )}

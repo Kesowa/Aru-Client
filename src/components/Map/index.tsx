@@ -6,6 +6,7 @@ import { DataFilterExtension } from "@deck.gl/extensions";
 import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
 import { MaskExtension } from "@deck.gl/extensions/typed";
+import { TerrainLayer } from "@deck.gl/geo-layers/typed";
 import {
   Row,
   Col,
@@ -186,6 +187,7 @@ function BaseMap(props) {
   const [missionLayer, setMissionLayer] = useState("");
   const [videoDetails, setVideoDetails] = useState<any>({});
   const [showCarousel, setShowCarousel] = useState(false);
+  const [terrainmap, setTerrainMap] = useState(false);
   const [dateRange, setDateRange] = useState([
     moment(
       moment().subtract(7, "d").format("YYYY-MM-DD") + " " + "00:00",
@@ -1979,13 +1981,9 @@ function BaseMap(props) {
         );
 
       case "DEM":
-        return (
-          `${COG_URL}` +
-          `/cog/tiles` +
-          `/${z}/${x}/${y}@1x?url=${TITILER_STATIC}` +
-          path +
-          `&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
-        );
+        return terrainmap
+          ?  `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=null&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
+          : `${COG_URL}/cog/tiles/${z}/${x}/${y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`;
 
       default:
         return (
@@ -1996,6 +1994,7 @@ function BaseMap(props) {
         );
     }
   };
+
 
   function handleClose(status: boolean) {
     togglePopup(status);
@@ -2038,6 +2037,7 @@ function BaseMap(props) {
   //-------------on layer check-------------------------------
 
   useEffect(() => {
+    // console.log("it may be by traiin map",checkedKeys);
     setScaleData(checkedKeys);
     drawLayers(checkedKeys);
     console.log("lost");
@@ -2055,7 +2055,7 @@ function BaseMap(props) {
 
   useEffect(() => {
     forceUpdateAllLayers();
-  }, [colorMap, selectedIndexes, showSelectedIndexes]);
+  }, [terrainmap,colorMap, selectedIndexes, showSelectedIndexes]);
 
   useEffect(() => {
     //console.log("current 3d", threeDState);
@@ -2092,6 +2092,7 @@ function BaseMap(props) {
   };
 
   const forceUpdateAllLayers = () => {
+    // console.log("it my br by terrainmap");
     const cv = [...checkedKeys];
     setCheckedKeys([]);
 
@@ -2180,7 +2181,6 @@ function BaseMap(props) {
     await checkedKeysValue.forEach(async (element) => {
       if (element.split("-")[0] === "2" && element !== "2") {
         if (props.isBaseMap) {
-          console.log("Raster");
           const layer: any = allLayers[element];
           await layer?.layerPath.map(async (layerr: any) => {
             const settings: any = {
@@ -2274,10 +2274,13 @@ function BaseMap(props) {
                     opacity: opcity,
                   });
                 },
-              })
+              }),
             );
+
           });
         } else {
+
+          console.log("Raster");
           const rasterpath =
             `${TITILER_STATIC}` + allLayers[element]?.layerPath;
           const metaDataURL = `${COG_URL}/cog/info?url=${rasterpath}`;
@@ -2367,6 +2370,32 @@ function BaseMap(props) {
               },
             })
           );
+          if(terrainmap){ 
+            vlayers.pop()
+            vlayers.push(
+              new TerrainLayer({
+                elevationDecoder: {
+                  rScaler: 0.299,
+                  gScaler: 0.587,
+                  bScaler: 0.114,
+                  offset: 0,
+                },
+                minZoom: 13,
+                maxZoom: 19,
+                elevationData: getRasterURL(
+                  allLayers[element]?.type,
+                  allLayers[element]?.layerPath,
+                  allLayers[element]?.settings,
+                  "x",
+                  "y",
+                  "z"
+                ),
+                tileSize: 256,
+                texture: "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.webp?sku=101Y90ZfwGPtj&access_token=pk.eyJ1IjoibmVlbGR1dHRhMTkiLCJhIjoiY2tweG9mN3F4MThrNTJ4cDk0enVjcTN4dCJ9.uxa_h0rjqumTxFMI1QELKQ"
+              })
+            );
+
+          }
         }
       } else if (element.split("-")[0] === "1" && element !== "1") {
         switch (allLayers[element]?.type) {
@@ -7250,6 +7279,7 @@ function BaseMap(props) {
                     featureCount={pane.count}
                     setViewport={setViewport}
                     setColorMap={SetColorMap}
+                    setTerrainMap={setTerrainMap}
                     setSelectedIndexes={setSelectedIndexes}
                     setshowSelectedIndexes={setshowSelectedIndexes}
                     selectedIndexes={selectedIndexes}
@@ -7381,6 +7411,7 @@ function BaseMap(props) {
             </div>
           }
         ></Tabs>
+        {console.log("setTerrainMap",terrainmap)}
       </div>
       {showForm && (
         <VectorForm
