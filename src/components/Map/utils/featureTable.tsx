@@ -72,7 +72,9 @@ interface FeatureTableProps {
   tableData: any[];
   total: number;
   page: number;
+  setPage: (number) => void;
   limit: number;
+  setLimit: (number) => void;
   id: string;
   pointMarkerColour: string;
   canEditGeojson: boolean;
@@ -104,8 +106,10 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
   const [search, setSearch] = useState(false);
   const [selectedRowsArray, setSelectedRowsArray] = useState<React.Key[]>([]);
   const [isFiltering, setIsFiltering] = useState(false);
-  const [page, setPage] = useState(props.page);
-  const [limit, setLimit] = useState(props.limit);
+  const page = props.page;
+  const setPage = props.setPage;
+  const limit = props.limit;
+  const setLimit = props.setLimit;
   const [form] = Form.useForm();
   const [form1] = Form.useForm();
   let searchInput: any;
@@ -809,7 +813,9 @@ const mapStateToProps = (state: {
     tableData: any;
     total: any;
     page: any;
+    setPage: (page: number) => void;
     limit: any;
+    setLimit: (limit: number) => void;
     pointMarkerColour: any;
     canEditGeojson: any;
     canDeleteFeature: any;
@@ -829,7 +835,9 @@ const mapStateToProps = (state: {
     tableData: state.app.tableData,
     total: state.app.total,
     page: state.app.page,
+    setPage: state.app.setPage,
     limit: state.app.limit,
+    setLimit: state.app.setLimit,
     pointMarkerColour: state.app.pointMarkerColour,
     canEditGeojson: state.app.canEditGeojson,
     canDeleteFeature: state.app.canDeleteFeature,

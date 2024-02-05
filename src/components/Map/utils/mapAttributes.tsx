@@ -76,7 +76,7 @@ const MapAttributes: React.FC<Props> = (props) => {
     contentHeight: "",
     page: 1,
     limit: 10,
-    total: undefined,
+    total: 10,
     refresh: false,
   };
 
@@ -228,6 +228,7 @@ const MapAttributes: React.FC<Props> = (props) => {
           if (res.data.status) {
             setState((prevState) => ({
               ...prevState,
+              total: res.data.total,
               trueTableData: res.data.data,
               tableData: updateTableColors(res.data.data),
               refresh: !prevState.refresh,
@@ -373,14 +374,14 @@ const MapAttributes: React.FC<Props> = (props) => {
           allLayers={props.allLayers}
           flaggedFilter={props.flaggedFilter}
           unflaggedFilter={props.unflaggedFilter}
-          setPage={setPage}
+          setPage={page => setState(prev => ({...prev, page}))}
           page={state.page}
-          setLimit={setLimit}
+          setLimit={limit => setState(prev => ({...prev, limit}))}
           limit={state.limit}
           setPaginationPage={setPaginationPage}
           setPageLimit={setPageLimit}
           total={state.total}
-          setTotal={setTotal}
+          setTotal={total => setState(prev => ({...prev, total}))}
           setViewport={props.setViewport}
           setSelectedIndexes={props.setSelectedIndexes}
           defaultKeys={props.defaultKeys}
