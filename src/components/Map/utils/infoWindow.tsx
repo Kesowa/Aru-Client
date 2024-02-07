@@ -255,7 +255,7 @@ function InfoWindow(props) {
   }, []);
 
   function updateLayerFlag() {
-    const body: any = {
+    const body = {
       featureIndex: [props.featureIdx],
       flag: !props.flag,
     };
@@ -303,10 +303,13 @@ function InfoWindow(props) {
   };
 
   const toggleFlag = () => {
-    if (props.missionLayer === "Vector" && props.mode === "PointView") {
+    if (props.missionLayer === "Vector") {
       updateLayerFlag();
     } else if (props.missionLayer === "Alert") {
       updateAlert();
+    }
+    else {
+      console.warn("item cannot be flagged");
     }
   };
 
