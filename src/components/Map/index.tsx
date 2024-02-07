@@ -188,6 +188,7 @@ function BaseMap(props) {
   const [videoDetails, setVideoDetails] = useState<any>({});
   const [showCarousel, setShowCarousel] = useState(false);
   const [terrainmap, setTerrainMap] = useState(false);
+  const [overlayId,setOverlayID] = useState<string>();
   const [dateRange, setDateRange] = useState([
     moment(
       moment().subtract(7, "d").format("YYYY-MM-DD") + " " + "00:00",
@@ -1985,6 +1986,10 @@ function BaseMap(props) {
           ?  `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=null&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
           : `${COG_URL}/cog/tiles/${z}/${x}/${y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`;
 
+      case "OVERLAY":
+        // console.log()
+        return `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
+
       default:
         return (
           `${COG_URL}` +
@@ -2055,7 +2060,7 @@ function BaseMap(props) {
 
   useEffect(() => {
     forceUpdateAllLayers();
-  }, [terrainmap,colorMap, selectedIndexes, showSelectedIndexes]);
+  }, [overlayId,terrainmap,colorMap, selectedIndexes, showSelectedIndexes]);
 
   useEffect(() => {
     //console.log("current 3d", threeDState);
@@ -2179,6 +2184,7 @@ function BaseMap(props) {
     let windData: any;
 
     await checkedKeysValue.forEach(async (element) => {
+      // console.log("element ----------",element)
       if (element.split("-")[0] === "2" && element !== "2") {
         if (props.isBaseMap) {
           const layer: any = allLayers[element];
@@ -2372,7 +2378,9 @@ function BaseMap(props) {
           );
           if(terrainmap){ 
             vlayers.pop()
+            console.log("overlayid",overlayId,element)
             vlayers.push(
+              
               new TerrainLayer({
                 elevationDecoder: {
                   rScaler: 0.299,
@@ -2391,7 +2399,15 @@ function BaseMap(props) {
                   "z"
                 ),
                 tileSize: 256,
-                texture: "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.webp?sku=101Y90ZfwGPtj&access_token=pk.eyJ1IjoibmVlbGR1dHRhMTkiLCJhIjoiY2tweG9mN3F4MThrNTJ4cDk0enVjcTN4dCJ9.uxa_h0rjqumTxFMI1QELKQ"
+                // texture: "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.webp?sku=101Y90ZfwGPtj&access_token=pk.eyJ1IjoibmVlbGR1dHRhMTkiLCJhIjoiY2tweG9mN3F4MThrNTJ4cDk0enVjcTN4dCJ9.uxa_h0rjqumTxFMI1QELKQ"
+                texture: getRasterURL(
+                  "OVERLAY",
+                  allLayers[element]?.layerPath,
+                  allLayers[element]?.settings,
+                  "x",
+                  "y",
+                  "z"
+                ),
               })
             );
 
@@ -7279,6 +7295,7 @@ function BaseMap(props) {
                     featureCount={pane.count}
                     setViewport={setViewport}
                     setColorMap={SetColorMap}
+                    setOverlayID={setOverlayID}
                     setTerrainMap={setTerrainMap}
                     setSelectedIndexes={setSelectedIndexes}
                     setshowSelectedIndexes={setshowSelectedIndexes}

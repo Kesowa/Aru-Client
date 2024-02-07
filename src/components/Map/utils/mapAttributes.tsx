@@ -39,6 +39,7 @@ interface Props {
   defaultKeys: any;
   selectedIndexes: number[];
   setColorMap: (color: string) => void;
+  setOverlayID: (color: string) => void;
   setTerrainMap: (value: boolean) => void;
   allLayers: any;
   canEditGeojson: boolean;
@@ -317,6 +318,11 @@ const MapAttributes: React.FC<Props> = (props) => {
     props.setColorMap(value);
   }
 
+  function changeOverlay(value:string) {
+    console.log(`2-${value}`)
+    props.setOverlayID(value);
+  }
+
   const rasterData = (
     // Render raster data UI
     <div style={{ width: "100%", padding: "5px" }}>
@@ -388,11 +394,12 @@ const MapAttributes: React.FC<Props> = (props) => {
                 <Select
                   defaultValue="Select"
                   style={{ width: 120, float: "right" }}
-                  // onChange={changeColor}
+                  onChange={changeOverlay}
                 >
                   {filteredLayers.map((layer) => (
-                    <Option key={layer.name} value={layer.name}>
+                    <Option key={layer.name} value={layer.settings._id}>
                       {layer.name}
+                      {console.log("layer",layer)}
                     </Option>
                   ))}
                 </Select>
