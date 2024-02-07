@@ -307,8 +307,7 @@ function InfoWindow(props) {
       updateLayerFlag();
     } else if (props.missionLayer === "Alert") {
       updateAlert();
-    }
-    else {
+    } else {
       console.warn("item cannot be flagged");
     }
   };
