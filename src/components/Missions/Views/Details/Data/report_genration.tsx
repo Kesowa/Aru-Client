@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "react-loading-skeleton/dist/skeleton.css";
-import { Typography, Tabs, Button } from "antd";
+import { Typography, Tabs, Button, message } from "antd";
+
 
 import { DownloadOutlined } from "@ant-design/icons";
 import "./data.less";
@@ -41,6 +42,8 @@ function ReportGenration(props) {
       )
       .then((result) => {
         console.log(result.data.message);
+        if (result.data.status) message.success(result.data.message);
+        else message.error(result.data.message);
       })
       .catch((err) => {
         console.log(err);
