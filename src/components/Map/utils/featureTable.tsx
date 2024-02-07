@@ -138,7 +138,6 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
 
   useEffect(() => {
     const obj: any = [];
-    console.log(props.tableData);
     props.tableData.map((i, index) =>
       obj.push({
         ...i.properties,
