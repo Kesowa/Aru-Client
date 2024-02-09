@@ -78,7 +78,7 @@ const MapAttributes: React.FC<Props> = (props) => {
     contentHeight: "",
     page: 1,
     limit: 10,
-    total: undefined,
+    total: 10,
     refresh: false,
   };
 
@@ -101,7 +101,7 @@ const MapAttributes: React.FC<Props> = (props) => {
 
   useEffect(() => {
     // Update content height and limit based on props.bottomBarHeight and props.type
-    updateContentHeightAndLimit(props.bottomBarHeight, props.type);
+    updateContentHeight(props.bottomBarHeight, props.type);
   }, [props.bottomBarHeight, props.type]);
 
   useEffect(() => {
@@ -129,19 +129,14 @@ const MapAttributes: React.FC<Props> = (props) => {
     setTableData(updatedatedTable);
   }, [props.selectedIndexes]);
 
-  const updateContentHeightAndLimit = (
-    bottomBarHeight: string,
-    type: string
-  ) => {
+  const updateContentHeight = (bottomBarHeight: string, type: string) => {
     let contentHeight = "";
-    let limit = 10;
     let refresh = false;
 
     switch (bottomBarHeight) {
       case "240px":
         if (type === "vector") {
           contentHeight = "160px";
-          limit = 2;
           refresh = true;
         } else {
           contentHeight = "100px";
@@ -151,7 +146,6 @@ const MapAttributes: React.FC<Props> = (props) => {
       case "480px":
         if (type === "vector") {
           contentHeight = "340px";
-          limit = 8;
           refresh = true;
         } else {
           contentHeight = "340px";
@@ -161,7 +155,6 @@ const MapAttributes: React.FC<Props> = (props) => {
       case "540px":
         if (type === "vector") {
           contentHeight = "460px";
-          limit = 10;
           refresh = true;
         } else {
           contentHeight = "400px";
@@ -171,7 +164,6 @@ const MapAttributes: React.FC<Props> = (props) => {
       case "700px":
         if (type === "vector") {
           contentHeight = "680px";
-          limit = 14;
           refresh = true;
         } else {
           contentHeight = "550px";
@@ -181,7 +173,6 @@ const MapAttributes: React.FC<Props> = (props) => {
       case "900px":
         if (type === "vector") {
           contentHeight = "750px";
-          limit = 20;
           refresh = true;
         } else {
           contentHeight = "750px";
@@ -195,7 +186,6 @@ const MapAttributes: React.FC<Props> = (props) => {
     setState((prevState) => ({
       ...prevState,
       contentHeight,
-      limit,
       refresh,
     }));
   };
@@ -242,6 +232,7 @@ const MapAttributes: React.FC<Props> = (props) => {
           if (res.data.status) {
             setState((prevState) => ({
               ...prevState,
+              total: res.data.total,
               trueTableData: res.data.data,
               tableData: updateTableColors(res.data.data),
               refresh: !prevState.refresh,
@@ -265,7 +256,6 @@ const MapAttributes: React.FC<Props> = (props) => {
 
   const updateTableColors = (records) => {
     return records.map((record) => {
-      console.log("record", record);
       if (props.selectedIndexes.includes(record.index)) {
         return {
           ...record,
@@ -425,14 +415,14 @@ const MapAttributes: React.FC<Props> = (props) => {
           allLayers={props.allLayers}
           flaggedFilter={props.flaggedFilter}
           unflaggedFilter={props.unflaggedFilter}
-          setPage={setPage}
+          setPage={(page) => setState((prev) => ({ ...prev, page }))}
           page={state.page}
-          setLimit={setLimit}
+          setLimit={(limit) => setState((prev) => ({ ...prev, limit }))}
           limit={state.limit}
           setPaginationPage={setPaginationPage}
           setPageLimit={setPageLimit}
           total={state.total}
-          setTotal={setTotal}
+          setTotal={(total) => setState((prev) => ({ ...prev, total }))}
           setViewport={props.setViewport}
           setSelectedIndexes={props.setSelectedIndexes}
           defaultKeys={props.defaultKeys}

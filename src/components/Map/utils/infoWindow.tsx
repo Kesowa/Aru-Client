@@ -255,7 +255,7 @@ function InfoWindow(props) {
   }, []);
 
   function updateLayerFlag() {
-    const body: any = {
+    const body = {
       featureIndex: [props.featureIdx],
       flag: !props.flag,
     };
@@ -303,10 +303,12 @@ function InfoWindow(props) {
   };
 
   const toggleFlag = () => {
-    if (props.missionLayer === "Vector" && props.mode === "PointView") {
+    if (props.missionLayer === "Vector") {
       updateLayerFlag();
     } else if (props.missionLayer === "Alert") {
       updateAlert();
+    } else {
+      console.warn("item cannot be flagged");
     }
   };
 
@@ -738,23 +740,20 @@ function InfoWindow(props) {
                               />
                             </Badge>
                           </Tooltip>
-                          {props.missionLayer === "Vector" &&
-                            props.mode === "PointView" && (
-                              <Tooltip
-                                placement="bottom"
-                                title={props.flag ? "Unflag" : "Flag"}
-                              >
-                                <BsFlagFill
-                                  style={{
-                                    color: props.flag ? "#da1c5c" : "#000",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() => {
-                                    toggleFlag();
-                                  }}
-                                />
-                              </Tooltip>
-                            )}
+                          <Tooltip
+                            placement="bottom"
+                            title={props.flag ? "Unflag" : "Flag"}
+                          >
+                            <BsFlagFill
+                              style={{
+                                color: props.flag ? "#da1c5c" : "#000",
+                                cursor: "pointer",
+                              }}
+                              onClick={() => {
+                                toggleFlag();
+                              }}
+                            />
+                          </Tooltip>
                         </Row>
                       </div>
                     )}

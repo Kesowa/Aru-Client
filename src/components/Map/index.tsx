@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { v4 as uuid } from "uuid";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
@@ -7,6 +13,8 @@ import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
 import { MaskExtension } from "@deck.gl/extensions/typed";
 import { TerrainLayer } from "@deck.gl/geo-layers/typed";
+import { readPixelsToArray } from "@luma.gl/webgl";
+
 import {
   Row,
   Col,
@@ -189,6 +197,8 @@ function BaseMap(props) {
   const [showCarousel, setShowCarousel] = useState(false);
   const [terrainmap, setTerrainMap] = useState(false);
   const [overlayId,setOverlayID] = useState<string>();
+  const [isElevationEnabled, setIsElevationEnabled] = useState(false);
+  const isElevationEnabledRef = useRef(isElevationEnabled);
   const [dateRange, setDateRange] = useState([
     moment(
       moment().subtract(7, "d").format("YYYY-MM-DD") + " " + "00:00",
@@ -329,12 +339,20 @@ function BaseMap(props) {
       key: "14",
       label: "Mask Layer",
     });
+    items.push({
+      key: "15",
+      label: "Elevation",
+    });
 
     return items;
   };
   useEffect(() => {
     console.log("isMaskLayerVisible updated:", isMaskLayerVisible);
   }, [isMaskLayerVisible]);
+
+  useEffect(() => {
+    isElevationEnabledRef.current = isElevationEnabled;
+  }, [isElevationEnabled]);
 
   //---------Notifications--------------------------------------
   const openNotification = (layerName) => {
@@ -701,21 +719,18 @@ function BaseMap(props) {
   const [selectedKey, setSelectedKey] = useState<any>();
 
   //---------------------Open Stree Maps Layer ----------------------------------------------------
+  const [hoverInfo, setHoverInfo] = useState(null);
+  const deckRef = useRef(null);
   const [polygonSize, setPolygonSize] = useState(150);
   const [opcity, setOpcity] = useState(1);
-  useEffect(() => {
-    console.log("Opacity is :", opcity);
-  }, [opcity]);
+  const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
 
   const changePolygonSize = (value) => {
     setPolygonSize(value);
-    // Update the polygon size or any other logic based on the slider value
   };
   const changeOpacity = (value) => {
     setOpcity(value);
   };
-
-  const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
 
   const maskLayer = useMemo(() => {
     return new SolidPolygonLayer({
@@ -728,6 +743,37 @@ function BaseMap(props) {
       zIndex: 9999,
     });
   }, [polygon, isMaskLayerVisible]);
+
+  const handleHover = useCallback(
+    ({ x, y, allLayers, element, bitmap, sourceLayer, settings }) => {
+      try {
+        const layerType = allLayers[element]?.type;
+
+        if (bitmap && layerType === "DEM" && isElevationEnabledRef.current) {
+          const pixelColor = readPixelsToArray(sourceLayer.props.image, {
+            sourceX: bitmap.pixel[0],
+            sourceY: bitmap.pixel[1],
+            sourceWidth: 1,
+            sourceHeight: 1,
+          });
+          const [r, g, b, a] = pixelColor;
+          const scalarValue = pixelColor[0] / 255.0;
+
+          const elementSettings = settings || allLayers[element]?.settings;
+          const minp = elementSettings?.minp;
+          const maxp = elementSettings?.maxp;
+          const elevation = minp + (maxp - minp) * scalarValue;
+
+          setHoverInfo({ r, g, b, x, y, elevation });
+        } else {
+          setHoverInfo(null);
+        }
+      } catch (error) {
+        console.error("Try with the dem layer instead", error);
+      }
+    },
+    [isElevationEnabled]
+  );
 
   const osm = [
     new TileLayer({
@@ -752,6 +798,7 @@ function BaseMap(props) {
           bbox: { west, south, east, north },
         } = props.tile;
         console.log("props.data:", props.data);
+
         return [
           new BitmapLayer(props, {
             data: null,
@@ -2237,6 +2284,7 @@ function BaseMap(props) {
                     index.y,
                     index.z
                   );
+
                   const mapBounds = mapRef.current.getMap().getBounds();
                   // console.log("Map Bounds: ", mapBounds);
                   // console.log("Raster Bounds: ", bounds);
@@ -2265,12 +2313,16 @@ function BaseMap(props) {
                   setLayerLoading(false);
                 },
 
+                pickable: true,
+                onHover: (event) =>
+                  handleHover({ ...event, allLayers, element, settings }),
+
                 renderSubLayers: (props) => {
                   const {
                     bbox: { west, south, east, north },
                   } = props.tile;
                   console.log("props.data 2:", props.data);
-
+                  console.log("layer type: ", allLayers[element]?.type);
                   return new BitmapLayer(props, {
                     data: null,
                     image: props.data,
@@ -2323,6 +2375,8 @@ function BaseMap(props) {
               //   allLayers[element]?.layerPath,
               //   allLayers[element]?.settings
               // ),
+              pickable: true,
+
               getTileData: async (tile) => {
                 const { index } = tile;
                 const rasterUrl = getRasterURL(
@@ -2333,6 +2387,7 @@ function BaseMap(props) {
                   index.y,
                   index.z
                 );
+
                 const mapBounds = mapRef.current.getMap().getBounds();
                 // console.log("Map Bounds: ", mapBounds);
                 // console.log("Raster Bounds: ", bounds);
@@ -2354,6 +2409,9 @@ function BaseMap(props) {
                   return load(rasterUrl);
                 }
               },
+
+              onHover: (event) => handleHover({ ...event, allLayers, element }),
+
               minZoom: 0,
               maxZoom: 24,
               tileSize: 256,
@@ -2365,6 +2423,7 @@ function BaseMap(props) {
                   bbox: { west, south, east, north },
                 } = props.tile;
                 console.log("props.data 4:", props.data, maskLayer.id);
+                console.log("layer type: ", allLayers[element]?.type);
                 return new BitmapLayer(props, {
                   data: null,
                   image: props.data,
@@ -2977,6 +3036,21 @@ function BaseMap(props) {
     setVisibleLayers(vlayers);
   };
 
+  // useEffect(() => {
+  //   // Log the class name of the DeckGL canvas
+  //   const canvasClassName = deckRef.current.deck.gl.canvas.className;
+  //   console.log('DeckGL Canvas Class Name:', canvasClassName);
+  // }, []);
+
+  // Linear interpolation function (replace with your logic)
+  const linearInterpolation = (rgbValues) => {
+    console.log("DeckGL Canvas Class Name:");
+    // Your linear interpolation logic here
+    // For example, average of the RGB values
+    const averageValue = (rgbValues[0] + rgbValues[1] + rgbValues[2]) / 3;
+    return averageValue;
+  };
+
   const [lastCount, setLastCount] = useState(0);
 
   const sortLayersBySidebarOrdering = (checkedKeys, type) => {
@@ -3525,6 +3599,14 @@ function BaseMap(props) {
     console.log("isMaskLayerVisible:", isMaskLayerVisible);
   };
 
+  const toggleElevation = () => {
+    setIsElevationEnabled((prevValue) => !prevValue);
+    console.log(
+      "Elevation toggled successfully. New state:",
+      isElevationEnabled
+    );
+  };
+
   const getTreeData = (layer, type, keyPrefix) => {
     const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
       const type = layer.type;
@@ -3662,9 +3744,10 @@ function BaseMap(props) {
           break;
         case "14":
           handleMaskLayerOption();
-
           break;
-
+        case "15":
+          toggleElevation();
+          break;
         default:
           break;
       }
@@ -6290,9 +6373,10 @@ function BaseMap(props) {
       )}
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
+        ref={deckRef}
         // onHover={(info) => {
         //   const coords = getPolygon(info.x, info.y, 150);
-        //   const mapCoords = coords.map((coord) =>
+        //   const mapCoords = coords.map((coord) =>DeckGL
         //     info.viewport?.unproject(coord)
         //   );
         //   setPolygon(mapCoords);
@@ -6325,7 +6409,7 @@ function BaseMap(props) {
         //   setPolygon(mapCoords);
         // }}
         getCursor={() => {
-          return isDrawing ? "crosshair" : "grab";
+          return isDrawing ? "crosshair" : "pointer";
         }}
         getTooltip={({ object }) => {
           return (
@@ -6362,6 +6446,45 @@ function BaseMap(props) {
         }}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
+        {hoverInfo && (
+          <div
+            style={{
+              position: "absolute",
+              left: hoverInfo.x + 7,
+              top: hoverInfo.y + 7,
+              background: "white",
+              padding: "4px",
+              borderRadius: "10px",
+              boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+              zIndex: 1000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: "-15px",
+              marginBottom: "-15px",
+            }}
+          >
+            <div
+              style={{
+                background: `rgb(${hoverInfo.r}, ${hoverInfo.g}, ${hoverInfo.b})`,
+                width: "25px",
+                height: "30px",
+                marginRight: "8px",
+                borderRadius: "7px",
+              }}
+            ></div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "-15px",
+              }}
+            >
+              <p>{hoverInfo.elevation.toFixed(2)} Meter</p>
+            </div>
+          </div>
+        )}
+
         {osmState ? (
           <>
             <div style={COPYRIGHT_LICENSE_STYLE}>
@@ -6638,6 +6761,7 @@ function BaseMap(props) {
                   </div>
                 </div>
               </Tooltip>
+
               {isDrawing && (
                 <Tooltip placement="bottom" title="Clear Selection">
                   <div className="cancel-tool" onClick={() => cancelDrawing()}>
@@ -6650,6 +6774,16 @@ function BaseMap(props) {
                   <div
                     className="cancel-tool"
                     onClick={() => handleShowMaskLayer()}
+                  >
+                    <span className="cancel-icon">Disable</span>
+                  </div>
+                </Tooltip>
+              )}
+              {isElevationEnabled && (
+                <Tooltip placement="bottom" title="Disable Elevation">
+                  <div
+                    className="cancel-tool"
+                    onClick={() => toggleElevation()}
                   >
                     <span className="cancel-icon">Disable</span>
                   </div>

@@ -1288,7 +1288,7 @@ function MissionView(props) {
           console.log("Video processing finished: ", data);
           openNotification(
             "Finished Processing!",
-            `Processing ${data.originalName} has been complete!`,
+            `Processing ${data.videoName} has been complete!`,
             "success"
           );
           setVodRefresh(true);
@@ -1314,13 +1314,13 @@ function MissionView(props) {
         });
 
         socket.current.on("REPORT_GENERATION_COMPLETE", (data) => {
-          setDocRefresh(true);
           console.log("Report successfully generated!", data);
           openNotification(
-            "Report Generated!.",
-            "Report generation successful",
+            "Report Generated!",
+            `Report generated: ${data.name}, for mission ${data.missionId}`,
             "success"
           );
+          setDocRefresh(true);
         });
 
         socket.current.on("REPORT_GENERATION_FAILED", (data) => {
