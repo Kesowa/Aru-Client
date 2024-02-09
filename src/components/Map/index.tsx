@@ -144,7 +144,898 @@ import NavIcon from "../../static/nav_icon.png";
 // import { JSONLoader } from "@loaders.gl/json";
 // import { LASLoader } from "@loaders.gl/las";
 import { load } from "@loaders.gl/core";
+import { ILayer } from "src/types/layer";
+type Layer = ILayer & {
+  isChecked?: boolean,
+}
 
+const createSVGIcon = (color: string) => {
+  return `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+    width="800px" height="800px" viewBox="0 0 490.939 490.939" xml:space="preserve">
+    <g>
+      <g>
+        <path style="fill:${color};" d="M41.552,490.939c-2.665,0-5.297-1.064-7.237-3.095c-3.185-3.337-3.675-8.419-1.186-12.303L181.221,244.52L33.149,15.43
+          c-2.508-3.88-2.031-8.973,1.152-12.32c3.183-3.347,8.245-4.081,12.246-1.768l407.844,235.47c3.094,1.786,5,5.088,5,8.66
+          s-1.906,6.874-5,8.66L46.548,489.6C44.986,490.5,43.263,490.939,41.552,490.939z M72.451,39.39l129.061,199.679
+          c2.128,3.293,2.136,7.525,0.02,10.825L72.156,451.721l357.236-206.25L72.451,39.39z"/>
+      </g>
+    </g>
+  </svg>`;
+};
+
+const svgToDataURL = (svg: string) => {
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+};
+const getRasterDataUrl = (rasterType: string, path: string, settings, x, y, z) => {
+    //SetColorMap(settings.color);
+    switch (rasterType) {
+      case "NDVI":
+        return (
+          `${COG_URL}` +
+          `/cog/tiles` +
+          `/${z}/${x}/${y}%401x?url=${TITILER_STATIC}` +
+          path
+        );
+
+      case "NDWI":
+        return (
+          `${COG_URL}` +
+          `/cog/tiles` +
+          `/${z}/${x}/${y}%401x?url=${TITILER_STATIC}` +
+          path +
+          `&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}`
+        );
+
+      case "DEM":
+        return terrainmap
+          ? `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=null&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
+          : `${COG_URL}/cog/tiles/${z}/${x}/${y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`;
+
+      case "OVERLAY":
+        // console.log()
+        return `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`;
+
+      default:
+        return (
+          `${COG_URL}` +
+          `/cog/tiles` +
+          `/${z}/${x}/${y}.png?url=${TITILER_STATIC}` +
+          path
+        );
+    }
+  }
+const ILayerToDeckLayer = (layers: Layer[]) => {
+    return layers
+    .filter(layer => layer.isChecked === true)
+    .map(layer => {
+      if (layer.type == "Raster") {
+        return new TileLayer({
+                id: layer._id,
+                // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
+                // data: getRasterURL(layer?.type, layerr[0].path, settings),
+                getTileData: (tile) => {
+                  const { index } = tile;
+                  const rasterUrl = getRasterURL(
+                    layer?.type,
+                    layerr[0].path,
+                    settings,
+                    index.x,
+                    index.y,
+                    index.z
+                  );
+
+                  const mapBounds = mapRef.current.getMap().getBounds();
+                  // console.log("Map Bounds: ", mapBounds);
+                  // console.log("Raster Bounds: ", bounds);
+                  const [minLong, minLat, maxLong, maxLat] = bounds;
+                  const minLongMap = mapBounds._sw.lng;
+                  const minLatMap = mapBounds._sw.lat;
+                  const maxLongMap = mapBounds._ne.lng;
+                  const maxLatMap = mapBounds._ne.lat;
+                  if (
+                    minLongMap > maxLong ||
+                    maxLongMap < minLong ||
+                    minLatMap > maxLat ||
+                    maxLatMap < minLat
+                  ) {
+                    return tile;
+                  } else {
+                    return load(rasterUrl);
+                  }
+                },
+                minZoom: 0,
+                maxZoom: 24,
+                tileSize: 256,
+
+                pickable: true,
+
+                renderSubLayers: (props) => {
+                  const {
+                    bbox: { west, south, east, north },
+                  } = props.tile;
+                  console.log("props.data 2:", props.data);
+                  console.log("layer type: ", allLayers[element]?.type);
+                  return new BitmapLayer(props, {
+                    data: null,
+                    image: props.data,
+                    bounds: [west, south, east, north],
+                    extensions: [new MaskExtension()],
+                    maskId: maskLayer.id,
+                    opacity: opcity,
+                  });
+                },
+              })
+            
+      }
+      else {}
+    });
+
+            vlayers.push(
+              new TileLayer({
+                id: element,
+                // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
+                // data: getRasterURL(layer?.type, layerr[0].path, settings),
+                getTileData: (tile) => {
+                  const { index } = tile;
+                  const rasterUrl = getRasterURL(
+                    layer?.type,
+                    layerr[0].path,
+                    settings,
+                    index.x,
+                    index.y,
+                    index.z
+                  );
+
+                  const mapBounds = mapRef.current.getMap().getBounds();
+                  // console.log("Map Bounds: ", mapBounds);
+                  // console.log("Raster Bounds: ", bounds);
+                  const [minLong, minLat, maxLong, maxLat] = bounds;
+                  const minLongMap = mapBounds._sw.lng;
+                  const minLatMap = mapBounds._sw.lat;
+                  const maxLongMap = mapBounds._ne.lng;
+                  const maxLatMap = mapBounds._ne.lat;
+                  if (
+                    minLongMap > maxLong ||
+                    maxLongMap < minLong ||
+                    minLatMap > maxLat ||
+                    maxLatMap < minLat
+                  ) {
+                    console.log("Not loading new data");
+                    return tile;
+                  } else {
+                    console.log("Loading new data");
+                    return load(rasterUrl);
+                  }
+                },
+                minZoom: 0,
+                maxZoom: 24,
+                tileSize: 256,
+                onDataLoad: () => {
+                  setLayerLoading(false);
+                },
+
+                pickable: true,
+                onHover: (event) =>
+                  handleHover({ ...event, allLayers, element, settings }),
+
+                renderSubLayers: (props) => {
+                  const {
+                    bbox: { west, south, east, north },
+                  } = props.tile;
+                  console.log("props.data 2:", props.data);
+                  console.log("layer type: ", allLayers[element]?.type);
+                  return new BitmapLayer(props, {
+                    data: null,
+                    image: props.data,
+                    bounds: [west, south, east, north],
+                    extensions: [new MaskExtension()],
+                    maskId: maskLayer.id,
+                    opacity: opcity,
+                  });
+                },
+              })
+            );
+          });
+        } else {
+          console.log("Raster");
+          const rasterpath =
+            `${TITILER_STATIC}` + allLayers[element]?.layerPath;
+          const metaDataURL = `${COG_URL}/cog/info?url=${rasterpath}`;
+          const response = await fetch(metaDataURL, {
+            method: "GET",
+          });
+          const metadata = await response.json();
+          const bounds = [
+            metadata["bounds"][0],
+            metadata["bounds"][1],
+            metadata["bounds"][2],
+            metadata["bounds"][3],
+          ];
+          console.log("props.data 3:", bounds);
+
+          const { longitude, latitude, zoom } = calculateViewport(bounds);
+          setViewport({
+            longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+            latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
+            zoom,
+            pitch: 0,
+            minZoom: 0,
+            maxZoom: 22,
+            bearing: 0,
+            transitionDuration: 2000,
+            transitionInterpolator: new FlyToInterpolator(),
+          });
+          vlayers.push(
+            new TileLayer({
+              id: element,
+              // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
+              // data: getRasterURL(
+              //   allLayers[element]?.type,
+              //   allLayers[element]?.layerPath,
+              //   allLayers[element]?.settings
+              // ),
+              pickable: true,
+
+              getTileData: async (tile) => {
+                const { index } = tile;
+                const rasterUrl = getRasterURL(
+                  allLayers[element]?.type,
+                  allLayers[element]?.layerPath,
+                  allLayers[element]?.settings,
+                  index.x,
+                  index.y,
+                  index.z
+                );
+
+                const mapBounds = mapRef.current.getMap().getBounds();
+                // console.log("Map Bounds: ", mapBounds);
+                // console.log("Raster Bounds: ", bounds);
+                const [minLong, minLat, maxLong, maxLat] = bounds;
+                const minLongMap = mapBounds._sw.lng;
+                const minLatMap = mapBounds._sw.lat;
+                const maxLongMap = mapBounds._ne.lng;
+                const maxLatMap = mapBounds._ne.lat;
+                if (
+                  minLongMap > maxLong ||
+                  maxLongMap < minLong ||
+                  minLatMap > maxLat ||
+                  maxLatMap < minLat
+                ) {
+                  // console.log("Not loading new data");
+                  return tile;
+                } else {
+                  // console.log("Loading new data");
+                  return load(rasterUrl);
+                }
+              },
+
+              onHover: (event) => handleHover({ ...event, allLayers, element }),
+
+              minZoom: 0,
+              maxZoom: 24,
+              tileSize: 256,
+              onDataLoad: () => {
+                setLayerLoading(false);
+              },
+              renderSubLayers: (props) => {
+                const {
+                  bbox: { west, south, east, north },
+                } = props.tile;
+                console.log("props.data 4:", props.data, maskLayer.id);
+                console.log("layer type: ", allLayers[element]?.type);
+                return new BitmapLayer(props, {
+                  data: null,
+                  image: props.data,
+                  bounds: [west, south, east, north],
+                  extensions: [new MaskExtension()],
+                  maskId: maskLayer.id,
+                  opacity: opcity, // Set the desired opacity value (0 to 1)
+                });
+              },
+            })
+          );
+          if (terrainmap) {
+            vlayers.splice(
+              vlayers.findIndex((layer) => layer.id == element),
+              1
+            );
+            vlayers.push(
+              new TerrainLayer({
+                id: element,
+                elevationDecoder: {
+                  rScaler: 0.299,
+                  gScaler: 0.587,
+                  bScaler: 0.114,
+                  offset: 0,
+                },
+                minZoom: 13,
+                maxZoom: 19,
+                elevationData: getRasterURL(
+                  allLayers[element]?.type,
+                  allLayers[element]?.layerPath,
+                  allLayers[element]?.settings,
+                  "x",
+                  "y",
+                  "z"
+                ),
+                tileSize: 256,
+                // texture: "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.webp?sku=101Y90ZfwGPtj&access_token=pk.eyJ1IjoibmVlbGR1dHRhMTkiLCJhIjoiY2tweG9mN3F4MThrNTJ4cDk0enVjcTN4dCJ9.uxa_h0rjqumTxFMI1QELKQ"
+                texture: getRasterURL(
+                  "OVERLAY",
+                  allLayers[element]?.layerPath,
+                  allLayers[element]?.settings,
+                  "x",
+                  "y",
+                  "z"
+                ),
+              })
+            );
+          }
+        }
+      } else if (element.split("-")[0] === "1" && element !== "1") {
+        switch (allLayers[element]?.type) {
+          case "MultiLineString":
+            vlayers.push(
+              new GeoJsonLayer({
+                id: element,
+                data: STATIC_URL + allLayers[element]?.layerPath,
+                pickable: true,
+                // stroked: true,
+                // filled: true,
+                extruded: false,
+                lineWidthUnits: "pixels",
+                lineWidthScale: 4,
+                lineWidthMinPixels: 2,
+                lineJoinRounded: true,
+                onDataLoad: () => {
+                  setLayerLoading(false);
+                },
+                getLineColor: (d, i) => {
+                  if (activeID === element.split("-")[1]) {
+                    if (selectedIndexes.includes(i.index)) {
+                      return hexToRGB2("#ffaa00", true);
+                    }
+                  }
+                  return hexToRGB2(d.properties.color, false);
+                },
+                // getRadius: 100,
+                // getLineWidth: 1,
+                // getElevation: 30 ,
+                onClick: (data, e) => {
+                  if (e.leftButton) {
+                    InfoWindow(
+                      data.index,
+                      data.coordinate,
+                      allLayers[element]?.name,
+                      "LineView",
+                      data.object,
+                      false,
+                      allLayers[element]?.id,
+                      data.object.properties.sys_id,
+                      "Vector"
+                    );
+                    setSelectedLayerLabel(
+                      allLayers[element]?.layerLabel
+                        ? allLayers[element]?.layerLabel
+                        : "No label selected"
+                    );
+                    setSelectedLayerPopupLabel(
+                      allLayers[element]?.layerPopupLabel
+                        ? allLayers[element]?.layerPopupLabel
+                        : "No label selected"
+                    );
+                  } else {
+                    setSelectedLayerId(element.split("-")[1]);
+                    setColorChangeFeatureData(data);
+                    setShowColorChangeForm(true);
+                  }
+                },
+                onHover: (data, e) => {
+                  setLayerName(allLayers[element]?.name);
+                  setSelectedLayerPopupLabel(
+                    allLayers[element]?.layerPopupLabel
+                  );
+                },
+              })
+            );
+            break;
+          case "MultiPolygon":
+            vlayers.push(
+              new GeoJsonLayer({
+                id: element,
+                data: STATIC_URL + allLayers[element]?.layerPath,
+                pickable: true,
+                stroked: true,
+                filled: true,
+                extruded: allLayers[element]?.T3DTranspose,
+                lineWidthUnits: "pixels",
+                lineWidthScale: 4,
+                lineWidthMinPixels: 2,
+                lineJoinRounded: true,
+                onDataLoad: () => {
+                  setLayerLoading(false);
+                },
+                getFillColor: (d, i) => {
+                  if (allLayers[element]?.T3DTranspose) {
+                    if (activeID === element.split("-")[1]) {
+                      if (selectedIndexes.includes(i.index)) {
+                        console.log(i);
+                        return hexToRGB2("#ffaa00", true);
+                      }
+                    }
+                    return hexToRGB2(d.properties.color, false);
+                  } else {
+                    if (activeID === element.split("-")[1]) {
+                      console.log(i);
+                      if (selectedIndexes.includes(i.index)) {
+                        return hexToRGB("#ffaa00", true);
+                      }
+                    }
+                    return hexToRGB(d.properties.color, false);
+                  }
+                },
+                getLineColor: (d, i) => {
+                  if (allLayers[element]?.T3DTranspose) {
+                    if (activeID === element.split("-")[1]) {
+                      if (selectedIndexes.includes(i.index)) {
+                        return hexToRGB2("#ffaa00", true);
+                      }
+                    }
+                    return hexToRGB2(d.properties.color, false);
+                  } else {
+                    if (activeID === element.split("-")[1]) {
+                      if (selectedIndexes.includes(i.index)) {
+                        return hexToRGB2("#ffaa00", true);
+                      }
+                    }
+                    return hexToRGB2(d.properties.color, true);
+                  }
+                },
+                //getRadius: 100,
+                //getLineWidth: 1,
+                getElevation: (d) => {
+                  if (d.properties?.height) {
+                    return d.properties.height;
+                  }
+                },
+                onClick: (data, e) => {
+                  //console.log("data",allLayers[element]?);
+                  if (e.leftButton) {
+                    InfoWindow(
+                      data.index,
+                      data.coordinate,
+                      allLayers[element]?.name,
+                      "PolygonView",
+                      data.object,
+                      false,
+                      allLayers[element]?.id,
+                      data.object.properties.sys_id,
+                      "Vector"
+                    );
+                    setSelectedLayerLabel(
+                      allLayers[element]?.layerLabel
+                        ? allLayers[element]?.layerLabel
+                        : "No label selected"
+                    );
+                    setSelectedLayerPopupLabel(
+                      allLayers[element]?.layerPopupLabel
+                        ? allLayers[element]?.layerPopupLabel
+                        : "No label selected"
+                    );
+                  } else {
+                    setSelectedLayerId(element.split("-")[1]);
+                    setColorChangeFeatureData(data);
+                    setShowColorChangeForm(true);
+                  }
+                },
+                onHover: (data, e) => {
+                  setLayerName(allLayers[element]?.name);
+                  setSelectedLayerPopupLabel(
+                    allLayers[element]?.layerPopupLabel
+                  );
+                },
+                extensions: [new DataFilterExtension({ filterSize: 1 })],
+                getFilterValue: (f, i) => {
+                  return showSelectedIndexes.length
+                    ? Number(f.properties[key])
+                    : null;
+                },
+                filterRange: showSelectedIndexes,
+              })
+            );
+            break;
+          case "Point":
+            setShowMarkerSizeTool(true);
+            vlayers.push(
+              new IconLayer({
+                id: element,
+                data: parseGeoJson(
+                  element,
+                  STATIC_URL + allLayers[element]?.layerPath
+                ),
+                pickable: true,
+                // iconAtlas: TankIcon,
+                //iconMapping: ICON_MAPPING,
+                getIcon: (d) => {
+                  const iconSelector = (iconType) => {
+                    let icon = "";
+                    switch (iconType) {
+                      case "MarkerIcon":
+                        icon = MarkerIcon;
+                        break;
+                      case "TankIcon":
+                        icon = TankIcon;
+                        break;
+                      case "DotIcon":
+                        icon = DotIcon;
+                        break;
+                      case "ValveIcon":
+                        icon = ValveIcon;
+                        break;
+                    }
+                    return icon;
+                  };
+                  return {
+                    url: `${iconSelector(d.properties.icon)}`,
+                    width: 100,
+                    height: 129,
+                    anchorY: 125,
+                    mask: true,
+                  };
+                },
+                onDataLoad: () => {
+                  setLayerLoading(false);
+                },
+                // getFillColor: (d, i) => {
+                //   if (activeID === element.split("-")[1]) {
+                //     if (selectedIndexes.includes(i.index)) {
+                //       return hexToRGB2("#ffaa00", true);
+                //     }
+                //   }
+                //   return hexToRGB2(d.properties.color, false);
+                // },
+                sizeScale: 12 * pointMarkerSize,
+                getPosition: (d) => d.geometry.coordinates,
+                getSize: (d) => 5,
+                getColor: (d, i) => {
+                  if (activeID === element.split("-")[1]) {
+                    if (selectedIndexes.includes(i.index)) {
+                      return hexToRGB2("#ffaa00", true);
+                    }
+                  }
+                  if (unflaggedFilter) {
+                    return hexToRGB2(d.properties.color, false);
+                  }
+                  if (
+                    flaggedFilter ||
+                    allLayers[element]?.flaggedFeatures.includes(i.index)
+                  ) {
+                    return hexToRGB2(invertColor(d.properties.color), true);
+                  }
+                  return hexToRGB2(d.properties.color, false);
+                },
+                onClick: (data, e) => {
+                  if (e.leftButton) {
+                    InfoWindow(
+                      data.index,
+                      data.coordinate,
+                      allLayers[element]?.name,
+                      "PointView",
+                      data.object,
+                      false,
+                      allLayers[element]?.id,
+                      data.object.properties.sys_id,
+                      "Vector"
+                    );
+                    setSelectedLayerLabel(
+                      allLayers[element]?.layerLabel
+                        ? allLayers[element]?.layerLabel
+                        : "No label selected"
+                    );
+                    setSelectedLayerPopupLabel(
+                      allLayers[element]?.layerPopupLabel
+                        ? allLayers[element]?.layerPopupLabel
+                        : "No label selected"
+                    );
+                  } else {
+                    setSelectedLayerId(element.split("-")[1]);
+                    setColorChangeFeatureData(data);
+                    setShowColorChangeForm(true);
+                  }
+                },
+                onHover: (data, e) => {
+                  setLayerName(allLayers[element]?.name);
+                  setSelectedLayerPopupLabel(
+                    allLayers[element]?.layerPopupLabel
+                  );
+                },
+              })
+            );
+            break;
+          case "air_pollution":
+            vlayers.push(
+              new HeatmapLayer({
+                id: element,
+                data: parseGeoJson(
+                  element,
+                  STATIC_URL + allLayers[element]?.layerPath
+                ),
+                getPosition: (d: any) => d.geometry.coordinates,
+                getWeight: (d: any) => d.properties.aqi,
+                aggregation: "SUM",
+                pickable: true,
+                pickingRadius: 20,
+              })
+            );
+            vlayers.push(
+              new TextLayer({
+                id: element + "-1",
+                data: parseGeoJson(
+                  element,
+                  STATIC_URL + allLayers[element]?.layerPath
+                ),
+                getPosition: (d: any) => d.geometry.coordinates,
+                getText: (d: any) => {
+                  return `${d.properties.aqi}`;
+                },
+                getSize: 32,
+                getColor: [59, 43, 82],
+                pickable: true,
+                sizeable: 2,
+                sizeMinPixels: 6,
+                sizeMaxPixels: 25,
+                getBorderColor: [255, 255, 255, 255],
+                getTextOutlineWidth: 2,
+                getTextOutlineColor: [255, 255, 255, 255],
+              })
+            );
+            break;
+          case "wind_direction":
+            windData = await parseGeoJson(
+              element,
+              STATIC_URL + allLayers[element]?.layerPath
+            );
+            console.log(windData);
+
+            vlayers.push(
+              new IconLayer({
+                id: element,
+                data: windData,
+                getPosition: (d: any) => d.geometry.coordinates,
+                getIcon: (d: any, { index }: { index: any }) => {
+                  const windSpeed = d.properties.windSpeed;
+                  const maxWindSpeed = Math.max(
+                    ...windData.map((d) => d.properties.windSpeed)
+                  );
+
+                  // Check if windSpeed is a valid number
+                  if (
+                    !isNaN(windSpeed) &&
+                    !isNaN(maxWindSpeed) &&
+                    maxWindSpeed !== 0
+                  ) {
+                    const t = windSpeed / maxWindSpeed;
+                    const color = `rgb(${255 * (1 - t)}, ${255 * t}, 0)`;
+
+                    return {
+                      url: svgToDataURL(createSVGIcon(index, color)),
+                      width: 1024,
+                      height: 1024,
+                    };
+                  } else {
+                    // Handle invalid windSpeed or maxWindSpeed
+                    console.error(
+                      "Invalid windSpeed or maxWindSpeed:",
+                      windSpeed,
+                      maxWindSpeed
+                    );
+                    // You can provide a default color or take other appropriate actions here
+                    return {
+                      url: svgToDataURL(createSVGIcon(index, "rgb(255, 0, 0)")),
+                      width: 1024,
+                      height: 1024,
+                    };
+                  }
+                },
+
+                getSize: (d) => d.properties.windSpeed * 4,
+                getAngle: (d) => 90 - d.properties.windDirection,
+              })
+            );
+            break;
+        }
+
+        (async () => {
+          try {
+            const filteredFeatures = await parseGeoJson(
+              element,
+              STATIC_URL + allLayers[element]?.layerPath
+            );
+
+            console.log("filteredFeatures", filteredFeatures);
+
+            if (Array.isArray(filteredFeatures)) {
+              const bound = turf.bbox(turf.featureCollection(filteredFeatures));
+              console.log("Bbox", bound);
+              const { longitude, latitude, zoom } = calculateViewport(bound);
+              console.log(
+                "longitude, latitude, zoom",
+                longitude,
+                latitude,
+                zoom
+              );
+
+              setViewport({
+                longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+                latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
+                zoom,
+                pitch: 0,
+                minZoom: 0,
+                maxZoom: 22,
+                bearing: 0,
+                transitionDuration: 2000,
+                transitionInterpolator: new FlyToInterpolator(),
+              });
+            } else {
+              console.log("Filtered features is not an array.");
+            }
+          } catch (error) {
+            console.error("Error:", error);
+          }
+        })();
+      } else if (element.split("-")[0] === "3" && element !== "3") {
+        setShowMarkerSizeTool(true);
+        if (element.split("-")[1] === "2") {
+          vlayers.push(
+            new IconLayer({
+              id: element,
+              data: geoJsonAlert?.features,
+              pickable: true,
+              // iconAtlas: TankIcon,
+              //iconMapping: ICON_MAPPING,
+              getIcon: (d) => {
+                return {
+                  url: AlertIcon,
+                  width: 200,
+                  height: 220,
+                  anchorY: 125,
+                  mask: true,
+                };
+              },
+              onDataLoad: () => {
+                setLayerLoading(false);
+              },
+              // getFillColor: (d, i) => {
+              //   if (activeID === element.split("-")[1]) {
+              //     if (selectedIndexes.includes(i.index)) {
+              //       return hexToRGB2("#ffaa00", true);
+              //     }
+              //   }
+              //   return hexToRGB2(d.properties.color, false);
+              // },
+              sizeScale: 15 * pointMarkerSize,
+              getPosition: (d) => d.geometry.coordinates,
+              getSize: (d) => 5,
+              getColor: (d, i) => {
+                return hexToRGB2("#d0021b", false);
+              },
+              onClick: (data, e) => {
+                if (e.leftButton) {
+                  InfoWindow(
+                    data.index,
+                    data.coordinate,
+                    data.object.properties.Name.split(",")
+                      .slice(0, 2)
+                      .join(","),
+                    "PointView",
+                    data.object,
+                    false,
+                    element.split("-")[1],
+                    data.object._id,
+                    "Alert"
+                  );
+                } else {
+                  setSelectedLayerId(element.split("-")[1]);
+                  setColorChangeFeatureData(data);
+                  setShowColorChangeForm(true);
+                }
+              },
+            })
+          );
+        }
+        if (element.split("-")[1] === "3") {
+          vlayers.push(
+            new IconLayer({
+              id: element,
+              data: geoJsonVOD?.features,
+              pickable: true,
+              // iconAtlas: TankIcon,
+              //iconMapping: ICON_MAPPING,
+              getIcon: (d) => {
+                return {
+                  url: VODIcon,
+                  width: 200,
+                  height: 220,
+                  anchorY: 125,
+                  mask: true,
+                };
+              },
+              onDataLoad: () => {
+                setLayerLoading(false);
+              },
+              // getFillColor: (d, i) => {
+              //   if (activeID === element.split("-")[1]) {
+              //     if (selectedIndexes.includes(i.index)) {
+              //       return hexToRGB2("#ffaa00", true);
+              //     }
+              //   }
+              //   return hexToRGB2(d.properties.color, false);
+              // },
+              sizeScale: 15 * pointMarkerSize,
+              getPosition: (d) => d.geometry.coordinates,
+              getSize: (d) => 5,
+              getColor: (d, i) => {
+                return hexToRGB2("#d0021b", false);
+              },
+              onClick: (data, e) => {
+                if (e.leftButton) {
+                  InfoWindow(
+                    data.index,
+                    data.coordinate,
+                    data.object.properties.name
+                      .split(",")
+                      .slice(0, 2)
+                      .join(","),
+                    "PointView",
+                    data.object,
+                    false,
+                    element.split("-")[1],
+                    data.object._id,
+                    "VOD"
+                  );
+                } else {
+                  setSelectedLayerId(element.split("-")[1]);
+                  setColorChangeFeatureData(data);
+                  setShowColorChangeForm(true);
+                }
+              },
+            })
+          );
+        }
+      }
+      console.log("Missions", vlayers);
+    });
+    /* vlayers.push(
+       new TileLayer({
+         id: "BASE_LAYER-123123123",
+         // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
+         data: `${COG_URL}` +
+         `/cog/tiles` +
+         `/{z}/{x}/{y}@1x?url=${import.meta.env.VITE_BASE_URL}` +
+         `/raster/1642486263367_20_DEM_10cm.tif` +
+         `&resampling_method=nearest&bidx=1&rescale=17.799230575561523%2C93.64027404785156&colormap_name=plasma`,
+
+         minZoom: 0,
+         maxZoom: 24,
+         tileSize: 256,
+          onDataLoad: () => {
+            setLayerLoading(false);
+          },
+         renderSubLayers: (props) => {
+           const {
+             bbox: { west, south, east, north },
+           } = props.tile;
+
+           return new BitmapLayer(props, {
+             data: null,
+             image: props.data,
+             bounds: [west, south, east, north],
+           });
+         },
+       })
+     )*/
+    setVisibleLayers(vlayers);
+  }
 export const getPolygon = (lat: number, lng: number, size: number) => [
   [lat - size * 0.5, lng - size * 0.5],
   [lat + size * 0.5, lng - size * 0.5],
@@ -883,7 +1774,6 @@ function BaseMap(props) {
   const [toolSelected, setToolSelected] = useState("");
   const [defaultLayerType, setDefaultLayerType] = useState<any>([]);
   const [activeType, setActiveType] = useState(false);
-  const [totalLayers, setTotalLayers] = useState(0);
   const [time, setTime] = useState("100 days");
   const [timeEnabled, setTimeEnabled] = useState<any>();
   const [sortType, setSortType] = useState("");
@@ -1113,10 +2003,6 @@ function BaseMap(props) {
             .then((res) => {
               console.log("Filter API response", res);
               if (res.data.status) {
-                //console.log(res.data.data);
-                setTotalLayers(res.data.data.length);
-                segrigateLayers(res.data.data);
-                //message.success(res.data.message);
                 removeChips(res.data.data);
               } else {
                 if (res.data.message === " data not match!") {
@@ -1363,7 +2249,7 @@ function BaseMap(props) {
     setAutoExpandParent(false);
   };
 
-  const [allLayers, setAllLayers] = useState({});
+  const [allLayers, setAllLayers] = useState<Layer[]>([]);
   const [visibleLayers, setVisibleLayers] = useState([]);
   const [colorChangeFeatureData, setColorChangeFeatureData] =
     useState<any>(null);
@@ -3262,7 +4148,18 @@ function BaseMap(props) {
     console.log("I am inside getAllLayers");
     if (!props.isBaseMap) {
       try {
-        const result: any = await http.get(
+        const result = await http.get<{
+          status: boolean,
+          message: string,
+          data: {
+            mission: string,
+            centerPoints: {
+              lat: number,
+              lng: number
+            },
+            layers: ILayer[],
+          },
+        }>(
           `${apis.GET_ALL_LAYERS_FOR_MISSION}`,
           {
             params: {
@@ -3272,11 +4169,12 @@ function BaseMap(props) {
         );
 
         if (result.data.status) {
+          setAllLayers(result.data.data.layers);
           if (result.data.message === "No layer exists for mission") {
-            setMissioName(result.data.missionName);
+            setMissioName(result.data.data.mission);
             setViewport({
-              latitude: result.data.centerPoints.lat,
-              longitude: result.data.centerPoints.lng,
+              latitude: result.data.data.centerPoints.lat,
+              longitude: result.data.data.centerPoints.lng,
               zoom: 13,
               pitch: 0,
               minZoom: 0,
@@ -3286,12 +4184,7 @@ function BaseMap(props) {
               // transitionInterpolator: new FlyToInterpolator(),
             });
           } else {
-            //console.log("layers fetched: ", result.data.data);
             setMissioName(result.data.data.mission);
-            setTotalLayers(0);
-            console.log("api result", result.data.data.layers);
-            setlayerz(result.data.data.layers);
-            segrigateLayers(result.data.data.layers);
             setViewport({
               latitude: result.data.data.centerPoints.lat,
               longitude: result.data.data.centerPoints.lng,
@@ -3316,13 +4209,14 @@ function BaseMap(props) {
       }
     } else {
       try {
-        const result: any = await http.get(`${apis.GET_ALL_BASELAYERS}`);
+        const result = await http.get<{
+          success: boolean,
+          message: string,
+          data: ILayer[],
+        }>(apis.GET_ALL_BASELAYERS);
         if (result.data.success) {
-          console.log("Base map result", result.data);
           setMissioName("none");
-          setTotalLayers(0);
-          setlayerz(result.data.data);
-          segrigateLayers(result.data.data);
+          setAllLayers(result.data.data);
         } else {
           message.error(result.data.message);
         }
@@ -6854,8 +7748,8 @@ function BaseMap(props) {
                   {missioName === "none" ? "Map" : missioName}
                 </Text>
               </Title>
-              {totalLayers !== 0 && (
-                <Text type="secondary">Results: {totalLayers}</Text>
+              {allLayers.length !== 0 && (
+                <Text type="secondary">Results: {allLayers.length}</Text>
               )}
             </Row>
             <div
