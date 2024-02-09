@@ -5,7 +5,6 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { v4 as uuid } from "uuid";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
 import { DataFilterExtension } from "@deck.gl/extensions";
@@ -196,7 +195,7 @@ function BaseMap(props) {
   const [videoDetails, setVideoDetails] = useState<any>({});
   const [showCarousel, setShowCarousel] = useState(false);
   const [terrainmap, setTerrainMap] = useState(false);
-  const [overlayId,setOverlayID] = useState<string>();
+  const [overlayId, setOverlayID] = useState<string>();
   const [isElevationEnabled, setIsElevationEnabled] = useState(false);
   const isElevationEnabledRef = useRef(isElevationEnabled);
   const [dateRange, setDateRange] = useState([
@@ -2030,12 +2029,12 @@ function BaseMap(props) {
 
       case "DEM":
         return terrainmap
-          ?  `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=null&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
+          ? `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=null&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
           : `${COG_URL}/cog/tiles/${z}/${x}/${y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`;
 
       case "OVERLAY":
         // console.log()
-        return `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
+        return `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`;
 
       default:
         return (
@@ -2046,7 +2045,6 @@ function BaseMap(props) {
         );
     }
   };
-
 
   function handleClose(status: boolean) {
     togglePopup(status);
@@ -2107,7 +2105,7 @@ function BaseMap(props) {
 
   useEffect(() => {
     forceUpdateAllLayers();
-  }, [overlayId,terrainmap,colorMap, selectedIndexes, showSelectedIndexes]);
+  }, [overlayId, terrainmap, colorMap, selectedIndexes, showSelectedIndexes]);
 
   useEffect(() => {
     //console.log("current 3d", threeDState);
@@ -2332,12 +2330,10 @@ function BaseMap(props) {
                     opacity: opcity,
                   });
                 },
-              }),
+              })
             );
-
           });
         } else {
-
           console.log("Raster");
           const rasterpath =
             `${TITILER_STATIC}` + allLayers[element]?.layerPath;
@@ -2435,8 +2431,11 @@ function BaseMap(props) {
               },
             })
           );
-          if(terrainmap){ 
-            vlayers.splice(vlayers.findIndex(layer => layer.id == element), 1);
+          if (terrainmap) {
+            vlayers.splice(
+              vlayers.findIndex((layer) => layer.id == element),
+              1
+            );
             vlayers.push(
               new TerrainLayer({
                 id: element,
@@ -2468,7 +2467,6 @@ function BaseMap(props) {
                 ),
               })
             );
-
           }
         }
       } else if (element.split("-")[0] === "1" && element !== "1") {
@@ -7561,7 +7559,7 @@ function BaseMap(props) {
             </div>
           }
         ></Tabs>
-        {console.log("setTerrainMap",terrainmap)}
+        {console.log("setTerrainMap", terrainmap)}
       </div>
       {showForm && (
         <VectorForm

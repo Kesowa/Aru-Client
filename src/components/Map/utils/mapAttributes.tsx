@@ -308,8 +308,8 @@ const MapAttributes: React.FC<Props> = (props) => {
     props.setColorMap(value);
   }
 
-  function changeOverlay(value:string) {
-    console.log(`2-${value}`)
+  function changeOverlay(value: string) {
+    console.log(`2-${value}`);
     props.setOverlayID(value);
   }
 
@@ -389,7 +389,7 @@ const MapAttributes: React.FC<Props> = (props) => {
                   {filteredLayers.map((layer) => (
                     <Option key={layer.name} value={layer.settings._id}>
                       {layer.name}
-                      {console.log("layer",layer)}
+                      {console.log("layer", layer)}
                     </Option>
                   ))}
                 </Select>
