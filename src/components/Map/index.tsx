@@ -12,7 +12,9 @@ import { DataFilterExtension } from "@deck.gl/extensions";
 import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
 import { MaskExtension } from "@deck.gl/extensions/typed";
+import { TerrainLayer } from "@deck.gl/geo-layers/typed";
 import { readPixelsToArray } from "@luma.gl/webgl";
+
 import {
   Row,
   Col,
@@ -193,6 +195,8 @@ function BaseMap(props) {
   const [missionLayer, setMissionLayer] = useState("");
   const [videoDetails, setVideoDetails] = useState<any>({});
   const [showCarousel, setShowCarousel] = useState(false);
+  const [terrainmap, setTerrainMap] = useState(false);
+  const [overlayId,setOverlayID] = useState<string>();
   const [isElevationEnabled, setIsElevationEnabled] = useState(false);
   const isElevationEnabledRef = useRef(isElevationEnabled);
   const [dateRange, setDateRange] = useState([
@@ -2025,13 +2029,13 @@ function BaseMap(props) {
         );
 
       case "DEM":
-        return (
-          `${COG_URL}` +
-          `/cog/tiles` +
-          `/${z}/${x}/${y}@1x?url=${TITILER_STATIC}` +
-          path +
-          `&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
-        );
+        return terrainmap
+          ?  `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=null&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
+          : `${COG_URL}/cog/tiles/${z}/${x}/${y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`;
+
+      case "OVERLAY":
+        // console.log()
+        return `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
 
       default:
         return (
@@ -2042,6 +2046,7 @@ function BaseMap(props) {
         );
     }
   };
+
 
   function handleClose(status: boolean) {
     togglePopup(status);
@@ -2084,6 +2089,7 @@ function BaseMap(props) {
   //-------------on layer check-------------------------------
 
   useEffect(() => {
+    // console.log("it may be by traiin map",checkedKeys);
     setScaleData(checkedKeys);
     drawLayers(checkedKeys);
     console.log("lost");
@@ -2101,7 +2107,7 @@ function BaseMap(props) {
 
   useEffect(() => {
     forceUpdateAllLayers();
-  }, [colorMap, selectedIndexes, showSelectedIndexes]);
+  }, [overlayId,terrainmap,colorMap, selectedIndexes, showSelectedIndexes]);
 
   useEffect(() => {
     //console.log("current 3d", threeDState);
@@ -2138,6 +2144,7 @@ function BaseMap(props) {
   };
 
   const forceUpdateAllLayers = () => {
+    // console.log("it my br by terrainmap");
     const cv = [...checkedKeys];
     setCheckedKeys([]);
 
@@ -2200,7 +2207,7 @@ function BaseMap(props) {
   };
 
   const drawLayers = async (checkedKeysValue: any) => {
-    const vlayers: any = [];
+    const vlayers: Array<any> = [];
     setShowMarkerSizeTool(false);
 
     const createSVGIcon = (idx: any, color: string) => {
@@ -2224,9 +2231,9 @@ function BaseMap(props) {
     let windData: any;
 
     await checkedKeysValue.forEach(async (element) => {
+      // console.log("element ----------",element)
       if (element.split("-")[0] === "2" && element !== "2") {
         if (props.isBaseMap) {
-          console.log("Raster");
           const layer: any = allLayers[element];
           await layer?.layerPath.map(async (layerr: any) => {
             const settings: any = {
@@ -2264,7 +2271,7 @@ function BaseMap(props) {
 
             vlayers.push(
               new TileLayer({
-                id: `${element}-${uuid()}`,
+                id: element,
                 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
                 // data: getRasterURL(layer?.type, layerr[0].path, settings),
                 getTileData: (tile) => {
@@ -2325,10 +2332,13 @@ function BaseMap(props) {
                     opacity: opcity,
                   });
                 },
-              })
+              }),
             );
+
           });
         } else {
+
+          console.log("Raster");
           const rasterpath =
             `${TITILER_STATIC}` + allLayers[element]?.layerPath;
           const metaDataURL = `${COG_URL}/cog/info?url=${rasterpath}`;
@@ -2425,6 +2435,41 @@ function BaseMap(props) {
               },
             })
           );
+          if(terrainmap){ 
+            vlayers.splice(vlayers.findIndex(layer => layer.id == element), 1);
+            vlayers.push(
+              new TerrainLayer({
+                id: element,
+                elevationDecoder: {
+                  rScaler: 0.299,
+                  gScaler: 0.587,
+                  bScaler: 0.114,
+                  offset: 0,
+                },
+                minZoom: 13,
+                maxZoom: 19,
+                elevationData: getRasterURL(
+                  allLayers[element]?.type,
+                  allLayers[element]?.layerPath,
+                  allLayers[element]?.settings,
+                  "x",
+                  "y",
+                  "z"
+                ),
+                tileSize: 256,
+                // texture: "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.webp?sku=101Y90ZfwGPtj&access_token=pk.eyJ1IjoibmVlbGR1dHRhMTkiLCJhIjoiY2tweG9mN3F4MThrNTJ4cDk0enVjcTN4dCJ9.uxa_h0rjqumTxFMI1QELKQ"
+                texture: getRasterURL(
+                  "OVERLAY",
+                  allLayers[element]?.layerPath,
+                  allLayers[element]?.settings,
+                  "x",
+                  "y",
+                  "z"
+                ),
+              })
+            );
+
+          }
         }
       } else if (element.split("-")[0] === "1" && element !== "1") {
         switch (allLayers[element]?.type) {
@@ -7383,6 +7428,8 @@ function BaseMap(props) {
                     featureCount={pane.count}
                     setViewport={setViewport}
                     setColorMap={SetColorMap}
+                    setOverlayID={setOverlayID}
+                    setTerrainMap={setTerrainMap}
                     setSelectedIndexes={setSelectedIndexes}
                     setshowSelectedIndexes={setshowSelectedIndexes}
                     selectedIndexes={selectedIndexes}
@@ -7514,6 +7561,7 @@ function BaseMap(props) {
             </div>
           }
         ></Tabs>
+        {console.log("setTerrainMap",terrainmap)}
       </div>
       {showForm && (
         <VectorForm
