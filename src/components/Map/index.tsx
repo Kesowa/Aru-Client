@@ -2160,7 +2160,7 @@ function BaseMap(props) {
   };
 
   const drawLayers = async (checkedKeysValue: any) => {
-    const vlayers: any = [];
+    const vlayers: Array<any> = [];
     setShowMarkerSizeTool(false);
 
     const createSVGIcon = (idx: any, color: string) => {
@@ -2224,7 +2224,7 @@ function BaseMap(props) {
 
             vlayers.push(
               new TileLayer({
-                id: `${element}-${uuid()}`,
+                id: element,
                 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
                 // data: getRasterURL(layer?.type, layerr[0].path, settings),
                 getTileData: (tile) => {
@@ -2377,11 +2377,10 @@ function BaseMap(props) {
             })
           );
           if(terrainmap){ 
-            vlayers.pop()
-            console.log("overlayid",overlayId,element)
+            vlayers.splice(vlayers.findIndex(layer => layer.id == element), 1);
             vlayers.push(
-              
               new TerrainLayer({
+                id: element,
                 elevationDecoder: {
                   rScaler: 0.299,
                   gScaler: 0.587,

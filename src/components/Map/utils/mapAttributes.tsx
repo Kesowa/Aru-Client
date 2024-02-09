@@ -384,7 +384,7 @@ const MapAttributes: React.FC<Props> = (props) => {
           <div style={{ marginRight: "20rem" }}>
             <div>
               <Space size="large">
-                <Text>Terrian: </Text>
+                <Text>Terrain: </Text>
                 <Switch onChange={onChange} />
               </Space>
             </div>
