@@ -263,8 +263,8 @@ function VideoPlayer(props: any) {
 
   useEffect(() => {
     setIsFlagged(props.mission?.isFlagged);
-    if ("bookmarks" in props.mission) setBookmark(props.mission.bookmarks);
-  }, [props.mission]);
+    if (props.mission && props.mission.bookmarks !== undefined) setBookmark(props.mission.bookmarks);
+  }, [props.mission, props.mission?.bookmarks]);
   useEffect(() => {
     socket = connectSocket(streamKey);
 
