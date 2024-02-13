@@ -1270,21 +1270,21 @@ function MissionView(props) {
 
   //socket event listeners here
   useEffect(() => {
-    if (MissionDetails.missionId) {
-      if (!socket.current) {
-        socket.current = io(
-          `${API_URL}/stream/mission-specific?missionID=${MissionDetails.missionId}`
-        );
-        socket.current.on("PROCESS_VIDEO_STARTED", (data) => {
+    if (MissionDetails.missionId && !socket.current) {
+      socket.current = io(
+        `${API_URL}/stream/mission-specific?missionID=${MissionDetails.missionId}`
+      );
+  
+      const eventHandlers = {
+        PROCESS_VIDEO_STARTED: (data) => {
           console.log("Video processing started: ", data);
           openNotification(
             "Video Processing!",
             `Processing ${data.originalName}`,
             "info"
           );
-        });
-
-        socket.current.on("PROCESS_VIDEO_FINISHED", (data) => {
+        },
+        PROCESS_VIDEO_FINISHED: (data) => {
           console.log("Video processing finished: ", data);
           openNotification(
             "Finished Processing!",
@@ -1292,28 +1292,25 @@ function MissionView(props) {
             "success"
           );
           setVodRefresh(true);
-        });
-
-        socket.current.on("POINTCLOUD_EXTRACTION_START", (data) => {
+        },
+        POINTCLOUD_EXTRACTION_START: (data) => {
           console.log("Extraction started: ", data);
           openNotification(
             "Extracting now...",
-            `Extracing pointclouds`,
+            `Extracting point clouds`,
             "info"
           );
-        });
-
-        socket.current.on("POINTCLOUD_EXTRACTION_COMPLETED", (data) => {
+        },
+        POINTCLOUD_EXTRACTION_COMPLETED: (data) => {
           console.log("Extraction complete!: ", data);
           setDocRefresh(true);
           openNotification(
-            "Extraction Complete!.",
+            "Extraction Complete!",
             `The point cloud has been extracted.`,
             "success"
           );
-        });
-
-        socket.current.on("REPORT_GENERATION_COMPLETE", (data) => {
+        },
+        REPORT_GENERATION_COMPLETE: (data) => {
           console.log("Report successfully generated!", data);
           openNotification(
             "Report Generated!",
@@ -1321,19 +1318,33 @@ function MissionView(props) {
             "success"
           );
           setDocRefresh(true);
-        });
-
-        socket.current.on("REPORT_GENERATION_FAILED", (data) => {
+        },
+        REPORT_GENERATION_FAILED: (data) => {
           console.log("Report generation failed!", data);
           openNotification(
             "Failed to generate Report!",
             "Report generation failed",
             "error"
           );
-        });
-      }
+        },
+      };
+      
+      Object.keys(eventHandlers).forEach((eventName) => {
+        socket.current.on(eventName, eventHandlers[eventName]);
+      });
+
+      return () => {
+        if (socket.current) {
+          Object.keys(eventHandlers).forEach((eventName) => {
+            socket.current.off(eventName, eventHandlers[eventName]);
+          });
+          socket.current.disconnect();
+          socket.current = null;
+        }
+      };
     }
   }, [MissionDetails.missionId]);
+  
   console.log(location.state);
 
   return (
