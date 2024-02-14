@@ -141,10 +141,9 @@ import {
 } from "src/constants";
 import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
-// import { JSONLoader } from "@loaders.gl/json";
-// import { LASLoader } from "@loaders.gl/las";
 import { load } from "@loaders.gl/core";
 import { ILayer } from "src/types/layer";
+import { Feature, GeoJson, Point } from "src/types/geojson";
 type Layer = ILayer & {
   isChecked?: boolean,
   render3D?: boolean,
@@ -233,8 +232,7 @@ const ILayerToDeckLayer = (layers: Layer[]) => {
             id: layer._id,
             data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()),
             pickable: true,
-            //iconAtlas: TankIcon,
-            //iconMapping: ICON_MAPPING,
+
             getIcon: (d) => {
               const iconSelector = (iconType) => {
                 let icon = "";
@@ -262,48 +260,12 @@ const ILayerToDeckLayer = (layers: Layer[]) => {
                 mask: true,
               };
             },
-            // onDataLoad: () => {
-            //   setLayerLoading(false);
-            // },
+
             sizeScale: 12,
             getPosition: (d) => d.geometry.coordinates,
             getSize: (d) => 5,
             getColor: [255, 0, 0],
-            // onClick: (data, e) => {
-            //   if (e.leftButton) {
-            //     InfoWindow(
-            //       data.index,
-            //       data.coordinate,
-            //       allLayers[element]?.name,
-            //       "PointView",
-            //       data.object,
-            //       false,
-            //       allLayers[element]?.id,
-            //       data.object.properties.sys_id,
-            //       "Vector"
-            //     );
-            //     setSelectedLayerLabel(
-            //       allLayers[element]?.layerLabel
-            //         ? allLayers[element]?.layerLabel
-            //         : "No label selected"
-            //     );
-            //     setSelectedLayerPopupLabel(
-            //       allLayers[element]?.layerPopupLabel
-            //         ? allLayers[element]?.layerPopupLabel
-            //         : "No label selected"
-            //     );
-            //   } else {
-            //     setSelectedLayerId(element.split("-")[1]);
-            //     setColorChangeFeatureData(data);
-            //     setShowColorChangeForm(true);
-            //   }
-            // },
-            // onHover: (data, e) => {
-            //   setLayerName(allLayers[element]?.name);
-            //   setSelectedLayerPopupLabel(
-            //     allLayers[element]?.layerPopupLabel
-            //   );
-            // },
+
           })
         else if (layer.vector.type == "air_pollution")
           return new HeatmapLayer({
@@ -315,34 +277,18 @@ const ILayerToDeckLayer = (layers: Layer[]) => {
             pickable: true,
             pickingRadius: 20,
           })
-        // new TextLayer({
-        //   id: element + "-1",
-        //   data: parseGeoJson(
-        //     element,
-        //     STATIC_URL + allLayers[element]?.layerPath
-        //   ),
-        //   getPosition: (d: any) => d.geometry.coordinates,
-        //   getText: (d: any) => {
-        //     return `${d.properties.aqi}`;
-        //   },
-        //   getSize: 32,
-        //   getColor: [59, 43, 82],
-        //   pickable: true,
-        //   sizeable: 2,
-        //   sizeMinPixels: 6,
-        //   sizeMaxPixels: 25,
-        //   getBorderColor: [255, 255, 255, 255],
-        //   getTextOutlineWidth: 2,
-        //   getTextOutlineColor: [255, 255, 255, 255],
-        // })
         else if (layer.vector.type == "wind_direction")
           return new IconLayer({
             id: layer._id,
-            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()),
+            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()).then((data: GeoJson<Feature<Point, { windSpeed: number }>>) => {
+              const maxWindSpeed = data.features.map(feature => feature.properties.windSpeed).reduce((maxSpeed, curr) => Math.max(maxSpeed, curr), 0);
+              data.features.forEach(feature => feature.properties["maxWindSpeed"] = maxWindSpeed);
+              return data;
+            }),
             getPosition: (d: any) => d.geometry.coordinates,
             getIcon: (d: any, { index }: { index: any }) => {
               const windSpeed = d.properties.windSpeed;
-              const maxWindSpeed = 10; // TODO!
+              const maxWindSpeed = d.properties.maxWindSpeed;
 
               // Check if windSpeed is a valid number
               if (
@@ -354,20 +300,13 @@ const ILayerToDeckLayer = (layers: Layer[]) => {
                 const color = `rgb(${255 * (1 - t)}, ${255 * t}, 0)`;
 
                 return {
-                  url: svgToDataURL(createSVGIcon(index, color)),
+                  url: svgToDataURL(createSVGIcon(color)),
                   width: 1024,
                   height: 1024,
                 };
               } else {
-                // Handle invalid windSpeed or maxWindSpeed
-                console.error(
-                  "Invalid windSpeed or maxWindSpeed:",
-                  windSpeed,
-                  maxWindSpeed
-                );
-                // You can provide a default color or take other appropriate actions here
                 return {
-                  url: svgToDataURL(createSVGIcon(index, "rgb(255, 0, 0)")),
+                  url: svgToDataURL(createSVGIcon("rgb(255, 0, 0)")),
                   width: 1024,
                   height: 1024,
                 };
@@ -388,50 +327,8 @@ const ILayerToDeckLayer = (layers: Layer[]) => {
             lineWidthUnits: "pixels",
             lineWidthScale: 4,
             lineWidthMinPixels: 2,
-            // lineJoinRounded: true,
-            // onDataLoad: () => {
-            //   setLayerLoading(false);
-            // },
             getLineColor: [255, 0, 0],
             getFillColor: layer.vector.type == "MultiPolygon" ? [0, 225, 0] : undefined,
-            // getRadius: 100,
-            // getLineWidth: 1,
-            // getElevation: 30 ,
-            // onClick: (data, e) => {
-            //   if (e.leftButton) {
-            //     InfoWindow(
-            //       data.index,
-            //       data.coordinate,
-            //       allLayers[element]?.name,
-            //       "LineView",
-            //       data.object,
-            //       false,
-            //       allLayers[element]?.id,
-            //       data.object.properties.sys_id,
-            //       "Vector"
-            //     );
-            //     setSelectedLayerLabel(
-            //       allLayers[element]?.layerLabel
-            //         ? allLayers[element]?.layerLabel
-            //         : "No label selected"
-            //     );
-            //     setSelectedLayerPopupLabel(
-            //       allLayers[element]?.layerPopupLabel
-            //         ? allLayers[element]?.layerPopupLabel
-            //         : "No label selected"
-            //     );
-            //   } else {
-            //     setSelectedLayerId(element.split("-")[1]);
-            //     setColorChangeFeatureData(data);
-            //     setShowColorChangeForm(true);
-            //   }
-            // },
-            // onHover: (data, e) => {
-            //   setLayerName(allLayers[element]?.name);
-            //   setSelectedLayerPopupLabel(
-            //     allLayers[element]?.layerPopupLabel
-            //   );
-            // },
           })
       }
     });
@@ -3571,7 +3468,7 @@ function BaseMap(props) {
         );
 
         if (result.data.status) {
-          SetAllLayers(result.data.data.layers.map(layer => ({...layer, isChecked: true})));
+          SetAllLayers(result.data.data.layers.map(layer => ({ ...layer, isChecked: true })));
           setAllLayers(result.data.data.layers);
           if (result.data.message === "No layer exists for mission") {
             setMissioName(result.data.data.mission);
