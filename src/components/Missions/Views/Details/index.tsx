@@ -1274,7 +1274,7 @@ function MissionView(props) {
       socket.current = io(
         `${API_URL}/stream/mission-specific?missionID=${MissionDetails.missionId}`
       );
-  
+
       const eventHandlers = {
         PROCESS_VIDEO_STARTED: (data) => {
           console.log("Video processing started: ", data);
@@ -1328,7 +1328,7 @@ function MissionView(props) {
           );
         },
       };
-      
+
       Object.keys(eventHandlers).forEach((eventName) => {
         socket.current.on(eventName, eventHandlers[eventName]);
       });
@@ -1344,7 +1344,7 @@ function MissionView(props) {
       };
     }
   }, [MissionDetails.missionId]);
-  
+
   console.log(location.state);
 
   return (
