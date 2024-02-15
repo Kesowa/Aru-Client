@@ -177,7 +177,7 @@ function LiveViewBase(props: any) {
       }
     }
   }, [missionDetails]);
-console.log(missionDetails)
+  console.log(missionDetails);
   return (
     <div className="live-view-wrapper">
       <div>

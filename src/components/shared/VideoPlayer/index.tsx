@@ -145,7 +145,7 @@ const b64toBlob = (b64Data, contentType) => {
 };
 
 function VideoPlayer(props: any) {
-  console.log("oooo",props);
+  console.log("oooo", props);
   const [isAiTaskCompleted, setIsAiTaskCompleted] = useState(false);
   const [aiTaskData, setAiTaskData] = useState({ Keys: [], Values: [] });
   const [aiGraphData, setAiGraphData] = useState({});
@@ -264,7 +264,8 @@ function VideoPlayer(props: any) {
 
   useEffect(() => {
     setIsFlagged(props.mission?.isFlagged);
-    if (props.mission && props.mission.bookmarks !== undefined) setBookmark(props.mission.bookmarks);
+    if (props.mission && props.mission.bookmarks !== undefined)
+      setBookmark(props.mission.bookmarks);
   }, [props.mission, props.mission?.bookmarks]);
   useEffect(() => {
     socket = connectSocket(streamKey);
@@ -739,7 +740,7 @@ function VideoPlayer(props: any) {
       const progress = Math.round(played * 100);
       if (!(progress in bookmark)) {
         const allBookmark = { ...bookmark, [progress]: elapsedTime };
-        console.log("allbookmark",allBookmark);
+        console.log("allbookmark", allBookmark);
         setBookmark(allBookmark);
         updateBookmark(allBookmark, "add");
       }
