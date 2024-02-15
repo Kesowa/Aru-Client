@@ -731,6 +731,7 @@ function VideoPlayer(props: any) {
       id: props.mission._id,
       update: { bookmarks: updatedBookmark },
     };
+    props.updateVOD(body, action);
   };
   const addBookmark = () => {
     console.log("Add", bookmark);

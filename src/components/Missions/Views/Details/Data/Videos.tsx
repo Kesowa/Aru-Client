@@ -218,7 +218,7 @@ function Videos(props) {
               } successfully!`
             );
           } else if ("bookmarks" in body.update) {
-            setRefresh(true);
+            //setRefresh(true);
             message.success(
               `Bookmark ${action === "add" ? "added" : "removed"} successfully!`
             );
