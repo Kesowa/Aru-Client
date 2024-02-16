@@ -2204,8 +2204,8 @@ function BaseMap(props) {
     };
   };
 
-  const drawLayers = async (checkedKeysValue: any) => {
-    const vlayers: Array<any> = [];
+  const drawLayers = async (checkedKeysValue: Array<string>) => {
+    const vlayers = new Array(checkedKeysValue.length);
     setShowMarkerSizeTool(false);
 
     const createSVGIcon = (idx: any, color: string) => {
@@ -2228,12 +2228,12 @@ function BaseMap(props) {
 
     let windData: any;
 
-    await checkedKeysValue.forEach(async (element) => {
+    await Promise.all(checkedKeysValue.sort().reverse().map(async (element, index) => {
       // console.log("element ----------",element)
       if (element.split("-")[0] === "2" && element !== "2") {
         if (props.isBaseMap) {
           const layer: any = allLayers[element];
-          await layer?.layerPath.map(async (layerr: any) => {
+          await Promise.allSettled(layer?.layerPath.map(async (layerr: any) => {
             const settings: any = {
               minp: layerr[0].minP,
               maxp: layerr[0].maxP,
@@ -2267,7 +2267,7 @@ function BaseMap(props) {
 
             // ---pushing tiler layers
 
-            vlayers.push(
+            vlayers[index] = (
               new TileLayer({
                 id: element,
                 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
@@ -2332,7 +2332,7 @@ function BaseMap(props) {
                 },
               })
             );
-          });
+          }));
         } else {
           console.log("Raster");
           const rasterpath =
@@ -2362,7 +2362,7 @@ function BaseMap(props) {
             transitionDuration: 2000,
             transitionInterpolator: new FlyToInterpolator(),
           });
-          vlayers.push(
+          vlayers[index] = (
             new TileLayer({
               id: element,
               // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
@@ -2432,11 +2432,7 @@ function BaseMap(props) {
             })
           );
           if (terrainmap) {
-            vlayers.splice(
-              vlayers.findIndex((layer) => layer.id == element),
-              1
-            );
-            vlayers.push(
+            vlayers[index] = (
               new TerrainLayer({
                 id: element,
                 elevationDecoder: {
@@ -2472,7 +2468,7 @@ function BaseMap(props) {
       } else if (element.split("-")[0] === "1" && element !== "1") {
         switch (allLayers[element]?.type) {
           case "MultiLineString":
-            vlayers.push(
+            vlayers[index]=(
               new GeoJsonLayer({
                 id: element,
                 data: STATIC_URL + allLayers[element]?.layerPath,
@@ -2537,7 +2533,7 @@ function BaseMap(props) {
             );
             break;
           case "MultiPolygon":
-            vlayers.push(
+            vlayers[index] = (
               new GeoJsonLayer({
                 id: element,
                 data: STATIC_URL + allLayers[element]?.layerPath,
@@ -2643,7 +2639,7 @@ function BaseMap(props) {
             break;
           case "Point":
             setShowMarkerSizeTool(true);
-            vlayers.push(
+            vlayers[index] = (
               new IconLayer({
                 id: element,
                 data: parseGeoJson(
@@ -2750,7 +2746,7 @@ function BaseMap(props) {
             );
             break;
           case "air_pollution":
-            vlayers.push(
+            vlayers[index]=[(
               new HeatmapLayer({
                 id: element,
                 data: parseGeoJson(
@@ -2763,8 +2759,8 @@ function BaseMap(props) {
                 pickable: true,
                 pickingRadius: 20,
               })
-            );
-            vlayers.push(
+            ),
+           (
               new TextLayer({
                 id: element + "-1",
                 data: parseGeoJson(
@@ -2785,7 +2781,7 @@ function BaseMap(props) {
                 getTextOutlineWidth: 2,
                 getTextOutlineColor: [255, 255, 255, 255],
               })
-            );
+            )];
             break;
           case "wind_direction":
             windData = await parseGeoJson(
@@ -2794,7 +2790,7 @@ function BaseMap(props) {
             );
             console.log(windData);
 
-            vlayers.push(
+            vlayers[index] = (
               new IconLayer({
                 id: element,
                 data: windData,
@@ -2883,7 +2879,7 @@ function BaseMap(props) {
       } else if (element.split("-")[0] === "3" && element !== "3") {
         setShowMarkerSizeTool(true);
         if (element.split("-")[1] === "2") {
-          vlayers.push(
+          vlayers[index](
             new IconLayer({
               id: element,
               data: geoJsonAlert?.features,
@@ -2941,7 +2937,7 @@ function BaseMap(props) {
           );
         }
         if (element.split("-")[1] === "3") {
-          vlayers.push(
+          vlayers[index](
             new IconLayer({
               id: element,
               data: geoJsonVOD?.features,
@@ -3001,7 +2997,7 @@ function BaseMap(props) {
         }
       }
       console.log("Missions", vlayers);
-    });
+    }));
     /* vlayers.push(
        new TileLayer({
          id: "BASE_LAYER-123123123",
