@@ -2228,7 +2228,7 @@ function BaseMap(props) {
 
     let windData: any;
 
-    await Promise.all(
+    await Promise.allSettled(
       checkedKeysValue
         .sort()
         .reverse()
