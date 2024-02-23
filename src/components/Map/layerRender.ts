@@ -1,0 +1,206 @@
+import MarkerIcon from "../../static/MarkerIcon.png";
+import TankIcon from "../../static/TankIcon.png";
+import ValveIcon from "../../static/ValveIcon.png";
+import DotIcon from "../../static/DotIcon.png";
+import { TerrainLayer } from "@deck.gl/geo-layers/typed";
+import {
+  BitmapLayer,
+  GeoJsonLayer,
+  IconLayer,
+} from "@deck.gl/layers/typed";
+import { HeatmapLayer, TileLayer } from "deck.gl";
+import { COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
+import { Feature, GeoJson, Point } from "src/types/geojson";
+import { ILayer } from "src/types/layer";
+
+export type Layer = ILayer & {
+  isChecked?: boolean,
+  render3D?: boolean,
+}
+
+const createSVGIcon = (color: string) => {
+  return `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+    width="800px" height="800px" viewBox="0 0 490.939 490.939" xml:space="preserve">
+    <g>
+      <g>
+        <path style="fill:${color};" d="M41.552,490.939c-2.665,0-5.297-1.064-7.237-3.095c-3.185-3.337-3.675-8.419-1.186-12.303L181.221,244.52L33.149,15.43
+          c-2.508-3.88-2.031-8.973,1.152-12.32c3.183-3.347,8.245-4.081,12.246-1.768l407.844,235.47c3.094,1.786,5,5.088,5,8.66
+          s-1.906,6.874-5,8.66L46.548,489.6C44.986,490.5,43.263,490.939,41.552,490.939z M72.451,39.39l129.061,199.679
+          c2.128,3.293,2.136,7.525,0.02,10.825L72.156,451.721l357.236-206.25L72.451,39.39z"/>
+      </g>
+    </g>
+  </svg>`;
+};
+
+const svgToDataURL = (svg: string) => {
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+};
+const getRasterDataUrl = (layer: Layer) => {
+  switch (layer.raster.name) {
+    case "NDVI":
+      return (
+        `${COG_URL}/cog/tiles/{z}/{x}/{y}%401x?url=${TITILER_STATIC}${layer.layerpath}`
+      );
+
+    case "NDWI":
+      return (
+        `${COG_URL}/cog/tiles/{z}/{x}/{y}%401x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${layer.raster.resamplingMethod}&bidx=${layer.raster.bidx}`
+      );
+
+    case "DEM":
+      return `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${layer.raster.resamplingMethod}&bidx=${layer.raster.bidx}&rescale=${layer.minp}%2C${layer.maxp}&colormap_name=${layer.raster.colorMap}`;
+
+    default:
+      return (
+        `${COG_URL}/cog/tiles/{z}/{x}/{y}.png?url=${TITILER_STATIC}${layer.layerpath}`
+      );
+  }
+}
+
+export const ILayerToDeckLayer = (layers: Layer[]) => {
+  return layers
+    .filter(layer => layer.isChecked === true)
+    .map(layer => {
+      if (layer.type == "Raster") {
+        if (layer.raster.name == "DEM" && layer.render3D == true) {
+          return new TerrainLayer({
+            id: layer._id,
+            elevationDecoder: {
+              rScaler: 0.299,
+              gScaler: 0.587,
+              bScaler: 0.114,
+              offset: 0,
+            },
+            minZoom: 13,
+            maxZoom: 19,
+            elevationData: getRasterDataUrl(layer),
+            tileSize: 256,
+          })
+        }
+        return new TileLayer({
+          id: layer._id,
+          minZoom: 0,
+          maxZoom: 24,
+          tileSize: 256,
+          pickable: true,
+          renderSubLayers: (props) => {
+            const {
+              bbox: { west, south, east, north },
+            } = props.tile;
+            return new BitmapLayer(props, {
+              data: null,
+              image: props.data,
+              bounds: [west, south, east, north],
+            });
+          },
+        })
+
+      }
+      else if (layer.type == "Vector") {
+        if (layer.vector.type == "Point")
+          return new IconLayer({
+            id: layer._id,
+            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()),
+            pickable: true,
+
+            getIcon: (d) => {
+              const iconSelector = (iconType) => {
+                let icon = "";
+                switch (iconType) {
+                  case "MarkerIcon":
+                    icon = MarkerIcon;
+                    break;
+                  case "TankIcon":
+                    icon = TankIcon;
+                    break;
+                  case "DotIcon":
+                    icon = DotIcon;
+                    break;
+                  case "ValveIcon":
+                    icon = ValveIcon;
+                    break;
+                }
+                return icon;
+              };
+              return {
+                url: iconSelector(d.properties.icon),
+                width: 100,
+                height: 129,
+                anchorY: 125,
+                mask: true,
+              };
+            },
+
+            sizeScale: 12,
+            getPosition: (d) => d.geometry.coordinates,
+            getSize: (d) => 5,
+            getColor: [255, 0, 0],
+
+          })
+        else if (layer.vector.type == "air_pollution")
+          return new HeatmapLayer({
+            id: layer._id,
+            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()),
+            getPosition: (d: any) => d.geometry.coordinates,
+            getWeight: (d: any) => d.properties.aqi,
+            aggregation: "SUM",
+            pickable: true,
+            pickingRadius: 20,
+          })
+        else if (layer.vector.type == "wind_direction")
+          return new IconLayer({
+            id: layer._id,
+            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()).then((data: GeoJson<Feature<Point, { windSpeed: number }>>) => {
+              const maxWindSpeed = data.features.map(feature => feature.properties.windSpeed).reduce((maxSpeed, curr) => Math.max(maxSpeed, curr), 0);
+              data.features.forEach(feature => feature.properties["maxWindSpeed"] = maxWindSpeed);
+              return data;
+            }),
+            getPosition: (d: any) => d.geometry.coordinates,
+            getIcon: (d: any, { index }: { index: any }) => {
+              const windSpeed = d.properties.windSpeed;
+              const maxWindSpeed = d.properties.maxWindSpeed;
+
+              // Check if windSpeed is a valid number
+              if (
+                !isNaN(windSpeed) &&
+                !isNaN(maxWindSpeed) &&
+                maxWindSpeed !== 0
+              ) {
+                const t = windSpeed / maxWindSpeed;
+                const color = `rgb(${255 * (1 - t)}, ${255 * t}, 0)`;
+
+                return {
+                  url: svgToDataURL(createSVGIcon(color)),
+                  width: 1024,
+                  height: 1024,
+                };
+              } else {
+                return {
+                  url: svgToDataURL(createSVGIcon("rgb(255, 0, 0)")),
+                  width: 1024,
+                  height: 1024,
+                };
+              }
+            },
+
+            getSize: (d) => d.properties.windSpeed * 4,
+            getAngle: (d) => 90 - d.properties.windDirection,
+          })
+        else
+          return new GeoJsonLayer({
+            id: layer._id,
+            data: STATIC_URL + layer.layerpath,
+            pickable: true,
+            stroked: layer.vector.type == "MultiPolygon",
+            filled: layer.vector.type == "MultiPolygon",
+            extruded: false,
+            lineWidthUnits: "pixels",
+            lineWidthScale: 4,
+            lineWidthMinPixels: 2,
+            getLineColor: [255, 0, 0],
+            getFillColor: layer.vector.type == "MultiPolygon" ? [0, 225, 0] : undefined,
+          })
+      }
+    });
+}
+
