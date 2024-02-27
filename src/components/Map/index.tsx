@@ -4761,7 +4761,7 @@ function BaseMap(props) {
 
   // ++++++++++++++++++++++++++++++++++++++ Create Layer ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  const fileTypes = ["geojson", "tif", "kml", "shp", "zip"];
+  const fileTypes = ["geojson", "tif", "kml", "shp", "zip", "laz"];
 
   const createLayer = async () => {
     if (!fileList.length) {
@@ -4773,7 +4773,7 @@ function BaseMap(props) {
     const ext = file.name.split(".").pop();
 
     if (!fileTypes.includes(ext)) {
-      message.error("Please select the geojson or tif file");
+      message.error("Please select the geojson or tif file or laz file");
       return;
     }
 
@@ -7041,7 +7041,7 @@ function BaseMap(props) {
                         />
                       }
                       title={"Upload File"}
-                      description="Create a new layer by uploading a vector file (.geojson, .shp, .kml) or raster file (only .tif)"
+                      description="Create a new layer by uploading a vector file (.geojson, .shp, .kml) or raster file (.tif, .laz)"
                     />
                   </Card>
                   <Card
@@ -7160,7 +7160,7 @@ function BaseMap(props) {
                     <Row>
                       <Alert
                         style={{ width: "100%" }}
-                        message={`Only .geojson and .kml files support for type "Vector" and .tif for type "Raster"`}
+                        message={`Only .geojson and .kml files support for type "Vector" and .tif or .laz for type "Raster"`}
                         type="info"
                         showIcon
                       />
