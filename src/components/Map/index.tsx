@@ -13,7 +13,8 @@ import { WebMercatorViewport } from "viewport-mercator-project";
 import { MaskExtension } from "@deck.gl/extensions/typed";
 import { TerrainLayer } from "@deck.gl/geo-layers/typed";
 import { readPixelsToArray } from "@luma.gl/webgl";
-
+import { CesiumIonLoader } from '@loaders.gl/3d-tiles';
+import { Tile3DLayer } from '@deck.gl/geo-layers';
 import {
   Row,
   Col,
@@ -195,6 +196,7 @@ function BaseMap(props) {
   const [videoDetails, setVideoDetails] = useState<any>({});
   const [showCarousel, setShowCarousel] = useState(false);
   const [terrainmap, setTerrainMap] = useState(false);
+  const [metadata1, setMetaData1] = useState(null)
   const [overlayId, setOverlayID] = useState<string>();
   const [isElevationEnabled, setIsElevationEnabled] = useState(false);
   const isElevationEnabledRef = useRef(isElevationEnabled);
@@ -2237,6 +2239,7 @@ function BaseMap(props) {
           if (element.split("-")[0] === "2" && element !== "2") {
             if (props.isBaseMap) {
               const layer: any = allLayers[element];
+              console.log(layer);
               await Promise.allSettled(
                 layer?.layerPath.map(async (layerr: any) => {
                   const settings: any = {
@@ -2339,7 +2342,43 @@ function BaseMap(props) {
                 })
               );
             } else {
+              console.log(allLayers);
+              console.log("meta dataaaa :",metadata1);
+              const pointId = metadata1.metadata.id;
+              const myname = metadata1.raster.name; 
+              console.log(myname); // This will log: 2481217
               console.log("Raster");
+              if (metadata1.raster.name == "POINT_CLOUD"){
+                // Fetch the dynamic ID from the backend and bounds
+               
+                
+                //Render the pointcloud data
+                const tile3DLayer = new Tile3DLayer({
+                  id: element,
+                  data: `https://assets.cesium.com/${pointId}/tileset.json`, // Construct URL with dynamicID
+                  loader: CesiumIonLoader,
+                  loadOptions: {
+                    'cesium-ion': { accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhOWZlODM4YS01YTMxLTQ2MTEtOGFiYy04NzgwYjY1NjQyZjQiLCJpZCI6MTk2NDI1LCJpYXQiOjE3MDkwMzIzNzZ9.MSO5NO47tm1Ikbnqi-e44xyq7eOMBGS-3EMBEiyNFf4' }
+                  },
+                  onTilesetLoad: (tileset) => {
+                    const { cartographicCenter, zoom } = tileset;
+                    setViewport({
+                      ...INITIAL_VIEW_STATE,
+                      longitude: cartographicCenter[0],
+                      latitude: cartographicCenter[1],
+                      pitch: 85, // Adjust the pitch to your desired angle
+                      bearing: 45, // Adjust the bearing to your desired angle
+                      zoom: 17
+                    });
+                  },
+                  _subLayerProps: {
+                    scenegraph: { _lighting: 'flat' }
+                  }
+                  //bounds: [west, south, east, north]
+                });
+              
+                vlayers.push(tile3DLayer);
+              } 
               const rasterpath =
                 `${TITILER_STATIC}` + allLayers[element]?.layerPath;
               const metaDataURL = `${COG_URL}/cog/info?url=${rasterpath}`;
@@ -2465,7 +2504,7 @@ function BaseMap(props) {
                     "z"
                   ),
                 });
-              }
+              }   
             }
           } else if (element.split("-")[0] === "1" && element !== "1") {
             switch (allLayers[element]?.type) {
@@ -4816,8 +4855,14 @@ function BaseMap(props) {
         config
       );
 
+      setMetaData1(result.data.data);
+
+      //console.log("data uploaded: ",result);
+
+
+
       if (result.data.status) {
-        console.log(result.data.data);
+        console.log("metadata for me:",result.data.data);
         addLayer(result.data.data);
         message.success("Layer created!");
       } else {
