@@ -2007,43 +2007,26 @@ function BaseMap(props) {
     //console.log("onclick", index);
   }
   //-----------------------Fetch Raster URL----------------------------------
-  const getRasterURL = (rasterType, path, settings, x, y, z) => {
+  const getRasterURL = (rasterType, path, settings, x?, y?, z?) => {
     //SetColorMap(settings.color);
-    switch (rasterType) {
-      case "NDVI":
-        return (
-          `${COG_URL}` +
-          `/cog/tiles` +
-          `/${z}/${x}/${y}%401x?url=${TITILER_STATIC}` +
-          path
-        );
-
-      case "NDWI":
-        return (
-          `${COG_URL}` +
-          `/cog/tiles` +
-          `/${z}/${x}/${y}%401x?url=${TITILER_STATIC}` +
-          path +
-          `&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}`
-        );
-
-      case "DEM":
-        return terrainmap
-          ? `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=null&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
-          : `${COG_URL}/cog/tiles/${z}/${x}/${y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`;
-
-      case "OVERLAY":
-        // console.log()
-        return `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`;
-
-      default:
-        return (
-          `${COG_URL}` +
-          `/cog/tiles` +
-          `/${z}/${x}/${y}.png?url=${TITILER_STATIC}` +
-          path
-        );
+    const scale = "@1x";
+    const format = ".png";
+    const baseURL = `${COG_URL}/cog/tiles/${z ? z : "{z}"}/${x ? x : "{x}"}/${y ? y : "{y}"}${scale}${format}`;
+    const { resamplingMethod, bidx, minp, maxp } = settings;
+    let queries: any = {
+      url: `${TITILER_STATIC}${path}`,
+      [resamplingMethod && "resampling_method"]: resamplingMethod,
+      [bidx && "bidx"]: bidx,
+      [minp && maxp && "rescale"]: `${minp},${maxp}`,
+    };
+    if(["DEM","OVERLAY"].includes(rasterType)){
+      queries["colormap_name"] = colorMap;
     }
+    delete queries["undefined"];
+    delete queries["null"];
+    const queryString = (new URLSearchParams(queries)).toString();
+    console.log(`${baseURL}?${queryString}`);
+    return `${baseURL}?${queryString}`;
   };
 
   function handleClose(status: boolean) {
@@ -2087,7 +2070,6 @@ function BaseMap(props) {
   //-------------on layer check-------------------------------
 
   useEffect(() => {
-    // console.log("it may be by traiin map",checkedKeys);
     setScaleData(checkedKeys);
     drawLayers(checkedKeys);
     console.log("lost");
@@ -2142,7 +2124,6 @@ function BaseMap(props) {
   };
 
   const forceUpdateAllLayers = () => {
-    // console.log("it my br by terrainmap");
     const cv = [...checkedKeys];
     setCheckedKeys([]);
 
@@ -2450,10 +2431,7 @@ function BaseMap(props) {
                 elevationData: getRasterURL(
                   allLayers[element]?.type,
                   allLayers[element]?.layerPath,
-                  allLayers[element]?.settings,
-                  "x",
-                  "y",
-                  "z"
+                  allLayers[element]?.settings
                 ),
                 tileSize: 256,
                 // texture: "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.webp?sku=101Y90ZfwGPtj&access_token=pk.eyJ1IjoibmVlbGR1dHRhMTkiLCJhIjoiY2tweG9mN3F4MThrNTJ4cDk0enVjcTN4dCJ9.uxa_h0rjqumTxFMI1QELKQ"
@@ -2461,9 +2439,6 @@ function BaseMap(props) {
                   "OVERLAY",
                   allLayers[element]?.layerPath,
                   allLayers[element]?.settings,
-                  "x",
-                  "y",
-                  "z"
                 ),
               })
             );
