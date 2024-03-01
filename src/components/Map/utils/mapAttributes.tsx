@@ -83,9 +83,19 @@ const MapAttributes: React.FC<Props> = (props) => {
   };
 
   const [state, setState] = useState<State>(initialState);
-  const filteredLayers = Object.values(props.allLayers).filter(
-    (layer) => layer.type === "DEM" || layer.type === "ORTHO"
-  );
+  const filteredLayers = Object.keys(props.allLayers)
+    .map((key) => {
+      const layer = props.allLayers[key];
+      if (layer.type === "DEM" || layer.type === "ORTHO") {
+        return {
+          key,
+          ...layer,
+        };
+      } else {
+        return null;
+      }
+    })
+    .filter((layer) => layer !== null);
 
   const onChange = (checked: boolean) => {
     props.setTerrainMap(checked);
@@ -317,7 +327,6 @@ const MapAttributes: React.FC<Props> = (props) => {
   }
 
   function changeOverlay(value: string) {
-    console.log(`2-${value}`);
     props.setOverlayID(value);
   }
 
@@ -395,7 +404,7 @@ const MapAttributes: React.FC<Props> = (props) => {
                   onChange={changeOverlay}
                 >
                   {filteredLayers.map((layer) => (
-                    <Option key={layer.name} value={layer.settings._id}>
+                    <Option key={layer.name} value={layer.key}>
                       {layer.name}
                       {console.log("layer", layer)}
                     </Option>

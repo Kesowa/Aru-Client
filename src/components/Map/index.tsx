@@ -2019,7 +2019,7 @@ function BaseMap(props) {
       [bidx && "bidx"]: bidx,
       [minp && maxp && "rescale"]: `${minp},${maxp}`,
     };
-    if(["DEM","OVERLAY"].includes(rasterType)){
+    if(["DEM"].includes(rasterType)){ // kept as an array because more raster types may need colormap in future
       queries["colormap_name"] = colorMap;
     }
     delete queries["undefined"];
@@ -2436,9 +2436,9 @@ function BaseMap(props) {
                 tileSize: 256,
                 // texture: "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.webp?sku=101Y90ZfwGPtj&access_token=pk.eyJ1IjoibmVlbGR1dHRhMTkiLCJhIjoiY2tweG9mN3F4MThrNTJ4cDk0enVjcTN4dCJ9.uxa_h0rjqumTxFMI1QELKQ"
                 texture: getRasterURL(
-                  "OVERLAY",
-                  allLayers[element]?.layerPath,
-                  allLayers[element]?.settings,
+                  allLayers[overlayId ? overlayId : element]?.type,
+                  allLayers[overlayId ? overlayId : element]?.layerPath,
+                  allLayers[overlayId ? overlayId : element]?.settings,
                 ),
               })
             );
