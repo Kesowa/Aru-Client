@@ -50,7 +50,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   ...restProps
 }) => {
-  const inputNode = <Input size="small" />;
+
+  const initialValue = record ? record[dataIndex] : undefined;
+  const inputNode = <Input size="small" defaultValue={initialValue}/>;
 
   return (
     <td {...restProps}>
