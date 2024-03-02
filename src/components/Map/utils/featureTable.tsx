@@ -465,11 +465,10 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       delete obj.key;
       delete obj.featureIndex;
       delete obj.index;
+      const initialProperties = props.tableData[key].properties;
       const properties = {
         ...obj,
-        color: props.tableData[key].properties.color,
-        Id: props.tableData[key].properties.Id,
-        icon: props.tableData[key].properties.icon,
+        ...initialProperties,
       };
       const body = {
         id: props.id,
@@ -765,14 +764,18 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       }),
     };
   });
-
   return (
     <>
       <Table
         // size="small"
         components={{
           body: {
-            cell: EditableCell,
+            cell: (cellProps) => (
+              <EditableCell
+                form={form}
+                {...cellProps}
+              />
+            ),
           },
         }}
         columns={mergedColumns}
