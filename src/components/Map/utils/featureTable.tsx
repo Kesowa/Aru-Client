@@ -767,7 +767,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
   });
 
   return (
-    <>
+    <Form form={form} component={false}>
       <Table
         // size="small"
         components={{
@@ -805,7 +805,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
           };
         }}
       />
-    </>
+    </Form>
   );
 };
 
