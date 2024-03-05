@@ -770,12 +770,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
         // size="small"
         components={{
           body: {
-            cell: (cellProps) => (
-              <EditableCell
-                form={form}
-                {...cellProps}
-              />
-            ),
+            cell: EditableCell,
           },
         }}
         columns={mergedColumns}
