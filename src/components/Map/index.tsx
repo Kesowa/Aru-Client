@@ -2238,7 +2238,6 @@ function BaseMap(props) {
           if (element.split("-")[0] === "2" && element !== "2") {
             if (props.isBaseMap) {
               const layer: any = allLayers[element];
-              console.log("he baga ete:",allLayers);
               console.log(layer);
               await Promise.allSettled(
                 layer?.layerPath.map(async (layerr: any) => {
@@ -2344,7 +2343,7 @@ function BaseMap(props) {
             } else if (allLayers[element].type == "POINT_CLOUD") {
                 // Fetch the dynamic ID from the backend (bounds are not yet avaliable)
                 const cloudLayer = allLayers[element];
-                const pointId = cloudLayer["layerId"];
+                const pointId = cloudLayer["metadata"]["id"];
                 
                 //Render the pointcloud data
                 vlayers[index] = new Tile3DLayer({
@@ -4387,7 +4386,7 @@ function BaseMap(props) {
   };
 
   const segrigateLayers = (layers) => {
-    //console.log("segrate layer");
+    console.log("segrate layer");
     let data: any = [...treeDataa];
     let allLayers: any = {};
     if (
@@ -4454,6 +4453,7 @@ function BaseMap(props) {
         l[data[1]["key"] + "-" + layer._id] = {
           layerPath: layer.layerdataArr,
           type: layer.raster.name,
+          metadata: layer.metadata,
           settings: {
             ...layer.raster,
             // minp: layer.minp,
@@ -4466,6 +4466,7 @@ function BaseMap(props) {
         l[data[1]["key"] + "-" + layer._id] = {
           layerPath: layer.layerpath,
           type: layer.raster.name,
+          metadata: layer.metadata,
           settings: {
             ...layer.raster,
             minp: layer.minp,
@@ -4933,6 +4934,7 @@ function BaseMap(props) {
           l[data[1]["key"] + "-" + layer._id] = {
             layerPath: layer.layerdataArr,
             type: layer.raster.name,
+            metadata: layer.metadata,
             settings: {
               ...layer.raster,
               // minp: layer.minp,
@@ -4945,6 +4947,7 @@ function BaseMap(props) {
           l[data[1]["key"] + "-" + layer._id] = {
             layerPath: layer.layerpath,
             type: layer.raster.name,
+            metadata: layer.metadata,
             settings: {
               ...layer.raster,
               minp: layer.minp,
@@ -4952,7 +4955,6 @@ function BaseMap(props) {
             },
             name: layer.name,
             id: layer._id,
-            layerId: layer.metadata.id,
           };
         }
 
