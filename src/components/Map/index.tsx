@@ -2011,20 +2011,23 @@ function BaseMap(props) {
     //SetColorMap(settings.color);
     const scale = "@1x";
     const format = ".png";
-    const baseURL = `${COG_URL}/cog/tiles/${z ? z : "{z}"}/${x ? x : "{x}"}/${y ? y : "{y}"}${scale}${format}`;
+    const baseURL = `${COG_URL}/cog/tiles/${z ? z : "{z}"}/${x ? x : "{x}"}/${
+      y ? y : "{y}"
+    }${scale}${format}`;
     const { resamplingMethod, bidx, minp, maxp } = settings;
-    let queries: any = {
+    const queries: any = {
       url: `${TITILER_STATIC}${path}`,
       [resamplingMethod && "resampling_method"]: resamplingMethod,
       [bidx && "bidx"]: bidx,
       [minp && maxp && "rescale"]: `${minp},${maxp}`,
     };
-    if(["DEM"].includes(rasterType)){ // kept as an array because more raster types may need colormap in future
+    if (["DEM"].includes(rasterType)) {
+      // kept as an array because more raster types may need colormap in future
       queries["colormap_name"] = colorMap;
     }
     delete queries["undefined"];
     delete queries["null"];
-    const queryString = (new URLSearchParams(queries)).toString();
+    const queryString = new URLSearchParams(queries).toString();
     console.log(`${baseURL}?${queryString}`);
     return `${baseURL}?${queryString}`;
   };
