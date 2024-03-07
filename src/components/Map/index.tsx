@@ -142,7 +142,7 @@ import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
 import { load } from "@loaders.gl/core";
 import { ILayer } from "src/types/layer";
-import { ILayerToDeckLayer } from "./layerRender";
+import { ILayerToDeckLayer, Layer } from "./layerRender";
 import { ILayersToTree } from "./treeRender";
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
