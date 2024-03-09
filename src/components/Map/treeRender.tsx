@@ -1,11 +1,11 @@
-import { Layer as GLayer } from "./layerRender";
+import { Layer as GLayer, MissionLayer } from "./layerRender";
 import { Dropdown, Typography } from "antd";
 import { MenuClickEventHandler } from "rc-menu/lib/interface";
 import { FolderOutlined, FileImageOutlined, EnvironmentOutlined, BranchesOutlined, GatewayOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
 
-export const ILayersToTree = (layers: GLayer[]): TreeData => {
+export const ILayersToTree = (layers: GLayer[], missionLayers: MissionLayer[]): TreeData => {
   const treeData: TreeData = [
     {
       title: "Vector",
@@ -26,7 +26,7 @@ export const ILayersToTree = (layers: GLayer[]): TreeData => {
   ;
   treeData[0].children = groupLayers(layers.filter(layer => layer.type == "Vector"));
   treeData[1].children = groupLayers(layers.filter(layer => layer.type == "Raster"));
-  // treeData[2].children = layers.filter(layer => layer.type == "Mission");
+  treeData[2].children = missionLayersMenu(missionLayers);
   return treeData;
 };
 
@@ -72,6 +72,13 @@ type LayerGroup = {
   groupType: 1 | 2,
 };
 type Child = Layer | LayerGroup;
+type MissionChild = MissionLayer & {
+  icon: Object,
+  key: string,
+  title: Object,
+  group: boolean,
+};
+
 type TreeData = [
   {
     title: "Vector",
@@ -86,7 +93,7 @@ type TreeData = [
   {
     title: "Mission",
     key: "3",
-    children: Child[]
+    children: MissionChild[]
   }
 ];
 
@@ -138,6 +145,18 @@ function groupLayers(layers: GLayer[]) {
     }
   })
   return groupedLayers;
+}
+
+function missionLayersMenu(missionLayers: MissionLayer[]) {
+  return missionLayers.map((layer) => {
+    return {
+      ...layer,
+      icon: vectorIcon("Point", "#d0021b"),
+      key: layer.id,
+      title: titleElement(layer.name, () => {}),
+      group: false,
+    };
+  });
 }
 
 function AirPollutionIcon({ color }: { color: string }) {

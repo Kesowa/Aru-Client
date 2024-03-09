@@ -18,6 +18,13 @@ export type Layer = ILayer & {
   render3D?: boolean,
 }
 
+export type MissionLayer = {
+  id: string,
+  name: string,
+  geojsonUrl: string,
+  isChecked: boolean,
+}
+
 const createSVGIcon = (color: string) => {
   return `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
     width="800px" height="800px" viewBox="0 0 490.939 490.939" xml:space="preserve">
@@ -204,3 +211,47 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
     });
 }
 
+export const MissionLayerToDeckLayer = (layers: MissionLayer[]) => {
+  return layers
+    .filter((layer) => layer.isChecked === true)
+    .map((layer) => {
+      return new IconLayer({
+        id: layer.id,
+        data: fetch(layer.geojsonUrl).then((response) => response.json()),
+        pickable: true,
+
+        getIcon: (d) => {
+          const iconSelector = (iconType) => {
+            let icon = "";
+            switch (iconType) {
+              case "MarkerIcon":
+                icon = MarkerIcon;
+                break;
+              case "TankIcon":
+                icon = TankIcon;
+                break;
+              case "DotIcon":
+                icon = DotIcon;
+                break;
+              case "ValveIcon":
+                icon = ValveIcon;
+                break;
+            }
+            return icon;
+          };
+          return {
+            url: iconSelector(d.properties.icon),
+            width: 100,
+            height: 129,
+            anchorY: 125,
+            mask: true,
+          };
+        },
+
+        sizeScale: 12,
+        getPosition: (d) => d.geometry.coordinates,
+        getSize: (d) => 5,
+        getColor: [255, 0, 0],
+      });
+    });
+};

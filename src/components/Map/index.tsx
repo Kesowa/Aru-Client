@@ -142,7 +142,7 @@ import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
 import { load } from "@loaders.gl/core";
 import { ILayer } from "src/types/layer";
-import { ILayerToDeckLayer, Layer } from "./layerRender";
+import { ILayerToDeckLayer, Layer, MissionLayer, MissionLayerToDeckLayer } from "./layerRender";
 import { ILayersToTree } from "./treeRender";
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -1360,6 +1360,7 @@ function BaseMap(props) {
 
   const [allLayers, setAllLayers] = useState<Layer[]>([]);
   const [AllLayers, SetAllLayers] = useState<Layer[]>([]);
+  const [MissionLayers, SetMissionLayers] = useState<MissionLayer[]>([]);
   const [visibleLayers, setVisibleLayers] = useState([]);
   const [colorChangeFeatureData, setColorChangeFeatureData] =
     useState<any>(null);
@@ -3280,6 +3281,10 @@ function BaseMap(props) {
 
         if (result.data.status) {
           SetAllLayers(result.data.data.layers.map(layer => ({ ...layer, isChecked: true })));
+          SetMissionLayers([
+            { id: (Math.random()*1000).toString(), name: "Alert", geojsonUrl: `${apis.BASE_SERVER_URL}/apis/v1/mission/${id}/alerts`, isChecked: true },
+            { id: (Math.random()*1000).toString(), name: "VOD", geojsonUrl: `${apis.BASE_SERVER_URL}/apis/v1/mission/${id}/vods`, isChecked: true },
+          ]);
           setAllLayers(result.data.data.layers);
           if (result.data.message === "No layer exists for mission") {
             setMissioName(result.data.data.mission);
@@ -6395,15 +6400,26 @@ function BaseMap(props) {
           }
         }}
         controller={true}
-        layers={[
-          isDrawing
-            ? osmState
-              ? [osm, ILayerToDeckLayer(AllLayers), drawPolygonTool]
-              : [visibleLayers, drawPolygonTool]
-            : osmState
-              ? [osm, ILayerToDeckLayer(AllLayers), maskLayer]
-              : [ILayerToDeckLayer(AllLayers), maskLayer],
-        ]}
+        layers={(() => {
+          const layers: any[] = [];
+
+          // OSMState Layers
+          if(osmState) layers.push(osm);
+
+          // Tree Menu Layers
+          layers.push([
+            ...ILayerToDeckLayer(AllLayers),
+            ...MissionLayerToDeckLayer(MissionLayers)
+          ]);
+
+          // Drawing State Layers
+          if (isDrawing) {
+            layers.push(drawPolygonTool);
+          } else {
+            layers.push(maskLayer);
+          }
+          return layers;
+        })()}
         style={{ height: "100vh", width: "100%" }}
         // onHover={(info) => {
         //   const coords = getPolygon(info.x, info.y, 150);
@@ -7362,7 +7378,7 @@ function BaseMap(props) {
               checkedKeys={checkedKeys}
               onSelect={onSelect}
               selectedKeys={selectedKeys}
-              treeData={ILayersToTree(AllLayers)}
+              treeData={ILayersToTree(AllLayers, MissionLayers)}
               onDrop={onDrop}
               draggable={(node: any) => {
                 if (
