@@ -138,6 +138,7 @@ import {
   PUBLIC_URL,
   STATIC_URL,
   TITILER_STATIC,
+  CESIUM_TOKEN,
   API_URL,
 } from "src/constants";
 import * as turf from "@turf/turf";
@@ -2344,14 +2345,14 @@ function BaseMap(props) {
                 // Fetch the dynamic ID from the backend (bounds are not yet avaliable)
                 const cloudLayer = allLayers[element];
                 const pointId = cloudLayer["metadata"]["id"];
-                
+              
                 //Render the pointcloud data
                 vlayers[index] = new Tile3DLayer({
                   id: element,
                   data: `https://assets.cesium.com/${pointId}/tileset.json`,
                   loader: CesiumIonLoader,
                   loadOptions: {
-                    'cesium-ion': { accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhOWZlODM4YS01YTMxLTQ2MTEtOGFiYy04NzgwYjY1NjQyZjQiLCJpZCI6MTk2NDI1LCJpYXQiOjE3MDkwMzIzNzZ9.MSO5NO47tm1Ikbnqi-e44xyq7eOMBGS-3EMBEiyNFf4' }
+                    'cesium-ion': { accessToken: CESIUM_TOKEN }
                   },
                   onTilesetLoad: (tileset) => {
                     const { cartographicCenter, zoom } = tileset;
@@ -2359,7 +2360,8 @@ function BaseMap(props) {
                       ...INITIAL_VIEW_STATE,
                       longitude: cartographicCenter[0],
                       latitude: cartographicCenter[1],
-                      zoom
+                      zoom,
+                      pitch:150
                     });
                   },
                   _subLayerProps: {
