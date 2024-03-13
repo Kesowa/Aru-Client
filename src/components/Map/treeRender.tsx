@@ -1,11 +1,11 @@
-import { Layer as GLayer, MissionLayer } from "./layerRender";
+import { Layer as GLayer, IMissionLayers } from "./layerRender";
 import { Dropdown, Typography } from "antd";
 import { MenuClickEventHandler } from "rc-menu/lib/interface";
 import { FolderOutlined, FileImageOutlined, EnvironmentOutlined, BranchesOutlined, GatewayOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
 
-export const ILayersToTree = (layers: GLayer[], missionLayers: MissionLayer[]): TreeData => {
+export const ILayersToTree = (layers: GLayer[], missionLayers: IMissionLayers): TreeData => {
   const treeData: TreeData = [
     {
       title: "Vector",
@@ -147,16 +147,25 @@ function groupLayers(layers: GLayer[]) {
   return groupedLayers;
 }
 
-function missionLayersMenu(missionLayers: MissionLayer[]) {
-  return missionLayers.map((layer) => {
-    return {
-      ...layer,
+function missionLayersMenu(missionLayers: IMissionLayers) {
+  return [
+    {
+      name: "Alert",
+      id: "alert",
       icon: vectorIcon("Point", "#d0021b"),
-      key: layer.id,
-      title: titleElement(layer.name, () => {}),
+      key: "alert",
+      title: titleElement("Alert", () => {}),
       group: false,
-    };
-  });
+    },
+    {
+      name: "VOD",
+      id: "vod",
+      icon: vectorIcon("Point", "#d0021b"),
+      key: "vod",
+      title: titleElement("VOD", () => {}),
+      group: false,
+    },
+  ];
 }
 
 function AirPollutionIcon({ color }: { color: string }) {

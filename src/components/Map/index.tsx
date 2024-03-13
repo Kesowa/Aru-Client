@@ -142,8 +142,9 @@ import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
 import { load } from "@loaders.gl/core";
 import { ILayer } from "src/types/layer";
-import { ILayerToDeckLayer, Layer, MissionLayer, MissionLayerToDeckLayer } from "./layerRender";
+import { ILayerToDeckLayer, Layer, IMissionLayers, MissionLayerToDeckLayer } from "./layerRender";
 import { ILayersToTree } from "./treeRender";
+import { is } from "date-fns/locale";
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
   [lat - size * 0.5, lng - size * 0.5],
@@ -1360,7 +1361,7 @@ function BaseMap(props) {
 
   const [allLayers, setAllLayers] = useState<Layer[]>([]);
   const [AllLayers, SetAllLayers] = useState<Layer[]>([]);
-  const [MissionLayers, SetMissionLayers] = useState<MissionLayer[]>([]);
+  const [MissionLayers, SetMissionLayers] = useState<IMissionLayers>([]);
   const [visibleLayers, setVisibleLayers] = useState([]);
   const [colorChangeFeatureData, setColorChangeFeatureData] =
     useState<any>(null);
@@ -1644,10 +1645,12 @@ function BaseMap(props) {
   //-----creating drone path-----
 
   useEffect(() => {
-    SetMissionLayers([
-      { id: "alert", name: "Alert", geojsonUrl: missionGeojsonURL("alert", props.isBaseMap, dateRange[0], dateRange[1]), isChecked: true },
-      { id: "vod", name: "VOD", geojsonUrl: missionGeojsonURL("vod", props.isBaseMap, dateRange[0], dateRange[1]), isChecked: true },
-    ]);
+    SetMissionLayers({
+      alertGeojsonUrl: missionGeojsonURL("alert", props.isBaseMap, dateRange[0], dateRange[1]),
+      vodGeojsonUrl: missionGeojsonURL("vod", props.isBaseMap, dateRange[0], dateRange[1]),
+      isAlertChecked: true,
+      isVODChecked: true,
+    });
   }, [dateRange]);
 
   const updateVOD = (data, idx) => {
@@ -3296,10 +3299,12 @@ function BaseMap(props) {
 
         if (result.data.status) {
           SetAllLayers(result.data.data.layers.map(layer => ({ ...layer, isChecked: true })));
-          SetMissionLayers([
-            { id: "alert", name: "Alert", geojsonUrl: missionGeojsonURL("alert", props.isBaseMap, dateRange[0], dateRange[1]), isChecked: true },
-            { id: "vod", name: "VOD", geojsonUrl: missionGeojsonURL("vod", props.isBaseMap, dateRange[0], dateRange[1]), isChecked: true },
-          ]);
+          SetMissionLayers({
+            alertGeojsonUrl: missionGeojsonURL("alert", props.isBaseMap, dateRange[0], dateRange[1]),
+            vodGeojsonUrl: missionGeojsonURL("vod", props.isBaseMap, dateRange[0], dateRange[1]),
+            isAlertChecked: true,
+            isVODChecked: true,
+          });
           setAllLayers(result.data.data.layers);
           if (result.data.message === "No layer exists for mission") {
             setMissioName(result.data.data.mission);
@@ -6434,10 +6439,8 @@ function BaseMap(props) {
           if(osmState) layers.push(osm);
 
           // Tree Menu Layers
-          layers.push([
-            ...ILayerToDeckLayer(AllLayers),
-            ...MissionLayerToDeckLayer(MissionLayers)
-          ]);
+          layers.push(ILayerToDeckLayer(AllLayers));
+          layers.push(MissionLayerToDeckLayer(MissionLayers));
 
           // Drawing State Layers
           if (isDrawing) {

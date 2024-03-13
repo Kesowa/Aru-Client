@@ -19,11 +19,11 @@ export type Layer = ILayer & {
   render3D?: boolean,
 }
 
-export type MissionLayer = {
-  id: string,
-  name: string,
-  geojsonUrl: string,
-  isChecked: boolean,
+export type IMissionLayers = {
+  alertGeojsonUrl: string,
+  vodGeojsonUrl: string,
+  isAlertChecked: boolean,
+  isVODChecked: boolean,
 }
 
 const createSVGIcon = (color: string) => {
@@ -212,49 +212,69 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
     });
 }
 
-export const MissionLayerToDeckLayer = (layers: MissionLayer[]) => {
-  return layers
-    .filter((layer) => layer.isChecked === true)
-    .map((layer) => {
-      return new IconLayer({
-        id: layer.id,
+export const MissionLayerToDeckLayer = (missionLayers: IMissionLayers) => {
+  const deckLayers: IconLayer[] = [];
+
+  const getIcon = (d) => {
+    const iconSelector = (iconType) => {
+      let icon = "";
+      switch (iconType) {
+        case "MarkerIcon":
+          icon = MarkerIcon;
+          break;
+        case "TankIcon":
+          icon = TankIcon;
+          break;
+        case "DotIcon":
+          icon = DotIcon;
+          break;
+        case "ValveIcon":
+          icon = ValveIcon;
+          break;
+      }
+      return icon;
+    };
+    return {
+      url: iconSelector(d.properties.icon),
+      width: 100,
+      height: 129,
+      anchorY: 125,
+      mask: true,
+    };
+  };
+
+  if (missionLayers.isAlertChecked) {
+    deckLayers.push(
+      new IconLayer({
+        id: "alert",
         data: http
-          .get(STATIC_URL + layer.geojsonUrl)
+          .get(STATIC_URL + missionLayers.alertGeojsonUrl)
           .then((result) => result.data),
         pickable: true,
-
-        getIcon: (d) => {
-          const iconSelector = (iconType) => {
-            let icon = "";
-            switch (iconType) {
-              case "MarkerIcon":
-                icon = MarkerIcon;
-                break;
-              case "TankIcon":
-                icon = TankIcon;
-                break;
-              case "DotIcon":
-                icon = DotIcon;
-                break;
-              case "ValveIcon":
-                icon = ValveIcon;
-                break;
-            }
-            return icon;
-          };
-          return {
-            url: iconSelector(d.properties.icon),
-            width: 100,
-            height: 129,
-            anchorY: 125,
-            mask: true,
-          };
-        },
-
+        getIcon,
         sizeScale: 12,
         getPosition: (d) => d.geometry.coordinates,
         getSize: (d) => 5,
         getColor: [255, 0, 0],
-      });
-    });
+      })
+    );
+  }
+  if (missionLayers.isVODChecked) {
+    deckLayers.push(
+      new IconLayer({
+        id: "vod",
+        data: http
+          .get(STATIC_URL + missionLayers.vodGeojsonUrl)
+          .then((result) => result.data),
+        pickable: true,
+        getIcon,
+        sizeScale: 12,
+        getPosition: (d) => d.geometry.coordinates,
+        getSize: (d) => 5,
+        getColor: [255, 0, 0],
+      })
+    );
+  }
+
+  return deckLayers;
 };
