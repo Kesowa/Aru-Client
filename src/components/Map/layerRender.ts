@@ -12,6 +12,7 @@ import { HeatmapLayer, TileLayer } from "deck.gl";
 import { COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
 import { Feature, GeoJson, Point } from "src/types/geojson";
 import { ILayer } from "src/types/layer";
+import http from "src/services/httpCall";
 
 export type Layer = ILayer & {
   isChecked?: boolean,
@@ -217,7 +218,9 @@ export const MissionLayerToDeckLayer = (layers: MissionLayer[]) => {
     .map((layer) => {
       return new IconLayer({
         id: layer.id,
-        data: fetch(layer.geojsonUrl).then((response) => response.json()),
+        data: http
+          .get(STATIC_URL + layer.geojsonUrl)
+          .then((result) => result.data),
         pickable: true,
 
         getIcon: (d) => {

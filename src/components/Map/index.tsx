@@ -231,7 +231,7 @@ function BaseMap(props) {
     canUploadToBaseLayer: false,
   });
 
-  const treeMenu: MenuProps["items"] = (layer) => {
+  const treeMenu = (layer): MenuProps["items"] => {
     const items: MenuProps["items"] = [];
     if ((props.isBaseMap && perms.canEditBaseLayer) || !props.isBaseMap) {
       items.push({
@@ -298,7 +298,7 @@ function BaseMap(props) {
         label: "Unassign Form Group",
       });
     }
-    if (checkedKeys.includes(layer.key)) {
+    if (layer.isChecked) {
       const submenuChildren: MenuProps["items"] = [];
       if ((props.isBaseMap && perms.canCreateBaseLayer) || !props.isBaseMap) {
         submenuChildren.push({
@@ -1336,7 +1336,7 @@ function BaseMap(props) {
   }, [sortType, isAscending]);
 
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
-  const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
+  // const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
   const [colorMap, SetColorMap] = useState("plasma");
@@ -1366,7 +1366,7 @@ function BaseMap(props) {
     useState<any>(null);
   const [showColorChangeForm, setShowColorChangeForm] = useState(false);
   const [color, setColor] = useState("");
-  const [scales, setScales] = useState([]);
+  const [scales, setScales] = useState<Layer[]>([]);
   const onRangeChange = (date, dateString) => {
     const startDate = moment(
       dateString[0] + " " + "00:00",
@@ -1378,80 +1378,93 @@ function BaseMap(props) {
     ).format();
     setDateRange([startDate, endDate]);
   };
-  const fetchMissionGeoJSON = () => {
-    checkedKeys.map((key) => {
-      if (key.split("-")[0] === "3") {
-        if (key.split("-")[1] === "2") {
-          if (props.isBaseMap) {
-            http
-              .get(`${apis.GET_ALERT_LOCATION_GEOJSON}`, {
-                params: {
-                  startDate: dateRange[0],
-                  endDate: dateRange[1],
-                },
-              })
-              .then((result) => {
-                console.log("geoJsonAlert", result);
-                setGeoJsonAlert(result.data);
-              })
-              .catch((err) => {
-                console.log(err);
-                AxiosErrorHandler(err, props.logout);
-              });
-          } else {
-            http
-              .get(`${apis.GET_MISSION_GEOJSON}/${id}/alerts`, {
-                params: {
-                  startDate: dateRange[0],
-                  endDate: dateRange[1],
-                },
-              })
-              .then((result) => {
-                setGeoJsonAlert(result.data);
-              })
-              .catch((err) => {
-                console.log(err);
-                AxiosErrorHandler(err, props.logout);
-              });
-          }
-        } else if (key.split("-")[1] === "3") {
-          if (props.isBaseMap) {
-            http
-              .get(`${apis.GET_VOD_LOCATION_GEOJSON}`, {
-                params: {
-                  startDate: dateRange[0],
-                  endDate: dateRange[1],
-                },
-              })
-              .then((result) => {
-                console.log("geoJsonVOD", result);
-                setGeoJsonVOD(result.data);
-              })
-              .catch((err) => {
-                console.log(err);
-                AxiosErrorHandler(err, props.logout);
-              });
-          } else {
-            http
-              .get(`${apis.GET_MISSION_GEOJSON}/${id}/vods`, {
-                params: {
-                  startDate: dateRange[0],
-                  endDate: dateRange[1],
-                },
-              })
-              .then((result) => {
-                console.log("geoJsonVOD", result);
-                setGeoJsonVOD(result.data);
-              })
-              .catch((err) => {
-                console.log(err);
-                AxiosErrorHandler(err, props.logout);
-              });
-          }
-        }
-      }
-    });
-  };
+  const missionGeojsonURL = (type: "alert"|"vod", isBaseMap: boolean, startDate: string, endDate: string) => {
+    const params = (new URLSearchParams({ startDate, endDate })).toString();
+    let url = "";
+    if(isBaseMap) {
+      if(type === "alert") url = `${apis.GET_ALERT_LOCATION_GEOJSON}?${params}`;
+      if(type === "vod") url = `${apis.GET_VOD_LOCATION_GEOJSON}?${params}`;
+    } else {
+      if(type === "alert") url = `${apis.GET_MISSION_GEOJSON}/${id}/alerts?${params}`;
+      if(type === "vod") url = `${apis.GET_MISSION_GEOJSON}/${id}/vods?${params}`;
+    }
+    return url;
+  }
+  // Should no longer be required
+  // const fetchMissionGeoJSON = () => {
+  //   checkedKeys.map((key) => {
+  //     if (key.split("-")[0] === "3") {
+  //       if (key.split("-")[1] === "2") {
+  //         if (props.isBaseMap) {
+  //           http
+  //             .get(`${apis.GET_ALERT_LOCATION_GEOJSON}`, {
+  //               params: {
+  //                 startDate: dateRange[0],
+  //                 endDate: dateRange[1],
+  //               },
+  //             })
+  //             .then((result) => {
+  //               console.log("geoJsonAlert", result);
+  //               setGeoJsonAlert(result.data);
+  //             })
+  //             .catch((err) => {
+  //               console.log(err);
+  //               AxiosErrorHandler(err, props.logout);
+  //             });
+  //         } else {
+  //           http
+  //             .get(`${apis.GET_MISSION_GEOJSON}/${id}/alerts`, {
+  //               params: {
+  //                 startDate: dateRange[0],
+  //                 endDate: dateRange[1],
+  //               },
+  //             })
+  //             .then((result) => {
+  //               setGeoJsonAlert(result.data);
+  //             })
+  //             .catch((err) => {
+  //               console.log(err);
+  //               AxiosErrorHandler(err, props.logout);
+  //             });
+  //         }
+  //       } else if (key.split("-")[1] === "3") {
+  //         if (props.isBaseMap) {
+  //           http
+  //             .get(`${apis.GET_VOD_LOCATION_GEOJSON}`, {
+  //               params: {
+  //                 startDate: dateRange[0],
+  //                 endDate: dateRange[1],
+  //               },
+  //             })
+  //             .then((result) => {
+  //               console.log("geoJsonVOD", result);
+  //               setGeoJsonVOD(result.data);
+  //             })
+  //             .catch((err) => {
+  //               console.log(err);
+  //               AxiosErrorHandler(err, props.logout);
+  //             });
+  //         } else {
+  //           http
+  //             .get(`${apis.GET_MISSION_GEOJSON}/${id}/vods`, {
+  //               params: {
+  //                 startDate: dateRange[0],
+  //                 endDate: dateRange[1],
+  //               },
+  //             })
+  //             .then((result) => {
+  //               console.log("geoJsonVOD", result);
+  //               setGeoJsonVOD(result.data);
+  //             })
+  //             .catch((err) => {
+  //               console.log(err);
+  //               AxiosErrorHandler(err, props.logout);
+  //             });
+  //         }
+  //       }
+  //     }
+  //   });
+  // };
   const markerData = [
     {
       name: "Drone",
@@ -1631,8 +1644,11 @@ function BaseMap(props) {
   //-----creating drone path-----
 
   useEffect(() => {
-    fetchMissionGeoJSON();
-  }, [dateRange, checkedKeys]);
+    SetMissionLayers([
+      { id: "alert", name: "Alert", geojsonUrl: missionGeojsonURL("alert", props.isBaseMap, dateRange[0], dateRange[1]), isChecked: true },
+      { id: "vod", name: "VOD", geojsonUrl: missionGeojsonURL("vod", props.isBaseMap, dateRange[0], dateRange[1]), isChecked: true },
+    ]);
+  }, [dateRange]);
 
   const updateVOD = (data, idx) => {
     const body = {
@@ -1692,7 +1708,7 @@ function BaseMap(props) {
   useEffect(() => {
     console.log("missionLayer2", missionLayer, coordinates);
   }, [missionLayer, coordinates]);
-  // useEffect(() => console.log("All layers: ", allLayers), [allLayers]);
+  // useEffect(() => console.log("All layers: ", AllLayers), [AllLayers]);
   const handleChangeComplete = (color) => {
     setColor(color.hex);
   };
@@ -2085,12 +2101,13 @@ function BaseMap(props) {
 
   useEffect(() => {
     // console.log("it may be by traiin map",checkedKeys);
-    setScaleData(checkedKeys);
-    drawLayers(checkedKeys);
+    setScaleData();
+    // drawLayers(checkedKeys);
     console.log("lost");
   }, [
-    checkedKeys,
+    // checkedKeys,
     allLayers,
+    AllLayers,
     geoJsonVOD,
     geoJsonAlert,
     flaggedFilter,
@@ -2122,46 +2139,37 @@ function BaseMap(props) {
   }, [threeDState]);
   // ++++++++++++++++++++++++++++++++++++ force updation of layers after creating or adding features +++++++++++++++++++++++++++++++++++++++++++
   const forceUpdateLayers = (id: any) => {
-    const cv = [...checkedKeys];
+    // const cv = [...checkedKeys];
 
-    if (cv.length == 0) {
-      cv.push("1" + "-" + id);
-    } else {
-      setCheckedKeys([]);
-      const idx = cv.findIndex((key) => key === "1" + "-" + id);
+    // if (cv.length == 0) {
+    //   cv.push("1" + "-" + id);
+    // } else {
+    //   setCheckedKeys([]);
+    //   const idx = cv.findIndex((key) => key === "1" + "-" + id);
 
-      if (idx === -1) cv.push("1" + "-" + id);
-    }
+    //   if (idx === -1) cv.push("1" + "-" + id);
+    // }
 
-    setTimeout(() => {
-      setCheckedKeys(cv);
-    }, 0);
+    // setTimeout(() => {
+    //   setCheckedKeys(cv);
+    // }, 0);
+    SetAllLayers((prev) => [...prev]);
   };
 
   const forceUpdateAllLayers = () => {
     // console.log("it my br by terrainmap");
-    const cv = [...checkedKeys];
-    setCheckedKeys([]);
+    // const cv = [...checkedKeys];
+    // setCheckedKeys([]);
 
-    setTimeout(() => {
-      setCheckedKeys(cv);
-    });
+    // setTimeout(() => {
+    //   setCheckedKeys(cv);
+    // });
+    SetAllLayers((prev) => [...prev]);
   };
 
-  const setScaleData = (checkedKeys) => {
-    const demKeys = checkedKeys.filter((key) => allLayers[key]?.type === "DEM");
-    const demLayers: any = [];
-    demKeys.forEach((element) => {
-      let obj;
-      if (allLayers[element]) {
-        obj = {
-          ...allLayers[element],
-        };
-      }
-      demLayers.push(obj);
-    });
+  const setScaleData = () => {
+    const demLayers = AllLayers.filter((layer) => (layer.isChecked && layer.type === "Raster" && layer.raster.name === "DEM"));
     setScales(demLayers);
-    //console.log(demLayers);
     if (demLayers.length) {
       setScaleVisible(true);
     } else {
@@ -3048,60 +3056,67 @@ function BaseMap(props) {
 
   const [lastCount, setLastCount] = useState(0);
 
-  const sortLayersBySidebarOrdering = (checkedKeys, type) => {
-    if (!checkedKeys.length) return [];
-    const layerType = type === "mission" ? 2 : type === "raster" ? 1 : 0;
-    const ordering: any = [];
-    treeDataa[layerType].children.forEach((layer: any) => {
-      checkedKeys.forEach((key) => {
-        if (!layer.group) {
-          if (key === layer.key) {
-            ordering.push(key);
-            return;
-          }
-        } else {
-          layer.children.forEach((l) => {
-            if (key === l.key) {
-              ordering.push(key);
-              return;
-            }
-          });
-        }
-      });
-    });
+  // Should no longer be required
+  // const sortLayersBySidebarOrdering = (checkedKeys, type) => {
+  //   if (!checkedKeys.length) return [];
+  //   const layerType = type === "mission" ? 2 : type === "raster" ? 1 : 0;
+  //   const ordering: any = [];
+  //   treeDataa[layerType].children.forEach((layer: any) => {
+  //     checkedKeys.forEach((key) => {
+  //       if (!layer.group) {
+  //         if (key === layer.key) {
+  //           ordering.push(key);
+  //           return;
+  //         }
+  //       } else {
+  //         layer.children.forEach((l) => {
+  //           if (key === l.key) {
+  //             ordering.push(key);
+  //             return;
+  //           }
+  //         });
+  //       }
+  //     });
+  //   });
 
-    return ordering.reverse();
-  };
+  //   return ordering.reverse();
+  // };
 
   const onCheck = (checkedKeysValue: any, e) => {
-    if (
-      checkedKeysValue.length > lastCount &&
-      checkedKeysValue[checkedKeysValue.length - 1].split("-")[0] === "1"
-    ) {
-      setLayerLoading(true);
-    }
+    // why setLayerLoading(true) only for vectors?
+    // if (
+    //   checkedKeysValue.length > lastCount &&
+    //   checkedKeysValue[checkedKeysValue.length - 1].split("-")[0] === "1"
+    // ) {
+    //   setLayerLoading(true);
+    // }
 
-    //console.log(checkedKeysValue);
     if (checkedKeysValue.length) {
       setActiveGroupButton(false);
     } else {
       setActiveGroupButton(true);
     }
 
-    const rasters = checkedKeysValue.filter((key) => key.split("-")[0] === "2");
-    const vectors = checkedKeysValue.filter((key) => key.split("-")[0] === "1");
-    const missions = checkedKeysValue.filter(
-      (key) => key.split("-")[0] === "3"
-    );
-    const rasterOrdering: any = sortLayersBySidebarOrdering(rasters, "raster");
-    const vectorOrdering: any = sortLayersBySidebarOrdering(vectors, "vector");
-    const missionOrdering: any = sortLayersBySidebarOrdering(
-      missions,
-      "mission"
-    );
+    // Should no longer be required
+    // const rasters = checkedKeysValue.filter((key) => key.split("-")[0] === "2");
+    // const vectors = checkedKeysValue.filter((key) => key.split("-")[0] === "1");
+    // const missions = checkedKeysValue.filter(
+    //   (key) => key.split("-")[0] === "3"
+    // );
+    // const rasterOrdering: any = sortLayersBySidebarOrdering(rasters, "raster");
+    // const vectorOrdering: any = sortLayersBySidebarOrdering(vectors, "vector");
+    // const missionOrdering: any = sortLayersBySidebarOrdering(
+    //   missions,
+    //   "mission"
+    // );
+    // setCheckedKeys([...rasterOrdering, ...vectorOrdering, ...missionOrdering]);
+
     setLastCount(checkedKeysValue.length);
-    //console.log(rasterOrdering);
-    setCheckedKeys([...rasterOrdering, ...vectorOrdering, ...missionOrdering]);
+    // console.log("CHECKED: ", checkedKeysValue);
+    SetAllLayers((prev) => (prev.map((layer) => {
+      layer.isChecked = checkedKeysValue.includes(layer._id);
+      return layer;
+    })));
   };
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++ Start Drawing +++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -3282,8 +3297,8 @@ function BaseMap(props) {
         if (result.data.status) {
           SetAllLayers(result.data.data.layers.map(layer => ({ ...layer, isChecked: true })));
           SetMissionLayers([
-            { id: (Math.random()*1000).toString(), name: "Alert", geojsonUrl: `${apis.BASE_SERVER_URL}/apis/v1/mission/${id}/alerts`, isChecked: true },
-            { id: (Math.random()*1000).toString(), name: "VOD", geojsonUrl: `${apis.BASE_SERVER_URL}/apis/v1/mission/${id}/vods`, isChecked: true },
+            { id: "alert", name: "Alert", geojsonUrl: missionGeojsonURL("alert", props.isBaseMap, dateRange[0], dateRange[1]), isChecked: true },
+            { id: "vod", name: "VOD", geojsonUrl: missionGeojsonURL("vod", props.isBaseMap, dateRange[0], dateRange[1]), isChecked: true },
           ]);
           setAllLayers(result.data.data.layers);
           if (result.data.message === "No layer exists for mission") {
@@ -3389,12 +3404,13 @@ function BaseMap(props) {
 
       setTreeStructure(td);
 
-      setTimeout(() => {
-        const cl = checkedKeys.filter(
-          (key: any) => !layers.includes(key.split("-")[1])
-        );
-        setCheckedKeys(cl);
-      });
+      // Should no longer be required
+      // setTimeout(() => {
+      //   const cl = checkedKeys.filter(
+      //     (key: any) => !layers.includes(key.split("-")[1])
+      //   );
+      //   setCheckedKeys(cl);
+      // });
     } catch (err) {
       console.log(err);
     }
@@ -3498,13 +3514,12 @@ function BaseMap(props) {
     }
   };
 
-  const deleteMultipleLayers = (keys, type) => {
+  const deleteMultipleLayers = (type) => {
     props.loading(true);
-    console.log(keys);
 
-    const layers = keys
-      .filter((key) => key.split("-")[0] == type)
-      .map((key) => key.split("-")[1]);
+    const layers = AllLayers
+      .filter((layer) => (layer.isChecked && layer.type === type))
+      .map((layer) => layer._id);
 
     if (props.isBaseMap) {
       http
@@ -3616,7 +3631,7 @@ function BaseMap(props) {
     );
   };
 
-  const getTreeData = (layer, type, keyPrefix) => {
+  const getTreeData = (layer: ILayer, type, keyPrefix) => {
     const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
       const type = layer.type;
       switch (e.key) {
@@ -3688,7 +3703,7 @@ function BaseMap(props) {
             okText: "Yes",
             cancelText: "No",
             onOk: () => {
-              deleteMultipleLayers(checkedKeys, type === "Raster" ? "2" : "1");
+              deleteMultipleLayers(type);
             },
           });
           break;
@@ -4010,8 +4025,8 @@ function BaseMap(props) {
     }, 100);
   };
 
-  const updateTreeDataAfterMovingLayers = async (groupid, layerids, keys) => {
-    const al = { ...allLayers };
+  const updateTreeDataAfterMovingLayers = async (groupid, layerids) => {
+    // const al = { ...allLayers };
     props.loading(true);
 
     const res = await http.patch(`${apis.EDIT_LAYER_GROUP}`, {
@@ -4023,9 +4038,9 @@ function BaseMap(props) {
       return message.error(res.data.message);
     }
 
-    keys.forEach((key) => {
-      al[key].groupId = groupid;
-    });
+    // keys.forEach((key) => {
+    //   al[key].groupId = groupid;
+    // });
 
     const td: any = [...treeStructure];
     const ltmv: any = [];
@@ -4103,7 +4118,11 @@ function BaseMap(props) {
     });
 
     setTreeStructure(td);
-    setAllLayers(al);
+    // setAllLayers(al);
+    SetAllLayers((prev) => (prev.map((layer) => {
+      if(layer.isChecked) layer.layerGroupId = groupid;
+      return layer;
+    })));
   };
 
   const updateTreeDataAfterGroupEdit = (group, id) => {
@@ -4320,7 +4339,7 @@ function BaseMap(props) {
 
   useEffect(() => {
     refreshLayers();
-  }, [treeStructure, checkedKeys, panes, dateRange]);
+  }, [treeStructure, AllLayers, panes, dateRange]);
   useEffect(() => {
     if (!props.Thread.open) {
       setRefreshLayer(!refreshLayer);
@@ -4541,11 +4560,12 @@ function BaseMap(props) {
     rasters.forEach((element) => {
       //console.log(element)
       if (element.raster.name === "ORTHO") {
+        element.isChecked = true;
         //console.log(element);
-        const cl: any = [];
-        cl.push(`2-${element._id}`);
+        // const cl: any = [];
+        // cl.push(`2-${element._id}`);
         //console.log(cl);
-        setCheckedKeys(cl);
+        // setCheckedKeys(cl);
         return;
       }
     });
@@ -4895,6 +4915,7 @@ function BaseMap(props) {
           layerPopupLabel: layer.layerPopupLabel,
           isPublic: layer.isPublic,
           flaggedFeatures: layer.flaggedFeatures,
+          isChecked: true,
         };
 
         layers = {
@@ -4926,6 +4947,7 @@ function BaseMap(props) {
             },
             name: layer.name,
             id: layer._id,
+            isChecked: true,
           };
         } else {
           l[data[1]["key"] + "-" + layer._id] = {
@@ -4938,6 +4960,7 @@ function BaseMap(props) {
             },
             name: layer.name,
             id: layer._id,
+            isChecked: true,
           };
         }
 
@@ -4962,15 +4985,16 @@ function BaseMap(props) {
       setAllLayers(layers);
       setTreeStructure(data);
 
-      if (layer.type === "Vector") {
-        const cl = [...checkedKeys];
-        cl.push(data[0]["key"] + "-" + layer._id);
-        setCheckedKeys(cl);
-      } else {
-        const cl = [...checkedKeys];
-        cl.push(data[1]["key"] + "-" + layer._id);
-        setCheckedKeys(cl);
-      }
+      // Should no longer be required
+      // if (layer.type === "Vector") {
+      //   const cl = [...checkedKeys];
+      //   cl.push(data[0]["key"] + "-" + layer._id);
+      //   setCheckedKeys(cl);
+      // } else {
+      //   const cl = [...checkedKeys];
+      //   cl.push(data[1]["key"] + "-" + layer._id);
+      //   setCheckedKeys(cl);
+      // }
     } catch (error) {
       message.error(error.message);
     }
@@ -5943,48 +5967,49 @@ function BaseMap(props) {
 
       const dropc = info.dragNode.checked;
 
-      if (dropc) {
-        const cv = [...checkedKeys];
+      // Should no longer be required
+      // if (dropc) {
+      //   const cv = [...checkedKeys];
 
-        const rasters: any = [];
+      //   const rasters: any = [];
 
-        data[1].children.forEach((node: any) => {
-          if (node.group) {
-            node.value.children.forEach((n) => {
-              if (cv.includes(n.key)) {
-                rasters.push(n.key);
-              }
-            });
-          } else {
-            if (cv.includes(node.key)) {
-              rasters.push(node.key);
-            }
-          }
-        });
+      //   data[1].children.forEach((node: any) => {
+      //     if (node.group) {
+      //       node.value.children.forEach((n) => {
+      //         if (cv.includes(n.key)) {
+      //           rasters.push(n.key);
+      //         }
+      //       });
+      //     } else {
+      //       if (cv.includes(node.key)) {
+      //         rasters.push(node.key);
+      //       }
+      //     }
+      //   });
 
-        const vectors: any = [];
+      //   const vectors: any = [];
 
-        data[0].children.forEach((node: any) => {
-          if (node.group) {
-            node.value.children.forEach((n) => {
-              if (cv.includes(n.key)) {
-                rasters.push(n.key);
-              }
-            });
-          } else {
-            if (cv.includes(node.key)) {
-              rasters.push(node.key);
-            }
-          }
-        });
+      //   data[0].children.forEach((node: any) => {
+      //     if (node.group) {
+      //       node.value.children.forEach((n) => {
+      //         if (cv.includes(n.key)) {
+      //           rasters.push(n.key);
+      //         }
+      //       });
+      //     } else {
+      //       if (cv.includes(node.key)) {
+      //         rasters.push(node.key);
+      //       }
+      //     }
+      //   });
 
-        vectors.reverse();
-        rasters.reverse();
-        setCheckedKeys([]);
-        setTimeout(() => {
-          setCheckedKeys([...rasters, ...vectors]);
-        }, 0);
-      }
+      //   vectors.reverse();
+      //   rasters.reverse();
+      //   setCheckedKeys([]);
+      //   setTimeout(() => {
+      //     setCheckedKeys([...rasters, ...vectors]);
+      //   }, 0);
+      // }
 
       setTreeStructure(data);
     } catch (error) {
@@ -6167,28 +6192,30 @@ function BaseMap(props) {
 
   const createLayerGroup = (data) => {
     props.loading(true);
-    const layersToGroup = [];
     const type = moveType === 1 ? "vector" : "raster";
-    switch (moveType) {
-      case 1:
-        checkedKeys.forEach((ele: any) => {
-          const k = ele.split("-");
-          if (k[0] === "1") {
-            layersToGroup.push(k[1]);
-          }
-        });
-        break;
-      case 2:
-        checkedKeys.forEach((ele: any) => {
-          const k = ele.split("-");
-          if (k[0] === "2") {
-            layersToGroup.push(k[1]);
-          }
-        });
-        break;
-      default:
-        return;
-    }
+    // Should no longer be required
+    // Basically picks the ids of all checked layers
+    // switch (moveType) {
+    //   case 1:
+    //     checkedKeys.forEach((ele: any) => {
+    //       const k = ele.split("-");
+    //       if (k[0] === "1") {
+    //         layersToGroup.push(k[1]);
+    //       }
+    //     });
+    //     break;
+    //   case 2:
+    //     checkedKeys.forEach((ele: any) => {
+    //       const k = ele.split("-");
+    //       if (k[0] === "2") {
+    //         layersToGroup.push(k[1]);
+    //       }
+    //     });
+    //     break;
+    //   default:
+    //     return;
+    // }
+    const layersToGroup = AllLayers.filter((layer) => (layer.isChecked && layer.type === ["","Vector","Raster"][moveType])).map((layer) => (layer._id));
 
     http
       .post(`${apis.CREATE_GROUP_LAYER}`, {
@@ -6216,20 +6243,20 @@ function BaseMap(props) {
   const moveLayers = async (data) => {
     // props.loading(true)
     try {
-      const layersToMove = [];
+      // const layersToMove = [];
 
-      checkedKeys.forEach((ele: any) => {
-        const k = ele.split("-");
+      // checkedKeys.forEach((ele: any) => {
+      //   const k = ele.split("-");
 
-        if (k[0] == moveType) {
-          layersToMove.push(k[1]);
-        }
-      });
+      //   if (k[0] == moveType) {
+      //     layersToMove.push(k[1]);
+      //   }
+      // });
+      const layersToMove = AllLayers.filter((layer) => (layer.isChecked && layer.type === ["","Vector","Raster"][moveType])).map((layer) => (layer._id));
 
       await updateTreeDataAfterMovingLayers(
         data.group,
-        layersToMove,
-        checkedKeys
+        layersToMove
       );
     } catch (err) {
       console.log(err);
@@ -7375,7 +7402,7 @@ function BaseMap(props) {
               expandedKeys={expandedKeys}
               autoExpandParent={autoExpandParent}
               onCheck={onCheck}
-              checkedKeys={checkedKeys}
+              checkedKeys={AllLayers.filter((layer) => layer.isChecked).map((layer) => layer._id)}
               onSelect={onSelect}
               selectedKeys={selectedKeys}
               treeData={ILayersToTree(AllLayers, MissionLayers)}
