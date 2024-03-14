@@ -142,7 +142,7 @@ import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
 import { load } from "@loaders.gl/core";
 import { ILayer } from "src/types/layer";
-import { ILayerToDeckLayer, Layer, IMissionLayers, MissionLayerToDeckLayer } from "./layerRender";
+import { ILayerToDeckLayer, Layer, IMissionLayers, MissionLayerToDeckLayer, BBox, mergeBoundingBoxes } from "./layerRender";
 import { ILayersToTree } from "./treeRender";
 import { is } from "date-fns/locale";
 
@@ -2066,39 +2066,39 @@ function BaseMap(props) {
     togglePopup(status);
   }
 
-  const filterFeatures = (layerId, data) => {
-    if (flaggedFilter || unflaggedFilter) {
-      return data.filter((feature, idx) => {
-        if (flaggedFilter) {
-          return allLayers[layerId]?.flaggedFeatures.includes(idx);
-        } else if (unflaggedFilter) {
-          return !allLayers[layerId]?.flaggedFeatures.includes(idx);
-        }
-      });
-    } else {
-      return data;
-    }
-  };
-  //geojson to json
-  async function parseGeoJson(layerId, file) {
-    return new Promise((resolve, reject) => {
-      fetch(file)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to fetch GeoJSON data");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          const features = data.features;
-          const filteredFeatures = filterFeatures(layerId, features);
-          resolve(filteredFeatures);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-  }
+  // Should no longer be required, both implemented within focusSelectedLayers
+  // const filterFeatures = (layerId, data) => {
+  //   if (flaggedFilter || unflaggedFilter) {
+  //     return data.filter((feature, idx) => {
+  //       if (flaggedFilter) {
+  //         return allLayers[layerId]?.flaggedFeatures.includes(idx);
+  //       } else if (unflaggedFilter) {
+  //         return !allLayers[layerId]?.flaggedFeatures.includes(idx);
+  //       }
+  //     });
+  //   } else {
+  //     return data;
+  //   }
+  // };
+  // async function parseGeoJson(layerId, file) {
+  //   return new Promise((resolve, reject) => {
+  //     fetch(file)
+  //       .then((response) => {
+  //         if (!response.ok) {
+  //           throw new Error("Failed to fetch GeoJSON data");
+  //         }
+  //         return response.json();
+  //       })
+  //       .then((data) => {
+  //         const features = data.features;
+  //         const filteredFeatures = filterFeatures(layerId, features);
+  //         resolve(filteredFeatures);
+  //       })
+  //       .catch((error) => {
+  //         reject(error);
+  //       });
+  //   });
+  // }
 
   //-------------on layer check-------------------------------
 
@@ -2106,6 +2106,7 @@ function BaseMap(props) {
     // console.log("it may be by traiin map",checkedKeys);
     setScaleData();
     // drawLayers(checkedKeys);
+    focusSelectedLayers();
     console.log("lost");
   }, [
     // checkedKeys,
@@ -2211,6 +2212,61 @@ function BaseMap(props) {
       zoom,
     };
   };
+
+  const focusSelectedLayers = async () => {
+    const boundingBoxes: BBox[] = [];
+    for(const layer of AllLayers) {
+      if(layer.isChecked) {
+        if(layer.type === "Vector") {
+          const response = await fetch(STATIC_URL + layer.layerpath);
+          const data = await response.json();
+          let features = data.features;
+          if (flaggedFilter || unflaggedFilter) {
+            features = features.filter((feature, idx) => {
+              if (flaggedFilter) {
+                return layer.flaggedFeatures.includes(idx);
+              } else if (unflaggedFilter) {
+                return !layer.flaggedFeatures.includes(idx);
+              }
+            });
+          }
+          if (Array.isArray(features)) {
+            const bounds = turf.bbox(turf.featureCollection(features)) as BBox;
+            boundingBoxes.push(bounds);
+          }
+        }
+        if(layer.type === "Raster") {
+          const metaDataURL = `${COG_URL}/cog/info?url=${TITILER_STATIC}${layer.layerpath}`;
+          const response = await fetch(metaDataURL, {
+            method: "GET",
+          });
+          const metadata = await response.json();
+          const bounds = [
+            metadata["bounds"][0],
+            metadata["bounds"][1],
+            metadata["bounds"][2],
+            metadata["bounds"][3],
+          ] as BBox;
+          boundingBoxes.push(bounds);
+        }
+      }
+    }
+    if(boundingBoxes.length > 0) {
+      const finalBounds = mergeBoundingBoxes(boundingBoxes);
+      const { longitude, latitude, zoom } = calculateViewport(finalBounds);
+      setViewport({
+        longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+        latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
+        zoom,
+        pitch: 0,
+        minZoom: 0,
+        maxZoom: 22,
+        bearing: 0,
+        transitionDuration: 2000,
+        transitionInterpolator: new FlyToInterpolator(),
+      });
+    }
+  }
 
   const drawLayers = async (checkedKeysValue: any) => {
     const vlayers: Array<any> = [];
@@ -4899,98 +4955,103 @@ function BaseMap(props) {
     try {
       setIsDrawing(false);
       setFeatureState(myFeatureCollection);
-      const data: any = [...treeStructure];
-      let layers = {
-        ...allLayers,
-      };
-
-      if (layer.type === "Vector") {
-        layer.key = `1-${layer._id}`;
-        data[0].children.push(layer);
-
-        const l = {};
-        l[data[0]["key"] + "-" + layer._id] = {
-          layerPath: layer.layerpath,
-          type: layer.vector.type,
-          name: layer.name,
-          id: layer._id,
-          T3DTranspose: false,
-          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
-          layerLabel: layer.layerLabel,
-          layerPopupLabel: layer.layerPopupLabel,
-          isPublic: layer.isPublic,
-          flaggedFeatures: layer.flaggedFeatures,
-          isChecked: true,
-        };
-
-        layers = {
-          ...layers,
-          ...l,
-        };
-
-        data[0].children.sort((a, b) =>
-          moment(b.captureDate).diff(moment(a.captureDate))
-        );
-
+      if(layer.type === "Vector") {
         setvectorLayers([...vectorLayers, layer]);
-      } else {
-        layer.key = `2-${layer._id}`;
-        data[1].children.push(layer);
-
-        const l = {};
-
-        if (props.isBaseMap) {
-          // -----to merge all rasters paths------------------
-
-          l[data[1]["key"] + "-" + layer._id] = {
-            layerPath: layer.layerdataArr,
-            type: layer.raster.name,
-            settings: {
-              ...layer.raster,
-              // minp: layer.minp,
-              // maxp: layer.maxp,
-            },
-            name: layer.name,
-            id: layer._id,
-            isChecked: true,
-          };
-        } else {
-          l[data[1]["key"] + "-" + layer._id] = {
-            layerPath: layer.layerpath,
-            type: layer.raster.name,
-            settings: {
-              ...layer.raster,
-              minp: layer.minp,
-              maxp: layer.maxp,
-            },
-            name: layer.name,
-            id: layer._id,
-            isChecked: true,
-          };
+      }
+      SetAllLayers(prev => [
+        ...prev,
+        {
+          ...layer,
+          isChecked: true,
+          render3D: false,
         }
-
-        layers = {
-          ...layers,
-          ...l,
-        };
-
-        data[1].children.sort((a, b) =>
-          moment(b.captureDate).diff(moment(a.captureDate))
-        );
-      }
-
-      while (data[0].children.length && data[0].children[0].group) {
-        data[0].children.push(data[0].children.shift());
-      }
-
-      while (data[1].children.length && data[1].children[0].group) {
-        data[1].children.push(data[1].children.shift());
-      }
-
-      setAllLayers(layers);
-      setTreeStructure(data);
+      ]);
 
       // Should no longer be required
+      // const data: any = [...treeStructure];
+      // let layers = {
+      //   ...allLayers,
+      // };
+      // if (layer.type === "Vector") {
+      //   layer.key = `1-${layer._id}`;
+      //   data[0].children.push(layer);
+
+      //   const l = {};
+      //   l[data[0]["key"] + "-" + layer._id] = {
+      //     layerPath: layer.layerpath,
+      //     type: layer.vector.type,
+      //     name: layer.name,
+      //     id: layer._id,
+      //     T3DTranspose: false,
+      //     groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
+      //     layerLabel: layer.layerLabel,
+      //     layerPopupLabel: layer.layerPopupLabel,
+      //     isPublic: layer.isPublic,
+      //     flaggedFeatures: layer.flaggedFeatures,
+      //     isChecked: true,
+      //   };
+
+      //   layers = {
+      //     ...layers,
+      //     ...l,
+      //   };
+
+      //   data[0].children.sort((a, b) =>
+      //     moment(b.captureDate).diff(moment(a.captureDate))
+      //   );
+      // } else {
+      //   layer.key = `2-${layer._id}`;
+      //   data[1].children.push(layer);
+
+      //   const l = {};
+
+      //   if (props.isBaseMap) {
+      //     // -----to merge all rasters paths------------------
+
+      //     l[data[1]["key"] + "-" + layer._id] = {
+      //       layerPath: layer.layerdataArr,
+      //       type: layer.raster.name,
+      //       settings: {
+      //         ...layer.raster,
+      //         // minp: layer.minp,
+      //         // maxp: layer.maxp,
+      //       },
+      //       name: layer.name,
+      //       id: layer._id,
+      //       isChecked: true,
+      //     };
+      //   } else {
+      //     l[data[1]["key"] + "-" + layer._id] = {
+      //       layerPath: layer.layerpath,
+      //       type: layer.raster.name,
+      //       settings: {
+      //         ...layer.raster,
+      //         minp: layer.minp,
+      //         maxp: layer.maxp,
+      //       },
+      //       name: layer.name,
+      //       id: layer._id,
+      //       isChecked: true,
+      //     };
+      //   }
+
+      //   layers = {
+      //     ...layers,
+      //     ...l,
+      //   };
+
+      //   data[1].children.sort((a, b) =>
+      //     moment(b.captureDate).diff(moment(a.captureDate))
+      //   );
+      // }
+      // while (data[0].children.length && data[0].children[0].group) {
+      //   data[0].children.push(data[0].children.shift());
+      // }
+      // while (data[1].children.length && data[1].children[0].group) {
+      //   data[1].children.push(data[1].children.shift());
+      // }
+      // setAllLayers(layers);
+      // setTreeStructure(data);
       // if (layer.type === "Vector") {
       //   const cl = [...checkedKeys];
       //   cl.push(data[0]["key"] + "-" + layer._id);

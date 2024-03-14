@@ -278,3 +278,17 @@ export const MissionLayerToDeckLayer = (missionLayers: IMissionLayers) => {
 
   return deckLayers;
 };
+
+export type BBox = [number, number, number, number];
+
+export const mergeBoundingBoxes = (boundingBoxes: BBox[]): BBox => {
+  let [minLeft, minBottom, maxRight, maxTop] = boundingBoxes[0];
+  boundingBoxes.forEach(([left, bottom, right, top]) => {
+    if (left < minLeft) minLeft = left;
+    if (bottom < minBottom) minBottom = bottom;
+    if (right > maxRight) maxRight = right;
+    if (top > maxTop) maxTop = top;
+  });
+
+  return [minLeft, minBottom, maxRight, maxTop];
+};
