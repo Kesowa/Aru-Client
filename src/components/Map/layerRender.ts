@@ -108,7 +108,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
         if (layer.vector.type == "Point")
           return new IconLayer({
             id: layer._id,
-            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()),
+            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()).then(data => data.features),
             pickable: true,
 
             getIcon: (d) => {
@@ -148,7 +148,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
         else if (layer.vector.type == "air_pollution")
           return new HeatmapLayer({
             id: layer._id,
-            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()),
+            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()).then(data => data.features),
             getPosition: (d: any) => d.geometry.coordinates,
             getWeight: (d: any) => d.properties.aqi,
             aggregation: "SUM",
@@ -162,7 +162,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               const maxWindSpeed = data.features.map(feature => feature.properties.windSpeed).reduce((maxSpeed, curr) => Math.max(maxSpeed, curr), 0);
               data.features.forEach(feature => feature.properties["maxWindSpeed"] = maxWindSpeed);
               return data;
-            }),
+            }).then(data => data.features),
             getPosition: (d: any) => d.geometry.coordinates,
             getIcon: (d: any, { index }: { index: any }) => {
               const windSpeed = d.properties.windSpeed;
