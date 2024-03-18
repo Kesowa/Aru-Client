@@ -6500,8 +6500,8 @@ function BaseMap(props) {
           if(osmState) layers.push(osm);
 
           // Tree Menu Layers
-          layers.push(ILayerToDeckLayer(AllLayers));
-          layers.push(MissionLayerToDeckLayer(MissionLayers));
+          layers.push(useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers]));
+          layers.push(useMemo(() => MissionLayerToDeckLayer(MissionLayers), [MissionLayers]));
 
           // Drawing State Layers
           if (isDrawing) {

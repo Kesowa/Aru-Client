@@ -106,11 +106,15 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
       }
       else if (layer.type == "Vector") {
         if (layer.vector.type == "Point")
-          return new IconLayer({
+          return new GeoJsonLayer({
             id: layer._id,
-            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()).then(data => data.features),
+            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()),
             pickable: true,
-
+            pointType: "icon",
+            iconSizeMinPixels: 6,
+            iconSizeUnits: "meters",
+            iconSizeScale: 10,
+            getIconSize: 2,
             getIcon: (d) => {
               const iconSelector = (iconType) => {
                 let icon = "";
@@ -138,10 +142,6 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
                 mask: true,
               };
             },
-
-            sizeScale: 12,
-            getPosition: (d) => d.geometry.coordinates,
-            getSize: (d) => 5,
             getColor: [255, 0, 0],
 
           })
