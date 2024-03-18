@@ -13,7 +13,6 @@ import { WebMercatorViewport } from "viewport-mercator-project";
 import { MaskExtension } from "@deck.gl/extensions/typed";
 import { TerrainLayer } from "@deck.gl/geo-layers/typed";
 import { readPixelsToArray } from "@luma.gl/webgl";
-import { CesiumIonLoader } from '@loaders.gl/3d-tiles';
 import { Tile3DLayer } from '@deck.gl/geo-layers';
 import {
   Row,
@@ -138,14 +137,12 @@ import {
   PUBLIC_URL,
   STATIC_URL,
   TITILER_STATIC,
-  CESIUM_TOKEN,
   API_URL,
 } from "src/constants";
 import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
-// import { JSONLoader } from "@loaders.gl/json";
-// import { LASLoader } from "@loaders.gl/las";
 import { load } from "@loaders.gl/core";
+import { Tiles3DLoader } from "@loaders.gl/3d-tiles";
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
   [lat - size * 0.5, lng - size * 0.5],
@@ -2344,16 +2341,13 @@ function BaseMap(props) {
             } else if (allLayers[element].type == "POINT_CLOUD") {
                 // Fetch the dynamic ID from the backend (bounds are not yet avaliable)
                 const cloudLayer = allLayers[element];
-                const pointId = cloudLayer["metadata"]["id"];
               
                 //Render the pointcloud data
                 vlayers[index] = new Tile3DLayer({
                   id: element,
-                  data: `https://assets.cesium.com/${pointId}/tileset.json`,
-                  loader: CesiumIonLoader,
-                  loadOptions: {
-                    'cesium-ion': { accessToken: CESIUM_TOKEN }
-                  },
+                  data: STATIC_URL + cloudLayer["metadata"],
+                  loader: Tiles3DLoader,
+                  loadOptions: {},
                   onTilesetLoad: (tileset) => {
                     const { cartographicCenter, zoom } = tileset;
                     setViewport({
