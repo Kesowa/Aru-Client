@@ -142,9 +142,10 @@ import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
 import { load } from "@loaders.gl/core";
 import { ILayer } from "src/types/layer";
-import { ILayerToDeckLayer, Layer, IMissionLayers, MissionLayerToDeckLayer, BBox, mergeBoundingBoxes } from "./layerRender";
+import { ILayerToDeckLayer, Layer, IMissionLayers, MissionLayerToDeckLayer } from "./layerRender";
 import { ILayersToTree } from "./treeRender";
 import { is } from "date-fns/locale";
+import { BBox, mergeBoundingBoxes } from "src/types/geojson";
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
   [lat - size * 0.5, lng - size * 0.5],
@@ -1361,7 +1362,12 @@ function BaseMap(props) {
 
   const [allLayers, setAllLayers] = useState<Layer[]>([]);
   const [AllLayers, SetAllLayers] = useState<Layer[]>([]);
-  const [MissionLayers, SetMissionLayers] = useState<IMissionLayers>([]);
+  const [MissionLayers, SetMissionLayers] = useState<IMissionLayers>({
+    alertGeojsonUrl: "",
+    vodGeojsonUrl: "",
+    isAlertChecked: false,
+    isVODChecked: false,
+  });
   const [visibleLayers, setVisibleLayers] = useState([]);
   const [colorChangeFeatureData, setColorChangeFeatureData] =
     useState<any>(null);
@@ -1645,12 +1651,12 @@ function BaseMap(props) {
   //-----creating drone path-----
 
   useEffect(() => {
-    SetMissionLayers({
+    SetMissionLayers(prev => ({
       alertGeojsonUrl: missionGeojsonURL("alert", props.isBaseMap, dateRange[0], dateRange[1]),
       vodGeojsonUrl: missionGeojsonURL("vod", props.isBaseMap, dateRange[0], dateRange[1]),
-      isAlertChecked: true,
-      isVODChecked: true,
-    });
+      isAlertChecked: prev.isAlertChecked,
+      isVODChecked: prev.isVODChecked,
+    }));
   }, [dateRange]);
 
   const updateVOD = (data, idx) => {
@@ -3176,6 +3182,11 @@ function BaseMap(props) {
       layer.isChecked = checkedKeysValue.includes(layer._id);
       return layer;
     })));
+    SetMissionLayers((prev) => ({
+      ...prev,
+      isAlertChecked: checkedKeysValue.includes("alert"),
+      isVODChecked: checkedKeysValue.includes("vod")
+    }));
   };
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++ Start Drawing +++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -3358,8 +3369,8 @@ function BaseMap(props) {
           SetMissionLayers({
             alertGeojsonUrl: missionGeojsonURL("alert", props.isBaseMap, dateRange[0], dateRange[1]),
             vodGeojsonUrl: missionGeojsonURL("vod", props.isBaseMap, dateRange[0], dateRange[1]),
-            isAlertChecked: true,
-            isVODChecked: true,
+            isAlertChecked: false,
+            isVODChecked: false,
           });
           setAllLayers(result.data.data.layers);
           if (result.data.message === "No layer exists for mission") {
@@ -3426,56 +3437,57 @@ function BaseMap(props) {
   };
 
   // ++++++++++++++++++++++++++++++++++++++++++++++ Delete Layer +++++++++++++++++++++++++++++++++++++++++++++++
-  const removeLayerFromTree = (layers) => {
-    const td: any = [...treeStructure];
+  // Should no longer be required
+  // const removeLayerFromTree = (layers) => {
+  //   const td: any = [...treeStructure];
 
-    try {
-      const newTreeDataVectors = td[0].children.filter((layer) => {
-        if (layer.group) {
-          let groupLayers = [];
-          groupLayers = layer.value.children.filter((l) => {
-            const k = l.key.split("-")[1];
-            return !layers.includes(k);
-          });
-          layer.value.children = [...groupLayers];
+  //   try {
+  //     const newTreeDataVectors = td[0].children.filter((layer) => {
+  //       if (layer.group) {
+  //         let groupLayers = [];
+  //         groupLayers = layer.value.children.filter((l) => {
+  //           const k = l.key.split("-")[1];
+  //           return !layers.includes(k);
+  //         });
+  //         layer.value.children = [...groupLayers];
 
-          return true;
-        } else {
-          const k = layer.key.split("-")[1];
-          return !layers.includes(k);
-        }
-      });
-      td[0].children = [...newTreeDataVectors];
+  //         return true;
+  //       } else {
+  //         const k = layer.key.split("-")[1];
+  //         return !layers.includes(k);
+  //       }
+  //     });
+  //     td[0].children = [...newTreeDataVectors];
 
-      const newTreeDataRasters = td[1].children.filter((layer) => {
-        if (layer.group) {
-          let groupLayers = [];
-          groupLayers = layer.value.children.filter((l) => {
-            const k = l.key.split("-")[1];
-            return !layers.includes(k);
-          });
-          layer.value.children = [...groupLayers];
-          return true;
-        } else {
-          const k = layer.key.split("-")[1];
-          return !layers.includes(k);
-        }
-      });
-      td[1].children = [...newTreeDataRasters];
+  //     const newTreeDataRasters = td[1].children.filter((layer) => {
+  //       if (layer.group) {
+  //         let groupLayers = [];
+  //         groupLayers = layer.value.children.filter((l) => {
+  //           const k = l.key.split("-")[1];
+  //           return !layers.includes(k);
+  //         });
+  //         layer.value.children = [...groupLayers];
+  //         return true;
+  //       } else {
+  //         const k = layer.key.split("-")[1];
+  //         return !layers.includes(k);
+  //       }
+  //     });
+  //     td[1].children = [...newTreeDataRasters];
 
-      setTreeStructure(td);
+  //     setTreeStructure(td);
 
-      // Should no longer be required
-      // setTimeout(() => {
-      //   const cl = checkedKeys.filter(
-      //     (key: any) => !layers.includes(key.split("-")[1])
-      //   );
-      //   setCheckedKeys(cl);
-      // });
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  //     // Should no longer be required
+  //     // setTimeout(() => {
+  //     //   const cl = checkedKeys.filter(
+  //     //     (key: any) => !layers.includes(key.split("-")[1])
+  //     //   );
+  //     //   setCheckedKeys(cl);
+  //     // });
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
 
   const deleteLayer = (layerId) => {
     props.loading(true);
@@ -3489,7 +3501,7 @@ function BaseMap(props) {
         })
         .then((res) => {
           if (res.data.status) {
-            removeLayerFromTree([layerId]);
+            // removeLayerFromTree([layerId]);
 
             // remove layer from vector create form
             const vectors = vectorLayers.filter((layer) => layer._id !== id);
@@ -3506,6 +3518,8 @@ function BaseMap(props) {
             }
 
             setPanes(newPanes);
+
+            SetAllLayers(prev => prev.filter(layer => layer._id !== layerId));
 
             message.success(res.data.message);
             //console.log(res.data);
@@ -3535,7 +3549,7 @@ function BaseMap(props) {
         })
         .then((res) => {
           if (res.data.status) {
-            removeLayerFromTree([layerId]);
+            // removeLayerFromTree([layerId]);
 
             // remove layer from vector create form
             const vectors = vectorLayers.filter((layer) => layer._id !== id);
@@ -3552,6 +3566,8 @@ function BaseMap(props) {
             }
 
             setPanes(newPanes);
+
+            SetAllLayers(prev => prev.filter(layer => layer._id !== layerId));
 
             message.success(res.data.message);
             //console.log(res.data);
@@ -3591,7 +3607,7 @@ function BaseMap(props) {
         })
         .then((res) => {
           if (res.data.status) {
-            removeLayerFromTree(layers);
+            // removeLayerFromTree(layers);
 
             // remove layer from vector create form
             const vectors = vectorLayers.filter(
@@ -3610,6 +3626,8 @@ function BaseMap(props) {
             }
 
             setPanes(newPanes);
+
+            SetAllLayers(prev => prev.filter(layer => !layers.includes(layer._id)));
 
             message.success(res.data.message);
             //console.log(res.data);
@@ -3637,7 +3655,7 @@ function BaseMap(props) {
         })
         .then((res) => {
           if (res.data.status) {
-            removeLayerFromTree(layers);
+            // removeLayerFromTree(layers);
 
             // remove layer from vector create form
             const vectors = vectorLayers.filter(
@@ -3656,6 +3674,8 @@ function BaseMap(props) {
             }
 
             setPanes(newPanes);
+
+            SetAllLayers(prev => prev.filter(layer => !layers.includes(layer._id)));
 
             message.success(res.data.message);
             //console.log(res.data);
@@ -3692,7 +3712,288 @@ function BaseMap(props) {
     );
   };
 
-  const getTreeData = (layer: ILayer, type, keyPrefix) => {
+  // Should no longer be required
+  // const getTreeData = (layer: ILayer, type, keyPrefix) => {
+  //   const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
+  //     const type = layer.type;
+  //     switch (e.key) {
+  //       case "1":
+  //         showModal1();
+  //         setSelectedLayerId(layer._id);
+  //         setCaptureDate(layer.captureDate);
+  //         setLayerName(layer.name);
+  //         type === "Raster"
+  //           ? setDefaultLayerType([
+  //             type.toUpperCase(),
+  //             layer.raster.name.toUpperCase(),
+  //           ])
+  //           : setDefaultLayerType([
+  //             type.toUpperCase(),
+  //             layer.vector.type.toUpperCase(),
+  //             layer.vector.name.toUpperCase(),
+  //           ]);
+  //         setSelectedLayerType(type.toLowerCase());
+  //         break;
+  //       case "2":
+  //         props.thread(true, {
+  //           docType: "layer",
+  //           docId: layer._id,
+  //         });
+  //         break;
+  //       case "3":
+  //         download(STATIC_URL + layer.layerpath);
+  //         break;
+  //       case "4":
+  //         setUpdate(true);
+  //         setUpdateType(type);
+  //         setUpdateId(layer._id);
+  //         setIsModalVisible4(true);
+  //         break;
+  //       case "5":
+  //         Modal.confirm({
+  //           title: "Delete Layer?",
+  //           icon: <ExclamationCircleOutlined />,
+  //           content: "Are you sure you want to delete this layer?",
+  //           okText: "Yes",
+  //           cancelText: "No",
+  //           onOk: () => {
+  //             deleteLayer(layer._id);
+  //           },
+  //         });
+  //         break;
+  //       case "6":
+  //         const idOfLayerGroup =
+  //           typeof layer.layerGroupId === "object"
+  //             ? layer.layerGroupId._id
+  //             : layer.layerGroupId;
+  //         await removeLayerFromGroup(
+  //           idOfLayerGroup,
+  //           layer._id,
+  //           `1-${layer._id}`
+  //         );
+  //         updateTreeDataAfterSingleLayerRemovalFromGroup(layer._id);
+  //         break;
+  //       case "7":
+  //         setVisibleGroupCreateModal(!visibleGroupCreateModal);
+  //         type === "Raster" ? setMoveType(2) : setMoveType(1);
+  //         break;
+  //       case "8":
+  //         Modal.confirm({
+  //           title: "Delete Selected Layers?",
+  //           icon: <ExclamationCircleOutlined />,
+  //           content: "Are you sure you want to delete selected layers?",
+  //           okText: "Yes",
+  //           cancelText: "No",
+  //           onOk: () => {
+  //             deleteMultipleLayers(type);
+  //           },
+  //         });
+  //         break;
+  //       case "9":
+  //         setMoveToOtherGroupModal(true);
+  //         type === "Raster" ? setMoveType(2) : setMoveType(1);
+  //         break;
+  //       case "10":
+  //         http
+  //           .get(`${apis.DOWNLOAD_KML}?id=${layer._id}`)
+  //           .then((res: any) => {
+  //             if (res.data.status) {
+  //               //download(API_URL + res.data.link);
+  //               window.open(PUBLIC_URL + res.data.link);
+  //             } else {
+  //               console.log(res.data.message);
+  //             }
+  //           })
+  //           .catch((err: any) => {
+  //             console.log(err);
+  //             AxiosErrorHandler(err, props.logout);
+  //           });
+  //         break;
+  //       case "11":
+  //         Modal.confirm({
+  //           title: "Flag Layer?",
+  //           icon: <ExclamationCircleOutlined />,
+  //           content: "Are you sure you want to flag the entire layer?",
+  //           okText: "Yes",
+  //           cancelText: "No",
+  //           onOk: () => {
+  //             toggleLayerFlag(layer._id, true);
+  //           },
+  //         });
+  //         break;
+  //       case "12":
+  //         Modal.confirm({
+  //           title: "Un-flag Layer?",
+  //           icon: <ExclamationCircleOutlined />,
+  //           content:
+  //             "Are you sure you want to un-flag the entire layer? This will un-flag all flagged features as well.",
+  //           okText: "Yes",
+  //           cancelText: "No",
+  //           onOk: () => {
+  //             toggleLayerFlag(layer._id, false);
+  //           },
+  //         });
+  //         break;
+  //       case "13":
+  //         setViewDocs(true);
+  //         setSelectedLayerInfo(layer);
+  //         setFeatureLayer(layer._id);
+  //         setFeatureLayerPath(layer.layerpath);
+  //         setWindowTitle(layer.name);
+  //         setSelectedLayerLabel(
+  //           layer.layerLabel ? layer.layerLabel : "No label selected"
+  //         );
+  //         setSelectedLayerPopupLabel(
+  //           layer.layerPopupLabel ? layer.layerPopupLabel : "No label selected"
+  //         );
+  //         setIsLayerDocs(true);
+  //         break;
+  //       case "14":
+  //         handleMaskLayerOption();
+  //         break;
+  //       case "15":
+  //         toggleElevation();
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   };
+  //   switch (type) {
+  //     case "raster":
+  //       return {
+  //         title: (
+  //           <>
+  //             <Dropdown
+  //               menu={{ items: treeMenu(layer), onClick: treeMenuOnClick }}
+  //               trigger={["contextMenu"]}
+  //             >
+  //               <Tooltip
+  //                 mouseLeaveDelay={0.0}
+  //                 mouseEnterDelay={0.0}
+  //                 placement="bottom"
+  //                 title={
+  //                   <span>
+  //                     {layer.name} &#8226;{" "}
+  //                     {moment(layer.captureDate).format("DD/MM/YYYY")}
+  //                   </span>
+  //                 }
+  //               >
+  //                 <Badge
+  //                   style={{
+  //                     backgroundColor: "#3b86ff",
+  //                     boxShadow: "0 0 3px 1px black",
+  //                     zIndex: 10,
+  //                   }}
+  //                   offset={[25, 6]}
+  //                   count={layer.isThreadExist ? layer.commentCount : 0}
+  //                   overflowCount={9}
+  //                 >
+  //                   <Text
+  //                     style={
+  //                       layer.layerGroupId
+  //                         ? { width: "139px" }
+  //                         : { width: "160px" }
+  //                     }
+  //                     ellipsis={true}
+  //                     onClick={() => {
+  //                       if (!props.isBaseMap) {
+  //                         setlayerToAddInAttributeTable({
+  //                           name: layer.name,
+  //                           type: layer.type,
+  //                           id: layer._id,
+  //                           path: layer.layerpath,
+  //                           count: layer.featureCount,
+  //                         });
+  //                       }
+  //                     }}
+  //                   >
+  //                     {layer.name}
+  //                   </Text>
+  //                 </Badge>
+  //               </Tooltip>
+  //             </Dropdown>
+  //           </>
+  //         ),
+  //         key: keyPrefix + "-" + layer._id,
+  //         icon: <FileImageOutlined />,
+  //         captureDate: layer.captureDate,
+  //         name: layer.name,
+  //         groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
+  //         layer: layer,
+  //       };
+  //     case "vector":
+  //       return {
+  //         title: (
+  //           <>
+  //             <Dropdown
+  //               menu={{ items: treeMenu(layer), onClick: treeMenuOnClick }}
+  //               trigger={["contextMenu"]}
+  //             >
+  //               <Tooltip
+  //                 mouseLeaveDelay={0.0}
+  //                 mouseEnterDelay={0.0}
+  //                 placement="bottom"
+  //                 title={
+  //                   <span>
+  //                     {layer.name} &#8226;{" "}
+  //                     {moment(layer.captureDate).format("DD/MM/YYYY")}
+  //                   </span>
+  //                 }
+  //               >
+  //                 <Badge
+  //                   style={{
+  //                     backgroundColor: "#3b86ff",
+  //                     boxShadow: "0 0 3px 1px black",
+  //                     zIndex: 10,
+  //                   }}
+  //                   offset={[25, 6]}
+  //                   count={layer.isThreadExist ? layer.commentCount : 0}
+  //                   overflowCount={9}
+  //                 >
+  //                   <Text
+  //                     style={
+  //                       layer.layerGroupId
+  //                         ? { width: "119px" }
+  //                         : { width: "140px" }
+  //                     }
+  //                     ellipsis={true}
+  //                     onClick={() => {
+  //                       setlayerToAddInAttributeTable({
+  //                         name: layer.name,
+  //                         type: layer.type,
+  //                         id: layer._id,
+  //                         path: layer.layerpath,
+  //                         count: layer.featureCount,
+  //                       });
+  //                     }}
+  //                   >
+  //                     {layer.name}
+  //                   </Text>
+  //                   {layer.isFlagged && (
+  //                     <FlagOutlined style={{ color: "#da1c5c" }} />
+  //                   )}
+  //                   {layer.isPublic && (
+  //                     <EyeOutlined style={{ color: "#3b86ff" }} />
+  //                   )}
+  //                 </Badge>
+  //               </Tooltip>
+  //             </Dropdown>
+  //           </>
+  //         ),
+  //         key: keyPrefix + "-" + layer._id,
+  //         icon: generateIcon(
+  //           layer.vector.type,
+  //           layer.color === "multiColor" ? "#00000" : layer.color
+  //         ),
+  //         captureDate: layer.captureDate,
+  //         name: layer.name,
+  //         groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
+  //         layer: layer,
+  //       };
+  //   }
+  // };
+
+  const getTitleElement = (layer: ILayer) => {
     const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
       const type = layer.type;
       switch (e.key) {
@@ -3837,146 +4138,66 @@ function BaseMap(props) {
           break;
       }
     };
-    switch (type) {
-      case "raster":
-        return {
-          title: (
-            <>
-              <Dropdown
-                menu={{ items: treeMenu(layer), onClick: treeMenuOnClick }}
-                trigger={["contextMenu"]}
-              >
-                <Tooltip
-                  mouseLeaveDelay={0.0}
-                  mouseEnterDelay={0.0}
-                  placement="bottom"
-                  title={
-                    <span>
-                      {layer.name} &#8226;{" "}
-                      {moment(layer.captureDate).format("DD/MM/YYYY")}
-                    </span>
-                  }
-                >
-                  <Badge
-                    style={{
-                      backgroundColor: "#3b86ff",
-                      boxShadow: "0 0 3px 1px black",
-                      zIndex: 10,
-                    }}
-                    offset={[25, 6]}
-                    count={layer.isThreadExist ? layer.commentCount : 0}
-                    overflowCount={9}
-                  >
-                    <Text
-                      style={
-                        layer.layerGroupId
-                          ? { width: "139px" }
-                          : { width: "160px" }
-                      }
-                      ellipsis={true}
-                      onClick={() => {
-                        if (!props.isBaseMap) {
-                          setlayerToAddInAttributeTable({
-                            name: layer.name,
-                            type: layer.type,
-                            id: layer._id,
-                            path: layer.layerpath,
-                            count: layer.featureCount,
-                          });
-                        }
-                      }}
-                    >
-                      {layer.name}
-                    </Text>
-                  </Badge>
-                </Tooltip>
-              </Dropdown>
-            </>
-          ),
-          key: keyPrefix + "-" + layer._id,
-          icon: <FileImageOutlined />,
-          captureDate: layer.captureDate,
-          name: layer.name,
-          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
-          layer: layer,
-        };
-      case "vector":
-        return {
-          title: (
-            <>
-              <Dropdown
-                menu={{ items: treeMenu(layer), onClick: treeMenuOnClick }}
-                trigger={["contextMenu"]}
-              >
-                <Tooltip
-                  mouseLeaveDelay={0.0}
-                  mouseEnterDelay={0.0}
-                  placement="bottom"
-                  title={
-                    <span>
-                      {layer.name} &#8226;{" "}
-                      {moment(layer.captureDate).format("DD/MM/YYYY")}
-                    </span>
-                  }
-                >
-                  <Badge
-                    style={{
-                      backgroundColor: "#3b86ff",
-                      boxShadow: "0 0 3px 1px black",
-                      zIndex: 10,
-                    }}
-                    offset={[25, 6]}
-                    count={layer.isThreadExist ? layer.commentCount : 0}
-                    overflowCount={9}
-                  >
-                    <Text
-                      style={
-                        layer.layerGroupId
-                          ? { width: "119px" }
-                          : { width: "140px" }
-                      }
-                      ellipsis={true}
-                      onClick={() => {
-                        setlayerToAddInAttributeTable({
-                          name: layer.name,
-                          type: layer.type,
-                          id: layer._id,
-                          path: layer.layerpath,
-                          count: layer.featureCount,
-                        });
-                      }}
-                    >
-                      {layer.name}
-                    </Text>
-                    {layer.isFlagged && (
-                      <FlagOutlined style={{ color: "#da1c5c" }} />
-                    )}
-                    {layer.isPublic && (
-                      <EyeOutlined style={{ color: "#3b86ff" }} />
-                    )}
-                  </Badge>
-                </Tooltip>
-              </Dropdown>
-            </>
-          ),
-          key: keyPrefix + "-" + layer._id,
-          icon: generateIcon(
-            layer.vector.type,
-            layer.color === "multiColor" ? "#00000" : layer.color
-          ),
-          captureDate: layer.captureDate,
-          name: layer.name,
-          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
-          layer: layer,
-        };
-    }
+    return (
+      <Dropdown
+        menu={{ items: treeMenu(layer), onClick: treeMenuOnClick }}
+        trigger={["contextMenu"]}
+      >
+        <Tooltip
+          mouseLeaveDelay={0.0}
+          mouseEnterDelay={0.0}
+          placement="bottom"
+          title={
+            <span>
+              {layer.name} &#8226;{" "}
+              {moment(layer.captureDate).format("DD/MM/YYYY")}
+            </span>
+          }
+        >
+          <Badge
+            style={{
+              backgroundColor: "#3b86ff",
+              boxShadow: "0 0 3px 1px black",
+              zIndex: 10,
+            }}
+            offset={[25, 6]}
+            count={<>{layer.isThreadExist ? layer.commentCount : ""}</>}
+            overflowCount={9}
+          >
+            <Text
+              style={{
+                width: layer.type === "Raster" ?
+                  layer.layerGroupId ? "139px" : "160px" :
+                  layer.layerGroupId ? "119px" : "140px"
+              }}
+              ellipsis={true}
+              onClick={() => {
+                if (!props.isBaseMap || layer.type === "Vector") {
+                  setlayerToAddInAttributeTable({
+                    name: layer.name,
+                    type: layer.type,
+                    id: layer._id,
+                    path: layer.layerpath,
+                    count: layer.featureCount,
+                  });
+                }
+              }}
+            >
+              {layer.name}
+            </Text>
+            {layer.type === "Vector" && layer.isFlagged && (
+              <FlagOutlined style={{ color: "#da1c5c" }} />
+            )}
+            {layer.type === "Vector" && layer.isPublic && (
+              <EyeOutlined style={{ color: "#3b86ff" }} />
+            )}
+          </Badge>
+        </Tooltip>
+      </Dropdown>
+    );
   };
 
-  const [groupToEdit, setgroupToEdit] = useState<any>(null);
-  const [visibleEditModal, setVisibleEditModal] = useState(false);
-  const [groupName, setgroupName] = useState("");
-
-  const getGroupTitle = (value, id) => {
+  const getGroupTitleElement = (layerGroup: Layer["layerGroupId"]) => {
     const items: MenuProps["items"] = [
       {
         key: "1",
@@ -3989,10 +4210,10 @@ function BaseMap(props) {
     ];
     const onClick: MenuProps["onClick"] = (e) => {
       if (e.key === "1") {
-        setgroupName(value.name);
+        setgroupName(layerGroup.name);
         setgroupToEdit({
           id: id,
-          name: value.name,
+          name: layerGroup.name,
         });
         setVisibleEditModal(true);
       }
@@ -4005,7 +4226,7 @@ function BaseMap(props) {
               <p>Are You Sure To Want To Delete This Group</p>
               <b>These Layers Will be deleted along with this group</b>
               <>
-                {value.children.map((layer) => {
+                {AllLayers.filter((layer) => (layer.layerGroupId?._id === layerGroup._id)).map((layer) => {
                   return <p>{layer.name}</p>;
                 })}
               </>
@@ -4019,23 +4240,80 @@ function BaseMap(props) {
         });
       }
     };
-    return {
-      title: (
-        <>
-          <Dropdown menu={{ items, onClick }} trigger={["contextMenu"]}>
-            <Text style={{ width: "160px" }} ellipsis={true}>
-              {value.name}
-            </Text>
-          </Dropdown>
-        </>
-      ),
-      children: [...value.children],
-      key: "group-" + id,
-      group: true,
-      icon: <FolderOutlined />,
-      groupId: id,
-    };
+    return (
+      <Dropdown menu={{ items, onClick }} trigger={["contextMenu"]}>
+        <Text style={{ width: "160px" }} ellipsis={true}>
+          {layerGroup.name}
+        </Text>
+      </Dropdown>
+    );
   };
+
+  const [groupToEdit, setgroupToEdit] = useState<any>(null);
+  const [visibleEditModal, setVisibleEditModal] = useState(false);
+  const [groupName, setgroupName] = useState("");
+
+  // Should no longer be required
+  // const getGroupTitle = (value, id) => {
+  //   const items: MenuProps["items"] = [
+  //     {
+  //       key: "1",
+  //       label: "Rename",
+  //     },
+  //     {
+  //       key: "2",
+  //       label: "Delete",
+  //     },
+  //   ];
+  //   const onClick: MenuProps["onClick"] = (e) => {
+  //     if (e.key === "1") {
+  //       setgroupName(value.name);
+  //       setgroupToEdit({
+  //         id: id,
+  //         name: value.name,
+  //       });
+  //       setVisibleEditModal(true);
+  //     }
+  //     if (e.key === "2") {
+  //       Modal.confirm({
+  //         title: "Delete Group?",
+  //         icon: <ExclamationCircleOutlined />,
+  //         content: (
+  //           <>
+  //             <p>Are You Sure To Want To Delete This Group</p>
+  //             <b>These Layers Will be deleted along with this group</b>
+  //             <>
+  //               {value.children.map((layer) => {
+  //                 return <p>{layer.name}</p>;
+  //               })}
+  //             </>
+  //           </>
+  //         ),
+  //         okText: "Yes",
+  //         cancelText: "No",
+  //         onOk: () => {
+  //           deleteGroup(id);
+  //         },
+  //       });
+  //     }
+  //   };
+  //   return {
+  //     title: (
+  //       <>
+  //         <Dropdown menu={{ items, onClick }} trigger={["contextMenu"]}>
+  //           <Text style={{ width: "160px" }} ellipsis={true}>
+  //             {value.name}
+  //           </Text>
+  //         </Dropdown>
+  //       </>
+  //     ),
+  //     children: [...value.children],
+  //     key: "group-" + id,
+  //     group: true,
+  //     icon: <FolderOutlined />,
+  //     groupId: id,
+  //   };
+  // };
 
   const updateTreeDataAfterGroupDelete = (id) => {
     const td: any = [...treeStructure];
@@ -4398,59 +4676,62 @@ function BaseMap(props) {
   const [allLayerGroups, setAllLayerGroups] = useState({});
   //----------------------Segrigate layers-------------------------------------------------------
 
-  useEffect(() => {
-    refreshLayers();
-  }, [treeStructure, AllLayers, panes, dateRange]);
+  // Should no longer be required
+  // useEffect(() => {
+  //   refreshLayers();
+  // }, [treeStructure, AllLayers, panes, dateRange]);
   useEffect(() => {
     if (!props.Thread.open) {
       setRefreshLayer(!refreshLayer);
     }
   }, [props.Thread.open]);
-  const refreshLayers = () => {
-    const td: any = [...treeStructure];
-    let newTreeDataVector: any = [];
-    let newTreeDataRaster: any = [];
 
-    //console.log(td);
-    const data: any = treeData;
+  // Should no longer be required
+  // const refreshLayers = () => {
+  //   const td: any = [...treeStructure];
+  //   let newTreeDataVector: any = [];
+  //   let newTreeDataRaster: any = [];
 
-    newTreeDataVector = td[0].children.map((layer) => {
-      if (layer.group) {
-        let groupLayers = [];
-        const value = {
-          ...layer.value,
-        };
-        groupLayers = layer.value.children.map((l) => {
-          return getTreeData(l, "vector", td[0]["key"]);
-        });
+  //   //console.log(td);
+  //   const data: any = treeData;
 
-        value.children = [...groupLayers];
-        return getGroupTitle(value, layer.id);
-      } else {
-        return getTreeData(layer, "vector", td[0]["key"]);
-      }
-    });
-    data[0].children = [...newTreeDataVector];
+  //   newTreeDataVector = td[0].children.map((layer) => {
+  //     if (layer.group) {
+  //       let groupLayers = [];
+  //       const value = {
+  //         ...layer.value,
+  //       };
+  //       groupLayers = layer.value.children.map((l) => {
+  //         return getTreeData(l, "vector", td[0]["key"]);
+  //       });
 
-    newTreeDataRaster = td[1].children.map((layer) => {
-      if (layer.group) {
-        let groupLayers = [];
-        const value = {
-          ...layer.value,
-        };
-        groupLayers = layer.value.children.map((l) => {
-          return getTreeData(l, "raster", td[1]["key"]);
-        });
-        value.children = [...groupLayers];
-        return getGroupTitle(value, layer.id);
-      } else {
-        return getTreeData(layer, "raster", td[1]["key"]);
-      }
-    });
-    data[1].children = [...newTreeDataRaster];
+  //       value.children = [...groupLayers];
+  //       return getGroupTitle(value, layer.id);
+  //     } else {
+  //       return getTreeData(layer, "vector", td[0]["key"]);
+  //     }
+  //   });
+  //   data[0].children = [...newTreeDataVector];
 
-    setTreeDataa(data);
-  };
+  //   newTreeDataRaster = td[1].children.map((layer) => {
+  //     if (layer.group) {
+  //       let groupLayers = [];
+  //       const value = {
+  //         ...layer.value,
+  //       };
+  //       groupLayers = layer.value.children.map((l) => {
+  //         return getTreeData(l, "raster", td[1]["key"]);
+  //       });
+  //       value.children = [...groupLayers];
+  //       return getGroupTitle(value, layer.id);
+  //     } else {
+  //       return getTreeData(layer, "raster", td[1]["key"]);
+  //     }
+  //   });
+  //   data[1].children = [...newTreeDataRaster];
+
+  //   setTreeDataa(data);
+  // };
 
   const segrigateLayers = (layers) => {
     //console.log("segrate layer");
@@ -5261,7 +5542,7 @@ function BaseMap(props) {
           props.loading(false);
         });
 
-      refreshLayers();
+      // refreshLayers();
     }
 
     props.loading(true);
@@ -5301,7 +5582,7 @@ function BaseMap(props) {
         props.loading(false);
       });
 
-    refreshLayers();
+    // refreshLayers();
   };
 
   const editFeature = (data, color, index) => {
@@ -5335,124 +5616,129 @@ function BaseMap(props) {
       });
   };
 
-  const updateLayerDataAfterEditing = (data, color, id) => {
+  const updateLayerDataAfterEditing = (data: Layer, color, id) => {
     if (data) {
-      const td: any = [...treeStructure];
-      const id = data._id;
-      const type = data.type;
-      let newTreeData: any = [];
-      const al = { ...allLayers };
-      const l = {};
-      switch (type) {
-        case "Vector":
-          al[`1-${data._id}`].layerLabel = data.layerLabel;
-          newTreeData = td[0].children.map((layer: any) => {
-            if (!layer.group) {
-              if (layer.key === `1-${id}`) {
-                data.key = `1-${id}`;
-                return data;
-              } else return layer;
-            } else {
-              let groupLayers = [];
+      // Should no longer be required
+      // const td: any = [...treeStructure];
+      // const id = data._id;
+      // const type = data.type;
+      // let newTreeData: any = [];
+      // const al = { ...allLayers };
+      // const l = {};
+      // switch (type) {
+      //   case "Vector":
+      //     al[`1-${data._id}`].layerLabel = data.layerLabel;
+      //     newTreeData = td[0].children.map((layer: any) => {
+      //       if (!layer.group) {
+      //         if (layer.key === `1-${id}`) {
+      //           data.key = `1-${id}`;
+      //           return data;
+      //         } else return layer;
+      //       } else {
+      //         let groupLayers = [];
 
-              groupLayers = layer.value.children.map((l) => {
-                if (l.key === `1-${id}`) {
-                  data.key = `1-${id}`;
-                  return data;
-                } else return l;
-              });
+      //         groupLayers = layer.value.children.map((l) => {
+      //           if (l.key === `1-${id}`) {
+      //             data.key = `1-${id}`;
+      //             return data;
+      //           } else return l;
+      //         });
 
-              layer.value.children = [...groupLayers];
-              return layer;
-            }
-          });
+      //         layer.value.children = [...groupLayers];
+      //         return layer;
+      //       }
+      //     });
 
-          td[0].children = [...newTreeData];
+      //     td[0].children = [...newTreeData];
 
-          l[td[0]["key"] + "-" + data._id] = {
-            layerPath: data.layerpath,
-            type: data.vector.type,
-            name: data.name,
-            id: data._id,
-            layerLabel: data.layerLabel,
-            layerPopupLabel: data.layerPopupLabel,
-            isPublic: data.isPublic,
-            flaggedFeatures: data.flaggedFeatures,
-          };
+      //     l[td[0]["key"] + "-" + data._id] = {
+      //       layerPath: data.layerpath,
+      //       type: data.vector.type,
+      //       name: data.name,
+      //       id: data._id,
+      //       layerLabel: data.layerLabel,
+      //       layerPopupLabel: data.layerPopupLabel,
+      //       isPublic: data.isPublic,
+      //       flaggedFeatures: data.flaggedFeatures,
+      //     };
 
-          break;
-        case "Raster":
-          if (props.isBaseMap) {
-            // -----to merge all rasters paths------------------
-            l[td[1]["key"] + "-" + data._id] = {
-              layerPath: data.layerdataArr,
-              type: data.raster.name,
-              settings: {
-                ...data.raster,
-                // minp: layer.minp,
-                // maxp: layer.maxp,
-              },
-              name: data.name,
-              id: data._id,
-            };
+      //     break;
+      //   case "Raster":
+      //     if (props.isBaseMap) {
+      //       // -----to merge all rasters paths------------------
+      //       l[td[1]["key"] + "-" + data._id] = {
+      //         layerPath: data.layerdataArr,
+      //         type: data.raster.name,
+      //         settings: {
+      //           ...data.raster,
+      //           // minp: layer.minp,
+      //           // maxp: layer.maxp,
+      //         },
+      //         name: data.name,
+      //         id: data._id,
+      //       };
 
-            newTreeData = td[1].children.map((layer: any) => {
-              if (!layer.group) {
-                if (layer.key === `2-${id}`) {
-                  data.key = `2-${id}`;
-                  return data;
-                } else return layer;
-              } else {
-                let groupLayers = [];
+      //       newTreeData = td[1].children.map((layer: any) => {
+      //         if (!layer.group) {
+      //           if (layer.key === `2-${id}`) {
+      //             data.key = `2-${id}`;
+      //             return data;
+      //           } else return layer;
+      //         } else {
+      //           let groupLayers = [];
 
-                groupLayers = layer.value.children.map((l) => {
-                  if (l.key === `2-${id}`) {
-                    data.key = `2-${id}`;
-                    return data;
-                  } else return l;
-                });
+      //           groupLayers = layer.value.children.map((l) => {
+      //             if (l.key === `2-${id}`) {
+      //               data.key = `2-${id}`;
+      //               return data;
+      //             } else return l;
+      //           });
 
-                layer.value.children = [...groupLayers];
-                return layer;
-              }
-            });
+      //           layer.value.children = [...groupLayers];
+      //           return layer;
+      //         }
+      //       });
 
-            td[1].children = [...newTreeData];
-          } else {
-            newTreeData = td[1].children.map((layer: any) => {
-              if (!layer.group) {
-                if (layer.key === `2-${id}`) {
-                  data.key = `2-${id}`;
-                  return data;
-                } else return layer;
-              } else {
-                let groupLayers = [];
+      //       td[1].children = [...newTreeData];
+      //     } else {
+      //       newTreeData = td[1].children.map((layer: any) => {
+      //         if (!layer.group) {
+      //           if (layer.key === `2-${id}`) {
+      //             data.key = `2-${id}`;
+      //             return data;
+      //           } else return layer;
+      //         } else {
+      //           let groupLayers = [];
 
-                groupLayers = layer.value.children.map((l) => {
-                  if (l.key === `2-${id}`) {
-                    data.key = `2-${id}`;
-                    return data;
-                  } else return l;
-                });
+      //           groupLayers = layer.value.children.map((l) => {
+      //             if (l.key === `2-${id}`) {
+      //               data.key = `2-${id}`;
+      //               return data;
+      //             } else return l;
+      //           });
 
-                layer.value.children = [...groupLayers];
-                return layer;
-              }
-            });
+      //           layer.value.children = [...groupLayers];
+      //           return layer;
+      //         }
+      //       });
 
-            td[1].children = [...newTreeData];
-            break;
-          }
-      }
+      //       td[1].children = [...newTreeData];
+      //       break;
+      //     }
+      // }
 
-      setTreeStructure(td);
-      setAllLayers({
-        ...al,
-        ...l,
-      });
-      setTimeout(() => {
-        forceUpdateLayers(id);
-      });
+      // setTreeStructure(td);
+      // setAllLayers({
+      //   ...al,
+      //   ...l,
+      // });
+      // setTimeout(() => {
+      //   forceUpdateLayers(id);
+      // });
+      SetAllLayers(prev => prev.map((layer) => {
+        if(layer._id === data._id) return { ...data, isChecked: layer.isChecked, render3D: layer.render3D};
+        else return layer;
+      }));
     }
   };
   //==============socket listen========================
@@ -7466,10 +7752,15 @@ function BaseMap(props) {
               expandedKeys={expandedKeys}
               autoExpandParent={autoExpandParent}
               onCheck={onCheck}
-              checkedKeys={AllLayers.filter((layer) => layer.isChecked).map((layer) => layer._id)}
+              checkedKeys={(() => {
+                const checked = AllLayers.filter((layer) => layer.isChecked).map((layer) => layer._id)
+                if(MissionLayers.isAlertChecked) checked.push("alert");
+                if(MissionLayers.isVODChecked) checked.push("vod");
+                return checked;
+              })()}
               onSelect={onSelect}
               selectedKeys={selectedKeys}
-              treeData={ILayersToTree(AllLayers, MissionLayers)}
+              treeData={ILayersToTree(AllLayers, getTitleElement, getGroupTitleElement)}
               onDrop={onDrop}
               draggable={(node: any) => {
                 if (

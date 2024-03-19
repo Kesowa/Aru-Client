@@ -1,11 +1,15 @@
-import { Layer as GLayer, IMissionLayers } from "./layerRender";
+import { Layer as GLayer } from "./layerRender";
 import { Dropdown, Typography } from "antd";
 import { MenuClickEventHandler } from "rc-menu/lib/interface";
 import { FolderOutlined, FileImageOutlined, EnvironmentOutlined, BranchesOutlined, GatewayOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
 
-export const ILayersToTree = (layers: GLayer[], missionLayers: IMissionLayers): TreeData => {
+export const ILayersToTree = (
+  layers: GLayer[],
+  getTitleElement: (layer: GLayer) => any,
+  getGroupTitleElement: (layerGroup: GLayer["layerGroupId"]) => any
+): TreeData => {
   const treeData: TreeData = [
     {
       title: "Vector",
@@ -24,35 +28,35 @@ export const ILayersToTree = (layers: GLayer[], missionLayers: IMissionLayers): 
     }
   ];
   ;
-  treeData[0].children = groupLayers(layers.filter(layer => layer.type == "Vector"));
-  treeData[1].children = groupLayers(layers.filter(layer => layer.type == "Raster"));
-  treeData[2].children = missionLayersMenu(missionLayers);
+  treeData[0].children = groupLayers(layers.filter(layer => layer.type == "Vector"), getTitleElement, getGroupTitleElement);
+  treeData[1].children = groupLayers(layers.filter(layer => layer.type == "Raster"), getTitleElement, getGroupTitleElement);
+  treeData[2].children = missionLayersMenu();
   return treeData;
 };
 
 
 
-function titleElement(title: string, onClick: MenuClickEventHandler) {
-  return (
-    <Dropdown menu={{
-      items: [
-        {
-          key: "1",
-          label: "Rename",
-        },
-        {
-          key: "2",
-          label: "Delete",
-        },
-      ],
-      onClick,
-    }} trigger={["contextMenu"]}>
-      <Text style={{ width: "160px" }} ellipsis={true}>
-        {title}
-      </Text>
-    </Dropdown>
-  )
-}
+// function titleElement(title: string, onClick: MenuClickEventHandler) {
+//   return (
+//     <Dropdown menu={{
+//       items: [
+//         {
+//           key: "1",
+//           label: "Rename",
+//         },
+//         {
+//           key: "2",
+//           label: "Delete",
+//         },
+//       ],
+//       onClick,
+//     }} trigger={["contextMenu"]}>
+//       <Text style={{ width: "160px" }} ellipsis={true}>
+//         {title}
+//       </Text>
+//     </Dropdown>
+//   )
+// }
 
 type Layer = GLayer & {
   icon: Object,
@@ -112,14 +116,18 @@ function vectorIcon(type: GLayer["vector"]["type"], color: string) {
   }
 }
 
-function groupLayers(layers: GLayer[]) {
+function groupLayers(
+  layers: GLayer[],
+  getTitleElement: (layer: GLayer) => any,
+  getGroupTitleElement: (layerGroup: GLayer["layerGroupId"]) => any
+) {
   const groupedLayers: Child[] = []
   layers.forEach(layer => {
     const cookedLayer: Layer = {
       ...layer,
       icon: layer.type == "Raster" ? <FileImageOutlined /> : vectorIcon(layer.vector.type, layer.color),
       key: layer._id,
-      title: titleElement(layer.name, () => { }),
+      title: getTitleElement(layer),
       groupId: layer.layerGroupId?._id,
       group: false,
     };
@@ -132,7 +140,7 @@ function groupLayers(layers: GLayer[]) {
           group: true,
           groupId: layer.layerGroupId._id,
           icon: <FolderOutlined />,
-          title: titleElement(layer.layerGroupId.name, () => { }),
+          title: getGroupTitleElement(layer.layerGroupId),
           children: [],
           groupType: layer.type == "Vector" ? 1 : 2,
         })
@@ -147,14 +155,19 @@ function groupLayers(layers: GLayer[]) {
   return groupedLayers;
 }
 
-function missionLayersMenu(missionLayers: IMissionLayers) {
+function missionLayersMenu() {
   return [
     {
       name: "Alert",
       id: "alert",
       icon: vectorIcon("Point", "#d0021b"),
       key: "alert",
-      title: titleElement("Alert", () => {}),
+      // title: titleElement("Alert", () => {}),
+      title: (
+        <Text style={{ width: "160px" }} ellipsis={true}>
+          Alert
+        </Text>
+      ),
       group: false,
     },
     {
@@ -162,7 +175,12 @@ function missionLayersMenu(missionLayers: IMissionLayers) {
       id: "vod",
       icon: vectorIcon("Point", "#d0021b"),
       key: "vod",
-      title: titleElement("VOD", () => {}),
+      // title: titleElement("VOD", () => {}),
+      title: (
+        <Text style={{ width: "160px" }} ellipsis={true}>
+          VOD
+        </Text>
+      ),
       group: false,
     },
   ];
