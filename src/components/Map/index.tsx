@@ -2361,7 +2361,6 @@ function BaseMap(props) {
                 _subLayerProps: {
                   scenegraph: { _lighting: "flat" },
                 },
-                //bounds: [west, south, east, north]
               });
             } else {
               console.log(allLayers);

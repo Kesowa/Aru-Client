@@ -95,7 +95,6 @@ class CastError extends Error {
 }
 
 export const MAPBOX_API_KEY = new EnvVar("VITE_MAPBOX_API_KEY").toString();
-export const CESIUM_TOKEN = new EnvVar("VITE_CESIUM_TOKEN").toString();
 export const COG_URL = new WindowVar("VITE_COG_URL").isUrl().toString();
 export const TITILER_STATIC = new WindowVar("VITE_TITILER_STATIC")
   .isUrl()
