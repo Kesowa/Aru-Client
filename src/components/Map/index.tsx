@@ -13,7 +13,7 @@ import { WebMercatorViewport } from "viewport-mercator-project";
 import { MaskExtension } from "@deck.gl/extensions/typed";
 import { TerrainLayer } from "@deck.gl/geo-layers/typed";
 import { readPixelsToArray } from "@luma.gl/webgl";
-import { Tile3DLayer } from '@deck.gl/geo-layers';
+import { Tile3DLayer } from "@deck.gl/geo-layers";
 import {
   Row,
   Col,
@@ -2339,31 +2339,31 @@ function BaseMap(props) {
                 })
               );
             } else if (allLayers[element].type == "POINT_CLOUD") {
-                // Fetch the dynamic ID from the backend (bounds are not yet avaliable)
-                const cloudLayer = allLayers[element];
-              
-                //Render the pointcloud data
-                vlayers[index] = new Tile3DLayer({
-                  id: element,
-                  data: STATIC_URL + cloudLayer["metadata"],
-                  loader: Tiles3DLoader,
-                  loadOptions: {},
-                  onTilesetLoad: (tileset) => {
-                    const { cartographicCenter, zoom } = tileset;
-                    setViewport({
-                      ...INITIAL_VIEW_STATE,
-                      longitude: cartographicCenter[0],
-                      latitude: cartographicCenter[1],
-                      zoom,
-                      pitch:150
-                    });
-                  },
-                  _subLayerProps: {
-                    scenegraph: { _lighting: 'flat' }
-                  }
-                  //bounds: [west, south, east, north]
-                });
-             } else {
+              // Fetch the dynamic ID from the backend (bounds are not yet avaliable)
+              const cloudLayer = allLayers[element];
+
+              //Render the pointcloud data
+              vlayers[index] = new Tile3DLayer({
+                id: element,
+                data: STATIC_URL + cloudLayer["metadata"],
+                loader: Tiles3DLoader,
+                loadOptions: {},
+                onTilesetLoad: (tileset) => {
+                  const { cartographicCenter, zoom } = tileset;
+                  setViewport({
+                    ...INITIAL_VIEW_STATE,
+                    longitude: cartographicCenter[0],
+                    latitude: cartographicCenter[1],
+                    zoom,
+                    pitch: 150,
+                  });
+                },
+                _subLayerProps: {
+                  scenegraph: { _lighting: "flat" },
+                },
+                //bounds: [west, south, east, north]
+              });
+            } else {
               console.log(allLayers);
               console.log("Raster");
               const rasterpath =
@@ -2491,9 +2491,9 @@ function BaseMap(props) {
                     "z"
                   ),
                 });
-              }   
+              }
             }
-          }else if (element.split("-")[0] === "1" && element !== "1") {
+          } else if (element.split("-")[0] === "1" && element !== "1") {
             switch (allLayers[element]?.type) {
               case "MultiLineString":
                 vlayers[index] = new GeoJsonLayer({
@@ -4845,7 +4845,7 @@ function BaseMap(props) {
       );
 
       if (result.data.status) {
-        console.log("metadata for me:",result.data.data);
+        console.log("metadata for me:", result.data.data);
         addLayer(result.data.data);
         message.success("Layer created!");
       } else {
