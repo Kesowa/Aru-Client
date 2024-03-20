@@ -13,6 +13,7 @@ import { COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
 import { Feature, GeoJson, Point } from "src/types/geojson";
 import { ILayer } from "src/types/layer";
 import http from "src/services/httpCall";
+import { hexToRGB } from "./colorUtils";
 
 export type Layer = ILayer & {
   isChecked?: boolean,
@@ -142,9 +143,11 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
                 mask: true,
               };
             },
-            getColor: [255, 0, 0],
-
-          })
+            getIconColor: (d) =>
+              d.properties?.color
+                ? hexToRGB(d.properties?.color as string)
+                : hexToRGB("#ff0000"),
+          });
         else if (layer.vector.type == "air_pollution")
           return new HeatmapLayer({
             id: layer._id,
@@ -199,15 +202,21 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             id: layer._id,
             data: STATIC_URL + layer.layerpath,
             pickable: true,
-            stroked: layer.vector.type == "MultiPolygon",
-            filled: layer.vector.type == "MultiPolygon",
+            stroked: ["MultiPolygon", "Polygon"].includes(layer.vector.type),
+            filled: ["MultiPolygon", "Polygon"].includes(layer.vector.type),
             extruded: false,
             lineWidthUnits: "pixels",
             lineWidthScale: 4,
             lineWidthMinPixels: 2,
-            getLineColor: [255, 0, 0],
-            getFillColor: layer.vector.type == "MultiPolygon" ? [0, 225, 0] : undefined,
-          })
+            getLineColor: (d) =>
+              d.properties?.color
+                ? hexToRGB(d.properties?.color as string)
+                : hexToRGB("#000000"),
+            getFillColor: (d) =>
+              d.properties?.color
+                ? hexToRGB(d.properties?.color as string, 50)
+                : hexToRGB("#000000"),
+          });
       }
     });
 }
