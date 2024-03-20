@@ -2,39 +2,60 @@ import { Layer as GLayer } from "./layerRender";
 import { Dropdown, Typography } from "antd";
 import { MenuClickEventHandler } from "rc-menu/lib/interface";
 import { FolderOutlined, FileImageOutlined, EnvironmentOutlined, BranchesOutlined, GatewayOutlined } from "@ant-design/icons";
+import moment from "moment";
 
 const { Text } = Typography;
 
 export const ILayersToTree = (
   layers: GLayer[],
   getTitleElement: (layer: GLayer) => any,
-  getGroupTitleElement: (layerGroup: GLayer["layerGroupId"]) => any
+  getGroupTitleElement: (layerGroup: GLayer["layerGroupId"]) => any,
+  sortType: string,
+  isAscending: boolean
 ): TreeData => {
   const treeData: TreeData = [
     {
       title: "Vector",
       key: "1",
-      children: []
+      children: [],
     },
     {
       title: "Raster",
       key: "2",
-      children: []
+      children: [],
     },
     {
       title: "Mission",
       key: "3",
-      children: []
-    }
+      children: [],
+    },
   ];
-  ;
-  treeData[0].children = groupLayers(layers.filter(layer => layer.type == "Vector"), getTitleElement, getGroupTitleElement);
-  treeData[1].children = groupLayers(layers.filter(layer => layer.type == "Raster"), getTitleElement, getGroupTitleElement);
+
+  const sortFunc = (a: Child, b: Child) => {
+    if (sortType === "createdAt") {
+      if (isAscending) return moment(a.createdAt).diff(moment(b.createdAt));
+      else return moment(b.createdAt).diff(moment(a.createdAt));
+    } else {
+      // sortType is "name"
+      if (isAscending) return a.name.localeCompare(b.name);
+      else return b.name.localeCompare(a.name);
+    }
+  };
+
+  treeData[0].children = groupLayers(
+    layers.filter((layer) => layer.type === "Vector"),
+    getTitleElement,
+    getGroupTitleElement
+  ).sort(sortFunc);
+  treeData[1].children = groupLayers(
+    layers.filter((layer) => layer.type === "Raster"),
+    getTitleElement,
+    getGroupTitleElement
+  ).sort(sortFunc);
   treeData[2].children = missionLayersMenu();
+
   return treeData;
 };
-
-
 
 // function titleElement(title: string, onClick: MenuClickEventHandler) {
 //   return (
@@ -66,7 +87,7 @@ type Layer = GLayer & {
   group: false,
 }
 
-type LayerGroup = {
+type LayerGroup = GLayer["layerGroupId"] & {
   key: string,
   group: true,
   groupId: string,
@@ -141,12 +162,12 @@ function groupLayers(
           groupId: layer.layerGroupId._id,
           icon: <FolderOutlined />,
           title: getGroupTitleElement(layer.layerGroupId),
-          children: [],
+          children: [cookedLayer],
           groupType: layer.type == "Vector" ? 1 : 2,
         })
       }
       if (layerGroup?.group && layerGroup) {
-        layerGroup.children.push(cookedLayer)
+        layerGroup.children.push(cookedLayer);
       }
     } else {
       groupedLayers.push(cookedLayer);

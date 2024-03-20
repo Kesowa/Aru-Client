@@ -888,8 +888,8 @@ function BaseMap(props) {
   const [activeType, setActiveType] = useState(false);
   const [time, setTime] = useState("100 days");
   const [timeEnabled, setTimeEnabled] = useState<any>();
-  const [sortType, setSortType] = useState("");
-  const [isAscending, setIsAscending] = useState(true);
+  const [sortType, setSortType] = useState("createdAt");
+  const [isAscending, setIsAscending] = useState(false);
   const [showEditModel, setshowEditModel] = useState(false);
   const [selectedRasterProps, setSelectedRasterProps] = useState<any>([]);
   const [selectedVectorProps, setSelectedVectorProps] = useState<any>([]);
@@ -1256,86 +1256,96 @@ function BaseMap(props) {
   };
 
   useEffect(() => {
-    if (sortType == "createdAt") {
-      const data: any = [...treeDataa];
-      if (isAscending) {
-        data[0].children.sort((a, b) =>
-          moment(a.captureDate).diff(moment(b.captureDate))
-        );
-        data[1].children.sort((a, b) =>
-          moment(a.captureDate).diff(moment(b.captureDate))
-        );
+    // if (sortType == "createdAt") {
+    //   const data: any = [...treeDataa];
+    //   if (isAscending) {
+    //     data[0].children.sort((a, b) =>
+    //       moment(a.captureDate).diff(moment(b.captureDate))
+    //     );
+    //     data[1].children.sort((a, b) =>
+    //       moment(a.captureDate).diff(moment(b.captureDate))
+    //     );
 
-        data[0].children.map((item) =>
-          item?.group
-            ? item.children.sort((a, b) =>
-              moment(a.captureDate).diff(moment(b.captureDate))
-            )
-            : null
-        );
-        data[1].children.map((item) =>
-          item?.group
-            ? item.children.sort((a, b) =>
-              moment(a.captureDate).diff(moment(b.captureDate))
-            )
-            : null
-        );
-      } else {
-        data[0].children.sort((a, b) =>
-          moment(b.captureDate).diff(moment(a.captureDate))
-        );
-        data[1].children.sort((a, b) =>
-          moment(b.captureDate).diff(moment(a.captureDate))
-        );
+    //     data[0].children.map((item) =>
+    //       item?.group
+    //         ? item.children.sort((a, b) =>
+    //           moment(a.captureDate).diff(moment(b.captureDate))
+    //         )
+    //         : null
+    //     );
+    //     data[1].children.map((item) =>
+    //       item?.group
+    //         ? item.children.sort((a, b) =>
+    //           moment(a.captureDate).diff(moment(b.captureDate))
+    //         )
+    //         : null
+    //     );
+    //   } else {
+    //     data[0].children.sort((a, b) =>
+    //       moment(b.captureDate).diff(moment(a.captureDate))
+    //     );
+    //     data[1].children.sort((a, b) =>
+    //       moment(b.captureDate).diff(moment(a.captureDate))
+    //     );
 
-        data[0].children.map((item) =>
-          item?.group
-            ? item.children.sort((a, b) =>
-              moment(b.captureDate).diff(moment(a.captureDate))
-            )
-            : null
-        );
-        data[1].children.map((item) =>
-          item?.group
-            ? item.children.sort((a, b) =>
-              moment(b.captureDate).diff(moment(a.captureDate))
-            )
-            : null
-        );
-      }
-      setTreeDataa(data);
-    }
-    if (sortType == "name") {
-      const data: any = [...treeDataa];
-      if (isAscending) {
-        data[0].children.sort((a, b) => a.name?.localeCompare(b.name));
-        data[1].children.sort((a, b) => a.name?.localeCompare(b.name));
-        data[0].children.map((item) =>
-          item?.group
-            ? item.children.sort((a, b) => a.name?.localeCompare(b.name))
-            : null
-        );
-        data[1].children.map((item) =>
-          item?.group
-            ? item.children.sort((a, b) => a.name?.localeCompare(b.name))
-            : null
-        );
+    //     data[0].children.map((item) =>
+    //       item?.group
+    //         ? item.children.sort((a, b) =>
+    //           moment(b.captureDate).diff(moment(a.captureDate))
+    //         )
+    //         : null
+    //     );
+    //     data[1].children.map((item) =>
+    //       item?.group
+    //         ? item.children.sort((a, b) =>
+    //           moment(b.captureDate).diff(moment(a.captureDate))
+    //         )
+    //         : null
+    //     );
+    //   }
+    //   setTreeDataa(data);
+    // }
+    // if (sortType == "name") {
+    //   const data: any = [...treeDataa];
+    //   if (isAscending) {
+    //     data[0].children.sort((a, b) => a.name?.localeCompare(b.name));
+    //     data[1].children.sort((a, b) => a.name?.localeCompare(b.name));
+    //     data[0].children.map((item) =>
+    //       item?.group
+    //         ? item.children.sort((a, b) => a.name?.localeCompare(b.name))
+    //         : null
+    //     );
+    //     data[1].children.map((item) =>
+    //       item?.group
+    //         ? item.children.sort((a, b) => a.name?.localeCompare(b.name))
+    //         : null
+    //     );
+    //   } else {
+    //     data[0].children.sort((a, b) => b.name?.localeCompare(a.name));
+    //     data[1].children.sort((a, b) => b.name?.localeCompare(a.name));
+    //     data[0].children.map((item) =>
+    //       item?.group
+    //         ? item.children.sort((a, b) => b.name?.localeCompare(a.name))
+    //         : null
+    //     );
+    //     data[1].children.map((item) =>
+    //       item?.group
+    //         ? item.children.sort((a, b) => b.name?.localeCompare(a.name))
+    //         : null
+    //     );
+    //   }
+    //   setTreeDataa(data);
+    // }
+    SetAllLayers(prev => [...prev.sort((a,b) => {
+      if (sortType === "createdAt") {
+        if (isAscending) return moment(a.createdAt).diff(moment(b.createdAt));
+        else return moment(b.createdAt).diff(moment(a.createdAt));
       } else {
-        data[0].children.sort((a, b) => b.name?.localeCompare(a.name));
-        data[1].children.sort((a, b) => b.name?.localeCompare(a.name));
-        data[0].children.map((item) =>
-          item?.group
-            ? item.children.sort((a, b) => b.name?.localeCompare(a.name))
-            : null
-        );
-        data[1].children.map((item) =>
-          item?.group
-            ? item.children.sort((a, b) => b.name?.localeCompare(a.name))
-            : null
-        );
+        // sortType is "name"
+        if (isAscending) return a.name.localeCompare(b.name);
+        else return b.name.localeCompare(a.name);
       }
-      setTreeDataa(data);
-    }
+    })]);
   }, [sortType, isAscending]);
 
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
@@ -5968,11 +5978,11 @@ function BaseMap(props) {
   //----------sorting menu
   const sortMenu = [
     {
-      key: "0",
+      key: "1",
       label: "Name",
     },
     {
-      key: "1",
+      key: "2",
       label: "Time",
     },
   ];
@@ -7755,7 +7765,7 @@ function BaseMap(props) {
               })()}
               onSelect={onSelect}
               selectedKeys={selectedKeys}
-              treeData={ILayersToTree(AllLayers, getTitleElement, getGroupTitleElement)}
+              treeData={ILayersToTree(AllLayers, getTitleElement, getGroupTitleElement, sortType, isAscending)}
               onDrop={onDrop}
               draggable={(node: any) => {
                 if (
