@@ -3773,8 +3773,7 @@ function BaseMap(props) {
   //             : layer.layerGroupId;
   //         await removeLayerFromGroup(
   //           idOfLayerGroup,
-  //           layer._id,
-  //           `1-${layer._id}`
+  //           layer._id
   //         );
   //         updateTreeDataAfterSingleLayerRemovalFromGroup(layer._id);
   //         break;
@@ -4053,10 +4052,9 @@ function BaseMap(props) {
               : layer.layerGroupId;
           await removeLayerFromGroup(
             idOfLayerGroup,
-            layer._id,
-            `1-${layer._id}`
+            layer._id
           );
-          updateTreeDataAfterSingleLayerRemovalFromGroup(layer._id);
+          // updateTreeDataAfterSingleLayerRemovalFromGroup(layer._id);
           break;
         case "7":
           setVisibleGroupCreateModal(!visibleGroupCreateModal);
@@ -4217,7 +4215,7 @@ function BaseMap(props) {
       if (e.key === "1") {
         setgroupName(layerGroup.name);
         setgroupToEdit({
-          id: id,
+          id: layerGroup._id,
           name: layerGroup.name,
         });
         setVisibleEditModal(true);
@@ -4320,258 +4318,259 @@ function BaseMap(props) {
   //   };
   // };
 
-  const updateTreeDataAfterGroupDelete = (id) => {
-    const td: any = [...treeStructure];
-    const al = { ...allLayers };
+  // const updateTreeDataAfterGroupDelete = (id) => {
+  //   const td: any = [...treeStructure];
+  //   const al = { ...allLayers };
 
-    const newVectorLayers = td[0].children.filter((layer) => {
-      if (!layer.group) {
-        return true;
-      } else {
-        if (layer.id === id) {
-          layer.value.children.forEach((l) => {
-            delete al[l.key];
-          });
-          return false;
-        } else {
-          return true;
-        }
-      }
-    });
+  //   const newVectorLayers = td[0].children.filter((layer) => {
+  //     if (!layer.group) {
+  //       return true;
+  //     } else {
+  //       if (layer.id === id) {
+  //         layer.value.children.forEach((l) => {
+  //           delete al[l.key];
+  //         });
+  //         return false;
+  //       } else {
+  //         return true;
+  //       }
+  //     }
+  //   });
 
-    td[0].children = [...newVectorLayers];
+  //   td[0].children = [...newVectorLayers];
 
-    const newRasterLayers = td[1].children.filter((layer) => {
-      if (!layer.group) {
-        return true;
-      } else {
-        if (layer.id === id) {
-          layer.value.children.forEach((l) => {
-            delete al[l.key];
-          });
-          return false;
-        } else {
-          return true;
-        }
-      }
-    });
+  //   const newRasterLayers = td[1].children.filter((layer) => {
+  //     if (!layer.group) {
+  //       return true;
+  //     } else {
+  //       if (layer.id === id) {
+  //         layer.value.children.forEach((l) => {
+  //           delete al[l.key];
+  //         });
+  //         return false;
+  //       } else {
+  //         return true;
+  //       }
+  //     }
+  //   });
 
-    td[1].children = [...newRasterLayers];
+  //   td[1].children = [...newRasterLayers];
 
-    const ag = { ...allLayerGroups };
-    delete ag[id];
+  //   const ag = { ...allLayerGroups };
+  //   delete ag[id];
 
-    setTimeout(() => {
-      setAllLayers(al);
-      setAllLayerGroups(ag);
-      setTreeStructure(td);
-      forceUpdateAllLayers();
-    }, 100);
-  };
+  //   setTimeout(() => {
+  //     setAllLayers(al);
+  //     setAllLayerGroups(ag);
+  //     setTreeStructure(td);
+  //     forceUpdateAllLayers();
+  //   }, 100);
+  // };
 
-  const updateTreeDataAfterMovingLayers = async (groupid, layerids) => {
-    // const al = { ...allLayers };
-    props.loading(true);
+  // No longer required
+  // const updateTreeDataAfterMovingLayers = async (groupid, layerids) => {
+  //   // const al = { ...allLayers };
+  //   props.loading(true);
 
-    const res = await http.patch(`${apis.EDIT_LAYER_GROUP}`, {
-      _id: groupid,
-      layers: layerids,
-    });
+  //   const res = await http.patch(`${apis.EDIT_LAYER_GROUP}`, {
+  //     _id: groupid,
+  //     layers: layerids,
+  //   });
 
-    if (!res.data.status) {
-      return message.error(res.data.message);
-    }
+  //   if (!res.data.status) {
+  //     return message.error(res.data.message);
+  //   }
 
-    // keys.forEach((key) => {
-    //   al[key].groupId = groupid;
-    // });
+  //   // keys.forEach((key) => {
+  //   //   al[key].groupId = groupid;
+  //   // });
 
-    const td: any = [...treeStructure];
-    const ltmv: any = [];
+  //   const td: any = [...treeStructure];
+  //   const ltmv: any = [];
 
-    td[0].children = td[0].children.filter((layer) => {
-      if (!layer.group) {
-        if (layerids.includes(layer._id)) {
-          layer.layerGroupId
-            ? (layer.layerGroupId["_id"] = groupid)
-            : (layer.layerGroupId = { _id: groupid });
-          ltmv.push(layer);
-          return false;
-        } else {
-          return true;
-        }
-      } else {
-        layer.value.children = layer.value.children.filter((l) => {
-          if (layerids.includes(l._id)) {
-            l.layerGroupId
-              ? (l.layerGroupId["_id"] = groupid)
-              : (l.layerGroupId = { _id: groupid });
-            ltmv.push(l);
-            return false;
-          } else {
-            return true;
-          }
-        });
-        return true;
-      }
-    });
+  //   td[0].children = td[0].children.filter((layer) => {
+  //     if (!layer.group) {
+  //       if (layerids.includes(layer._id)) {
+  //         layer.layerGroupId
+  //           ? (layer.layerGroupId["_id"] = groupid)
+  //           : (layer.layerGroupId = { _id: groupid });
+  //         ltmv.push(layer);
+  //         return false;
+  //       } else {
+  //         return true;
+  //       }
+  //     } else {
+  //       layer.value.children = layer.value.children.filter((l) => {
+  //         if (layerids.includes(l._id)) {
+  //           l.layerGroupId
+  //             ? (l.layerGroupId["_id"] = groupid)
+  //             : (l.layerGroupId = { _id: groupid });
+  //           ltmv.push(l);
+  //           return false;
+  //         } else {
+  //           return true;
+  //         }
+  //       });
+  //       return true;
+  //     }
+  //   });
 
-    td[1].children = td[1].children.filter((layer) => {
-      if (!layer.group) {
-        if (layerids.includes(layer._id)) {
-          layer.layerGroupId
-            ? (layer.layerGroupId["_id"] = groupid)
-            : (layer.layerGroupId = { _id: groupid });
-          ltmv.push(layer);
-          return false;
-        } else {
-          return true;
-        }
-      } else {
-        layer.value.children = layer.value.children.filter((l) => {
-          if (layerids.includes(l._id)) {
-            l.layerGroupId
-              ? (l.layerGroupId["_id"] = groupid)
-              : (l.layerGroupId = { _id: groupid });
-            ltmv.push(l);
-            return false;
-          } else {
-            return true;
-          }
-        });
-        return true;
-      }
-    });
+  //   td[1].children = td[1].children.filter((layer) => {
+  //     if (!layer.group) {
+  //       if (layerids.includes(layer._id)) {
+  //         layer.layerGroupId
+  //           ? (layer.layerGroupId["_id"] = groupid)
+  //           : (layer.layerGroupId = { _id: groupid });
+  //         ltmv.push(layer);
+  //         return false;
+  //       } else {
+  //         return true;
+  //       }
+  //     } else {
+  //       layer.value.children = layer.value.children.filter((l) => {
+  //         if (layerids.includes(l._id)) {
+  //           l.layerGroupId
+  //             ? (l.layerGroupId["_id"] = groupid)
+  //             : (l.layerGroupId = { _id: groupid });
+  //           ltmv.push(l);
+  //           return false;
+  //         } else {
+  //           return true;
+  //         }
+  //       });
+  //       return true;
+  //     }
+  //   });
 
-    td[0].children = td[0].children.map((layer) => {
-      if (layer.group) {
-        if (layer.id === groupid) {
-          layer.value.children = [...layer.value.children, ...ltmv];
-        }
-      }
-      return layer;
-    });
+  //   td[0].children = td[0].children.map((layer) => {
+  //     if (layer.group) {
+  //       if (layer.id === groupid) {
+  //         layer.value.children = [...layer.value.children, ...ltmv];
+  //       }
+  //     }
+  //     return layer;
+  //   });
 
-    td[1].children = td[1].children.map((layer) => {
-      if (layer.group) {
-        if (layer.id === groupid) {
-          layer.value.children = [...layer.value.children, ...ltmv];
-        }
-      }
-      return layer;
-    });
+  //   td[1].children = td[1].children.map((layer) => {
+  //     if (layer.group) {
+  //       if (layer.id === groupid) {
+  //         layer.value.children = [...layer.value.children, ...ltmv];
+  //       }
+  //     }
+  //     return layer;
+  //   });
 
-    setTreeStructure(td);
-    // setAllLayers(al);
-    SetAllLayers((prev) => (prev.map((layer) => {
-      if(layer.isChecked) layer.layerGroupId = groupid;
-      return layer;
-    })));
-  };
+  //   setTreeStructure(td);
+  //   // setAllLayers(al);
+  //   SetAllLayers((prev) => (prev.map((layer) => {
+  //     if(layer.isChecked) layer.layerGroupId = groupid;
+  //     return layer;
+  //   })));
+  // };
 
-  const updateTreeDataAfterGroupEdit = (group, id) => {
-    const td: any = [...treeStructure];
+  // const updateTreeDataAfterGroupEdit = (group, id) => {
+  //   const td: any = [...treeStructure];
 
-    const newVectorLayers = td[0].children.map((layer) => {
-      if (!layer.group) {
-        return layer;
-      } else {
-        if (layer.id === group._id) {
-          layer.value.name = group.name;
-          return layer;
-        } else {
-          return layer;
-        }
-      }
-    });
+  //   const newVectorLayers = td[0].children.map((layer) => {
+  //     if (!layer.group) {
+  //       return layer;
+  //     } else {
+  //       if (layer.id === group._id) {
+  //         layer.value.name = group.name;
+  //         return layer;
+  //       } else {
+  //         return layer;
+  //       }
+  //     }
+  //   });
 
-    td[0].children = [...newVectorLayers];
+  //   td[0].children = [...newVectorLayers];
 
-    const newRasterLayers = td[1].children.filter((layer) => {
-      if (!layer.group) {
-        return layer;
-      } else {
-        if (layer.id === group._id) {
-          group.children = [...layer.value.children];
-          return {
-            group: true,
-            value: group,
-            id: layer.id,
-          };
-        } else {
-          return layer;
-        }
-      }
-    });
+  //   const newRasterLayers = td[1].children.filter((layer) => {
+  //     if (!layer.group) {
+  //       return layer;
+  //     } else {
+  //       if (layer.id === group._id) {
+  //         group.children = [...layer.value.children];
+  //         return {
+  //           group: true,
+  //           value: group,
+  //           id: layer.id,
+  //         };
+  //       } else {
+  //         return layer;
+  //       }
+  //     }
+  //   });
 
-    td[1].children = [...newRasterLayers];
+  //   td[1].children = [...newRasterLayers];
 
-    setTimeout(() => {
-      setTreeStructure(td);
-      forceUpdateAllLayers();
-    });
-  };
+  //   setTimeout(() => {
+  //     setTreeStructure(td);
+  //     forceUpdateAllLayers();
+  //   });
+  // };
 
-  const updateTreeDataAfterSingleLayerRemovalFromGroup = (id) => {
-    const td: any = [...treeStructure];
-    let layerToRemove: any = null;
-    const newVectorLayers = td[0].children.filter((layer) => {
-      if (!layer.group) {
-        if (layer._id === id) {
-          layerToRemove = layer;
-        }
-        return true;
-      } else {
-        const groupLayers = layer.value.children.filter((l) => {
-          if (l._id === id) {
-            layerToRemove = l;
-            return false;
-          }
-          return true;
-        });
-        layer.value.children = [...groupLayers];
-        return true;
-      }
-    });
+  // const updateTreeDataAfterSingleLayerRemovalFromGroup = (id) => {
+  //   const td: any = [...treeStructure];
+  //   let layerToRemove: any = null;
+  //   const newVectorLayers = td[0].children.filter((layer) => {
+  //     if (!layer.group) {
+  //       if (layer._id === id) {
+  //         layerToRemove = layer;
+  //       }
+  //       return true;
+  //     } else {
+  //       const groupLayers = layer.value.children.filter((l) => {
+  //         if (l._id === id) {
+  //           layerToRemove = l;
+  //           return false;
+  //         }
+  //         return true;
+  //       });
+  //       layer.value.children = [...groupLayers];
+  //       return true;
+  //     }
+  //   });
 
-    td[0].children = [...newVectorLayers];
+  //   td[0].children = [...newVectorLayers];
 
-    if (layerToRemove) {
-      layerToRemove.layerGroupId = null;
-      td[0].children.unshift(layerToRemove);
-      layerToRemove = null;
-    }
+  //   if (layerToRemove) {
+  //     layerToRemove.layerGroupId = null;
+  //     td[0].children.unshift(layerToRemove);
+  //     layerToRemove = null;
+  //   }
 
-    const newRasterLayers = td[1].children.filter((layer) => {
-      if (!layer.group) {
-        if (layer._id === id) {
-          layerToRemove = layer;
-        }
-        return true;
-      } else {
-        const groupLayers = layer.value.children.filter((l) => {
-          if (l._id === id) {
-            layerToRemove = l;
-            return false;
-          }
-          return true;
-        });
-        layer.value.children = [...groupLayers];
-        return true;
-      }
-    });
+  //   const newRasterLayers = td[1].children.filter((layer) => {
+  //     if (!layer.group) {
+  //       if (layer._id === id) {
+  //         layerToRemove = layer;
+  //       }
+  //       return true;
+  //     } else {
+  //       const groupLayers = layer.value.children.filter((l) => {
+  //         if (l._id === id) {
+  //           layerToRemove = l;
+  //           return false;
+  //         }
+  //         return true;
+  //       });
+  //       layer.value.children = [...groupLayers];
+  //       return true;
+  //     }
+  //   });
 
-    td[1].children = [...newRasterLayers];
+  //   td[1].children = [...newRasterLayers];
 
-    if (layerToRemove) {
-      layerToRemove.layerGroupId = null;
-      td[1].children.unshift(layerToRemove);
-    }
+  //   if (layerToRemove) {
+  //     layerToRemove.layerGroupId = null;
+  //     td[1].children.unshift(layerToRemove);
+  //   }
 
-    setTimeout(() => {
-      setTreeStructure(td);
-    });
-  };
+  //   setTimeout(() => {
+  //     setTreeStructure(td);
+  //   });
+  // };
 
   const deleteGroup = (id: any) => {
     props.loading(true);
@@ -4585,7 +4584,9 @@ function BaseMap(props) {
       .then((res) => {
         if (res.data.status) {
           message.success(res.data.message);
-          updateTreeDataAfterGroupDelete(id);
+          const deletedLayerGroupId = result.data.data._id;
+          SetAllLayers((prev) => prev.filter(layer => layer.layerGroupId !== deletedLayerGroupId));
+          // updateTreeDataAfterGroupDelete(id);
         } else {
           message.error(res.data.message);
         }
@@ -4607,12 +4608,27 @@ function BaseMap(props) {
       .patch(`${apis.EDIT_LAYER_GROUP}`, {
         name: group.name,
         _id: group.id,
-        layers: group.layers,
+        layers: [],
       })
       .then((res) => {
         if (res.data.status) {
           message.success(res.data.message);
-          updateTreeDataAfterGroupEdit(res.data.data, group.id);
+          // updateTreeDataAfterGroupEdit(res.data.data, group.id);
+          const updatedLayerGroup: Layer["layerGroupId"] = {
+            _id: res.data.data._id,
+            name: res.data.data.name,
+            layers: res.data.data.layers,
+            createdBy: res.data.data.createdBy,
+            tenantId: res.data.data.tenantId,
+            createdAt: res.data.data.createdAt,
+            updatedAt: res.data.data.updatedAt,
+          };
+          SetAllLayers((prev) => prev.map((layer) => {
+            if (updatedLayerGroup.layers.includes(layer._id)) {
+              layer.layerGroupId = updatedLayerGroup;
+            }
+            return layer;
+          }));
         } else {
           message.error(res.data.message);
         }
@@ -6048,7 +6064,7 @@ function BaseMap(props) {
   }
 
   const changeGroupOfLayer = async (groupid, layerids, keys) => {
-    const al = { ...allLayers };
+    // const al = { ...allLayers };
     props.loading(true);
     //console.log(groupid);
     try {
@@ -6061,64 +6077,77 @@ function BaseMap(props) {
         return message.error(res.data.message);
       }
 
-      keys.forEach((key) => {
-        al[key].groupId = groupid;
-      });
-
-      const td: any = [...treeStructure];
-
-      td[0].children = td[0].children.map((layer) => {
-        if (!layer.group) {
-          if (layerids.includes(layer._id)) {
-            layer.layerGroupId
-              ? (layer.layerGroupId["_id"] = groupid)
-              : (layer.layerGroupId = { _id: groupid });
-            return layer;
-          } else {
-            return layer;
-          }
-        } else {
-          layer.value.children = layer.value.children.map((l) => {
-            if (layerids.includes(l._id)) {
-              l.layerGroupId
-                ? (l.layerGroupId["_id"] = groupid)
-                : (l.layerGroupId = { _id: groupid });
-              return l;
-            } else {
-              return l;
-            }
-          });
-          return layer;
+      const updatedLayerGroup: Layer["layerGroupId"] = {
+        _id: res.data.data._id,
+        name: res.data.data.name,
+        layers: res.data.data.layers,
+        createdBy: res.data.data.createdBy,
+        tenantId: res.data.data.tenantId,
+        createdAt: res.data.data.createdAt,
+        updatedAt: res.data.data.updatedAt,
+      };
+      SetAllLayers((prev) => prev.map((layer) => {
+        if (updatedLayerGroup.layers.includes(layer._id)) {
+          layer.layerGroupId = updatedLayerGroup;
         }
-      });
+        return layer;
+      }));
 
-      td[1].children = td[1].children.map((layer) => {
-        if (!layer.group) {
-          if (layerids.includes(layer._id)) {
-            layer.layerGroupId
-              ? (layer.layerGroupId["_id"] = groupid)
-              : (layer.layerGroupId = { _id: groupid });
-            return layer;
-          } else {
-            return layer;
-          }
-        } else {
-          layer.value.children = layer.value.children.map((l) => {
-            if (layerids.includes(l._id)) {
-              l.layerGroupId
-                ? (l.layerGroupId["_id"] = groupid)
-                : (l.layerGroupId = { _id: groupid });
-              return l;
-            } else {
-              return l;
-            }
-          });
-          return layer;
-        }
-      });
-
-      setTreeStructure(td);
-      setAllLayers(al);
+      // No longer required
+      // keys.forEach((key) => {
+      //   al[key].groupId = groupid;
+      // });
+      // const td: any = [...treeStructure];
+      // td[0].children = td[0].children.map((layer) => {
+      //   if (!layer.group) {
+      //     if (layerids.includes(layer._id)) {
+      //       layer.layerGroupId
+      //         ? (layer.layerGroupId["_id"] = groupid)
+      //         : (layer.layerGroupId = { _id: groupid });
+      //       return layer;
+      //     } else {
+      //       return layer;
+      //     }
+      //   } else {
+      //     layer.value.children = layer.value.children.map((l) => {
+      //       if (layerids.includes(l._id)) {
+      //         l.layerGroupId
+      //           ? (l.layerGroupId["_id"] = groupid)
+      //           : (l.layerGroupId = { _id: groupid });
+      //         return l;
+      //       } else {
+      //         return l;
+      //       }
+      //     });
+      //     return layer;
+      //   }
+      // });
+      // td[1].children = td[1].children.map((layer) => {
+      //   if (!layer.group) {
+      //     if (layerids.includes(layer._id)) {
+      //       layer.layerGroupId
+      //         ? (layer.layerGroupId["_id"] = groupid)
+      //         : (layer.layerGroupId = { _id: groupid });
+      //       return layer;
+      //     } else {
+      //       return layer;
+      //     }
+      //   } else {
+      //     layer.value.children = layer.value.children.map((l) => {
+      //       if (layerids.includes(l._id)) {
+      //         l.layerGroupId
+      //           ? (l.layerGroupId["_id"] = groupid)
+      //           : (l.layerGroupId = { _id: groupid });
+      //         return l;
+      //       } else {
+      //         return l;
+      //       }
+      //     });
+      //     return layer;
+      //   }
+      // });
+      // setTreeStructure(td);
+      // setAllLayers(al);
     } catch (err) {
       console.log(err);
       message.error(err.message);
@@ -6128,8 +6157,8 @@ function BaseMap(props) {
     }
   };
 
-  const removeLayerFromGroup = async (groupId, layerId, key) => {
-    const al = { ...allLayers };
+  const removeLayerFromGroup = async (groupId, layerId) => {
+    // const al = { ...allLayers };
     props.loading(true);
     try {
       const res = await http.post(`${apis.DELETE_LAYER_ID_FROM_GROUP}`, {
@@ -6140,53 +6169,58 @@ function BaseMap(props) {
         return message.error(res.data.message);
       }
 
-      al[key].groupId = null;
-
-      const td: any = [...treeStructure];
-
-      td[0].children = td[0].children.map((layer) => {
-        if (!layer.group) {
-          if (layer._id === layerId) {
-            layer.layerGroupId = null;
-            return layer;
-          } else {
-            return layer;
-          }
-        } else {
-          layer.value.children = layer.value.children.map((l) => {
-            if (l._id === layerId) {
-              l.layerGroupId = null;
-              return l;
-            } else {
-              return l;
-            }
-          });
-          return layer;
+      SetAllLayers(prev => prev.map((layer) => {
+        if (layer._id === layerId) {
+          layer.layerGroupId = null;
         }
-      });
+        return layer;
+      }));
 
-      td[1].children = td[1].children.map((layer) => {
-        if (!layer.group) {
-          if (layer._id === layerId) {
-            layer.layerGroupId = null;
-            return layer;
-          } else {
-            return layer;
-          }
-        } else {
-          layer.value.children = layer.value.children.map((l) => {
-            if (l._id === layerId) {
-              l.layerGroupId = null;
-              return l;
-            } else {
-              return l;
-            }
-          });
-          return layer;
-        }
-      });
-      setTreeStructure(td);
-      setAllLayers(al);
+      // No longer required
+      // al[key].groupId = null;
+      // const td: any = [...treeStructure];
+      // td[0].children = td[0].children.map((layer) => {
+      //   if (!layer.group) {
+      //     if (layer._id === layerId) {
+      //       layer.layerGroupId = null;
+      //       return layer;
+      //     } else {
+      //       return layer;
+      //     }
+      //   } else {
+      //     layer.value.children = layer.value.children.map((l) => {
+      //       if (l._id === layerId) {
+      //         l.layerGroupId = null;
+      //         return l;
+      //       } else {
+      //         return l;
+      //       }
+      //     });
+      //     return layer;
+      //   }
+      // });
+      // td[1].children = td[1].children.map((layer) => {
+      //   if (!layer.group) {
+      //     if (layer._id === layerId) {
+      //       layer.layerGroupId = null;
+      //       return layer;
+      //     } else {
+      //       return layer;
+      //     }
+      //   } else {
+      //     layer.value.children = layer.value.children.map((l) => {
+      //       if (l._id === layerId) {
+      //         l.layerGroupId = null;
+      //         return l;
+      //       } else {
+      //         return l;
+      //       }
+      //     });
+      //     return layer;
+      //   }
+      // });
+      // setTreeStructure(td);
+      // setAllLayers(al);
     } catch (err) {
       console.log(err);
       message.error(err.message);
@@ -6221,8 +6255,7 @@ function BaseMap(props) {
         const key = info.dragNode.key;
         await removeLayerFromGroup(
           info.dragNode.groupId,
-          info.dragNode.layer._id,
-          key
+          info.dragNode.layer._id
         );
       } else if (
         info.dragNode.key.split("-")[0] === "group" &&
@@ -6258,8 +6291,7 @@ function BaseMap(props) {
           const key = info.dragNode.key;
           await removeLayerFromGroup(
             info.dragNode.groupId,
-            info.dragNode.layer._id,
-            key
+            info.dragNode.layer._id
           );
         } else if (info.dragNode.layer) {
           const layerid = info.dragNode.layer._id;
@@ -6432,146 +6464,124 @@ function BaseMap(props) {
   const [toGroupForm] = Form.useForm();
   const [editForm] = Form.useForm();
 
-  const updateTreeDataAfterGroupCreation = (data, type) => {
-    const td: any = [...treeStructure];
-    let newTreeData = [];
-    const al = { ...allLayers };
-    const layers = data.layers.map((layer) => {
-      return layer._id;
-    });
+  // No longer required
+  // const updateTreeDataAfterGroupCreation = (data, type) => {
+  //   const td: any = [...treeStructure];
+  //   let newTreeData = [];
+  //   const al = { ...allLayers };
+  //   const layers = data.layers.map((layer) => {
+  //     return layer._id;
+  //   });
 
-    switch (type) {
-      case "vector":
-        newTreeData = td[0].children.filter((layer: any) => {
-          if (!layer.group) {
-            if (!layers.includes(layer._id)) {
-              return true;
-            } else return false;
-          } else {
-            let groupLayers = [];
+  //   switch (type) {
+  //     case "vector":
+  //       newTreeData = td[0].children.filter((layer: any) => {
+  //         if (!layer.group) {
+  //           if (!layers.includes(layer._id)) {
+  //             return true;
+  //           } else return false;
+  //         } else {
+  //           let groupLayers = [];
 
-            groupLayers = layer.value.children.filter((l) => {
-              if (!layers.includes(l._id)) {
-                return true;
-              } else return false;
-            });
+  //           groupLayers = layer.value.children.filter((l) => {
+  //             if (!layers.includes(l._id)) {
+  //               return true;
+  //             } else return false;
+  //           });
 
-            layer.value.children = [...groupLayers];
-            return true;
-          }
-        });
+  //           layer.value.children = [...groupLayers];
+  //           return true;
+  //         }
+  //       });
 
-        td[0].children = [...newTreeData];
+  //       td[0].children = [...newTreeData];
 
-        break;
-      case "raster":
-        newTreeData = td[1].children.filter((layer: any) => {
-          if (!layer.group) {
-            if (!layers.includes(layer._id)) return true;
-            else return false;
-          } else {
-            let groupLayers = [];
+  //       break;
+  //     case "raster":
+  //       newTreeData = td[1].children.filter((layer: any) => {
+  //         if (!layer.group) {
+  //           if (!layers.includes(layer._id)) return true;
+  //           else return false;
+  //         } else {
+  //           let groupLayers = [];
 
-            groupLayers = layer.value.children.filter((l) => {
-              if (!layers.includes(l._id)) {
-                return true;
-              } else return false;
-            });
+  //           groupLayers = layer.value.children.filter((l) => {
+  //             if (!layers.includes(l._id)) {
+  //               return true;
+  //             } else return false;
+  //           });
 
-            layer.value.children = [...groupLayers];
-            return true;
-          }
-        });
+  //           layer.value.children = [...groupLayers];
+  //           return true;
+  //         }
+  //       });
 
-        td[1].children = [...newTreeData];
-        break;
-    }
+  //       td[1].children = [...newTreeData];
+  //       break;
+  //   }
 
-    switch (type) {
-      case "vector":
-        const vectors = data.layers.map((layer) => {
-          al[`1-${layer._id}`].groupId = data._id;
-          return {
-            key: `1-${layer._id}`,
-            ...layer,
-          };
-        });
+  //   switch (type) {
+  //     case "vector":
+  //       const vectors = data.layers.map((layer) => {
+  //         al[`1-${layer._id}`].groupId = data._id;
+  //         return {
+  //           key: `1-${layer._id}`,
+  //           ...layer,
+  //         };
+  //       });
 
-        data.children = [...vectors];
+  //       data.children = [...vectors];
 
-        td[0].children.push({
-          group: true,
-          value: data,
-          id: data._id,
-          key: "group-" + data._id,
-          groupType: 1,
-        });
+  //       td[0].children.push({
+  //         group: true,
+  //         value: data,
+  //         id: data._id,
+  //         key: "group-" + data._id,
+  //         groupType: 1,
+  //       });
 
-        break;
-      case "raster":
-        const rasters = data.layers.map((layer) => {
-          al[`2-${layer._id}`].groupId = data._id;
-          return {
-            key: `2-${layer._id}`,
-            ...layer,
-          };
-        });
+  //       break;
+  //     case "raster":
+  //       const rasters = data.layers.map((layer) => {
+  //         al[`2-${layer._id}`].groupId = data._id;
+  //         return {
+  //           key: `2-${layer._id}`,
+  //           ...layer,
+  //         };
+  //       });
 
-        data.children = [...rasters];
+  //       data.children = [...rasters];
 
-        td[1].children.push({
-          group: true,
-          value: data,
-          id: data._id,
-          key: "group-" + data._id,
-          groupType: 2,
-        });
-    }
+  //       td[1].children.push({
+  //         group: true,
+  //         value: data,
+  //         id: data._id,
+  //         key: "group-" + data._id,
+  //         groupType: 2,
+  //       });
+  //   }
 
-    const ag = { ...allLayerGroups };
+  //   const ag = { ...allLayerGroups };
 
-    ag[data._id] = {
-      id: data._id,
-      name: data.name,
-      groupType: type === "vector" ? 1 : 2,
-    };
+  //   ag[data._id] = {
+  //     id: data._id,
+  //     name: data.name,
+  //     groupType: type === "vector" ? 1 : 2,
+  //   };
 
-    setAllLayerGroups(ag);
-    setAllLayers(al);
+  //   setAllLayerGroups(ag);
+  //   setAllLayers(al);
 
-    setTimeout(() => {
-      setTreeStructure(td);
-      forceUpdateAllLayers();
-      setVisibleGroupCreateModal(false);
-      resetGroupFormFields();
-    });
-  };
+  //   setTimeout(() => {
+  //     setTreeStructure(td);
+  //     forceUpdateAllLayers();
+  //     setVisibleGroupCreateModal(false);
+  //     resetGroupFormFields();
+  //   });
+  // };
 
   const createLayerGroup = (data) => {
     props.loading(true);
-    const type = moveType === 1 ? "vector" : "raster";
-    // Should no longer be required
-    // Basically picks the ids of all checked layers
-    // switch (moveType) {
-    //   case 1:
-    //     checkedKeys.forEach((ele: any) => {
-    //       const k = ele.split("-");
-    //       if (k[0] === "1") {
-    //         layersToGroup.push(k[1]);
-    //       }
-    //     });
-    //     break;
-    //   case 2:
-    //     checkedKeys.forEach((ele: any) => {
-    //       const k = ele.split("-");
-    //       if (k[0] === "2") {
-    //         layersToGroup.push(k[1]);
-    //       }
-    //     });
-    //     break;
-    //   default:
-    //     return;
-    // }
     const layersToGroup = AllLayers.filter((layer) => (layer.isChecked && layer.type === ["","Vector","Raster"][moveType])).map((layer) => (layer._id));
 
     http
@@ -6582,7 +6592,29 @@ function BaseMap(props) {
       .then((result) => {
         if (result.data.status) {
           message.success("Group Created");
-          updateTreeDataAfterGroupCreation(result.data.data[0], type);
+          const layerGroup: Layer["layerGroupId"] = {
+            _id: result.data.data[0]._id,
+            name: result.data.data[0].name,
+            layers: result.data.data[0].layers.map((layer) => layer._id),
+            createdBy: result.data.data[0].createdBy,
+            tenantId: result.data.data[0].tenantId,
+            createdAt: result.data.data[0].createdAt,
+            updatedAt: result.data.data[0].updatedAt,
+          };
+          SetAllLayers((prev) => prev.map((layer) => {
+            if (layerGroup.layers.includes(layer._id)) {
+              layer.layerGroupId = layerGroup;
+            }
+            return layer;
+          }));
+          setAllLayerGroups(prev => ({
+            ...prev,
+            [layerGroup._id]: {
+              id: layerGroup._id,
+              name: layerGroup.name,
+              groupType: moveType
+            }
+          }));
         } else {
           message.error(result.data.message);
         }
@@ -6593,36 +6625,53 @@ function BaseMap(props) {
         AxiosErrorHandler(err, props.logout);
       })
       .finally(() => {
+        setVisibleGroupCreateModal(false);
+        resetGroupFormFields();
         props.loading(false);
       });
   };
 
   const moveLayers = async (data) => {
-    // props.loading(true)
-    try {
-      // const layersToMove = [];
-
-      // checkedKeys.forEach((ele: any) => {
-      //   const k = ele.split("-");
-
-      //   if (k[0] == moveType) {
-      //     layersToMove.push(k[1]);
-      //   }
-      // });
-      const layersToMove = AllLayers.filter((layer) => (layer.isChecked && layer.type === ["","Vector","Raster"][moveType])).map((layer) => (layer._id));
-
-      await updateTreeDataAfterMovingLayers(
-        data.group,
-        layersToMove
-      );
-    } catch (err) {
-      console.log(err);
-      message.error(err.message);
-    } finally {
-      setMoveToOtherGroupModal(false);
-      toGroupForm.resetFields();
-      props.loading(false);
-    }
+    props.loading(true);
+    const layersToMove = AllLayers.filter((layer) => (layer.isChecked && layer.type === ["","Vector","Raster"][moveType])).map((layer) => (layer._id));
+    
+    http
+      .patch(`${apis.EDIT_LAYER_GROUP}`, {
+        _id: data.group,
+        layers: layersToMove,
+      })
+      .then((result) => {
+        if (result.data.status) {
+          message.success("Layers Moved");
+          const updatedLayerGroup: Layer["layerGroupId"] = {
+            _id: result.data.data._id,
+            name: result.data.data.name,
+            layers: result.data.data.layers,
+            createdBy: result.data.data.createdBy,
+            tenantId: result.data.data.tenantId,
+            createdAt: result.data.data.createdAt,
+            updatedAt: result.data.data.updatedAt,
+          };
+          SetAllLayers((prev) => prev.map((layer) => {
+            if (updatedLayerGroup.layers.includes(layer._id)) {
+              layer.layerGroupId = updatedLayerGroup;
+            }
+            return layer;
+          }));
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        message.error(err.message);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => {
+        setMoveToOtherGroupModal(false);
+        toGroupForm.resetFields();
+        props.loading(false);
+      });
   };
 
   const creteNewGroupCard = () => {
