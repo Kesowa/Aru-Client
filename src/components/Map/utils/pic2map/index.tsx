@@ -48,7 +48,9 @@ function Pictomap(props) {
   const [reviewPending, setReviewPending] = useState(false);
   const [storageModal, setStorageModal] = useState(false);
   const [subHeading, setSubHeading] = useState("");
-  const [matchMode, setMatchMode] = useState<"LayerLabel" | "GeoCoord">("GeoCoord");
+  const [matchMode, setMatchMode] = useState<"LayerLabel" | "GeoCoord">(
+    "GeoCoord"
+  );
   const menuItem1 = () => {
     const items = [
       {
@@ -695,8 +697,15 @@ function Pictomap(props) {
         } else {
           return (
             <>
-              <p>Match Label?
-              <Switch onChange={(matchLayer) => setMatchMode(matchLayer ? "LayerLabel" : "GeoCoord")} style={{ margin: "0.5rem 1rem" }} /></p>
+              <p>
+                Match Label?
+                <Switch
+                  onChange={(matchLayer) =>
+                    setMatchMode(matchLayer ? "LayerLabel" : "GeoCoord")
+                  }
+                  style={{ margin: "0.5rem 1rem" }}
+                />
+              </p>
               <Button
                 onClick={() => {
                   if (isUploading) {
