@@ -13,7 +13,7 @@ import { WebMercatorViewport } from "viewport-mercator-project";
 import { MaskExtension } from "@deck.gl/extensions/typed";
 import { TerrainLayer } from "@deck.gl/geo-layers/typed";
 import { readPixelsToArray } from "@luma.gl/webgl";
-
+import { Tile3DLayer } from "@deck.gl/geo-layers";
 import {
   Row,
   Col,
@@ -141,9 +141,8 @@ import {
 } from "src/constants";
 import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
-// import { JSONLoader } from "@loaders.gl/json";
-// import { LASLoader } from "@loaders.gl/las";
 import { load } from "@loaders.gl/core";
+import { Tiles3DLoader } from "@loaders.gl/3d-tiles";
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
   [lat - size * 0.5, lng - size * 0.5],
@@ -2223,6 +2222,7 @@ function BaseMap(props) {
           if (element.split("-")[0] === "2" && element !== "2") {
             if (props.isBaseMap) {
               const layer: any = allLayers[element];
+              console.log(layer);
               await Promise.allSettled(
                 layer?.layerPath.map(async (layerr: any) => {
                   const settings: any = {
@@ -2324,7 +2324,32 @@ function BaseMap(props) {
                   });
                 })
               );
+            } else if (allLayers[element].type == "POINT_CLOUD") {
+              // Fetch the dynamic ID from the backend (bounds are not yet avaliable)
+              const cloudLayer = allLayers[element];
+
+              //Render the pointcloud data
+              vlayers[index] = new Tile3DLayer({
+                id: element,
+                data: STATIC_URL + cloudLayer["metadata"],
+                loader: Tiles3DLoader,
+                loadOptions: {},
+                onTilesetLoad: (tileset) => {
+                  const { cartographicCenter, zoom } = tileset;
+                  setViewport({
+                    ...INITIAL_VIEW_STATE,
+                    longitude: cartographicCenter[0],
+                    latitude: cartographicCenter[1],
+                    zoom,
+                    pitch: 150,
+                  });
+                },
+                _subLayerProps: {
+                  scenegraph: { _lighting: "flat" },
+                },
+              });
             } else {
+              console.log(allLayers);
               console.log("Raster");
               const rasterpath =
                 `${TITILER_STATIC}` + allLayers[element]?.layerPath;
@@ -4342,7 +4367,7 @@ function BaseMap(props) {
   };
 
   const segrigateLayers = (layers) => {
-    //console.log("segrate layer");
+    console.log("segrate layer");
     let data: any = [...treeDataa];
     let allLayers: any = {};
     if (
@@ -4409,6 +4434,7 @@ function BaseMap(props) {
         l[data[1]["key"] + "-" + layer._id] = {
           layerPath: layer.layerdataArr,
           type: layer.raster.name,
+          metadata: layer.metadata,
           settings: {
             ...layer.raster,
             // minp: layer.minp,
@@ -4421,6 +4447,7 @@ function BaseMap(props) {
         l[data[1]["key"] + "-" + layer._id] = {
           layerPath: layer.layerpath,
           type: layer.raster.name,
+          metadata: layer.metadata,
           settings: {
             ...layer.raster,
             minp: layer.minp,
@@ -4747,7 +4774,7 @@ function BaseMap(props) {
 
   // ++++++++++++++++++++++++++++++++++++++ Create Layer ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  const fileTypes = ["geojson", "tif", "kml", "shp", "zip"];
+  const fileTypes = ["geojson", "tif", "kml", "shp", "zip", "laz"];
 
   const createLayer = async () => {
     if (!fileList.length) {
@@ -4759,7 +4786,7 @@ function BaseMap(props) {
     const ext = file.name.split(".").pop();
 
     if (!fileTypes.includes(ext)) {
-      message.error("Please select the geojson or tif file");
+      message.error("Please select the geojson or tif file or laz file");
       return;
     }
 
@@ -4803,7 +4830,7 @@ function BaseMap(props) {
       );
 
       if (result.data.status) {
-        console.log(result.data.data);
+        console.log("metadata for me:", result.data.data);
         addLayer(result.data.data);
         message.success("Layer created!");
       } else {
@@ -4888,6 +4915,7 @@ function BaseMap(props) {
           l[data[1]["key"] + "-" + layer._id] = {
             layerPath: layer.layerdataArr,
             type: layer.raster.name,
+            metadata: layer.metadata,
             settings: {
               ...layer.raster,
               // minp: layer.minp,
@@ -4900,6 +4928,7 @@ function BaseMap(props) {
           l[data[1]["key"] + "-" + layer._id] = {
             layerPath: layer.layerpath,
             type: layer.raster.name,
+            metadata: layer.metadata,
             settings: {
               ...layer.raster,
               minp: layer.minp,
@@ -7027,7 +7056,7 @@ function BaseMap(props) {
                         />
                       }
                       title={"Upload File"}
-                      description="Create a new layer by uploading a vector file (.geojson, .shp, .kml) or raster file (only .tif)"
+                      description="Create a new layer by uploading a vector file (.geojson, .shp, .kml) or raster file (.tif, .laz)"
                     />
                   </Card>
                   <Card
@@ -7146,7 +7175,7 @@ function BaseMap(props) {
                     <Row>
                       <Alert
                         style={{ width: "100%" }}
-                        message={`Only .geojson and .kml files support for type "Vector" and .tif for type "Raster"`}
+                        message={`Only .geojson and .kml files support for type "Vector" and .tif or .laz for type "Raster"`}
                         type="info"
                         showIcon
                       />
