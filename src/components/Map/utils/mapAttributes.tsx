@@ -83,20 +83,22 @@ const MapAttributes: React.FC<Props> = (props) => {
   };
 
   const [state, setState] = useState<State>(initialState);
-  const [page, setPage] = useState<State>(initialState);
-  const [limit, setLimit] = useState<State>(initialState);
-  const [total, setTotal] = useState<State>(initialState);
-  const [isTableLoading, setIsTableLoading] = useState<boolean>(
-    initialState.isTableLoading
-  );
-  const [tableData, setTableData] = useState<State>(initialState);
-  const filteredLayers = Object.values(props.allLayers).filter(
-    (layer) => layer.type === "DEM" || layer.type === "ortho"
-  );
+  const filteredLayers = Object.keys(props.allLayers)
+    .map((key) => {
+      const layer = props.allLayers[key];
+      if (layer.type === "DEM" || layer.type === "ORTHO") {
+        return {
+          key,
+          ...layer,
+        };
+      } else {
+        return null;
+      }
+    })
+    .filter((layer) => layer !== null);
 
   const onChange = (checked: boolean) => {
     props.setTerrainMap(checked);
-    console.log(`switch to ${JSON.stringify(filteredLayers)}`);
   };
 
   useEffect(() => {
@@ -109,7 +111,12 @@ const MapAttributes: React.FC<Props> = (props) => {
     if (props.type === "raster") {
       fetchRasterDetails(props.id);
     } else if (props.type === "vector") {
-      if (props.featureCount) setTotal(props.featureCount);
+      if (props.featureCount) {
+        setState((prevState) => ({
+          ...prevState,
+          total: props.featureCount,
+        }));
+      }
       fetchJsonData();
     }
   }, [props.shouldAttributeTableReload]);
@@ -126,7 +133,10 @@ const MapAttributes: React.FC<Props> = (props) => {
 
   useEffect(() => {
     const updatedatedTable = updateTableColors(initialState.trueTableData);
-    setTableData(updatedatedTable);
+    setState((prevState) => ({
+      ...prevState,
+      tableData: updatedatedTable as any[],
+    }));
   }, [props.selectedIndexes]);
 
   const updateContentHeight = (bottomBarHeight: string, type: string) => {
@@ -214,7 +224,10 @@ const MapAttributes: React.FC<Props> = (props) => {
   };
 
   const fetchJsonData = () => {
-    setIsTableLoading(true);
+    setState((prevState) => ({
+      ...prevState,
+      isTableLoading: true,
+    }));
     const payload = {
       id: props.id,
       page: state.page - 1,
@@ -242,7 +255,12 @@ const MapAttributes: React.FC<Props> = (props) => {
         .catch((err) => {
           AxiosErrorHandler(err, props.logout);
         })
-        .finally(() => setIsTableLoading(false));
+        .finally(() =>
+          setState((prevState) => ({
+            ...prevState,
+            isTableLoading: false,
+          }))
+        );
     }
   };
 
@@ -309,7 +327,6 @@ const MapAttributes: React.FC<Props> = (props) => {
   }
 
   function changeOverlay(value: string) {
-    console.log(`2-${value}`);
     props.setOverlayID(value);
   }
 
@@ -387,7 +404,7 @@ const MapAttributes: React.FC<Props> = (props) => {
                   onChange={changeOverlay}
                 >
                   {filteredLayers.map((layer) => (
-                    <Option key={layer.name} value={layer.settings._id}>
+                    <Option key={layer.name} value={layer.key}>
                       {layer.name}
                       {console.log("layer", layer)}
                     </Option>
