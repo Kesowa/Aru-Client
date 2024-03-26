@@ -1115,6 +1115,7 @@ function BaseMap(props) {
             .then((res) => {
               console.log("Filter API response", res);
               if (res.data.status) {
+                SetAllLayers(res.data.data.map(layer => ({ ...layer, isChecked: true })));
                 removeChips(res.data.data);
               } else {
                 if (res.data.message === " data not match!") {
@@ -1830,7 +1831,7 @@ function BaseMap(props) {
       ],
     },
   ];
-  const toggleLayerFlag = (layerId, flag) => {
+  const toggleLayerFlag = (layerId: string, flag: boolean) => {
     const payload: any = {
       flag: flag,
     };
@@ -1841,6 +1842,12 @@ function BaseMap(props) {
           message.success(
             flag ? "Layer Flagged Successfully" : "Layer Unflagged Successfully"
           );
+          SetAllLayers(prev => prev.map((layer) => {
+            if (layer._id === layerId) {
+              layer.isFlagged = flag;
+            }
+            return layer;
+          }));
           setRefreshLayer(!refreshLayer);
           setShouldAttributeTableReload(!shouldAttributeTableReload);
         } else {
@@ -3393,7 +3400,7 @@ function BaseMap(props) {
             });
           } else {
             setMissioName(result.data.data.mission);
-            segrigateLayers(result.data.data.layers);
+            // segrigateLayers(result.data.data.layers);
             setViewport({
               latitude: result.data.data.centerPoints.lat,
               longitude: result.data.data.centerPoints.lng,
@@ -4754,185 +4761,186 @@ function BaseMap(props) {
   //   setTreeDataa(data);
   // };
 
-  const segrigateLayers = (layers) => {
-    //console.log("segrate layer");
-    let data: any = [...treeDataa];
-    let allLayers: any = {};
-    if (
-      sortType ||
-      timeEnabled ||
-      selectedRasterProps ||
-      selectedVectorProps ||
-      selectedVectorPropsType
-    ) {
-      data = [
-        {
-          title: "Vector",
-          key: "1",
-          children: [],
-        },
-        {
-          title: "Raster",
-          key: "2",
-          children: [],
-        },
-      ];
-    }
-    if (!sortType) {
-      layers.sort((a, b) => {
-        return moment(b.captureDate).diff(moment(a.captureDate));
-      });
-    }
+  // No longer required
+  // const segrigateLayers = (layers) => {
+  //   //console.log("segrate layer");
+  //   let data: any = [...treeDataa];
+  //   let allLayers: any = {};
+  //   if (
+  //     sortType ||
+  //     timeEnabled ||
+  //     selectedRasterProps ||
+  //     selectedVectorProps ||
+  //     selectedVectorPropsType
+  //   ) {
+  //     data = [
+  //       {
+  //         title: "Vector",
+  //         key: "1",
+  //         children: [],
+  //       },
+  //       {
+  //         title: "Raster",
+  //         key: "2",
+  //         children: [],
+  //       },
+  //     ];
+  //   }
+  //   if (!sortType) {
+  //     layers.sort((a, b) => {
+  //       return moment(b.captureDate).diff(moment(a.captureDate));
+  //     });
+  //   }
 
-    const rasters = layers.filter((layer) => layer.type === "Raster");
-    const vectors = layers.filter((layer) => layer.type === "Vector");
+  //   const rasters = layers.filter((layer) => layer.type === "Raster");
+  //   const vectors = layers.filter((layer) => layer.type === "Vector");
 
-    setvectorLayers(vectors);
+  //   setvectorLayers(vectors);
 
-    const rasterGroups = {};
-    const allGroups = {};
+  //   const rasterGroups = {};
+  //   const allGroups = {};
 
-    rasters.forEach((layer, i) => {
-      if (!layer.layerGroupId) {
-        data[1].children.push({
-          key: `2-${layer._id}`,
-          ...layer,
-        });
-      } else {
-        if (!rasterGroups[layer.layerGroupId._id]) {
-          rasterGroups[layer.layerGroupId._id] = {
-            name: layer.layerGroupId.name,
-            children: [],
-          };
-          allGroups[layer.layerGroupId._id] = {
-            name: layer.layerGroupId.name,
-            id: layer.layerGroupId._id,
-            groupType: 2,
-          };
-        }
-        rasterGroups[layer.layerGroupId._id].children.push({
-          key: `2-${layer._id}`,
-          ...layer,
-        });
-      }
+  //   rasters.forEach((layer, i) => {
+  //     if (!layer.layerGroupId) {
+  //       data[1].children.push({
+  //         key: `2-${layer._id}`,
+  //         ...layer,
+  //       });
+  //     } else {
+  //       if (!rasterGroups[layer.layerGroupId._id]) {
+  //         rasterGroups[layer.layerGroupId._id] = {
+  //           name: layer.layerGroupId.name,
+  //           children: [],
+  //         };
+  //         allGroups[layer.layerGroupId._id] = {
+  //           name: layer.layerGroupId.name,
+  //           id: layer.layerGroupId._id,
+  //           groupType: 2,
+  //         };
+  //       }
+  //       rasterGroups[layer.layerGroupId._id].children.push({
+  //         key: `2-${layer._id}`,
+  //         ...layer,
+  //       });
+  //     }
 
-      const l = {};
-      if (props.isBaseMap) {
-        // -----to merge all rasters paths------------------
-        l[data[1]["key"] + "-" + layer._id] = {
-          layerPath: layer.layerdataArr,
-          type: layer.raster.name,
-          settings: {
-            ...layer.raster,
-            // minp: layer.minp,
-            // maxp: layer.maxp,
-          },
-          name: layer.name,
-          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
-        };
-      } else {
-        l[data[1]["key"] + "-" + layer._id] = {
-          layerPath: layer.layerpath,
-          type: layer.raster.name,
-          settings: {
-            ...layer.raster,
-            minp: layer.minp,
-            maxp: layer.maxp,
-          },
-          name: layer.name,
-          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
-        };
-      }
+  //     const l = {};
+  //     if (props.isBaseMap) {
+  //       // -----to merge all rasters paths------------------
+  //       l[data[1]["key"] + "-" + layer._id] = {
+  //         layerPath: layer.layerdataArr,
+  //         type: layer.raster.name,
+  //         settings: {
+  //           ...layer.raster,
+  //           // minp: layer.minp,
+  //           // maxp: layer.maxp,
+  //         },
+  //         name: layer.name,
+  //         groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
+  //       };
+  //     } else {
+  //       l[data[1]["key"] + "-" + layer._id] = {
+  //         layerPath: layer.layerpath,
+  //         type: layer.raster.name,
+  //         settings: {
+  //           ...layer.raster,
+  //           minp: layer.minp,
+  //           maxp: layer.maxp,
+  //         },
+  //         name: layer.name,
+  //         groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
+  //       };
+  //     }
 
-      allLayers = {
-        ...allLayers,
-        ...l,
-      };
-    });
+  //     allLayers = {
+  //       ...allLayers,
+  //       ...l,
+  //     };
+  //   });
 
-    const vectorGroups = {};
+  //   const vectorGroups = {};
 
-    vectors.forEach((layer, i) => {
-      if (!layer.layerGroupId) {
-        data[0].children.push({
-          key: `1-${layer._id}`,
-          ...layer,
-        });
-      } else {
-        if (!vectorGroups[layer.layerGroupId._id]) {
-          vectorGroups[layer.layerGroupId._id] = {
-            name: layer.layerGroupId.name,
-            children: [],
-          };
-          allGroups[layer.layerGroupId._id] = {
-            name: layer.layerGroupId.name,
-            id: layer.layerGroupId._id,
-            groupType: 1,
-          };
-        }
-        vectorGroups[layer.layerGroupId._id].children.push({
-          key: `1-${layer._id}`,
-          ...layer,
-        });
-      }
+  //   vectors.forEach((layer, i) => {
+  //     if (!layer.layerGroupId) {
+  //       data[0].children.push({
+  //         key: `1-${layer._id}`,
+  //         ...layer,
+  //       });
+  //     } else {
+  //       if (!vectorGroups[layer.layerGroupId._id]) {
+  //         vectorGroups[layer.layerGroupId._id] = {
+  //           name: layer.layerGroupId.name,
+  //           children: [],
+  //         };
+  //         allGroups[layer.layerGroupId._id] = {
+  //           name: layer.layerGroupId.name,
+  //           id: layer.layerGroupId._id,
+  //           groupType: 1,
+  //         };
+  //       }
+  //       vectorGroups[layer.layerGroupId._id].children.push({
+  //         key: `1-${layer._id}`,
+  //         ...layer,
+  //       });
+  //     }
 
-      const l = {};
-      l[data[0]["key"] + "-" + layer._id] = {
-        layerPath: layer.layerpath,
-        type: layer.vector.type,
-        name: layer.name,
-        id: layer._id,
-        T3DTranspose: false,
-        groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
-        layerLabel: layer.layerLabel,
-        layerPopupLabel: layer.layerPopupLabel,
-        isPublic: layer.isPublic,
-        flaggedFeatures: layer.flaggedFeatures,
-      };
+  //     const l = {};
+  //     l[data[0]["key"] + "-" + layer._id] = {
+  //       layerPath: layer.layerpath,
+  //       type: layer.vector.type,
+  //       name: layer.name,
+  //       id: layer._id,
+  //       T3DTranspose: false,
+  //       groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
+  //       layerLabel: layer.layerLabel,
+  //       layerPopupLabel: layer.layerPopupLabel,
+  //       isPublic: layer.isPublic,
+  //       flaggedFeatures: layer.flaggedFeatures,
+  //     };
 
-      allLayers = {
-        ...allLayers,
-        ...l,
-      };
-    });
+  //     allLayers = {
+  //       ...allLayers,
+  //       ...l,
+  //     };
+  //   });
 
-    for (const [key, value] of Object.entries(vectorGroups) as any) {
-      data[0].children.push({
-        group: true,
-        value: value,
-        id: key,
-        key: "group-" + key,
-        groupType: 1,
-      });
-    }
+  //   for (const [key, value] of Object.entries(vectorGroups) as any) {
+  //     data[0].children.push({
+  //       group: true,
+  //       value: value,
+  //       id: key,
+  //       key: "group-" + key,
+  //       groupType: 1,
+  //     });
+  //   }
 
-    for (const [key, value] of Object.entries(rasterGroups) as any) {
-      data[1].children.push({
-        group: true,
-        value: value,
-        id: key,
-        key: "group-" + key,
-        groupType: 2,
-      });
-    }
+  //   for (const [key, value] of Object.entries(rasterGroups) as any) {
+  //     data[1].children.push({
+  //       group: true,
+  //       value: value,
+  //       id: key,
+  //       key: "group-" + key,
+  //       groupType: 2,
+  //     });
+  //   }
 
-    setAllLayerGroups(allGroups);
-    setAllLayers(allLayers);
-    setTreeStructure(data);
-    //--------check last ortho-----
-    rasters.forEach((element) => {
-      //console.log(element)
-      if (element.raster.name === "ORTHO") {
-        element.isChecked = true;
-        //console.log(element);
-        // const cl: any = [];
-        // cl.push(`2-${element._id}`);
-        //console.log(cl);
-        // setCheckedKeys(cl);
-        return;
-      }
-    });
-  };
+  //   setAllLayerGroups(allGroups);
+  //   setAllLayers(allLayers);
+  //   setTreeStructure(data);
+  //   //--------check last ortho-----
+  //   rasters.forEach((element) => {
+  //     //console.log(element)
+  //     if (element.raster.name === "ORTHO") {
+  //       element.isChecked = true;
+  //       //console.log(element);
+  //       // const cl: any = [];
+  //       // cl.push(`2-${element._id}`);
+  //       //console.log(cl);
+  //       // setCheckedKeys(cl);
+  //       return;
+  //     }
+  //   });
+  // };
 
   const onFinish = (values: any) => {
     //console.log("Success:", values);
