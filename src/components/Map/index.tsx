@@ -1115,7 +1115,7 @@ function BaseMap(props) {
             .then((res) => {
               console.log("Filter API response", res);
               if (res.data.status) {
-                SetAllLayers(res.data.data.map(layer => ({ ...layer, isChecked: true })));
+                SetAllLayers(res.data.data);
                 removeChips(res.data.data);
               } else {
                 if (res.data.message === " data not match!") {
@@ -3377,7 +3377,7 @@ function BaseMap(props) {
         );
 
         if (result.data.status) {
-          SetAllLayers(result.data.data.layers.map(layer => ({ ...layer, isChecked: true })));
+          SetAllLayers(result.data.data.layers);
           SetMissionLayers({
             alertGeojsonUrl: missionGeojsonURL("alert", props.isBaseMap, dateRange[0], dateRange[1]),
             vodGeojsonUrl: missionGeojsonURL("vod", props.isBaseMap, dateRange[0], dateRange[1]),

@@ -86,8 +86,10 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             tileSize: 256,
           })
         }
+        console.log("RENDERING RASTER LAYER!!!!");
         return new TileLayer({
           id: layer._id,
+          data: getRasterDataUrl(layer),
           minZoom: 0,
           maxZoom: 24,
           tileSize: 256,
