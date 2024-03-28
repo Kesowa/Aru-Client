@@ -10,6 +10,7 @@ import { logout } from "../../../actions/authAction";
 import { connect } from "react-redux";
 import FeatureTable from "./featureTable";
 import { COG_URL, TITILER_STATIC } from "src/constants";
+import { Layer } from "../layerRender";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -41,7 +42,8 @@ interface Props {
   setColorMap: (color: string) => void;
   setOverlayID: (color: string) => void;
   setTerrainMap: (value: boolean) => void;
-  allLayers: any;
+  // allLayers: any;
+  AllLayers: Layer[];
   canEditGeojson: boolean;
   canDeleteFeature: boolean;
   updateFeatureCountInLayers: (id: string, count: number) => void;
@@ -90,8 +92,11 @@ const MapAttributes: React.FC<Props> = (props) => {
     initialState.isTableLoading
   );
   const [tableData, setTableData] = useState<State>(initialState);
-  const filteredLayers = Object.values(props.allLayers).filter(
-    (layer) => layer.type === "DEM" || layer.type === "ortho"
+  // const filteredLayers = Object.values(props.allLayers).filter(
+  //   (layer) => layer.type === "DEM" || layer.type === "ortho"
+  // );
+  const filteredLayers = props.AllLayers.filter((layer) =>
+    ["DEM", "ORTHO"].includes(layer.raster.name)
   );
 
   const onChange = (checked: boolean) => {
@@ -267,7 +272,7 @@ const MapAttributes: React.FC<Props> = (props) => {
       }
       if (
         props.flaggedFilter ||
-        props.allLayers[`1-${props.id}`]?.flaggedFeatures.includes(record.index)
+        props.AllLayers.find((layer) => (layer._id === props.id))?.flaggedFeatures.includes(record.index)
       ) {
         return {
           ...record,
@@ -412,7 +417,7 @@ const MapAttributes: React.FC<Props> = (props) => {
           bottomBarHeight={props.bottomBarHeight}
           contentHeight={state.contentHeight}
           tableData={state.tableData}
-          allLayers={props.allLayers}
+          // allLayers={props.allLayers} // The FeatureTable component takes the allLayers prop from global state, the value passed here doesn't get used
           flaggedFilter={props.flaggedFilter}
           unflaggedFilter={props.unflaggedFilter}
           setPage={(page) => setState((prev) => ({ ...prev, page }))}

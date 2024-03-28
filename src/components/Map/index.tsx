@@ -1372,7 +1372,7 @@ function BaseMap(props) {
     setAutoExpandParent(false);
   };
 
-  const [allLayers, setAllLayers] = useState<Layer[]>([]);
+  // const [allLayers, setAllLayers] = useState<Layer[]>([]);
   const [AllLayers, SetAllLayers] = useState<Layer[]>([]);
   const [MissionLayers, SetMissionLayers] = useState<IMissionLayers>({
     alertGeojsonUrl: "",
@@ -2127,7 +2127,7 @@ function BaseMap(props) {
     console.log("lost");
   }, [
     // checkedKeys,
-    allLayers,
+    // allLayers,
     AllLayers,
     MissionLayers,
     geoJsonVOD,
@@ -2145,19 +2145,23 @@ function BaseMap(props) {
 
   useEffect(() => {
     //console.log("current 3d", threeDState);
-    if (threeDState === "Enabled") {
-      // set3DTranspose(true);
-      const al = { ...allLayers };
-      al[`1-${featureLayer}`].T3DTranspose = true;
-      setAllLayers(al);
-      forceUpdateLayers(featureLayer);
-    } else if (threeDState === "Disabled") {
-      // set3DTranspose(false);
-      const al = { ...allLayers };
-      al[`1-${featureLayer}`].T3DTranspose = false;
-      setAllLayers(al);
-      forceUpdateLayers(featureLayer);
-    }
+    SetAllLayers(prev => prev.map((layer) => {
+      if (layer._id === featureLayer) layer.render3D = (threeDState === "Enabled");
+      return layer;
+    }));
+    // if (threeDState === "Enabled") {
+    //   set3DTranspose(true);
+    //   const al = { ...allLayers };
+    //   al[`1-${featureLayer}`].T3DTranspose = true;
+    //   setAllLayers(al);
+    //   forceUpdateLayers(featureLayer);
+    // } else if (threeDState === "Disabled") {
+    //   set3DTranspose(false);
+    //   const al = { ...allLayers };
+    //   al[`1-${featureLayer}`].T3DTranspose = false;
+    //   setAllLayers(al);
+    //   forceUpdateLayers(featureLayer);
+    // }
   }, [threeDState]);
   // ++++++++++++++++++++++++++++++++++++ force updation of layers after creating or adding features +++++++++++++++++++++++++++++++++++++++++++
   const forceUpdateLayers = (id: any) => {
@@ -3402,7 +3406,7 @@ function BaseMap(props) {
             isAlertChecked: false,
             isVODChecked: false,
           });
-          setAllLayers(result.data.data.layers);
+          // setAllLayers(result.data.data.layers);
           if (result.data.message === "No layer exists for mission") {
             setMissioName(result.data.data.mission);
             setViewport({
@@ -3450,7 +3454,8 @@ function BaseMap(props) {
         }>(apis.GET_ALL_BASELAYERS);
         if (result.data.success) {
           setMissioName("none");
-          setAllLayers(result.data.data);
+          // setAllLayers(result.data.data);
+          SetAllLayers(result.data.data);
         } else {
           message.error(result.data.message);
         }
@@ -7008,7 +7013,7 @@ function BaseMap(props) {
                       layerId={featureLayer}
                       missionLayer={missionLayer}
                       setMissionLayer={setMissionLayer}
-                      allLayers={allLayers}
+                      AllLayers={AllLayers}
                       flag={flag}
                       setFlag={setFlag}
                       setShouldAttributeTableReload={
@@ -7333,8 +7338,8 @@ function BaseMap(props) {
                   {missioName === "none" ? "Map" : missioName}
                 </Text>
               </Title>
-              {allLayers.length !== 0 && (
-                <Text type="secondary">Results: {allLayers.length}</Text>
+              {AllLayers.length !== 0 && (
+                <Text type="secondary">Results: {AllLayers.length}</Text>
               )}
             </Row>
             <div
@@ -7924,7 +7929,7 @@ function BaseMap(props) {
                     updateFeatureCountInLayers={updateFeatureCountInLayers}
                     flaggedFilter={flaggedFilter}
                     unflaggedFilter={unflaggedFilter}
-                    allLayers={allLayers}
+                    AllLayers={AllLayers}
                     refreshLayer={refreshLayer}
                     setRefreshLayer={setRefreshLayer}
                     invertColor={invertColor}
@@ -8100,7 +8105,7 @@ function BaseMap(props) {
         canUploadToBaseLayer={perms.canUploadToBaseLayer}
         canUpdateBaseLayer={perms.canUpdateBaseLayer}
         setViewport={setViewport}
-        layer={{ ...allLayers[`1-${featureLayer}`] }}
+        layer={AllLayers.find((layer) => (layer._id === featureLayer))}
         layerPath={featureLayerPath}
         layerLabel={selectedLayerLabel}
         updateLayerDataAfterEditing={updateLayerDataAfterEditing}
