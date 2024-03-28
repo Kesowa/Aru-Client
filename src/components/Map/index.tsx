@@ -4691,39 +4691,39 @@ function BaseMap(props) {
       />
     );
   };
-  const treeData = [
-    {
-      title: "Vector",
-      key: "1",
-      children: [],
-    },
-    {
-      title: "Raster",
-      key: "2",
-      children: [],
-    },
-    {
-      title: "Mission",
-      key: "3",
-      children: [
-        {
-          title: renderRangePicker(),
-          key: "3-1",
-          checkable: false,
-        },
-        {
-          title: "Alerts",
-          key: "3-2",
-        },
-        {
-          title: "VODs",
-          key: "3-3",
-        },
-      ],
-    },
-  ];
-  const [treeDataa, setTreeDataa] = useState<any>(treeData);
-  const [treeStructure, setTreeStructure] = useState(treeData);
+  // const treeData = [
+  //   {
+  //     title: "Vector",
+  //     key: "1",
+  //     children: [],
+  //   },
+  //   {
+  //     title: "Raster",
+  //     key: "2",
+  //     children: [],
+  //   },
+  //   {
+  //     title: "Mission",
+  //     key: "3",
+  //     children: [
+  //       {
+  //         title: renderRangePicker(),
+  //         key: "3-1",
+  //         checkable: false,
+  //       },
+  //       {
+  //         title: "Alerts",
+  //         key: "3-2",
+  //       },
+  //       {
+  //         title: "VODs",
+  //         key: "3-3",
+  //       },
+  //     ],
+  //   },
+  // ];
+  // const [treeDataa, setTreeDataa] = useState<any>(treeData);
+  // const [treeStructure, setTreeStructure] = useState(treeData);
   const [allLayerGroups, setAllLayerGroups] = useState({});
   //----------------------Segrigate layers-------------------------------------------------------
 
@@ -6262,130 +6262,149 @@ function BaseMap(props) {
   };
 
   const onDrop = async (info) => {
-    //console.log(info);
-    const dropKey = info.node.key;
-    const dragKey = info.dragNode.key;
-    const dropPos = info.node.pos.split("-");
-    const dropPosition =
-      info.dropPosition - Number(dropPos[dropPos.length - 1]);
+    // console.log("OnDrop Event => ", info);
+    // const dropKey = info.node.key;
+    // const dragKey = info.dragNode.key;
+    // const dropPos = info.node.pos.split("-");
+    // const dropPosition =
+    //   info.dropPosition - Number(dropPos[dropPos.length - 1]);
 
     try {
-      if (
-        info.dragNode.key.split("-")[0] !== "group" &&
-        !info.dragNode.groupId &&
-        info.node.key.split("-")[0] === "group" &&
-        !info.node.expanded
-      ) {
-      } else if (
-        info.dragNode.key.split("-")[0] !== "group" &&
-        info.dragNode.groupId &&
-        info.node.key.split("-")[0] === "group" &&
-        !info.node.expanded &&
-        info.node.groupId !== info.dragNode.groupId
-      ) {
+      // if (
+      //   info.dragNode.key.split("-")[0] !== "group" &&
+      //   !info.dragNode.groupId &&
+      //   info.node.key.split("-")[0] === "group" &&
+      //   !info.node.expanded
+      // ) {
+      // } else if (
+      //   info.dragNode.key.split("-")[0] !== "group" &&
+      //   info.dragNode.groupId &&
+      //   info.node.key.split("-")[0] === "group" &&
+      //   !info.node.expanded &&
+      //   info.node.groupId !== info.dragNode.groupId
+      // ) {
+      //   const key = info.dragNode.key;
+      //   await removeLayerFromGroup(
+      //     info.dragNode.groupId,
+      //     info.dragNode.layer._id
+      //   );
+      // } else if (
+      //   info.dragNode.key.split("-")[0] === "group" &&
+      //   info.node.key.split("-")[0] === "group" &&
+      //   !info.node.expanded
+      // ) {
+      // } else if (
+      //   info.dragNode.key.split("-")[0] === "group" &&
+      //   info.node.key.split("-")[0] === "group" &&
+      //   info.node.expanded
+      // ) {
+      //   return message.info("Please Collapse The Group Before Dropping");
+      // } else if (info.dragNode.groupId === info.node.groupId) {
+      //   if (info.node.group) {
+      //     return;
+      //   }
+      // } else if (
+      //   (info.dragNode.key.split("-")[0] === "group" && info.node.groupId) ||
+      //   (info.dragNode.key.split("-")[0] !== "group" &&
+      //     info.node.key.split("-")[0] === "group")
+      // ) {
+      //   return;
+      // } else if (
+      //   info.dragNode.key.split("-")[0] === "group" &&
+      //   !info.node.groupId &&
+      //   info.node.pos === "0-0-0"
+      // ) {
+      //   return;
+      // } else {
+      //   const groupid = info.node.groupId;
+      //   if (!groupid && !info.dragNode.group) {
+      //     if (info.node.pos === "0-0") return;
+      //     const key = info.dragNode.key;
+      //     await removeLayerFromGroup(
+      //       info.dragNode.groupId,
+      //       info.dragNode.layer._id
+      //     );
+      //   } else if (info.dragNode.layer) {
+      //     const layerid = info.dragNode.layer._id;
+      //     const key = info.dragNode.key;
+      //     //console.log(layerid, groupid);
+      //     await changeGroupOfLayer(groupid, [layerid], [key]);
+      //   }
+      // }
+
+      if (info.dragNode && !info.dragNode.group) {
+        // allow only individual layers to be dragged and dropped, not entire layer groups
         const key = info.dragNode.key;
-        await removeLayerFromGroup(
-          info.dragNode.groupId,
-          info.dragNode.layer._id
-        );
-      } else if (
-        info.dragNode.key.split("-")[0] === "group" &&
-        info.node.key.split("-")[0] === "group" &&
-        !info.node.expanded
-      ) {
-      } else if (
-        info.dragNode.key.split("-")[0] === "group" &&
-        info.node.key.split("-")[0] === "group" &&
-        info.node.expanded
-      ) {
-        return message.info("Please Collapse The Group Before Dropping");
-      } else if (info.dragNode.groupId === info.node.groupId) {
-        if (info.node.group) {
-          return;
-        }
-      } else if (
-        (info.dragNode.key.split("-")[0] === "group" && info.node.groupId) ||
-        (info.dragNode.key.split("-")[0] !== "group" &&
-          info.node.key.split("-")[0] === "group")
-      ) {
-        return;
-      } else if (
-        info.dragNode.key.split("-")[0] === "group" &&
-        !info.node.groupId &&
-        info.node.pos === "0-0-0"
-      ) {
-        return;
-      } else {
-        const groupid = info.node.groupId;
-        if (!groupid && !info.dragNode.group) {
+        const layerId = info.dragNode._id;
+        const oldGroupId = info.dragNode.groupId;
+        const newGroupId = info.node.groupId;
+
+        if (!newGroupId) {
           if (info.node.pos === "0-0") return;
-          const key = info.dragNode.key;
-          await removeLayerFromGroup(
-            info.dragNode.groupId,
-            info.dragNode.layer._id
-          );
-        } else if (info.dragNode.layer) {
-          const layerid = info.dragNode.layer._id;
-          const key = info.dragNode.key;
-          //console.log(layerid, groupid);
-          await changeGroupOfLayer(groupid, [layerid], [key]);
+          // the node under which it was dragged is not a layer group, so it must have been dragged under "Vector" or "Raster"
+          // this means it was actually ungrouped
+          await removeLayerFromGroup(oldGroupId, layerId);
+        } else {
+          // layer was moved under a new group
+          //console.log(layerid, newGroupId);
+          await changeGroupOfLayer(newGroupId, [layerId], [key]);
         }
       }
 
-      const loop = (data, key, callback) => {
-        for (let i = 0; i < data.length; i++) {
-          if (data[i].key === key) {
-            return callback(data[i], i, data);
-          }
-          if (data[i].children) {
-            loop(data[i].children, key, callback);
-          }
-          if (data[i].group) {
-            loop(data[i].value.children, key, callback);
-          }
-        }
-      };
+      // const loop = (data, key, callback) => {
+      //   for (let i = 0; i < data.length; i++) {
+      //     if (data[i].key === key) {
+      //       return callback(data[i], i, data);
+      //     }
+      //     if (data[i].children) {
+      //       loop(data[i].children, key, callback);
+      //     }
+      //     if (data[i].group) {
+      //       loop(data[i].value.children, key, callback);
+      //     }
+      //   }
+      // };
 
-      const data = [...treeStructure];
+      // const data = [...treeStructure];
 
       // Find dragObject
-      let dragObj;
-      loop(data, dragKey, (item, index, arr) => {
-        arr.splice(index, 1);
-        dragObj = item;
-      });
+      // let dragObj;
+      // loop(data, dragKey, (item, index, arr) => {
+      //   arr.splice(index, 1);
+      //   dragObj = item;
+      // });
 
-      if (!info.dropToGap) {
-        // Drop on the content
-        loop(data, dropKey, (item) => {
-          item.children = item.children || [];
-          // where to insert
-          item.children.unshift(dragObj);
-        });
-      } else if (
-        (info.node.props.children || []).length > 0 && // Has children
-        info.node.props.expanded && // Is expanded
-        dropPosition === 1 // On the bottom gap
-      ) {
-        loop(data, dropKey, (item) => {
-          item.children = item.children || [];
-          item.children.unshift(dragObj);
-        });
-      } else {
-        let ar;
-        let i;
-        loop(data, dropKey, (item, index, arr) => {
-          ar = arr;
-          i = index;
-        });
-        if (dropPosition === -1) {
-          ar.splice(i, 0, dragObj);
-        } else {
-          ar.splice(i + 1, 0, dragObj);
-        }
-      }
+      // if (!info.dropToGap) {
+      //   // Drop on the content
+      //   loop(data, dropKey, (item) => {
+      //     item.children = item.children || [];
+      //     // where to insert
+      //     item.children.unshift(dragObj);
+      //   });
+      // } else if (
+      //   (info.node.props.children || []).length > 0 && // Has children
+      //   info.node.props.expanded && // Is expanded
+      //   dropPosition === 1 // On the bottom gap
+      // ) {
+      //   loop(data, dropKey, (item) => {
+      //     item.children = item.children || [];
+      //     item.children.unshift(dragObj);
+      //   });
+      // } else {
+      //   let ar;
+      //   let i;
+      //   loop(data, dropKey, (item, index, arr) => {
+      //     ar = arr;
+      //     i = index;
+      //   });
+      //   if (dropPosition === -1) {
+      //     ar.splice(i, 0, dragObj);
+      //   } else {
+      //     ar.splice(i + 1, 0, dragObj);
+      //   }
+      // }
 
-      const dropc = info.dragNode.checked;
+      // const dropc = info.dragNode.checked;
 
       // Should no longer be required
       // if (dropc) {
@@ -6431,7 +6450,7 @@ function BaseMap(props) {
       //   }, 0);
       // }
 
-      setTreeStructure(data);
+      // setTreeStructure(data);
     } catch (error) {
       console.log(error);
     }
