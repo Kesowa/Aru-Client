@@ -1,6 +1,5 @@
 import { Layer as GLayer } from "./layerRender";
-import { Dropdown, Typography } from "antd";
-import { MenuClickEventHandler } from "rc-menu/lib/interface";
+import { Typography } from "antd";
 import { FolderOutlined, FileImageOutlined, EnvironmentOutlined, BranchesOutlined, GatewayOutlined } from "@ant-design/icons";
 import moment from "moment";
 
@@ -8,8 +7,9 @@ const { Text } = Typography;
 
 export const ILayersToTree = (
   layers: GLayer[],
-  getTitleElement: (layer: GLayer) => any,
-  getGroupTitleElement: (layerGroup: GLayer["layerGroupId"]) => any,
+  getTitleElement: (layer: GLayer) => JSX.Element,
+  getGroupTitleElement: (layerGroup: GLayer["layerGroupId"]) => JSX.Element,
+  renderRangePicker: () => JSX.Element,
   sortType: string,
   isAscending: boolean
 ): TreeData => {
@@ -52,7 +52,7 @@ export const ILayersToTree = (
     getTitleElement,
     getGroupTitleElement
   ).sort(sortFunc);
-  treeData[2].children = missionLayersMenu();
+  treeData[2].children = missionLayersMenu(renderRangePicker);
 
   return treeData;
 };
@@ -139,8 +139,8 @@ function vectorIcon(type: GLayer["vector"]["type"], color: string) {
 
 function groupLayers(
   layers: GLayer[],
-  getTitleElement: (layer: GLayer) => any,
-  getGroupTitleElement: (layerGroup: GLayer["layerGroupId"]) => any
+  getTitleElement: (layer: GLayer) => JSX.Element,
+  getGroupTitleElement: (layerGroup: GLayer["layerGroupId"]) => JSX.Element
 ) {
   const groupedLayers: Child[] = []
   layers.forEach(layer => {
@@ -176,8 +176,13 @@ function groupLayers(
   return groupedLayers;
 }
 
-function missionLayersMenu() {
+function missionLayersMenu(renderRangePicker: () => JSX.Element) {
   return [
+    {
+      title: renderRangePicker(),
+      key: "dateRangePicker",
+      checkable: false,
+    },
     {
       name: "Alert",
       id: "alert",

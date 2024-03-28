@@ -2129,6 +2129,7 @@ function BaseMap(props) {
     // checkedKeys,
     allLayers,
     AllLayers,
+    MissionLayers,
     geoJsonVOD,
     geoJsonAlert,
     flaggedFilter,
@@ -2266,6 +2267,22 @@ function BaseMap(props) {
           ] as BBox;
           boundingBoxes.push(bounds);
         }
+      }
+    }
+    if (MissionLayers.isAlertChecked) {
+      const { data } = await http.get(STATIC_URL + MissionLayers.alertGeojsonUrl);
+      const { features } = data;
+      if (Array.isArray(features) && features.length > 0) {
+        const bounds = turf.bbox(turf.featureCollection(features)) as BBox;
+        boundingBoxes.push(bounds);
+      }
+    }
+    if (MissionLayers.isVODChecked) {
+      const { data } = await http.get(STATIC_URL + MissionLayers.vodGeojsonUrl);
+      const { features } = data;
+      if (Array.isArray(features) && features.length > 0) {
+        const bounds = turf.bbox(turf.featureCollection(features)) as BBox;
+        boundingBoxes.push(bounds);
       }
     }
     if(boundingBoxes.length > 0) {
@@ -3194,11 +3211,12 @@ function BaseMap(props) {
       layer.isChecked = checkedKeysValue.includes(layer._id);
       return layer;
     })));
-    SetMissionLayers((prev) => ({
-      ...prev,
+    SetMissionLayers({
+      alertGeojsonUrl: missionGeojsonURL("alert", props.isBaseMap, dateRange[0], dateRange[1]),
+      vodGeojsonUrl: missionGeojsonURL("vod", props.isBaseMap, dateRange[0], dateRange[1]),
       isAlertChecked: checkedKeysValue.includes("alert"),
       isVODChecked: checkedKeysValue.includes("vod")
-    }));
+    });
   };
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++ Start Drawing +++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -4656,7 +4674,7 @@ function BaseMap(props) {
   // ++++++++++++++++++++++++++++++++
   const renderRangePicker = () => {
     const disabledDate = (current) => {
-      return current && current > moment(dateRange[1]);
+      return current && current > moment();
     };
     return (
       <DatePicker.RangePicker
@@ -7822,7 +7840,7 @@ function BaseMap(props) {
               })()}
               onSelect={onSelect}
               selectedKeys={selectedKeys}
-              treeData={ILayersToTree(AllLayers, getTitleElement, getGroupTitleElement, sortType, isAscending)}
+              treeData={ILayersToTree(AllLayers, getTitleElement, getGroupTitleElement, renderRangePicker, sortType, isAscending)}
               onDrop={onDrop}
               draggable={(node: any) => {
                 if (

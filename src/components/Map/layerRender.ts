@@ -224,7 +224,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
 }
 
 export const MissionLayerToDeckLayer = (missionLayers: IMissionLayers) => {
-  const deckLayers: IconLayer[] = [];
+  const deckLayers: GeoJsonLayer[] = [];
 
   const getIcon = (d) => {
     const iconSelector = (iconType) => {
@@ -256,33 +256,43 @@ export const MissionLayerToDeckLayer = (missionLayers: IMissionLayers) => {
 
   if (missionLayers.isAlertChecked) {
     deckLayers.push(
-      new IconLayer({
+      new GeoJsonLayer({
         id: "alert",
         data: http
           .get(STATIC_URL + missionLayers.alertGeojsonUrl)
           .then((result) => result.data),
         pickable: true,
+        pointType: "icon",
+        iconSizeMinPixels: 6,
+        iconSizeUnits: "meters",
+        iconSizeScale: 10,
+        getIconSize: 2,
         getIcon,
-        sizeScale: 12,
-        getPosition: (d) => d.geometry.coordinates,
-        getSize: (d) => 5,
-        getColor: [255, 0, 0],
+        getIconColor: (d) =>
+          d.properties?.color
+            ? hexToRGB(d.properties?.color as string)
+            : hexToRGB("#ff0000"),
       })
     );
   }
   if (missionLayers.isVODChecked) {
     deckLayers.push(
-      new IconLayer({
+      new GeoJsonLayer({
         id: "vod",
         data: http
           .get(STATIC_URL + missionLayers.vodGeojsonUrl)
           .then((result) => result.data),
         pickable: true,
+        pointType: "icon",
+        iconSizeMinPixels: 6,
+        iconSizeUnits: "meters",
+        iconSizeScale: 10,
+        getIconSize: 2,
         getIcon,
-        sizeScale: 12,
-        getPosition: (d) => d.geometry.coordinates,
-        getSize: (d) => 5,
-        getColor: [255, 0, 0],
+        getIconColor: (d) =>
+          d.properties?.color
+            ? hexToRGB(d.properties?.color as string)
+            : hexToRGB("#ff0000"),
       })
     );
   }
