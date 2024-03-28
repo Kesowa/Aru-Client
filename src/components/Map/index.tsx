@@ -4724,7 +4724,7 @@ function BaseMap(props) {
   // ];
   // const [treeDataa, setTreeDataa] = useState<any>(treeData);
   // const [treeStructure, setTreeStructure] = useState(treeData);
-  const [allLayerGroups, setAllLayerGroups] = useState({});
+  // const [allLayerGroups, setAllLayerGroups] = useState({});
   //----------------------Segrigate layers-------------------------------------------------------
 
   // Should no longer be required
@@ -6657,14 +6657,14 @@ function BaseMap(props) {
             }
             return layer;
           }));
-          setAllLayerGroups(prev => ({
-            ...prev,
-            [layerGroup._id]: {
-              id: layerGroup._id,
-              name: layerGroup.name,
-              groupType: moveType
-            }
-          }));
+          // setAllLayerGroups(prev => ({
+          //   ...prev,
+          //   [layerGroup._id]: {
+          //     id: layerGroup._id,
+          //     name: layerGroup.name,
+          //     groupType: moveType
+          //   }
+          // }));
         } else {
           message.error(result.data.message);
         }
@@ -6753,6 +6753,12 @@ function BaseMap(props) {
   };
 
   const moveToGroupForm = () => {
+    const groups: { id: string, name: string }[] = [];
+    AllLayers.forEach((layer) => {
+      if (layer.layerGroupId && !groups.find(group => group.id === layer.layerGroupId._id)) {
+        groups.push({ id: layer.layerGroupId._id, name: layer.layerGroupId.name });
+      }
+    })
     return (
       <>
         <Form
@@ -6775,7 +6781,7 @@ function BaseMap(props) {
                 setgroupType(type);
               }}
             >
-              {Object.entries(allLayerGroups).map(
+              {/* {Object.entries(allLayerGroups).map(
                 ([key, value]: any, idx: any) => {
                   return (
                     <>
@@ -6787,7 +6793,16 @@ function BaseMap(props) {
                     </>
                   );
                 }
-              )}
+              )} */}
+              {
+                groups.map((group, idx) => {
+                    return (
+                      <Option value={group.id} key={idx}>
+                        {group.name}
+                      </Option>
+                    );
+                  })
+              }
             </Select>
           </Form.Item>
 
