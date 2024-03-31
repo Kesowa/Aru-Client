@@ -1205,7 +1205,6 @@ function LayerDocs(props) {
   //-------------- render media content --------------------
   function renderMedia() {
     const media: any = files;
-    let mediaItem: unknown;
     const items = [
       {
         key: "1",
@@ -1218,23 +1217,25 @@ function LayerDocs(props) {
         icon: <DeleteOutlined />,
       },
     ];
-    const onClick = (e: unknown) => {
-      if (e.key === "1") {
-        download(PUBLIC_URL + mediaItem.filePath);
-      }
-      if (e.key === "2") {
-        Modal.confirm({
-          title: "Delete Image?",
-          icon: <ExclamationCircleOutlined />,
-          content: "Are you sure you want to delete this Image?",
-          okText: "Yes",
-          cancelText: "No",
-          onOk: () => {
-            deleteFile(mediaItem._id);
-          },
-        });
-      }
-    };
+    const genOnClick = (mediaItem: any) => {
+      return (e: unknown) => {
+        if (e.key === "1") {
+          download(PUBLIC_URL + mediaItem.filePath);
+        }
+        if (e.key === "2") {
+          Modal.confirm({
+            title: "Delete Image?",
+            icon: <ExclamationCircleOutlined />,
+            content: "Are you sure you want to delete this Image?",
+            okText: "Yes",
+            cancelText: "No",
+            onOk: () => {
+              deleteFile(mediaItem._id);
+            },
+          });
+        }
+      };
+    } 
     return (
       <div>
         {media.length > 0 ? (
@@ -1271,8 +1272,7 @@ function LayerDocs(props) {
                     {subHeading.data.files.map((item: any) => {
                       return (
                         <Dropdown
-                          onOpenChange={() => (mediaItem = item)}
-                          menu={{ items, onClick }}
+                          menu={{ items, onClick: genOnClick(item) }}
                           trigger={["contextMenu"]}
                         >
                           <Image
