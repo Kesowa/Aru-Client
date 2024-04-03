@@ -72,6 +72,10 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
     .map(layer => {
       if (layer.type == "Raster") {
         if (layer.raster.name == "DEM" && layer.render3D == true) {
+          const overlayLayer = layer.raster.overlayId
+            ? layers.find((l) => l._id === layer.raster.overlayId)
+            : layer;
+          console.log("OVERLAYY LAYER => ", overlayLayer);
           return new TerrainLayer({
             id: layer._id,
             elevationDecoder: {
@@ -84,7 +88,10 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             maxZoom: 19,
             elevationData: getRasterDataUrl(layer),
             tileSize: 256,
-          })
+            texture: overlayLayer
+              ? getRasterDataUrl(overlayLayer)
+              : getRasterDataUrl(layer),
+          });
         }
         console.log("RENDERING RASTER LAYER!!!!");
         return new TileLayer({

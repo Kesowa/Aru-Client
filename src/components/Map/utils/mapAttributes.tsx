@@ -40,7 +40,7 @@ interface Props {
   defaultKeys: any;
   selectedIndexes: number[];
   setColorMap: (color: string) => void;
-  setOverlayID: (color: string) => void;
+  setOverlayID: (id: string, overlayId: string) => void;
   setTerrainMap: (value: boolean) => void;
   // allLayers: any;
   AllLayers: Layer[];
@@ -95,8 +95,9 @@ const MapAttributes: React.FC<Props> = (props) => {
   // const filteredLayers = Object.values(props.allLayers).filter(
   //   (layer) => layer.type === "DEM" || layer.type === "ortho"
   // );
-  const filteredLayers = props.AllLayers.filter((layer) =>
-    ["DEM", "ORTHO"].includes(layer.raster.name)
+  const filteredLayers = props.AllLayers.filter(
+    (layer) =>
+      layer.type === "Raster" && ["DEM", "ORTHO"].includes(layer.raster.name)
   );
 
   const onChange = (checked: boolean) => {
@@ -315,7 +316,7 @@ const MapAttributes: React.FC<Props> = (props) => {
 
   function changeOverlay(value: string) {
     console.log(`2-${value}`);
-    props.setOverlayID(value);
+    props.setOverlayID(props.id, value);
   }
 
   const rasterData = (
@@ -392,9 +393,8 @@ const MapAttributes: React.FC<Props> = (props) => {
                   onChange={changeOverlay}
                 >
                   {filteredLayers.map((layer) => (
-                    <Option key={layer.name} value={layer.settings._id}>
+                    <Option key={layer.name} value={layer._id}>
                       {layer.name}
-                      {console.log("layer", layer)}
                     </Option>
                   ))}
                 </Select>

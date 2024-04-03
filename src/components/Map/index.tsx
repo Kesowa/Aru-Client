@@ -198,7 +198,7 @@ function BaseMap(props) {
   const [videoDetails, setVideoDetails] = useState<any>({});
   const [showCarousel, setShowCarousel] = useState(false);
   const [terrainmap, setTerrainMap] = useState(false);
-  const [overlayId, setOverlayID] = useState<string>();
+  // const [overlayId, setOverlayID] = useState<string>();
   const [isElevationEnabled, setIsElevationEnabled] = useState(false);
   const isElevationEnabledRef = useRef(isElevationEnabled);
   const [dateRange, setDateRange] = useState([
@@ -2141,7 +2141,24 @@ function BaseMap(props) {
 
   useEffect(() => {
     forceUpdateAllLayers();
-  }, [overlayId, terrainmap, colorMap, selectedIndexes, showSelectedIndexes]);
+  }, [selectedIndexes, showSelectedIndexes]);
+
+  function setOverlayID(id: string, overlayId: string) {
+    SetAllLayers(prev => prev.map((layer) => {
+      if (layer._id === id) layer.raster.overlayId = overlayId;
+      return layer;
+    }))
+  }
+
+  useEffect(() => {
+    SetAllLayers(prev => prev.map((layer) => {
+      if (layer.type === "Raster" && layer.raster.name === "DEM") {
+        layer.render3D = terrainmap;
+        layer.raster.colorMap = colorMap;
+      }
+      return layer;
+    }))
+  }, [terrainmap, colorMap]);
 
   useEffect(() => {
     //console.log("current 3d", threeDState);
@@ -2206,33 +2223,36 @@ function BaseMap(props) {
   const calculateViewport = (bbox) => {
     const [minLon, minLat, maxLon, maxLat] = bbox;
     const mapContainer = document.getElementById("view-default-view");
-    const mapWidth = mapContainer.clientWidth; // Get the actual width of the map container
-    const mapHeight = mapContainer.clientHeight;
-    // Replace with the actual height of your map container
 
-    // Calculate the new viewport using getViewState
-    const viewport = new WebMercatorViewport({
-      width: mapWidth,
-      height: mapHeight,
-    });
-
-    // Get the new zoom and center to fit the layer on the screen
-    const { longitude, latitude, zoom } = viewport.fitBounds(
-      [
-        [minLon, minLat],
-        [maxLon, maxLat],
-      ],
-      {
-        padding: 10,
-        offset: [0, 0],
-      }
-    );
-
-    return {
-      longitude,
-      latitude,
-      zoom,
-    };
+    if (mapContainer) {
+      const mapWidth = mapContainer.clientWidth; // Get the actual width of the map container
+      const mapHeight = mapContainer.clientHeight;
+      // Replace with the actual height of your map container
+  
+      // Calculate the new viewport using getViewState
+      const viewport = new WebMercatorViewport({
+        width: mapWidth,
+        height: mapHeight,
+      });
+  
+      // Get the new zoom and center to fit the layer on the screen
+      const { longitude, latitude, zoom } = viewport.fitBounds(
+        [
+          [minLon, minLat],
+          [maxLon, maxLat],
+        ],
+        {
+          padding: 10,
+          offset: [0, 0],
+        }
+      );
+  
+      return {
+        longitude,
+        latitude,
+        zoom,
+      };
+    }
   };
 
   const focusSelectedLayers = async () => {
@@ -8246,7 +8266,7 @@ function BaseMap(props) {
             width: "200px",
           }}
         >
-          {scales.map((scale: any) => (
+          {scales.map((scale) => (
             <div
               style={{
                 position: "relative",
@@ -8257,7 +8277,10 @@ function BaseMap(props) {
             >
               {!props.isBaseMap ? (
                 <Colorscale
-                  settings={scale.settings}
+                  settings={{
+                    minp: scale.minp,
+                    maxp: scale.maxp,
+                  }}
                   name={scale.name}
                   colorMap={colorMap}
                 />

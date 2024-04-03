@@ -85,6 +85,7 @@ export type ILayer = {
     updatedBy: ObjectId;
     createdAt: ISODate;
     updatedAt: ISODate;
+    overlayId?: string; // only for DEM layers
   };
   vector: {
     _id: ObjectId;
