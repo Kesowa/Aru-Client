@@ -1235,7 +1235,7 @@ function LayerDocs(props) {
           });
         }
       };
-    } 
+    };
     return (
       <div>
         {media.length > 0 ? (
