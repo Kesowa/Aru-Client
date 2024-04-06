@@ -178,6 +178,8 @@ const { Option } = Select;
 const { SubMenu } = Menu;
 const { Meta } = Card;
 
+export const MASK_ID = "MaskLayerGeofence";
+
 function BaseMap(props) {
   const [refreshLayer, setRefreshLayer] = useState(false);
   const [isMinimise, setMinimise] = useState(false);
@@ -234,7 +236,7 @@ function BaseMap(props) {
     canUploadToBaseLayer: false,
   });
 
-  const treeMenu = (layer): MenuProps["items"] => {
+  const treeMenu = (layer: Layer): MenuProps["items"] => {
     const items: MenuProps["items"] = [];
     if ((props.isBaseMap && perms.canEditBaseLayer) || !props.isBaseMap) {
       items.push({
@@ -339,7 +341,7 @@ function BaseMap(props) {
 
     items.push({
       key: "14",
-      label: "Mask Layer",
+      label: layer.isMasked ? "Remove Mask" : "Add Mask",
     });
     items.push({
       key: "15",
@@ -736,13 +738,14 @@ function BaseMap(props) {
 
   const maskLayer = useMemo(() => {
     return new SolidPolygonLayer({
-      id: "geofence",
+      id: MASK_ID,
       operation: "mask",
       data: [polygon],
       getPolygon: (d) => d,
       getColor: [255, 0, 0],
       visible: isMaskLayerVisible,
       zIndex: 9999,
+      opacity: opcity,
     });
   }, [polygon, isMaskLayerVisible]);
 
@@ -807,7 +810,7 @@ function BaseMap(props) {
             image: props.data,
             bounds: [west, south, east, north],
             extensions: [new MaskExtension()],
-            maskId: maskLayer.id,
+            maskId: MASK_ID,
             opacity: opcity,
           }),
           showBorder &&
@@ -3754,9 +3757,11 @@ function BaseMap(props) {
     }
   };
 
-  const handleMaskLayerOption = () => {
-    setisMaskLayerVisible((prevValue) => !prevValue);
-    console.log("isMaskLayerVisible:", isMaskLayerVisible);
+  const handleMaskLayerOption = (id: string) => {
+    SetAllLayers(prev => prev.map((layer) => {
+      if (layer._id === id) layer.isMasked = !layer.isMasked;
+      return layer;
+    }))
   };
 
   const toggleElevation = () => {
@@ -4182,7 +4187,7 @@ function BaseMap(props) {
           setIsLayerDocs(true);
           break;
         case "14":
-          handleMaskLayerOption();
+          handleMaskLayerOption(layer._id);
           break;
         case "15":
           toggleElevation();
@@ -6924,16 +6929,17 @@ function BaseMap(props) {
           // OSMState Layers
           if(osmState) layers.push(osm);
 
-          // Tree Menu Layers
-          layers.push(useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers]));
-          layers.push(useMemo(() => MissionLayerToDeckLayer(MissionLayers), [MissionLayers]));
-
           // Drawing State Layers
           if (isDrawing) {
             layers.push(drawPolygonTool);
           } else {
             layers.push(maskLayer);
           }
+          
+          // Tree Menu Layers
+          layers.push(useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers]));
+          layers.push(useMemo(() => MissionLayerToDeckLayer(MissionLayers), [MissionLayers]));
+
           return layers;
         })()}
         style={{ height: "100vh", width: "100%" }}
@@ -7209,6 +7215,7 @@ function BaseMap(props) {
                 </Tooltip>
               )}
               {isMaskLayerVisible && (
+                // HERE: Polygon Opacity Slider
                 <Tooltip placement="bottom" title="Opacity">
                   <div
                     style={{
@@ -7305,16 +7312,16 @@ function BaseMap(props) {
                   </div>
                 </Tooltip>
               )}
-              {isMaskLayerVisible && (
-                <Tooltip placement="bottom" title="Disable Mask Layer">
-                  <div
-                    className="cancel-tool"
-                    onClick={() => handleShowMaskLayer()}
-                  >
-                    <span className="cancel-icon">Disable</span>
-                  </div>
-                </Tooltip>
-              )}
+              <Tooltip placement="bottom" title={isMaskLayerVisible ? "Disable Masking" : "Enable Masking"}>
+                <div
+                  className="time-filter-tool"
+                  onClick={() => {
+                    setisMaskLayerVisible(prev => !prev);
+                  }}
+                >
+                  <Text strong>{isMaskLayerVisible ? "Disable Masking" : "Enable Masking"}</Text>
+                </div>
+              </Tooltip>
               {isElevationEnabled && (
                 <Tooltip placement="bottom" title="Disable Elevation">
                   <div

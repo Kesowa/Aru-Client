@@ -8,16 +8,19 @@ import {
   GeoJsonLayer,
   IconLayer,
 } from "@deck.gl/layers/typed";
+import { MaskExtension } from "@deck.gl/extensions/typed";
 import { HeatmapLayer, TileLayer } from "deck.gl";
 import { COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
 import { Feature, GeoJson, Point } from "src/types/geojson";
 import { ILayer } from "src/types/layer";
 import http from "src/services/httpCall";
 import { hexToRGB } from "./colorUtils";
+import { MASK_ID } from ".";
 
 export type Layer = ILayer & {
   isChecked?: boolean,
   render3D?: boolean,
+  isMasked?: boolean,
 }
 
 export type IMissionLayers = {
@@ -70,6 +73,17 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
   return layers
     .filter(layer => layer.isChecked === true)
     .map(layer => {
+
+      const maskProps = layer.isMasked
+        ? {
+            // enable masking
+            extensions: [new MaskExtension()],
+            maskId: MASK_ID,
+            // bring masked layers above others
+            zIndex: 9999,
+          }
+        : {};
+
       if (layer.type == "Raster") {
         if (layer.raster.name == "DEM" && layer.render3D == true) {
           const overlayLayer = layer.raster.overlayId
@@ -109,9 +123,10 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               data: null,
               image: props.data,
               bounds: [west, south, east, north],
+              ...maskProps,
             });
           },
-        })
+        });
 
       }
       else if (layer.type == "Vector") {
@@ -156,6 +171,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               d.properties?.color
                 ? hexToRGB(d.properties?.color as string)
                 : hexToRGB("#ff0000"),
+            ...maskProps,
           });
         else if (layer.vector.type == "air_pollution")
           return new HeatmapLayer({
@@ -166,7 +182,8 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             aggregation: "SUM",
             pickable: true,
             pickingRadius: 20,
-          })
+            // Masking Not supported in HeatmapLayer
+          });
         else if (layer.vector.type == "wind_direction")
           return new IconLayer({
             id: layer._id,
@@ -205,7 +222,9 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
 
             getSize: (d) => d.properties.windSpeed * 4,
             getAngle: (d) => 90 - d.properties.windDirection,
-          })
+
+            ...maskProps,
+          });
         else
           return new GeoJsonLayer({
             id: layer._id,
@@ -225,10 +244,11 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               d.properties?.color
                 ? hexToRGB(d.properties?.color as string, 50)
                 : hexToRGB("#000000"),
+            ...maskProps,
           });
       }
     });
-}
+};
 
 export const MissionLayerToDeckLayer = (missionLayers: IMissionLayers) => {
   const deckLayers: GeoJsonLayer[] = [];
