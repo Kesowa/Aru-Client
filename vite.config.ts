@@ -2,6 +2,8 @@ import { defineConfig } from "vite";
 import reactRefresh from "@vitejs/plugin-react";
 import svgrPlugin from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
+import wasm from "vite-plugin-wasm";
+import topLevelAwait from "vite-plugin-top-level-await";
 import path from "path";
 import { env } from "process";
 // import { visualizer } from "rollup-plugin-visualizer";
@@ -39,6 +41,8 @@ export default defineConfig({
     outDir: "build",
   },
   plugins: [
+    wasm(),
+    topLevelAwait(),
     reactRefresh(),
     tsconfigPaths(),
     svgrPlugin({

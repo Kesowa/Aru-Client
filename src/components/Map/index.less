@@ -234,6 +234,7 @@
       max-height: 520px;
     }
 
+
     .body-content {
       display: block;
       width: 100%;
@@ -241,13 +242,82 @@
       
     }
   }
- 
+
+  .digitizer {
+    position: absolute;
+    z-index: 1;
+    background-color: white;
+    padding: 16px;
+    box-shadow: @darkShadow;
+    border-radius: 4px;
+    width: 340px;
+    overflow: auto;
+    resize: vertical;
+    min-height: 410px;
+    max-height: 880px;
+    right: 10px;
+    top: 480px;
+    @media (-webkit-min-device-pixel-ratio: 1.5) {
+      min-height: 210px;
+      max-height: 520px;
+  }
+}
+
+.svgprev {
+  position: absolute;
+  z-index: 1;
+  background-color: white;
+  padding: 0px;
+  box-shadow: @darkShadow;
+  border-radius: 4px;
+  width: 400px;
+  overflow: auto;
+  overflow: hidden;
+  min-height: 300px;
+  max-height: 880px;
+  right: 360px;
+  top: 590px;
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  @media (-webkit-min-device-pixel-ratio: 1.5) {
+    min-height: 210px;
+    max-height: 520px;
+  }
+}
+
+
+.parameters-container {
+  display: flex;
+  flex-wrap: wrap; 
+  justify-content: center;
+}
+
+.parameters-container {
+  margin: 2px;
+}
+
+.parameter label {
+  display: block;
+}
+
+.parameter select {
+  width: 100%;
+}
+
+.broad-slider {
+  width: 130%;
+  margin: 6px 0;
+}
+
+
+
+
   .bottom-bar {
     background-color: white;
     box-shadow: @darkShadow;
     border-radius: 4px;
     z-index: 2;
-   
     position: absolute;
     bottom: 10px;
     left: 10px;
@@ -460,3 +530,4 @@
 .filter-btn-selected {
   color: #da1c5c;
 }
+

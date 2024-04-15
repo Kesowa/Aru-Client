@@ -14,6 +14,7 @@ import { MaskExtension } from "@deck.gl/extensions/typed";
 import { TerrainLayer } from "@deck.gl/geo-layers/typed";
 import { readPixelsToArray } from "@luma.gl/webgl";
 import { Tile3DLayer } from "@deck.gl/geo-layers";
+import { BinaryImageConverter, ColorImageConverter } from 'vtracer-webapp';
 import {
   Row,
   Col,
@@ -722,6 +723,30 @@ function BaseMap(props) {
   const [polygonSize, setPolygonSize] = useState(150);
   const [opcity, setOpcity] = useState(1);
   const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
+  const [image, setImage] = useState(null);
+  const [imageBounds, setImageBounds] = useState(null);
+
+  const [canvas, setCanvas] = useState(null);
+  const [ctx, setCtx] = useState(null);
+  const [svg, setSvg] = useState(null);
+  const [img, setImg] = useState(new Image());
+  const [outputCanvas, setOutputCanvas] = useState(null);
+  const [outputCtx, setOutputCtx] = useState(null);
+  const [mode1, setMode1] = useState('polygon');
+  const [clusteringMode, setClusteringMode] = useState('color');
+  const [clusteringHierarchical, setClusteringHierarchical] = useState('stacked');
+  const [runner, setRunner] = useState(null);
+  const [globalCorner, setGlobalCorner] = useState(60);
+  const [globalLength, setGlobalLength] = useState(4);
+  const [iterations, setIterations] = useState(10)
+  const [globalSplice, setGlobalSplice] = useState(45);
+  const [globalFilterSpeckle, setGlobalFilterSpeckle] = useState(4);
+  const [globalColorPrecision, setGlobalColorPrecision] = useState(6);
+  const [globalLayerDifference, setGlobalLayerDifference] = useState(16);
+  const [globalPathPrecision, setGlobalPathPrecision] = useState(8);
+  const [conversionInProgress, setConversionInProgress] = useState(false);
+  const [digitizer, setDigitizer] = useState(false);
+
 
   const changePolygonSize = (value) => {
     setPolygonSize(value);
@@ -772,6 +797,216 @@ function BaseMap(props) {
     },
     [isElevationEnabled]
   );
+
+  //-----------------------digitizer layer logic----------------------------------------------------
+  useEffect(() => {
+    if (canvas) {
+      const context = canvas.getContext("2d");
+      setCtx(context);
+    }
+    if (outputCanvas) {
+      const outputContext = outputCanvas.getContext("2d");
+      setOutputCtx(outputContext);
+    }
+  }, [canvas, outputCanvas]);
+
+  useEffect(() => {
+    try {
+      restart();
+    } catch (error) {
+      console.error("An error occurred while restarting:", error);
+    }
+  }, [
+    image,
+    mode1,
+    clusteringMode,
+    clusteringHierarchical,
+    globalCorner,
+    globalLength,
+    iterations,
+    globalSplice,
+    globalFilterSpeckle,
+    globalColorPrecision,
+    globalLayerDifference,
+    globalPathPrecision,
+  ]);
+  
+
+  // useEffect(() => {
+  //   const svgElement = document.getElementById("svg");
+  //   svgElement.addEventListener("mouseover", handleMouseOver);
+  //   svgElement.addEventListener("mouseout", handleMouseOut);
+  //   return () => {
+  //     svgElement.removeEventListener("mouseover", handleMouseOver);
+  //     svgElement.removeEventListener("mouseout", handleMouseOut);
+  //   };
+  // }, []);
+
+  // const handleMouseOver = (e) => {
+  //   e.target.classList.add("over");
+  // };
+
+  // const handleMouseOut = (e) => {
+  //   e.target.classList.remove("over");
+  // };
+
+  const handleImageLoad = async () => {
+    const width = img.naturalWidth;
+    const height = img.naturalHeight;
+    if (width > 0 && height > 0 && canvas) {
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      if (svg) {
+        while (svg.firstChild) {
+          svg.removeChild(svg.firstChild);
+        }
+      }
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      restart();
+    } else {
+      console.error("Invalid canvas or image dimensions.");
+    }
+  };
+  img.onload = handleImageLoad;
+
+  const deg2rad = (deg) => {
+    return (deg / 180) * Math.PI;
+  };
+
+  const restart = () => {
+    if (!img.src) {
+      return;
+    }
+    while (svg.firstChild) {
+      svg.removeChild(svg.firstChild);
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    const converterParams = {
+      canvas_id: canvas.id,
+      svg_id: svg.id,
+      mode: mode1,
+      clustering_mode: clusteringMode,
+      hierarchical: clusteringHierarchical,
+      corner_threshold: deg2rad(globalCorner),
+      length_threshold: globalLength,
+      max_iterations: iterations,
+      splice_threshold: deg2rad(globalSplice),
+      filter_speckle: globalFilterSpeckle * globalFilterSpeckle,
+      color_precision: 8 - globalColorPrecision,
+      layer_difference: globalLayerDifference,
+      path_precision: globalPathPrecision,
+    };
+    if (runner) {
+      runner.stop();
+    }
+    setConversionInProgress(true);
+    const converterRunner = new ConverterRunner(converterParams);
+    setRunner(converterRunner);
+    converterRunner
+      .run()
+      .then(() => {
+        setConversionInProgress(false);
+      })
+      .catch((error) => {
+        console.error("Error during conversion:", error);
+        setConversionInProgress(false);
+      });
+  };
+
+  const handleFileInputChange = (info) => {
+    const file = info.file.originFileObj;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const source = e.target.result;
+      const newImg = new Image();
+      newImg.onload = handleImageLoad;
+      newImg.src = source;
+      setImg(newImg); // Update state with the new image
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  
+
+  const ConverterRunner = class {
+    constructor(converterParams) {
+      this.converter =
+        clusteringMode === "color"
+          ? ColorImageConverter.new_with_string(JSON.stringify(converterParams))
+          : BinaryImageConverter.new_with_string(
+              JSON.stringify(converterParams)
+            );
+      this.converter.init();
+    }
+
+    run() {
+      return new Promise((resolve, reject) => {
+        const tick = () => {
+          if (!this.stopped) {
+            let done = false;
+            const startTick = performance.now();
+            while (
+              !(done = this.converter.tick()) &&
+              performance.now() - startTick < 25
+            ) {}
+            if (!done) {
+              requestAnimationFrame(tick);
+            } else {
+              resolve();
+            }
+          }
+        };
+        tick();
+      });
+    }
+
+    stop() {
+      this.stopped = true;
+      this.converter.free();
+    }
+  };
+
+
+//handle map rerendring with cursor position---------------
+
+  const handleMapClick = (event) => {
+    console.log(event);
+    const { coordinate } = event;
+    console.log("offsetCenter:", coordinate);
+  
+    const newBounds = [
+      coordinate[0] - 0.05,
+      coordinate[1] + 0.05,
+      coordinate[0] + 0.05,
+      coordinate[1] - 0.05
+    ];
+    console.log("bounds :", newBounds);
+  
+    setImageBounds(newBounds);
+    setViewport({
+      ...INITIAL_VIEW_STATE,
+      longitude: coordinate.x,
+      latitude: coordinate.y
+    });
+  };
+  
+
+  const imageLayer = useMemo(() => {
+    console.log("bitmap rendering",img);
+    if (!img) return null;
+    console.log("here im");
+    return new BitmapLayer({
+      id: 'image-layer',
+      image: img,
+      pickable: true,
+      // coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+      bounds: imageBounds || [ 88.46719207850916, 22.56768919223844, 88.47660601263651, 22.576554895496912 ], // Use imageBounds if available, otherwise use default bounds
+      opacity: 1
+    });
+  }, [img,imageBounds]);
 
   const osm = [
     new TileLayer({
@@ -2438,6 +2673,7 @@ function BaseMap(props) {
                   console.log("layer type: ", allLayers[element]?.type);
                   return new BitmapLayer(props, {
                     data: null,
+                    pickable: true,
                     image: props.data,
                     bounds: [west, south, east, north],
                     extensions: [new MaskExtension()],
@@ -6404,8 +6640,8 @@ function BaseMap(props) {
               ? [osm, visibleLayers, drawPolygonTool]
               : [visibleLayers, drawPolygonTool]
             : osmState
-            ? [osm, visibleLayers, maskLayer]
-            : [visibleLayers, maskLayer],
+            ? [osm, visibleLayers, maskLayer, imageLayer]
+            : [visibleLayers, maskLayer, imageLayer],
         ]}
         style={{ height: "100vh", width: "100%" }}
         // onHover={(info) => {
@@ -6431,6 +6667,7 @@ function BaseMap(props) {
             }
           );
         }}
+        onDrag={() => {}}
         onClick={(info, event) => {
           setShowDrawingTools(false);
           if (event.rightButton) {
@@ -6449,6 +6686,7 @@ function BaseMap(props) {
             }
           } else {
             setShowDrawingTools(false);
+            handleMapClick(info, event);
           }
         }}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
@@ -6709,7 +6947,12 @@ function BaseMap(props) {
                   </div>
                 </Tooltip>
               )}
-
+              <Button
+                style={{ marginRight: "10px" }}
+                onClick={() => setDigitizer(!digitizer)}
+              >
+                Digitizer
+              </Button>
               <Tooltip title="Time" placement="bottom">
                 <div
                   className="time-filter-tool"
@@ -7385,6 +7628,157 @@ function BaseMap(props) {
           {/* <Button onClick={() => setIsModalVisible4(true)}>new</Button> */}
         </div>
       )}
+      {digitizer && (
+        <div className="digitizer">
+          <Upload
+            accept="image/*"
+            onChange={handleFileInputChange}
+            multiple={false} 
+            showUploadList={false}
+          >
+            <Button icon={<UploadOutlined />}>Select Image</Button>
+          </Upload>
+          <div className="parameters-container">
+            <label>
+              <input
+                title="Global Corner"
+                type="range"
+                name="globalCorner"
+                min="0"
+                max="360"
+                value={globalCorner}
+                onChange={(e) => setGlobalCorner(parseInt(e.target.value))}
+                className="broad-slider"
+              />
+            </label>
+            <label>
+              <input
+                title="Global Length"
+                type="range"
+                name="globalLength"
+                min="0"
+                max="10"
+                step="0.1"
+                value={globalLength}
+                onChange={(e) => setGlobalLength(parseFloat(e.target.value))}
+                className="broad-slider"
+              />
+            </label>
+            <label>
+              <input
+                title="Max Iteration"
+                type="range"
+                name="maxiteration"
+                min="0"
+                max="360"
+                value={iterations}
+                onChange={(e) => setIterations(parseInt(e.target.value))}
+                className="broad-slider"
+              />
+            </label>
+            <label>
+              <input
+                title="Golbal Splice"
+                type="range"
+                name="globalSplice"
+                min="0"
+                max="360"
+                step="0.1"
+                value={globalSplice}
+                onChange={(e) => setGlobalSplice(parseInt(e.target.value))}
+                className="broad-slider"
+              />
+            </label>
+            <label>
+              <input
+                title="Global FilterSpeckle"
+                type="range"
+                name="globalFilterSpeckle"
+                min="0"
+                max="360"
+                step="0.1"
+                value={globalFilterSpeckle}
+                onChange={(e) =>
+                  setGlobalFilterSpeckle(parseInt(e.target.value))
+                }
+                className="broad-slider"
+              />
+            </label>
+            <label>
+              <input
+                title="Global ColorPrecision"
+                type="range"
+                name="globalColorPrecision"
+                min="0"
+                max="360"
+                step="0.1"
+                value={globalColorPrecision}
+                onChange={(e) =>
+                  setGlobalColorPrecision(parseInt(e.target.value))
+                }
+                className="broad-slider"
+              />
+            </label>
+            <label>
+              <input
+                title="Global LayerDifference"
+                type="range"
+                name="globalLayerDifference"
+                min="0"
+                max="360"
+                step="0.1"
+                value={globalLayerDifference}
+                onChange={(e) =>
+                  setGlobalLayerDifference(parseInt(e.target.value))
+                }
+                className="broad-slider"
+              />
+            </label>
+            <label>
+              <input
+                title="Global PathPrecision"
+                type="range"
+                name="globalPathPrecision"
+                min="0"
+                max="360"
+                step="0.1"
+                value={globalPathPrecision}
+                onChange={(e) =>
+                  setGlobalPathPrecision(parseInt(e.target.value))
+                }
+                className="broad-slider"
+              />
+            </label>
+          </div>
+          <canvas
+            id="frame"
+            ref={(ref) => setCanvas(ref)}
+            style={{ display: "none" }}
+          ></canvas>
+          <Button
+            type="default"
+            style={{ position: "absolute", bottom: "10px", left: "70px" }}
+          >
+            Convert to geojson
+          </Button>
+          <Button
+            type="primary"
+            style={{ position: "absolute", bottom: "10px", right: "10px" }}
+          >
+            Pin to map
+          </Button>
+        </div>
+      )}
+      {digitizer && (
+        <div className="svgprev" title="Svg Image Preview">
+          <svg
+            id="svg"
+            ref={(ref) => setSvg(ref)}
+            style={{ width: "90%", height: "80%", marginTop: "20px" }}
+          ></svg>
+        </div>
+      )}
+
       <div
         className="bottom-bar"
         style={{

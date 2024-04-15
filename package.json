@@ -92,7 +92,8 @@
     "socket.io-client": "^4.5.3",
     "terser": "^5.16.2",
     "uuid": "^8.3.2",
-    "viewport-mercator-project": "^7.0.4"
+    "viewport-mercator-project": "^7.0.4",
+    "vtracer-webapp": "file:vtracer-webapp-0.4.0.tgz"
   },
   "eslintConfig": {
     "extends": [
@@ -149,6 +150,8 @@
     "typescript": "^4.9.5",
     "vite": "^4.0.1",
     "vite-plugin-svgr": "^2.4.0",
+    "vite-plugin-top-level-await": "^1.4.1",
+    "vite-plugin-wasm": "^3.3.0",
     "vite-tsconfig-paths": "^4.0.5"
   }
 }
