@@ -19,6 +19,7 @@ import {
   Result,
   Divider,
   Progress,
+  Switch,
 } from "antd";
 import {
   InboxOutlined,
@@ -47,6 +48,9 @@ function Pictomap(props) {
   const [reviewPending, setReviewPending] = useState(false);
   const [storageModal, setStorageModal] = useState(false);
   const [subHeading, setSubHeading] = useState("");
+  const [matchMode, setMatchMode] = useState<"LayerLabel" | "GeoCoord">(
+    "GeoCoord"
+  );
   const menuItem1 = () => {
     const items = [
       {
@@ -144,7 +148,7 @@ function Pictomap(props) {
         },
       };
       http
-        .patch(`${apis.PIC_TO_MAP}`, fData, config)
+        .patch(`${apis.PIC_TO_MAP}?mode=${matchMode}`, fData, config)
         .then((res: any) => {
           if (res.data.status) {
             console.log(res.data.result);
@@ -693,6 +697,15 @@ function Pictomap(props) {
         } else {
           return (
             <>
+              <p>
+                Match Label?
+                <Switch
+                  onChange={(matchLayer) =>
+                    setMatchMode(matchLayer ? "LayerLabel" : "GeoCoord")
+                  }
+                  style={{ margin: "0.5rem 1rem" }}
+                />
+              </p>
               <Button
                 onClick={() => {
                   if (isUploading) {
@@ -710,9 +723,7 @@ function Pictomap(props) {
               </Button>
               <Button
                 type="primary"
-                onClick={() => {
-                  handleUploadFiles();
-                }}
+                onClick={handleUploadFiles}
                 loading={isUploading}
                 disabled={isUploading}
               >

@@ -2222,7 +2222,6 @@ function BaseMap(props) {
           if (element.split("-")[0] === "2" && element !== "2") {
             if (props.isBaseMap) {
               const layer: any = allLayers[element];
-              console.log(layer);
               await Promise.allSettled(
                 layer?.layerPath.map(async (layerr: any) => {
                   const settings: any = {
@@ -2256,8 +2255,6 @@ function BaseMap(props) {
                     transitionDuration: 2000,
                     transitionInterpolator: new FlyToInterpolator(),
                   });
-
-                  // ---pushing tiler layers
 
                   vlayers[index] = new TileLayer({
                     id: element,
@@ -2349,8 +2346,6 @@ function BaseMap(props) {
                 },
               });
             } else {
-              console.log(allLayers);
-              console.log("Raster");
               const rasterpath =
                 `${TITILER_STATIC}` + allLayers[element]?.layerPath;
               const metaDataURL = `${COG_URL}/cog/info?url=${rasterpath}`;
