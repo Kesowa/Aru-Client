@@ -2013,14 +2013,15 @@ function BaseMap(props) {
     const baseURL = `${COG_URL}/cog/tiles/${z ? z : "{z}"}/${x ? x : "{x}"}/${
       y ? y : "{y}"
     }${scale}${format}`;
-    const { resamplingMethod, bidx, minp, maxp } = settings;
+    const { resamplingMethod, bidx, minp, maxp, elevation } = settings;
     const queries: any = {
       url: `${TITILER_STATIC}${path}`,
       [resamplingMethod && "resampling_method"]: resamplingMethod,
       [bidx && "bidx"]: bidx,
       [minp && maxp && "rescale"]: `${minp},${maxp}`,
+      [elevation && "nodata"]: minp,
     };
-    if (["DEM"].includes(rasterType)) {
+    if (["DEM"].includes(rasterType) && !elevation) {
       // kept as an array because more raster types may need colormap in future
       queries["colormap_name"] = colorMap;
     }
@@ -2243,7 +2244,7 @@ function BaseMap(props) {
                     metadata["bounds"][3],
                   ];
                   const { longitude, latitude, zoom } =
-                    calculateViewport(bounds);
+                  calculateViewport(bounds);
                   setViewport({
                     longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
                     latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
@@ -2255,45 +2256,13 @@ function BaseMap(props) {
                     transitionDuration: 2000,
                     transitionInterpolator: new FlyToInterpolator(),
                   });
-
                   vlayers[index] = new TileLayer({
                     id: element,
                     // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-                    // data: getRasterURL(layer?.type, layerr[0].path, settings),
-                    getTileData: (tile) => {
-                      const { index } = tile;
-                      const rasterUrl = getRasterURL(
-                        layer?.type,
-                        layerr[0].path,
-                        settings,
-                        index.x,
-                        index.y,
-                        index.z
-                      );
-
-                      const mapBounds = mapRef.current.getMap().getBounds();
-                      // console.log("Map Bounds: ", mapBounds);
-                      // console.log("Raster Bounds: ", bounds);
-                      const [minLong, minLat, maxLong, maxLat] = bounds;
-                      const minLongMap = mapBounds._sw.lng;
-                      const minLatMap = mapBounds._sw.lat;
-                      const maxLongMap = mapBounds._ne.lng;
-                      const maxLatMap = mapBounds._ne.lat;
-                      if (
-                        minLongMap > maxLong ||
-                        maxLongMap < minLong ||
-                        minLatMap > maxLat ||
-                        maxLatMap < minLat
-                      ) {
-                        console.log("Not loading new data");
-                        return tile;
-                      } else {
-                        console.log("Loading new data");
-                        return load(rasterUrl);
-                      }
-                    },
-                    minZoom: 0,
-                    maxZoom: 24,
+                    data: getRasterURL(layer?.type, layerr[0].path, settings),
+                    minZoom: metadata["minzoom"],
+                    maxZoom: metadata["maxzoom"],
+                    extent: metadata["bounds"],
                     tileSize: 256,
                     onDataLoad: () => {
                       setLayerLoading(false);
@@ -2307,8 +2276,6 @@ function BaseMap(props) {
                       const {
                         bbox: { west, south, east, north },
                       } = props.tile;
-                      console.log("props.data 2:", props.data);
-                      console.log("layer type: ", allLayers[element]?.type);
                       return new BitmapLayer(props, {
                         data: null,
                         image: props.data,
@@ -2376,51 +2343,18 @@ function BaseMap(props) {
               vlayers[index] = new TileLayer({
                 id: element,
                 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-                // data: getRasterURL(
-                //   allLayers[element]?.type,
-                //   allLayers[element]?.layerPath,
-                //   allLayers[element]?.settings
-                // ),
+                data: getRasterURL(
+                  allLayers[element]?.type,
+                  allLayers[element]?.layerPath,
+                  allLayers[element]?.settings
+                ),
                 pickable: true,
-
-                getTileData: async (tile) => {
-                  const { index } = tile;
-                  const rasterUrl = getRasterURL(
-                    allLayers[element]?.type,
-                    allLayers[element]?.layerPath,
-                    allLayers[element]?.settings,
-                    index.x,
-                    index.y,
-                    index.z
-                  );
-
-                  const mapBounds = mapRef.current.getMap().getBounds();
-                  // console.log("Map Bounds: ", mapBounds);
-                  // console.log("Raster Bounds: ", bounds);
-                  const [minLong, minLat, maxLong, maxLat] = bounds;
-                  const minLongMap = mapBounds._sw.lng;
-                  const minLatMap = mapBounds._sw.lat;
-                  const maxLongMap = mapBounds._ne.lng;
-                  const maxLatMap = mapBounds._ne.lat;
-                  if (
-                    minLongMap > maxLong ||
-                    maxLongMap < minLong ||
-                    minLatMap > maxLat ||
-                    maxLatMap < minLat
-                  ) {
-                    // console.log("Not loading new data");
-                    return tile;
-                  } else {
-                    // console.log("Loading new data");
-                    return load(rasterUrl);
-                  }
-                },
-
+                extent: metadata["bounds"],
                 onHover: (event) =>
                   handleHover({ ...event, allLayers, element }),
 
-                minZoom: 0,
-                maxZoom: 24,
+                minZoom: metadata["minzoom"],
+                maxZoom: metadata["maxzoom"],
                 tileSize: 256,
                 onDataLoad: () => {
                   setLayerLoading(false);
@@ -2429,8 +2363,6 @@ function BaseMap(props) {
                   const {
                     bbox: { west, south, east, north },
                   } = props.tile;
-                  console.log("props.data 4:", props.data, maskLayer.id);
-                  console.log("layer type: ", allLayers[element]?.type);
                   return new BitmapLayer(props, {
                     data: null,
                     image: props.data,
@@ -2442,33 +2374,31 @@ function BaseMap(props) {
                 },
               });
               if (terrainmap) {
+                const {minp, maxp} = allLayers[element]?.settings;
                 vlayers[index] = new TerrainLayer({
                   id: element,
                   elevationDecoder: {
-                    rScaler: 0.299,
-                    gScaler: 0.587,
-                    bScaler: 0.114,
+                    rScaler: (maxp - minp)/255,
+                    gScaler: 0,
+                    bScaler: 0,
                     offset: 0,
                   },
-                  minZoom: 13,
-                  maxZoom: 19,
+                  minZoom: metadata["minzoom"],
+                  maxZoom: metadata["maxzoom"],
+                  extent: metadata["bounds"],
                   elevationData: getRasterURL(
                     allLayers[element]?.type,
                     allLayers[element]?.layerPath,
-                    allLayers[element]?.settings,
-                    "x",
-                    "y",
-                    "z"
+                    {...allLayers[element]?.settings, elevation: true},
                   ),
                   tileSize: 256,
-                  // texture: "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.webp?sku=101Y90ZfwGPtj&access_token=pk.eyJ1IjoibmVlbGR1dHRhMTkiLCJhIjoiY2tweG9mN3F4MThrNTJ4cDk0enVjcTN4dCJ9.uxa_h0rjqumTxFMI1QELKQ"
+                  material: {
+                    diffuse: 1,
+                  },
                   texture: getRasterURL(
-                    "OVERLAY",
+                    allLayers[element]?.type,
                     allLayers[element]?.layerPath,
                     allLayers[element]?.settings,
-                    "x",
-                    "y",
-                    "z"
                   ),
                 });
               }
@@ -7563,7 +7493,6 @@ function BaseMap(props) {
             </div>
           }
         ></Tabs>
-        {console.log("setTerrainMap", terrainmap)}
       </div>
       {showForm && (
         <VectorForm
