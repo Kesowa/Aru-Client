@@ -15,6 +15,7 @@ import { TerrainLayer } from "@deck.gl/geo-layers/typed";
 import { readPixelsToArray } from "@luma.gl/webgl";
 import { Tile3DLayer } from "@deck.gl/geo-layers";
 import { BinaryImageConverter, ColorImageConverter } from 'vtracer-webapp';
+import { geoFromSVGXML } from "svg2geojson";
 import {
   Row,
   Col,
@@ -725,7 +726,6 @@ function BaseMap(props) {
   const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
   const [image, setImage] = useState(null);
   const [imageBounds, setImageBounds] = useState(null);
-
   const [canvas, setCanvas] = useState(null);
   const [ctx, setCtx] = useState(null);
   const [svg, setSvg] = useState(null);
@@ -746,6 +746,15 @@ function BaseMap(props) {
   const [globalPathPrecision, setGlobalPathPrecision] = useState(8);
   const [conversionInProgress, setConversionInProgress] = useState(false);
   const [digitizer, setDigitizer] = useState(false);
+  const [svgImage, setSvgImage] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartX, setDragStartX] = useState(0);
+  const [dragStartY, setDragStartY] = useState(0);
+  const [canvasOffsetX, setCanvasOffsetX] = useState(0);
+  const [canvasOffsetY, setCanvasOffsetY] = useState(0);
+  const [canvasRotation, setCanvasRotation] = useState(0);
+  // const [canvasImageOpacity, setCanvasImageOpacity] = useState(1);
+  // const [geojsonRender, setGeojsonRender] = useState(null);
 
 
   const changePolygonSize = (value) => {
@@ -798,17 +807,62 @@ function BaseMap(props) {
     [isElevationEnabled]
   );
 
-  //-----------------------digitizer layer logic----------------------------------------------------
+//--------------------------digitizer layer logic-----------------------------------------------------------------------
+
+  //handle the drag image 
   useEffect(() => {
     if (canvas) {
-      const context = canvas.getContext("2d");
+      const context = canvas.getContext('2d');
       setCtx(context);
+
+      // context.globalAlpha = canvasImageOpacity;
+
+      canvas.addEventListener('mousedown', handleMouseDown);
+      canvas.addEventListener('mousemove', handleMouseMoves);
+      canvas.addEventListener('mouseup', handleMouseUp);
     }
     if (outputCanvas) {
-      const outputContext = outputCanvas.getContext("2d");
+      const outputContext = outputCanvas.getContext('2d');
       setOutputCtx(outputContext);
     }
+
+    return () => {
+      if (canvas) {
+        canvas.removeEventListener('mousedown', handleMouseDown);
+        canvas.removeEventListener('mousemove', handleMouseMoves);
+        canvas.removeEventListener('mouseup', handleMouseUp);
+      }
+    };
   }, [canvas, outputCanvas]);
+
+  const handleMouseDown = (event) => {
+    setIsDragging(true);
+    setDragStartX(event.clientX);
+    setDragStartY(event.clientY);
+    setCanvasOffsetX(canvas.offsetLeft);
+    setCanvasOffsetY(canvas.offsetTop);
+  };
+
+  const handleMouseMoves = (event) => {
+    if (isDragging) {
+      const offsetX = event.clientX - dragStartX;
+      const offsetY = event.clientY - dragStartY;
+      canvas.style.left = `${canvasOffsetX + offsetX}px`;
+      canvas.style.top = `${canvasOffsetY + offsetY}px`;
+    }
+  };
+  
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleRotationChange = (event) => {
+    setCanvasRotation(parseInt(event.target.value));
+  };
+
+  // const handleCanvasImageOpacityChange = (event) => {
+  //   setCanvasImageOpacity(parseInt(event.target.value));
+  // };
 
   useEffect(() => {
     try {
@@ -834,26 +888,35 @@ function BaseMap(props) {
 
   // useEffect(() => {
   //   const svgElement = document.getElementById("svg");
+
+  //   if(svgElement){
   //   svgElement.addEventListener("mouseover", handleMouseOver);
   //   svgElement.addEventListener("mouseout", handleMouseOut);
   //   return () => {
   //     svgElement.removeEventListener("mouseover", handleMouseOver);
   //     svgElement.removeEventListener("mouseout", handleMouseOut);
   //   };
+  // }
   // }, []);
 
   // const handleMouseOver = (e) => {
-  //   e.target.classList.add("over");
+  
+  //   svgElement.setAttribute("fill", "#ff0");
+  //   svgElement.setAttribute("stroke", "#f00");
   // };
-
+  
   // const handleMouseOut = (e) => {
-  //   e.target.classList.remove("over");
+
+  //   svgElement.removeAttribute("fill");
+  //   svgElement.removeAttribute("stroke");
   // };
+  
 
   const handleImageLoad = async () => {
     const width = img.naturalWidth;
     const height = img.naturalHeight;
     if (width > 0 && height > 0 && canvas) {
+      console.log("canvas ", canvas)
       canvas.width = width;
       canvas.height = height;
       ctx.drawImage(img, 0, 0, width, height);
@@ -874,7 +937,8 @@ function BaseMap(props) {
   const deg2rad = (deg) => {
     return (deg / 180) * Math.PI;
   };
-
+  
+  //function to convert bitmap image to svg 
   const restart = () => {
     if (!img.src) {
       return;
@@ -925,6 +989,7 @@ function BaseMap(props) {
       newImg.onload = handleImageLoad;
       newImg.src = source;
       setImg(newImg); // Update state with the new image
+      setSvgImage(true);
     };
     reader.readAsDataURL(file);
   };
@@ -969,44 +1034,115 @@ function BaseMap(props) {
     }
   };
 
-
-//handle map rerendring with cursor position---------------
-
-  const handleMapClick = (event) => {
-    console.log(event);
-    const { coordinate } = event;
-    console.log("offsetCenter:", coordinate);
+  //convert SVG to GEOJSON 
+  const downloadGeojson = (a,b,c,d) => {
   
-    const newBounds = [
-      coordinate[0] - 0.05,
-      coordinate[1] + 0.05,
-      coordinate[0] + 0.05,
-      coordinate[1] - 0.05
-    ];
-    console.log("bounds :", newBounds);
+    const svgContent = svg.outerHTML;
+    const blob = new Blob([svgContent], { type: "image/svg+xml" });
   
-    setImageBounds(newBounds);
-    setViewport({
-      ...INITIAL_VIEW_STATE,
-      longitude: coordinate.x,
-      latitude: coordinate.y
-    });
+    
+    const reader = new FileReader();
+    reader.onload = async function(event) {
+      const svgText = event.target.result;
+  
+      console.log(svgText);
+  
+      const parser = new DOMParser();
+      const svgDocument = parser.parseFromString(svgText, "image/svg+xml");
+  
+      const metaInfoNS = "http://www.prognoz.ru";
+      const metaInfoElement = svgDocument.createElementNS(metaInfoNS, "MetaInfo");
+  
+      const geoElement = svgDocument.createElement("Geo");
+  
+      // const geoItems = [
+      //   { X: "0", Y: "0", Latitude: "37.375593", Longitude: "-121.977795" }, 
+      //   { X: "665", Y: "632", Latitude: "37.369930", Longitude: "-121.959404" }
+      // ];
+
+       const geoItems = [
+        { X: c[0], Y: c[1], Latitude: a[0], Longitude: a[1] }, //need to use all the coordinates get in the imagepin function
+        { X: d[0], Y: d[1], Latitude: b[0], Longitude: b[1] }
+      ];
+
+      for (const item of geoItems) {
+        const geoItemElement = svgDocument.createElement("GeoItem");
+        geoItemElement.setAttribute("X", item.X);
+        geoItemElement.setAttribute("Y", item.Y);
+        geoItemElement.setAttribute("Latitude", item.Latitude);
+        geoItemElement.setAttribute("Longitude", item.Longitude);
+        geoElement.appendChild(geoItemElement);
+      }
+
+      metaInfoElement.appendChild(geoElement);
+  
+      svgDocument.documentElement.appendChild(metaInfoElement);
+  
+      const modifiedSvgText = new XMLSerializer().serializeToString(svgDocument);
+  
+      await new Promise((resolve, reject) => {
+        geoFromSVGXML(modifiedSvgText, layers => {
+          const json = JSON.stringify(layers[0].geo);
+          console.log(json);
+          const geoJsonString = JSON.stringify(layers[0].geo);
+          const blob = new Blob([geoJsonString], { type: "application/json" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "output.geojson";
+          link.click();
+          URL.revokeObjectURL(link.href);
+          // setGeojsonRender(link.href);
+          resolve();
+        }, { layers: true, tolerance: 0.5 });
+      });
+    };
+    reader.readAsText(blob);
   };
   
+  // const geoJsonLayer = new GeoJsonLayer({
+  //     id: 'geojson-layer',
+  //     data: geojsonRender,
+  //     stroked: false,
+  //     filled: true,
+  //     lineWidthMinPixels: 2,
+  //     getFillColor: [255, 0, 0, 100],
+  //     getLineColor: [255, 255, 255],
+  //   });
+ 
+  //function to pin image to the map
+  const imagePin = (info) => {
+    var pointNW = [canvas.offsetLeft, canvas.offsetTop];
+    var pointNE = [canvas.offsetLeft + canvas.width,canvas.offsetTop];
+    var pointSE = [canvas.offsetLeft + canvas.width,canvas.offsetTop + canvas.height];
+    var pointSW = [canvas.offsetLeft, canvas.offsetTop + canvas.height];
+    
+    // Convert points to LatLng
+    var lngLatNW = info.viewport?.unproject(pointNW);
+    var lngLatNE = info.viewport?.unproject(pointNE);
+    var lngLatSE = info.viewport?.unproject(pointSE);
+    var lngLatSW = info.viewport?.unproject(pointSW);
 
-  const imageLayer = useMemo(() => {
-    console.log("bitmap rendering",img);
-    if (!img) return null;
-    console.log("here im");
-    return new BitmapLayer({
-      id: 'image-layer',
-      image: img,
-      pickable: true,
-      // coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
-      bounds: imageBounds || [ 88.46719207850916, 22.56768919223844, 88.47660601263651, 22.576554895496912 ], // Use imageBounds if available, otherwise use default bounds
-      opacity: 1
-    });
-  }, [img,imageBounds]);
+    console.log("lnglatNW :",lngLatNW,lngLatNE,lngLatSE,lngLatSW)
+    
+    // Create GeoJSON feature representing the image's extent
+    var geoJSONFeature = {
+        "type": "Feature",
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [lngLatNW[0], lngLatNW[1]],
+                [lngLatNE[0], lngLatNE[1]],
+                [lngLatSE[0], lngLatSE[1]],
+                [lngLatSW[0], lngLatSW[1]],
+                [lngLatNW[0], lngLatNW[1]] 
+            ]
+        },
+        "properties": {}
+    };
+    downloadGeojson(lngLatNE,lngLatSW,pointNE,pointSW);
+}
+
+
 
   const osm = [
     new TileLayer({
@@ -6640,8 +6776,8 @@ function BaseMap(props) {
               ? [osm, visibleLayers, drawPolygonTool]
               : [visibleLayers, drawPolygonTool]
             : osmState
-            ? [osm, visibleLayers, maskLayer, imageLayer]
-            : [visibleLayers, maskLayer, imageLayer],
+            ? [osm, visibleLayers, maskLayer] // geoJsonLayer 
+            : [visibleLayers, maskLayer],
         ]}
         style={{ height: "100vh", width: "100%" }}
         // onHover={(info) => {
@@ -6669,6 +6805,7 @@ function BaseMap(props) {
         }}
         onDrag={() => {}}
         onClick={(info, event) => {
+          imagePin(info);
           setShowDrawingTools(false);
           if (event.rightButton) {
             if (!info.layer) {
@@ -6686,7 +6823,6 @@ function BaseMap(props) {
             }
           } else {
             setShowDrawingTools(false);
-            handleMapClick(info, event);
           }
         }}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
@@ -7085,7 +7221,10 @@ function BaseMap(props) {
       <div
         className="collapser-button"
         onClick={() => sideBarHandeller()}
-        style={{ right: sideBarState === false ? "10px" : "354px" }}
+        style={{
+          right: sideBarState === false ? "10px" : "354px",
+          zIndex: 9999,
+        }}
       >
         <span className="icon">{sideBarIcon}</span>
       </div>
@@ -7628,12 +7767,48 @@ function BaseMap(props) {
           {/* <Button onClick={() => setIsModalVisible4(true)}>new</Button> */}
         </div>
       )}
+      {svgImage && (
+        <canvas
+          id="frame"
+          title="Drag to set location"
+          ref={(ref) => setCanvas(ref)}
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            transform: `rotate(${canvasRotation}deg)`,
+            border: "1px dashed black",
+          }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMoves}
+          onMouseUp={handleMouseUp}
+        ></canvas>
+      )}
+
+      {svgImage && (
+        <div className="canvas-rotate" title="Rotate Image">
+          <input
+            type="range"
+            min="0"
+            max="360"
+            value={canvasRotation}
+            onChange={handleRotationChange}
+          />
+           {/* <input
+            type="range"
+            min="0"
+            max="1"
+            value={canvasImageOpacity}
+            onChange={handleCanvasImageOpacityChange}
+          /> */}
+        </div>
+      )}
       {digitizer && (
         <div className="digitizer">
           <Upload
             accept="image/*"
             onChange={handleFileInputChange}
-            multiple={false} 
+            multiple={false}
             showUploadList={false}
           >
             <Button icon={<UploadOutlined />}>Select Image</Button>
@@ -7750,26 +7925,23 @@ function BaseMap(props) {
               />
             </label>
           </div>
-          <canvas
-            id="frame"
-            ref={(ref) => setCanvas(ref)}
-            style={{ display: "none" }}
-          ></canvas>
           <Button
             type="default"
             style={{ position: "absolute", bottom: "10px", left: "70px" }}
+            onClick={downloadGeojson}
           >
             Convert to geojson
           </Button>
-          <Button
+          <Button // this does not work need to click on map to invoke the imagepin() function
             type="primary"
             style={{ position: "absolute", bottom: "10px", right: "10px" }}
-          >
-            Pin to map
+            onClick={(info, event) => imagePin(info,event)} //this info object does not contain the unproject function need to find a way to use deckgl "info" object insted of this info obj
+           >                                             
+            Pin to map   
           </Button>
         </div>
       )}
-      {digitizer && (
+      {svgImage && (
         <div className="svgprev" title="Svg Image Preview">
           <svg
             id="svg"
@@ -7778,7 +7950,6 @@ function BaseMap(props) {
           ></svg>
         </div>
       )}
-
       <div
         className="bottom-bar"
         style={{
@@ -8168,3 +8339,5 @@ export default connect(mapStateToProps, {
   logout,
   thread,
 })(BaseMap);
+
+
