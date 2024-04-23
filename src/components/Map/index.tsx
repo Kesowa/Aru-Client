@@ -7815,6 +7815,7 @@ function BaseMap(props) {
           </Upload>
           <div className="parameters-container">
             <label>
+            Global Corner:
               <input
                 title="Global Corner"
                 type="range"
@@ -7827,6 +7828,7 @@ function BaseMap(props) {
               />
             </label>
             <label>
+            Global Length:
               <input
                 title="Global Length"
                 type="range"
@@ -7840,18 +7842,7 @@ function BaseMap(props) {
               />
             </label>
             <label>
-              <input
-                title="Max Iteration"
-                type="range"
-                name="maxiteration"
-                min="0"
-                max="360"
-                value={iterations}
-                onChange={(e) => setIterations(parseInt(e.target.value))}
-                className="broad-slider"
-              />
-            </label>
-            <label>
+            Global Splice:
               <input
                 title="Golbal Splice"
                 type="range"
@@ -7865,6 +7856,7 @@ function BaseMap(props) {
               />
             </label>
             <label>
+            Filter Speckle:
               <input
                 title="Global FilterSpeckle"
                 type="range"
@@ -7880,6 +7872,7 @@ function BaseMap(props) {
               />
             </label>
             <label>
+            Color Precision:
               <input
                 title="Global ColorPrecision"
                 type="range"
@@ -7895,6 +7888,7 @@ function BaseMap(props) {
               />
             </label>
             <label>
+             Layer Difference:
               <input
                 title="Global LayerDifference"
                 type="range"
@@ -7910,6 +7904,7 @@ function BaseMap(props) {
               />
             </label>
             <label>
+            Path Precision:
               <input
                 title="Global PathPrecision"
                 type="range"
@@ -7925,13 +7920,6 @@ function BaseMap(props) {
               />
             </label>
           </div>
-          <Button
-            type="default"
-            style={{ position: "absolute", bottom: "10px", left: "70px" }}
-            onClick={downloadGeojson}
-          >
-            Convert to geojson
-          </Button>
           <Button // this does not work need to click on map to invoke the imagepin() function
             type="primary"
             style={{ position: "absolute", bottom: "10px", right: "10px" }}
