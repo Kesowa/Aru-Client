@@ -14,7 +14,7 @@ import { MaskExtension } from "@deck.gl/extensions/typed";
 import { TerrainLayer } from "@deck.gl/geo-layers/typed";
 import { readPixelsToArray } from "@luma.gl/webgl";
 import { Tile3DLayer } from "@deck.gl/geo-layers";
-import { BinaryImageConverter, ColorImageConverter } from 'vtracer-webapp';
+import { BinaryImageConverter, ColorImageConverter } from "vtracer-webapp";
 import { geoFromSVGXML } from "svg2geojson";
 import {
   Row,
@@ -732,13 +732,14 @@ function BaseMap(props) {
   const [img, setImg] = useState(new Image());
   const [outputCanvas, setOutputCanvas] = useState(null);
   const [outputCtx, setOutputCtx] = useState(null);
-  const [mode1, setMode1] = useState('polygon');
-  const [clusteringMode, setClusteringMode] = useState('color');
-  const [clusteringHierarchical, setClusteringHierarchical] = useState('stacked');
+  const [mode1, setMode1] = useState("polygon");
+  const [clusteringMode, setClusteringMode] = useState("color");
+  const [clusteringHierarchical, setClusteringHierarchical] =
+    useState("stacked");
   const [runner, setRunner] = useState(null);
   const [globalCorner, setGlobalCorner] = useState(60);
   const [globalLength, setGlobalLength] = useState(4);
-  const [iterations, setIterations] = useState(10)
+  const [iterations, setIterations] = useState(10);
   const [globalSplice, setGlobalSplice] = useState(45);
   const [globalFilterSpeckle, setGlobalFilterSpeckle] = useState(4);
   const [globalColorPrecision, setGlobalColorPrecision] = useState(6);
@@ -755,7 +756,6 @@ function BaseMap(props) {
   const [canvasRotation, setCanvasRotation] = useState(0);
   // const [canvasImageOpacity, setCanvasImageOpacity] = useState(1);
   // const [geojsonRender, setGeojsonRender] = useState(null);
-
 
   const changePolygonSize = (value) => {
     setPolygonSize(value);
@@ -807,30 +807,30 @@ function BaseMap(props) {
     [isElevationEnabled]
   );
 
-//--------------------------digitizer layer logic-----------------------------------------------------------------------
+  //--------------------------digitizer layer logic-----------------------------------------------------------------------
 
-  //handle the drag image 
+  //handle the drag image
   useEffect(() => {
     if (canvas) {
-      const context = canvas.getContext('2d');
+      const context = canvas.getContext("2d");
       setCtx(context);
 
       // context.globalAlpha = canvasImageOpacity;
 
-      canvas.addEventListener('mousedown', handleMouseDown);
-      canvas.addEventListener('mousemove', handleMouseMoves);
-      canvas.addEventListener('mouseup', handleMouseUp);
+      canvas.addEventListener("mousedown", handleMouseDown);
+      canvas.addEventListener("mousemove", handleMouseMoves);
+      canvas.addEventListener("mouseup", handleMouseUp);
     }
     if (outputCanvas) {
-      const outputContext = outputCanvas.getContext('2d');
+      const outputContext = outputCanvas.getContext("2d");
       setOutputCtx(outputContext);
     }
 
     return () => {
       if (canvas) {
-        canvas.removeEventListener('mousedown', handleMouseDown);
-        canvas.removeEventListener('mousemove', handleMouseMoves);
-        canvas.removeEventListener('mouseup', handleMouseUp);
+        canvas.removeEventListener("mousedown", handleMouseDown);
+        canvas.removeEventListener("mousemove", handleMouseMoves);
+        canvas.removeEventListener("mouseup", handleMouseUp);
       }
     };
   }, [canvas, outputCanvas]);
@@ -851,7 +851,7 @@ function BaseMap(props) {
       canvas.style.top = `${canvasOffsetY + offsetY}px`;
     }
   };
-  
+
   const handleMouseUp = () => {
     setIsDragging(false);
   };
@@ -884,7 +884,6 @@ function BaseMap(props) {
     globalLayerDifference,
     globalPathPrecision,
   ]);
-  
 
   // useEffect(() => {
   //   const svgElement = document.getElementById("svg");
@@ -900,23 +899,22 @@ function BaseMap(props) {
   // }, []);
 
   // const handleMouseOver = (e) => {
-  
+
   //   svgElement.setAttribute("fill", "#ff0");
   //   svgElement.setAttribute("stroke", "#f00");
   // };
-  
+
   // const handleMouseOut = (e) => {
 
   //   svgElement.removeAttribute("fill");
   //   svgElement.removeAttribute("stroke");
   // };
-  
 
   const handleImageLoad = async () => {
     const width = img.naturalWidth;
     const height = img.naturalHeight;
     if (width > 0 && height > 0 && canvas) {
-      console.log("canvas ", canvas)
+      console.log("canvas ", canvas);
       canvas.width = width;
       canvas.height = height;
       ctx.drawImage(img, 0, 0, width, height);
@@ -937,8 +935,8 @@ function BaseMap(props) {
   const deg2rad = (deg) => {
     return (deg / 180) * Math.PI;
   };
-  
-  //function to convert bitmap image to svg 
+
+  //function to convert bitmap image to svg
   const restart = () => {
     if (!img.src) {
       return;
@@ -993,8 +991,6 @@ function BaseMap(props) {
     };
     reader.readAsDataURL(file);
   };
-  
-  
 
   const ConverterRunner = class {
     constructor(converterParams) {
@@ -1034,35 +1030,36 @@ function BaseMap(props) {
     }
   };
 
-  //convert SVG to GEOJSON 
-  const downloadGeojson = (a,b,c,d) => {
-  
+  //convert SVG to GEOJSON
+  const downloadGeojson = (a, b, c, d) => {
     const svgContent = svg.outerHTML;
     const blob = new Blob([svgContent], { type: "image/svg+xml" });
-  
-    
+
     const reader = new FileReader();
-    reader.onload = async function(event) {
+    reader.onload = async function (event) {
       const svgText = event.target.result;
-  
+
       console.log(svgText);
-  
+
       const parser = new DOMParser();
       const svgDocument = parser.parseFromString(svgText, "image/svg+xml");
-  
+
       const metaInfoNS = "http://www.prognoz.ru";
-      const metaInfoElement = svgDocument.createElementNS(metaInfoNS, "MetaInfo");
-  
+      const metaInfoElement = svgDocument.createElementNS(
+        metaInfoNS,
+        "MetaInfo"
+      );
+
       const geoElement = svgDocument.createElement("Geo");
-  
+
       // const geoItems = [
-      //   { X: "0", Y: "0", Latitude: "37.375593", Longitude: "-121.977795" }, 
+      //   { X: "0", Y: "0", Latitude: "37.375593", Longitude: "-121.977795" },
       //   { X: "665", Y: "632", Latitude: "37.369930", Longitude: "-121.959404" }
       // ];
 
-       const geoItems = [
+      const geoItems = [
         { X: c[0], Y: c[1], Latitude: a[0], Longitude: a[1] }, //need to use all the coordinates get in the imagepin function
-        { X: d[0], Y: d[1], Latitude: b[0], Longitude: b[1] }
+        { X: d[0], Y: d[1], Latitude: b[0], Longitude: b[1] },
       ];
 
       for (const item of geoItems) {
@@ -1075,30 +1072,38 @@ function BaseMap(props) {
       }
 
       metaInfoElement.appendChild(geoElement);
-  
+
       svgDocument.documentElement.appendChild(metaInfoElement);
-  
-      const modifiedSvgText = new XMLSerializer().serializeToString(svgDocument);
-  
+
+      const modifiedSvgText = new XMLSerializer().serializeToString(
+        svgDocument
+      );
+
       await new Promise((resolve, reject) => {
-        geoFromSVGXML(modifiedSvgText, layers => {
-          const json = JSON.stringify(layers[0].geo);
-          console.log(json);
-          const geoJsonString = JSON.stringify(layers[0].geo);
-          const blob = new Blob([geoJsonString], { type: "application/json" });
-          const link = document.createElement("a");
-          link.href = URL.createObjectURL(blob);
-          link.download = "output.geojson";
-          link.click();
-          URL.revokeObjectURL(link.href);
-          // setGeojsonRender(link.href);
-          resolve();
-        }, { layers: true, tolerance: 0.5 });
+        geoFromSVGXML(
+          modifiedSvgText,
+          (layers) => {
+            const json = JSON.stringify(layers[0].geo);
+            console.log(json);
+            const geoJsonString = JSON.stringify(layers[0].geo);
+            const blob = new Blob([geoJsonString], {
+              type: "application/json",
+            });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "output.geojson";
+            link.click();
+            URL.revokeObjectURL(link.href);
+            // setGeojsonRender(link.href);
+            resolve();
+          },
+          { layers: true, tolerance: 0.5 }
+        );
       });
     };
     reader.readAsText(blob);
   };
-  
+
   // const geoJsonLayer = new GeoJsonLayer({
   //     id: 'geojson-layer',
   //     data: geojsonRender,
@@ -1108,41 +1113,42 @@ function BaseMap(props) {
   //     getFillColor: [255, 0, 0, 100],
   //     getLineColor: [255, 255, 255],
   //   });
- 
+
   //function to pin image to the map
   const imagePin = (info) => {
-    var pointNW = [canvas.offsetLeft, canvas.offsetTop];
-    var pointNE = [canvas.offsetLeft + canvas.width,canvas.offsetTop];
-    var pointSE = [canvas.offsetLeft + canvas.width,canvas.offsetTop + canvas.height];
-    var pointSW = [canvas.offsetLeft, canvas.offsetTop + canvas.height];
-    
+    const pointNW = [canvas.offsetLeft, canvas.offsetTop];
+    const pointNE = [canvas.offsetLeft + canvas.width, canvas.offsetTop];
+    const pointSE = [
+      canvas.offsetLeft + canvas.width,
+      canvas.offsetTop + canvas.height,
+    ];
+    const pointSW = [canvas.offsetLeft, canvas.offsetTop + canvas.height];
+
     // Convert points to LatLng
-    var lngLatNW = info.viewport?.unproject(pointNW);
-    var lngLatNE = info.viewport?.unproject(pointNE);
-    var lngLatSE = info.viewport?.unproject(pointSE);
-    var lngLatSW = info.viewport?.unproject(pointSW);
+    const lngLatNW = info.viewport?.unproject(pointNW);
+    const lngLatNE = info.viewport?.unproject(pointNE);
+    const lngLatSE = info.viewport?.unproject(pointSE);
+    const lngLatSW = info.viewport?.unproject(pointSW);
 
-    console.log("lnglatNW :",lngLatNW,lngLatNE,lngLatSE,lngLatSW)
-    
+    console.log("lnglatNW :", lngLatNW, lngLatNE, lngLatSE, lngLatSW);
+
     // Create GeoJSON feature representing the image's extent
-    var geoJSONFeature = {
-        "type": "Feature",
-        "geometry": {
-            "type": "Polygon",
-            "coordinates": [
-                [lngLatNW[0], lngLatNW[1]],
-                [lngLatNE[0], lngLatNE[1]],
-                [lngLatSE[0], lngLatSE[1]],
-                [lngLatSW[0], lngLatSW[1]],
-                [lngLatNW[0], lngLatNW[1]] 
-            ]
-        },
-        "properties": {}
+    const geoJSONFeature = {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [lngLatNW[0], lngLatNW[1]],
+          [lngLatNE[0], lngLatNE[1]],
+          [lngLatSE[0], lngLatSE[1]],
+          [lngLatSW[0], lngLatSW[1]],
+          [lngLatNW[0], lngLatNW[1]],
+        ],
+      },
+      properties: {},
     };
-    downloadGeojson(lngLatNE,lngLatSW,pointNE,pointSW);
-}
-
-
+    downloadGeojson(lngLatNE, lngLatSW, pointNE, pointSW);
+  };
 
   const osm = [
     new TileLayer({
@@ -6776,7 +6782,7 @@ function BaseMap(props) {
               ? [osm, visibleLayers, drawPolygonTool]
               : [visibleLayers, drawPolygonTool]
             : osmState
-            ? [osm, visibleLayers, maskLayer] // geoJsonLayer 
+            ? [osm, visibleLayers, maskLayer] // geoJsonLayer
             : [visibleLayers, maskLayer],
         ]}
         style={{ height: "100vh", width: "100%" }}
@@ -7794,7 +7800,7 @@ function BaseMap(props) {
             value={canvasRotation}
             onChange={handleRotationChange}
           />
-           {/* <input
+          {/* <input
             type="range"
             min="0"
             max="1"
@@ -7815,7 +7821,7 @@ function BaseMap(props) {
           </Upload>
           <div className="parameters-container">
             <label>
-            Global Corner:
+              Global Corner:
               <input
                 title="Global Corner"
                 type="range"
@@ -7828,7 +7834,7 @@ function BaseMap(props) {
               />
             </label>
             <label>
-            Global Length:
+              Global Length:
               <input
                 title="Global Length"
                 type="range"
@@ -7842,7 +7848,7 @@ function BaseMap(props) {
               />
             </label>
             <label>
-            Global Splice:
+              Global Splice:
               <input
                 title="Golbal Splice"
                 type="range"
@@ -7856,7 +7862,7 @@ function BaseMap(props) {
               />
             </label>
             <label>
-            Filter Speckle:
+              Filter Speckle:
               <input
                 title="Global FilterSpeckle"
                 type="range"
@@ -7872,7 +7878,7 @@ function BaseMap(props) {
               />
             </label>
             <label>
-            Color Precision:
+              Color Precision:
               <input
                 title="Global ColorPrecision"
                 type="range"
@@ -7888,7 +7894,7 @@ function BaseMap(props) {
               />
             </label>
             <label>
-             Layer Difference:
+              Layer Difference:
               <input
                 title="Global LayerDifference"
                 type="range"
@@ -7904,7 +7910,7 @@ function BaseMap(props) {
               />
             </label>
             <label>
-            Path Precision:
+              Path Precision:
               <input
                 title="Global PathPrecision"
                 type="range"
@@ -7923,9 +7929,9 @@ function BaseMap(props) {
           <Button // this does not work need to click on map to invoke the imagepin() function
             type="primary"
             style={{ position: "absolute", bottom: "10px", right: "10px" }}
-            onClick={(info, event) => imagePin(info,event)} //this info object does not contain the unproject function need to find a way to use deckgl "info" object insted of this info obj
-           >                                             
-            Pin to map   
+            onClick={(info, event) => imagePin(info, event)} //this info object does not contain the unproject function need to find a way to use deckgl "info" object insted of this info obj
+          >
+            Pin to map
           </Button>
         </div>
       )}
@@ -8327,5 +8333,3 @@ export default connect(mapStateToProps, {
   logout,
   thread,
 })(BaseMap);
-
-
