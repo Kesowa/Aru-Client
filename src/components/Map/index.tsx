@@ -2321,7 +2321,7 @@ function BaseMap(props) {
                   });
                 })
               );
-            } else if (allLayers[element].type == "POINT_CLOUD") {
+            } else if (allLayers[element].type == "POINT_CLOUD" || allLayers[element].type == "CESIUM_3D") {
               // Fetch the dynamic ID from the backend (bounds are not yet avaliable)
               const cloudLayer = allLayers[element];
 
