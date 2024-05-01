@@ -14,7 +14,7 @@ import { MaskExtension } from "@deck.gl/extensions/typed";
 import { TerrainLayer } from "@deck.gl/geo-layers/typed";
 import { readPixelsToArray } from "@luma.gl/webgl";
 import { Tile3DLayer } from "@deck.gl/geo-layers";
-import { BinaryImageConverter, ColorImageConverter } from 'vtracer-webapp';
+import { BinaryImageConverter, ColorImageConverter } from "vtracer-webapp";
 import { geoFromSVGXML } from "svg2geojson";
 import {
   Row,
@@ -732,13 +732,14 @@ function BaseMap(props) {
   const [img, setImg] = useState(new Image());
   const [outputCanvas, setOutputCanvas] = useState(null);
   const [outputCtx, setOutputCtx] = useState(null);
-  const [mode1, setMode1] = useState('polygon');
-  const [clusteringMode, setClusteringMode] = useState('color');
-  const [clusteringHierarchical, setClusteringHierarchical] = useState('stacked');
+  const [mode1, setMode1] = useState("polygon");
+  const [clusteringMode, setClusteringMode] = useState("color");
+  const [clusteringHierarchical, setClusteringHierarchical] =
+    useState("stacked");
   const [runner, setRunner] = useState(null);
   const [globalCorner, setGlobalCorner] = useState(60);
   const [globalLength, setGlobalLength] = useState(4);
-  const [iterations, setIterations] = useState(10)
+  const [iterations, setIterations] = useState(10);
   const [globalSplice, setGlobalSplice] = useState(45);
   const [globalFilterSpeckle, setGlobalFilterSpeckle] = useState(4);
   const [globalColorPrecision, setGlobalColorPrecision] = useState(6);
@@ -805,33 +806,32 @@ function BaseMap(props) {
     [isElevationEnabled]
   );
 
-//--------------------------digitizer layer logic-----------------------------------------------------------------------
+  //--------------------------digitizer layer logic-----------------------------------------------------------------------
 
-  //handle the drag image 
+  //handle the drag image
   useEffect(() => {
     if (canvas) {
-      const context = canvas.getContext('2d');
+      const context = canvas.getContext("2d");
       setCtx(context);
       context.globalAlpha = canvasImageOpacity;
 
-      canvas.addEventListener('mousedown', handleMouseDown);
-      canvas.addEventListener('mousemove', handleMouseMoves);
-      canvas.addEventListener('mouseup', handleMouseUp);
+      canvas.addEventListener("mousedown", handleMouseDown);
+      canvas.addEventListener("mousemove", handleMouseMoves);
+      canvas.addEventListener("mouseup", handleMouseUp);
     }
     if (outputCanvas) {
-      const outputContext = outputCanvas.getContext('2d');
+      const outputContext = outputCanvas.getContext("2d");
       setOutputCtx(outputContext);
     }
 
     return () => {
       if (canvas) {
-        canvas.removeEventListener('mousedown', handleMouseDown);
-        canvas.removeEventListener('mousemove', handleMouseMoves);
-        canvas.removeEventListener('mouseup', handleMouseUp);
+        canvas.removeEventListener("mousedown", handleMouseDown);
+        canvas.removeEventListener("mousemove", handleMouseMoves);
+        canvas.removeEventListener("mouseup", handleMouseUp);
       }
     };
-  }, [canvasImageOpacity,canvas,outputCanvas]);
-  
+  }, [canvasImageOpacity, canvas, outputCanvas]);
 
   const handleMouseDown = (event) => {
     setIsDragging(true);
@@ -849,7 +849,7 @@ function BaseMap(props) {
       canvas.style.top = `${canvasOffsetY + offsetY}px`;
     }
   };
-  
+
   const handleMouseUp = () => {
     setIsDragging(false);
   };
@@ -860,9 +860,9 @@ function BaseMap(props) {
 
   const handleCanvasImageOpacityChange = (event) => {
     const newValue = parseFloat(event.target.value);
-    const snappedValue = Math.round(newValue * 10) / 10; 
+    const snappedValue = Math.round(newValue * 10) / 10;
     setCanvasImageOpacity(snappedValue);
-};
+  };
 
   useEffect(() => {
     try {
@@ -884,7 +884,6 @@ function BaseMap(props) {
     globalLayerDifference,
     globalPathPrecision,
   ]);
-  
 
   // useEffect(() => {
   //   const svgElement = document.getElementById("svg");
@@ -910,13 +909,12 @@ function BaseMap(props) {
   //   svgElement.removeAttribute("fill");
   //   svgElement.removeAttribute("stroke");
   // };
-  
 
   const handleImageLoad = async () => {
     const width = img.naturalWidth;
     const height = img.naturalHeight;
     if (width > 0 && height > 0 && canvas) {
-      console.log("canvas ", canvas)
+      console.log("canvas ", canvas);
       canvas.width = width;
       canvas.height = height;
       ctx.drawImage(img, 0, 0, width, height);
@@ -937,8 +935,8 @@ function BaseMap(props) {
   const deg2rad = (deg) => {
     return (deg / 180) * Math.PI;
   };
-  
-  //function to convert bitmap image to svg 
+
+  //function to convert bitmap image to svg
   const restart = () => {
     if (!img.src) {
       return;
@@ -993,8 +991,6 @@ function BaseMap(props) {
     };
     reader.readAsDataURL(file);
   };
-  
-  
 
   const ConverterRunner = class {
     constructor(converterParams) {
@@ -1034,8 +1030,8 @@ function BaseMap(props) {
     }
   };
 
-  //convert SVG to GEOJSON 
-  const downloadGeojson = (a,b) => {
+  //convert SVG to GEOJSON
+  const downloadGeojson = (a, b) => {
     // const svgRect = svg.getBoundingClientRect();
 
     // // Extract width and height from the rect object
@@ -1118,60 +1114,60 @@ function BaseMap(props) {
     };
     reader.readAsText(blob);
   };
- 
+
   // function to pin image to the map
   const imagePin = () => {
     // Use deckgl reference to access the unproject method
-    const deck = deckRef.current.deck; 
-    const defaultViewport = deck.viewManager._viewportMap['default-view'];
+    const deck = deckRef.current.deck;
+    const defaultViewport = deck.viewManager._viewportMap["default-view"];
 
-    var pointNW = [canvas.offsetLeft, canvas.offsetTop];
-    var pointNE = [canvas.offsetLeft + canvas.width, canvas.offsetTop];
-    var pointSE = [canvas.offsetLeft + canvas.width, canvas.offsetTop + canvas.height];
-    var pointSW = [canvas.offsetLeft, canvas.offsetTop + canvas.height];
-    
+    const pointNW = [canvas.offsetLeft, canvas.offsetTop];
+    const pointNE = [canvas.offsetLeft + canvas.width, canvas.offsetTop];
+    const pointSE = [
+      canvas.offsetLeft + canvas.width,
+      canvas.offsetTop + canvas.height,
+    ];
+    const pointSW = [canvas.offsetLeft, canvas.offsetTop + canvas.height];
+
     // Convert points to LatLng
-    var lngLatNW = defaultViewport.unproject(pointNW);
-    var lngLatNE = defaultViewport.unproject(pointNE);
-    var lngLatSE = defaultViewport.unproject(pointSE);
-    var lngLatSW = defaultViewport.unproject(pointSW);
+    const lngLatNW = defaultViewport.unproject(pointNW);
+    const lngLatNE = defaultViewport.unproject(pointNE);
+    const lngLatSE = defaultViewport.unproject(pointSE);
+    const lngLatSW = defaultViewport.unproject(pointSW);
 
     console.log("lnglatNW :", lngLatNW, lngLatNE, lngLatSE, lngLatSW);
-    
+
     // Create GeoJSON feature representing the image's extent
-    var geoJSONFeature = {
-        "type": "Feature",
-        "geometry": {
-            "type": "Polygon",
-            "coordinates": [
-                [lngLatNW[0], lngLatNW[1]],
-                [lngLatNE[0], lngLatNE[1]],
-                [lngLatSE[0], lngLatSE[1]],
-                [lngLatSW[0], lngLatSW[1]],
-                [lngLatNW[0], lngLatNW[1]] 
-            ]
-        },
-        "properties": {}
+    const geoJSONFeature = {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [lngLatNW[0], lngLatNW[1]],
+          [lngLatNE[0], lngLatNE[1]],
+          [lngLatSE[0], lngLatSE[1]],
+          [lngLatSW[0], lngLatSW[1]],
+          [lngLatNW[0], lngLatNW[1]],
+        ],
+      },
+      properties: {},
     };
 
     // Render canvas image on map
     deck.setProps({
       layers: [
-          new BitmapLayer({
-              id: 'image-layer',
-              data: [geoJSONFeature],
-              image: img,
-              bounds: [lngLatSE, lngLatNW], 
-              opacity: 1
-          })
-      ]
-  });
+        new BitmapLayer({
+          id: "image-layer",
+          data: [geoJSONFeature],
+          image: img,
+          bounds: [lngLatSE, lngLatNW],
+          opacity: 1,
+        }),
+      ],
+    });
 
     downloadGeojson(lngLatNE, lngLatSW);
-}
-
-
-
+  };
 
   const osm = [
     new TileLayer({
@@ -8358,5 +8354,3 @@ export default connect(mapStateToProps, {
   logout,
   thread,
 })(BaseMap);
-
-
