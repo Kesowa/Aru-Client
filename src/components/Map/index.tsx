@@ -734,7 +734,8 @@ function BaseMap(props) {
   const [outputCtx, setOutputCtx] = useState(null);
   const [mode1, setMode1] = useState("polygon");
   const [clusteringMode, setClusteringMode] = useState("color");
-  const [clusteringHierarchical, setClusteringHierarchical] = useState("stacked");
+  const [clusteringHierarchical, setClusteringHierarchical] =
+    useState("stacked");
   const [runner, setRunner] = useState(null);
   const [globalCorner, setGlobalCorner] = useState(60);
   const [globalLength, setGlobalLength] = useState(4);
@@ -1141,9 +1142,9 @@ function BaseMap(props) {
     const bounds = [lngLatSE, lngLatNW];
     const flattenedBounds = [];
     for (const coord of bounds) {
-       flattenedBounds.push(...coord);
+      flattenedBounds.push(...coord);
     }
-    setFlattenedBounds(flattenedBounds)
+    setFlattenedBounds(flattenedBounds);
 
     downloadGeojson(lngLatNE, lngLatSW);
     setDigitizer(false);
@@ -6795,8 +6796,8 @@ function BaseMap(props) {
               ? [osm, visibleLayers, drawPolygonTool]
               : [visibleLayers, drawPolygonTool]
             : osmState
-            ? [osm, visibleLayers, maskLayer,digitizerLayer]
-            : [visibleLayers, maskLayer,digitizerLayer],
+            ? [osm, visibleLayers, maskLayer, digitizerLayer]
+            : [visibleLayers, maskLayer, digitizerLayer],
         ]}
         style={{ height: "100vh", width: "100%" }}
         // onHover={(info) => {
