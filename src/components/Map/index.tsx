@@ -734,8 +734,7 @@ function BaseMap(props) {
   const [outputCtx, setOutputCtx] = useState(null);
   const [mode1, setMode1] = useState("polygon");
   const [clusteringMode, setClusteringMode] = useState("color");
-  const [clusteringHierarchical, setClusteringHierarchical] =
-    useState("stacked");
+  const [clusteringHierarchical, setClusteringHierarchical] = useState("stacked");
   const [runner, setRunner] = useState(null);
   const [globalCorner, setGlobalCorner] = useState(60);
   const [globalLength, setGlobalLength] = useState(4);
@@ -755,6 +754,8 @@ function BaseMap(props) {
   const [canvasOffsetY, setCanvasOffsetY] = useState(0);
   const [canvasRotation, setCanvasRotation] = useState(0);
   const [canvasImageOpacity, setCanvasImageOpacity] = useState(1);
+  const [digitizerLayer, setDigitizerLayer] = useState(null);
+  const [flattenedBounds, setFlattenedBounds] = useState([]);
 
   const changePolygonSize = (value) => {
     setPolygonSize(value);
@@ -813,7 +814,6 @@ function BaseMap(props) {
     if (canvas) {
       const context = canvas.getContext("2d");
       setCtx(context);
-      context.globalAlpha = canvasImageOpacity;
 
       canvas.addEventListener("mousedown", handleMouseDown);
       canvas.addEventListener("mousemove", handleMouseMoves);
@@ -831,7 +831,7 @@ function BaseMap(props) {
         canvas.removeEventListener("mouseup", handleMouseUp);
       }
     };
-  }, [canvasImageOpacity, canvas, outputCanvas]);
+  }, [canvas, outputCanvas]);
 
   const handleMouseDown = (event) => {
     setIsDragging(true);
@@ -988,6 +988,7 @@ function BaseMap(props) {
       newImg.src = source;
       setImg(newImg); // Update state with the new image
       setSvgImage(true);
+      setCanvasImageOpacity(1);
     };
     reader.readAsDataURL(file);
   };
@@ -1069,8 +1070,8 @@ function BaseMap(props) {
       // ];
 
       const geoItems = [
-        { X: "0", Y: "0", Latitude: a[0], Longitude: a[1] }, //use all the coordinates get in the imagepin function with Dimension of svg at X and Y properly
-        { X: svgDem.height, Y: svgDem.width, Latitude: b[0], Longitude: b[1] },
+        { X: "0", Y: "0", Latitude: a[1], Longitude: a[0] }, //use all the coordinates get in the imagepin function with Dimension of svg at X and Y properly {dont chnage order of lat,lng}
+        { X: svgDem.height, Y: svgDem.width, Latitude: b[1], Longitude: b[0] },
       ];
 
       for (const item of geoItems) {
@@ -1113,6 +1114,7 @@ function BaseMap(props) {
       });
     };
     reader.readAsText(blob);
+    setSvgImage(false);
   };
 
   // function to pin image to the map
@@ -1136,38 +1138,30 @@ function BaseMap(props) {
     const lngLatSW = defaultViewport.unproject(pointSW);
 
     console.log("lnglatNW :", lngLatNW, lngLatNE, lngLatSE, lngLatSW);
-
-    // Create GeoJSON feature representing the image's extent
-    const geoJSONFeature = {
-      type: "Feature",
-      geometry: {
-        type: "Polygon",
-        coordinates: [
-          [lngLatNW[0], lngLatNW[1]],
-          [lngLatNE[0], lngLatNE[1]],
-          [lngLatSE[0], lngLatSE[1]],
-          [lngLatSW[0], lngLatSW[1]],
-          [lngLatNW[0], lngLatNW[1]],
-        ],
-      },
-      properties: {},
-    };
-
-    // Render canvas image on map
-    deck.setProps({
-      layers: [
-        new BitmapLayer({
-          id: "image-layer",
-          data: [geoJSONFeature],
-          image: img,
-          bounds: [lngLatSE, lngLatNW],
-          opacity: 1,
-        }),
-      ],
-    });
+    const bounds = [lngLatSE, lngLatNW];
+    const flattenedBounds = [];
+    for (const coord of bounds) {
+       flattenedBounds.push(...coord);
+    }
+    setFlattenedBounds(flattenedBounds)
 
     downloadGeojson(lngLatNE, lngLatSW);
+    setDigitizer(false);
   };
+
+  useEffect(() => {
+    if (img && flattenedBounds.length > 0) {
+      const newDigitizerLayer = new BitmapLayer({
+        id: "image-layer",
+        image: img,
+        bounds: flattenedBounds,
+        opacity: 1,
+      });
+      setDigitizerLayer(newDigitizerLayer);
+    }
+  }, [img, flattenedBounds]);
+
+  // -------------------------------digitizer ends here--------------------------------------
 
   const osm = [
     new TileLayer({
@@ -6801,8 +6795,8 @@ function BaseMap(props) {
               ? [osm, visibleLayers, drawPolygonTool]
               : [visibleLayers, drawPolygonTool]
             : osmState
-            ? [osm, visibleLayers, maskLayer]
-            : [visibleLayers, maskLayer],
+            ? [osm, visibleLayers, maskLayer,digitizerLayer]
+            : [visibleLayers, maskLayer,digitizerLayer],
         ]}
         style={{ height: "100vh", width: "100%" }}
         // onHover={(info) => {
@@ -7802,6 +7796,7 @@ function BaseMap(props) {
             top: 0,
             transform: `rotate(${canvasRotation}deg)`,
             border: "1px dashed black",
+            opacity: canvasImageOpacity,
           }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMoves}
