@@ -19,7 +19,7 @@ export type Layer = ILayer & {
   render3D?: boolean;
   isMasked?: boolean;
   _metadata?: {
-    bounds: [number, number, number, number],
+    bounds: [number, number, number, number];
   };
 };
 
@@ -60,7 +60,7 @@ const getRasterDataUrl = (layer: Layer) => {
 
     case "POINT_CLOUD":
       return `${STATIC_URL}${layer.metadata}`;
-    
+
     case "CESIUM_3D":
       return `${STATIC_URL}${layer.metadata}`;
 
@@ -84,7 +84,10 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
         : {};
 
       if (layer.type == "Raster") {
-        if (layer.raster.name == "POINT_CLOUD" || layer.raster.name == "CESIUM_3D") {
+        if (
+          layer.raster.name == "POINT_CLOUD" ||
+          layer.raster.name == "CESIUM_3D"
+        ) {
           return new Tile3DLayer({
             id: layer._id,
             data: getRasterDataUrl(layer),

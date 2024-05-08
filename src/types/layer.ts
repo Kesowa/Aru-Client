@@ -76,7 +76,14 @@ export type ILayer = {
   type: "Vector" | "Raster"; // index
   raster: {
     _id: ObjectId;
-    name: "ORTHO" | "DEM" | "NDVI" | "DTM" | "NDWI" | "POINT_CLOUD" | "CESIUM_3D";
+    name:
+      | "ORTHO"
+      | "DEM"
+      | "NDVI"
+      | "DTM"
+      | "NDWI"
+      | "POINT_CLOUD"
+      | "CESIUM_3D";
     bidx?: string;
     bandExp?: string;
     colorMap?: string;
