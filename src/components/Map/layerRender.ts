@@ -2,8 +2,9 @@ import MarkerIcon from "../../static/MarkerIcon.png";
 import TankIcon from "../../static/TankIcon.png";
 import ValveIcon from "../../static/ValveIcon.png";
 import DotIcon from "../../static/DotIcon.png";
-import { TerrainLayer } from "@deck.gl/geo-layers/typed";
+import { TerrainLayer, Tile3DLayer } from "@deck.gl/geo-layers/typed";
 import { BitmapLayer, GeoJsonLayer, IconLayer } from "@deck.gl/layers/typed";
+import { Tiles3DLoader } from "@loaders.gl/3d-tiles";
 import { MaskExtension } from "@deck.gl/extensions/typed";
 import { HeatmapLayer, TileLayer } from "deck.gl";
 import { COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
@@ -17,6 +18,9 @@ export type Layer = ILayer & {
   isChecked?: boolean;
   render3D?: boolean;
   isMasked?: boolean;
+  _metadata?: {
+    bounds: [number, number, number, number],
+  };
 };
 
 export type IMissionLayers = {
@@ -54,6 +58,12 @@ const getRasterDataUrl = (layer: Layer) => {
     case "DEM":
       return `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${layer.raster.resamplingMethod}&bidx=${layer.raster.bidx}&rescale=${layer.minp}%2C${layer.maxp}&colormap_name=${layer.raster.colorMap}`;
 
+    case "POINT_CLOUD":
+      return `${STATIC_URL}${layer.metadata}`;
+    
+    case "CESIUM_3D":
+      return `${STATIC_URL}${layer.metadata}`;
+
     default:
       return `${COG_URL}/cog/tiles/{z}/{x}/{y}.png?url=${TITILER_STATIC}${layer.layerpath}`;
   }
@@ -74,11 +84,20 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
         : {};
 
       if (layer.type == "Raster") {
+        if (layer.raster.name == "POINT_CLOUD" || layer.raster.name == "CESIUM_3D") {
+          return new Tile3DLayer({
+            id: layer._id,
+            data: getRasterDataUrl(layer),
+            loader: Tiles3DLoader,
+            _subLayerProps: {
+              scenegraph: { _lighting: "flat" },
+            },
+          });
+        }
         if (layer.raster.name == "DEM" && layer.render3D == true) {
           const overlayLayer = layer.raster.overlayId
             ? layers.find((l) => l._id === layer.raster.overlayId)
             : layer;
-          console.log("OVERLAYY LAYER => ", overlayLayer);
           return new TerrainLayer({
             id: layer._id,
             elevationDecoder: {
@@ -96,7 +115,6 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               : getRasterDataUrl(layer),
           });
         }
-        console.log("RENDERING RASTER LAYER!!!!");
         return new TileLayer({
           id: layer._id,
           data: getRasterDataUrl(layer),
