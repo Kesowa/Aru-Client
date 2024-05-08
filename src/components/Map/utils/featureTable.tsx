@@ -50,7 +50,8 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   ...restProps
 }) => {
-  const inputNode = <Input size="small" />;
+  const initialValue = record ? record[dataIndex] : undefined;
+  const inputNode = <Input size="small" defaultValue={initialValue} />;
 
   return (
     <td {...restProps}>
@@ -463,11 +464,10 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       delete obj.key;
       delete obj.featureIndex;
       delete obj.index;
+      const initialProperties = props.tableData[key].properties;
       const properties = {
         ...obj,
-        color: props.tableData[key].properties.color,
-        Id: props.tableData[key].properties.Id,
-        icon: props.tableData[key].properties.icon,
+        ...initialProperties,
       };
       const body = {
         id: props.id,
@@ -763,9 +763,8 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       }),
     };
   });
-
   return (
-    <>
+    <Form form={form} component={false}>
       <Table
         // size="small"
         components={{
@@ -803,7 +802,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
           };
         }}
       />
-    </>
+    </Form>
   );
 };
 

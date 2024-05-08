@@ -102,7 +102,6 @@ const MapAttributes: React.FC<Props> = (props) => {
 
   const onChange = (checked: boolean) => {
     props.setTerrainMap(checked);
-    console.log(`switch to ${JSON.stringify(filteredLayers)}`);
   };
 
   useEffect(() => {
@@ -115,7 +114,12 @@ const MapAttributes: React.FC<Props> = (props) => {
     if (props.type === "raster") {
       fetchRasterDetails(props.id);
     } else if (props.type === "vector") {
-      if (props.featureCount) setTotal(props.featureCount);
+      if (props.featureCount) {
+        setState((prevState) => ({
+          ...prevState,
+          total: props.featureCount,
+        }));
+      }
       fetchJsonData();
     }
   }, [props.shouldAttributeTableReload]);
@@ -132,7 +136,10 @@ const MapAttributes: React.FC<Props> = (props) => {
 
   useEffect(() => {
     const updatedatedTable = updateTableColors(initialState.trueTableData);
-    setTableData(updatedatedTable);
+    setState((prevState) => ({
+      ...prevState,
+      tableData: updatedatedTable as any[],
+    }));
   }, [props.selectedIndexes]);
 
   const updateContentHeight = (bottomBarHeight: string, type: string) => {
@@ -220,7 +227,10 @@ const MapAttributes: React.FC<Props> = (props) => {
   };
 
   const fetchJsonData = () => {
-    setIsTableLoading(true);
+    setState((prevState) => ({
+      ...prevState,
+      isTableLoading: true,
+    }));
     const payload = {
       id: props.id,
       page: state.page - 1,
@@ -248,7 +258,12 @@ const MapAttributes: React.FC<Props> = (props) => {
         .catch((err) => {
           AxiosErrorHandler(err, props.logout);
         })
-        .finally(() => setIsTableLoading(false));
+        .finally(() =>
+          setState((prevState) => ({
+            ...prevState,
+            isTableLoading: false,
+          }))
+        );
     }
   };
 
@@ -315,7 +330,6 @@ const MapAttributes: React.FC<Props> = (props) => {
   }
 
   function changeOverlay(value: string) {
-    console.log(`2-${value}`);
     props.setOverlayID(props.id, value);
   }
 

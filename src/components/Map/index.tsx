@@ -13,7 +13,7 @@ import { WebMercatorViewport } from "viewport-mercator-project";
 import { MaskExtension } from "@deck.gl/extensions/typed";
 import { TerrainLayer } from "@deck.gl/geo-layers/typed";
 import { readPixelsToArray } from "@luma.gl/webgl";
-
+import { Tile3DLayer } from "@deck.gl/geo-layers";
 import {
   Row,
   Col,
@@ -2043,43 +2043,29 @@ function BaseMap(props) {
     //console.log("onclick", index);
   }
   //-----------------------Fetch Raster URL----------------------------------
-  const getRasterURL = (rasterType, path, settings, x, y, z) => {
+  const getRasterURL = (rasterType, path, settings, x?, y?, z?) => {
     //SetColorMap(settings.color);
-    switch (rasterType) {
-      case "NDVI":
-        return (
-          `${COG_URL}` +
-          `/cog/tiles` +
-          `/${z}/${x}/${y}%401x?url=${TITILER_STATIC}` +
-          path
-        );
-
-      case "NDWI":
-        return (
-          `${COG_URL}` +
-          `/cog/tiles` +
-          `/${z}/${x}/${y}%401x?url=${TITILER_STATIC}` +
-          path +
-          `&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}`
-        );
-
-      case "DEM":
-        return terrainmap
-          ? `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=null&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
-          : `${COG_URL}/cog/tiles/${z}/${x}/${y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`;
-
-      case "OVERLAY":
-        // console.log()
-        return `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${path}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`;
-
-      default:
-        return (
-          `${COG_URL}` +
-          `/cog/tiles` +
-          `/${z}/${x}/${y}.png?url=${TITILER_STATIC}` +
-          path
-        );
+    const scale = "@1x";
+    const format = ".png";
+    const baseURL = `${COG_URL}/cog/tiles/${z ? z : "{z}"}/${x ? x : "{x}"}/${
+      y ? y : "{y}"
+    }${scale}${format}`;
+    const { resamplingMethod, bidx, minp, maxp } = settings;
+    const queries: any = {
+      url: `${TITILER_STATIC}${path}`,
+      [resamplingMethod && "resampling_method"]: resamplingMethod,
+      [bidx && "bidx"]: bidx,
+      [minp && maxp && "rescale"]: `${minp},${maxp}`,
+    };
+    if (["DEM"].includes(rasterType)) {
+      // kept as an array because more raster types may need colormap in future
+      queries["colormap_name"] = colorMap;
     }
+    delete queries["undefined"];
+    delete queries["null"];
+    const queryString = new URLSearchParams(queries).toString();
+    console.log(`${baseURL}?${queryString}`);
+    return `${baseURL}?${queryString}`;
   };
 
   function handleClose(status: boolean) {
@@ -3159,6 +3145,7 @@ function BaseMap(props) {
   //    )*/
   //   setVisibleLayers(vlayers);
   // };
+
 
   // useEffect(() => {
   //   // Log the class name of the DeckGL canvas
@@ -5217,7 +5204,7 @@ function BaseMap(props) {
 
   // ++++++++++++++++++++++++++++++++++++++ Create Layer ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  const fileTypes = ["geojson", "tif", "kml", "shp", "zip"];
+  const fileTypes = ["geojson", "tif", "kml", "shp", "zip", "laz"];
 
   const createLayer = async () => {
     if (!fileList.length) {
@@ -5229,7 +5216,7 @@ function BaseMap(props) {
     const ext = file.name.split(".").pop();
 
     if (!fileTypes.includes(ext)) {
-      message.error("Please select the geojson or tif file");
+      message.error("Please select the geojson or tif file or laz file");
       return;
     }
 
@@ -5273,7 +5260,7 @@ function BaseMap(props) {
       );
 
       if (result.data.status) {
-        console.log(result.data.data);
+        console.log("metadata for me:", result.data.data);
         addLayer(result.data.data);
         message.success("Layer created!");
       } else {
@@ -7591,7 +7578,7 @@ function BaseMap(props) {
                         />
                       }
                       title={"Upload File"}
-                      description="Create a new layer by uploading a vector file (.geojson, .shp, .kml) or raster file (only .tif)"
+                      description="Create a new layer by uploading a vector file (.geojson, .shp, .kml) or raster file (.tif, .laz)"
                     />
                   </Card>
                   <Card
@@ -7709,7 +7696,7 @@ function BaseMap(props) {
                     <Row>
                       <Alert
                         style={{ width: "100%" }}
-                        message={`Only .geojson and .kml files support for type "Vector" and .tif for type "Raster"`}
+                        message={`Only .geojson and .kml files support for type "Vector" and .tif or .laz for type "Raster"`}
                         type="info"
                         showIcon
                       />
