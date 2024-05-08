@@ -288,7 +288,9 @@ const MapAttributes: React.FC<Props> = (props) => {
       }
       if (
         props.flaggedFilter ||
-        props.AllLayers.find((layer) => (layer._id === props.id))?.flaggedFeatures.includes(record.index)
+        props.AllLayers.find(
+          (layer) => layer._id === props.id
+        )?.flaggedFeatures.includes(record.index)
       ) {
         return {
           ...record,

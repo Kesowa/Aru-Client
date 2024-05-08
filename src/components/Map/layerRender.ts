@@ -3,11 +3,7 @@ import TankIcon from "../../static/TankIcon.png";
 import ValveIcon from "../../static/ValveIcon.png";
 import DotIcon from "../../static/DotIcon.png";
 import { TerrainLayer } from "@deck.gl/geo-layers/typed";
-import {
-  BitmapLayer,
-  GeoJsonLayer,
-  IconLayer,
-} from "@deck.gl/layers/typed";
+import { BitmapLayer, GeoJsonLayer, IconLayer } from "@deck.gl/layers/typed";
 import { MaskExtension } from "@deck.gl/extensions/typed";
 import { HeatmapLayer, TileLayer } from "deck.gl";
 import { COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
@@ -18,17 +14,17 @@ import { hexToRGB } from "./colorUtils";
 import { MASK_ID } from ".";
 
 export type Layer = ILayer & {
-  isChecked?: boolean,
-  render3D?: boolean,
-  isMasked?: boolean,
-}
+  isChecked?: boolean;
+  render3D?: boolean;
+  isMasked?: boolean;
+};
 
 export type IMissionLayers = {
-  alertGeojsonUrl: string,
-  vodGeojsonUrl: string,
-  isAlertChecked: boolean,
-  isVODChecked: boolean,
-}
+  alertGeojsonUrl: string;
+  vodGeojsonUrl: string;
+  isAlertChecked: boolean;
+  isVODChecked: boolean;
+};
 
 const createSVGIcon = (color: string) => {
   return `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
@@ -50,30 +46,23 @@ const svgToDataURL = (svg: string) => {
 const getRasterDataUrl = (layer: Layer) => {
   switch (layer.raster.name) {
     case "NDVI":
-      return (
-        `${COG_URL}/cog/tiles/{z}/{x}/{y}%401x?url=${TITILER_STATIC}${layer.layerpath}`
-      );
+      return `${COG_URL}/cog/tiles/{z}/{x}/{y}%401x?url=${TITILER_STATIC}${layer.layerpath}`;
 
     case "NDWI":
-      return (
-        `${COG_URL}/cog/tiles/{z}/{x}/{y}%401x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${layer.raster.resamplingMethod}&bidx=${layer.raster.bidx}`
-      );
+      return `${COG_URL}/cog/tiles/{z}/{x}/{y}%401x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${layer.raster.resamplingMethod}&bidx=${layer.raster.bidx}`;
 
     case "DEM":
       return `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${layer.raster.resamplingMethod}&bidx=${layer.raster.bidx}&rescale=${layer.minp}%2C${layer.maxp}&colormap_name=${layer.raster.colorMap}`;
 
     default:
-      return (
-        `${COG_URL}/cog/tiles/{z}/{x}/{y}.png?url=${TITILER_STATIC}${layer.layerpath}`
-      );
+      return `${COG_URL}/cog/tiles/{z}/{x}/{y}.png?url=${TITILER_STATIC}${layer.layerpath}`;
   }
-}
+};
 
 export const ILayerToDeckLayer = (layers: Layer[]) => {
   return layers
-    .filter(layer => layer.isChecked === true)
-    .map(layer => {
-
+    .filter((layer) => layer.isChecked === true)
+    .map((layer) => {
       const maskProps = layer.isMasked
         ? {
             // enable masking
@@ -127,13 +116,13 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             });
           },
         });
-
-      }
-      else if (layer.type == "Vector") {
+      } else if (layer.type == "Vector") {
         if (layer.vector.type == "Point")
           return new GeoJsonLayer({
             id: layer._id,
-            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()),
+            data: fetch(STATIC_URL + layer.layerpath).then((response) =>
+              response.json()
+            ),
             pickable: true,
             pointType: "icon",
             iconSizeMinPixels: 6,
@@ -176,7 +165,9 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
         else if (layer.vector.type == "air_pollution")
           return new HeatmapLayer({
             id: layer._id,
-            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()).then(data => data.features),
+            data: fetch(STATIC_URL + layer.layerpath)
+              .then((response) => response.json())
+              .then((data) => data.features),
             getPosition: (d: any) => d.geometry.coordinates,
             getWeight: (d: any) => d.properties.aqi,
             aggregation: "SUM",
@@ -187,11 +178,19 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
         else if (layer.vector.type == "wind_direction")
           return new IconLayer({
             id: layer._id,
-            data: fetch(STATIC_URL + layer.layerpath).then(response => response.json()).then((data: GeoJson<Feature<Point, { windSpeed: number }>>) => {
-              const maxWindSpeed = data.features.map(feature => feature.properties.windSpeed).reduce((maxSpeed, curr) => Math.max(maxSpeed, curr), 0);
-              data.features.forEach(feature => feature.properties["maxWindSpeed"] = maxWindSpeed);
-              return data;
-            }).then(data => data.features),
+            data: fetch(STATIC_URL + layer.layerpath)
+              .then((response) => response.json())
+              .then((data: GeoJson<Feature<Point, { windSpeed: number }>>) => {
+                const maxWindSpeed = data.features
+                  .map((feature) => feature.properties.windSpeed)
+                  .reduce((maxSpeed, curr) => Math.max(maxSpeed, curr), 0);
+                data.features.forEach(
+                  (feature) =>
+                    (feature.properties["maxWindSpeed"] = maxWindSpeed)
+                );
+                return data;
+              })
+              .then((data) => data.features),
             getPosition: (d: any) => d.geometry.coordinates,
             getIcon: (d: any, { index }: { index: any }) => {
               const windSpeed = d.properties.windSpeed;

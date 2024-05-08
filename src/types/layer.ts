@@ -69,7 +69,7 @@ export enum VectorName {
   Garbage_Collection_Area = "Garbage Collection Area",
   Mobile_Drone_Port = "Mobile Drone Port",
   Potholes = "Potholes",
-};
+}
 
 export type ILayer = {
   _id: ObjectId;
@@ -90,7 +90,12 @@ export type ILayer = {
   vector: {
     _id: ObjectId;
     name: VectorName;
-    type: "Point" | "MultiLineString" | "MultiPolygon" | "air_pollution" | "wind_direction";
+    type:
+      | "Point"
+      | "MultiLineString"
+      | "MultiPolygon"
+      | "air_pollution"
+      | "wind_direction";
     createdBy: ObjectId;
     updatedBy: ObjectId;
     createdAt: ISODate;

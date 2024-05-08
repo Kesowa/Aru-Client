@@ -7,13 +7,10 @@ import React, {
 } from "react";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
-import { DataFilterExtension } from "@deck.gl/extensions";
 import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
 import { MaskExtension } from "@deck.gl/extensions/typed";
-import { TerrainLayer } from "@deck.gl/geo-layers/typed";
 import { readPixelsToArray } from "@luma.gl/webgl";
-import { Tile3DLayer } from "@deck.gl/geo-layers";
 import {
   Row,
   Col,
@@ -72,7 +69,6 @@ import {
   SyncOutlined,
   PlusOutlined,
   CheckCircleOutlined,
-  FolderOutlined,
   ArrowLeftOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
@@ -81,24 +77,13 @@ import MarkerIcon from "../../static/MarkerIcon.png";
 import TankIcon from "../../static/TankIcon.png";
 import ValveIcon from "../../static/ValveIcon.png";
 import DotIcon from "../../static/DotIcon.png";
-import VODIcon from "../../static/VODIcon.svg";
-import AlertIcon from "../../static/AlertIcon.svg";
 import { SketchPicker } from "react-color";
 import "./index.less";
 import LineIcon from "../../static/line.svg";
 import PolygonIcon from "../../static/polygon.svg";
 import DeckGL from "@deck.gl/react";
-import {
-  FlyToInterpolator,
-  HeatmapLayer,
-  TextLayer,
-} from "deck.gl";
-import {
-  BitmapLayer,
-  GeoJsonLayer,
-  IconLayer,
-  PathLayer,
-} from "@deck.gl/layers";
+import { FlyToInterpolator } from "deck.gl";
+import { BitmapLayer, IconLayer, PathLayer } from "@deck.gl/layers";
 import { SolidPolygonLayer } from "@deck.gl/layers/typed";
 import { TileLayer } from "@deck.gl/geo-layers";
 import { HtmlOverlayItem, HtmlOverlay } from "@nebula.gl/overlays";
@@ -140,11 +125,14 @@ import {
 } from "src/constants";
 import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
-import { load } from "@loaders.gl/core";
 import { ILayer } from "src/types/layer";
-import { ILayerToDeckLayer, Layer, IMissionLayers, MissionLayerToDeckLayer } from "./layerRender";
+import {
+  ILayerToDeckLayer,
+  Layer,
+  IMissionLayers,
+  MissionLayerToDeckLayer,
+} from "./layerRender";
 import { ILayersToTree } from "./treeRender";
-import { is } from "date-fns/locale";
 import { BBox, mergeBoundingBoxes } from "src/types/geojson";
 import { invertColor } from "./colorUtils";
 
@@ -640,9 +628,9 @@ function BaseMap(props) {
       if (navigator.geolocation) {
         navigator.permissions
           .query({ name: "geolocation" })
-          .then(function(result: any) {
+          .then(function (result: any) {
             if (result.state === "granted") {
-              navigator.geolocation.getCurrentPosition(function(pos: any) {
+              navigator.geolocation.getCurrentPosition(function (pos: any) {
                 const crd = pos.coords;
                 // console.log("Your current position is:");
                 // console.log(`Latitude : ${crd.latitude}`);
@@ -662,7 +650,7 @@ function BaseMap(props) {
               });
             } else if (result.state === "prompt") {
               navigator.geolocation.getCurrentPosition(
-                function(pos: any) {
+                function (pos: any) {
                   const crd = pos.coords;
                   // console.log("Your current position is:");
                   // console.log(`Latitude : ${crd.latitude}`);
@@ -680,7 +668,7 @@ function BaseMap(props) {
                     transitionInterpolator: new FlyToInterpolator(),
                   });
                 },
-                function(err) {
+                function (err) {
                   console.log(`Location fetch error: \n ${err}`);
                 },
                 {
@@ -694,7 +682,7 @@ function BaseMap(props) {
                 "Please allow location access from your browser for best experience of ARU!"
               );
             }
-            result.onChange = function() {
+            result.onChange = function () {
               console.log(result.state);
             };
           });
@@ -814,22 +802,22 @@ function BaseMap(props) {
             opacity: opcity,
           }),
           showBorder &&
-          new PathLayer({
-            id: `${props.id}-border`,
-            visible: props.visible,
-            data: [
-              [
-                [west, north],
-                [west, south],
-                [east, south],
-                [east, north],
-                [west, north],
+            new PathLayer({
+              id: `${props.id}-border`,
+              visible: props.visible,
+              data: [
+                [
+                  [west, north],
+                  [west, south],
+                  [east, south],
+                  [east, north],
+                  [west, north],
+                ],
               ],
-            ],
-            getPath: (d) => d,
-            getColor: [255, 0, 0],
-            widthMinPixels: 4,
-          }),
+              getPath: (d) => d,
+              getColor: [255, 0, 0],
+              widthMinPixels: 4,
+            }),
         ];
       },
     }),
@@ -1340,16 +1328,18 @@ function BaseMap(props) {
     //   }
     //   setTreeDataa(data);
     // }
-    SetAllLayers(prev => [...prev.sort((a,b) => {
-      if (sortType === "createdAt") {
-        if (isAscending) return moment(a.createdAt).diff(moment(b.createdAt));
-        else return moment(b.createdAt).diff(moment(a.createdAt));
-      } else {
-        // sortType is "name"
-        if (isAscending) return a.name.localeCompare(b.name);
-        else return b.name.localeCompare(a.name);
-      }
-    })]);
+    SetAllLayers((prev) => [
+      ...prev.sort((a, b) => {
+        if (sortType === "createdAt") {
+          if (isAscending) return moment(a.createdAt).diff(moment(b.createdAt));
+          else return moment(b.createdAt).diff(moment(a.createdAt));
+        } else {
+          // sortType is "name"
+          if (isAscending) return a.name.localeCompare(b.name);
+          else return b.name.localeCompare(a.name);
+        }
+      }),
+    ]);
   }, [sortType, isAscending]);
 
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
@@ -1400,18 +1390,26 @@ function BaseMap(props) {
     ).format();
     setDateRange([startDate, endDate]);
   };
-  const missionGeojsonURL = (type: "alert"|"vod", isBaseMap: boolean, startDate: string, endDate: string) => {
-    const params = (new URLSearchParams({ startDate, endDate })).toString();
+  const missionGeojsonURL = (
+    type: "alert" | "vod",
+    isBaseMap: boolean,
+    startDate: string,
+    endDate: string
+  ) => {
+    const params = new URLSearchParams({ startDate, endDate }).toString();
     let url = "";
-    if(isBaseMap) {
-      if(type === "alert") url = `${apis.GET_ALERT_LOCATION_GEOJSON}?${params}`;
-      if(type === "vod") url = `${apis.GET_VOD_LOCATION_GEOJSON}?${params}`;
+    if (isBaseMap) {
+      if (type === "alert")
+        url = `${apis.GET_ALERT_LOCATION_GEOJSON}?${params}`;
+      if (type === "vod") url = `${apis.GET_VOD_LOCATION_GEOJSON}?${params}`;
     } else {
-      if(type === "alert") url = `${apis.GET_MISSION_GEOJSON}/${id}/alerts?${params}`;
-      if(type === "vod") url = `${apis.GET_MISSION_GEOJSON}/${id}/vods?${params}`;
+      if (type === "alert")
+        url = `${apis.GET_MISSION_GEOJSON}/${id}/alerts?${params}`;
+      if (type === "vod")
+        url = `${apis.GET_MISSION_GEOJSON}/${id}/vods?${params}`;
     }
     return url;
-  }
+  };
   // Should no longer be required
   // const fetchMissionGeoJSON = () => {
   //   checkedKeys.map((key) => {
@@ -1658,7 +1656,7 @@ function BaseMap(props) {
 
   function fetchJSON(file: any) {
     return fetch(file)
-      .then(function(res) {
+      .then(function (res) {
         return res.json();
       })
       .catch((err) => console.log(err));
@@ -1666,9 +1664,19 @@ function BaseMap(props) {
   //-----creating drone path-----
 
   useEffect(() => {
-    SetMissionLayers(prev => ({
-      alertGeojsonUrl: missionGeojsonURL("alert", props.isBaseMap, dateRange[0], dateRange[1]),
-      vodGeojsonUrl: missionGeojsonURL("vod", props.isBaseMap, dateRange[0], dateRange[1]),
+    SetMissionLayers((prev) => ({
+      alertGeojsonUrl: missionGeojsonURL(
+        "alert",
+        props.isBaseMap,
+        dateRange[0],
+        dateRange[1]
+      ),
+      vodGeojsonUrl: missionGeojsonURL(
+        "vod",
+        props.isBaseMap,
+        dateRange[0],
+        dateRange[1]
+      ),
       isAlertChecked: prev.isAlertChecked,
       isVODChecked: prev.isVODChecked,
     }));
@@ -1845,12 +1853,14 @@ function BaseMap(props) {
           message.success(
             flag ? "Layer Flagged Successfully" : "Layer Unflagged Successfully"
           );
-          SetAllLayers(prev => prev.map((layer) => {
-            if (layer._id === layerId) {
-              layer.isFlagged = flag;
-            }
-            return layer;
-          }));
+          SetAllLayers((prev) =>
+            prev.map((layer) => {
+              if (layer._id === layerId) {
+                layer.isFlagged = flag;
+              }
+              return layer;
+            })
+          );
           setRefreshLayer(!refreshLayer);
           setShouldAttributeTableReload(!shouldAttributeTableReload);
         } else {
@@ -2133,28 +2143,35 @@ function BaseMap(props) {
   }, [selectedIndexes, showSelectedIndexes]);
 
   function setOverlayID(id: string, overlayId: string) {
-    SetAllLayers(prev => prev.map((layer) => {
-      if (layer._id === id) layer.raster.overlayId = overlayId;
-      return layer;
-    }))
+    SetAllLayers((prev) =>
+      prev.map((layer) => {
+        if (layer._id === id) layer.raster.overlayId = overlayId;
+        return layer;
+      })
+    );
   }
 
   useEffect(() => {
-    SetAllLayers(prev => prev.map((layer) => {
-      if (layer.type === "Raster" && layer.raster.name === "DEM") {
-        layer.render3D = terrainmap;
-        layer.raster.colorMap = colorMap;
-      }
-      return layer;
-    }))
+    SetAllLayers((prev) =>
+      prev.map((layer) => {
+        if (layer.type === "Raster" && layer.raster.name === "DEM") {
+          layer.render3D = terrainmap;
+          layer.raster.colorMap = colorMap;
+        }
+        return layer;
+      })
+    );
   }, [terrainmap, colorMap]);
 
   useEffect(() => {
     //console.log("current 3d", threeDState);
-    SetAllLayers(prev => prev.map((layer) => {
-      if (layer._id === featureLayer) layer.render3D = (threeDState === "Enabled");
-      return layer;
-    }));
+    SetAllLayers((prev) =>
+      prev.map((layer) => {
+        if (layer._id === featureLayer)
+          layer.render3D = threeDState === "Enabled";
+        return layer;
+      })
+    );
     // if (threeDState === "Enabled") {
     //   set3DTranspose(true);
     //   const al = { ...allLayers };
@@ -2200,7 +2217,12 @@ function BaseMap(props) {
   };
 
   const setScaleData = () => {
-    const demLayers = AllLayers.filter((layer) => (layer.isChecked && layer.type === "Raster" && layer.raster.name === "DEM"));
+    const demLayers = AllLayers.filter(
+      (layer) =>
+        layer.isChecked &&
+        layer.type === "Raster" &&
+        layer.raster.name === "DEM"
+    );
     setScales(demLayers);
     if (demLayers.length) {
       setScaleVisible(true);
@@ -2217,13 +2239,13 @@ function BaseMap(props) {
       const mapWidth = mapContainer.clientWidth; // Get the actual width of the map container
       const mapHeight = mapContainer.clientHeight;
       // Replace with the actual height of your map container
-  
+
       // Calculate the new viewport using getViewState
       const viewport = new WebMercatorViewport({
         width: mapWidth,
         height: mapHeight,
       });
-  
+
       // Get the new zoom and center to fit the layer on the screen
       const { longitude, latitude, zoom } = viewport.fitBounds(
         [
@@ -2235,7 +2257,7 @@ function BaseMap(props) {
           offset: [0, 0],
         }
       );
-  
+
       return {
         longitude,
         latitude,
@@ -2246,9 +2268,9 @@ function BaseMap(props) {
 
   const focusSelectedLayers = async () => {
     const boundingBoxes: BBox[] = [];
-    for(const layer of AllLayers) {
-      if(layer.isChecked) {
-        if(layer.type === "Vector") {
+    for (const layer of AllLayers) {
+      if (layer.isChecked) {
+        if (layer.type === "Vector") {
           const response = await fetch(STATIC_URL + layer.layerpath);
           const data = await response.json();
           let features = data.features;
@@ -2266,7 +2288,7 @@ function BaseMap(props) {
             boundingBoxes.push(bounds);
           }
         }
-        if(layer.type === "Raster") {
+        if (layer.type === "Raster") {
           const metaDataURL = `${COG_URL}/cog/info?url=${TITILER_STATIC}${layer.layerpath}`;
           const response = await fetch(metaDataURL, {
             method: "GET",
@@ -2283,7 +2305,9 @@ function BaseMap(props) {
       }
     }
     if (MissionLayers.isAlertChecked) {
-      const { data } = await http.get(STATIC_URL + MissionLayers.alertGeojsonUrl);
+      const { data } = await http.get(
+        STATIC_URL + MissionLayers.alertGeojsonUrl
+      );
       const { features } = data;
       if (Array.isArray(features) && features.length > 0) {
         const bounds = turf.bbox(turf.featureCollection(features)) as BBox;
@@ -2298,7 +2322,7 @@ function BaseMap(props) {
         boundingBoxes.push(bounds);
       }
     }
-    if(boundingBoxes.length > 0) {
+    if (boundingBoxes.length > 0) {
       const finalBounds = mergeBoundingBoxes(boundingBoxes);
       const { longitude, latitude, zoom } = calculateViewport(finalBounds);
       setViewport({
@@ -2313,7 +2337,7 @@ function BaseMap(props) {
         transitionInterpolator: new FlyToInterpolator(),
       });
     }
-  }
+  };
 
   // No longer required
   // const drawLayers = async (checkedKeysValue: any) => {
@@ -2321,7 +2345,7 @@ function BaseMap(props) {
   //   setShowMarkerSizeTool(false);
 
   //   const createSVGIcon = (idx: any, color: string) => {
-  //     return `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+  //     return `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
   //       width="800px" height="800px" viewBox="0 0 490.939 490.939" xml:space="preserve">
   //       <g>
   //         <g>
@@ -3146,7 +3170,6 @@ function BaseMap(props) {
   //   setVisibleLayers(vlayers);
   // };
 
-
   // useEffect(() => {
   //   // Log the class name of the DeckGL canvas
   //   const canvasClassName = deckRef.current.deck.gl.canvas.className;
@@ -3221,15 +3244,27 @@ function BaseMap(props) {
 
     setLastCount(checkedKeysValue.length);
     // console.log("CHECKED: ", checkedKeysValue);
-    SetAllLayers((prev) => (prev.map((layer) => {
-      layer.isChecked = checkedKeysValue.includes(layer._id);
-      return layer;
-    })));
+    SetAllLayers((prev) =>
+      prev.map((layer) => {
+        layer.isChecked = checkedKeysValue.includes(layer._id);
+        return layer;
+      })
+    );
     SetMissionLayers({
-      alertGeojsonUrl: missionGeojsonURL("alert", props.isBaseMap, dateRange[0], dateRange[1]),
-      vodGeojsonUrl: missionGeojsonURL("vod", props.isBaseMap, dateRange[0], dateRange[1]),
+      alertGeojsonUrl: missionGeojsonURL(
+        "alert",
+        props.isBaseMap,
+        dateRange[0],
+        dateRange[1]
+      ),
+      vodGeojsonUrl: missionGeojsonURL(
+        "vod",
+        props.isBaseMap,
+        dateRange[0],
+        dateRange[1]
+      ),
       isAlertChecked: checkedKeysValue.includes("alert"),
-      isVODChecked: checkedKeysValue.includes("vod")
+      isVODChecked: checkedKeysValue.includes("vod"),
     });
   };
 
@@ -3389,30 +3424,37 @@ function BaseMap(props) {
     if (!props.isBaseMap) {
       try {
         const result = await http.get<{
-          status: boolean,
-          message: string,
+          status: boolean;
+          message: string;
           data: {
-            mission: string,
+            mission: string;
             centerPoints: {
-              lat: number,
-              lng: number
-            },
-            layers: ILayer[],
+              lat: number;
+              lng: number;
+            };
+            layers: ILayer[];
+          };
+        }>(`${apis.GET_ALL_LAYERS_FOR_MISSION}`, {
+          params: {
+            missionId: id,
           },
-        }>(
-          `${apis.GET_ALL_LAYERS_FOR_MISSION}`,
-          {
-            params: {
-              missionId: id,
-            },
-          }
-        );
+        });
 
         if (result.data.status) {
           SetAllLayers(result.data.data.layers);
           SetMissionLayers({
-            alertGeojsonUrl: missionGeojsonURL("alert", props.isBaseMap, dateRange[0], dateRange[1]),
-            vodGeojsonUrl: missionGeojsonURL("vod", props.isBaseMap, dateRange[0], dateRange[1]),
+            alertGeojsonUrl: missionGeojsonURL(
+              "alert",
+              props.isBaseMap,
+              dateRange[0],
+              dateRange[1]
+            ),
+            vodGeojsonUrl: missionGeojsonURL(
+              "vod",
+              props.isBaseMap,
+              dateRange[0],
+              dateRange[1]
+            ),
             isAlertChecked: false,
             isVODChecked: false,
           });
@@ -3458,9 +3500,9 @@ function BaseMap(props) {
     } else {
       try {
         const result = await http.get<{
-          success: boolean,
-          message: string,
-          data: ILayer[],
+          success: boolean;
+          message: string;
+          data: ILayer[];
         }>(apis.GET_ALL_BASELAYERS);
         if (result.data.success) {
           setMissioName("none");
@@ -3564,7 +3606,9 @@ function BaseMap(props) {
 
             setPanes(newPanes);
 
-            SetAllLayers(prev => prev.filter(layer => layer._id !== layerId));
+            SetAllLayers((prev) =>
+              prev.filter((layer) => layer._id !== layerId)
+            );
 
             message.success(res.data.message);
             //console.log(res.data);
@@ -3612,7 +3656,9 @@ function BaseMap(props) {
 
             setPanes(newPanes);
 
-            SetAllLayers(prev => prev.filter(layer => layer._id !== layerId));
+            SetAllLayers((prev) =>
+              prev.filter((layer) => layer._id !== layerId)
+            );
 
             message.success(res.data.message);
             //console.log(res.data);
@@ -3639,9 +3685,9 @@ function BaseMap(props) {
   const deleteMultipleLayers = (type) => {
     props.loading(true);
 
-    const layers = AllLayers
-      .filter((layer) => (layer.isChecked && layer.type === type))
-      .map((layer) => layer._id);
+    const layers = AllLayers.filter(
+      (layer) => layer.isChecked && layer.type === type
+    ).map((layer) => layer._id);
 
     if (props.isBaseMap) {
       http
@@ -3672,7 +3718,9 @@ function BaseMap(props) {
 
             setPanes(newPanes);
 
-            SetAllLayers(prev => prev.filter(layer => !layers.includes(layer._id)));
+            SetAllLayers((prev) =>
+              prev.filter((layer) => !layers.includes(layer._id))
+            );
 
             message.success(res.data.message);
             //console.log(res.data);
@@ -3720,7 +3768,9 @@ function BaseMap(props) {
 
             setPanes(newPanes);
 
-            SetAllLayers(prev => prev.filter(layer => !layers.includes(layer._id)));
+            SetAllLayers((prev) =>
+              prev.filter((layer) => !layers.includes(layer._id))
+            );
 
             message.success(res.data.message);
             //console.log(res.data);
@@ -3745,10 +3795,12 @@ function BaseMap(props) {
   };
 
   const handleMaskLayerOption = (id: string) => {
-    SetAllLayers(prev => prev.map((layer) => {
-      if (layer._id === id) layer.isMasked = !layer.isMasked;
-      return layer;
-    }))
+    SetAllLayers((prev) =>
+      prev.map((layer) => {
+        if (layer._id === id) layer.isMasked = !layer.isMasked;
+        return layer;
+      })
+    );
   };
 
   const toggleElevation = () => {
@@ -4050,14 +4102,14 @@ function BaseMap(props) {
           setLayerName(layer.name);
           type === "Raster"
             ? setDefaultLayerType([
-              type.toUpperCase(),
-              layer.raster.name.toUpperCase(),
-            ])
+                type.toUpperCase(),
+                layer.raster.name.toUpperCase(),
+              ])
             : setDefaultLayerType([
-              type.toUpperCase(),
-              layer.vector.type.toUpperCase(),
-              layer.vector.name.toUpperCase(),
-            ]);
+                type.toUpperCase(),
+                layer.vector.type.toUpperCase(),
+                layer.vector.name.toUpperCase(),
+              ]);
           setSelectedLayerType(type.toLowerCase());
           break;
         case "2":
@@ -4092,10 +4144,7 @@ function BaseMap(props) {
             typeof layer.layerGroupId === "object"
               ? layer.layerGroupId._id
               : layer.layerGroupId;
-          await removeLayerFromGroup(
-            idOfLayerGroup,
-            layer._id
-          );
+          await removeLayerFromGroup(idOfLayerGroup, layer._id);
           // updateTreeDataAfterSingleLayerRemovalFromGroup(layer._id);
           break;
         case "7":
@@ -4211,9 +4260,14 @@ function BaseMap(props) {
           >
             <Text
               style={{
-                width: layer.type === "Raster" ?
-                  layer.layerGroupId ? "139px" : "160px" :
-                  layer.layerGroupId ? "119px" : "140px"
+                width:
+                  layer.type === "Raster"
+                    ? layer.layerGroupId
+                      ? "139px"
+                      : "160px"
+                    : layer.layerGroupId
+                    ? "119px"
+                    : "140px",
               }}
               ellipsis={true}
               onClick={() => {
@@ -4271,7 +4325,9 @@ function BaseMap(props) {
               <p>Are You Sure To Want To Delete This Group</p>
               <b>These Layers Will be deleted along with this group</b>
               <>
-                {AllLayers.filter((layer) => (layer.layerGroupId?._id === layerGroup._id)).map((layer) => {
+                {AllLayers.filter(
+                  (layer) => layer.layerGroupId?._id === layerGroup._id
+                ).map((layer) => {
                   return <p>{layer.name}</p>;
                 })}
               </>
@@ -4627,7 +4683,9 @@ function BaseMap(props) {
         if (res.data.status) {
           message.success(res.data.message);
           const deletedLayerGroupId = result.data.data._id;
-          SetAllLayers((prev) => prev.filter(layer => layer.layerGroupId !== deletedLayerGroupId));
+          SetAllLayers((prev) =>
+            prev.filter((layer) => layer.layerGroupId !== deletedLayerGroupId)
+          );
           // updateTreeDataAfterGroupDelete(id);
         } else {
           message.error(res.data.message);
@@ -4665,12 +4723,14 @@ function BaseMap(props) {
             createdAt: res.data.data.createdAt,
             updatedAt: res.data.data.updatedAt,
           };
-          SetAllLayers((prev) => prev.map((layer) => {
-            if (updatedLayerGroup.layers.includes(layer._id)) {
-              layer.layerGroupId = updatedLayerGroup;
-            }
-            return layer;
-          }));
+          SetAllLayers((prev) =>
+            prev.map((layer) => {
+              if (updatedLayerGroup.layers.includes(layer._id)) {
+                layer.layerGroupId = updatedLayerGroup;
+              }
+              return layer;
+            })
+          );
         } else {
           message.error(res.data.message);
         }
@@ -5300,16 +5360,16 @@ function BaseMap(props) {
     try {
       setIsDrawing(false);
       setFeatureState(myFeatureCollection);
-      if(layer.type === "Vector") {
+      if (layer.type === "Vector") {
         setvectorLayers([...vectorLayers, layer]);
       }
-      SetAllLayers(prev => [
+      SetAllLayers((prev) => [
         ...prev,
         {
           ...layer,
           isChecked: true,
           render3D: false,
-        }
+        },
       ]);
 
       // Should no longer be required
@@ -5799,10 +5859,17 @@ function BaseMap(props) {
       // setTimeout(() => {
       //   forceUpdateLayers(id);
       // });
-      SetAllLayers(prev => prev.map((layer) => {
-        if(layer._id === data._id) return { ...data, isChecked: layer.isChecked, render3D: layer.render3D};
-        else return layer;
-      }));
+      SetAllLayers((prev) =>
+        prev.map((layer) => {
+          if (layer._id === data._id)
+            return {
+              ...data,
+              isChecked: layer.isChecked,
+              render3D: layer.render3D,
+            };
+          else return layer;
+        })
+      );
     }
   };
   //==============socket listen========================
@@ -6129,12 +6196,14 @@ function BaseMap(props) {
         createdAt: res.data.data.createdAt,
         updatedAt: res.data.data.updatedAt,
       };
-      SetAllLayers((prev) => prev.map((layer) => {
-        if (updatedLayerGroup.layers.includes(layer._id)) {
-          layer.layerGroupId = updatedLayerGroup;
-        }
-        return layer;
-      }));
+      SetAllLayers((prev) =>
+        prev.map((layer) => {
+          if (updatedLayerGroup.layers.includes(layer._id)) {
+            layer.layerGroupId = updatedLayerGroup;
+          }
+          return layer;
+        })
+      );
 
       // No longer required
       // keys.forEach((key) => {
@@ -6212,12 +6281,14 @@ function BaseMap(props) {
         return message.error(res.data.message);
       }
 
-      SetAllLayers(prev => prev.map((layer) => {
-        if (layer._id === layerId) {
-          layer.layerGroupId = null;
-        }
-        return layer;
-      }));
+      SetAllLayers((prev) =>
+        prev.map((layer) => {
+          if (layer._id === layerId) {
+            layer.layerGroupId = null;
+          }
+          return layer;
+        })
+      );
 
       // No longer required
       // al[key].groupId = null;
@@ -6644,7 +6715,10 @@ function BaseMap(props) {
 
   const createLayerGroup = (data) => {
     props.loading(true);
-    const layersToGroup = AllLayers.filter((layer) => (layer.isChecked && layer.type === ["","Vector","Raster"][moveType])).map((layer) => (layer._id));
+    const layersToGroup = AllLayers.filter(
+      (layer) =>
+        layer.isChecked && layer.type === ["", "Vector", "Raster"][moveType]
+    ).map((layer) => layer._id);
 
     http
       .post(`${apis.CREATE_GROUP_LAYER}`, {
@@ -6663,12 +6737,14 @@ function BaseMap(props) {
             createdAt: result.data.data[0].createdAt,
             updatedAt: result.data.data[0].updatedAt,
           };
-          SetAllLayers((prev) => prev.map((layer) => {
-            if (layerGroup.layers.includes(layer._id)) {
-              layer.layerGroupId = layerGroup;
-            }
-            return layer;
-          }));
+          SetAllLayers((prev) =>
+            prev.map((layer) => {
+              if (layerGroup.layers.includes(layer._id)) {
+                layer.layerGroupId = layerGroup;
+              }
+              return layer;
+            })
+          );
           // setAllLayerGroups(prev => ({
           //   ...prev,
           //   [layerGroup._id]: {
@@ -6695,8 +6771,11 @@ function BaseMap(props) {
 
   const moveLayers = async (data) => {
     props.loading(true);
-    const layersToMove = AllLayers.filter((layer) => (layer.isChecked && layer.type === ["","Vector","Raster"][moveType])).map((layer) => (layer._id));
-    
+    const layersToMove = AllLayers.filter(
+      (layer) =>
+        layer.isChecked && layer.type === ["", "Vector", "Raster"][moveType]
+    ).map((layer) => layer._id);
+
     http
       .patch(`${apis.EDIT_LAYER_GROUP}`, {
         _id: data.group,
@@ -6714,12 +6793,14 @@ function BaseMap(props) {
             createdAt: result.data.data.createdAt,
             updatedAt: result.data.data.updatedAt,
           };
-          SetAllLayers((prev) => prev.map((layer) => {
-            if (updatedLayerGroup.layers.includes(layer._id)) {
-              layer.layerGroupId = updatedLayerGroup;
-            }
-            return layer;
-          }));
+          SetAllLayers((prev) =>
+            prev.map((layer) => {
+              if (updatedLayerGroup.layers.includes(layer._id)) {
+                layer.layerGroupId = updatedLayerGroup;
+              }
+              return layer;
+            })
+          );
         } else {
           message.error(result.data.message);
         }
@@ -6765,12 +6846,18 @@ function BaseMap(props) {
   };
 
   const moveToGroupForm = () => {
-    const groups: { id: string, name: string }[] = [];
+    const groups: { id: string; name: string }[] = [];
     AllLayers.forEach((layer) => {
-      if (layer.layerGroupId && !groups.find(group => group.id === layer.layerGroupId._id)) {
-        groups.push({ id: layer.layerGroupId._id, name: layer.layerGroupId.name });
+      if (
+        layer.layerGroupId &&
+        !groups.find((group) => group.id === layer.layerGroupId._id)
+      ) {
+        groups.push({
+          id: layer.layerGroupId._id,
+          name: layer.layerGroupId.name,
+        });
       }
-    })
+    });
     return (
       <>
         <Form
@@ -6806,15 +6893,13 @@ function BaseMap(props) {
                   );
                 }
               )} */}
-              {
-                groups.map((group, idx) => {
-                    return (
-                      <Option value={group.id} key={idx}>
-                        {group.name}
-                      </Option>
-                    );
-                  })
-              }
+              {groups.map((group, idx) => {
+                return (
+                  <Option value={group.id} key={idx}>
+                    {group.name}
+                  </Option>
+                );
+              })}
             </Select>
           </Form.Item>
 
@@ -6870,7 +6955,7 @@ function BaseMap(props) {
           status="500"
           title="Oops! You have reached your limit of creating layers!"
           subTitle="Please contact your admin."
-        //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
+          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
@@ -6914,7 +6999,7 @@ function BaseMap(props) {
           const layers: any[] = [];
 
           // OSMState Layers
-          if(osmState) layers.push(osm);
+          if (osmState) layers.push(osm);
 
           // Drawing State Layers
           if (isDrawing) {
@@ -6922,10 +7007,15 @@ function BaseMap(props) {
           } else {
             layers.push(maskLayer);
           }
-          
+
           // Tree Menu Layers
           layers.push(useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers]));
-          layers.push(useMemo(() => MissionLayerToDeckLayer(MissionLayers), [MissionLayers]));
+          layers.push(
+            useMemo(
+              () => MissionLayerToDeckLayer(MissionLayers),
+              [MissionLayers]
+            )
+          );
 
           return layers;
         })()}
@@ -6973,7 +7063,7 @@ function BaseMap(props) {
             setShowDrawingTools(false);
           }
         }}
-      //getTooltip={({object}) => object && (object.properties.Block_Nm)}
+        //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         {hoverInfo && (
           <div
@@ -7299,14 +7389,21 @@ function BaseMap(props) {
                   </div>
                 </Tooltip>
               )}
-              <Tooltip placement="bottom" title={isMaskLayerVisible ? "Disable Masking" : "Enable Masking"}>
+              <Tooltip
+                placement="bottom"
+                title={
+                  isMaskLayerVisible ? "Disable Masking" : "Enable Masking"
+                }
+              >
                 <div
                   className="time-filter-tool"
                   onClick={() => {
-                    setisMaskLayerVisible(prev => !prev);
+                    setisMaskLayerVisible((prev) => !prev);
                   }}
                 >
-                  <Text strong>{isMaskLayerVisible ? "Disable Masking" : "Enable Masking"}</Text>
+                  <Text strong>
+                    {isMaskLayerVisible ? "Disable Masking" : "Enable Masking"}
+                  </Text>
                 </div>
               </Tooltip>
               {isElevationEnabled && (
@@ -7467,7 +7564,7 @@ function BaseMap(props) {
                 menu={{ items: filterMenu, onClick: filterMenuOnClick }}
                 //overlay={filterMenu}
                 disabled={chipsLoading}
-              //overlayStyle={{}}
+                //overlayStyle={{}}
               >
                 <Button style={{ float: "right" }} type="link">
                   Filter <DownOutlined />
@@ -7559,10 +7656,11 @@ function BaseMap(props) {
                   <Card
                     key="1"
                     onClick={() => setSelectedKey(1)}
-                    className={`create-mission-extended-card ${selectedKey == 1
-                      ? "create-mission-extended-card-selected"
-                      : ""
-                      }`}
+                    className={`create-mission-extended-card ${
+                      selectedKey == 1
+                        ? "create-mission-extended-card-selected"
+                        : ""
+                    }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -7584,10 +7682,11 @@ function BaseMap(props) {
                   <Card
                     key="2"
                     onClick={() => setSelectedKey(2)}
-                    className={`create-mission-extended-card ${selectedKey == 2
-                      ? "create-mission-extended-card-selected"
-                      : ""
-                      }`}
+                    className={`create-mission-extended-card ${
+                      selectedKey == 2
+                        ? "create-mission-extended-card-selected"
+                        : ""
+                    }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -7886,14 +7985,23 @@ function BaseMap(props) {
               autoExpandParent={autoExpandParent}
               onCheck={onCheck}
               checkedKeys={(() => {
-                const checked = AllLayers.filter((layer) => layer.isChecked).map((layer) => layer._id)
-                if(MissionLayers.isAlertChecked) checked.push("alert");
-                if(MissionLayers.isVODChecked) checked.push("vod");
+                const checked = AllLayers.filter(
+                  (layer) => layer.isChecked
+                ).map((layer) => layer._id);
+                if (MissionLayers.isAlertChecked) checked.push("alert");
+                if (MissionLayers.isVODChecked) checked.push("vod");
                 return checked;
               })()}
               onSelect={onSelect}
               selectedKeys={selectedKeys}
-              treeData={ILayersToTree(AllLayers, getTitleElement, getGroupTitleElement, renderRangePicker, sortType, isAscending)}
+              treeData={ILayersToTree(
+                AllLayers,
+                getTitleElement,
+                getGroupTitleElement,
+                renderRangePicker,
+                sortType,
+                isAscending
+              )}
               onDrop={onDrop}
               draggable={(node: any) => {
                 if (
@@ -8153,7 +8261,7 @@ function BaseMap(props) {
         canUploadToBaseLayer={perms.canUploadToBaseLayer}
         canUpdateBaseLayer={perms.canUpdateBaseLayer}
         setViewport={setViewport}
-        layer={AllLayers.find((layer) => (layer._id === featureLayer))}
+        layer={AllLayers.find((layer) => layer._id === featureLayer)}
         layerPath={featureLayerPath}
         layerLabel={selectedLayerLabel}
         updateLayerDataAfterEditing={updateLayerDataAfterEditing}
@@ -8216,7 +8324,7 @@ function BaseMap(props) {
         <Modal
           title="Edit Group"
           open={visibleEditModal}
-          onOk={() => { }}
+          onOk={() => {}}
           onCancel={() => {
             setVisibleEditModal(false);
           }}

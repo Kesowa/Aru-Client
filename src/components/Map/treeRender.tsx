@@ -1,6 +1,12 @@
 import { Layer as GLayer } from "./layerRender";
 import { Typography } from "antd";
-import { FolderOutlined, FileImageOutlined, EnvironmentOutlined, BranchesOutlined, GatewayOutlined } from "@ant-design/icons";
+import {
+  FolderOutlined,
+  FileImageOutlined,
+  EnvironmentOutlined,
+  BranchesOutlined,
+  GatewayOutlined,
+} from "@ant-design/icons";
 import moment from "moment";
 
 const { Text } = Typography;
@@ -80,45 +86,45 @@ export const ILayersToTree = (
 // }
 
 type Layer = GLayer & {
-  icon: Object,
-  key: string,
-  title: Object,
-  groupId: string,
-  group: false,
-}
+  icon: Object;
+  key: string;
+  title: Object;
+  groupId: string;
+  group: false;
+};
 
 type LayerGroup = GLayer["layerGroupId"] & {
-  key: string,
-  group: true,
-  groupId: string,
-  icon: Object,
-  title: Object,
-  children: Layer[],
-  groupType: 1 | 2,
+  key: string;
+  group: true;
+  groupId: string;
+  icon: Object;
+  title: Object;
+  children: Layer[];
+  groupType: 1 | 2;
 };
 type Child = Layer | LayerGroup;
 type MissionChild = MissionLayer & {
-  icon: Object,
-  key: string,
-  title: Object,
-  group: boolean,
+  icon: Object;
+  key: string;
+  title: Object;
+  group: boolean;
 };
 
 type TreeData = [
   {
-    title: "Vector",
-    key: "1",
-    children: Child[]
+    title: "Vector";
+    key: "1";
+    children: Child[];
   },
   {
-    title: "Raster",
-    key: "2",
-    children: Child[]
+    title: "Raster";
+    key: "2";
+    children: Child[];
   },
   {
-    title: "Mission",
-    key: "3",
-    children: MissionChild[]
+    title: "Mission";
+    key: "3";
+    children: MissionChild[];
   }
 ];
 
@@ -142,18 +148,25 @@ function groupLayers(
   getTitleElement: (layer: GLayer) => JSX.Element,
   getGroupTitleElement: (layerGroup: GLayer["layerGroupId"]) => JSX.Element
 ) {
-  const groupedLayers: Child[] = []
-  layers.forEach(layer => {
+  const groupedLayers: Child[] = [];
+  layers.forEach((layer) => {
     const cookedLayer: Layer = {
       ...layer,
-      icon: layer.type == "Raster" ? <FileImageOutlined /> : vectorIcon(layer.vector.type, layer.color),
+      icon:
+        layer.type == "Raster" ? (
+          <FileImageOutlined />
+        ) : (
+          vectorIcon(layer.vector.type, layer.color)
+        ),
       key: layer._id,
       title: getTitleElement(layer),
       groupId: layer.layerGroupId?._id,
       group: false,
     };
     if (layer.layerGroupId?._id) {
-      let layerGroup = groupedLayers.find(child => (child.group && child.groupId == layer.layerGroupId._id));
+      const layerGroup = groupedLayers.find(
+        (child) => child.group && child.groupId == layer.layerGroupId._id
+      );
       if (layerGroup == undefined) {
         groupedLayers.push({
           ...layer.layerGroupId,
@@ -164,7 +177,7 @@ function groupLayers(
           title: getGroupTitleElement(layer.layerGroupId),
           children: [cookedLayer],
           groupType: layer.type == "Vector" ? 1 : 2,
-        })
+        });
       }
       if (layerGroup?.group && layerGroup) {
         layerGroup.children.push(cookedLayer);
@@ -172,7 +185,7 @@ function groupLayers(
     } else {
       groupedLayers.push(cookedLayer);
     }
-  })
+  });
   return groupedLayers;
 }
 
@@ -248,7 +261,7 @@ function AirPollutionIcon({ color }: { color: string }) {
       />
     </svg>
   );
-};
+}
 
 function WindDirectionIcon({ color }: { color: string }) {
   return (
@@ -265,5 +278,4 @@ function WindDirectionIcon({ color }: { color: string }) {
       />
     </svg>
   );
-};
-
+}
