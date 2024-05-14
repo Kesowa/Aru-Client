@@ -790,8 +790,6 @@ function BaseMap(props) {
   // }, [img, flattenedBounds]);
   //-----------------------------
 
-
-
   const osm = [
     new TileLayer({
       // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
@@ -6424,8 +6422,8 @@ function BaseMap(props) {
               ? [osm, visibleLayers, drawPolygonTool]
               : [visibleLayers, drawPolygonTool]
             : osmState
-            ? [osm, visibleLayers, maskLayer] //digitizerLayer  
-            : [visibleLayers, maskLayer], //digitizerLayer  
+            ? [osm, visibleLayers, maskLayer] //digitizerLayer
+            : [visibleLayers, maskLayer], //digitizerLayer
         ]}
         style={{ height: "100vh", width: "100%" }}
         // onHover={(info) => {
@@ -7414,7 +7412,7 @@ function BaseMap(props) {
           {/* <Button onClick={() => setIsModalVisible4(true)}>new</Button> */}
         </div>
       )}
-      {digitizer && (<SvgToGeojson deckRef={deckRef} />)}
+      {digitizer && <SvgToGeojson deckRef={deckRef} />}
       <div
         className="bottom-bar"
         style={{

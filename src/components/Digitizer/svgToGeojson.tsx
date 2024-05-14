@@ -34,7 +34,7 @@ const SvgToGeojson = (deckRef) => {
   const [canvasOffsetY, setCanvasOffsetY] = useState(0);
   const [canvasRotation, setCanvasRotation] = useState(0);
   const [canvasImageOpacity, setCanvasImageOpacity] = useState(1);
-//   const [digitizerLayer, setDigitizerLayer] = useState(null);
+  //   const [digitizerLayer, setDigitizerLayer] = useState(null);
   const [flattenedBounds, setFlattenedBounds] = useState([]);
 
   useEffect(() => {
