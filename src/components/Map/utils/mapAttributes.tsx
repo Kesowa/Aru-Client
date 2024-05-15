@@ -10,6 +10,7 @@ import { logout } from "../../../actions/authAction";
 import { connect } from "react-redux";
 import FeatureTable from "./featureTable";
 import { COG_URL, TITILER_STATIC } from "src/constants";
+import { Layer } from "../layerRender";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -39,9 +40,10 @@ interface Props {
   defaultKeys: any;
   selectedIndexes: number[];
   setColorMap: (color: string) => void;
-  setOverlayID: (color: string) => void;
+  setOverlayID: (id: string, overlayId: string) => void;
   setTerrainMap: (value: boolean) => void;
-  allLayers: any;
+  // allLayers: any;
+  AllLayers: Layer[];
   canEditGeojson: boolean;
   canDeleteFeature: boolean;
   updateFeatureCountInLayers: (id: string, count: number) => void;
@@ -83,19 +85,20 @@ const MapAttributes: React.FC<Props> = (props) => {
   };
 
   const [state, setState] = useState<State>(initialState);
-  const filteredLayers = Object.keys(props.allLayers)
-    .map((key) => {
-      const layer = props.allLayers[key];
-      if (layer.type === "DEM" || layer.type === "ORTHO") {
-        return {
-          key,
-          ...layer,
-        };
-      } else {
-        return null;
-      }
-    })
-    .filter((layer) => layer !== null);
+  const [page, setPage] = useState<State>(initialState);
+  const [limit, setLimit] = useState<State>(initialState);
+  const [total, setTotal] = useState<State>(initialState);
+  const [isTableLoading, setIsTableLoading] = useState<boolean>(
+    initialState.isTableLoading
+  );
+  const [tableData, setTableData] = useState<State>(initialState);
+  // const filteredLayers = Object.values(props.allLayers).filter(
+  //   (layer) => layer.type === "DEM" || layer.type === "ortho"
+  // );
+  const filteredLayers = props.AllLayers.filter(
+    (layer) =>
+      layer.type === "Raster" && ["DEM", "ORTHO"].includes(layer.raster.name)
+  );
 
   const onChange = (checked: boolean) => {
     props.setTerrainMap(checked);
@@ -285,7 +288,9 @@ const MapAttributes: React.FC<Props> = (props) => {
       }
       if (
         props.flaggedFilter ||
-        props.allLayers[`1-${props.id}`]?.flaggedFeatures.includes(record.index)
+        props.AllLayers.find(
+          (layer) => layer._id === props.id
+        )?.flaggedFeatures.includes(record.index)
       ) {
         return {
           ...record,
@@ -327,7 +332,7 @@ const MapAttributes: React.FC<Props> = (props) => {
   }
 
   function changeOverlay(value: string) {
-    props.setOverlayID(value);
+    props.setOverlayID(props.id, value);
   }
 
   const rasterData = (
@@ -404,9 +409,8 @@ const MapAttributes: React.FC<Props> = (props) => {
                   onChange={changeOverlay}
                 >
                   {filteredLayers.map((layer) => (
-                    <Option key={layer.name} value={layer.key}>
+                    <Option key={layer.name} value={layer._id}>
                       {layer.name}
-                      {console.log("layer", layer)}
                     </Option>
                   ))}
                 </Select>
@@ -429,7 +433,7 @@ const MapAttributes: React.FC<Props> = (props) => {
           bottomBarHeight={props.bottomBarHeight}
           contentHeight={state.contentHeight}
           tableData={state.tableData}
-          allLayers={props.allLayers}
+          // allLayers={props.allLayers} // The FeatureTable component takes the allLayers prop from global state, the value passed here doesn't get used
           flaggedFilter={props.flaggedFilter}
           unflaggedFilter={props.unflaggedFilter}
           setPage={(page) => setState((prev) => ({ ...prev, page }))}
