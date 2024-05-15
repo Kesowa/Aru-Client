@@ -724,6 +724,12 @@ function BaseMap(props) {
   const [opcity, setOpcity] = useState(1);
   const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
   const [digitizer, setDigitizer] = useState(false);
+  const [digitizerLayer, setDigitizerLayer] = useState(null);
+
+  const handleChildValueChange = (newValue) => {
+    console.log(newValue);
+    setDigitizerLayer(newValue);
+  };
 
   const changePolygonSize = (value) => {
     setPolygonSize(value);
@@ -774,21 +780,6 @@ function BaseMap(props) {
     },
     [isElevationEnabled]
   );
-
-  //need in the index.tsx to render the image
-
-  // useEffect(() => {
-  //   if (img && flattenedBounds.length > 0) {
-  //     const newDigitizerLayer = new BitmapLayer({
-  //       id: "image-layer",
-  //       image: img,
-  //       bounds: flattenedBounds,
-  //       opacity: 1,
-  //     });
-  //     setDigitizerLayer(newDigitizerLayer);
-  //   }
-  // }, [img, flattenedBounds]);
-  //-----------------------------
 
   const osm = [
     new TileLayer({
@@ -6422,8 +6413,8 @@ function BaseMap(props) {
               ? [osm, visibleLayers, drawPolygonTool]
               : [visibleLayers, drawPolygonTool]
             : osmState
-            ? [osm, visibleLayers, maskLayer] //digitizerLayer
-            : [visibleLayers, maskLayer], //digitizerLayer
+            ? [osm, visibleLayers, maskLayer,digitizerLayer]
+            : [visibleLayers, maskLayer,digitizerLayer],
         ]}
         style={{ height: "100vh", width: "100%" }}
         // onHover={(info) => {
@@ -7412,7 +7403,9 @@ function BaseMap(props) {
           {/* <Button onClick={() => setIsModalVisible4(true)}>new</Button> */}
         </div>
       )}
-      {digitizer && <SvgToGeojson deckRef={deckRef} />}
+
+      {digitizer && (<SvgToGeojson deckRef={deckRef} onValueChange={handleChildValueChange} />)}      
+      
       <div
         className="bottom-bar"
         style={{
