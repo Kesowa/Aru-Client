@@ -4684,7 +4684,9 @@ function BaseMap(props) {
           message.success(res.data.message);
           const deletedLayerGroupId = res.data.data._id;
           SetAllLayers((prev) =>
-            prev.filter((layer) => layer.layerGroupId?._id !== deletedLayerGroupId)
+            prev.filter(
+              (layer) => layer.layerGroupId?._id !== deletedLayerGroupId
+            )
           );
           // updateTreeDataAfterGroupDelete(id);
         } else {
