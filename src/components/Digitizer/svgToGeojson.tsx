@@ -420,8 +420,29 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
         geoFromSVGXML(
           modifiedSvgText,
           (layers) => {
-            const json = JSON.stringify(layers[0].geo);
-            console.log(json);
+            // Extract the fill color from each path
+            const paths = svgDocument.querySelectorAll("path");
+            const geoJsonFeatures = layers[0].geo.features.map(
+              (feature, index) => {
+                const path = paths[index];
+                const pathStyle = path.getAttribute("style");
+                const fillMatch = pathStyle.match(/fill:\s*([^;]+)/);
+                const fillColor = fillMatch ? fillMatch[1] : null;
+
+                // Add color property to the properties of each feature
+                return {
+                  ...feature,
+                  properties: {
+                    ...feature.properties,
+                    color: fillColor,
+                  },
+                };
+              }
+            );
+
+            // Replace features array with the modified one
+            layers[0].geo.features = geoJsonFeatures;
+
             const geoJsonString = JSON.stringify(layers[0].geo);
             const blob = new Blob([geoJsonString], {
               type: "application/json",
@@ -436,6 +457,7 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
           { layers: true, tolerance: 0.5 }
         );
       });
+    
     };
     reader.readAsText(blob);
     setSvgImage(false);
@@ -538,69 +560,70 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
         </Upload>
         <div className="parameters-container">
           <label>
-            Global Corner:
+            Global Corner: {globalCorner}
             <input
               title="Global Corner"
               type="range"
               name="globalCorner"
               min="0"
-              max="360"
+              max="180"
+              step="1"
               value={globalCorner}
               onChange={(e) => setGlobalCorner(parseInt(e.target.value))}
               className="broad-slider"
             />
           </label>
           <label>
-            Global Length:
+            Global Length: {globalLength}
             <input
               title="Global Length"
               type="range"
               name="globalLength"
-              min="0"
+              min="3.5"
               max="10"
-              step="0.1"
+              step="0.5"
               value={globalLength}
               onChange={(e) => setGlobalLength(parseFloat(e.target.value))}
               className="broad-slider"
             />
           </label>
           <label>
-            Global Splice:
+            Global Splice: {globalSplice}
             <input
               title="Golbal Splice"
               type="range"
               name="globalSplice"
               min="0"
-              max="360"
-              step="0.1"
+              max="180"
+              step="1"
               value={globalSplice}
               onChange={(e) => setGlobalSplice(parseInt(e.target.value))}
               className="broad-slider"
             />
           </label>
           <label>
-            Filter Speckle:
+            Filter Speckle: {globalFilterSpeckle}
             <input
               title="Global FilterSpeckle"
               type="range"
               name="globalFilterSpeckle"
-              min="0"
-              max="360"
-              step="0.1"
+              min="1"
+              max="16"
+              step="1"
               value={globalFilterSpeckle}
               onChange={(e) => setGlobalFilterSpeckle(parseInt(e.target.value))}
               className="broad-slider"
             />
           </label>
           <label>
-            Color Precision:
+            Color Precision: {globalColorPrecision}
             <input
               title="Global ColorPrecision"
               type="range"
               name="globalColorPrecision"
-              min="0"
-              max="360"
-              step="0.1"
+              min="1"
+              max="8"
+              step="1"
               value={globalColorPrecision}
               onChange={(e) =>
                 setGlobalColorPrecision(parseInt(e.target.value))
@@ -609,14 +632,14 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
             />
           </label>
           <label>
-            Layer Difference:
+             Layer Difference: {globalLayerDifference}
             <input
               title="Global LayerDifference"
               type="range"
               name="globalLayerDifference"
               min="0"
-              max="360"
-              step="0.1"
+              max="255"
+              step="1"
               value={globalLayerDifference}
               onChange={(e) =>
                 setGlobalLayerDifference(parseInt(e.target.value))
@@ -625,7 +648,7 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
             />
           </label>
           <label>
-            Path Precision:
+            Path Precision: {globalPathPrecision}
             <input
               title="Global PathPrecision"
               type="range"
