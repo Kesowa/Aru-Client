@@ -4336,7 +4336,7 @@ function BaseMap(props) {
           okText: "Yes",
           cancelText: "No",
           onOk: () => {
-            deleteGroup(id);
+            deleteGroup(layerGroup._id);
           },
         });
       }
@@ -4682,9 +4682,9 @@ function BaseMap(props) {
       .then((res) => {
         if (res.data.status) {
           message.success(res.data.message);
-          const deletedLayerGroupId = result.data.data._id;
+          const deletedLayerGroupId = res.data.data._id;
           SetAllLayers((prev) =>
-            prev.filter((layer) => layer.layerGroupId !== deletedLayerGroupId)
+            prev.filter((layer) => layer.layerGroupId?._id !== deletedLayerGroupId)
           );
           // updateTreeDataAfterGroupDelete(id);
         } else {
