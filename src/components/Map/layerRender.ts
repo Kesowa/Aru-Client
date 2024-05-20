@@ -2,11 +2,15 @@ import MarkerIcon from "../../static/MarkerIcon.png";
 import TankIcon from "../../static/TankIcon.png";
 import ValveIcon from "../../static/ValveIcon.png";
 import DotIcon from "../../static/DotIcon.png";
-import { TerrainLayer, Tile3DLayer } from "@deck.gl/geo-layers/typed";
+import {
+  TerrainLayer,
+  Tile3DLayer,
+  TileLayer,
+} from "@deck.gl/geo-layers/typed";
 import { BitmapLayer, GeoJsonLayer, IconLayer } from "@deck.gl/layers/typed";
 import { Tiles3DLoader } from "@loaders.gl/3d-tiles";
 import { MaskExtension } from "@deck.gl/extensions/typed";
-import { HeatmapLayer, TileLayer } from "deck.gl";
+import { HeatmapLayer } from "@deck.gl/aggregation-layers/typed";
 import { COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
 import { Feature, GeoJson, Point } from "src/types/geojson";
 import { ILayer } from "src/types/layer";
@@ -15,9 +19,9 @@ import { hexToRGB } from "./colorUtils";
 import { MASK_ID } from ".";
 
 export type Layer = ILayer & {
-  isChecked?: boolean;
-  render3D?: boolean;
-  isMasked?: boolean;
+  _isChecked?: boolean;
+  _render3D?: boolean;
+  _isMasked?: boolean;
   _metadata?: {
     bounds: [number, number, number, number];
   };
@@ -71,9 +75,9 @@ const getRasterDataUrl = (layer: Layer) => {
 
 export const ILayerToDeckLayer = (layers: Layer[]) => {
   return layers
-    .filter((layer) => layer.isChecked === true)
+    .filter((layer) => layer._isChecked === true)
     .map((layer) => {
-      const maskProps = layer.isMasked
+      const maskProps = layer._isMasked
         ? {
             // enable masking
             extensions: [new MaskExtension()],
@@ -97,7 +101,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             },
           });
         }
-        if (layer.raster.name == "DEM" && layer.render3D == true) {
+        if (layer.raster.name == "DEM" && layer._render3D == true) {
           const overlayLayer = layer.raster.overlayId
             ? layers.find((l) => l._id === layer.raster.overlayId)
             : layer;
@@ -125,6 +129,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
           maxZoom: 24,
           tileSize: 256,
           pickable: true,
+          extent: layer._metadata?.bounds,
           renderSubLayers: (props) => {
             const {
               bbox: { west, south, east, north },

@@ -291,7 +291,7 @@ function BaseMap(props) {
         label: "Unassign Form Group",
       });
     }
-    if (layer.isChecked) {
+    if (layer._isChecked) {
       const submenuChildren: MenuProps["items"] = [];
       if ((props.isBaseMap && perms.canCreateBaseLayer) || !props.isBaseMap) {
         submenuChildren.push({
@@ -329,7 +329,7 @@ function BaseMap(props) {
 
     items.push({
       key: "14",
-      label: layer.isMasked ? "Remove Mask" : "Add Mask",
+      label: layer._isMasked ? "Remove Mask" : "Add Mask",
     });
     items.push({
       key: "15",
@@ -2155,7 +2155,7 @@ function BaseMap(props) {
     SetAllLayers((prev) =>
       prev.map((layer) => {
         if (layer.type === "Raster" && layer.raster.name === "DEM") {
-          layer.render3D = terrainmap;
+          layer._render3D = terrainmap;
           layer.raster.colorMap = colorMap;
         }
         return layer;
@@ -2168,7 +2168,7 @@ function BaseMap(props) {
     SetAllLayers((prev) =>
       prev.map((layer) => {
         if (layer._id === featureLayer)
-          layer.render3D = threeDState === "Enabled";
+          layer._render3D = threeDState === "Enabled";
         return layer;
       })
     );
@@ -2219,7 +2219,7 @@ function BaseMap(props) {
   const setScaleData = () => {
     const demLayers = AllLayers.filter(
       (layer) =>
-        layer.isChecked &&
+        layer._isChecked &&
         layer.type === "Raster" &&
         layer.raster.name === "DEM"
     );
@@ -2269,39 +2269,8 @@ function BaseMap(props) {
   const focusSelectedLayers = async () => {
     const boundingBoxes: BBox[] = [];
     for (const layer of AllLayers) {
-      if (layer.isChecked) {
-        if (layer.type === "Vector") {
-          const response = await fetch(STATIC_URL + layer.layerpath);
-          const data = await response.json();
-          let features = data.features;
-          if (flaggedFilter || unflaggedFilter) {
-            features = features.filter((feature, idx) => {
-              if (flaggedFilter) {
-                return layer.flaggedFeatures.includes(idx);
-              } else if (unflaggedFilter) {
-                return !layer.flaggedFeatures.includes(idx);
-              }
-            });
-          }
-          if (Array.isArray(features)) {
-            const bounds = turf.bbox(turf.featureCollection(features)) as BBox;
-            boundingBoxes.push(bounds);
-          }
-        }
-        if (layer.type === "Raster") {
-          const metaDataURL = `${COG_URL}/cog/info?url=${TITILER_STATIC}${layer.layerpath}`;
-          const response = await fetch(metaDataURL, {
-            method: "GET",
-          });
-          const metadata = await response.json();
-          const bounds = [
-            metadata["bounds"][0],
-            metadata["bounds"][1],
-            metadata["bounds"][2],
-            metadata["bounds"][3],
-          ] as BBox;
-          boundingBoxes.push(bounds);
-        }
+      if (layer._isChecked && layer._metadata?.bounds) {
+        boundingBoxes.push(layer._metadata.bounds);
       }
     }
     if (MissionLayers.isAlertChecked) {
@@ -3213,7 +3182,7 @@ function BaseMap(props) {
   //   return ordering.reverse();
   // };
 
-  const onCheck = (checkedKeysValue: any, e) => {
+  const onCheck = async (checkedKeysValue: any, e) => {
     // why setLayerLoading(true) only for vectors?
     // if (
     //   checkedKeysValue.length > lastCount &&
@@ -3244,12 +3213,53 @@ function BaseMap(props) {
 
     setLastCount(checkedKeysValue.length);
     // console.log("CHECKED: ", checkedKeysValue);
-    SetAllLayers((prev) =>
-      prev.map((layer) => {
-        layer.isChecked = checkedKeysValue.includes(layer._id);
-        return layer;
-      })
-    );
+
+    const layersWithBounds: Layer[] = [];
+
+    for (const layer of AllLayers) {
+      const _isChecked = checkedKeysValue.includes(layer._id);
+      if (_isChecked && !layer._metadata?.bounds) {
+        let bounds: BBox;
+        if (layer.type === "Vector") {
+          const response = await fetch(STATIC_URL + layer.layerpath);
+          const data = await response.json();
+          let features = data.features;
+          if (flaggedFilter || unflaggedFilter) {
+            features = features.filter((feature, idx) => {
+              if (flaggedFilter) {
+                return layer.flaggedFeatures.includes(idx);
+              } else if (unflaggedFilter) {
+                return !layer.flaggedFeatures.includes(idx);
+              }
+            });
+          }
+          bounds = turf.bbox(turf.featureCollection(features)) as BBox;
+        } else {
+          const metaDataURL = `${COG_URL}/cog/info?url=${TITILER_STATIC}${layer.layerpath}`;
+          const response = await fetch(metaDataURL, {
+            method: "GET",
+          });
+          const metadata = await response.json();
+          bounds = [
+            metadata["bounds"][0],
+            metadata["bounds"][1],
+            metadata["bounds"][2],
+            metadata["bounds"][3],
+          ] as BBox;
+        }
+        layersWithBounds.push({
+          ...layer,
+          _isChecked,
+          _metadata: {
+            ...layer._metadata,
+            bounds
+          }
+        });
+      }
+    }
+
+
+    SetAllLayers(layersWithBounds);
     SetMissionLayers({
       alertGeojsonUrl: missionGeojsonURL(
         "alert",
@@ -3686,7 +3696,7 @@ function BaseMap(props) {
     props.loading(true);
 
     const layers = AllLayers.filter(
-      (layer) => layer.isChecked && layer.type === type
+      (layer) => layer._isChecked && layer.type === type
     ).map((layer) => layer._id);
 
     if (props.isBaseMap) {
@@ -3797,7 +3807,7 @@ function BaseMap(props) {
   const handleMaskLayerOption = (id: string) => {
     SetAllLayers((prev) =>
       prev.map((layer) => {
-        if (layer._id === id) layer.isMasked = !layer.isMasked;
+        if (layer._id === id) layer._isMasked = !layer._isMasked;
         return layer;
       })
     );
@@ -5369,8 +5379,8 @@ function BaseMap(props) {
         ...prev,
         {
           ...layer,
-          isChecked: true,
-          render3D: false,
+          _isChecked: true,
+          _render3D: false,
         },
       ]);
 
@@ -5866,8 +5876,8 @@ function BaseMap(props) {
           if (layer._id === data._id)
             return {
               ...data,
-              isChecked: layer.isChecked,
-              render3D: layer.render3D,
+              _isChecked: layer._isChecked,
+              _render3D: layer._render3D,
             };
           else return layer;
         })
@@ -6719,7 +6729,7 @@ function BaseMap(props) {
     props.loading(true);
     const layersToGroup = AllLayers.filter(
       (layer) =>
-        layer.isChecked && layer.type === ["", "Vector", "Raster"][moveType]
+        layer._isChecked && layer.type === ["", "Vector", "Raster"][moveType]
     ).map((layer) => layer._id);
 
     http
@@ -6775,7 +6785,7 @@ function BaseMap(props) {
     props.loading(true);
     const layersToMove = AllLayers.filter(
       (layer) =>
-        layer.isChecked && layer.type === ["", "Vector", "Raster"][moveType]
+        layer._isChecked && layer.type === ["", "Vector", "Raster"][moveType]
     ).map((layer) => layer._id);
 
     http
@@ -7988,7 +7998,7 @@ function BaseMap(props) {
               onCheck={onCheck}
               checkedKeys={(() => {
                 const checked = AllLayers.filter(
-                  (layer) => layer.isChecked
+                  (layer) => layer._isChecked
                 ).map((layer) => layer._id);
                 if (MissionLayers.isAlertChecked) checked.push("alert");
                 if (MissionLayers.isVODChecked) checked.push("vod");
