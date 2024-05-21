@@ -3255,6 +3255,11 @@ function BaseMap(props) {
             bounds
           }
         });
+      } else {
+        layersWithBounds.push({
+          ...layer,
+          _isChecked
+        });
       }
     }
 
