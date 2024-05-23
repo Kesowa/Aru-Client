@@ -173,6 +173,8 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
     }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0);
+
+
     const converterParams = {
       canvas_id: canvas.id,
       svg_id: svg.id,
@@ -414,7 +416,7 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
       const modifiedSvgText = new XMLSerializer().serializeToString(
         svgDocument
       );
-
+      
       // Pass modified SVG text to svg2geojson converter
       await new Promise((resolve, reject) => {
         geoFromSVGXML(
@@ -530,14 +532,14 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
 
       {svgImage && (
         <div className="canvas-rotate">
-          <input
+          {/* <input
             title="Rotate Image"
             type="range"
             min="0"
             max="360"
             value={canvasRotation}
             onChange={handleRotationChange}
-          />
+          /> */}
           <input
             title="Opacity Of Image"
             type="range"

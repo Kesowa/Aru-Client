@@ -4,6 +4,8 @@ import React, {
   useRef,
   useMemo,
   useCallback,
+  lazy, 
+  Suspense
 } from "react";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
@@ -143,7 +145,7 @@ import * as turf from "@turf/turf";
 import NavIcon from "../../static/nav_icon.png";
 import { load } from "@loaders.gl/core";
 import { Tiles3DLoader } from "@loaders.gl/3d-tiles";
-import SvgToGeojson from "../Digitizer/svgToGeojson";
+const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
   [lat - size * 0.5, lng - size * 0.5],
@@ -7403,9 +7405,9 @@ function BaseMap(props) {
           {/* <Button onClick={() => setIsModalVisible4(true)}>new</Button> */}
         </div>
       )}
-
-      {digitizer && (<SvgToGeojson deckRef={deckRef} onValueChange={handleChildValueChange} />)}      
-      
+      <Suspense fallback={null}>
+      {digitizer && (<SvgToGeojson deckRef={deckRef} onValueChange={handleChildValueChange} />)}  
+      </Suspense>
       <div
         className="bottom-bar"
         style={{
