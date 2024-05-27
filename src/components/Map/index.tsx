@@ -1079,7 +1079,6 @@ function BaseMap(props) {
 
   // Filter
   const filterLayers = () => {
-    console.log(filterState);
     let body: any = {};
     if (!props.isBaseMap) {
       body = {
@@ -7234,12 +7233,15 @@ function BaseMap(props) {
                       )}
                     </span>{" "}
                     <Checkbox
-                      checked={!!filterState.time}
                       style={{
                         marginTop: "2px",
                         marginRight: "6px",
                         marginLeft: "6px",
                       }}
+                      onChange={(e) => setFilterState((prev) => {
+                        prev.time = (e.target.checked) ? "100 days" : null;
+                        return { ...prev };
+                      })}
                     />{" "}
                     <Text strong>Time Filter</Text>
                     <div
@@ -7260,7 +7262,7 @@ function BaseMap(props) {
                         onChange={(value) => {
                           setFilterState((prev) => {
                             prev.time = value;
-                            return prev;
+                            return { ...prev };
                           });
                         }}
                         disabled={!filterState.time}
