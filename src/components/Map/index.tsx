@@ -1079,50 +1079,47 @@ function BaseMap(props) {
 
   // Filter
   const filterLayers = () => {
-    if (filterState.rasterProps.size && filterState.vectorProps.size) {
-      let body: any = {};
-      if (!props.isBaseMap) {
-        body = {
-          missionId: id,
-        };
-      }
+    console.log(filterState);
+    let body: any = {};
+    if (!props.isBaseMap) {
+      body = {
+        missionId: id,
+      };
+    }
 
-      if (filterState.rasterProps.size) body["rasterProps"] = Array.from(filterState.rasterProps);
-      if (filterState.vectorProps.size) body["vectorProps"] = Array.from(filterState.vectorProps);;
-      if (filterState.vectorPropsType.size) body["vectorPropsType"] = Array.from(filterState.vectorPropsType);
-      if (!!filterState.time) body["time"] = filterState.time;
+    if (filterState.rasterProps.size) body["rasterProps"] = Array.from(filterState.rasterProps);
+    if (filterState.vectorProps.size) body["vectorProps"] = Array.from(filterState.vectorProps);;
+    if (filterState.vectorPropsType.size) body["vectorPropsType"] = Array.from(filterState.vectorPropsType);
+    if (!!filterState.time) body["time"] = filterState.time;
 
-      if (
-        filterState.rasterProps.size ||
-        filterState.vectorProps.size ||
-        filterState.vectorPropsType.size ||
-        !!filterState.time
-      ) {
-        setChipsLoading(true);
-        http
-          .post(`${apis.FILTER_LAYER}`, body)
-          .then((res) => {
-            console.log("Filter API response", res);
-            if (res.data.status) {
-              SetAllLayers(res.data.data);
-              // removeChips(res.data.data);
-            } else {
-              message.info("No result for selected filter!");
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-            message.error("Layers couldn't be filtered");
-            AxiosErrorHandler(err, props.logout);
-          })
-          .finally(() => setChipsLoading(false));
-      } else {
-        getAllLayers(id);
-      }
+    if (
+      filterState.rasterProps.size ||
+      filterState.vectorProps.size ||
+      filterState.vectorPropsType.size ||
+      !!filterState.time
+    ) {
+      setChipsLoading(true);
+      http
+        .post(`${apis.FILTER_LAYER}`, body)
+        .then((res) => {
+          console.log("Filter API response", res);
+          if (res.data.status) {
+            SetAllLayers(res.data.data);
+            // removeChips(res.data.data);
+          } else {
+            message.info("No result for selected filter!");
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          message.error("Layers couldn't be filtered");
+          AxiosErrorHandler(err, props.logout);
+        })
+        .finally(() => setChipsLoading(false));
     } else {
-        getAllLayers(id);
-      }  
-    };
+      getAllLayers(id);
+    } 
+  };
 
   useEffect(() => {
     const missionData = async () => {
@@ -1150,7 +1147,6 @@ function BaseMap(props) {
 
   useEffect(() => {
     filterLayers();
-    // console.log("filterLayercalled");
   }, [filterState]);
 
   // ++++++++++++++++++++++++++++++ Sort All Layers +++++++++++++++++++++++++++++++++++++
@@ -5932,17 +5928,24 @@ function BaseMap(props) {
           return {
             key: type,
             label: type,
+            onTitleClick: () => {
+              setFilterState((prev) => {
+                prev.vectorPropsType.add(type);
+                return { ...prev };
+              });
+            },
             children: vectorProps.filter(p => p.type === type).map((p) => {
               return {
-                key: p.name,
-                label: p.name,
-                onTitleClick: () => {
-                  setFilterState((prev) => {
-                    prev.vectorPropsType.add(type);
+                key: `${p.name}${p.type}`,
+                label: (
+                  <div onClick={() => setFilterState((prev) => {
+                    // prev.vectorPropsType.add(type);
                     prev.vectorProps.add(p.name);
-                    return prev;
-                  });
-                }
+                    return { ...prev };
+                  })}>
+                    {p.name}
+                  </div>
+                ),
               };
             }),
           }
@@ -5952,15 +5955,16 @@ function BaseMap(props) {
           label: "Other",
           children: vectorProps.filter(p => !["Point","MultiLineString","MultiPolygon"].includes(p.type)).map((p) => {
             return {
-              key: p.name,
-              label: p.name,
-              onTitleClick: () => {
-                setFilterState((prev) => {
+              key: `${p.name}-${p.type}`,
+              label: (
+                <div onClick={() => setFilterState((prev) => {
                   prev.vectorPropsType.add(p.type);
                   prev.vectorProps.add(p.name);
-                  return prev;
-                });
-              }
+                  return { ...prev };
+                })}>
+                  {p.name}
+                </div>
+              ),
             };
           }),
         }
@@ -5972,13 +5976,14 @@ function BaseMap(props) {
       children: rasterProps.map((p) => {
         return {
           key: p.name,
-          label: p.name,
-          onTitleClick: () => {
-            setFilterState((prev) => {
+          label: (
+            <div onClick={() => setFilterState((prev) => {
               prev.rasterProps.add(p.name);
-              return prev;
-            });
-          }
+              return { ...prev };
+            })}>
+              {p.name}
+            </div>
+          ),
         };
       }),
     },
@@ -7479,7 +7484,7 @@ function BaseMap(props) {
                 closable
                 onClose={() => setFilterState((prev) => {
                   prev.time = null;
-                  return prev;
+                  return { ...prev };
                 })}
               >
                 Last {filterState.time}
@@ -7499,7 +7504,7 @@ function BaseMap(props) {
                     closable
                     onClose={() => setFilterState((prev) => {
                       prev.rasterProps.delete(tag);
-                      return prev;
+                      return { ...prev };
                     })}
                   >
                     {tag}
@@ -7521,7 +7526,7 @@ function BaseMap(props) {
                     closable
                     onClose={() => setFilterState((prev) => {
                       prev.vectorPropsType.delete(tag);
-                      return prev;
+                      return { ...prev };
                     })}
                   >
                     {tag}
@@ -7532,6 +7537,7 @@ function BaseMap(props) {
               {
                 ...Array.from(filterState.vectorProps).map((tag) => {
                   return <Tag
+                  style={{ display: "inline" }}
                     icon={
                       chipsLoading ? (
                         <SyncOutlined spin />
@@ -7543,7 +7549,7 @@ function BaseMap(props) {
                     closable
                     onClose={() => setFilterState((prev) => {
                       prev.vectorProps.delete(tag);
-                      return prev;
+                      return { ...prev };
                     })}
                   >
                     {tag}
