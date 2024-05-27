@@ -1119,8 +1119,10 @@ function BaseMap(props) {
       } else {
         getAllLayers(id);
       }
-    }
-  };
+    } else {
+        getAllLayers(id);
+      }  
+    };
 
   useEffect(() => {
     const missionData = async () => {
@@ -1148,7 +1150,7 @@ function BaseMap(props) {
 
   useEffect(() => {
     filterLayers();
-    //console.log("filterLayercalled");
+    // console.log("filterLayercalled");
   }, [filterState]);
 
   // ++++++++++++++++++++++++++++++ Sort All Layers +++++++++++++++++++++++++++++++++++++
