@@ -1086,10 +1086,13 @@ function BaseMap(props) {
       };
     }
 
-    if (filterState.rasterProps.size) body["rasterProps"] = Array.from(filterState.rasterProps);
-    if (filterState.vectorProps.size) body["vectorProps"] = Array.from(filterState.vectorProps);;
-    if (filterState.vectorPropsType.size) body["vectorPropsType"] = Array.from(filterState.vectorPropsType);
-    if (!!filterState.time) body["time"] = filterState.time;
+    if (filterState.rasterProps.size)
+      body["rasterProps"] = Array.from(filterState.rasterProps);
+    if (filterState.vectorProps.size)
+      body["vectorProps"] = Array.from(filterState.vectorProps);
+    if (filterState.vectorPropsType.size)
+      body["vectorPropsType"] = Array.from(filterState.vectorPropsType);
+    if (filterState.time) body["time"] = filterState.time;
 
     if (
       filterState.rasterProps.size ||
@@ -1117,7 +1120,7 @@ function BaseMap(props) {
         .finally(() => setChipsLoading(false));
     } else {
       getAllLayers(id);
-    } 
+    }
   };
 
   useEffect(() => {
@@ -3090,7 +3093,11 @@ function BaseMap(props) {
   //   return ordering.reverse();
   // };
 
-  const fetchLayerBounds = async (type: string, layerpath: string, flaggedFeatures?: number[]) => {
+  const fetchLayerBounds = async (
+    type: string,
+    layerpath: string,
+    flaggedFeatures?: number[]
+  ) => {
     let bounds: BBox;
     if (type === "Vector") {
       const response = await fetch(STATIC_URL + layerpath);
@@ -3120,7 +3127,7 @@ function BaseMap(props) {
       ] as BBox;
     }
     return bounds;
-  }
+  };
 
   const onCheck = async (checkedKeysValue: any, e) => {
     // why setLayerLoading(true) only for vectors?
@@ -3159,23 +3166,26 @@ function BaseMap(props) {
     for (const layer of AllLayers) {
       const _isChecked = checkedKeysValue.includes(layer._id);
       if (_isChecked && !layer._metadata?.bounds) {
-        const bounds = await fetchLayerBounds(layer.type, layer.layerpath, layer.flaggedFeatures);
+        const bounds = await fetchLayerBounds(
+          layer.type,
+          layer.layerpath,
+          layer.flaggedFeatures
+        );
         layersWithBounds.push({
           ...layer,
           _isChecked,
           _metadata: {
             ...layer._metadata,
-            bounds
-          }
+            bounds,
+          },
         });
       } else {
         layersWithBounds.push({
           ...layer,
-          _isChecked
+          _isChecked,
         });
       }
     }
-
 
     SetAllLayers(layersWithBounds);
     SetMissionLayers({
@@ -5294,20 +5304,20 @@ function BaseMap(props) {
         setvectorLayers([...vectorLayers, layer]);
       }
       fetchLayerBounds(layer.type, layer.layerpath, layer.flaggedFeatures)
-      .then((bounds) => {
-        SetAllLayers((prev) => [
-          ...prev,
-          {
-            ...layer,
-            _isChecked: true,
-            _render3D: false,
-            _metadata: {
-              bounds
-            }
-          },
-        ]);
-      })
-      .catch(error => message.error(error.message));
+        .then((bounds) => {
+          SetAllLayers((prev) => [
+            ...prev,
+            {
+              ...layer,
+              _isChecked: true,
+              _render3D: false,
+              _metadata: {
+                bounds,
+              },
+            },
+          ]);
+        })
+        .catch((error) => message.error(error.message));
 
       // Should no longer be required
       // const data: any = [...treeStructure];
@@ -5923,7 +5933,7 @@ function BaseMap(props) {
       key: "vector",
       label: "Vector",
       children: [
-        ...["Point","MultiLineString","MultiPolygon"].map((type) => {
+        ...["Point", "MultiLineString", "MultiPolygon"].map((type) => {
           return {
             key: type,
             label: type,
@@ -5933,40 +5943,55 @@ function BaseMap(props) {
                 return { ...prev };
               });
             },
-            children: vectorProps.filter(p => p.type === type).map((p) => {
+            children: vectorProps
+              .filter((p) => p.type === type)
+              .map((p) => {
+                return {
+                  key: `${p.name}${p.type}`,
+                  label: (
+                    <div
+                      onClick={() =>
+                        setFilterState((prev) => {
+                          // prev.vectorPropsType.add(type);
+                          prev.vectorProps.add(p.name);
+                          return { ...prev };
+                        })
+                      }
+                    >
+                      {p.name}
+                    </div>
+                  ),
+                };
+              }),
+          };
+        }),
+        {
+          key: "Other",
+          label: "Other",
+          children: vectorProps
+            .filter(
+              (p) =>
+                !["Point", "MultiLineString", "MultiPolygon"].includes(p.type)
+            )
+            .map((p) => {
               return {
-                key: `${p.name}${p.type}`,
+                key: `${p.name}-${p.type}`,
                 label: (
-                  <div onClick={() => setFilterState((prev) => {
-                    // prev.vectorPropsType.add(type);
-                    prev.vectorProps.add(p.name);
-                    return { ...prev };
-                  })}>
+                  <div
+                    onClick={() =>
+                      setFilterState((prev) => {
+                        prev.vectorPropsType.add(p.type);
+                        prev.vectorProps.add(p.name);
+                        return { ...prev };
+                      })
+                    }
+                  >
                     {p.name}
                   </div>
                 ),
               };
             }),
-          }
-        }),
-        {
-          key: "Other",
-          label: "Other",
-          children: vectorProps.filter(p => !["Point","MultiLineString","MultiPolygon"].includes(p.type)).map((p) => {
-            return {
-              key: `${p.name}-${p.type}`,
-              label: (
-                <div onClick={() => setFilterState((prev) => {
-                  prev.vectorPropsType.add(p.type);
-                  prev.vectorProps.add(p.name);
-                  return { ...prev };
-                })}>
-                  {p.name}
-                </div>
-              ),
-            };
-          }),
-        }
+        },
       ],
     },
     {
@@ -5976,10 +6001,14 @@ function BaseMap(props) {
         return {
           key: p.name,
           label: (
-            <div onClick={() => setFilterState((prev) => {
-              prev.rasterProps.add(p.name);
-              return { ...prev };
-            })}>
+            <div
+              onClick={() =>
+                setFilterState((prev) => {
+                  prev.rasterProps.add(p.name);
+                  return { ...prev };
+                })
+              }
+            >
               {p.name}
             </div>
           ),
@@ -7238,10 +7267,12 @@ function BaseMap(props) {
                         marginRight: "6px",
                         marginLeft: "6px",
                       }}
-                      onChange={(e) => setFilterState((prev) => {
-                        prev.time = (e.target.checked) ? "100 days" : null;
-                        return { ...prev };
-                      })}
+                      onChange={(e) =>
+                        setFilterState((prev) => {
+                          prev.time = e.target.checked ? "100 days" : null;
+                          return { ...prev };
+                        })
+                      }
                     />{" "}
                     <Text strong>Time Filter</Text>
                     <div
@@ -7250,7 +7281,7 @@ function BaseMap(props) {
                         transition: "0.2s",
                       }}
                     >
-                      {(!!filterState.time) && (
+                      {!!filterState.time && (
                         <span style={{ margin: "0 5px" }}>
                           {dateFormat()} - {moment().format("DD MMM")}{" "}
                         </span>
@@ -7484,17 +7515,19 @@ function BaseMap(props) {
                 }
                 color="blue"
                 closable
-                onClose={() => setFilterState((prev) => {
-                  prev.time = null;
-                  return { ...prev };
-                })}
+                onClose={() =>
+                  setFilterState((prev) => {
+                    prev.time = null;
+                    return { ...prev };
+                  })
+                }
               >
                 Last {filterState.time}
               </Tag>
               {/* RASTER PROP FILTER TAGS */}
-              {
-                ...Array.from(filterState.rasterProps).map((tag) => {
-                  return <Tag
+              {...Array.from(filterState.rasterProps).map((tag) => {
+                return (
+                  <Tag
                     icon={
                       chipsLoading ? (
                         <SyncOutlined spin />
@@ -7504,19 +7537,21 @@ function BaseMap(props) {
                     }
                     color="blue"
                     closable
-                    onClose={() => setFilterState((prev) => {
-                      prev.rasterProps.delete(tag);
-                      return { ...prev };
-                    })}
+                    onClose={() =>
+                      setFilterState((prev) => {
+                        prev.rasterProps.delete(tag);
+                        return { ...prev };
+                      })
+                    }
                   >
                     {tag}
                   </Tag>
-                })
-              }
+                );
+              })}
               {/* VECTOR PROP TYPE FILTER TAGS */}
-              {
-                ...Array.from(filterState.vectorPropsType).map((tag) => {
-                  return <Tag
+              {...Array.from(filterState.vectorPropsType).map((tag) => {
+                return (
+                  <Tag
                     icon={
                       chipsLoading ? (
                         <SyncOutlined spin />
@@ -7526,20 +7561,22 @@ function BaseMap(props) {
                     }
                     color="blue"
                     closable
-                    onClose={() => setFilterState((prev) => {
-                      prev.vectorPropsType.delete(tag);
-                      return { ...prev };
-                    })}
+                    onClose={() =>
+                      setFilterState((prev) => {
+                        prev.vectorPropsType.delete(tag);
+                        return { ...prev };
+                      })
+                    }
                   >
                     {tag}
                   </Tag>
-                })
-              }
+                );
+              })}
               {/* VECTOR PROP FILTER TAGS */}
-              {
-                ...Array.from(filterState.vectorProps).map((tag) => {
-                  return <Tag
-                  style={{ display: "inline" }}
+              {...Array.from(filterState.vectorProps).map((tag) => {
+                return (
+                  <Tag
+                    style={{ display: "inline" }}
                     icon={
                       chipsLoading ? (
                         <SyncOutlined spin />
@@ -7549,15 +7586,17 @@ function BaseMap(props) {
                     }
                     color="blue"
                     closable
-                    onClose={() => setFilterState((prev) => {
-                      prev.vectorProps.delete(tag);
-                      return { ...prev };
-                    })}
+                    onClose={() =>
+                      setFilterState((prev) => {
+                        prev.vectorProps.delete(tag);
+                        return { ...prev };
+                      })
+                    }
                   >
                     {tag}
                   </Tag>
-                })
-              }
+                );
+              })}
             </div>
 
             <Modal
