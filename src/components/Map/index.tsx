@@ -291,7 +291,7 @@ function BaseMap(props) {
         label: "Unassign Form Group",
       });
     }
-    if (layer.isChecked) {
+    if (layer._isChecked) {
       const submenuChildren: MenuProps["items"] = [];
       if ((props.isBaseMap && perms.canCreateBaseLayer) || !props.isBaseMap) {
         submenuChildren.push({
@@ -329,7 +329,7 @@ function BaseMap(props) {
 
     items.push({
       key: "14",
-      label: layer.isMasked ? "Remove Mask" : "Add Mask",
+      label: layer._isMasked ? "Remove Mask" : "Add Mask",
     });
     items.push({
       key: "15",
@@ -877,16 +877,20 @@ function BaseMap(props) {
   const [toolSelected, setToolSelected] = useState("");
   const [defaultLayerType, setDefaultLayerType] = useState<any>([]);
   const [activeType, setActiveType] = useState(false);
-  const [time, setTime] = useState("100 days");
-  const [timeEnabled, setTimeEnabled] = useState<any>();
   const [sortType, setSortType] = useState("createdAt");
   const [isAscending, setIsAscending] = useState(false);
   const [showEditModel, setshowEditModel] = useState(false);
-  const [selectedRasterProps, setSelectedRasterProps] = useState<any>([]);
-  const [selectedVectorProps, setSelectedVectorProps] = useState<any>([]);
-  const [selectedVectorPropsType, setSelectedVectorPropsType] = useState<any>(
-    []
-  );
+  const [filterState, setFilterState] = useState<{
+    vectorProps: Set<string>;
+    rasterProps: Set<string>;
+    vectorPropsType: Set<string>;
+    time: string | null;
+  }>({
+    vectorProps: new Set([]),
+    rasterProps: new Set([]),
+    vectorPropsType: new Set([]),
+    time: null,
+  });
   const [inheritColor, setInheritColor] = useState(false);
   const [chipsLoading, setChipsLoading] = useState(false);
   const [lastAdded, setLastAdded] = useState("");
@@ -1074,137 +1078,51 @@ function BaseMap(props) {
   }, []);
 
   // Filter
-  const filterLayers = (time) => {
-    if (rasterProps && vectorProps) {
-      let body: any = {};
-      if (!props.isBaseMap) {
-        body = {
-          missionId: id,
-        };
-      }
-
-      if (selectedRasterProps.length) body["rasterProps"] = selectedRasterProps;
-      if (selectedVectorPropsType.length)
-        body["vectorPropsType"] = selectedVectorPropsType;
-      if (selectedVectorProps.length) body["vectorProps"] = selectedVectorProps;
-      if (timeEnabled) body["time"] = time;
-
-      //console.log(JSON.stringify(body));
-
-      if (
-        selectedVectorPropsType.length ||
-        selectedRasterProps.length ||
-        selectedVectorProps.length ||
-        timeEnabled
-      ) {
-        if (valid) {
-          setChipsLoading(true);
-          console.log("Request Body", body);
-
-          http
-            .post(`${apis.FILTER_LAYER}`, body)
-            .then((res) => {
-              console.log("Filter API response", res);
-              if (res.data.status) {
-                SetAllLayers(res.data.data);
-                removeChips(res.data.data);
-              } else {
-                if (res.data.message === " data not match!") {
-                  //---data for filter found
-                  removeLastAdded(lastAdded);
-                  message.info("No result for selected filter!");
-                } else {
-                  message.error(res.data.message);
-                }
-              }
-            })
-            .catch((err) => {
-              console.log(err);
-              message.error("Layers couldn't be filtered");
-              AxiosErrorHandler(err, props.logout);
-            })
-            .finally(() => setChipsLoading(false));
-        }
-      } else {
-        getAllLayers(id);
-      }
+  const filterLayers = () => {
+    let body: any = {};
+    if (!props.isBaseMap) {
+      body = {
+        missionId: id,
+      };
     }
-  };
 
-  const removeLastAdded = (item) => {
-    if (selectedRasterProps && selectedRasterProps.find((i) => i === item)) {
-      const arr = [...selectedRasterProps];
-      setSelectedRasterProps(arr.filter((i) => i !== item));
-    } else if (
-      selectedVectorPropsType &&
-      selectedVectorPropsType.find((i) => i === item)
-    ) {
-      const arr = [...selectedVectorPropsType];
-      setSelectedVectorPropsType(arr.filter((i) => i !== item));
-    } else if (
-      selectedVectorProps &&
-      selectedVectorProps.find((i) => i === item)
-    ) {
-      const arr = [...selectedVectorProps];
-      setSelectedVectorProps(arr.filter((i) => i !== item));
-    }
-    setLastAdded("");
-  };
-
-  const removeChips = (layers) => {
-    let arr = [...selectedRasterProps];
-    let arr1 = [...selectedVectorPropsType];
-    let arr2 = [...selectedVectorProps];
-
-    // matching the chips with the response to filter
-    if (arr.length) {
-      arr.map((i) => {
-        let find = "false";
-        layers.map((layer) => {
-          if (layer.type == "Raster" && layer.raster.name == i) {
-            find = "true";
-          }
-        });
-        if (find === "false") arr = arr.filter((ele) => i !== ele);
-      });
-    }
-    if (arr1.length) {
-      arr1.map((i) => {
-        let find = "false";
-        layers.map((layer) => {
-          if (layer.type == "Vector" && layer.vector.type == i) {
-            find = "true";
-          }
-        });
-        if (find === "false") arr1 = arr1.filter((ele) => i !== ele);
-      });
-    }
-    if (arr2.length) {
-      arr2.map((i) => {
-        let find = "false";
-        layers.map((layer) => {
-          if (layer.type == "Vector" && layer.vector.name == i) {
-            find = "true";
-          }
-        });
-        if (find === "false") arr2 = arr2.filter((ele) => i !== ele);
-      });
-    }
+    if (filterState.rasterProps.size)
+      body["rasterProps"] = Array.from(filterState.rasterProps);
+    if (filterState.vectorProps.size)
+      body["vectorProps"] = Array.from(filterState.vectorProps);
+    if (filterState.vectorPropsType.size)
+      body["vectorPropsType"] = Array.from(filterState.vectorPropsType);
+    if (filterState.time) body["time"] = filterState.time;
 
     if (
-      arr.length !== selectedRasterProps.length ||
-      arr1.length !== selectedVectorPropsType.length ||
-      arr2.length !== selectedVectorProps.length
-    )
-      setValid(false);
-
-    // if any array is modified then state will be changed
-    if (arr.length !== selectedRasterProps.length) setSelectedRasterProps(arr);
-    if (arr1.length !== selectedVectorPropsType.length)
-      setSelectedVectorPropsType(arr1);
-    if (arr2.length !== selectedVectorProps.length)
-      setSelectedVectorProps(arr2);
+      filterState.rasterProps.size ||
+      filterState.vectorProps.size ||
+      filterState.vectorPropsType.size ||
+      !!filterState.time
+    ) {
+      setChipsLoading(true);
+      http
+        .post(`${apis.FILTER_LAYER}`, body)
+        .then((res) => {
+          console.log("Filter API response", res);
+          if (res.data.status) {
+            SetAllLayers(res.data.data);
+            // removeChips(res.data.data);
+          } else {
+            message.info("No result for selected filter!");
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          message.error("Layers couldn't be filtered");
+          AxiosErrorHandler(err, props.logout);
+        })
+        .finally(() => setChipsLoading(false));
+    } else {
+      getAllLayers(id);
+    }
   };
+
   useEffect(() => {
     const missionData = async () => {
       const mission = await http.get(`${apis.GET_MISSION_BY_ID}${id}`);
@@ -1230,15 +1148,8 @@ function BaseMap(props) {
   }, []);
 
   useEffect(() => {
-    filterLayers(time);
-    //console.log("filterLayercalled");
-  }, [
-    selectedRasterProps,
-    selectedVectorPropsType,
-    selectedVectorProps,
-    timeEnabled,
-    time,
-  ]);
+    filterLayers();
+  }, [filterState]);
 
   // ++++++++++++++++++++++++++++++ Sort All Layers +++++++++++++++++++++++++++++++++++++
   const changeSortArrange = (ascending) => {
@@ -2155,7 +2066,7 @@ function BaseMap(props) {
     SetAllLayers((prev) =>
       prev.map((layer) => {
         if (layer.type === "Raster" && layer.raster.name === "DEM") {
-          layer.render3D = terrainmap;
+          layer._render3D = terrainmap;
           layer.raster.colorMap = colorMap;
         }
         return layer;
@@ -2168,7 +2079,7 @@ function BaseMap(props) {
     SetAllLayers((prev) =>
       prev.map((layer) => {
         if (layer._id === featureLayer)
-          layer.render3D = threeDState === "Enabled";
+          layer._render3D = threeDState === "Enabled";
         return layer;
       })
     );
@@ -2219,7 +2130,7 @@ function BaseMap(props) {
   const setScaleData = () => {
     const demLayers = AllLayers.filter(
       (layer) =>
-        layer.isChecked &&
+        layer._isChecked &&
         layer.type === "Raster" &&
         layer.raster.name === "DEM"
     );
@@ -2269,39 +2180,8 @@ function BaseMap(props) {
   const focusSelectedLayers = async () => {
     const boundingBoxes: BBox[] = [];
     for (const layer of AllLayers) {
-      if (layer.isChecked) {
-        if (layer.type === "Vector") {
-          const response = await fetch(STATIC_URL + layer.layerpath);
-          const data = await response.json();
-          let features = data.features;
-          if (flaggedFilter || unflaggedFilter) {
-            features = features.filter((feature, idx) => {
-              if (flaggedFilter) {
-                return layer.flaggedFeatures.includes(idx);
-              } else if (unflaggedFilter) {
-                return !layer.flaggedFeatures.includes(idx);
-              }
-            });
-          }
-          if (Array.isArray(features)) {
-            const bounds = turf.bbox(turf.featureCollection(features)) as BBox;
-            boundingBoxes.push(bounds);
-          }
-        }
-        if (layer.type === "Raster") {
-          const metaDataURL = `${COG_URL}/cog/info?url=${TITILER_STATIC}${layer.layerpath}`;
-          const response = await fetch(metaDataURL, {
-            method: "GET",
-          });
-          const metadata = await response.json();
-          const bounds = [
-            metadata["bounds"][0],
-            metadata["bounds"][1],
-            metadata["bounds"][2],
-            metadata["bounds"][3],
-          ] as BBox;
-          boundingBoxes.push(bounds);
-        }
+      if (layer._isChecked && layer._metadata?.bounds) {
+        boundingBoxes.push(layer._metadata.bounds);
       }
     }
     if (MissionLayers.isAlertChecked) {
@@ -3213,7 +3093,43 @@ function BaseMap(props) {
   //   return ordering.reverse();
   // };
 
-  const onCheck = (checkedKeysValue: any, e) => {
+  const fetchLayerBounds = async (
+    type: string,
+    layerpath: string,
+    flaggedFeatures?: number[]
+  ) => {
+    let bounds: BBox;
+    if (type === "Vector") {
+      const response = await fetch(STATIC_URL + layerpath);
+      const data = await response.json();
+      let features = data.features;
+      if (flaggedFilter || unflaggedFilter) {
+        features = features.filter((feature, idx) => {
+          if (flaggedFilter) {
+            return flaggedFeatures?.includes(idx);
+          } else if (unflaggedFilter) {
+            return !flaggedFeatures?.includes(idx);
+          }
+        });
+      }
+      bounds = turf.bbox(turf.featureCollection(features)) as BBox;
+    } else {
+      const metaDataURL = `${COG_URL}/cog/info?url=${TITILER_STATIC}${layerpath}`;
+      const response = await fetch(metaDataURL, {
+        method: "GET",
+      });
+      const metadata = await response.json();
+      bounds = [
+        metadata["bounds"][0],
+        metadata["bounds"][1],
+        metadata["bounds"][2],
+        metadata["bounds"][3],
+      ] as BBox;
+    }
+    return bounds;
+  };
+
+  const onCheck = async (checkedKeysValue: any, e) => {
     // why setLayerLoading(true) only for vectors?
     // if (
     //   checkedKeysValue.length > lastCount &&
@@ -3244,12 +3160,34 @@ function BaseMap(props) {
 
     setLastCount(checkedKeysValue.length);
     // console.log("CHECKED: ", checkedKeysValue);
-    SetAllLayers((prev) =>
-      prev.map((layer) => {
-        layer.isChecked = checkedKeysValue.includes(layer._id);
-        return layer;
-      })
-    );
+
+    const layersWithBounds: Layer[] = [];
+
+    for (const layer of AllLayers) {
+      const _isChecked = checkedKeysValue.includes(layer._id);
+      if (_isChecked && !layer._metadata?.bounds) {
+        const bounds = await fetchLayerBounds(
+          layer.type,
+          layer.layerpath,
+          layer.flaggedFeatures
+        );
+        layersWithBounds.push({
+          ...layer,
+          _isChecked,
+          _metadata: {
+            ...layer._metadata,
+            bounds,
+          },
+        });
+      } else {
+        layersWithBounds.push({
+          ...layer,
+          _isChecked,
+        });
+      }
+    }
+
+    SetAllLayers(layersWithBounds);
     SetMissionLayers({
       alertGeojsonUrl: missionGeojsonURL(
         "alert",
@@ -3686,7 +3624,7 @@ function BaseMap(props) {
     props.loading(true);
 
     const layers = AllLayers.filter(
-      (layer) => layer.isChecked && layer.type === type
+      (layer) => layer._isChecked && layer.type === type
     ).map((layer) => layer._id);
 
     if (props.isBaseMap) {
@@ -3797,7 +3735,7 @@ function BaseMap(props) {
   const handleMaskLayerOption = (id: string) => {
     SetAllLayers((prev) =>
       prev.map((layer) => {
-        if (layer._id === id) layer.isMasked = !layer.isMasked;
+        if (layer._id === id) layer._isMasked = !layer._isMasked;
         return layer;
       })
     );
@@ -5358,21 +5296,28 @@ function BaseMap(props) {
   };
 
   // ++++++++++++++++++++++++++++++++++++++++++++++ Add Layer to list after createing new one +++++++++++++++++++++++++++++++++++++++++++++++
-  const addLayer = (layer) => {
+  const addLayer = (layer: Layer) => {
     try {
       setIsDrawing(false);
       setFeatureState(myFeatureCollection);
       if (layer.type === "Vector") {
         setvectorLayers([...vectorLayers, layer]);
       }
-      SetAllLayers((prev) => [
-        ...prev,
-        {
-          ...layer,
-          isChecked: true,
-          render3D: false,
-        },
-      ]);
+      fetchLayerBounds(layer.type, layer.layerpath, layer.flaggedFeatures)
+        .then((bounds) => {
+          SetAllLayers((prev) => [
+            ...prev,
+            {
+              ...layer,
+              _isChecked: true,
+              _render3D: false,
+              _metadata: {
+                bounds,
+              },
+            },
+          ]);
+        })
+        .catch((error) => message.error(error.message));
 
       // Should no longer be required
       // const data: any = [...treeStructure];
@@ -5866,8 +5811,8 @@ function BaseMap(props) {
           if (layer._id === data._id)
             return {
               ...data,
-              isChecked: layer.isChecked,
-              render3D: layer.render3D,
+              _isChecked: layer._isChecked,
+              _render3D: layer._render3D,
             };
           else return layer;
         })
@@ -5917,56 +5862,7 @@ function BaseMap(props) {
   //   }),
   // };
 
-  useEffect(() => {
-    console.log(
-      selectedRasterProps,
-      selectedVectorPropsType,
-      selectedVectorProps
-    );
-  }, [selectedRasterProps, selectedVectorPropsType, selectedVectorProps]);
-
-  const onToggleSelectRasterProps = (item) => {
-    let newArr = [...selectedRasterProps];
-    if (newArr.length && newArr.find((i) => i === item)) {
-      newArr = newArr.filter((i) => i !== item);
-    } else {
-      newArr.push(item);
-      setLastAdded(item);
-    }
-    setValid(true);
-    setSelectedRasterProps(newArr);
-  };
-
-  const onToggleSelectVectorPropsType = (item) => {
-    let newArr = [...selectedVectorPropsType];
-    if (newArr.length && newArr.find((i) => i === item)) {
-      newArr = newArr.filter((i) => i !== item);
-    } else {
-      newArr.push(item);
-      setLastAdded(item);
-    }
-    setValid(true);
-    setSelectedVectorPropsType(newArr);
-  };
-
-  const onToggleSelectVectorProps = (item, type) => {
-    let newArr = [...selectedVectorProps];
-    if (newArr.length && newArr.find((i) => i === item)) {
-      newArr = newArr.filter((i) => i !== item);
-    } else {
-      let newArr1 = [...selectedVectorPropsType];
-      if (type !== "") {
-        if (newArr1.length && newArr1.find((i) => i === type))
-          newArr1 = newArr1.filter((i) => i !== type);
-        setSelectedVectorPropsType(newArr1);
-      }
-      newArr.push(item);
-      setLastAdded(item);
-    }
-    setValid(true);
-    setSelectedVectorProps(newArr);
-  };
-  const toolMenu: MenuProps["items"] = () => {
+  const toolMenu = () => {
     const items: MenuProps["items"] = [
       {
         key: "0",
@@ -6037,71 +5933,89 @@ function BaseMap(props) {
       key: "vector",
       label: "Vector",
       children: [
-        {
-          key: "Point",
-          label: "Point",
-          onTitleClick: () => onToggleSelectVectorPropsType("Point"),
-          children: options[1].children[2].children.map((i) => {
-            return {
-              key: `${i.title}-Point`,
-              label: i.title,
-            };
-          }),
-        },
-        {
-          key: "MultiLineString",
-          label: "MultiLineString",
-          onTitleClick: () => onToggleSelectVectorPropsType("MultiLineString"),
-          children: options[1].children[0].children.map((i) => {
-            return {
-              key: `${i.title}-MultiLineString`,
-              label: i.title,
-            };
-          }),
-        },
-        {
-          key: "MultiPolygon",
-          label: "MultiPolygon",
-          onTitleClick: () => onToggleSelectVectorPropsType("MultiPolygon"),
-          children: options[1].children[1].children.map((i) => {
-            return {
-              key: `${i.title}-MultiPolygon`,
-              label: i.title,
-            };
-          }),
-        },
+        ...["Point", "MultiLineString", "MultiPolygon"].map((type) => {
+          return {
+            key: type,
+            label: type,
+            onTitleClick: () => {
+              setFilterState((prev) => {
+                prev.vectorPropsType.add(type);
+                return { ...prev };
+              });
+            },
+            children: vectorProps
+              .filter((p) => p.type === type)
+              .map((p) => {
+                return {
+                  key: `${p.name}${p.type}`,
+                  label: (
+                    <div
+                      onClick={() =>
+                        setFilterState((prev) => {
+                          // prev.vectorPropsType.add(type);
+                          prev.vectorProps.add(p.name);
+                          return { ...prev };
+                        })
+                      }
+                    >
+                      {p.name}
+                    </div>
+                  ),
+                };
+              }),
+          };
+        }),
         {
           key: "Other",
           label: "Other",
-          onTitleClick: () => onToggleSelectVectorPropsType("Other"),
-          children: options[1].children[3].children.map((i) => {
-            return {
-              key: `${i.title}-Other`,
-              label: i.title,
-            };
-          }),
+          children: vectorProps
+            .filter(
+              (p) =>
+                !["Point", "MultiLineString", "MultiPolygon"].includes(p.type)
+            )
+            .map((p) => {
+              return {
+                key: `${p.name}-${p.type}`,
+                label: (
+                  <div
+                    onClick={() =>
+                      setFilterState((prev) => {
+                        prev.vectorPropsType.add(p.type);
+                        prev.vectorProps.add(p.name);
+                        return { ...prev };
+                      })
+                    }
+                  >
+                    {p.name}
+                  </div>
+                ),
+              };
+            }),
         },
       ],
     },
     {
       key: "raster",
       label: "Raster",
-      children: rasterProps.map((i) => {
+      children: rasterProps.map((p) => {
         return {
-          key: `${i.name}-Raster`,
-          label: i.name,
+          key: p.name,
+          label: (
+            <div
+              onClick={() =>
+                setFilterState((prev) => {
+                  prev.rasterProps.add(p.name);
+                  return { ...prev };
+                })
+              }
+            >
+              {p.name}
+            </div>
+          ),
         };
       }),
     },
   ];
-  const filterMenuOnClick = (e) => {
-    const [name, type] = e.key.split("-");
-    if (type === "Raster") {
-      onToggleSelectRasterProps(name);
-    } else {
-      onToggleSelectVectorProps(name, type);
-    }
-  };
 
   //----------sorting menu
   const sortMenu = [
@@ -6138,7 +6052,7 @@ function BaseMap(props) {
 
   //-----------------Date Formatting for Time Filter--------------------------
   const dateFormat = () => {
-    const t = Number(time.split(" ")[0]);
+    const t = Number(filterState.time?.split(" ")[0]);
     const dt = new Date();
     dt.setDate(dt.getDate() - t);
     return moment(dt).format("DD MMM");
@@ -6719,7 +6633,7 @@ function BaseMap(props) {
     props.loading(true);
     const layersToGroup = AllLayers.filter(
       (layer) =>
-        layer.isChecked && layer.type === ["", "Vector", "Raster"][moveType]
+        layer._isChecked && layer.type === ["", "Vector", "Raster"][moveType]
     ).map((layer) => layer._id);
 
     http
@@ -6775,7 +6689,7 @@ function BaseMap(props) {
     props.loading(true);
     const layersToMove = AllLayers.filter(
       (layer) =>
-        layer.isChecked && layer.type === ["", "Vector", "Raster"][moveType]
+        layer._isChecked && layer.type === ["", "Vector", "Raster"][moveType]
     ).map((layer) => layer._id);
 
     http
@@ -7348,13 +7262,17 @@ function BaseMap(props) {
                       )}
                     </span>{" "}
                     <Checkbox
-                      checked={timeEnabled}
-                      onChange={(e) => setTimeEnabled(e.target.checked)}
                       style={{
                         marginTop: "2px",
                         marginRight: "6px",
                         marginLeft: "6px",
                       }}
+                      onChange={(e) =>
+                        setFilterState((prev) => {
+                          prev.time = e.target.checked ? "100 days" : null;
+                          return { ...prev };
+                        })
+                      }
                     />{" "}
                     <Text strong>Time Filter</Text>
                     <div
@@ -7363,7 +7281,7 @@ function BaseMap(props) {
                         transition: "0.2s",
                       }}
                     >
-                      {time && (
+                      {!!filterState.time && (
                         <span style={{ margin: "0 5px" }}>
                           {dateFormat()} - {moment().format("DD MMM")}{" "}
                         </span>
@@ -7372,8 +7290,13 @@ function BaseMap(props) {
                       <Select
                         defaultValue="100 days"
                         size="small"
-                        onChange={(value) => setTime(value)}
-                        disabled={!timeEnabled}
+                        onChange={(value) => {
+                          setFilterState((prev) => {
+                            prev.time = value;
+                            return { ...prev };
+                          });
+                        }}
+                        disabled={!filterState.time}
                       >
                         <Option value="7 days">Last 1 Week</Option>
                         <Option value="30 days">Last 1 Month</Option>
@@ -7563,7 +7486,7 @@ function BaseMap(props) {
                 </Button>
               </Dropdown>
               <Dropdown
-                menu={{ items: filterMenu, onClick: filterMenuOnClick }}
+                menu={{ items: filterMenu }}
                 //overlay={filterMenu}
                 disabled={chipsLoading}
                 //overlayStyle={{}}
@@ -7573,6 +7496,7 @@ function BaseMap(props) {
                 </Button>
               </Dropdown>
             </div>
+            {/* FILTER TAGS */}
             <div
               style={{
                 display: "flex",
@@ -7582,20 +7506,27 @@ function BaseMap(props) {
                 overflow: "auto",
               }}
             >
+              {/* TIME FILTER TAG */}
               <Tag
-                style={{ display: timeEnabled ? "inline" : "none" }}
+                style={{ display: filterState.time ? "inline" : "none" }}
                 // color='#108ee9'
                 icon={
                   chipsLoading ? <SyncOutlined spin /> : <CheckCircleOutlined />
                 }
                 color="blue"
                 closable
-                onClose={() => setTimeEnabled(false)}
+                onClose={() =>
+                  setFilterState((prev) => {
+                    prev.time = null;
+                    return { ...prev };
+                  })
+                }
               >
-                Last {time}
+                Last {filterState.time}
               </Tag>
-              {selectedRasterProps &&
-                selectedRasterProps.map((tag) => (
+              {/* RASTER PROP FILTER TAGS */}
+              {...Array.from(filterState.rasterProps).map((tag) => {
+                return (
                   <Tag
                     icon={
                       chipsLoading ? (
@@ -7606,13 +7537,20 @@ function BaseMap(props) {
                     }
                     color="blue"
                     closable
-                    onClose={() => onToggleSelectRasterProps(tag)}
+                    onClose={() =>
+                      setFilterState((prev) => {
+                        prev.rasterProps.delete(tag);
+                        return { ...prev };
+                      })
+                    }
                   >
                     {tag}
                   </Tag>
-                ))}
-              {selectedVectorPropsType &&
-                selectedVectorPropsType.map((tag) => (
+                );
+              })}
+              {/* VECTOR PROP TYPE FILTER TAGS */}
+              {...Array.from(filterState.vectorPropsType).map((tag) => {
+                return (
                   <Tag
                     icon={
                       chipsLoading ? (
@@ -7623,14 +7561,22 @@ function BaseMap(props) {
                     }
                     color="blue"
                     closable
-                    onClose={() => onToggleSelectVectorPropsType(tag)}
+                    onClose={() =>
+                      setFilterState((prev) => {
+                        prev.vectorPropsType.delete(tag);
+                        return { ...prev };
+                      })
+                    }
                   >
                     {tag}
                   </Tag>
-                ))}
-              {selectedVectorProps &&
-                selectedVectorProps.map((tag) => (
+                );
+              })}
+              {/* VECTOR PROP FILTER TAGS */}
+              {...Array.from(filterState.vectorProps).map((tag) => {
+                return (
                   <Tag
+                    style={{ display: "inline" }}
                     icon={
                       chipsLoading ? (
                         <SyncOutlined spin />
@@ -7640,11 +7586,17 @@ function BaseMap(props) {
                     }
                     color="blue"
                     closable
-                    onClose={() => onToggleSelectVectorProps(tag, "")}
+                    onClose={() =>
+                      setFilterState((prev) => {
+                        prev.vectorProps.delete(tag);
+                        return { ...prev };
+                      })
+                    }
                   >
                     {tag}
                   </Tag>
-                ))}
+                );
+              })}
             </div>
 
             <Modal
@@ -7988,7 +7940,7 @@ function BaseMap(props) {
               onCheck={onCheck}
               checkedKeys={(() => {
                 const checked = AllLayers.filter(
-                  (layer) => layer.isChecked
+                  (layer) => layer._isChecked
                 ).map((layer) => layer._id);
                 if (MissionLayers.isAlertChecked) checked.push("alert");
                 if (MissionLayers.isVODChecked) checked.push("vod");
