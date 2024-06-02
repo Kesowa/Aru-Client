@@ -4,7 +4,10 @@ import { geoFromSVGXML } from "svg2geojson";
 import { Upload, Button } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { BitmapLayer } from "@deck.gl/layers";
+import { parse, stringify } from 'svgson';
+import svgpath from 'svgpath';
 import "./index.less";
+
 
 const SvgToGeojson = ({deckRef, onValueChange}) => {
   const [canvas, setCanvas] = useState(null);
@@ -81,9 +84,9 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
     setIsDragging(false);
   };
 
-  const handleRotationChange = (event) => {
-    setCanvasRotation(parseInt(event.target.value));
-  };
+  // const handleRotationChange = (event) => {
+  //   setCanvasRotation(parseInt(event.target.value));
+  // };
 
   const handleCanvasImageOpacityChange = (event) => {
     const newValue = parseFloat(event.target.value);
@@ -355,37 +358,39 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
     reader.onload = async function (event) {
       const svgText = event.target.result;
 
-      const parser = new DOMParser();
-      const svgDocument = parser.parseFromString(svgText, "image/svg+xml");
+      // Parse SVG to JSON using svgson
+      const svgJson = await parse(svgText);
 
       // Apply transformations to path coordinates
-      const paths = svgDocument.querySelectorAll("path");
-      paths.forEach((path) => {
-        const transform = path.getAttribute("transform");
-        if (transform) {
-          // Extract translation values from the transform attribute
-          const translateMatch = transform.match(
-            /translate\(([\d.-]+),([\d.-]+)\)/
-          );
-          if (translateMatch) {
-            const translateX = parseFloat(translateMatch[1]);
-            const translateY = parseFloat(translateMatch[2]);
-            // Update path coordinates by applying translation
-            const pathCoordinates = path.getAttribute("d");
-            const updatedCoordinates = pathCoordinates.replace(
-              /(-?\d+\.?\d*)/g,
-              (match) => {
-                const coordinate = parseFloat(match);
-                if (!isNaN(coordinate)) {
-                  return (coordinate + translateX).toFixed(2);
-                }
-                return match;
-              }
+      svgJson.children.forEach((child) => {
+        if (child.name === "path") {
+          const transform = child.attributes.transform;
+          if (transform) {
+            const translateMatch = transform.match(
+              /translate\(([-\d.]+),\s*([-.\d]+)\)/
             );
-            path.setAttribute("d", updatedCoordinates);
+            if (translateMatch) {
+              const translateX = parseFloat(translateMatch[1]);
+              const translateY = parseFloat(translateMatch[2]);
+
+              const updatedPathData = svgpath(child.attributes.d)
+                .translate(translateX, translateY)
+                .toString();
+
+              child.attributes.d = updatedPathData;
+              delete child.attributes.transform;
+            }
           }
         }
       });
+
+      const updatedSvgText = stringify(svgJson);
+
+      const parser = new DOMParser();
+      const svgDocument = parser.parseFromString(
+        updatedSvgText,
+        "image/svg+xml"
+      );
 
       const metaInfoNS = "http://www.prognoz.ru";
       const metaInfoElement = svgDocument.createElementNS(
@@ -410,14 +415,12 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
       }
 
       metaInfoElement.appendChild(geoElement);
-
       svgDocument.documentElement.appendChild(metaInfoElement);
 
       const modifiedSvgText = new XMLSerializer().serializeToString(
         svgDocument
       );
-      
-      // Pass modified SVG text to svg2geojson converter
+
       await new Promise((resolve, reject) => {
         geoFromSVGXML(
           modifiedSvgText,
@@ -442,7 +445,6 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
               }
             );
 
-            // Replace features array with the modified one
             layers[0].geo.features = geoJsonFeatures;
 
             const geoJsonString = JSON.stringify(layers[0].geo);
@@ -459,13 +461,12 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
           { layers: true, tolerance: 0.5 }
         );
       });
-    
     };
     reader.readAsText(blob);
     setSvgImage(false);
   };
-
-  // function to pin image to the map    (need deck and canvas in the digitizer component)
+  
+  // function to pin image to the map  
   const imagePin = () => {
     // Use deckgl reference to access the unproject method
     const deck = deckRef.current.deck;
@@ -493,7 +494,7 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
     }
     setFlattenedBounds(flattenedBounds);
 
-    downloadGeojson(lngLatNE, lngLatSW);
+    downloadGeojson(lngLatNW, lngLatSE);
     setDigitizer(false);
   };
 

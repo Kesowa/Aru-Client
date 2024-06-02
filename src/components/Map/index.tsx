@@ -49,6 +49,7 @@ import {
   Result,
   notification,
   MenuProps,
+  Space
 } from "antd";
 import {
   UploadOutlined,
@@ -6415,8 +6416,8 @@ function BaseMap(props) {
               ? [osm, visibleLayers, drawPolygonTool]
               : [visibleLayers, drawPolygonTool]
             : osmState
-            ? [osm, visibleLayers, maskLayer,digitizerLayer]
-            : [visibleLayers, maskLayer,digitizerLayer],
+            ? [osm, visibleLayers, maskLayer, digitizerLayer]
+            : [visibleLayers, maskLayer, digitizerLayer],
         ]}
         style={{ height: "100vh", width: "100%" }}
         // onHover={(info) => {
@@ -6723,7 +6724,7 @@ function BaseMap(props) {
               )}
               <Button
                 style={{ marginRight: "10px" }}
-                onClick={() => setDigitizer(!digitizer)}
+                onClick={() => setDigitizer(digitizer => !digitizer)}
               >
                 Digitizer
               </Button>
@@ -7405,8 +7406,21 @@ function BaseMap(props) {
           {/* <Button onClick={() => setIsModalVisible4(true)}>new</Button> */}
         </div>
       )}
-      <Suspense fallback={null}>
-      {digitizer && (<SvgToGeojson deckRef={deckRef} onValueChange={handleChildValueChange} />)}  
+      <Suspense
+        fallback={
+          <div className="example">
+            <Space size="middle">
+              <Spin size="large" />
+            </Space>
+          </div>
+        }
+      >
+        {digitizer && (
+          <SvgToGeojson
+            deckRef={deckRef}
+            onValueChange={handleChildValueChange}
+          />
+        )}
       </Suspense>
       <div
         className="bottom-bar"

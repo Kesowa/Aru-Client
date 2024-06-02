@@ -90,11 +90,13 @@
     "rsuite": "^5.35.0",
     "screenfull": "^5.1.0",
     "socket.io-client": "^4.5.3",
+    "svg2geojson": "github:Kesowa/svg2geojson",
+    "svgpath": "^2.6.0",
+    "svgson": "^5.3.1",
     "terser": "^5.16.2",
     "uuid": "^8.3.2",
     "viewport-mercator-project": "^7.0.4",
-    "vtracer-webapp": "file:vtracer-webapp-0.4.0.tgz",
-    "svg2geojson": "github:Kesowa/svg2geojson"
+    "vtracer-webapp": "file:vtracer-webapp-0.4.0.tgz"
   },
   "eslintConfig": {
     "extends": [
