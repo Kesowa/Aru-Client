@@ -1797,7 +1797,17 @@ function BaseMap(props) {
               ? "Flagged Selected Successfully"
               : "Unflagged Selected Successfully"
           );
-          setRefreshLayer(!refreshLayer);
+          SetAllLayers((prev) => prev.map((layer) => {
+            if (activeID === layer._id) {
+              const indexes = selectedIndexes.map(i => Number(i));
+              return {
+                ...layer,
+                flaggedFeatures: (flag ? 
+                  [...layer.flaggedFeatures, ...indexes] : 
+                  layer.flaggedFeatures.filter(f => !indexes.includes(f)))
+              };
+            } else return layer;
+          }))
           setShouldAttributeTableReload(!shouldAttributeTableReload);
         } else {
           message.error(res.data.message);

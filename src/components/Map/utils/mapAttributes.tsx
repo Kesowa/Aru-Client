@@ -85,13 +85,6 @@ const MapAttributes: React.FC<Props> = (props) => {
   };
 
   const [state, setState] = useState<State>(initialState);
-  const [page, setPage] = useState<State>(initialState);
-  const [limit, setLimit] = useState<State>(initialState);
-  const [total, setTotal] = useState<State>(initialState);
-  const [isTableLoading, setIsTableLoading] = useState<boolean>(
-    initialState.isTableLoading
-  );
-  const [tableData, setTableData] = useState<State>(initialState);
   // const filteredLayers = Object.values(props.allLayers).filter(
   //   (layer) => layer.type === "DEM" || layer.type === "ortho"
   // );
@@ -133,14 +126,6 @@ const MapAttributes: React.FC<Props> = (props) => {
     // Fetch GeoJSON data when page, limit, or filter options change
     fetchJsonData();
   }, [state.page, state.limit, props.flaggedFilter, props.unflaggedFilter]);
-
-  useEffect(() => {
-    const updatedatedTable = updateTableColors(initialState.trueTableData);
-    setState((prevState) => ({
-      ...prevState,
-      tableData: updatedatedTable as any[],
-    }));
-  }, [props.selectedIndexes]);
 
   const updateContentHeight = (bottomBarHeight: string, type: string) => {
     let contentHeight = "";
@@ -277,12 +262,6 @@ const MapAttributes: React.FC<Props> = (props) => {
 
   const updateTableColors = (records) => {
     return records.map((record) => {
-      if (props.selectedIndexes.includes(record.index)) {
-        return {
-          ...record,
-          properties: { ...record.properties, color: "#ffaa00" },
-        };
-      }
       if (props.unflaggedFilter) {
         return record;
       }
