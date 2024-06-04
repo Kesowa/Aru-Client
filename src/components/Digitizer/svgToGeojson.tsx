@@ -4,12 +4,11 @@ import { geoFromSVGXML } from "svg2geojson";
 import { Upload, Button } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { BitmapLayer } from "@deck.gl/layers";
-import { parse, stringify } from 'svgson';
-import svgpath from 'svgpath';
+import { parse, stringify } from "svgson";
+import svgpath from "svgpath";
 import "./index.less";
 
-
-const SvgToGeojson = ({deckRef, onValueChange}) => {
+const SvgToGeojson = ({ deckRef, onValueChange }) => {
   const [canvas, setCanvas] = useState(null);
   const [ctx, setCtx] = useState(null);
   const [svg, setSvg] = useState(null);
@@ -176,7 +175,6 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
     }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0);
-
 
     const converterParams = {
       canvas_id: canvas.id,
@@ -465,8 +463,8 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
     reader.readAsText(blob);
     setSvgImage(false);
   };
-  
-  // function to pin image to the map  
+
+  // function to pin image to the map
   const imagePin = () => {
     // Use deckgl reference to access the unproject method
     const deck = deckRef.current.deck;
@@ -635,7 +633,7 @@ const SvgToGeojson = ({deckRef, onValueChange}) => {
             />
           </label>
           <label>
-             Layer Difference: {globalLayerDifference}
+            Layer Difference: {globalLayerDifference}
             <input
               title="Global LayerDifference"
               type="range"

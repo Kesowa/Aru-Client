@@ -4,8 +4,8 @@ import React, {
   useRef,
   useMemo,
   useCallback,
-  lazy, 
-  Suspense
+  lazy,
+  Suspense,
 } from "react";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
@@ -46,7 +46,7 @@ import {
   Result,
   notification,
   MenuProps,
-  Space
+  Space,
 } from "antd";
 import {
   UploadOutlined,
@@ -6944,8 +6944,7 @@ function BaseMap(props) {
             )
           );
 
-          if (isMaskLayerVisible)
-            layers.push(digitizerLayer);
+          if (isMaskLayerVisible) layers.push(digitizerLayer);
 
           return layers;
         })()}
@@ -7255,7 +7254,7 @@ function BaseMap(props) {
               )}
               <Button
                 style={{ marginRight: "10px" }}
-                onClick={() => setDigitizer(digitizer => !digitizer)}
+                onClick={() => setDigitizer((digitizer) => !digitizer)}
               >
                 Digitizer
               </Button>
