@@ -4,6 +4,8 @@ import React, {
   useRef,
   useMemo,
   useCallback,
+  lazy,
+  Suspense,
 } from "react";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
@@ -44,6 +46,7 @@ import {
   Result,
   notification,
   MenuProps,
+  Space,
 } from "antd";
 import {
   UploadOutlined,
@@ -135,6 +138,7 @@ import {
 import { ILayersToTree } from "./treeRender";
 import { BBox, mergeBoundingBoxes } from "src/types/geojson";
 import { invertColor } from "./colorUtils";
+const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
   [lat - size * 0.5, lng - size * 0.5],
@@ -716,6 +720,13 @@ function BaseMap(props) {
   const [polygonSize, setPolygonSize] = useState(150);
   const [opcity, setOpcity] = useState(1);
   const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
+  const [digitizer, setDigitizer] = useState(false);
+  const [digitizerLayer, setDigitizerLayer] = useState(null);
+
+  const handleChildValueChange = (newValue) => {
+    console.log(newValue);
+    setDigitizerLayer(newValue);
+  };
 
   const changePolygonSize = (value) => {
     setPolygonSize(value);
@@ -6933,6 +6944,8 @@ function BaseMap(props) {
             )
           );
 
+          if (digitizer) layers.push(digitizerLayer);
+
           return layers;
         })()}
         style={{ height: "100vh", width: "100%" }}
@@ -6959,6 +6972,7 @@ function BaseMap(props) {
             }
           );
         }}
+        onDrag={() => {}}
         onClick={(info, event) => {
           setShowDrawingTools(false);
           if (event.rightButton) {
@@ -7238,7 +7252,12 @@ function BaseMap(props) {
                   </div>
                 </Tooltip>
               )}
-
+              <Button
+                style={{ marginRight: "10px" }}
+                onClick={() => setDigitizer((digitizer) => !digitizer)}
+              >
+                Digitizer
+              </Button>
               <Tooltip title="Time" placement="bottom">
                 <div
                   className="time-filter-tool"
@@ -7387,7 +7406,10 @@ function BaseMap(props) {
       <div
         className="collapser-button"
         onClick={() => sideBarHandeller()}
-        style={{ right: sideBarState === false ? "10px" : "354px" }}
+        style={{
+          right: sideBarState === false ? "10px" : "354px",
+          zIndex: 9999,
+        }}
       >
         <span className="icon">{sideBarIcon}</span>
       </div>
@@ -7973,6 +7995,22 @@ function BaseMap(props) {
           {/* <Button onClick={() => setIsModalVisible4(true)}>new</Button> */}
         </div>
       )}
+      <Suspense
+        fallback={
+          <div className="example">
+            <Space size="middle">
+              <Spin size="large" />
+            </Space>
+          </div>
+        }
+      >
+        {digitizer && (
+          <SvgToGeojson
+            deckRef={deckRef}
+            onValueChange={handleChildValueChange}
+          />
+        )}
+      </Suspense>
       <div
         className="bottom-bar"
         style={{
