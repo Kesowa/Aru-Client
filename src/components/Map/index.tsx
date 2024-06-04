@@ -6944,8 +6944,7 @@ function BaseMap(props) {
             )
           );
 
-          if (digitizer)
-            layers.push(digitizerLayer);
+          if (digitizer) layers.push(digitizerLayer);
 
           return layers;
         })()}
