@@ -25,6 +25,7 @@ import {
   Badge,
   notification,
   Empty,
+  Table,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import type { MenuProps, TabsProps } from "antd";
@@ -41,6 +42,7 @@ import {
   RadiusUpleftOutlined,
   UserAddOutlined,
   EyeOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 
 import Videos from "./Data/Videos";
@@ -63,6 +65,7 @@ import ImageDoc from "./Data/ImageDocs";
 import ManageClients from "./Data/ManageClient";
 import { API_URL, PUBLIC_URL, STATIC_URL } from "src/constants";
 import Report_genration from "./Data/report_genration";
+import { IPlotReportError } from "src/types/report";
 
 const { Paragraph } = Typography;
 function MissionView(props) {
@@ -88,6 +91,11 @@ function MissionView(props) {
   const [missType, setMissType] = useState<any>("");
   const [typeflag, settypeflag] = useState<any>(0);
   const location = useLocation<any>();
+  const [showReportErrors, setShowReportErrors] = useState(false);
+  const [reportErrors, setReportErrors] = useState<IPlotReportError | null>(
+    null
+  );
+  const [reportErrorCSVPath, setReportErrorCSVPath] = useState("");
 
   //-----------------Notification Function-------------------------//
   const openNotification = (title, description, type) => {
@@ -448,6 +456,9 @@ function MissionView(props) {
           <Report_genration
             missionId={MissionDetails.missionId}
             missionDetails={MissionDetails}
+            setShowReportErrors={setShowReportErrors}
+            setReportErrors={setReportErrors}
+            setReportErrorCSVPath={setReportErrorCSVPath}
           />
         ),
       },
@@ -1630,6 +1641,107 @@ function MissionView(props) {
                 }}
               />
             </Form>
+          </Modal>
+
+          {/* +++++++++++++++++++++++++++++++++++++++++++++++++++ Report Generation Errors Modal ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
+          <Modal
+            title={[
+              <Title level={4}>
+                <ExceptionOutlined style={{ fontSize: "24px" }} />
+                &nbsp;&nbsp;&nbsp;Report generation failed!
+              </Title>,
+            ]}
+            open={showReportErrors}
+            onCancel={() => {
+              setShowReportErrors(false);
+            }}
+            footer={[
+              <Button
+                key="back"
+                onClick={() => {
+                  setShowReportErrors(false);
+                }}
+              >
+                Close
+              </Button>,
+              <Button
+                key="submit"
+                type="primary"
+                icon={<DownloadOutlined />}
+                onClick={() => {
+                  window.open(`${STATIC_URL}${reportErrorCSVPath}`);
+                }}
+              >
+                Download CSV
+              </Button>,
+            ]}
+            width={"50vw"}
+          >
+            <Title level={5}>
+              The following components were either missing or had invalid value
+            </Title>
+            {reportErrors && (
+              <Table
+                bordered
+                scroll={{
+                  x: "max-content",
+                  y: 440,
+                }}
+                columns={[
+                  {
+                    title: "Error Location",
+                    dataIndex: "location",
+                    width: "20%",
+                  },
+                  {
+                    title: "Invalid / Missing Component",
+                    dataIndex: "component",
+                    width: "20%",
+                  },
+                  {
+                    title: "Feature Indices",
+                    dataIndex: "fIdx",
+                  },
+                ]}
+                dataSource={[
+                  ...reportErrors.layers.map((layerType) => {
+                    return {
+                      location: "Mission",
+                      component: `Layer of type ${layerType}`,
+                      fIdx: "N/A",
+                    };
+                  }),
+                  ...Object.keys(reportErrors.plots).map((key) => {
+                    if (reportErrors.plots[key].length > 0) {
+                      return {
+                        location: "Plot Layer",
+                        component: `${key} property`,
+                        fIdx: reportErrors.plots[key].join(","),
+                      };
+                    }
+                  }),
+                  ...Object.keys(reportErrors.blocks).map((key) => {
+                    if (reportErrors.blocks[key].length > 0) {
+                      return {
+                        location: "Action Area Layer",
+                        component: `${key} property`,
+                        fIdx: reportErrors.blocks[key].join(","),
+                      };
+                    }
+                  }),
+                  ...Object.keys(reportErrors.buildings).map((key) => {
+                    if (reportErrors.buildings[key].length > 0) {
+                      return {
+                        location: "Building Footprint Layer",
+                        component: `${key} property`,
+                        fIdx: reportErrors.buildings[key].join(","),
+                      };
+                    }
+                  }),
+                ].filter((ele) => !!ele)}
+                pagination={false}
+              />
+            )}
           </Modal>
         </>
       ) : (

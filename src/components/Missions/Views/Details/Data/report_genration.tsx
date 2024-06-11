@@ -42,7 +42,11 @@ function ReportGenration(props) {
       .then((result) => {
         console.log(result.data.message);
         if (result.data.status) message.success(result.data.message);
-        else message.error(result.data.message);
+        else {
+          props.setReportErrors(result.data.errors);
+          props.setReportErrorCSVPath(result.data.csvPath);
+          props.setShowReportErrors(true);
+        }
       })
       .catch((err) => {
         console.log(err);
