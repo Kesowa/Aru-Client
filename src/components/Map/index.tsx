@@ -85,6 +85,8 @@ import {
   PathLayer,
 } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
+import { Tiles3DLoader } from "@loaders.gl/3d-tiles";
+import { Tile3DLayer } from "@deck.gl/geo-layers";
 import { HtmlOverlayItem, HtmlOverlay } from "@nebula.gl/overlays";
 import { EditableGeoJsonLayer } from "@nebula.gl/layers";
 import {
@@ -1984,6 +1986,18 @@ function BaseMap(props) {
             );
           });
         } else {
+          if (allLayers[element]?.type.name == "CESIUM_3D") {
+            vlayers.push(
+              new Tile3DLayer({
+                id: element,
+                data: STATIC_URL + allLayers[element]?.layerPath,
+                loader: Tiles3DLoader,
+                _subLayerProps: {
+                  scenegraph: { _lighting: "flat" },
+                },
+              }),
+            );
+          } else {
           vlayers.push(
             new TileLayer({
               id: element,
@@ -2013,7 +2027,7 @@ function BaseMap(props) {
               },
             })
           );
-        }
+        }}
       } else if (element.split("-")[0] === "1" && element !== "1") {
         console.log("vector");
         switch (allLayers[element]?.type) {
