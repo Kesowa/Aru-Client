@@ -1648,13 +1648,22 @@ function MissionView(props) {
             title={[
               <Title level={4}>
                 <ExceptionOutlined style={{ fontSize: "24px" }} />
-                &nbsp;&nbsp;&nbsp;Report generation failed! 
+                &nbsp;&nbsp;&nbsp;Report generation failed!
               </Title>,
             ]}
             open={showReportErrors}
-            onCancel={() => { setShowReportErrors(false); }}
+            onCancel={() => {
+              setShowReportErrors(false);
+            }}
             footer={[
-              <Button key="back" onClick={() => { setShowReportErrors(false); }}>Close</Button>,
+              <Button
+                key="back"
+                onClick={() => {
+                  setShowReportErrors(false);
+                }}
+              >
+                Close
+              </Button>,
               <Button
                 key="submit"
                 type="primary"
@@ -1671,13 +1680,12 @@ function MissionView(props) {
             <Title level={5}>
               The following components were either missing or had invalid value
             </Title>
-            {
-              reportErrors && 
+            {reportErrors && (
               <Table
                 bordered
                 scroll={{
                   x: "max-content",
-                  y: 440
+                  y: 440,
                 }}
                 columns={[
                   {
@@ -1700,8 +1708,8 @@ function MissionView(props) {
                     return {
                       location: "Mission",
                       component: `Layer of type ${layerType}`,
-                      fIdx: "N/A"
-                    }
+                      fIdx: "N/A",
+                    };
                   }),
                   ...Object.keys(reportErrors.plots).map((key) => {
                     if (reportErrors.plots[key].length > 0) {
@@ -1709,7 +1717,7 @@ function MissionView(props) {
                         location: "Plot Layer",
                         component: `${key} property`,
                         fIdx: reportErrors.plots[key].join(","),
-                      }
+                      };
                     }
                   }),
                   ...Object.keys(reportErrors.blocks).map((key) => {
@@ -1718,7 +1726,7 @@ function MissionView(props) {
                         location: "Action Area Layer",
                         component: `${key} property`,
                         fIdx: reportErrors.blocks[key].join(","),
-                      }
+                      };
                     }
                   }),
                   ...Object.keys(reportErrors.buildings).map((key) => {
@@ -1727,15 +1735,14 @@ function MissionView(props) {
                         location: "Building Footprint Layer",
                         component: `${key} property`,
                         fIdx: reportErrors.buildings[key].join(","),
-                      }
+                      };
                     }
                   }),
-                ].filter(ele => !!ele)}
+                ].filter((ele) => !!ele)}
                 pagination={false}
               />
-            }
+            )}
           </Modal>
-        
         </>
       ) : (
         <></>
