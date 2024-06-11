@@ -1,0 +1,91 @@
+@import "../shared/global_var.css";
+@import "../Missions/Create/index.less";
+@darkShadow: var(--shadow-dark);
+@primary: var(--primary-color);
+@accent: var(--accent-color);
+@secondary: var(--secondary-color);
+
+.digitizer {
+    position: absolute;
+    z-index: 1;
+    background-color: white;
+    padding: 16px;
+    box-shadow: @darkShadow;
+    border-radius: 4px;
+    width: 340px;
+    overflow: auto;
+    resize: vertical;
+    min-height: 410px;
+    max-height: 880px;
+    right: 10px;
+    top: 480px;
+    @media (-webkit-min-device-pixel-ratio: 1.5) {
+      min-height: 210px;
+      max-height: 520px;
+  }
+}
+
+.canvas-rotate {
+  position: absolute;
+  z-index: 1;
+  background-color: white;
+  padding: 16px;
+  box-shadow: @darkShadow;
+  border-radius: 4px;
+  width: 50px;
+  height: 200px; /* Occupy full height of container */
+  left: 10px;
+  top: 680px;
+  writing-mode: vertical-rl; /* Rotate the container to be vertical */
+}
+
+
+
+.svgprev {
+  position: absolute;
+  z-index: 1;
+  background-color: white;
+  padding: 0px;
+  box-shadow: @darkShadow;
+  border-radius: 4px;
+  width: 400px;
+  overflow: auto;
+  overflow: hidden;
+  min-height: 300px;
+  max-height: 880px;
+  right: 360px;
+  top: 550px;
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  @media (-webkit-min-device-pixel-ratio: 1.5) {
+    min-height: 210px;
+    max-height: 520px;
+  }
+}
+
+
+.parameters-container {
+  display: flex;
+  flex-wrap: wrap; 
+  justify-content: center;
+}
+
+.parameters-container {
+  margin: 0px;
+}
+
+.parameter label {
+  display: block;
+}
+
+.parameter select {
+  width: 100%;
+}
+
+.broad-slider {
+  width: 100%;
+  margin: 1px 0;
+}
+
+

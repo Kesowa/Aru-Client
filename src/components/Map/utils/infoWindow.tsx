@@ -239,9 +239,9 @@ function InfoWindow(props) {
         });
     } else if (props.missionLayer === "Vector" && props.mode === "PointView") {
       if (
-        props.allLayers[`1-${props.layerId}`].flaggedFeatures.includes(
-          props.featureIdx
-        )
+        props.AllLayers.find(
+          (layer) => layer._id === props.layerId
+        )?.flaggedFeatures.includes(props.featureIdx)
       ) {
         props.setFlag(true);
       } else {
