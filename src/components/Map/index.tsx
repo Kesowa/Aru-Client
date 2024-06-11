@@ -1986,7 +1986,7 @@ function BaseMap(props) {
             );
           });
         } else {
-          if (allLayers[element]?.type.name == "CESIUM_3D") {
+          if (allLayers[element]?.type == "CESIUM_3D") {
             vlayers.push(
               new Tile3DLayer({
                 id: element,
