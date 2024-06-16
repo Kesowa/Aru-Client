@@ -58,9 +58,8 @@ export enum permissions {
   CAN_DELETE_BASE_LAYER = "can_delete_base_layer",
   FLIGHT_LOG_LIST = "flight_log_list",
   WEBRTC_VIEW = "webrtc_view",
+  THREAD_CREATE = "thread_create",
+  THREAD_UPDATE = "thread_update",
+  THREAD_LIST = "thread_list",
+  COMMENT_DELETE = "comment_delete",
 }
-
-// SOME PERMISSIONS CAN BE GIVEN TO CLIENT ONLY
-// SOME PERMISSIONS CAN BE GIVEN TO STAFF ONLY
-// SOME PERMISSIONS CAN BE GIVEN TO PILOTS ONLY (?)
-// SOME PERMISSIONS, IF PRESENT, ALLOW VIEWING OF SOME ROUTES
