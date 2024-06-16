@@ -31,6 +31,7 @@ import {
   RTMP_URL,
   STATIC_URL,
 } from "src/constants";
+import { getSideBar } from "src/static/sideBarOptions";
 
 const { Title, Text } = Typography;
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -222,26 +223,7 @@ function DashboardContent(props: any) {
 
   const dashboardShortcuts = () => {
     if (props.UserDetails.userType === "tenant-staff") {
-      let frontendRoutes;
-      let permissions: any = [];
-      props.UserDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.isFrontendRoute === true && d.name !== "Dashboard"
-        );
-        const k = filteredPermissions.map((e) => {
-          return {
-            type: "menu",
-            link: e.frontendRoute.trim(),
-            icon: e.sideNavOptionIcon.trim(),
-            text: e.sideNavOptionLabel,
-          };
-        });
-        permissions = [...k, ...permissions];
-      });
-      frontendRoutes = permissions;
-      console.log("CustomPermissions: ", frontendRoutes);
-      //dynamic shorcut rendering based on permission management
-      return frontendRoutes.map((item) => (
+      return getSideBar(props.UserDetails).map((item) => (
         <>
           <Col md={12}>
             <Link to={item.link} key="1">

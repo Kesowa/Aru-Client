@@ -47,28 +47,6 @@ function DashboardWrapper(props: any) {
       )
       .then((result) => {
         if (result.data.status) {
-          let sidebarOptions: any = null;
-          if (result.data.data.userType === "tenant-staff") {
-            let permissions: any = [];
-            result.data.data.customPermissions.forEach((p) => {
-              const filteredPermissions = p.permissions.filter(
-                (d) => d.isFrontendRoute === true
-              );
-              const k = filteredPermissions.map((e) => {
-                return {
-                  type: "menu",
-                  link: e.frontendRoute.trim(),
-                  icon: e.sideNavOptionIcon.trim(),
-                  text: e.sideNavOptionLabel,
-                };
-              });
-              permissions = [...k, ...permissions];
-            });
-            sidebarOptions = permissions;
-          } else if (result.data.data.userType === "tenant-client") {
-            sidebarOptions = [...clientOptions];
-          }
-          result.data.data.sidebarOptions = sidebarOptions;
           props.setUserDetails(result.data.data);
         } else {
           message.error(result.status.toString());

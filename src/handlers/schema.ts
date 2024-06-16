@@ -835,23 +835,12 @@ export interface components {
     };
     IPermission: {
       name: string;
-      isSideNavOption: boolean;
-      isFrontendRoute: boolean;
-      isPilot: boolean;
-      isClient: boolean;
-      frontendRoute?: string;
-      isVisibleToTenant: boolean;
-      isVisibleToSuperAdmin: boolean;
-      sideNavOptionLabel: string;
-      sideNavOptionIcon: string;
-      description: string;
-      isActive: boolean;
+      createdBy: components["schemas"]["MongoId"];
+      updatedBy: components["schemas"]["MongoId"];
       /** Format: date-time */
       createdAt: string;
       /** Format: date-time */
       updatedAt: string;
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
     };
     IUserGroupPermissions: {
       permissions: components["schemas"]["IPermission"][];

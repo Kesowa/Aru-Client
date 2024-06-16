@@ -34,13 +34,27 @@ import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import moment from "moment";
 import { STATIC_URL } from "src/constants";
+import { components } from "src/handlers/schema";
+import { permissions } from "src/static/permissions";
 
 function UserCreatePage(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
-  const [userGroups, setUserGroups]: [any, any] = useState([]);
-  const [selectedUserGroup, setSelectedusergroup]: [any, any] = useState();
+  const [userGroups, setUserGroups] = useState<
+    {
+      name: string;
+      _id: string;
+      isActive: boolean;
+      permissions: string[];
+    }[]
+  >([]);
+  const [selectedUserGroup, setSelectedusergroup] = useState<{
+    name: string;
+    _id: string;
+    isActive: boolean;
+    permissions: string[];
+  }>();
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
   //avatar upload
@@ -86,29 +100,19 @@ function UserCreatePage(props: any) {
       .get(apis.FETCH_TENANT_USER_GROUP)
       .then((result) => {
         if (result.data.status) {
-          const data = result.data.data.map((ele: any) => {
-            return {
-              name: ele.name,
-              _id: ele._id,
-              isActive: ele.isActive,
-              permissions: [...ele.permissions],
-            };
-          });
-
-          let groups = data.filter((ele) => {
-            let f = false;
-            ele.permissions.forEach((p) => {
-              if (p.isClient) {
-                f = true;
-              }
-            });
-            return f;
-          });
-
-          groups = groups.map((group) => ({
-            ...group,
-            permissions: group.permissions.map((ele) => ele.name),
-          }));
+          const data: components["schemas"]["IUserGroupPermissions"][] = result.data.data;
+          const groups = data
+            .map((ele) => {
+              return {
+                name: ele.name,
+                _id: ele._id,
+                isActive: ele.isActive,
+                permissions: ele.permissions.map((p) => p.name),
+              };
+            })
+            .filter((ele) =>
+              ele.permissions.includes(permissions.CLIENT_MISSION_LIST)
+            );
 
           if (!props.client) {
             history.push("/dashboard/tenant/client/list");
