@@ -340,6 +340,12 @@ function BaseMap(props) {
       label: "Elevation",
     });
 
+    if (layer.type == "Raster" && layer.raster.name == "CESIUM_3D")
+      items.push({
+        key: "16",
+        label: layer._isMeshSource ? "Remove Mesh" : "Add Mesh",
+      });
+
     return items;
   };
   useEffect(() => {
@@ -632,9 +638,9 @@ function BaseMap(props) {
       if (navigator.geolocation) {
         navigator.permissions
           .query({ name: "geolocation" })
-          .then(function (result: any) {
+          .then(function(result: any) {
             if (result.state === "granted") {
-              navigator.geolocation.getCurrentPosition(function (pos: any) {
+              navigator.geolocation.getCurrentPosition(function(pos: any) {
                 const crd = pos.coords;
                 // console.log("Your current position is:");
                 // console.log(`Latitude : ${crd.latitude}`);
@@ -654,7 +660,7 @@ function BaseMap(props) {
               });
             } else if (result.state === "prompt") {
               navigator.geolocation.getCurrentPosition(
-                function (pos: any) {
+                function(pos: any) {
                   const crd = pos.coords;
                   // console.log("Your current position is:");
                   // console.log(`Latitude : ${crd.latitude}`);
@@ -672,7 +678,7 @@ function BaseMap(props) {
                     transitionInterpolator: new FlyToInterpolator(),
                   });
                 },
-                function (err) {
+                function(err) {
                   console.log(`Location fetch error: \n ${err}`);
                 },
                 {
@@ -686,7 +692,7 @@ function BaseMap(props) {
                 "Please allow location access from your browser for best experience of ARU!"
               );
             }
-            result.onChange = function () {
+            result.onChange = function() {
               console.log(result.state);
             };
           });
@@ -813,22 +819,22 @@ function BaseMap(props) {
             opacity: opcity,
           }),
           showBorder &&
-            new PathLayer({
-              id: `${props.id}-border`,
-              visible: props.visible,
-              data: [
-                [
-                  [west, north],
-                  [west, south],
-                  [east, south],
-                  [east, north],
-                  [west, north],
-                ],
+          new PathLayer({
+            id: `${props.id}-border`,
+            visible: props.visible,
+            data: [
+              [
+                [west, north],
+                [west, south],
+                [east, south],
+                [east, north],
+                [west, north],
               ],
-              getPath: (d) => d,
-              getColor: [255, 0, 0],
-              widthMinPixels: 4,
-            }),
+            ],
+            getPath: (d) => d,
+            getColor: [255, 0, 0],
+            widthMinPixels: 4,
+          }),
         ];
       },
     }),
@@ -1578,7 +1584,7 @@ function BaseMap(props) {
 
   function fetchJSON(file: any) {
     return fetch(file)
-      .then(function (res) {
+      .then(function(res) {
         return res.json();
       })
       .catch((err) => console.log(err));
@@ -1991,9 +1997,8 @@ function BaseMap(props) {
     //SetColorMap(settings.color);
     const scale = "@1x";
     const format = ".png";
-    const baseURL = `${COG_URL}/cog/tiles/${z ? z : "{z}"}/${x ? x : "{x}"}/${
-      y ? y : "{y}"
-    }${scale}${format}`;
+    const baseURL = `${COG_URL}/cog/tiles/${z ? z : "{z}"}/${x ? x : "{x}"}/${y ? y : "{y}"
+      }${scale}${format}`;
     const { resamplingMethod, bidx, minp, maxp } = settings;
     const queries: any = {
       url: `${TITILER_STATIC}${path}`,
@@ -3117,11 +3122,7 @@ function BaseMap(props) {
   // };
 
   const fetchLayerBounds = async (
-    type: string,
-    layerpath: string,
-    flaggedFeatures?: number[]
-  ) => {
-    let bounds: BBox;
+    { type, layerpath, flaggedFeatures, vector, raster }: Layer) => {
     if (type === "Vector") {
       const response = await fetch(STATIC_URL + layerpath);
       const data = await response.json();
@@ -3135,21 +3136,22 @@ function BaseMap(props) {
           }
         });
       }
-      bounds = turf.bbox(turf.featureCollection(features)) as BBox;
-    } else {
+      return turf.bbox(turf.featureCollection(features)) as BBox;
+    } else if (["ORTHO", "DEM", "DTM", "NDVI"].includes(raster.name)) {
       const metaDataURL = `${COG_URL}/cog/info?url=${TITILER_STATIC}${layerpath}`;
       const response = await fetch(metaDataURL, {
         method: "GET",
       });
       const metadata = await response.json();
-      bounds = [
+      return [
         metadata["bounds"][0],
         metadata["bounds"][1],
         metadata["bounds"][2],
         metadata["bounds"][3],
       ] as BBox;
     }
-    return bounds;
+    // Implementation for Pointcloud and Cesium_3D pending
+    return [0,0,0,0];
   };
 
   const onCheck = async (checkedKeysValue: any, e) => {
@@ -3189,11 +3191,7 @@ function BaseMap(props) {
     for (const layer of AllLayers) {
       const _isChecked = checkedKeysValue.includes(layer._id);
       if (_isChecked && !layer._metadata?.bounds) {
-        const bounds = await fetchLayerBounds(
-          layer.type,
-          layer.layerpath,
-          layer.flaggedFeatures
-        );
+        const bounds = await fetchLayerBounds(layer);
         layersWithBounds.push({
           ...layer,
           _isChecked,
@@ -3764,6 +3762,21 @@ function BaseMap(props) {
     );
   };
 
+  const handleMeshSourceOption = (id: string) => {
+    SetAllLayers((prev) =>
+      prev.map((layer) => {
+        if (layer.type == "Raster" && layer.raster.name == "CESIUM_3D") {
+          if (layer._id == id) {
+            layer._isMeshSource = !layer._isMeshSource;
+          } else {
+            layer._isMeshSource = false;
+          }
+        }
+        return layer;
+      })
+    );
+  };
+
   const toggleElevation = () => {
     setIsElevationEnabled((prevValue) => !prevValue);
     console.log(
@@ -4063,14 +4076,14 @@ function BaseMap(props) {
           setLayerName(layer.name);
           type === "Raster"
             ? setDefaultLayerType([
-                type.toUpperCase(),
-                layer.raster.name.toUpperCase(),
-              ])
+              type.toUpperCase(),
+              layer.raster.name.toUpperCase(),
+            ])
             : setDefaultLayerType([
-                type.toUpperCase(),
-                layer.vector.type.toUpperCase(),
-                layer.vector.name.toUpperCase(),
-              ]);
+              type.toUpperCase(),
+              layer.vector.type.toUpperCase(),
+              layer.vector.name.toUpperCase(),
+            ]);
           setSelectedLayerType(type.toLowerCase());
           break;
         case "2":
@@ -4189,6 +4202,9 @@ function BaseMap(props) {
         case "15":
           toggleElevation();
           break;
+        case "16":
+          handleMeshSourceOption(layer._id);
+          break;
         default:
           break;
       }
@@ -4227,8 +4243,8 @@ function BaseMap(props) {
                       ? "139px"
                       : "160px"
                     : layer.layerGroupId
-                    ? "119px"
-                    : "140px",
+                      ? "119px"
+                      : "140px",
               }}
               ellipsis={true}
               onClick={() => {
@@ -5326,7 +5342,7 @@ function BaseMap(props) {
       if (layer.type === "Vector") {
         setvectorLayers([...vectorLayers, layer]);
       }
-      fetchLayerBounds(layer.type, layer.layerpath, layer.flaggedFeatures)
+      fetchLayerBounds(layer)
         .then((bounds) => {
           SetAllLayers((prev) => [
             ...prev,
@@ -6894,7 +6910,7 @@ function BaseMap(props) {
           status="500"
           title="Oops! You have reached your limit of creating layers!"
           subTitle="Please contact your admin."
-          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
+        //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
@@ -6984,7 +7000,7 @@ function BaseMap(props) {
             }
           );
         }}
-        onDrag={() => {}}
+        onDrag={() => { }}
         onClick={(info, event) => {
           setShowDrawingTools(false);
           if (event.rightButton) {
@@ -7005,7 +7021,7 @@ function BaseMap(props) {
             setShowDrawingTools(false);
           }
         }}
-        //getTooltip={({object}) => object && (object.properties.Block_Nm)}
+      //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         {hoverInfo && (
           <div
@@ -7523,7 +7539,7 @@ function BaseMap(props) {
                 menu={{ items: filterMenu }}
                 //overlay={filterMenu}
                 disabled={chipsLoading}
-                //overlayStyle={{}}
+              //overlayStyle={{}}
               >
                 <Button style={{ float: "right" }} type="link">
                   Filter <DownOutlined />
@@ -7644,11 +7660,10 @@ function BaseMap(props) {
                   <Card
                     key="1"
                     onClick={() => setSelectedKey(1)}
-                    className={`create-mission-extended-card ${
-                      selectedKey == 1
+                    className={`create-mission-extended-card ${selectedKey == 1
                         ? "create-mission-extended-card-selected"
                         : ""
-                    }`}
+                      }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -7670,11 +7685,10 @@ function BaseMap(props) {
                   <Card
                     key="2"
                     onClick={() => setSelectedKey(2)}
-                    className={`create-mission-extended-card ${
-                      selectedKey == 2
+                    className={`create-mission-extended-card ${selectedKey == 2
                         ? "create-mission-extended-card-selected"
                         : ""
-                    }`}
+                      }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -8328,7 +8342,7 @@ function BaseMap(props) {
         <Modal
           title="Edit Group"
           open={visibleEditModal}
-          onOk={() => {}}
+          onOk={() => { }}
           onCancel={() => {
             setVisibleEditModal(false);
           }}
