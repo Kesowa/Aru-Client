@@ -23,6 +23,7 @@ import { logout } from "../../../../actions/authAction";
 import { connect } from "react-redux";
 import { InboxOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
+import { vectorProps } from "src/static/vectorprops";
 
 const { Dragger } = Upload;
 const { Text, Paragraph } = Typography;
@@ -122,57 +123,10 @@ const CreateLayer = (props: any) => {
         }
       });
 
-      switch (layerType) {
-        case "60c3a22aca0cbe039fce0d57": //------------Over Head Tank
-          fData.append("icon", "TankIcon");
-          break;
-        case "60c3a1e2ca0cbe039fce0d54": //------------PumpingStation
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a21dca0cbe039fce0d56": //------------Drainage Pumping Station
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a269ca0cbe039fce0d59": //------------Electric Pole
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a2d8ca0cbe039fce0d5b": //------------Electric Transformer
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a316ca0cbe039fce0d5d": //------------Street Light
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a349ca0cbe039fce0d5e": //------------Traffic Square
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a363ca0cbe039fce0d5f": //------------Fire Station
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a372ca0cbe039fce0d60": //------------Cellphone Tower
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a39eca0cbe039fce0d62": //------------Manhole
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a3b4ca0cbe039fce0d63": //------------Garbage Collection Point
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a3c5ca0cbe039fce0d64": //------------Landmark
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a42dca0cbe039fce0d67": //------------Public Convenience
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a464ca0cbe039fce0d6a": //------------Cycle Stand
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a542ca0cbe039fce0d74": //------------Mobile Drone port
-          fData.append("icon", "MarkerIcon");
-          break;
-        case "60c3a551ca0cbe039fce0d75": //------------PotHoles
-          fData.append("icon", "MarkerIcon");
-          break;
-        default:
-          fData.append("icon", "MarkerIcon");
+      if (layerTYpe === vectorProps.OVER_HEAD_TANK) {
+        featureData.features[0].properties["icon"] = "TankIcon";
+      } else {
+        featureData.features[0].properties["icon"] = "MarkerIcon";
       }
 
       const config = {
@@ -252,7 +206,7 @@ const CreateLayer = (props: any) => {
                     placeholder="Select Layer Type"
                     allowClear
                     treeData={props.options}
-                    onChange={(value) => setLayerType(value.substring(4, 28))}
+                    onChange={(value) => setLayerType(value.substring(4))}
                   />
                 </Item>
               </Col>

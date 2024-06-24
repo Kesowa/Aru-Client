@@ -29,44 +29,84 @@ import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { logout } from "../../../actions/authAction";
 import { connect } from "react-redux";
 import { API_URL } from "src/constants";
+import { featureType, featureTypes, vectorProps } from "src/static/vectorprops";
+import { ILayer } from "src/types/layer";
+import { components } from "src/handlers/schema";
+import { Feature, GeoJson, Properties } from "src/types/geojson";
 
 const { TextArea } = Input;
 
-const originData = [];
+interface IVectorFormProps {
+  visible: boolean;
+  setVisible: (b: boolean) => void;
+  mode: string;
+  vectorLayers: ILayer[];
+  features: {
+    type: string;
+    features: Feature<any, Properties>[];
+  };
+  missionId: string;
+  loading: (b: boolean) => void;
+  isBaseMap: boolean;
+  setIsDrawing: (b: boolean) => void;
+  forceUpdateLayers: (id: string) => void;
+  setShowForm: (b: boolean) => void;
+  addLayer: (l: any) => void;
+  updateLayerDataAfterEditing: (...args: any) => void;
+  setShouldAttributeTableReload: (b: boolean) => void;
+  shouldAttributeTableReload: boolean;
 
-const layerTypes: any = [
-  {
-    value: "MultiLineString",
-    label: "Line",
-    children: [],
-  },
-  {
-    value: "MultiPolygon",
-    label: "Area",
-    children: [],
-  },
-  {
-    value: "Point",
-    label: "Marker",
-    children: [],
-  },
-];
+  Auth: any;
+  Theme: any;
+  logout: (b: boolean) => any;
+}
 
-function VectorForm(props) {
-  const [data, setData] = useState<any>(originData);
+interface ILayerNameAutoCompleteOptions {
+  id: string;
+  value: string;
+  label: string;
+  layerpath: string;
+  vectorId: vectorProps;
+}
+
+interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
+  editing: boolean;
+  dataIndex: string;
+  title: string;
+  inputType: "text";
+  record: Item;
+  index: number;
+  children: React.ReactNode;
+}
+
+interface Item {
+  id: string;
+  key: string;
+  value: string;
+}
+
+function VectorForm(props: IVectorFormProps) {
+  const [data, setData] = useState<
+    { id: string; key: string; value: string }[]
+  >([]);
   const [count, setCount] = useState(0);
   const [editingKey, setEditingKey] = useState("");
 
   const [layerName, setLayerName] = useState("");
-  const [id, setId] = useState("");
+  const [id, setId] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [open, setopen] = useState(false);
   const [color, setColor] = useState("#000000");
-  const [cascaderOptions, setCascaderOptions] = useState<any>([]);
-  const [layerNames, setLayerNames] = useState([]);
-  const [vectorId, setVectorId] = useState("");
+  const [cascaderOptions, setCascaderOptions] = useState<
+    { value: string; label: string; children: any[] }[]
+  >([]);
+  const [layerNames, setLayerNames] = useState<ILayerNameAutoCompleteOptions[]>(
+    []
+  );
+  const [vectorId, setVectorId] = useState<vectorProps | null>(null);
   const [form] = Form.useForm();
-  const [defaultVectorType, setDefaultVectorType] = useState<any>([]);
+  const [defaultVectorType, setDefaultVectorType] =
+    useState<[string, vectorProps]>();
 
   const onClose = () => {
     props.setVisible(false);
@@ -75,89 +115,64 @@ function VectorForm(props) {
     }, 150);
   };
 
-  useEffect(() => {
-    let coptions: any;
-    if (props.vectorProps) {
-      switch (props.mode) {
-        case "PolygonView":
-          setDefaultVectorType(["Area", "Measurement"]);
-          coptions = structuredClone(layerTypes[1]);
-          break;
-        case "LineView":
-          setDefaultVectorType(["Line", "Boundary Wall"]);
-          coptions = structuredClone(layerTypes[0]);
-          break;
-        default:
-          setDefaultVectorType(["Marker", "Electric Pole"]);
-          coptions = structuredClone(layerTypes[2]);
-          break;
-      }
-
-      props.vectorProps.forEach((vectorProp) => {
-        if (props.mode === "PolygonView" && vectorProp.name === "Measurement") {
-          setVectorId(vectorProp._id);
-        } else if (
-          props.mode === "LineView" &&
-          vectorProp.name === "Boundary Wall"
-        ) {
-          setVectorId(vectorProp._id);
-        } else if (
-          props.mode === "PointView" &&
-          vectorProp.name === "Electric Pole"
-        ) {
-          setVectorId(vectorProp._id);
-        }
-
-        if (vectorProp.type == coptions.value) {
-          coptions.children.push({
-            label: vectorProp.name,
-            value: vectorProp._id,
-          });
-        }
-      });
-    }
-
-    setCascaderOptions([coptions]);
-  }, [props.vectorProps, props.mode]);
-
-  useEffect(() => {
-    if (props.vectorLayers) {
-      const options: any = [];
-
-      const insertLayers = (vectorLayers, type) => {
-        vectorLayers.forEach((layer) => {
-          if (type === layer.vector.type) {
-            options.push({
-              value: layer.name,
-              label: layer.name,
-              id: layer._id,
-              layerpath: layer.layerpath,
-              vectorId: layer.vector._id,
-            });
-          }
-        });
-      };
-
-      switch (props.mode) {
-        case "PolygonView":
-          insertLayers(props.vectorLayers, "MultiPolygon");
-          break;
-        case "LineView":
-          insertLayers(props.vectorLayers, "MultiLineString");
-          break;
-        case "PointView":
-          insertLayers(props.vectorLayers, "Point");
-      }
-
-      setLayerNames(options);
-    }
-  }, [props.vectorLayers]);
-
-  const changeLayerType = (value) => {
-    setVectorId(value[1]);
+  const getCascaderOptions = (fType: featureTypes) => {
+    return {
+      value: fType,
+      label:
+        fType === featureTypes.MULTI_POLYGON
+          ? "Area"
+          : fType === featureTypes.MULTI_LINE_STRING
+          ? "Line"
+          : "Marker",
+      children: Object.keys(featureType)
+        .filter((p) => featureType[p] === fType)
+        .map((p) => ({ label: p, value: p })),
+    };
   };
 
-  const onSelect = async (data, option) => {
+  const insertLayers = (type: featureTypes) => {
+    return props.vectorLayers
+      .filter((layer) => featureType[layer.vector] === type)
+      .map((layer) => ({
+        id: layer._id,
+        value: layer.name,
+        label: layer.name,
+        layerpath: layer.layerpath,
+        vectorId: layer.vector,
+      }));
+  };
+
+  useEffect(() => {
+    let fType: featureTypes;
+    switch (props.mode) {
+      case "PolygonView":
+        setDefaultVectorType(["Area", vectorProps.MEASUREMENT]);
+        setVectorId(vectorProps.MEASUREMENT);
+        fType = featureTypes.MULTI_POLYGON;
+        break;
+      case "LineView":
+        setDefaultVectorType(["Line", vectorProps.BOUNDARY_WALL]);
+        setVectorId(vectorProps.BOUNDARY_WALL);
+        fType = featureTypes.MULTI_LINE_STRING;
+        break;
+      default:
+        setDefaultVectorType(["Marker", vectorProps.ELECTRIC_POLE]);
+        setVectorId(vectorProps.ELECTRIC_POLE);
+        fType = featureTypes.POINT;
+        break;
+    }
+    setCascaderOptions([getCascaderOptions(fType)]);
+    if (props.vectorLayers) setLayerNames(insertLayers(fType));
+  }, [props.mode, props.vectorLayers]);
+
+  const changeLayerType = (value: (string | number)[]) => {
+    setVectorId(value[1] as vectorProps);
+  };
+
+  const onSelect = async (
+    data: string,
+    option: ILayerNameAutoCompleteOptions
+  ) => {
     console.log(option);
     setVectorId(option.vectorId);
     setLayerName(data);
@@ -168,27 +183,32 @@ function VectorForm(props) {
         method: "GET",
       });
 
-      const layerData = await data.json();
+      const layerData = (await data.json()) as GeoJson;
 
       addExistingAttributes(layerData.features[0].properties);
     } catch (err: any) {
-      message.error(err.message);
+      await message.error(err.message);
     }
 
     setopen(false);
   };
 
-  const onChange = (data) => {
-    setId("");
+  const onChange = (data: string) => {
+    setId(null);
     setLayerName(data);
   };
 
-  const filterOption = (inputValue, option) => {
-    if (!inputValue) return option;
-    return option.value.startsWith(inputValue);
+  const filterOption = (
+    inputValue: string,
+    option?: ILayerNameAutoCompleteOptions
+  ) => {
+    if (inputValue && option) return option.value.startsWith(inputValue);
+    return false;
   };
 
-  const onDescriptionChange = (e) => {
+  const onDescriptionChange: React.ChangeEventHandler<HTMLTextAreaElement> = (
+    e
+  ) => {
     setDescription(e.target.value);
   };
 
@@ -202,7 +222,7 @@ function VectorForm(props) {
 
   const handleAdd = () => {
     const newData: Item = {
-      id: count,
+      id: String(count),
       key: `Key ${count + 1}`,
       value: "",
     };
@@ -210,25 +230,19 @@ function VectorForm(props) {
     setCount(count + 1);
   };
 
-  const addExistingAttributes = (properties: any) => {
-    const newData: any = [];
-    Object.keys(properties).forEach((key: any, i: any) => {
-      if (
-        key !== "color" &&
-        key !== "Id" &&
-        key !== "description" &&
-        key !== "icon"
-      ) {
-        newData.push({
-          id: newData.length,
-          key: key,
-          value: "",
-        });
-      }
-      setCount(newData.length + 1);
-    });
+  const addExistingAttributes = (properties: Properties) => {
+    const keysToIgnore = ["color", "Id", "description", "icon"];
+    const newData = Object.keys(properties)
+      .filter((key) => !keysToIgnore.includes(key))
+      .map((key, idx) => ({
+        id: String(idx),
+        key: key,
+        value: "",
+      }));
 
-    setDescription(properties.description);
+    setCount(newData.length + 1);
+
+    setDescription(properties.description || "");
     setData(newData);
   };
 
@@ -244,9 +258,9 @@ function VectorForm(props) {
     setCount(count - 1);
   };
 
-  const edit = (record: Partial<Item> & { key: React.Key }) => {
+  const edit = (record: { key: React.Key }) => {
     form.setFieldsValue({ label: "", value: "", ...record });
-    setEditingKey(record.key);
+    setEditingKey(String(record.key));
   };
 
   const save = async (key: React.Key) => {
@@ -273,29 +287,9 @@ function VectorForm(props) {
     }
   };
 
-  interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
-    editing: boolean;
-    dataIndex: string;
-    title: any;
-    inputType: "text";
-    record: Item;
-    index: number;
-    children: React.ReactNode;
-  }
-
-  interface Item {
-    id: any;
-    key: any;
-    value: any;
-  }
-
   const EditableCell: React.FC<EditableCellProps> = ({
     editing,
     dataIndex,
-    title,
-    inputType,
-    record,
-    index,
     children,
     ...restProps
   }) => {
@@ -403,12 +397,12 @@ function VectorForm(props) {
     console.log(featureData);
 
     if (description)
-      featureData.data.features[0].properties["description"] = description;
-    featureData.data.features[0].properties["color"] = color;
+      featureData.features[0].properties["description"] = description;
+    featureData.features[0].properties["color"] = color;
 
     data.forEach((element) => {
       const k = element["key"];
-      featureData.data.features[0].properties[k] = element["value"];
+      featureData.features[0].properties[k] = element["value"];
     });
 
     if (!id) {
@@ -419,71 +413,25 @@ function VectorForm(props) {
 
       //setting layericon
       //setting layer icon
-      switch (vectorId) {
-        case "60c3a22aca0cbe039fce0d57": //------------verheadtank
-          featureData.data.features[0].properties["icon"] = "TankIcon";
-          break;
-        case "60c3a1e2ca0cbe039fce0d54": //------------PumpingStation
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a21dca0cbe039fce0d56": //------------Drainage Pumping Station
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a269ca0cbe039fce0d59": //------------Electric Pole
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a2d8ca0cbe039fce0d5b": //------------Electric Transformer
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a316ca0cbe039fce0d5d": //------------Street Light
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a349ca0cbe039fce0d5e": //------------Traffic Square
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a363ca0cbe039fce0d5f": //------------Fire Station
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a372ca0cbe039fce0d60": //------------Cellphone Tower
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a39eca0cbe039fce0d62": //------------Manhole
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a3b4ca0cbe039fce0d63": //------------Garbage Collection Point
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a3c5ca0cbe039fce0d64": //------------Landmark
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a42dca0cbe039fce0d67": //------------Public Convenience
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a464ca0cbe039fce0d6a": //------------Cycle Stand
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a542ca0cbe039fce0d74": //------------Mobile Drone port
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a551ca0cbe039fce0d75": //------------PotHoles
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        default:
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
+      if (vectorId === vectorProps.OVER_HEAD_TANK) {
+        featureData.features[0].properties["icon"] = "TankIcon";
+      } else {
+        featureData.features[0].properties["icon"] = "MarkerIcon";
       }
+
       let payload: any = {};
       if (props.isBaseMap) {
         payload = {
           name: layerName,
           vectorId: vectorId,
-          geoJSON: featureData.data,
+          geoJSON: featureData,
         };
       } else {
         payload = {
           name: layerName,
           vectorId: vectorId,
           missionId: props.missionId,
-          geoJSON: featureData.data,
+          geoJSON: featureData,
         };
       }
       props.loading(true);
@@ -517,61 +465,14 @@ function VectorForm(props) {
           }, 150);
         });
     } else {
-      switch (vectorId) {
-        case "60c3a22aca0cbe039fce0d57": //------------verheadtank
-          featureData.data.features[0].properties["icon"] = "TankIcon";
-          break;
-        case "60c3a1e2ca0cbe039fce0d54": //------------PumpingStation
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a21dca0cbe039fce0d56": //------------Drainage Pumping Station
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a269ca0cbe039fce0d59": //------------Electric Pole
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a2d8ca0cbe039fce0d5b": //------------Electric Transformer
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a316ca0cbe039fce0d5d": //------------Street Light
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a349ca0cbe039fce0d5e": //------------Traffic Square
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a363ca0cbe039fce0d5f": //------------Fire Station
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a372ca0cbe039fce0d60": //------------Cellphone Tower
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a39eca0cbe039fce0d62": //------------Manhole
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a3b4ca0cbe039fce0d63": //------------Garbage Collection Point
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a3c5ca0cbe039fce0d64": //------------Landmark
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a42dca0cbe039fce0d67": //------------Public Convenience
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a464ca0cbe039fce0d6a": //------------Cycle Stand
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a542ca0cbe039fce0d74": //------------Mobile Drone port
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        case "60c3a551ca0cbe039fce0d75": //------------PotHoles
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
-          break;
-        default:
-          featureData.data.features[0].properties["icon"] = "MarkerIcon";
+      if (vectorId === vectorProps.OVER_HEAD_TANK) {
+        featureData.features[0].properties["icon"] = "TankIcon";
+      } else {
+        featureData.features[0].properties["icon"] = "MarkerIcon";
       }
       const reqData = {
         id: id,
-        feature: featureData.data.features[0],
+        feature: featureData.features[0],
       };
       props.loading(true);
       http
@@ -599,8 +500,8 @@ function VectorForm(props) {
           setTimeout(() => {
             props.setShowForm(false);
           }, 150);
-          setId("");
-          setVectorId("");
+          setId(null);
+          setVectorId(null);
         });
     }
   };
@@ -638,7 +539,7 @@ function VectorForm(props) {
         }
       >
         <div style={{ height: "50px" }}>
-          {defaultVectorType.length && !id && (
+          {defaultVectorType?.length && !id && (
             <Row>
               <Col span={4}>
                 <h2>Save As</h2>

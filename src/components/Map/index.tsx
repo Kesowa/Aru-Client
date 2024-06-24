@@ -136,8 +136,12 @@ import {
   MissionLayerToDeckLayer,
 } from "./layerRender";
 import { ILayersToTree } from "./treeRender";
-import { BBox, mergeBoundingBoxes } from "src/types/geojson";
+import { BBox, Feature, mergeBoundingBoxes } from "src/types/geojson";
 import { invertColor } from "./colorUtils";
+
+import { featureType, featureTypes, vectorProps } from "src/static/vectorprops";
+import { defaultRasterSettings, rasterProps } from "src/static/rasterprops";
+
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -862,8 +866,8 @@ function BaseMap(props) {
   const [layerColor, setLayerColor] = useState("#ffaa00");
   const [icon, setIcon] = useState("");
   const [fileList, setFileList] = useState<any>([]);
-  const [rasterProps, setRasterProps] = useState<any>([]);
-  const [vectorProps, setVectorProps] = useState<any>([]);
+  // const [rasterProps, setRasterProps] = useState<any>([]);
+  // const [vectorProps, setVectorProps] = useState<any>([]);
   const [data, setData] = useState();
   const [editingKey, setEditingKey] = useState("");
   const [missioName, setMissioName] = useState("");
@@ -988,23 +992,24 @@ function BaseMap(props) {
     }
     setPointMarkerSize(value);
   };
-  const myFeatureCollection: any = {
+  const myFeatureCollection: {
+    type: string;
+    features: Feature<any, any>[];
+  } = {
     type: "FeatureCollection",
     features: [],
   };
 
   const [selectedFeatureIndexes, setselectedFeatureIndexes] = useState([]);
-  const [featureState, setFeatureState] = useState({
-    data: myFeatureCollection,
-  });
+  const [featureState, setFeatureState] = useState(myFeatureCollection);
 
-  const [selectedLayerId, setSelectedLayerId] = useState<any>();
+  const [selectedLayerId, setSelectedLayerId] = useState<string>();
   const [selectedLayerType, setSelectedLayerType] = useState("");
 
   const [layerToAddInAttributeTable, setlayerToAddInAttributeTable] =
     useState<any>(null);
   const [shouldAttributeTableReload, setShouldAttributeTableReload] =
-    useState<any>(false);
+    useState(false);
 
   const [scaleVisible, setScaleVisible] = useState(false);
 
@@ -1063,30 +1068,30 @@ function BaseMap(props) {
   }, []);
 
   //----------------------Fetching Raster Props and Vector Props------------
-  useEffect(() => {
-    http
-      .get(`${apis.GET_RASTER_PROPS}`)
-      .then((result) => {
-        if (result.data.status) {
-          setRasterProps(result.data.data);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        AxiosErrorHandler(err, props.logout);
-      });
-    http
-      .get(`${apis.GET_VECTOR_PROPS}`)
-      .then((result) => {
-        if (result.data.status) {
-          setVectorProps(result.data.data);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        AxiosErrorHandler(err, props.logout);
-      });
-  }, []);
+  // useEffect(() => {
+  //   http
+  //     .get(`${apis.GET_RASTER_PROPS}`)
+  //     .then((result) => {
+  //       if (result.data.status) {
+  //         setRasterProps(result.data.data);
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //       AxiosErrorHandler(err, props.logout);
+  //     });
+  //   http
+  //     .get(`${apis.GET_VECTOR_PROPS}`)
+  //     .then((result) => {
+  //       if (result.data.status) {
+  //         setVectorProps(result.data.data);
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //       AxiosErrorHandler(err, props.logout);
+  //     });
+  // }, []);
 
   // Filter
   const filterLayers = () => {
@@ -1987,30 +1992,30 @@ function BaseMap(props) {
     //console.log("onclick", index);
   }
   //-----------------------Fetch Raster URL----------------------------------
-  const getRasterURL = (rasterType, path, settings, x?, y?, z?) => {
-    //SetColorMap(settings.color);
-    const scale = "@1x";
-    const format = ".png";
-    const baseURL = `${COG_URL}/cog/tiles/${z ? z : "{z}"}/${x ? x : "{x}"}/${
-      y ? y : "{y}"
-    }${scale}${format}`;
-    const { resamplingMethod, bidx, minp, maxp } = settings;
-    const queries: any = {
-      url: `${TITILER_STATIC}${path}`,
-      [resamplingMethod && "resampling_method"]: resamplingMethod,
-      [bidx && "bidx"]: bidx,
-      [minp && maxp && "rescale"]: `${minp},${maxp}`,
-    };
-    if (["DEM"].includes(rasterType)) {
-      // kept as an array because more raster types may need colormap in future
-      queries["colormap_name"] = colorMap;
-    }
-    delete queries["undefined"];
-    delete queries["null"];
-    const queryString = new URLSearchParams(queries).toString();
-    console.log(`${baseURL}?${queryString}`);
-    return `${baseURL}?${queryString}`;
-  };
+  // const getRasterURL = (rasterType, path, settings, x?, y?, z?) => {
+  //   //SetColorMap(settings.color);
+  //   const scale = "@1x";
+  //   const format = ".png";
+  //   const baseURL = `${COG_URL}/cog/tiles/${z ? z : "{z}"}/${x ? x : "{x}"}/${
+  //     y ? y : "{y}"
+  //   }${scale}${format}`;
+  //   const { resamplingMethod, bidx, minp, maxp } = settings;
+  //   const queries: any = {
+  //     url: `${TITILER_STATIC}${path}`,
+  //     [resamplingMethod && "resampling_method"]: resamplingMethod,
+  //     [bidx && "bidx"]: bidx,
+  //     [minp && maxp && "rescale"]: `${minp},${maxp}`,
+  //   };
+  //   if (["DEM"].includes(rasterType)) {
+  //     // kept as an array because more raster types may need colormap in future
+  //     queries["colormap_name"] = colorMap;
+  //   }
+  //   delete queries["undefined"];
+  //   delete queries["null"];
+  //   const queryString = new URLSearchParams(queries).toString();
+  //   console.log(`${baseURL}?${queryString}`);
+  //   return `${baseURL}?${queryString}`;
+  // };
 
   function handleClose(status: boolean) {
     togglePopup(status);
@@ -2079,7 +2084,7 @@ function BaseMap(props) {
   function setOverlayID(id: string, overlayId: string) {
     SetAllLayers((prev) =>
       prev.map((layer) => {
-        if (layer._id === id) layer.raster.overlayId = overlayId;
+        if (layer._id === id) layer._metadata = { ...layer._metadata, overlayId };
         return layer;
       })
     );
@@ -2088,9 +2093,9 @@ function BaseMap(props) {
   useEffect(() => {
     SetAllLayers((prev) =>
       prev.map((layer) => {
-        if (layer.type === "Raster" && layer.raster.name === "DEM") {
+        if (layer.type === "Raster" && layer.raster === rasterProps.DEM) {
           layer._render3D = terrainmap;
-          layer.raster.colorMap = colorMap;
+          layer._metadata = { ...layer._metadata, colorMap };
         }
         return layer;
       })
@@ -2155,7 +2160,7 @@ function BaseMap(props) {
       (layer) =>
         layer._isChecked &&
         layer.type === "Raster" &&
-        layer.raster.name === "DEM"
+        layer.raster === rasterProps.DEM
     );
     setScales(demLayers);
     if (demLayers.length) {
@@ -3184,33 +3189,32 @@ function BaseMap(props) {
     setLastCount(checkedKeysValue.length);
     // console.log("CHECKED: ", checkedKeysValue);
 
-    const layersWithBounds: Layer[] = [];
+    // first update checked status
+    let updatedLayers = AllLayers.map(layer => ({ ...layer, _isChecked: checkedKeysValue.includes(layer._id) }));
 
-    for (const layer of AllLayers) {
-      const _isChecked = checkedKeysValue.includes(layer._id);
-      if (_isChecked && !layer._metadata?.bounds) {
-        const bounds = await fetchLayerBounds(
-          layer.type,
-          layer.layerpath,
-          layer.flaggedFeatures
-        );
-        layersWithBounds.push({
-          ...layer,
-          _isChecked,
-          _metadata: {
-            ...layer._metadata,
-            bounds,
-          },
-        });
-      } else {
-        layersWithBounds.push({
-          ...layer,
-          _isChecked,
-        });
+    // next update metadata for checked layers
+    for (let layer of updatedLayers) {
+      if (layer._isChecked) {
+        
+        // fetch bounds is they havent already been fetched
+        if (!layer._metadata?.bounds) {
+          const bounds = await fetchLayerBounds(
+            layer.type,
+            layer.layerpath,
+            layer.flaggedFeatures
+          );
+          layer._metadata = { ...layer._metadata, bounds };
+        }
+
+        // add raster settings
+        if (layer.type === "Raster") {
+          layer._metadata = { ...defaultRasterSettings[layer.raster], ...layer._metadata };
+        }
+
       }
     }
 
-    SetAllLayers(layersWithBounds);
+    SetAllLayers(updatedLayers);
     SetMissionLayers({
       alertGeojsonUrl: missionGeojsonURL(
         "alert",
@@ -3249,9 +3253,7 @@ function BaseMap(props) {
       DrawPoint: "PointView",
     };
 
-    setFeatureState({
-      data: myFeatureCollection,
-    });
+    setFeatureState(myFeatureCollection);
 
     setdrawMode(drawModes[mode]);
 
@@ -3269,9 +3271,7 @@ function BaseMap(props) {
 
   const cancelDrawing = () => {
     setIsDrawing(false);
-    setFeatureState({
-      data: myFeatureCollection,
-    });
+    setFeatureState(myFeatureCollection);
 
     setMode({
       mode: ViewMode,
@@ -4064,12 +4064,12 @@ function BaseMap(props) {
           type === "Raster"
             ? setDefaultLayerType([
                 type.toUpperCase(),
-                layer.raster.name.toUpperCase(),
+                layer.raster.toUpperCase(),
               ])
             : setDefaultLayerType([
                 type.toUpperCase(),
-                layer.vector.type.toUpperCase(),
-                layer.vector.name.toUpperCase(),
+                featureType[layer.vector].toUpperCase(),
+                layer.vector.toUpperCase(),
               ]);
           setSelectedLayerType(type.toLowerCase());
           break;
@@ -5008,11 +5008,15 @@ function BaseMap(props) {
     //console.log("Success:", values);
   };
 
+  function getPropOptions(prefix: string, propNames: string[]) {
+    return propNames.sort().map((propName) => ({ title: propName, value: `${prefix}-${propName}` }));
+  }
+
   const options: any = [
     {
       value: "raster",
       title: "RASTER",
-      children: [],
+      children: getPropOptions("0", Object.values(rasterProps)),
       selectable: false,
     },
     {
@@ -5024,80 +5028,87 @@ function BaseMap(props) {
           value: "MultiLineString",
           title: "Line",
           selectable: false,
-          children: [],
+          children: getPropOptions("1-0", Object.values(vectorProps).filter(p => featureType[p] === featureTypes.MULTI_LINE_STRING)),
         },
         {
           value: "MultiPolygon",
           title: "Area",
-          children: [],
+          children: getPropOptions("1-1", Object.values(vectorProps).filter(p => featureType[p] === featureTypes.MULTI_POLYGON)),
           selectable: false,
         },
         {
           value: "Point",
           title: "Point",
-          children: [],
+          children: getPropOptions("1-2", Object.values(vectorProps).filter(p => featureType[p] === featureTypes.POINT)),
           selectable: false,
         },
         {
           value: "Other",
           title: "Other",
-          children: [],
-          selectable: true,
+          children: getPropOptions("1-3", Object.values(vectorProps)
+            .filter(p => ![
+                featureTypes.POINT, 
+                featureTypes.MULTI_LINE_STRING, 
+                featureTypes.MULTI_POLYGON
+              ].includes(featureType[p])
+            )
+          ),
+          selectable: false,
         },
       ],
     },
   ];
 
-  if (rasterProps) {
-    options.map((option) => {
-      if (option.value == "raster") {
-        rasterProps.map((rasterProp) => {
-          option.children.push({
-            value: "0-" + rasterProp._id + "-" + rasterProp.name,
-            title: rasterProp.name,
-          });
-        });
-      }
-    });
-  }
+  // if (rasterProps) {
+  //   options.map((option) => {
+  //     if (option.value == "raster") {
+  //       rasterProps.map((rasterProp) => {
+  //         option.children.push({
+  //           value: "0-" + rasterProp._id + "-" + rasterProp.name,
+  //           title: rasterProp.name,
+  //         });
+  //       });
+  //     }
+  //   });
+  // }
 
-  if (vectorProps) {
-    vectorProps.map((vectorProp) => {
-      if (vectorProp.type == "MultiLineString") {
-        options[1].children[0].children.push({
-          title: vectorProp.name,
-          value: "1-0-" + vectorProp._id + "-" + vectorProp.name,
-        });
-      } else if (vectorProp.type == "MultiPolygon") {
-        options[1].children[1].children.push({
-          title: vectorProp.name,
-          value: "1-1-" + vectorProp._id + "-" + vectorProp.name,
-        });
-      } else if (vectorProp.type == "Point") {
-        options[1].children[2].children.push({
-          title: vectorProp.name,
-          value: "1-2-" + vectorProp._id + "-" + vectorProp.name,
-        });
-      } else if (vectorProp.type) {
-        options[1].children[3].children.push({
-          title: vectorProp.name,
-          value: "1-3-" + vectorProp._id + "-" + vectorProp.name,
-        });
-      }
-    });
-    options[1].children[0].children.sort(sortAlphabetically);
-    options[1].children[1].children.sort(sortAlphabetically);
-    options[1].children[2].children.sort(sortAlphabetically);
-    options[1].children[3].children.sort(sortAlphabetically);
-  }
+  // if (vectorProps) {
+  //   vectorProps.map((vectorProp) => {
+  //     if (vectorProp.type == "MultiLineString") {
+  //       options[1].children[0].children.push({
+  //         title: vectorProp.name,
+  //         value: "1-0-" + vectorProp._id + "-" + vectorProp.name,
+  //       });
+  //     } else if (vectorProp.type == "MultiPolygon") {
+  //       options[1].children[1].children.push({
+  //         title: vectorProp.name,
+  //         value: "1-1-" + vectorProp._id + "-" + vectorProp.name,
+  //       });
+  //     } else if (vectorProp.type == "Point") {
+  //       options[1].children[2].children.push({
+  //         title: vectorProp.name,
+  //         value: "1-2-" + vectorProp._id + "-" + vectorProp.name,
+  //       });
+  //     } else if (vectorProp.type) {
+  //       options[1].children[3].children.push({
+  //         title: vectorProp.name,
+  //         value: "1-3-" + vectorProp._id + "-" + vectorProp.name,
+  //       });
+  //     }
+  //   });
+  //   options[1].children[0].children.sort(sortAlphabetically);
+  //   options[1].children[1].children.sort(sortAlphabetically);
+  //   options[1].children[2].children.sort(sortAlphabetically);
+  //   options[1].children[3].children.sort(sortAlphabetically);
+  // }
 
-  function sortAlphabetically(a, b) {
-    const x = a.title.toLowerCase();
-    const y = b.title.toLowerCase();
-    if (x < y) return -1;
-    if (x > y) return 1;
-    return 0;
-  }
+  // function sortAlphabetically(a, b) {
+  //   const x = a.title.toLowerCase();
+  //   const y = b.title.toLowerCase();
+  //   if (x < y) return -1;
+  //   if (x > y) return 1;
+  //   return 0;
+  // }
 
   const getEditLayerTypeOptions = (layerType) => {
     console.log(layerType);
@@ -5217,11 +5228,11 @@ function BaseMap(props) {
     if (value[0] === "1") {
       setshowColorPicker(true);
       setLayerType("Vector");
-      setLayerTypeId(value.substring(4, 28));
+      setLayerTypeId(value.substring(4));
     } else if (value[0] === "0") {
       setshowColorPicker(false);
       setLayerType("Raster");
-      setLayerTypeId(value.substring(2, 26));
+      setLayerTypeId(value.substring(2));
     }
   };
 
@@ -5326,6 +5337,7 @@ function BaseMap(props) {
       if (layer.type === "Vector") {
         setvectorLayers([...vectorLayers, layer]);
       }
+      const rasterSettings = layer.type === "Raster" ? defaultRasterSettings[layer.raster] : {};
       fetchLayerBounds(layer.type, layer.layerpath, layer.flaggedFeatures)
         .then((bounds) => {
           SetAllLayers((prev) => [
@@ -5336,6 +5348,7 @@ function BaseMap(props) {
               _render3D: false,
               _metadata: {
                 bounds,
+                ...rasterSettings,
               },
             },
           ]);
@@ -5443,15 +5456,12 @@ function BaseMap(props) {
 
   const drawPolygonTool = new (EditableGeoJsonLayer as any)({
     id: "geojson",
-    data: featureState.data,
+    data: featureState,
     mode: mode.mode,
     selectedFeatureIndexes,
     onEdit: ({ updatedData, editType, editContext }): any => {
       let updatedSelectedFeatureIndexes: any = selectedFeatureIndexes;
-      setFeatureState({
-        ...featureState,
-        data: updatedData,
-      });
+      setFeatureState(updatedData);
       if (editType === "addFeature") {
         //event to fire up infowindow for registering new vector layer/shape
         //console.log("New Shape Created!", updatedData);
@@ -5956,7 +5966,7 @@ function BaseMap(props) {
       key: "vector",
       label: "Vector",
       children: [
-        ...["Point", "MultiLineString", "MultiPolygon"].map((type) => {
+        ...Object.values(featureTypes).map((type) => {
           return {
             key: type,
             label: type,
@@ -5966,73 +5976,76 @@ function BaseMap(props) {
                 return { ...prev };
               });
             },
-            children: vectorProps
-              .filter((p) => p.type === type)
-              .map((p) => {
-                return {
-                  key: `${p.name}${p.type}`,
-                  label: (
-                    <div
-                      onClick={() =>
-                        setFilterState((prev) => {
-                          // prev.vectorPropsType.add(type);
-                          prev.vectorProps.add(p.name);
-                          return { ...prev };
-                        })
-                      }
-                    >
-                      {p.name}
-                    </div>
-                  ),
-                };
-              }),
+            children: [
+              ...Object.keys(featureType)
+                .filter(prop => featureType[prop] === type)
+                .map((propName: string) => {
+                  return {
+                    key: `${propName}${type}`,
+                    label: (
+                      <div
+                        onClick={() =>
+                          setFilterState((prev) => {
+                            // prev.vectorPropsType.add(type);
+                            prev.vectorProps.add(propName);
+                            return { ...prev };
+                          })
+                        }
+                      >
+                        {propName}
+                      </div>
+                    ),
+                  };
+                })
+            ],
           };
         }),
         {
           key: "Other",
           label: "Other",
-          children: vectorProps
+          children: [...Object.keys(featureType)
             .filter(
               (p) =>
-                !["Point", "MultiLineString", "MultiPolygon"].includes(p.type)
+                ![featureTypes.POINT, featureTypes.MULTI_LINE_STRING, featureTypes.MULTI_POLYGON].includes(featureType[p])
             )
             .map((p) => {
               return {
-                key: `${p.name}-${p.type}`,
+                key: `${p}${featureType[p]}`,
                 label: (
                   <div
                     onClick={() =>
                       setFilterState((prev) => {
-                        prev.vectorPropsType.add(p.type);
-                        prev.vectorProps.add(p.name);
+                        // prev.vectorPropsType.add(featureType[p]);
+                        prev.vectorProps.add(p);
                         return { ...prev };
                       })
                     }
                   >
-                    {p.name}
+                    {p}
                   </div>
                 ),
               };
             }),
+          ],
         },
       ],
     },
     {
       key: "raster",
       label: "Raster",
-      children: rasterProps.map((p) => {
+      children: Object.values(rasterProps).map((propName) => {
         return {
-          key: p.name,
+          key: propName,
           label: (
             <div
               onClick={() =>
                 setFilterState((prev) => {
-                  prev.rasterProps.add(p.name);
+                  prev.rasterProps.add(propName);
                   return { ...prev };
                 })
               }
             >
-              {p.name}
+              {propName}
             </div>
           ),
         };
@@ -7899,7 +7912,7 @@ function BaseMap(props) {
                             const temp = String(value[value.length - 1]).split(
                               "-"
                             );
-                            const updatedTypeId = temp[temp.length - 2];
+                            const updatedTypeId = temp[temp.length - 1];
                             setLayerTypeId(updatedTypeId);
                           }}
                         />
@@ -8209,7 +8222,6 @@ function BaseMap(props) {
       </div>
       {showForm && (
         <VectorForm
-          vectorProps={vectorProps}
           visible={formDrawerVisible}
           setVisible={setformDrawerVisible}
           mode={drawMode ? drawMode : "PolygonView"}

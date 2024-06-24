@@ -2,6 +2,9 @@ export enum featureTypes {
   POINT = "Point",
   MULTI_LINE_STRING = "MultiLineString",
   MULTI_POLYGON = "MultiPolygon",
+  AIR_POLLUTION = "air_pollution",
+  WIND_DIRECTION = "wind_direction",
+  POLYGON = "Polygon",
 }
 
 export enum vectorProps {

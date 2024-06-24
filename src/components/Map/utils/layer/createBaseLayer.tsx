@@ -38,6 +38,7 @@ import TankIcon from "../../../../static/TankIcon.png";
 import ValveIcon from "../../../../static/ValveIcon.png";
 import DotIcon from "../../../../static/DotIcon.png";
 import { components } from "src/handlers/schema";
+import { featureType } from "src/static/vectorprops";
 const { Dragger } = Upload;
 const { Item } = Form;
 const { Meta } = Card;
@@ -124,8 +125,9 @@ const CreateBaseLayer = (props) => {
         layerOptions.map((layer) => {
           if (layer._id == item) {
             layertype.add(layer.type);
-            if (layer.type == "Vector") layertype1.add(layer.vector.type);
-            else layertype2.add(layer.raster.name);
+            if (layer.type == "Vector")
+              layertype1.add(featureType[layer.vector]);
+            else layertype2.add(layer.raster);
           }
         });
       });
@@ -870,18 +872,17 @@ const CreateBaseLayer = (props) => {
     fileList,
   };
 
-  const changeLayerType = (value) => {
-    console.log(value);
-    if (value === undefined) {
+  const changeLayerType = (value?: string) => {
+    if (!value) {
       setLayerTypeId("");
     } else if (value[0] === "1") {
       setShowColorPicker(true);
       setLayerType("Vector");
-      setLayerTypeId(value.substring(4, 28));
+      setLayerTypeId(value.substring(4));
     } else if (value[0] === "0") {
       setShowColorPicker(false);
       setLayerType("Raster");
-      setLayerTypeId(value.substring(2, 26));
+      setLayerTypeId(value.substring(2));
     }
   };
 

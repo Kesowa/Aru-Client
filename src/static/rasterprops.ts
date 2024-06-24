@@ -4,18 +4,38 @@ export enum rasterProps {
   ORTHO = "ORTHO",
   DEM = "DEM",
   NDWI = "NDWI",
+  NDVI = "NDVI",
 }
 
-export const rasterSettings = {
-  bidx: {
-    [rasterProps.DEM]: "1",
-    [rasterProps.NDWI]: "1%2C2%2C4",
+export const defaultRasterSettings = {
+  [rasterProps.POINT_CLOUD]: {
+    bidx: null,
+    bandExp: null,
+    colorMap: null,
+    resamplingMethod: null,
   },
-  colorMap: {
-    [rasterProps.DEM]: "plasma",
+  [rasterProps.CESIUM_3D]: {
+    bidx: null,
+    bandExp: null,
+    colorMap: null,
+    resamplingMethod: null,
   },
-  resamplingMethod: {
-    [rasterProps.DEM]: "nearest",
-    [rasterProps.NDWI]: "nearest",
+  [rasterProps.ORTHO]: {
+    bidx: null,
+    bandExp: null,
+    colorMap: null,
+    resamplingMethod: null,
+  },
+  [rasterProps.DEM]: {
+    bidx: "1",
+    bandExp: null,
+    colorMap: "plasma",
+    resamplingMethod: "nearest",
+  },
+  [rasterProps.NDWI]: {
+    bidx: "1%2C2%2C4",
+    bandExp: null,
+    colorMap: null,
+    resamplingMethod: "nearest",
   },
 };
