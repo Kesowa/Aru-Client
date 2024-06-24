@@ -11,8 +11,8 @@ import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
 import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
-import { MaskExtension } from "@deck.gl/extensions/typed";
-import { readPixelsToArray } from "@luma.gl/webgl";
+import { MaskExtension } from "@deck.gl/extensions";
+// import { readPixelsToArray } from "@luma.gl/webgl";
 import {
   Row,
   Col,
@@ -87,10 +87,10 @@ import PolygonIcon from "../../static/polygon.svg";
 import DeckGL from "@deck.gl/react";
 import { FlyToInterpolator } from "deck.gl";
 import { BitmapLayer, IconLayer, PathLayer } from "@deck.gl/layers";
-import { SolidPolygonLayer } from "@deck.gl/layers/typed";
+import { SolidPolygonLayer } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-import { HtmlOverlayItem, HtmlOverlay } from "@nebula.gl/overlays";
-import { EditableGeoJsonLayer } from "@nebula.gl/layers";
+// import { HtmlOverlayItem, HtmlOverlay } from "@deck.gl-community/editable-layers";
+import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
   DrawPolygonMode,
   CompositeMode,
@@ -99,7 +99,7 @@ import {
   DrawLineStringMode,
   DrawPointMode,
   GeoJsonEditMode,
-} from "nebula.gl";
+} from "@deck.gl-community/editable-layers";
 import { StaticMap } from "react-map-gl";
 import MapAttributes from "./utils/mapAttributes";
 import apis from "../../services/apis";
@@ -748,36 +748,36 @@ function BaseMap(props) {
     });
   }, [polygon, isMaskLayerVisible]);
 
-  const handleHover = useCallback(
-    ({ x, y, allLayers, element, bitmap, sourceLayer, settings }) => {
-      try {
-        const layerType = allLayers[element]?.type;
+  // const handleHover = useCallback(
+  //   ({ x, y, allLayers, element, bitmap, sourceLayer, settings }) => {
+  //     try {
+  //       const layerType = allLayers[element]?.type;
 
-        if (bitmap && layerType === "DEM" && isElevationEnabledRef.current) {
-          const pixelColor = readPixelsToArray(sourceLayer.props.image, {
-            sourceX: bitmap.pixel[0],
-            sourceY: bitmap.pixel[1],
-            sourceWidth: 1,
-            sourceHeight: 1,
-          });
-          const [r, g, b, a] = pixelColor;
-          const scalarValue = pixelColor[0] / 255.0;
+  //       if (bitmap && layerType === "DEM" && isElevationEnabledRef.current) {
+  //         const pixelColor = readPixelsToArray(sourceLayer.props.image, {
+  //           sourceX: bitmap.pixel[0],
+  //           sourceY: bitmap.pixel[1],
+  //           sourceWidth: 1,
+  //           sourceHeight: 1,
+  //         });
+  //         const [r, g, b, a] = pixelColor;
+  //         const scalarValue = pixelColor[0] / 255.0;
 
-          const elementSettings = settings || allLayers[element]?.settings;
-          const minp = elementSettings?.minp;
-          const maxp = elementSettings?.maxp;
-          const elevation = minp + (maxp - minp) * scalarValue;
+  //         const elementSettings = settings || allLayers[element]?.settings;
+  //         const minp = elementSettings?.minp;
+  //         const maxp = elementSettings?.maxp;
+  //         const elevation = minp + (maxp - minp) * scalarValue;
 
-          setHoverInfo({ r, g, b, x, y, elevation });
-        } else {
-          setHoverInfo(null);
-        }
-      } catch (error) {
-        console.error("Try with the dem layer instead", error);
-      }
-    },
-    [isElevationEnabled]
-  );
+  //         setHoverInfo({ r, g, b, x, y, elevation });
+  //       } else {
+  //         setHoverInfo(null);
+  //       }
+  //     } catch (error) {
+  //       console.error("Try with the dem layer instead", error);
+  //     }
+  //   },
+  //   [isElevationEnabled]
+  // );
 
   const osm = [
     new TileLayer({
@@ -7067,67 +7067,67 @@ function BaseMap(props) {
           />
         )}
 
-        {showPopup && (
-          <HtmlOverlay>
-            <HtmlOverlayItem coordinates={coordinates}>
-              <Popover
-                content={
-                  <>
-                    <InfoWindowContent
-                      mode={infoWindowMode}
-                      coordinates={coordinates}
-                      token={MAPBOX_API_KEY}
-                      feature={featureData}
-                      sysId={sysId}
-                      featureIdx={featureIdx}
-                      setformDrawerVisible={setformDrawerVisible}
-                      drawerVisibility={viewMedia}
-                      setImagesDrawer={setViewMedia}
-                      videoToShow={videoToShow}
-                      setVideoToShow={setVideoToShow}
-                      show={saveButtonShow}
-                      setShowForm={setShowForm}
-                      cancelDrawing={cancelDrawing}
-                      togglePopup={togglePopup}
-                      layerId={featureLayer}
-                      missionLayer={missionLayer}
-                      setMissionLayer={setMissionLayer}
-                      AllLayers={AllLayers}
-                      flag={flag}
-                      setFlag={setFlag}
-                      setShouldAttributeTableReload={
-                        setShouldAttributeTableReload
-                      }
-                      shouldAttributeTableReload={shouldAttributeTableReload}
-                      canDraw={perms.canCreateVectorLayer}
-                      isBaseMap={props.isBaseMaps}
-                      isPublic={false}
-                      setThumbnail={setThumbnail}
-                    />
-                  </>
-                }
-                title={
-                  <>
-                    <Title level={5} style={{ float: "left" }}>
-                      {layerName}
-                    </Title>
-                    <a
-                      style={{
-                        float: "right",
-                      }}
-                      onClick={() => handleClose(false)}
-                    >
-                      X
-                    </a>
-                  </>
-                }
-                trigger="click"
-                open={showPopup}
-                style={{ position: "relative" }}
-                onOpenChange={() => handleClose(false)}
-              />
-            </HtmlOverlayItem>
-          </HtmlOverlay>
+        {showPopup && (true
+          // <HtmlOverlay>
+          //   <HtmlOverlayItem coordinates={coordinates}>
+          //     <Popover
+          //       content={
+          //         <>
+          //           <InfoWindowContent
+          //             mode={infoWindowMode}
+          //             coordinates={coordinates}
+          //             token={MAPBOX_API_KEY}
+          //             feature={featureData}
+          //             sysId={sysId}
+          //             featureIdx={featureIdx}
+          //             setformDrawerVisible={setformDrawerVisible}
+          //             drawerVisibility={viewMedia}
+          //             setImagesDrawer={setViewMedia}
+          //             videoToShow={videoToShow}
+          //             setVideoToShow={setVideoToShow}
+          //             show={saveButtonShow}
+          //             setShowForm={setShowForm}
+          //             cancelDrawing={cancelDrawing}
+          //             togglePopup={togglePopup}
+          //             layerId={featureLayer}
+          //             missionLayer={missionLayer}
+          //             setMissionLayer={setMissionLayer}
+          //             AllLayers={AllLayers}
+          //             flag={flag}
+          //             setFlag={setFlag}
+          //             setShouldAttributeTableReload={
+          //               setShouldAttributeTableReload
+          //             }
+          //             shouldAttributeTableReload={shouldAttributeTableReload}
+          //             canDraw={perms.canCreateVectorLayer}
+          //             isBaseMap={props.isBaseMaps}
+          //             isPublic={false}
+          //             setThumbnail={setThumbnail}
+          //           />
+          //         </>
+          //       }
+          //       title={
+          //         <>
+          //           <Title level={5} style={{ float: "left" }}>
+          //             {layerName}
+          //           </Title>
+          //           <a
+          //             style={{
+          //               float: "right",
+          //             }}
+          //             onClick={() => handleClose(false)}
+          //           >
+          //             X
+          //           </a>
+          //         </>
+          //       }
+          //       trigger="click"
+          //       open={showPopup}
+          //       style={{ position: "relative" }}
+          //       onOpenChange={() => handleClose(false)}
+          //     />
+          //   </HtmlOverlayItem>
+          // </HtmlOverlay>
         )}
       </DeckGL>
 

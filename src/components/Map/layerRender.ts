@@ -6,11 +6,11 @@ import {
   TerrainLayer,
   Tile3DLayer,
   TileLayer,
-} from "@deck.gl/geo-layers/typed";
-import { BitmapLayer, GeoJsonLayer, IconLayer } from "@deck.gl/layers/typed";
+} from "@deck.gl/geo-layers";
+import { BitmapLayer, GeoJsonLayer, IconLayer } from "@deck.gl/layers";
 import { Tiles3DLoader } from "@loaders.gl/3d-tiles";
-import { MaskExtension } from "@deck.gl/extensions/typed";
-import { HeatmapLayer } from "@deck.gl/aggregation-layers/typed";
+import { MaskExtension } from "@deck.gl/extensions";
+import { HeatmapLayer } from "@deck.gl/aggregation-layers";
 import { COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
 import { Feature, GeoJson, Point } from "src/types/geojson";
 import { ILayer } from "src/types/layer";
