@@ -409,10 +409,36 @@ function Documents(props) {
     name: "file",
     multiple: true,
     action: `${API_URL}${apis.UPLOAD_DOCUMENT}`,
-    customRequest: (options: any) => {
+    customRequest: async (options: any) => {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       if (validateFile(options.file)) {
+
+      const getUrlRes = await http.post<{
+        status: true,
+        message: string,
+        data: {
+          postURL: string,
+          formData: Record<string,string>
+        }
+      }|{
+        status: false,
+        message: string,
+      }>("/apis/v1/common/upload-url", {
+        name: options.file.name,
+        size: options.file.size,
+        type: options.file.type,
+      });
+      if (getUrlRes.data.status == false) {
+        console.error("ERROR GETTING PRESIGNED URL!!!: ", getUrlRes.data.message);
+        return;
+      }
+      const formData = new FormData();
+      Object.entries(getUrlRes.data.data.formData).forEach(([key, val]) => formData.set(key, val));
+      formData.append("file", options.file);
+      await axios
+        .post("http://localhost:9000/aru", formData)
+        return;
         const fData = new FormData();
         fData.append("file", options.file);
         fData.append("missionId", props.missionDetails.missionId);

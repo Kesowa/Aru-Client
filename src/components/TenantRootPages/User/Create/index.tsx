@@ -35,6 +35,8 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import CountExceeded from "../../restrictions/restrictions";
 import Expired from "../../restrictions/expiry";
 import { STATIC_URL } from "src/constants";
+import type { RcFile } from "antd/lib/upload";
+import axios from "axios";
 
 function UserCreatePage(props: any) {
   const [form] = Form.useForm();
@@ -45,24 +47,33 @@ function UserCreatePage(props: any) {
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
   //avatar upload
-  const beforeUploadFunction = (file: any) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
+  const beforeUploadFunction = (file: RcFile) => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
+      const getUrlRes = await http.post<{
+        status: true,
+        message: string,
+        data: {
+          postURL: string,
+          formData: Record<string,string>
+        }
+      }|{
+        status: false,
+        message: string,
+      }>("/apis/v1/common/upload-url", {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      });
+      if (getUrlRes.data.status == false) {
+        console.error("ERROR GETTING PRESIGNED URL!!!: ", getUrlRes.data.message);
+        return;
+      }
       const formData = new FormData();
-      formData.append("avatar", file);
-      http
-        .post(apis.UPLOAD_USER_PROFILE_PICTURE, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((result) => {
-          if (result.data.status) {
-            setAvatar(result.data.file);
-          } else {
-            message.error(result.data.message);
-          }
-        })
+      Object.entries(getUrlRes.data.data.formData).forEach(([key, val]) => formData.set(key, val));
+      formData.append("file", file);
+      await axios
+        .post("http://localhost:9000/aru", formData)
         .catch((err) => {
           console.log(err);
           AxiosErrorHandler(err, props.logout);
