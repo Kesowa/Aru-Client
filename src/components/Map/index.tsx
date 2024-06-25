@@ -12,7 +12,6 @@ import Colorscale from "./utils/ColorScale";
 import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
 import { MaskExtension } from "@deck.gl/extensions";
-import proj4 from "proj4";
 import {
   Row,
   Col,
