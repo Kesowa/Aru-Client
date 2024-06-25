@@ -12,7 +12,7 @@ import Colorscale from "./utils/ColorScale";
 import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
 import { MaskExtension } from "@deck.gl/extensions";
-// import { readPixelsToArray } from "@luma.gl/webgl";
+import proj4 from "proj4";
 import {
   Row,
   Col,
@@ -138,6 +138,7 @@ import {
 import { ILayersToTree } from "./treeRender";
 import { BBox, mergeBoundingBoxes } from "src/types/geojson";
 import { invertColor } from "./colorUtils";
+import Tileset from "src/types/cesium_tileset";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -3122,7 +3123,7 @@ function BaseMap(props) {
   // };
 
   const fetchLayerBounds = async (
-    { type, layerpath, flaggedFeatures, vector, raster }: Layer) => {
+    { type, layerpath, flaggedFeatures, vector, raster, metadata }: Layer) => {
     if (type === "Vector") {
       const response = await fetch(STATIC_URL + layerpath);
       const data = await response.json();
@@ -3150,8 +3151,19 @@ function BaseMap(props) {
         metadata["bounds"][3],
       ] as BBox;
     }
-    // Implementation for Pointcloud and Cesium_3D pending
-    return [0,0,0,0];
+    else if (raster.name == "CESIUM_3D") {
+      const res = await http.get<Tileset>(STATIC_URL + metadata);
+      const tileset = res.data;
+      const bounds_rad = [
+        tileset.properties.Longitude.minimum,
+        tileset.properties.Latitude.minimum,
+        tileset.properties.Longitude.maximum,
+        tileset.properties.Latitude.maximum
+      ];
+      return bounds_rad.map(coord => coord * 180 / Math.PI);
+    }
+    // Implementation for Cesium_3D pending
+    return [0, 0, 0, 0];
   };
 
   const onCheck = async (checkedKeysValue: any, e) => {
@@ -7661,8 +7673,8 @@ function BaseMap(props) {
                     key="1"
                     onClick={() => setSelectedKey(1)}
                     className={`create-mission-extended-card ${selectedKey == 1
-                        ? "create-mission-extended-card-selected"
-                        : ""
+                      ? "create-mission-extended-card-selected"
+                      : ""
                       }`}
                     // loading={isLoading}
                     hoverable
@@ -7686,8 +7698,8 @@ function BaseMap(props) {
                     key="2"
                     onClick={() => setSelectedKey(2)}
                     className={`create-mission-extended-card ${selectedKey == 2
-                        ? "create-mission-extended-card-selected"
-                        : ""
+                      ? "create-mission-extended-card-selected"
+                      : ""
                       }`}
                     // loading={isLoading}
                     hoverable
