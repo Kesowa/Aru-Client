@@ -24,6 +24,7 @@ import { connect } from "react-redux";
 import { InboxOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
 import { vectorProps } from "src/static/vectorprops";
+import { options } from "../propUtils";
 
 const { Dragger } = Upload;
 const { Text, Paragraph } = Typography;
@@ -34,7 +35,7 @@ const CreateLayer = (props: any) => {
   const [current, setCurrent] = useState(0);
   const [fileList, setFileList] = useState<any>([]);
   const [layerName, setLayerName] = useState("");
-  const [layerType, setLayerType] = useState("");
+  const [layerType, setLayerType] = useState<vectorProps | null>(null);
   const [layerColor, setLayerColor] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -111,7 +112,7 @@ const CreateLayer = (props: any) => {
       }
       fData.append("name", layerName);
       fData.append("color", layerColor);
-      fData.append("vectorId", layerType);
+      fData.append("vectorType", String(layerType));
       fileList.forEach((file) => {
         if (validateFile(file)) {
           fData.append("file", file.originFileObj);
@@ -171,7 +172,7 @@ const CreateLayer = (props: any) => {
         })
         .finally(() => {
           setLayerName("");
-          setLayerType("");
+          setLayerType(null);
           setLayerColor("");
           setFileList([]);
           form.resetFields();
@@ -205,8 +206,8 @@ const CreateLayer = (props: any) => {
                     dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
                     placeholder="Select Layer Type"
                     allowClear
-                    treeData={props.options}
-                    onChange={(value) => setLayerType(value.substring(4))}
+                    treeData={options[1].children[2].children} // all vectorProps of featureType "Point"
+                    onChange={(value) => setLayerType(value as vectorProps)}
                   />
                 </Item>
               </Col>

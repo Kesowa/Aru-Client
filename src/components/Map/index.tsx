@@ -141,6 +141,11 @@ import { invertColor } from "./colorUtils";
 
 import { featureType, featureTypes, vectorProps } from "src/static/vectorprops";
 import { defaultRasterSettings, rasterProps } from "src/static/rasterprops";
+import {
+  ILayerTypeDetails,
+  getEditLayerTypeOptions,
+  options,
+} from "./utils/propUtils";
 
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
@@ -872,7 +877,9 @@ function BaseMap(props) {
   const [editingKey, setEditingKey] = useState("");
   const [missioName, setMissioName] = useState("");
   const [layerType, setLayerType] = useState("");
-  const [layerTypeId, setLayerTypeId] = useState("");
+  const [layerProp, setLayerProp] = useState<vectorProps | rasterProps | null>(
+    null
+  );
   const [captureDate, setCaptureDate] = useState("");
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -890,7 +897,8 @@ function BaseMap(props) {
   const [saveButtonShow, setSaveButtonShow] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [toolSelected, setToolSelected] = useState("");
-  const [defaultLayerType, setDefaultLayerType] = useState<any>([]);
+  const [defaultLayerType, setDefaultLayerType] =
+    useState<ILayerTypeDetails | null>(null);
   const [activeType, setActiveType] = useState(false);
   const [sortType, setSortType] = useState("createdAt");
   const [isAscending, setIsAscending] = useState(false);
@@ -1042,7 +1050,7 @@ function BaseMap(props) {
 
   const handleOk1 = () => {
     setLayerName("");
-    setDefaultLayerType([]);
+    setDefaultLayerType(null);
     setCaptureDate("");
     setIsModalVisible1(false);
   };
@@ -1052,7 +1060,7 @@ function BaseMap(props) {
       setshowEditModel(false);
     }, 500);
     setLayerName("");
-    setDefaultLayerType([]);
+    setDefaultLayerType(null);
     setCaptureDate("");
     setIsModalVisible1(false);
   };
@@ -4061,16 +4069,11 @@ function BaseMap(props) {
           setSelectedLayerId(layer._id);
           setCaptureDate(layer.captureDate);
           setLayerName(layer.name);
-          type === "Raster"
-            ? setDefaultLayerType([
-                type.toUpperCase(),
-                layer.raster.toUpperCase(),
-              ])
-            : setDefaultLayerType([
-                type.toUpperCase(),
-                featureType[layer.vector].toUpperCase(),
-                layer.vector.toUpperCase(),
-              ]);
+          setDefaultLayerType({
+            layerType: type,
+            layerProp: (type === "Vector") ? layer.vector : layer.raster,
+            featureType: (type === "Vector") ? featureType[layer.vector] : null,
+          });
           setSelectedLayerType(type.toLowerCase());
           break;
         case "2":
@@ -5008,57 +5011,6 @@ function BaseMap(props) {
     //console.log("Success:", values);
   };
 
-  function getPropOptions(prefix: string, propNames: string[]) {
-    return propNames.sort().map((propName) => ({ title: propName, value: `${prefix}-${propName}` }));
-  }
-
-  const options: any = [
-    {
-      value: "raster",
-      title: "RASTER",
-      children: getPropOptions("0", Object.values(rasterProps)),
-      selectable: false,
-    },
-    {
-      value: "vector",
-      title: "VECTOR",
-      selectable: false,
-      children: [
-        {
-          value: "MultiLineString",
-          title: "Line",
-          selectable: false,
-          children: getPropOptions("1-0", Object.values(vectorProps).filter(p => featureType[p] === featureTypes.MULTI_LINE_STRING)),
-        },
-        {
-          value: "MultiPolygon",
-          title: "Area",
-          children: getPropOptions("1-1", Object.values(vectorProps).filter(p => featureType[p] === featureTypes.MULTI_POLYGON)),
-          selectable: false,
-        },
-        {
-          value: "Point",
-          title: "Point",
-          children: getPropOptions("1-2", Object.values(vectorProps).filter(p => featureType[p] === featureTypes.POINT)),
-          selectable: false,
-        },
-        {
-          value: "Other",
-          title: "Other",
-          children: getPropOptions("1-3", Object.values(vectorProps)
-            .filter(p => ![
-                featureTypes.POINT, 
-                featureTypes.MULTI_LINE_STRING, 
-                featureTypes.MULTI_POLYGON
-              ].includes(featureType[p])
-            )
-          ),
-          selectable: false,
-        },
-      ],
-    },
-  ];
-
   // if (rasterProps) {
   //   options.map((option) => {
   //     if (option.value == "raster") {
@@ -5109,32 +5061,6 @@ function BaseMap(props) {
   //   if (x > y) return 1;
   //   return 0;
   // }
-
-  const getEditLayerTypeOptions = (layerType) => {
-    console.log(layerType);
-    const filteredOptions = options.filter(
-      (option) => option.value.toUpperCase() == layerType[0]
-    );
-
-    filteredOptions[0].label = filteredOptions[0].title;
-    delete filteredOptions[0].title;
-    console.log(filteredOptions[0].children);
-    if (filteredOptions[0].children.length > 0 && layerType.length > 0) {
-      filteredOptions[0].children = filteredOptions[0].children.filter(
-        (child) => child.value.toUpperCase() == layerType[1]
-      );
-      filteredOptions[0].children[0].label =
-        filteredOptions[0].children[0].title;
-      delete filteredOptions[0].children[0].title;
-      filteredOptions[0].children[0].children =
-        filteredOptions[0].children[0].children.map((option) => {
-          option.label = option.title;
-          delete option.title;
-          return option;
-        });
-    }
-    return filteredOptions;
-  };
 
   const uploadProps = {
     name: "file",
@@ -5224,15 +5150,15 @@ function BaseMap(props) {
     setActiveKey(newActiveKey);
   };
 
-  const changeLayerType = (value) => {
-    if (value[0] === "1") {
+  const changeLayerType = (value: string) => {
+    if (Object.values(vectorProps).includes(value as vectorProps)) {
       setshowColorPicker(true);
       setLayerType("Vector");
-      setLayerTypeId(value.substring(4));
-    } else if (value[0] === "0") {
+      setLayerProp(value as vectorProps);
+    } else if (Object.values(rasterProps).includes(value as rasterProps)) {
       setshowColorPicker(false);
       setLayerType("Raster");
-      setLayerTypeId(value.substring(2));
+      setLayerProp(value as rasterProps);
     }
   };
 
@@ -5254,7 +5180,7 @@ function BaseMap(props) {
       return;
     }
 
-    if (!layerType || !layerTypeId || !captureDate || !layerName) {
+    if (!layerType || !layerProp || !captureDate || !layerName) {
       message.error("Please fill all the required field");
       return;
     }
@@ -5281,9 +5207,9 @@ function BaseMap(props) {
       fmData.append("missionId", id);
       fmData.append("inHeritOriginalColorFromFile", inheritColor.toString());
 
-      if (layerType === "Vector") fmData.append("vector", layerTypeId);
+      if (layerType === "Vector") fmData.append("vector", layerProp);
 
-      if (layerType === "Raster") fmData.append("raster", layerTypeId);
+      if (layerType === "Raster") fmData.append("raster", layerProp);
 
       fmData.append("icon", icon2);
 
@@ -5323,7 +5249,7 @@ function BaseMap(props) {
       setCaptureDate("");
       setLayerName("");
       setLayerType("");
-      setLayerTypeId("");
+      setLayerProp(null);
       setIcon("");
       form.resetFields();
     }
@@ -5605,8 +5531,8 @@ function BaseMap(props) {
       name: layerName,
       captureDate: captureDate,
     };
-    if (layerTypeId !== "") {
-      data.layerType = layerTypeId;
+    if (layerProp) {
+      data.layerType = layerProp;
     }
 
     // change color
@@ -5682,7 +5608,7 @@ function BaseMap(props) {
         setLayerName("");
         setCaptureDate("");
         setLayerColor("#ffaa00");
-        setLayerTypeId("");
+        setLayerProp(null);
         props.loading(false);
       });
 
@@ -7852,7 +7778,6 @@ function BaseMap(props) {
             <CreateLayer
               isModalVisible={isModalVisible3}
               setVisbible={setIsModalVisible3}
-              options={options[1].children[2].children}
               missionId={id}
               addLayer={addLayer}
               status={pic2Mapv2Status}
@@ -7867,7 +7792,6 @@ function BaseMap(props) {
               updateType={updateType}
               BaseLayerId={updateId}
               setShow={setIsModalVisible4}
-              options={options}
               addLayer={addLayer}
               updateLayer={updateLayerDataAfterEditing}
               openPic2Mapv2={setIsModalVisible3}
@@ -7905,15 +7829,32 @@ function BaseMap(props) {
                         {/* <Form.Item label="Layer Type" name="type"> */}
                         <Cascader
                           style={{ width: "100%" }}
-                          defaultValue={defaultLayerType}
+                          defaultValue={
+                            defaultLayerType ? 
+                            defaultLayerType.featureType ?
+                            [ 
+                              defaultLayerType.layerType.toUpperCase(),
+                              defaultLayerType.featureType.toUpperCase(),
+                              defaultLayerType.layerProp.toUpperCase()
+                            ] : 
+                            [
+                              defaultLayerType.layerType.toUpperCase(),
+                              defaultLayerType.layerProp.toUpperCase()
+                            ] : []
+                          }
                           options={getEditLayerTypeOptions(defaultLayerType)}
                           placeholder="Select Layer Type"
                           onChange={(value) => {
-                            const temp = String(value[value.length - 1]).split(
-                              "-"
-                            );
-                            const updatedTypeId = temp[temp.length - 1];
-                            setLayerTypeId(updatedTypeId);
+                            // cascader returns a selection path from the top-most menu item to the bottom-most submenu item
+                            // in form of a string array
+                            // Here, we have "Vector" or "Raster" as the topmost menu, then for vector we have featureType submenu
+                            // and finally at the bottom-most level we have the vectorprops and rasterprops
+
+                            // So, value is a string array, of one of the following formats:
+                            // either [ "Vector", (geometry type), <vector prop name> ]
+                            // or [ "Raster", <raster prop name> ]
+                            const updatedTypeId = [...value].reverse()[0];
+                            setLayerProp(updatedTypeId as vectorProps | rasterProps);
                           }}
                         />
                         {/* </Form.Item> */}

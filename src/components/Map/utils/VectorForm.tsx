@@ -423,13 +423,13 @@ function VectorForm(props: IVectorFormProps) {
       if (props.isBaseMap) {
         payload = {
           name: layerName,
-          vectorId: vectorId,
+          vectorType: vectorId,
           geoJSON: featureData,
         };
       } else {
         payload = {
           name: layerName,
-          vectorId: vectorId,
+          vectorType: vectorId,
           missionId: props.missionId,
           geoJSON: featureData,
         };
