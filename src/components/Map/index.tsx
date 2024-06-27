@@ -11,8 +11,7 @@ import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
 import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
-import { MaskExtension } from "@deck.gl/extensions/typed";
-import { readPixelsToArray } from "@luma.gl/webgl";
+import { MaskExtension } from "@deck.gl/extensions";
 import {
   Row,
   Col,
@@ -87,10 +86,10 @@ import PolygonIcon from "../../static/polygon.svg";
 import DeckGL from "@deck.gl/react";
 import { FlyToInterpolator } from "deck.gl";
 import { BitmapLayer, IconLayer, PathLayer } from "@deck.gl/layers";
-import { SolidPolygonLayer } from "@deck.gl/layers/typed";
+import { SolidPolygonLayer } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-import { HtmlOverlayItem, HtmlOverlay } from "@nebula.gl/overlays";
-import { EditableGeoJsonLayer } from "@nebula.gl/layers";
+// import { HtmlOverlayItem, HtmlOverlay } from "@deck.gl-community/editable-layers";
+import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
   DrawPolygonMode,
   CompositeMode,
@@ -99,7 +98,7 @@ import {
   DrawLineStringMode,
   DrawPointMode,
   GeoJsonEditMode,
-} from "nebula.gl";
+} from "@deck.gl-community/editable-layers";
 import { StaticMap } from "react-map-gl";
 import MapAttributes from "./utils/mapAttributes";
 import apis from "../../services/apis";
@@ -138,6 +137,7 @@ import {
 import { ILayersToTree } from "./treeRender";
 import { BBox, mergeBoundingBoxes } from "src/types/geojson";
 import { invertColor } from "./colorUtils";
+import Tileset from "src/types/cesium_tileset";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -339,6 +339,12 @@ function BaseMap(props) {
       key: "15",
       label: "Elevation",
     });
+
+    if (layer.type == "Raster" && layer.raster.name == "CESIUM_3D")
+      items.push({
+        key: "16",
+        label: layer._isMeshSource ? "Remove Mesh" : "Add Mesh",
+      });
 
     return items;
   };
@@ -632,9 +638,9 @@ function BaseMap(props) {
       if (navigator.geolocation) {
         navigator.permissions
           .query({ name: "geolocation" })
-          .then(function (result: any) {
+          .then(function(result: any) {
             if (result.state === "granted") {
-              navigator.geolocation.getCurrentPosition(function (pos: any) {
+              navigator.geolocation.getCurrentPosition(function(pos: any) {
                 const crd = pos.coords;
                 // console.log("Your current position is:");
                 // console.log(`Latitude : ${crd.latitude}`);
@@ -654,7 +660,7 @@ function BaseMap(props) {
               });
             } else if (result.state === "prompt") {
               navigator.geolocation.getCurrentPosition(
-                function (pos: any) {
+                function(pos: any) {
                   const crd = pos.coords;
                   // console.log("Your current position is:");
                   // console.log(`Latitude : ${crd.latitude}`);
@@ -672,7 +678,7 @@ function BaseMap(props) {
                     transitionInterpolator: new FlyToInterpolator(),
                   });
                 },
-                function (err) {
+                function(err) {
                   console.log(`Location fetch error: \n ${err}`);
                 },
                 {
@@ -686,7 +692,7 @@ function BaseMap(props) {
                 "Please allow location access from your browser for best experience of ARU!"
               );
             }
-            result.onChange = function () {
+            result.onChange = function() {
               console.log(result.state);
             };
           });
@@ -748,36 +754,36 @@ function BaseMap(props) {
     });
   }, [polygon, isMaskLayerVisible]);
 
-  const handleHover = useCallback(
-    ({ x, y, allLayers, element, bitmap, sourceLayer, settings }) => {
-      try {
-        const layerType = allLayers[element]?.type;
+  // const handleHover = useCallback(
+  //   ({ x, y, allLayers, element, bitmap, sourceLayer, settings }) => {
+  //     try {
+  //       const layerType = allLayers[element]?.type;
 
-        if (bitmap && layerType === "DEM" && isElevationEnabledRef.current) {
-          const pixelColor = readPixelsToArray(sourceLayer.props.image, {
-            sourceX: bitmap.pixel[0],
-            sourceY: bitmap.pixel[1],
-            sourceWidth: 1,
-            sourceHeight: 1,
-          });
-          const [r, g, b, a] = pixelColor;
-          const scalarValue = pixelColor[0] / 255.0;
+  //       if (bitmap && layerType === "DEM" && isElevationEnabledRef.current) {
+  //         const pixelColor = readPixelsToArray(sourceLayer.props.image, {
+  //           sourceX: bitmap.pixel[0],
+  //           sourceY: bitmap.pixel[1],
+  //           sourceWidth: 1,
+  //           sourceHeight: 1,
+  //         });
+  //         const [r, g, b, a] = pixelColor;
+  //         const scalarValue = pixelColor[0] / 255.0;
 
-          const elementSettings = settings || allLayers[element]?.settings;
-          const minp = elementSettings?.minp;
-          const maxp = elementSettings?.maxp;
-          const elevation = minp + (maxp - minp) * scalarValue;
+  //         const elementSettings = settings || allLayers[element]?.settings;
+  //         const minp = elementSettings?.minp;
+  //         const maxp = elementSettings?.maxp;
+  //         const elevation = minp + (maxp - minp) * scalarValue;
 
-          setHoverInfo({ r, g, b, x, y, elevation });
-        } else {
-          setHoverInfo(null);
-        }
-      } catch (error) {
-        console.error("Try with the dem layer instead", error);
-      }
-    },
-    [isElevationEnabled]
-  );
+  //         setHoverInfo({ r, g, b, x, y, elevation });
+  //       } else {
+  //         setHoverInfo(null);
+  //       }
+  //     } catch (error) {
+  //       console.error("Try with the dem layer instead", error);
+  //     }
+  //   },
+  //   [isElevationEnabled]
+  // );
 
   const osm = [
     new TileLayer({
@@ -813,22 +819,22 @@ function BaseMap(props) {
             opacity: opcity,
           }),
           showBorder &&
-            new PathLayer({
-              id: `${props.id}-border`,
-              visible: props.visible,
-              data: [
-                [
-                  [west, north],
-                  [west, south],
-                  [east, south],
-                  [east, north],
-                  [west, north],
-                ],
+          new PathLayer({
+            id: `${props.id}-border`,
+            visible: props.visible,
+            data: [
+              [
+                [west, north],
+                [west, south],
+                [east, south],
+                [east, north],
+                [west, north],
               ],
-              getPath: (d) => d,
-              getColor: [255, 0, 0],
-              widthMinPixels: 4,
-            }),
+            ],
+            getPath: (d) => d,
+            getColor: [255, 0, 0],
+            widthMinPixels: 4,
+          }),
         ];
       },
     }),
@@ -1578,7 +1584,7 @@ function BaseMap(props) {
 
   function fetchJSON(file: any) {
     return fetch(file)
-      .then(function (res) {
+      .then(function(res) {
         return res.json();
       })
       .catch((err) => console.log(err));
@@ -1991,9 +1997,8 @@ function BaseMap(props) {
     //SetColorMap(settings.color);
     const scale = "@1x";
     const format = ".png";
-    const baseURL = `${COG_URL}/cog/tiles/${z ? z : "{z}"}/${x ? x : "{x}"}/${
-      y ? y : "{y}"
-    }${scale}${format}`;
+    const baseURL = `${COG_URL}/cog/tiles/${z ? z : "{z}"}/${x ? x : "{x}"}/${y ? y : "{y}"
+      }${scale}${format}`;
     const { resamplingMethod, bidx, minp, maxp } = settings;
     const queries: any = {
       url: `${TITILER_STATIC}${path}`,
@@ -3117,11 +3122,7 @@ function BaseMap(props) {
   // };
 
   const fetchLayerBounds = async (
-    type: string,
-    layerpath: string,
-    flaggedFeatures?: number[]
-  ) => {
-    let bounds: BBox;
+    { type, layerpath, flaggedFeatures, vector, raster, metadata }: Layer) => {
     if (type === "Vector") {
       const response = await fetch(STATIC_URL + layerpath);
       const data = await response.json();
@@ -3135,21 +3136,33 @@ function BaseMap(props) {
           }
         });
       }
-      bounds = turf.bbox(turf.featureCollection(features)) as BBox;
-    } else {
+      return turf.bbox(turf.featureCollection(features)) as BBox;
+    } else if (["ORTHO", "DEM", "DTM", "NDVI"].includes(raster.name)) {
       const metaDataURL = `${COG_URL}/cog/info?url=${TITILER_STATIC}${layerpath}`;
       const response = await fetch(metaDataURL, {
         method: "GET",
       });
       const metadata = await response.json();
-      bounds = [
+      return [
         metadata["bounds"][0],
         metadata["bounds"][1],
         metadata["bounds"][2],
         metadata["bounds"][3],
       ] as BBox;
     }
-    return bounds;
+    else if (raster.name == "CESIUM_3D") {
+      const res = await http.get<Tileset>(STATIC_URL + metadata);
+      const tileset = res.data;
+      const bounds_rad = [
+        tileset.properties.Longitude.minimum,
+        tileset.properties.Latitude.minimum,
+        tileset.properties.Longitude.maximum,
+        tileset.properties.Latitude.maximum
+      ];
+      return bounds_rad.map(coord => coord * 180 / Math.PI);
+    }
+    // Implementation for Cesium_3D pending
+    return [0, 0, 0, 0];
   };
 
   const onCheck = async (checkedKeysValue: any, e) => {
@@ -3189,11 +3202,7 @@ function BaseMap(props) {
     for (const layer of AllLayers) {
       const _isChecked = checkedKeysValue.includes(layer._id);
       if (_isChecked && !layer._metadata?.bounds) {
-        const bounds = await fetchLayerBounds(
-          layer.type,
-          layer.layerpath,
-          layer.flaggedFeatures
-        );
+        const bounds = await fetchLayerBounds(layer);
         layersWithBounds.push({
           ...layer,
           _isChecked,
@@ -3764,6 +3773,21 @@ function BaseMap(props) {
     );
   };
 
+  const handleMeshSourceOption = (id: string) => {
+    SetAllLayers((prev) =>
+      prev.map((layer) => {
+        if (layer.type == "Raster" && layer.raster.name == "CESIUM_3D") {
+          if (layer._id == id) {
+            layer._isMeshSource = !layer._isMeshSource;
+          } else {
+            layer._isMeshSource = false;
+          }
+        }
+        return layer;
+      })
+    );
+  };
+
   const toggleElevation = () => {
     setIsElevationEnabled((prevValue) => !prevValue);
     console.log(
@@ -4063,14 +4087,14 @@ function BaseMap(props) {
           setLayerName(layer.name);
           type === "Raster"
             ? setDefaultLayerType([
-                type.toUpperCase(),
-                layer.raster.name.toUpperCase(),
-              ])
+              type.toUpperCase(),
+              layer.raster.name.toUpperCase(),
+            ])
             : setDefaultLayerType([
-                type.toUpperCase(),
-                layer.vector.type.toUpperCase(),
-                layer.vector.name.toUpperCase(),
-              ]);
+              type.toUpperCase(),
+              layer.vector.type.toUpperCase(),
+              layer.vector.name.toUpperCase(),
+            ]);
           setSelectedLayerType(type.toLowerCase());
           break;
         case "2":
@@ -4189,6 +4213,9 @@ function BaseMap(props) {
         case "15":
           toggleElevation();
           break;
+        case "16":
+          handleMeshSourceOption(layer._id);
+          break;
         default:
           break;
       }
@@ -4227,8 +4254,8 @@ function BaseMap(props) {
                       ? "139px"
                       : "160px"
                     : layer.layerGroupId
-                    ? "119px"
-                    : "140px",
+                      ? "119px"
+                      : "140px",
               }}
               ellipsis={true}
               onClick={() => {
@@ -5326,7 +5353,7 @@ function BaseMap(props) {
       if (layer.type === "Vector") {
         setvectorLayers([...vectorLayers, layer]);
       }
-      fetchLayerBounds(layer.type, layer.layerpath, layer.flaggedFeatures)
+      fetchLayerBounds(layer)
         .then((bounds) => {
           SetAllLayers((prev) => [
             ...prev,
@@ -6894,7 +6921,7 @@ function BaseMap(props) {
           status="500"
           title="Oops! You have reached your limit of creating layers!"
           subTitle="Please contact your admin."
-          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
+        //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
@@ -6984,7 +7011,7 @@ function BaseMap(props) {
             }
           );
         }}
-        onDrag={() => {}}
+        onDrag={() => { }}
         onClick={(info, event) => {
           setShowDrawingTools(false);
           if (event.rightButton) {
@@ -7005,7 +7032,7 @@ function BaseMap(props) {
             setShowDrawingTools(false);
           }
         }}
-        //getTooltip={({object}) => object && (object.properties.Block_Nm)}
+      //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         {hoverInfo && (
           <div
@@ -7067,67 +7094,67 @@ function BaseMap(props) {
           />
         )}
 
-        {showPopup && (
-          <HtmlOverlay>
-            <HtmlOverlayItem coordinates={coordinates}>
-              <Popover
-                content={
-                  <>
-                    <InfoWindowContent
-                      mode={infoWindowMode}
-                      coordinates={coordinates}
-                      token={MAPBOX_API_KEY}
-                      feature={featureData}
-                      sysId={sysId}
-                      featureIdx={featureIdx}
-                      setformDrawerVisible={setformDrawerVisible}
-                      drawerVisibility={viewMedia}
-                      setImagesDrawer={setViewMedia}
-                      videoToShow={videoToShow}
-                      setVideoToShow={setVideoToShow}
-                      show={saveButtonShow}
-                      setShowForm={setShowForm}
-                      cancelDrawing={cancelDrawing}
-                      togglePopup={togglePopup}
-                      layerId={featureLayer}
-                      missionLayer={missionLayer}
-                      setMissionLayer={setMissionLayer}
-                      AllLayers={AllLayers}
-                      flag={flag}
-                      setFlag={setFlag}
-                      setShouldAttributeTableReload={
-                        setShouldAttributeTableReload
-                      }
-                      shouldAttributeTableReload={shouldAttributeTableReload}
-                      canDraw={perms.canCreateVectorLayer}
-                      isBaseMap={props.isBaseMaps}
-                      isPublic={false}
-                      setThumbnail={setThumbnail}
-                    />
-                  </>
-                }
-                title={
-                  <>
-                    <Title level={5} style={{ float: "left" }}>
-                      {layerName}
-                    </Title>
-                    <a
-                      style={{
-                        float: "right",
-                      }}
-                      onClick={() => handleClose(false)}
-                    >
-                      X
-                    </a>
-                  </>
-                }
-                trigger="click"
-                open={showPopup}
-                style={{ position: "relative" }}
-                onOpenChange={() => handleClose(false)}
-              />
-            </HtmlOverlayItem>
-          </HtmlOverlay>
+        {showPopup && (true
+          // <HtmlOverlay>
+          //   <HtmlOverlayItem coordinates={coordinates}>
+          //     <Popover
+          //       content={
+          //         <>
+          //           <InfoWindowContent
+          //             mode={infoWindowMode}
+          //             coordinates={coordinates}
+          //             token={MAPBOX_API_KEY}
+          //             feature={featureData}
+          //             sysId={sysId}
+          //             featureIdx={featureIdx}
+          //             setformDrawerVisible={setformDrawerVisible}
+          //             drawerVisibility={viewMedia}
+          //             setImagesDrawer={setViewMedia}
+          //             videoToShow={videoToShow}
+          //             setVideoToShow={setVideoToShow}
+          //             show={saveButtonShow}
+          //             setShowForm={setShowForm}
+          //             cancelDrawing={cancelDrawing}
+          //             togglePopup={togglePopup}
+          //             layerId={featureLayer}
+          //             missionLayer={missionLayer}
+          //             setMissionLayer={setMissionLayer}
+          //             AllLayers={AllLayers}
+          //             flag={flag}
+          //             setFlag={setFlag}
+          //             setShouldAttributeTableReload={
+          //               setShouldAttributeTableReload
+          //             }
+          //             shouldAttributeTableReload={shouldAttributeTableReload}
+          //             canDraw={perms.canCreateVectorLayer}
+          //             isBaseMap={props.isBaseMaps}
+          //             isPublic={false}
+          //             setThumbnail={setThumbnail}
+          //           />
+          //         </>
+          //       }
+          //       title={
+          //         <>
+          //           <Title level={5} style={{ float: "left" }}>
+          //             {layerName}
+          //           </Title>
+          //           <a
+          //             style={{
+          //               float: "right",
+          //             }}
+          //             onClick={() => handleClose(false)}
+          //           >
+          //             X
+          //           </a>
+          //         </>
+          //       }
+          //       trigger="click"
+          //       open={showPopup}
+          //       style={{ position: "relative" }}
+          //       onOpenChange={() => handleClose(false)}
+          //     />
+          //   </HtmlOverlayItem>
+          // </HtmlOverlay>
         )}
       </DeckGL>
 
@@ -7523,7 +7550,7 @@ function BaseMap(props) {
                 menu={{ items: filterMenu }}
                 //overlay={filterMenu}
                 disabled={chipsLoading}
-                //overlayStyle={{}}
+              //overlayStyle={{}}
               >
                 <Button style={{ float: "right" }} type="link">
                   Filter <DownOutlined />
@@ -7644,11 +7671,10 @@ function BaseMap(props) {
                   <Card
                     key="1"
                     onClick={() => setSelectedKey(1)}
-                    className={`create-mission-extended-card ${
-                      selectedKey == 1
-                        ? "create-mission-extended-card-selected"
-                        : ""
-                    }`}
+                    className={`create-mission-extended-card ${selectedKey == 1
+                      ? "create-mission-extended-card-selected"
+                      : ""
+                      }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -7670,11 +7696,10 @@ function BaseMap(props) {
                   <Card
                     key="2"
                     onClick={() => setSelectedKey(2)}
-                    className={`create-mission-extended-card ${
-                      selectedKey == 2
-                        ? "create-mission-extended-card-selected"
-                        : ""
-                    }`}
+                    className={`create-mission-extended-card ${selectedKey == 2
+                      ? "create-mission-extended-card-selected"
+                      : ""
+                      }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -8328,7 +8353,7 @@ function BaseMap(props) {
         <Modal
           title="Edit Group"
           open={visibleEditModal}
-          onOk={() => {}}
+          onOk={() => { }}
           onCancel={() => {
             setVisibleEditModal(false);
           }}

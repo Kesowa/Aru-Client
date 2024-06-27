@@ -44,8 +44,8 @@ import {
   PathLayer,
 } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-import { HtmlOverlayItem, HtmlOverlay } from "@nebula.gl/overlays";
-import { EditableGeoJsonLayer } from "@nebula.gl/layers";
+// import { HtmlOverlayItem, HtmlOverlay } from "@deck.gl-community/editable-layers";
+import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
   DrawPolygonMode,
   CompositeMode,
@@ -54,7 +54,7 @@ import {
   DrawLineStringMode,
   DrawPointMode,
   GeoJsonEditMode,
-} from "nebula.gl";
+} from "@deck.gl-community/editable-layers";
 import { StaticMap } from "react-map-gl";
 
 import apis from "../../../../services/apis";
@@ -2187,53 +2187,53 @@ function PublicMap(props) {
                 />
               )}
 
-              {showPopup && (
-                <HtmlOverlay>
-                  <HtmlOverlayItem coordinates={coordinates}>
-                    <Popover
-                      content={
-                        <>
-                          <InfoWindowContent
-                            mode={infoWindowMode}
-                            coordinates={coordinates}
-                            token={MAPBOX_API_KEY}
-                            feature={featureData}
-                            featureIndex={sysId}
-                            setformDrawerVisible={setformDrawerVisible}
-                            setImagesDrawer={setViewImages}
-                            show={saveButtonShow}
-                            setShowForm={setShowForm}
-                            cancelDrawing={cancelDrawing}
-                            togglePopup={togglePopup}
-                            layerId={featureLayer}
-                            canDraw={null}
-                            isPublic={true}
-                            isBaseMap={props.isBaseMaps}
-                          />
-                        </>
-                      }
-                      title={
-                        <>
-                          <Title level={5} style={{ float: "left" }}>
-                            {layerName}
-                          </Title>
-                          <a
-                            style={{
-                              float: "right",
-                            }}
-                            onClick={() => handleClose(false)}
-                          >
-                            X
-                          </a>
-                        </>
-                      }
-                      trigger="click"
-                      open={showPopup}
-                      style={{ position: "relative" }}
-                      onVisibleChange={() => handleClose(false)}
-                    />
-                  </HtmlOverlayItem>
-                </HtmlOverlay>
+              {showPopup && (true
+                // <HtmlOverlay>
+                //   <HtmlOverlayItem coordinates={coordinates}>
+                //     <Popover
+                //       content={
+                //         <>
+                //           <InfoWindowContent
+                //             mode={infoWindowMode}
+                //             coordinates={coordinates}
+                //             token={MAPBOX_API_KEY}
+                //             feature={featureData}
+                //             featureIndex={sysId}
+                //             setformDrawerVisible={setformDrawerVisible}
+                //             setImagesDrawer={setViewImages}
+                //             show={saveButtonShow}
+                //             setShowForm={setShowForm}
+                //             cancelDrawing={cancelDrawing}
+                //             togglePopup={togglePopup}
+                //             layerId={featureLayer}
+                //             canDraw={null}
+                //             isPublic={true}
+                //             isBaseMap={props.isBaseMaps}
+                //           />
+                //         </>
+                //       }
+                //       title={
+                //         <>
+                //           <Title level={5} style={{ float: "left" }}>
+                //             {layerName}
+                //           </Title>
+                //           <a
+                //             style={{
+                //               float: "right",
+                //             }}
+                //             onClick={() => handleClose(false)}
+                //           >
+                //             X
+                //           </a>
+                //         </>
+                //       }
+                //       trigger="click"
+                //       open={showPopup}
+                //       style={{ position: "relative" }}
+                //       onVisibleChange={() => handleClose(false)}
+                //     />
+                //   </HtmlOverlayItem>
+                // </HtmlOverlay>
               )}
             </DeckGL>
 

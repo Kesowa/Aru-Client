@@ -6,11 +6,11 @@ import {
   TerrainLayer,
   Tile3DLayer,
   TileLayer,
-} from "@deck.gl/geo-layers/typed";
-import { BitmapLayer, GeoJsonLayer, IconLayer } from "@deck.gl/layers/typed";
+} from "@deck.gl/geo-layers";
+import { BitmapLayer, GeoJsonLayer, IconLayer } from "@deck.gl/layers";
 import { Tiles3DLoader } from "@loaders.gl/3d-tiles";
-import { MaskExtension } from "@deck.gl/extensions/typed";
-import { HeatmapLayer } from "@deck.gl/aggregation-layers/typed";
+import { _TerrainExtension as TerrainExtension, MaskExtension } from "@deck.gl/extensions";
+import { HeatmapLayer } from "@deck.gl/aggregation-layers";
 import { COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
 import { Feature, GeoJson, Point } from "src/types/geojson";
 import { ILayer } from "src/types/layer";
@@ -25,6 +25,7 @@ export type Layer = ILayer & {
   _metadata?: {
     bounds: [number, number, number, number];
   };
+  _isMeshSource?: boolean;
 };
 
 export type IMissionLayers = {
@@ -74,18 +75,26 @@ const getRasterDataUrl = (layer: Layer) => {
 };
 
 export const ILayerToDeckLayer = (layers: Layer[]) => {
+  const meshOverlayActive = layers.some((layer) => layer._isMeshSource);
   return layers
     .filter((layer) => layer._isChecked === true)
     .map((layer) => {
-      const maskProps = layer._isMasked
+      let maskProps: Record<string, any> = layer._isMasked
         ? {
-            // enable masking
-            extensions: [new MaskExtension()],
-            maskId: MASK_ID,
-            // bring masked layers above others
-            zIndex: 9999,
-          }
+          // enable masking
+          extensions: [new MaskExtension()],
+          maskId: MASK_ID,
+          // bring masked layers above others
+          zIndex: 9999,
+        }
         : {};
+
+      // Overrides previous mask settings
+      if (meshOverlayActive && layer.type == "Vector") {
+        maskProps = {
+          extensions: [new TerrainExtension()],
+        }
+      }
 
       if (layer.type == "Raster") {
         if (
@@ -99,6 +108,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             _subLayerProps: {
               scenegraph: { _lighting: "flat" },
             },
+            operation: layer._isMeshSource ? "terrain+draw" : "draw"
           });
         }
         if (layer.raster.name == "DEM" && layer._render3D == true) {
