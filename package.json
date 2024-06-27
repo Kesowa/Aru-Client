@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "vite",
-    "build": "vite build",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 vite build",
     "serve": "vite preview",
     "lock": "npm i --package-lock-only",
     "eject": "react-scripts eject",
