@@ -3,11 +3,9 @@ import React, {
   useEffect,
   useRef,
   useMemo,
-  useCallback,
   lazy,
   Suspense,
 } from "react";
-import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
 import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
@@ -40,7 +38,6 @@ import {
   Select,
   Checkbox,
   Progress,
-  Popover,
   Alert,
   Result,
   notification,
@@ -638,9 +635,9 @@ function BaseMap(props) {
       if (navigator.geolocation) {
         navigator.permissions
           .query({ name: "geolocation" })
-          .then(function(result: any) {
+          .then(function (result: any) {
             if (result.state === "granted") {
-              navigator.geolocation.getCurrentPosition(function(pos: any) {
+              navigator.geolocation.getCurrentPosition(function (pos: any) {
                 const crd = pos.coords;
                 // console.log("Your current position is:");
                 // console.log(`Latitude : ${crd.latitude}`);
@@ -660,7 +657,7 @@ function BaseMap(props) {
               });
             } else if (result.state === "prompt") {
               navigator.geolocation.getCurrentPosition(
-                function(pos: any) {
+                function (pos: any) {
                   const crd = pos.coords;
                   // console.log("Your current position is:");
                   // console.log(`Latitude : ${crd.latitude}`);
@@ -678,7 +675,7 @@ function BaseMap(props) {
                     transitionInterpolator: new FlyToInterpolator(),
                   });
                 },
-                function(err) {
+                function (err) {
                   console.log(`Location fetch error: \n ${err}`);
                 },
                 {
@@ -692,7 +689,7 @@ function BaseMap(props) {
                 "Please allow location access from your browser for best experience of ARU!"
               );
             }
-            result.onChange = function() {
+            result.onChange = function () {
               console.log(result.state);
             };
           });
@@ -819,22 +816,22 @@ function BaseMap(props) {
             opacity: opcity,
           }),
           showBorder &&
-          new PathLayer({
-            id: `${props.id}-border`,
-            visible: props.visible,
-            data: [
-              [
-                [west, north],
-                [west, south],
-                [east, south],
-                [east, north],
-                [west, north],
+            new PathLayer({
+              id: `${props.id}-border`,
+              visible: props.visible,
+              data: [
+                [
+                  [west, north],
+                  [west, south],
+                  [east, south],
+                  [east, north],
+                  [west, north],
+                ],
               ],
-            ],
-            getPath: (d) => d,
-            getColor: [255, 0, 0],
-            widthMinPixels: 4,
-          }),
+              getPath: (d) => d,
+              getColor: [255, 0, 0],
+              widthMinPixels: 4,
+            }),
         ];
       },
     }),
@@ -1584,7 +1581,7 @@ function BaseMap(props) {
 
   function fetchJSON(file: any) {
     return fetch(file)
-      .then(function(res) {
+      .then(function (res) {
         return res.json();
       })
       .catch((err) => console.log(err));
@@ -1997,8 +1994,9 @@ function BaseMap(props) {
     //SetColorMap(settings.color);
     const scale = "@1x";
     const format = ".png";
-    const baseURL = `${COG_URL}/cog/tiles/${z ? z : "{z}"}/${x ? x : "{x}"}/${y ? y : "{y}"
-      }${scale}${format}`;
+    const baseURL = `${COG_URL}/cog/tiles/${z ? z : "{z}"}/${x ? x : "{x}"}/${
+      y ? y : "{y}"
+    }${scale}${format}`;
     const { resamplingMethod, bidx, minp, maxp } = settings;
     const queries: any = {
       url: `${TITILER_STATIC}${path}`,
@@ -3121,8 +3119,14 @@ function BaseMap(props) {
   //   return ordering.reverse();
   // };
 
-  const fetchLayerBounds = async (
-    { type, layerpath, flaggedFeatures, vector, raster, metadata }: Layer) => {
+  const fetchLayerBounds = async ({
+    type,
+    layerpath,
+    flaggedFeatures,
+    vector,
+    raster,
+    metadata,
+  }: Layer) => {
     if (type === "Vector") {
       const response = await fetch(STATIC_URL + layerpath);
       const data = await response.json();
@@ -3149,17 +3153,16 @@ function BaseMap(props) {
         metadata["bounds"][2],
         metadata["bounds"][3],
       ] as BBox;
-    }
-    else if (raster.name == "CESIUM_3D") {
+    } else if (raster.name == "CESIUM_3D") {
       const res = await http.get<Tileset>(STATIC_URL + metadata);
       const tileset = res.data;
       const bounds_rad = [
         tileset.properties.Longitude.minimum,
         tileset.properties.Latitude.minimum,
         tileset.properties.Longitude.maximum,
-        tileset.properties.Latitude.maximum
+        tileset.properties.Latitude.maximum,
       ];
-      return bounds_rad.map(coord => coord * 180 / Math.PI);
+      return bounds_rad.map((coord) => (coord * 180) / Math.PI);
     }
     // Implementation for Cesium_3D pending
     return [0, 0, 0, 0];
@@ -4087,14 +4090,14 @@ function BaseMap(props) {
           setLayerName(layer.name);
           type === "Raster"
             ? setDefaultLayerType([
-              type.toUpperCase(),
-              layer.raster.name.toUpperCase(),
-            ])
+                type.toUpperCase(),
+                layer.raster.name.toUpperCase(),
+              ])
             : setDefaultLayerType([
-              type.toUpperCase(),
-              layer.vector.type.toUpperCase(),
-              layer.vector.name.toUpperCase(),
-            ]);
+                type.toUpperCase(),
+                layer.vector.type.toUpperCase(),
+                layer.vector.name.toUpperCase(),
+              ]);
           setSelectedLayerType(type.toLowerCase());
           break;
         case "2":
@@ -4254,8 +4257,8 @@ function BaseMap(props) {
                       ? "139px"
                       : "160px"
                     : layer.layerGroupId
-                      ? "119px"
-                      : "140px",
+                    ? "119px"
+                    : "140px",
               }}
               ellipsis={true}
               onClick={() => {
@@ -6921,7 +6924,7 @@ function BaseMap(props) {
           status="500"
           title="Oops! You have reached your limit of creating layers!"
           subTitle="Please contact your admin."
-        //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
+          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
@@ -7011,7 +7014,7 @@ function BaseMap(props) {
             }
           );
         }}
-        onDrag={() => { }}
+        onDrag={() => {}}
         onClick={(info, event) => {
           setShowDrawingTools(false);
           if (event.rightButton) {
@@ -7032,7 +7035,7 @@ function BaseMap(props) {
             setShowDrawingTools(false);
           }
         }}
-      //getTooltip={({object}) => object && (object.properties.Block_Nm)}
+        //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         {hoverInfo && (
           <div
@@ -7094,7 +7097,8 @@ function BaseMap(props) {
           />
         )}
 
-        {showPopup && (true
+        {
+          showPopup && true
           // <HtmlOverlay>
           //   <HtmlOverlayItem coordinates={coordinates}>
           //     <Popover
@@ -7155,7 +7159,7 @@ function BaseMap(props) {
           //     />
           //   </HtmlOverlayItem>
           // </HtmlOverlay>
-        )}
+        }
       </DeckGL>
 
       {/* {showDrawingTools && ( */}
@@ -7550,7 +7554,7 @@ function BaseMap(props) {
                 menu={{ items: filterMenu }}
                 //overlay={filterMenu}
                 disabled={chipsLoading}
-              //overlayStyle={{}}
+                //overlayStyle={{}}
               >
                 <Button style={{ float: "right" }} type="link">
                   Filter <DownOutlined />
@@ -7671,10 +7675,11 @@ function BaseMap(props) {
                   <Card
                     key="1"
                     onClick={() => setSelectedKey(1)}
-                    className={`create-mission-extended-card ${selectedKey == 1
-                      ? "create-mission-extended-card-selected"
-                      : ""
-                      }`}
+                    className={`create-mission-extended-card ${
+                      selectedKey == 1
+                        ? "create-mission-extended-card-selected"
+                        : ""
+                    }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -7696,10 +7701,11 @@ function BaseMap(props) {
                   <Card
                     key="2"
                     onClick={() => setSelectedKey(2)}
-                    className={`create-mission-extended-card ${selectedKey == 2
-                      ? "create-mission-extended-card-selected"
-                      : ""
-                      }`}
+                    className={`create-mission-extended-card ${
+                      selectedKey == 2
+                        ? "create-mission-extended-card-selected"
+                        : ""
+                    }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -8353,7 +8359,7 @@ function BaseMap(props) {
         <Modal
           title="Edit Group"
           open={visibleEditModal}
-          onOk={() => { }}
+          onOk={() => {}}
           onCancel={() => {
             setVisibleEditModal(false);
           }}

@@ -2,14 +2,13 @@ import MarkerIcon from "../../static/MarkerIcon.png";
 import TankIcon from "../../static/TankIcon.png";
 import ValveIcon from "../../static/ValveIcon.png";
 import DotIcon from "../../static/DotIcon.png";
-import {
-  TerrainLayer,
-  Tile3DLayer,
-  TileLayer,
-} from "@deck.gl/geo-layers";
+import { TerrainLayer, Tile3DLayer, TileLayer } from "@deck.gl/geo-layers";
 import { BitmapLayer, GeoJsonLayer, IconLayer } from "@deck.gl/layers";
 import { Tiles3DLoader } from "@loaders.gl/3d-tiles";
-import { _TerrainExtension as TerrainExtension, MaskExtension } from "@deck.gl/extensions";
+import {
+  _TerrainExtension as TerrainExtension,
+  MaskExtension,
+} from "@deck.gl/extensions";
 import { HeatmapLayer } from "@deck.gl/aggregation-layers";
 import { COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
 import { Feature, GeoJson, Point } from "src/types/geojson";
@@ -81,19 +80,19 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
     .map((layer) => {
       let maskProps: Record<string, any> = layer._isMasked
         ? {
-          // enable masking
-          extensions: [new MaskExtension()],
-          maskId: MASK_ID,
-          // bring masked layers above others
-          zIndex: 9999,
-        }
+            // enable masking
+            extensions: [new MaskExtension()],
+            maskId: MASK_ID,
+            // bring masked layers above others
+            zIndex: 9999,
+          }
         : {};
 
       // Overrides previous mask settings
       if (meshOverlayActive && layer.type == "Vector") {
         maskProps = {
           extensions: [new TerrainExtension()],
-        }
+        };
       }
 
       if (layer.type == "Raster") {
@@ -108,7 +107,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             _subLayerProps: {
               scenegraph: { _lighting: "flat" },
             },
-            operation: layer._isMeshSource ? "terrain+draw" : "draw"
+            operation: layer._isMeshSource ? "terrain+draw" : "draw",
           });
         }
         if (layer.raster.name == "DEM" && layer._render3D == true) {

@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { v4 as uuid } from "uuid";
 import KesowaNewLogo from "../../../../static/kesowa-black.png";
-import InfoWindowContent from "../infoWindow";
 import { DataFilterExtension } from "@deck.gl/extensions";
 import * as turf from "@turf/turf";
 import {
@@ -19,7 +18,6 @@ import {
   Input,
   Select,
   Space,
-  Popover,
   MenuProps,
 } from "antd";
 import {
@@ -2187,7 +2185,8 @@ function PublicMap(props) {
                 />
               )}
 
-              {showPopup && (true
+              {
+                showPopup && true
                 // <HtmlOverlay>
                 //   <HtmlOverlayItem coordinates={coordinates}>
                 //     <Popover
@@ -2234,7 +2233,7 @@ function PublicMap(props) {
                 //     />
                 //   </HtmlOverlayItem>
                 // </HtmlOverlay>
-              )}
+              }
             </DeckGL>
 
             <div className="map-header-toolbar">
