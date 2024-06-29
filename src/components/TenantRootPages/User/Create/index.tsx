@@ -37,6 +37,7 @@ import Expired from "../../restrictions/expiry";
 import { STATIC_URL } from "src/constants";
 import type { RcFile } from "antd/lib/upload";
 import axios from "axios";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 
 function UserCreatePage(props: any) {
   const [form] = Form.useForm();
@@ -50,37 +51,8 @@ function UserCreatePage(props: any) {
   const beforeUploadFunction = (file: RcFile) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
-      const getUrlRes = await http.post<{
-        status: true,
-        message: string,
-        data: {
-          postURL: string,
-          formData: Record<string,string>
-        }
-      }|{
-        status: false,
-        message: string,
-      }>("/apis/v1/common/upload-url", {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-      });
-      if (getUrlRes.data.status == false) {
-        console.error("ERROR GETTING PRESIGNED URL!!!: ", getUrlRes.data.message);
-        return;
-      }
-      const formData = new FormData();
-      Object.entries(getUrlRes.data.data.formData).forEach(([key, val]) => formData.set(key, val));
-      formData.append("file", file);
-      await axios
-        .post("http://localhost:9000/aru", formData)
-        .catch((err) => {
-          console.log(err);
-          AxiosErrorHandler(err, props.logout);
-        })
-        .finally(() => {
-          setIsAvatarUploading(false);
-        });
+      await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
+      setIsAvatarUploading(false);
     });
     return false;
   };
