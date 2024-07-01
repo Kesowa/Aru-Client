@@ -1,4 +1,4 @@
-import "./hls.js";
+import "hls.js";
 import React, { useState, useRef, useEffect } from "react";
 import ReactPlayer from "react-player";
 import "./index.less";
