@@ -74,7 +74,9 @@ export const options = [
   },
 ];
 
-export const getEditLayerTypeOptions = (defaultLayerType: ) => {
+export const getEditLayerTypeOptions = (
+  defaultLayerType: ILayerTypeDetails
+) => {
   // defaultLayerType stores the layerType, featureType and layerProp of selected layer
   // when editing, user should be able to change only layerProp, not the layerType or featureType
   // options need to be set accordingly
