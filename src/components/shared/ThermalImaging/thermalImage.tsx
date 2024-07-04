@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef, MouseEvent as ME } from "react";
 import { STATIC_URL } from "src/constants";
+import { text } from "stream/consumers";
 
 const ThermalImage = (props: { data: any[]; onPixelClick: (arg0: { x: number; y: number; temp: any; color: string; label: string; }) => void; filePath: unknown; }) => {
   const [temperature, setTemperature] = useState(0);
   const [pixelColor, setPixelColor] = useState("");
+  const [pixel, setPixel] = useState({x:0, y:0});
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleCanvasClick = (event: ME<HTMLCanvasElement, MouseEvent>) => {
@@ -50,6 +52,7 @@ const ThermalImage = (props: { data: any[]; onPixelClick: (arg0: { x: number; y:
           const temperature = props.data[x + canvas.width * y];
           setPixelColor(color);
           setTemperature(temperature);
+          setPixel({x: event.clientX - rect.left, y: event.clientY - rect.top});
         }
         canvas.addEventListener("mouseenter", () => canvas.addEventListener("mousemove", onHover));
         canvas.addEventListener("mouseleave", () => canvas.removeEventListener("mousemove", onHover))
@@ -59,12 +62,48 @@ const ThermalImage = (props: { data: any[]; onPixelClick: (arg0: { x: number; y:
 
   return (
     <div id="container__canvas" style={{ display: "flex" }}>
+      <div
+        style={{
+          position: "absolute",
+          left: `${pixel.x + 5}px`,
+          top: `${pixel.y + 5}px`,
+          background: "black",
+          padding: "4px",
+          borderRadius: "10px",
+          boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+          zIndex: 1000,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: "-15px",
+          marginBottom: "-15px",
+        }}
+      >
+        <div
+          style={{
+            background: `${pixelColor}`,
+            width: "25px",
+            height: "30px",
+            marginRight: "8px",
+            borderRadius: "7px",
+          }}
+        ></div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginBottom: "-15px",
+          }}
+        >
+          <p style={{color:"white"}}>{temperature !== undefined ? `${temperature.toFixed(2)}°C` : ""}</p>
+        </div>
+      </div>
       <div id="canvas-container">
-        <canvas 
-          title={`${temperature.toFixed(2)}°C`} 
-          ref={canvasRef} onClick={handleCanvasClick} 
-          style={{cursor: "crosshair", border: `5px solid ${pixelColor}`}}>
-        </canvas>
+        <canvas
+          ref={canvasRef}
+          onClick={handleCanvasClick}
+          style={{ cursor: "pointer", border: "2px solid"}}
+        ></canvas>
       </div>
     </div>
   );
