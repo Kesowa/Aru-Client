@@ -1,19 +1,27 @@
 import React, { useState, useEffect, useRef, MouseEvent as ME } from "react";
 import { STATIC_URL } from "src/constants";
 
-const ThermalImage = (props: { data: any[]; onPixelClick: (arg0: { x: number; y: number; temp: any; color: string; label: string; }) => void; filePath: unknown; }) => {
+const ThermalImage = (props: {
+  data: any[];
+  onPixelClick: (arg0: {
+    x: number;
+    y: number;
+    temp: any;
+    color: string;
+    label: string;
+  }) => void;
+  filePath: unknown;
+}) => {
   const [temperature, setTemperature] = useState(0);
   const [pixelColor, setPixelColor] = useState("");
-  const [pixel, setPixel] = useState({x:0, y:0});
+  const [pixel, setPixel] = useState({ x: 0, y: 0 });
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleCanvasClick = (event: ME<HTMLCanvasElement, MouseEvent>) => {
-    if (canvasRef.current == null)
-      return;
+    if (canvasRef.current == null) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    if (ctx == null)
-      return;
+    if (ctx == null) return;
     const rect = canvas.getBoundingClientRect();
     const x = Math.floor(event.clientX - rect.left);
     const y = Math.floor(event.clientY - rect.top);
@@ -39,8 +47,7 @@ const ThermalImage = (props: { data: any[]; onPixelClick: (arg0: { x: number; y:
         canvas.width = img.width;
         canvas.height = img.height;
         const ctx = canvas.getContext("2d");
-        if (ctx == null)
-          return;
+        if (ctx == null) return;
         ctx.drawImage(img, 0, 0);
         const onHover = (event: MouseEvent) => {
           const rect = canvas.getBoundingClientRect();
@@ -51,13 +58,20 @@ const ThermalImage = (props: { data: any[]; onPixelClick: (arg0: { x: number; y:
           const temperature = props.data[x + canvas.width * y];
           setPixelColor(color);
           setTemperature(temperature);
-          setPixel({x: event.clientX - rect.left, y: event.clientY - rect.top});
-        }
-        canvas.addEventListener("mouseenter", () => canvas.addEventListener("mousemove", onHover));
-        canvas.addEventListener("mouseleave", () => canvas.removeEventListener("mousemove", onHover))
+          setPixel({
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top,
+          });
+        };
+        canvas.addEventListener("mouseenter", () =>
+          canvas.addEventListener("mousemove", onHover)
+        );
+        canvas.addEventListener("mouseleave", () =>
+          canvas.removeEventListener("mousemove", onHover)
+        );
       }
-    }
-  }, [props.filePath])
+    };
+  }, [props.filePath]);
 
   return (
     <div id="container__canvas" style={{ display: "flex" }}>
@@ -94,7 +108,9 @@ const ThermalImage = (props: { data: any[]; onPixelClick: (arg0: { x: number; y:
             marginBottom: "-10px",
           }}
         >
-          <p style={{color:"white"}}>{temperature !== undefined ? `${temperature.toFixed(2)}°C` : ""}</p>
+          <p style={{ color: "white" }}>
+            {temperature !== undefined ? `${temperature.toFixed(2)}°C` : ""}
+          </p>
         </div>
       </div>
       <div id="canvas-container">
