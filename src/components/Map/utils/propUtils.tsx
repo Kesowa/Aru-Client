@@ -85,22 +85,32 @@ export const getEditLayerTypeOptions = (
   // the "title" field named as "label", so that needs to be mapped as well
 
   if (defaultLayerType?.layerType === "Raster") {
-    return [{
-      label: options[0].title,
-      value: options[0].value,
-      children: options[0].children.map(({ title, value }) => ({ label: title, value })),
-    }]
+    return [
+      {
+        label: options[0].title,
+        value: options[0].value,
+        children: options[0].children.map(({ title, value }) => ({
+          label: title,
+          value,
+        })),
+      },
+    ];
   } else {
-    return [{
-      label: options[1].title,
-      value: options[1].value,
-      children: options[1].children
-                  .filter(child => child.value == defaultLayerType?.featureType)
-                  .map(({ title, value, children }) => ({ 
-                    label: title, 
-                    value, 
-                    children: children.map(({ title, value }) => ({ label: title, value })), 
-                  })),
-    }]
+    return [
+      {
+        label: options[1].title,
+        value: options[1].value,
+        children: options[1].children
+          .filter((child) => child.value == defaultLayerType?.featureType)
+          .map(({ title, value, children }) => ({
+            label: title,
+            value,
+            children: children.map(({ title, value }) => ({
+              label: title,
+              value,
+            })),
+          })),
+      },
+    ];
   }
 };

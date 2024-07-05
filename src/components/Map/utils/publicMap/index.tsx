@@ -85,7 +85,7 @@ import { AxiosResponse } from "axios";
 import { IMission } from "src/types/mission";
 import { ILayer } from "src/types/layer";
 import { featureType } from "src/static/vectorprops";
-import { defaultRasterSettings, rasterProps } from "src/static/rasterprops";
+import { rasterProps } from "src/static/rasterprops";
 
 interface Config {
   mode: typeof GeoJsonEditMode;

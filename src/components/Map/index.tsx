@@ -2092,7 +2092,8 @@ function BaseMap(props) {
   function setOverlayID(id: string, overlayId: string) {
     SetAllLayers((prev) =>
       prev.map((layer) => {
-        if (layer._id === id) layer._metadata = { ...layer._metadata, overlayId };
+        if (layer._id === id)
+          layer._metadata = { ...layer._metadata, overlayId };
         return layer;
       })
     );
@@ -3198,12 +3199,14 @@ function BaseMap(props) {
     // console.log("CHECKED: ", checkedKeysValue);
 
     // first update checked status
-    let updatedLayers = AllLayers.map(layer => ({ ...layer, _isChecked: checkedKeysValue.includes(layer._id) }));
+    const updatedLayers = AllLayers.map((layer) => ({
+      ...layer,
+      _isChecked: checkedKeysValue.includes(layer._id),
+    }));
 
     // next update metadata for checked layers
-    for (let layer of updatedLayers) {
+    for (const layer of updatedLayers) {
       if (layer._isChecked) {
-        
         // fetch bounds is they havent already been fetched
         if (!layer._metadata?.bounds) {
           const bounds = await fetchLayerBounds(
@@ -3216,9 +3219,11 @@ function BaseMap(props) {
 
         // add raster settings
         if (layer.type === "Raster") {
-          layer._metadata = { ...defaultRasterSettings[layer.raster], ...layer._metadata };
+          layer._metadata = {
+            ...defaultRasterSettings[layer.raster],
+            ...layer._metadata,
+          };
         }
-
       }
     }
 
@@ -4071,8 +4076,8 @@ function BaseMap(props) {
           setLayerName(layer.name);
           setDefaultLayerType({
             layerType: type,
-            layerProp: (type === "Vector") ? layer.vector : layer.raster,
-            featureType: (type === "Vector") ? featureType[layer.vector] : null,
+            layerProp: type === "Vector" ? layer.vector : layer.raster,
+            featureType: type === "Vector" ? featureType[layer.vector] : null,
           });
           setSelectedLayerType(type.toLowerCase());
           break;
@@ -5263,7 +5268,8 @@ function BaseMap(props) {
       if (layer.type === "Vector") {
         setvectorLayers([...vectorLayers, layer]);
       }
-      const rasterSettings = layer.type === "Raster" ? defaultRasterSettings[layer.raster] : {};
+      const rasterSettings =
+        layer.type === "Raster" ? defaultRasterSettings[layer.raster] : {};
       fetchLayerBounds(layer.type, layer.layerpath, layer.flaggedFeatures)
         .then((bounds) => {
           SetAllLayers((prev) => [
@@ -5904,7 +5910,7 @@ function BaseMap(props) {
             },
             children: [
               ...Object.keys(featureType)
-                .filter(prop => featureType[prop] === type)
+                .filter((prop) => featureType[prop] === type)
                 .map((propName: string) => {
                   return {
                     key: `${propName}${type}`,
@@ -5922,36 +5928,41 @@ function BaseMap(props) {
                       </div>
                     ),
                   };
-                })
+                }),
             ],
           };
         }),
         {
           key: "Other",
           label: "Other",
-          children: [...Object.keys(featureType)
-            .filter(
-              (p) =>
-                ![featureTypes.POINT, featureTypes.MULTI_LINE_STRING, featureTypes.MULTI_POLYGON].includes(featureType[p])
-            )
-            .map((p) => {
-              return {
-                key: `${p}${featureType[p]}`,
-                label: (
-                  <div
-                    onClick={() =>
-                      setFilterState((prev) => {
-                        // prev.vectorPropsType.add(featureType[p]);
-                        prev.vectorProps.add(p);
-                        return { ...prev };
-                      })
-                    }
-                  >
-                    {p}
-                  </div>
-                ),
-              };
-            }),
+          children: [
+            ...Object.keys(featureType)
+              .filter(
+                (p) =>
+                  ![
+                    featureTypes.POINT,
+                    featureTypes.MULTI_LINE_STRING,
+                    featureTypes.MULTI_POLYGON,
+                  ].includes(featureType[p])
+              )
+              .map((p) => {
+                return {
+                  key: `${p}${featureType[p]}`,
+                  label: (
+                    <div
+                      onClick={() =>
+                        setFilterState((prev) => {
+                          // prev.vectorPropsType.add(featureType[p]);
+                          prev.vectorProps.add(p);
+                          return { ...prev };
+                        })
+                      }
+                    >
+                      {p}
+                    </div>
+                  ),
+                };
+              }),
           ],
         },
       ],
@@ -7830,17 +7841,18 @@ function BaseMap(props) {
                         <Cascader
                           style={{ width: "100%" }}
                           defaultValue={
-                            defaultLayerType ? 
-                            defaultLayerType.featureType ?
-                            [ 
-                              defaultLayerType.layerType.toUpperCase(),
-                              defaultLayerType.featureType.toUpperCase(),
-                              defaultLayerType.layerProp.toUpperCase()
-                            ] : 
-                            [
-                              defaultLayerType.layerType.toUpperCase(),
-                              defaultLayerType.layerProp.toUpperCase()
-                            ] : []
+                            defaultLayerType
+                              ? defaultLayerType.featureType
+                                ? [
+                                    defaultLayerType.layerType.toUpperCase(),
+                                    defaultLayerType.featureType.toUpperCase(),
+                                    defaultLayerType.layerProp.toUpperCase(),
+                                  ]
+                                : [
+                                    defaultLayerType.layerType.toUpperCase(),
+                                    defaultLayerType.layerProp.toUpperCase(),
+                                  ]
+                              : []
                           }
                           options={getEditLayerTypeOptions(defaultLayerType)}
                           placeholder="Select Layer Type"
@@ -7854,7 +7866,9 @@ function BaseMap(props) {
                             // either [ "Vector", (geometry type), <vector prop name> ]
                             // or [ "Raster", <raster prop name> ]
                             const updatedTypeId = [...value].reverse()[0];
-                            setLayerProp(updatedTypeId as vectorProps | rasterProps);
+                            setLayerProp(
+                              updatedTypeId as vectorProps | rasterProps
+                            );
                           }}
                         />
                         {/* </Form.Item> */}
