@@ -49,6 +49,7 @@ import PictoMap from "../pic2map";
 import Link from "antd/lib/typography/Link";
 import Paragraph from "antd/lib/typography/Paragraph";
 import { PUBLIC_URL, STATIC_URL } from "../../../../constants";
+import { featureType, featureTypes } from "src/static/vectorprops";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -226,9 +227,9 @@ function LayerDocs(props) {
           ),
           children: (
             <>
-              {(props.layerData.vector
-                ? props.layerData.vector.type
-                : "null") === "MultiPolygon" ? (
+              {props.layerData.vector &&
+              featureType[props.layerData.vector] ===
+                featureTypes.MULTI_POLYGON ? (
                 <>
                   <Title level={4}>Enable 3D</Title>
                   <Alert
@@ -546,8 +547,9 @@ function LayerDocs(props) {
         ),
         children: (
           <>
-            {(props.layerData.vector ? props.layerData.vector.type : "null") ===
-            "MultiPolygon" ? (
+            {props.layerData.vector &&
+            featureType[props.layerData.vector] ===
+              featureTypes.MULTI_POLYGON ? (
               <>
                 <Title level={3}>Enable 3D</Title>
                 <div

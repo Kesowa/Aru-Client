@@ -17,13 +17,20 @@ import { ILayer } from "src/types/layer";
 import http from "src/services/httpCall";
 import { hexToRGB } from "./colorUtils";
 import { MASK_ID } from ".";
+import { featureType, featureTypes } from "src/static/vectorprops";
+import { rasterProps } from "src/static/rasterprops";
 
 export type Layer = ILayer & {
   _isChecked?: boolean;
   _render3D?: boolean;
   _isMasked?: boolean;
   _metadata?: {
-    bounds: [number, number, number, number];
+    bounds?: [number, number, number, number];
+    bidx?: string;
+    bandExp?: string;
+    colorMap?: string;
+    resamplingMethod?: string;
+    overlayId?: string;
   };
 };
 
@@ -52,20 +59,27 @@ const svgToDataURL = (svg: string) => {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 };
 const getRasterDataUrl = (layer: Layer) => {
-  switch (layer.raster.name) {
-    case "NDVI":
+  const settings = {
+    bidx: layer._metadata?.bidx || null,
+    bandExp: layer._metadata?.bandExp || null,
+    colorMap: layer._metadata?.colorMap || null,
+    resamplingMethod: layer._metadata?.resamplingMethod || null,
+    overlayId: layer._metadata?.overlayId || null,
+  };
+  switch (layer.raster) {
+    case rasterProps.NDVI:
       return `${COG_URL}/cog/tiles/{z}/{x}/{y}%401x?url=${TITILER_STATIC}${layer.layerpath}`;
 
-    case "NDWI":
-      return `${COG_URL}/cog/tiles/{z}/{x}/{y}%401x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${layer.raster.resamplingMethod}&bidx=${layer.raster.bidx}`;
+    case rasterProps.NDWI:
+      return `${COG_URL}/cog/tiles/{z}/{x}/{y}%401x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}`;
 
-    case "DEM":
-      return `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${layer.raster.resamplingMethod}&bidx=${layer.raster.bidx}&rescale=${layer.minp}%2C${layer.maxp}&colormap_name=${layer.raster.colorMap}`;
+    case rasterProps.DEM:
+      return `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${layer.minp}%2C${layer.maxp}&colormap_name=${settings.colorMap}`;
 
-    case "POINT_CLOUD":
+    case rasterProps.POINT_CLOUD:
       return `${STATIC_URL}${layer.metadata}`;
 
-    case "CESIUM_3D":
+    case rasterProps.CESIUM_3D:
       return `${STATIC_URL}${layer.metadata}`;
 
     default:
@@ -89,8 +103,8 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
 
       if (layer.type == "Raster") {
         if (
-          layer.raster.name == "POINT_CLOUD" ||
-          layer.raster.name == "CESIUM_3D"
+          layer.raster === rasterProps.POINT_CLOUD ||
+          layer.raster === rasterProps.CESIUM_3D
         ) {
           return new Tile3DLayer({
             id: layer._id,
@@ -101,9 +115,9 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             },
           });
         }
-        if (layer.raster.name == "DEM" && layer._render3D == true) {
-          const overlayLayer = layer.raster.overlayId
-            ? layers.find((l) => l._id === layer.raster.overlayId)
+        if (layer.raster === rasterProps.DEM && layer._render3D === true) {
+          const overlayLayer = layer._metadata?.overlayId
+            ? layers.find((l) => l._id === layer._metadata?.overlayId)
             : layer;
           return new TerrainLayer({
             id: layer._id,
@@ -142,8 +156,8 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             });
           },
         });
-      } else if (layer.type == "Vector") {
-        if (layer.vector.type == "Point")
+      } else if (layer.type === "Vector") {
+        if (featureType[layer.vector] === featureTypes.POINT)
           return new GeoJsonLayer({
             id: layer._id,
             data: fetch(STATIC_URL + layer.layerpath).then((response) =>
@@ -188,7 +202,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
                 : hexToRGB("#ff0000"),
             ...maskProps,
           });
-        else if (layer.vector.type == "air_pollution")
+        else if (featureType[layer.vector] === featureTypes.AIR_POLLUTION)
           return new HeatmapLayer({
             id: layer._id,
             data: fetch(STATIC_URL + layer.layerpath)
@@ -201,7 +215,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             pickingRadius: 20,
             // Masking Not supported in HeatmapLayer
           });
-        else if (layer.vector.type == "wind_direction")
+        else if (featureType[layer.vector] === featureTypes.WIND_DIRECTION)
           return new IconLayer({
             id: layer._id,
             data: fetch(STATIC_URL + layer.layerpath)
@@ -255,8 +269,13 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             id: layer._id,
             data: STATIC_URL + layer.layerpath,
             pickable: true,
-            stroked: ["MultiPolygon", "Polygon"].includes(layer.vector.type),
-            filled: ["MultiPolygon", "Polygon"].includes(layer.vector.type),
+            stroked: [
+              featureTypes.MULTI_POLYGON,
+              featureTypes.POLYGON,
+            ].includes(featureType[layer.vector]),
+            filled: [featureTypes.MULTI_POLYGON, featureTypes.POLYGON].includes(
+              featureType[layer.vector]
+            ),
             extruded: false,
             lineWidthUnits: "pixels",
             lineWidthScale: 4,

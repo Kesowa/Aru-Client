@@ -15,6 +15,7 @@ import {
   Collapse,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import { options } from "../propUtils";
 import React from "react";
 const { Dragger } = Upload;
 const { Item } = Form;
@@ -33,7 +34,6 @@ export const UploadRasterData = ({
   uploadProps,
   uploading,
   progress,
-  options,
 }) => {
   return (
     <>

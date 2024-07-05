@@ -11,6 +11,7 @@ import { connect } from "react-redux";
 import FeatureTable from "./featureTable";
 import { COG_URL, TITILER_STATIC } from "src/constants";
 import { Layer } from "../layerRender";
+import { rasterProps } from "src/static/rasterprops";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -71,8 +72,8 @@ interface State {
 const MapAttributes: React.FC<Props> = (props) => {
   const initialState: State = {
     isTableLoading: false,
-    rasterDetails: null,
-    rasterMetaData: null,
+    rasterDetails: null, // for fileSize and fileDetails of associated raster file
+    rasterMetaData: null, // bounnds data and more similar stuff (??)
     trueTableData: [],
     tableData: [],
     loading: false,
@@ -90,7 +91,8 @@ const MapAttributes: React.FC<Props> = (props) => {
   // );
   const filteredLayers = props.AllLayers.filter(
     (layer) =>
-      layer.type === "Raster" && ["DEM", "ORTHO"].includes(layer.raster.name)
+      layer.type === "Raster" &&
+      [rasterProps.DEM, rasterProps.ORTHO].includes(layer.raster)
   );
 
   const onChange = (checked: boolean) => {
