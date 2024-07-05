@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, MouseEvent as ME } from "react";
 import { STATIC_URL } from "src/constants";
-import { text } from "stream/consumers";
 
 const ThermalImage = (props: { data: any[]; onPixelClick: (arg0: { x: number; y: number; temp: any; color: string; label: string; }) => void; filePath: unknown; }) => {
   const [temperature, setTemperature] = useState(0);
@@ -68,31 +67,31 @@ const ThermalImage = (props: { data: any[]; onPixelClick: (arg0: { x: number; y:
           left: `${pixel.x + 5}px`,
           top: `${pixel.y + 5}px`,
           background: "black",
-          padding: "4px",
+          padding: "5px",
           borderRadius: "10px",
           boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
           zIndex: 1000,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          marginTop: "-15px",
-          marginBottom: "-15px",
+          marginTop: "-5px",
+          marginBottom: "-5px",
         }}
       >
         <div
           style={{
             background: `${pixelColor}`,
             width: "25px",
-            height: "30px",
-            marginRight: "8px",
-            borderRadius: "7px",
+            height: "25px",
+            marginRight: "5px",
+            borderRadius: "5px",
           }}
         ></div>
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            marginBottom: "-15px",
+            marginBottom: "-10px",
           }}
         >
           <p style={{color:"white"}}>{temperature !== undefined ? `${temperature.toFixed(2)}°C` : ""}</p>
@@ -102,7 +101,7 @@ const ThermalImage = (props: { data: any[]; onPixelClick: (arg0: { x: number; y:
         <canvas
           ref={canvasRef}
           onClick={handleCanvasClick}
-          style={{ cursor: "pointer", border: "2px solid"}}
+          style={{ cursor: "crosshair" }}
         ></canvas>
       </div>
     </div>
