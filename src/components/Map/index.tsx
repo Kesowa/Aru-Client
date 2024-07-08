@@ -43,6 +43,7 @@ import {
   notification,
   MenuProps,
   Space,
+  Popover
 } from "antd";
 import {
   UploadOutlined,
@@ -85,7 +86,7 @@ import { FlyToInterpolator } from "deck.gl";
 import { BitmapLayer, IconLayer, PathLayer } from "@deck.gl/layers";
 import { SolidPolygonLayer } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-// import { HtmlOverlayItem, HtmlOverlay } from "@deck.gl-community/editable-layers";
+import { HTMLOverlayItem, HTMLOverlay } from "../Overlay/HtmlOverlay";
 import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
   DrawPolygonMode,
@@ -2016,6 +2017,7 @@ function BaseMap(props) {
   };
 
   function handleClose(status: boolean) {
+    console.log("im in the handlecloe function ");
     togglePopup(status);
   }
 
@@ -7098,68 +7100,68 @@ function BaseMap(props) {
         )}
 
         {
-          showPopup && true
-          // <HtmlOverlay>
-          //   <HtmlOverlayItem coordinates={coordinates}>
-          //     <Popover
-          //       content={
-          //         <>
-          //           <InfoWindowContent
-          //             mode={infoWindowMode}
-          //             coordinates={coordinates}
-          //             token={MAPBOX_API_KEY}
-          //             feature={featureData}
-          //             sysId={sysId}
-          //             featureIdx={featureIdx}
-          //             setformDrawerVisible={setformDrawerVisible}
-          //             drawerVisibility={viewMedia}
-          //             setImagesDrawer={setViewMedia}
-          //             videoToShow={videoToShow}
-          //             setVideoToShow={setVideoToShow}
-          //             show={saveButtonShow}
-          //             setShowForm={setShowForm}
-          //             cancelDrawing={cancelDrawing}
-          //             togglePopup={togglePopup}
-          //             layerId={featureLayer}
-          //             missionLayer={missionLayer}
-          //             setMissionLayer={setMissionLayer}
-          //             AllLayers={AllLayers}
-          //             flag={flag}
-          //             setFlag={setFlag}
-          //             setShouldAttributeTableReload={
-          //               setShouldAttributeTableReload
-          //             }
-          //             shouldAttributeTableReload={shouldAttributeTableReload}
-          //             canDraw={perms.canCreateVectorLayer}
-          //             isBaseMap={props.isBaseMaps}
-          //             isPublic={false}
-          //             setThumbnail={setThumbnail}
-          //           />
-          //         </>
-          //       }
-          //       title={
-          //         <>
-          //           <Title level={5} style={{ float: "left" }}>
-          //             {layerName}
-          //           </Title>
-          //           <a
-          //             style={{
-          //               float: "right",
-          //             }}
-          //             onClick={() => handleClose(false)}
-          //           >
-          //             X
-          //           </a>
-          //         </>
-          //       }
-          //       trigger="click"
-          //       open={showPopup}
-          //       style={{ position: "relative" }}
-          //       onOpenChange={() => handleClose(false)}
-          //     />
-          //   </HtmlOverlayItem>
-          // </HtmlOverlay>
-        }
+            (
+          <HTMLOverlay>
+            <HTMLOverlayItem coordinates={coordinates} viewState={deckRef.current}>
+              <Popover
+                content={
+                  <>
+                    {/* <InfoWindowContent
+                      mode={infoWindowMode}
+                      coordinates={coordinates}
+                      token={MAPBOX_API_KEY}
+                      feature={featureData}
+                      sysId={sysId}
+                      featureIdx={featureIdx}
+                      setformDrawerVisible={setformDrawerVisible}
+                      drawerVisibility={viewMedia}
+                      setImagesDrawer={setViewMedia}
+                      videoToShow={videoToShow}
+                      setVideoToShow={setVideoToShow}
+                      show={saveButtonShow}
+                      setShowForm={setShowForm}
+                      cancelDrawing={cancelDrawing}
+                      togglePopup={togglePopup}
+                      layerId={featureLayer}
+                      missionLayer={missionLayer}
+                      setMissionLayer={setMissionLayer}
+                      AllLayers={AllLayers}
+                      flag={flag}
+                      setFlag={setFlag}
+                      setShouldAttributeTableReload={
+                        setShouldAttributeTableReload
+                      }
+                      shouldAttributeTableReload={shouldAttributeTableReload}
+                      canDraw={perms.canCreateVectorLayer}
+                      isBaseMap={props.isBaseMaps}
+                      isPublic={false}
+                      setThumbnail={setThumbnail}
+                    /> */}
+                  </>
+                }
+                title={
+                  <>
+                    <Title level={5} style={{ float: "left" }}>
+                      {layerName}
+                    </Title>
+                    <a
+                      style={{
+                        float: "right",
+                      }}
+                      onClick={() => handleClose(false)}
+                    >
+                      X
+                    </a>
+                  </>
+                }
+                trigger="click"
+                open={showPopup}
+                style={{ position: "relative" }}
+                onOpenChange={() => handleClose(false)}
+              />
+            </HTMLOverlayItem>
+          </HTMLOverlay>
+        )}
       </DeckGL>
 
       {/* {showDrawingTools && ( */}

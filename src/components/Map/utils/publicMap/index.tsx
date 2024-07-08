@@ -42,7 +42,7 @@ import {
   PathLayer,
 } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-// import { HtmlOverlayItem, HtmlOverlay } from "@deck.gl-community/editable-layers";
+import { HTMLOverlayItem, HTMLOverlay } from "../Overlay/HtmlOverlay";
 import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
   DrawPolygonMode,
@@ -484,7 +484,9 @@ function PublicMap(props) {
     setLayerName(layername);
     setInfoWindowMode(mode);
     setFeatureLayer(id);
+    console.log("togglePopup:", showPopup);
     togglePopup(true);
+    console.log("togglePopup:", showPopup);
     setSaveButtonShow(show);
   }
 
@@ -971,6 +973,7 @@ function PublicMap(props) {
       editMode: null,
       isCompleted: false,
     });
+    console.log("togglePopup:", showPopup);
     togglePopup(false);
     setShowForm(false);
   };
@@ -2186,54 +2189,54 @@ function PublicMap(props) {
               )}
 
               {
-                showPopup && true
-                // <HtmlOverlay>
-                //   <HtmlOverlayItem coordinates={coordinates}>
-                //     <Popover
-                //       content={
-                //         <>
-                //           <InfoWindowContent
-                //             mode={infoWindowMode}
-                //             coordinates={coordinates}
-                //             token={MAPBOX_API_KEY}
-                //             feature={featureData}
-                //             featureIndex={sysId}
-                //             setformDrawerVisible={setformDrawerVisible}
-                //             setImagesDrawer={setViewImages}
-                //             show={saveButtonShow}
-                //             setShowForm={setShowForm}
-                //             cancelDrawing={cancelDrawing}
-                //             togglePopup={togglePopup}
-                //             layerId={featureLayer}
-                //             canDraw={null}
-                //             isPublic={true}
-                //             isBaseMap={props.isBaseMaps}
-                //           />
-                //         </>
-                //       }
-                //       title={
-                //         <>
-                //           <Title level={5} style={{ float: "left" }}>
-                //             {layerName}
-                //           </Title>
-                //           <a
-                //             style={{
-                //               float: "right",
-                //             }}
-                //             onClick={() => handleClose(false)}
-                //           >
-                //             X
-                //           </a>
-                //         </>
-                //       }
-                //       trigger="click"
-                //       open={showPopup}
-                //       style={{ position: "relative" }}
-                //       onVisibleChange={() => handleClose(false)}
-                //     />
-                //   </HtmlOverlayItem>
-                // </HtmlOverlay>
-              }
+                (
+                <HTMLOverlay>
+                 <HTMLOverlayItem coordinates={coordinates} viewState={setViewport}>
+                    <Popover
+                      content={
+                        <>
+                          <InfoWindowContent
+                            mode={infoWindowMode}
+                            coordinates={coordinates}
+                            token={MAPBOX_API_KEY}
+                            feature={featureData}
+                            featureIndex={sysId}
+                            setformDrawerVisible={setformDrawerVisible}
+                            setImagesDrawer={setViewImages}
+                            show={saveButtonShow}
+                            setShowForm={setShowForm}
+                            cancelDrawing={cancelDrawing}
+                            togglePopup={togglePopup}
+                            layerId={featureLayer}
+                            canDraw={null}
+                            isPublic={true}
+                            isBaseMap={props.isBaseMaps}
+                          />
+                        </>
+                      }
+                      title={
+                        <>
+                          <Title level={5} style={{ float: "left" }}>
+                            {layerName}
+                          </Title>
+                          <a
+                            style={{
+                              float: "right",
+                            }}
+                            onClick={() => handleClose(false)}
+                          >
+                            X
+                          </a>
+                        </>
+                      }
+                      trigger="click"
+                      open={showPopup}
+                      style={{ position: "relative" }}
+                      onVisibleChange={() => handleClose(false)}
+                    />
+                  </HTMLOverlayItem>
+                </HTMLOverlay>
+              )}
             </DeckGL>
 
             <div className="map-header-toolbar">
