@@ -53,10 +53,10 @@ const App = (props) => {
                 <Redirect to={{ pathname: "/dashboard" }} />
               </Route>
               <Route exact path="/map/:id">
-                <PublicMap isBaseMap={true} />
+                <PublicMap />
               </Route>
               <Route exact path="/map/:tenantId/:missionId">
-                <PublicMap isMissionMap={true} isBaseMap={true} />
+                <PublicMap isMissionMap={true} />
               </Route>
               <Route exact path="/forgot-password">
                 <ForgotPassword />
