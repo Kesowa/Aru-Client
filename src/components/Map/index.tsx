@@ -6,6 +6,7 @@ import React, {
   lazy,
   Suspense,
 } from "react";
+import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
 import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
@@ -86,7 +87,8 @@ import { FlyToInterpolator } from "deck.gl";
 import { BitmapLayer, IconLayer, PathLayer } from "@deck.gl/layers";
 import { SolidPolygonLayer } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-import { HTMLOverlayItem, HTMLOverlay } from "../Overlay/HtmlOverlay";
+// import { HTMLOverlayItem, HTMLOverlay } from "../Overlay/HtmlOverlay";
+import { HTMLOverlayItem, HTMLOverlay } from "../shared/HTMLOverlay";
 import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
   DrawPolygonMode,
@@ -849,6 +851,7 @@ function BaseMap(props) {
     },
   };
   const [showPopup, togglePopup] = useState(false);
+  useEffect(() => console.log("SHOW_POPUP: ", showPopup), [showPopup]);
   const [featureData, setFeatureData] = useState<any>([]);
   const [sysId, setSysId] = useState("");
   const [coordinates, setCoordinates] = useState([]);
@@ -7100,13 +7103,12 @@ function BaseMap(props) {
         )}
 
         {
-            (
+           showPopup && (
           <HTMLOverlay>
-            <HTMLOverlayItem coordinates={coordinates} viewState={deckRef.current}>
+            <HTMLOverlayItem coordinates={coordinates}>
               <Popover
                 content={
-                  <>
-                    {/* <InfoWindowContent
+                    <InfoWindowContent
                       mode={infoWindowMode}
                       coordinates={coordinates}
                       token={MAPBOX_API_KEY}
@@ -7136,8 +7138,7 @@ function BaseMap(props) {
                       isBaseMap={props.isBaseMaps}
                       isPublic={false}
                       setThumbnail={setThumbnail}
-                    /> */}
-                  </>
+                    />
                 }
                 title={
                   <>
