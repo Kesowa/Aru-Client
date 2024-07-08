@@ -89,13 +89,10 @@ import { AxiosResponse } from "axios";
 import { IMission } from "src/types/mission";
 import { ILayer } from "src/types/layer";
 import { BBox, mergeBoundingBoxes } from "src/types/geojson";
-import {
-  Layer,
-  ILayerToDeckLayer,
-  MissionLayerToDeckLayer,
-} from "../../layerRender";
+import { Layer, ILayerToDeckLayer } from "../../layerRender";
 import { ILayersToTree } from "../../treeRender";
 import { WebMercatorViewport } from "viewport-mercator-project";
+import Fuse from "fuse.js";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -245,8 +242,9 @@ function PublicMap(props) {
   ];
 
   const [showPopup, togglePopup] = useState(false);
-  const [searching, SetSearching] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
+  // const [searching, SetSearching] = useState(false);
+  // const [searchValue, setSearchValue] = useState("");
+  const [fuse, setFuse] = useState<Fuse<any> | null>(null);
   const [featureData, setFeatureData] = useState<any>([]);
   const [sysId, setSysId] = useState("");
   const [coordinates, setCoordinates] = useState([]);
@@ -1017,50 +1015,50 @@ function PublicMap(props) {
   // Handle Current Layer
 
   // Public map search
-  useEffect(() => {
-    if (searchValue) {
-      SetSearching(true);
-      http
-        .get<components["schemas"]["SearchPublicLayerResponse"]>(
-          `${apis.PUBLIC_SEARCH}`,
-          {
-            params: {
-              mapRef: id,
-              key: "PremisesNo",
-              value: searchValue,
-            },
-          }
-        )
-        .then((res: any) => {
-          if (res.data.status) {
-            console.log("search successful", res.data);
-            // setActiveID(res.data.layerId);
-            const centerPoint = turf.centroid(res.data.data[0]);
-            setViewport({
-              longitude: centerPoint.geometry.coordinates[0],
-              latitude: centerPoint.geometry.coordinates[1],
-              zoom: 15,
-              pitch: 0,
-              minZoom: 0,
-              maxZoom: 22,
-              bearing: 0,
-              transitionDuration: 1000,
-              transitionInterpolator: new FlyToInterpolator(),
-            });
-          } else {
-            console.log("search failed", res.data);
-            message.warning("No match found!");
-          }
-        })
-        .catch((err: any) => {
-          console.log(err);
-          AxiosErrorHandler(err, props.logout);
-        })
-        .finally(() => SetSearching(false));
-    } else {
-      // setActiveID("");
-    }
-  }, [searchValue]);
+  // useEffect(() => {
+  //   if (searchValue) {
+  //     SetSearching(true);
+  //     http
+  //       .get<components["schemas"]["SearchPublicLayerResponse"]>(
+  //         `${apis.PUBLIC_SEARCH}`,
+  //         {
+  //           params: {
+  //             mapRef: id,
+  //             key: "PremisesNo",
+  //             value: searchValue,
+  //           },
+  //         }
+  //       )
+  //       .then((res: any) => {
+  //         if (res.data.status) {
+  //           console.log("search successful", res.data);
+  //           // setActiveID(res.data.layerId);
+  //           const centerPoint = turf.centroid(res.data.data[0]);
+  //           setViewport({
+  //             longitude: centerPoint.geometry.coordinates[0],
+  //             latitude: centerPoint.geometry.coordinates[1],
+  //             zoom: 15,
+  //             pitch: 0,
+  //             minZoom: 0,
+  //             maxZoom: 22,
+  //             bearing: 0,
+  //             transitionDuration: 1000,
+  //             transitionInterpolator: new FlyToInterpolator(),
+  //           });
+  //         } else {
+  //           console.log("search failed", res.data);
+  //           message.warning("No match found!");
+  //         }
+  //       })
+  //       .catch((err: any) => {
+  //         console.log(err);
+  //         AxiosErrorHandler(err, props.logout);
+  //       })
+  //       .finally(() => SetSearching(false));
+  //   } else {
+  //     // setActiveID("");
+  //   }
+  // }, [searchValue]);
 
   // MAP RENDER
   const renderMap = () => {
@@ -1105,7 +1103,10 @@ function PublicMap(props) {
 
                 // Tree Menu Layers
                 layers.push(
-                  useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers])
+                  useMemo(
+                    () => ILayerToDeckLayer(AllLayers, setFuse),
+                    [AllLayers]
+                  )
                 );
 
                 return layers;
@@ -1231,10 +1232,30 @@ function PublicMap(props) {
                       right: "8px",
                       top: "8px",
                     }}
-                    loading={searching}
                     onSearch={(e) => {
-                      console.log(e);
-                      setSearchValue(e);
+                      const searchValue = e;
+                      if (searchValue && fuse) {
+                        const searchResult = fuse.search(searchValue)[0];
+                        if (searchResult) {
+                          const centerPoint = turf.centroid(searchResult);
+                          setViewport({
+                            longitude: centerPoint.geometry.coordinates[0],
+                            latitude: centerPoint.geometry.coordinates[1],
+                            zoom: 15,
+                            pitch: 0,
+                            minZoom: 0,
+                            maxZoom: 22,
+                            bearing: 0,
+                            transitionDuration: 1000,
+                            transitionInterpolator: new FlyToInterpolator(),
+                          });
+                        } else {
+                          message.warning("No match found!");
+                        }
+                      } else {
+                        message.error("Couldn't search!");
+                        console.log("Search Index wasn't initialized!");
+                      }
                     }}
                   />
                 </Col>
