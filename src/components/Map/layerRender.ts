@@ -17,7 +17,7 @@ import { ILayer } from "src/types/layer";
 import http from "src/services/httpCall";
 import { hexToRGB } from "./colorUtils";
 import { MASK_ID } from ".";
-import Fuse, { FuseIndex } from "fuse.js";
+import Fuse from "fuse.js";
 
 export type Layer = ILayer & {
   _isChecked?: boolean;
@@ -76,21 +76,22 @@ const getRasterDataUrl = (layer: Layer) => {
 
 const getGeojsonData = async (
   layerpath: string,
+  searchIndexPath: string,
   setFuse?: (f: Fuse<any> | null) => void
 ) => {
   const dataResponse = await fetch(STATIC_URL + layerpath);
   const data = (await dataResponse.json()) as GeoJson;
-  if (setFuse) {
+  if (setFuse && searchIndexPath) {
     try {
-      const i = layerpath.lastIndexOf("/") + 1;
-      const filename =
-        "public-" + layerpath.substring(i).replace("geojson", "json");
-      const directory = layerpath.substring(0, i);
-      const searchIndexResponse = await fetch(
-        STATIC_URL + directory + filename
+      const searchIndexResponse = await fetch(STATIC_URL + searchIndexPath);
+      const searchIndex = await searchIndexResponse.json();
+      setFuse(
+        new Fuse(
+          data.features,
+          { threshold: 0 },
+          Fuse.parseIndex<any>(searchIndex)
+        )
       );
-      const searchIndex = (await searchIndexResponse.json()) as FuseIndex<any>;
-      setFuse(new Fuse(data.features as any[], { threshold: 0 }, searchIndex));
     } catch (error) {
       console.log(error);
       console.log("Couldn't fetch search index");
@@ -175,7 +176,11 @@ export const ILayerToDeckLayer = (
         if (layer.vector.type == "Point")
           return new GeoJsonLayer({
             id: layer._id,
-            data: getGeojsonData(layer.layerpath, setFuse),
+            data: getGeojsonData(
+              layer.layerpath,
+              layer.metadata?.searchIndexPath,
+              setFuse
+            ),
             pickable: true,
             pointType: "icon",
             iconSizeMinPixels: 6,
@@ -280,7 +285,11 @@ export const ILayerToDeckLayer = (
         else
           return new GeoJsonLayer({
             id: layer._id,
-            data: getGeojsonData(layer.layerpath, setFuse),
+            data: getGeojsonData(
+              layer.layerpath,
+              layer.metadata?.searchIndexPath,
+              setFuse
+            ),
             pickable: true,
             stroked: ["MultiPolygon", "Polygon"].includes(layer.vector.type),
             filled: ["MultiPolygon", "Polygon"].includes(layer.vector.type),
