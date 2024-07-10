@@ -7024,9 +7024,6 @@ function BaseMap(props) {
           setShowDrawingTools(false);
           if (event.rightButton) {
             if (!info.layer) {
-              // setMode({
-              //   mode: ViewMode,
-              // });
               setToolSelected("");
               setShowDrawingTools(false);
               settoolCoordinates([
@@ -7036,6 +7033,31 @@ function BaseMap(props) {
               setShowDrawingTools(true);
               drawingMenuRef.current.click();
             }
+          } else if (event) {
+            AllLayers.forEach((layer) => {
+              if (info.layer && layer.type === 'Vector' && info.layer.id === layer._id) {
+                InfoWindow(
+                  info.index,
+                  info.coordinate,
+                  layer.name,
+                  "PolygonView",
+                  info.object,
+                  false,
+                  layer._id,
+                  info.object.properties.sys_id,
+                  "Vector"
+                );
+                setSelectedLayerLabel(
+                  layer.layerLabel ? layer.layerLabel : "No label selected"
+                );
+                setSelectedLayerPopupLabel(
+                  layer.layerPopupLabel ? layer.layerPopupLabel : "No label selected"
+                );
+              } else {
+                setSelectedLayerId(layer._id);
+                setColorChangeFeatureData(info);
+              }
+            });
           } else {
             setShowDrawingTools(false);
           }
