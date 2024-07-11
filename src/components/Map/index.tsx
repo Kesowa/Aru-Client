@@ -7023,6 +7023,14 @@ function BaseMap(props) {
         onClick={(info, event) => {
           setShowDrawingTools(false);
           if (event.rightButton) {
+            const layerIndex = AllLayers.findIndex(
+              (layer) => info.layer?.id === layer._id
+            );
+            if (layerIndex !== -1) {
+              setSelectedLayerId(AllLayers[layerIndex]._id);
+              setColorChangeFeatureData(info);
+              setShowColorChangeForm(true);
+            }
             if (!info.layer) {
               setToolSelected("");
               setShowDrawingTools(false);
@@ -7033,35 +7041,27 @@ function BaseMap(props) {
               setShowDrawingTools(true);
               drawingMenuRef.current.click();
             }
-          } else if (event) {
-            AllLayers.forEach((layer) => {
-              if (info.layer && layer.type === 'Vector' && info.layer.id === layer._id) {
-                InfoWindow(
-                  info.index,
-                  info.coordinate,
-                  layer.name,
-                  "PolygonView",
-                  info.object,
-                  false,
-                  layer._id,
-                  info.object.properties.sys_id,
-                  "Vector"
-                );
-                setSelectedLayerLabel(
-                  layer.layerLabel ? layer.layerLabel : "No label selected"
-                );
-                setSelectedLayerPopupLabel(
-                  layer.layerPopupLabel ? layer.layerPopupLabel : "No label selected"
-                );
-              } else {
-                setSelectedLayerId(layer._id);
-                setColorChangeFeatureData(info);
-              }
-            });
+          } else if (info.layer) {
+            const layer = AllLayers.find((layer) => layer.type === 'Vector' && info.layer?.id === layer._id);
+            if (layer) {
+              InfoWindow(
+                info.index,
+                info.coordinate,
+                layer.name,
+                "PolygonView",
+                info.object,
+                false,
+                layer._id,
+                info.object.properties.sys_id,
+                "Vector"
+              );
+              setSelectedLayerLabel(layer.layerLabel ? layer.layerLabel : "No label selected");
+              setSelectedLayerPopupLabel(layer.layerPopupLabel ? layer.layerPopupLabel : "No label selected");
           } else {
             setShowDrawingTools(false);
           }
-        }}
+        }
+      }}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         {hoverInfo && (
