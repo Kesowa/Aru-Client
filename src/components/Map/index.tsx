@@ -3,7 +3,6 @@ import React, {
   useEffect,
   useRef,
   useMemo,
-  useCallback,
   lazy,
   Suspense,
 } from "react";
@@ -40,12 +39,12 @@ import {
   Select,
   Checkbox,
   Progress,
-  Popover,
   Alert,
   Result,
   notification,
   MenuProps,
   Space,
+  Popover
 } from "antd";
 import {
   UploadOutlined,
@@ -88,7 +87,7 @@ import { FlyToInterpolator } from "deck.gl";
 import { BitmapLayer, IconLayer, PathLayer } from "@deck.gl/layers";
 import { SolidPolygonLayer } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-// import { HtmlOverlayItem, HtmlOverlay } from "@deck.gl-community/editable-layers";
+import { HTMLOverlayItem, HTMLOverlay } from "../shared/HTMLOverlay";
 import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
   DrawPolygonMode,
@@ -851,6 +850,7 @@ function BaseMap(props) {
     },
   };
   const [showPopup, togglePopup] = useState(false);
+  useEffect(() => console.log("SHOW_POPUP: ", showPopup), [showPopup]);
   const [featureData, setFeatureData] = useState<any>([]);
   const [sysId, setSysId] = useState("");
   const [coordinates, setCoordinates] = useState([]);
@@ -2018,6 +2018,7 @@ function BaseMap(props) {
   };
 
   function handleClose(status: boolean) {
+    console.log("im in the handlecloe function ");
     togglePopup(status);
   }
 
@@ -3121,8 +3122,14 @@ function BaseMap(props) {
   //   return ordering.reverse();
   // };
 
-  const fetchLayerBounds = async (
-    { type, layerpath, flaggedFeatures, vector, raster, metadata }: Layer) => {
+  const fetchLayerBounds = async ({
+    type,
+    layerpath,
+    flaggedFeatures,
+    vector,
+    raster,
+    metadata,
+  }: Layer): [number, number, number, number] => {
     if (type === "Vector") {
       const response = await fetch(STATIC_URL + layerpath);
       const data = await response.json();
@@ -3149,8 +3156,7 @@ function BaseMap(props) {
         metadata["bounds"][2],
         metadata["bounds"][3],
       ] as BBox;
-    }
-    else if (raster.name == "CESIUM_3D") {
+    } else if (raster.name == "CESIUM_3D") {
       const res = await http.get<Tileset>(STATIC_URL + metadata);
       const tileset = res.data;
       const bounds_rad = [
@@ -3159,7 +3165,7 @@ function BaseMap(props) {
         tileset.properties.Longitude.maximum,
         tileset.properties.Latitude.maximum
       ];
-      return bounds_rad.map(coord => coord * 180 / Math.PI);
+      return bounds_rad.map(coord => coord * 180 / Math.PI) as [number, number, number, number];
     }
     // Implementation for Cesium_3D pending
     return [0, 0, 0, 0];
@@ -3313,12 +3319,12 @@ function BaseMap(props) {
         version="1.1"
         id="Smoke"
         xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
         width="68"
         height="68"
         viewBox="64 64 896 896"
         enable-background="new 0 0 256 256"
-        xml:space="preserve"
+        xmlSpace="preserve"
         style={{ padding: "0.5px" }}
       >
         <path
@@ -7015,10 +7021,15 @@ function BaseMap(props) {
         onClick={(info, event) => {
           setShowDrawingTools(false);
           if (event.rightButton) {
+            const layerIndex = AllLayers.findIndex(
+              (layer) => info.layer?.id === layer._id
+            );
+            if (layerIndex !== -1) {
+              setSelectedLayerId(AllLayers[layerIndex]._id);
+              setColorChangeFeatureData(info);
+              setShowColorChangeForm(true);
+            }
             if (!info.layer) {
-              // setMode({
-              //   mode: ViewMode,
-              // });
               setToolSelected("");
               setShowDrawingTools(false);
               settoolCoordinates([
@@ -7028,11 +7039,28 @@ function BaseMap(props) {
               setShowDrawingTools(true);
               drawingMenuRef.current.click();
             }
+          } else if (info.layer) {
+            const layer = AllLayers.find((layer) => layer.type === 'Vector' && info.layer?.id === layer._id);
+            if (layer) {
+              InfoWindow(
+                info.index,
+                info.coordinate,
+                layer.name,
+                "PolygonView",
+                info.object,
+                false,
+                layer._id,
+                info.object.properties.sys_id,
+                "Vector"
+              );
+              setSelectedLayerLabel(layer.layerLabel ? layer.layerLabel : "No label selected");
+              setSelectedLayerPopupLabel(layer.layerPopupLabel ? layer.layerPopupLabel : "No label selected");
           } else {
             setShowDrawingTools(false);
           }
-        }}
-      //getTooltip={({object}) => object && (object.properties.Block_Nm)}
+        }
+      }}
+        //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         {hoverInfo && (
           <div
@@ -7094,67 +7122,66 @@ function BaseMap(props) {
           />
         )}
 
-        {showPopup && (true
-          // <HtmlOverlay>
-          //   <HtmlOverlayItem coordinates={coordinates}>
-          //     <Popover
-          //       content={
-          //         <>
-          //           <InfoWindowContent
-          //             mode={infoWindowMode}
-          //             coordinates={coordinates}
-          //             token={MAPBOX_API_KEY}
-          //             feature={featureData}
-          //             sysId={sysId}
-          //             featureIdx={featureIdx}
-          //             setformDrawerVisible={setformDrawerVisible}
-          //             drawerVisibility={viewMedia}
-          //             setImagesDrawer={setViewMedia}
-          //             videoToShow={videoToShow}
-          //             setVideoToShow={setVideoToShow}
-          //             show={saveButtonShow}
-          //             setShowForm={setShowForm}
-          //             cancelDrawing={cancelDrawing}
-          //             togglePopup={togglePopup}
-          //             layerId={featureLayer}
-          //             missionLayer={missionLayer}
-          //             setMissionLayer={setMissionLayer}
-          //             AllLayers={AllLayers}
-          //             flag={flag}
-          //             setFlag={setFlag}
-          //             setShouldAttributeTableReload={
-          //               setShouldAttributeTableReload
-          //             }
-          //             shouldAttributeTableReload={shouldAttributeTableReload}
-          //             canDraw={perms.canCreateVectorLayer}
-          //             isBaseMap={props.isBaseMaps}
-          //             isPublic={false}
-          //             setThumbnail={setThumbnail}
-          //           />
-          //         </>
-          //       }
-          //       title={
-          //         <>
-          //           <Title level={5} style={{ float: "left" }}>
-          //             {layerName}
-          //           </Title>
-          //           <a
-          //             style={{
-          //               float: "right",
-          //             }}
-          //             onClick={() => handleClose(false)}
-          //           >
-          //             X
-          //           </a>
-          //         </>
-          //       }
-          //       trigger="click"
-          //       open={showPopup}
-          //       style={{ position: "relative" }}
-          //       onOpenChange={() => handleClose(false)}
-          //     />
-          //   </HtmlOverlayItem>
-          // </HtmlOverlay>
+        {
+           showPopup && (
+          <HTMLOverlay>
+            <HTMLOverlayItem coordinates={coordinates}>
+              <Popover
+                content={
+                    <InfoWindowContent
+                      mode={infoWindowMode}
+                      coordinates={coordinates}
+                      token={MAPBOX_API_KEY}
+                      feature={featureData}
+                      sysId={sysId}
+                      featureIdx={featureIdx}
+                      setformDrawerVisible={setformDrawerVisible}
+                      drawerVisibility={viewMedia}
+                      setImagesDrawer={setViewMedia}
+                      videoToShow={videoToShow}
+                      setVideoToShow={setVideoToShow}
+                      show={saveButtonShow}
+                      setShowForm={setShowForm}
+                      cancelDrawing={cancelDrawing}
+                      togglePopup={togglePopup}
+                      layerId={featureLayer}
+                      missionLayer={missionLayer}
+                      setMissionLayer={setMissionLayer}
+                      AllLayers={AllLayers}
+                      flag={flag}
+                      setFlag={setFlag}
+                      setShouldAttributeTableReload={
+                        setShouldAttributeTableReload
+                      }
+                      shouldAttributeTableReload={shouldAttributeTableReload}
+                      canDraw={perms.canCreateVectorLayer}
+                      isBaseMap={props.isBaseMaps}
+                      isPublic={false}
+                      setThumbnail={setThumbnail}
+                    />
+                }
+                title={
+                  <>
+                    <Title level={5} style={{ float: "left" }}>
+                      {layerName}
+                    </Title>
+                    <a
+                      style={{
+                        float: "right",
+                      }}
+                      onClick={() => handleClose(false)}
+                    >
+                      X
+                    </a>
+                  </>
+                }
+                trigger="click"
+                open={showPopup}
+                style={{ position: "relative" }}
+                onOpenChange={() => handleClose(false)}
+              />
+            </HTMLOverlayItem>
+          </HTMLOverlay>
         )}
       </DeckGL>
 
