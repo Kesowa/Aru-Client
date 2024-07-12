@@ -1740,7 +1740,6 @@ const CreateBaseLayer = (props) => {
           layerOptions={layerOptions}
           uiElement={uiElement}
           onScroll={onScroll}
-          layerOptions={layerOptions}
           current2={current2}
           showAddMissions={showAddMissions}
           setShowAddMissions={setShowAddMissions}

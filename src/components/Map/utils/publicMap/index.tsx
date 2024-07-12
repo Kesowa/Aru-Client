@@ -42,7 +42,7 @@ import {
   PathLayer,
 } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-import { HTMLOverlayItem, HTMLOverlay } from "../shared/HTMLOverlay";
+import { HTMLOverlayItem, HTMLOverlay } from "src/components/shared/HTMLOverlay";
 import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
   DrawPolygonMode,

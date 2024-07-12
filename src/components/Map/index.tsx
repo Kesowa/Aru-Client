@@ -346,7 +346,7 @@ function BaseMap(props) {
       label: "Elevation",
     });
 
-    if (layer.type == "Raster" && layer.raster.name == "CESIUM_3D")
+    if (layer.type == "Raster" && layer.raster == "CESIUM_3D")
       items.push({
         key: "16",
         label: layer._isMeshSource ? "Remove Mesh" : "Add Mesh",
@@ -3142,7 +3142,7 @@ function BaseMap(props) {
     vector,
     raster,
     metadata,
-  }: Layer): [number, number, number, number] => {
+  }: Layer): Promise<[number, number, number, number]> => {
     if (type === "Vector") {
       const response = await fetch(STATIC_URL + layerpath);
       const data = await response.json();
@@ -3157,7 +3157,7 @@ function BaseMap(props) {
         });
       }
       return turf.bbox(turf.featureCollection(features)) as BBox;
-    } else if (["ORTHO", "DEM", "DTM", "NDVI"].includes(raster.name)) {
+    } else if (["ORTHO", "DEM", "DTM", "NDVI"].includes(raster)) {
       const metaDataURL = `${COG_URL}/cog/info?url=${TITILER_STATIC}${layerpath}`;
       const response = await fetch(metaDataURL, {
         method: "GET",
@@ -3169,7 +3169,7 @@ function BaseMap(props) {
         metadata["bounds"][2],
         metadata["bounds"][3],
       ] as BBox;
-    } else if (raster.name == "CESIUM_3D") {
+    } else if (raster == "CESIUM_3D") {
       const res = await http.get<Tileset>(STATIC_URL + metadata);
       const tileset = res.data;
       const bounds_rad = [
@@ -3227,11 +3227,7 @@ function BaseMap(props) {
       if (layer._isChecked) {
         // fetch bounds is they havent already been fetched
         if (!layer._metadata?.bounds) {
-          const bounds = await fetchLayerBounds(
-            layer.type,
-            layer.layerpath,
-            layer.flaggedFeatures
-          );
+          const bounds = await fetchLayerBounds(layer);
           layer._metadata = { ...layer._metadata, bounds };
         }
 
@@ -3798,7 +3794,7 @@ function BaseMap(props) {
   const handleMeshSourceOption = (id: string) => {
     SetAllLayers((prev) =>
       prev.map((layer) => {
-        if (layer.type == "Raster" && layer.raster.name == "CESIUM_3D") {
+        if (layer.type == "Raster" && layer.raster == "CESIUM_3D") {
           if (layer._id == id) {
             layer._isMeshSource = !layer._isMeshSource;
           } else {
@@ -5306,7 +5302,7 @@ function BaseMap(props) {
       }
       const rasterSettings =
         layer.type === "Raster" ? defaultRasterSettings[layer.raster] : {};
-      fetchLayerBounds(layer.type, layer.layerpath, layer.flaggedFeatures)
+      fetchLayerBounds(layer)
         .then((bounds) => {
           SetAllLayers((prev) => [
             ...prev,
