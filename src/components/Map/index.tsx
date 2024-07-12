@@ -3,7 +3,6 @@ import React, {
   useEffect,
   useRef,
   useMemo,
-  useCallback,
   lazy,
   Suspense,
 } from "react";
@@ -11,8 +10,7 @@ import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
 import download from "downloadjs";
 import { WebMercatorViewport } from "viewport-mercator-project";
-import { MaskExtension } from "@deck.gl/extensions/typed";
-import { readPixelsToArray } from "@luma.gl/webgl";
+import { MaskExtension } from "@deck.gl/extensions";
 import {
   Row,
   Col,
@@ -41,12 +39,12 @@ import {
   Select,
   Checkbox,
   Progress,
-  Popover,
   Alert,
   Result,
   notification,
   MenuProps,
   Space,
+  Popover
 } from "antd";
 import {
   UploadOutlined,
@@ -87,10 +85,10 @@ import PolygonIcon from "../../static/polygon.svg";
 import DeckGL from "@deck.gl/react";
 import { FlyToInterpolator } from "deck.gl";
 import { BitmapLayer, IconLayer, PathLayer } from "@deck.gl/layers";
-import { SolidPolygonLayer } from "@deck.gl/layers/typed";
+import { SolidPolygonLayer } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-import { HtmlOverlayItem, HtmlOverlay } from "@nebula.gl/overlays";
-import { EditableGeoJsonLayer } from "@nebula.gl/layers";
+import { HTMLOverlayItem, HTMLOverlay } from "../shared/HTMLOverlay";
+import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
   DrawPolygonMode,
   CompositeMode,
@@ -99,7 +97,7 @@ import {
   DrawLineStringMode,
   DrawPointMode,
   GeoJsonEditMode,
-} from "nebula.gl";
+} from "@deck.gl-community/editable-layers";
 import { StaticMap } from "react-map-gl";
 import MapAttributes from "./utils/mapAttributes";
 import apis from "../../services/apis";
@@ -138,7 +136,6 @@ import {
 import { ILayersToTree } from "./treeRender";
 import { BBox, Feature, mergeBoundingBoxes } from "src/types/geojson";
 import { invertColor } from "./colorUtils";
-
 import { featureType, featureTypes, vectorProps } from "src/static/vectorprops";
 import { defaultRasterSettings, rasterProps } from "src/static/rasterprops";
 import {
@@ -146,7 +143,7 @@ import {
   getEditLayerTypeOptions,
   options,
 } from "./utils/propUtils";
-
+import Tileset from "src/types/cesium_tileset";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -348,6 +345,12 @@ function BaseMap(props) {
       key: "15",
       label: "Elevation",
     });
+
+    if (layer.type == "Raster" && layer.raster.name == "CESIUM_3D")
+      items.push({
+        key: "16",
+        label: layer._isMeshSource ? "Remove Mesh" : "Add Mesh",
+      });
 
     return items;
   };
@@ -641,9 +644,9 @@ function BaseMap(props) {
       if (navigator.geolocation) {
         navigator.permissions
           .query({ name: "geolocation" })
-          .then(function (result: any) {
+          .then(function(result: any) {
             if (result.state === "granted") {
-              navigator.geolocation.getCurrentPosition(function (pos: any) {
+              navigator.geolocation.getCurrentPosition(function(pos: any) {
                 const crd = pos.coords;
                 // console.log("Your current position is:");
                 // console.log(`Latitude : ${crd.latitude}`);
@@ -663,7 +666,7 @@ function BaseMap(props) {
               });
             } else if (result.state === "prompt") {
               navigator.geolocation.getCurrentPosition(
-                function (pos: any) {
+                function(pos: any) {
                   const crd = pos.coords;
                   // console.log("Your current position is:");
                   // console.log(`Latitude : ${crd.latitude}`);
@@ -681,7 +684,7 @@ function BaseMap(props) {
                     transitionInterpolator: new FlyToInterpolator(),
                   });
                 },
-                function (err) {
+                function(err) {
                   console.log(`Location fetch error: \n ${err}`);
                 },
                 {
@@ -695,7 +698,7 @@ function BaseMap(props) {
                 "Please allow location access from your browser for best experience of ARU!"
               );
             }
-            result.onChange = function () {
+            result.onChange = function() {
               console.log(result.state);
             };
           });
@@ -757,36 +760,36 @@ function BaseMap(props) {
     });
   }, [polygon, isMaskLayerVisible]);
 
-  const handleHover = useCallback(
-    ({ x, y, allLayers, element, bitmap, sourceLayer, settings }) => {
-      try {
-        const layerType = allLayers[element]?.type;
+  // const handleHover = useCallback(
+  //   ({ x, y, allLayers, element, bitmap, sourceLayer, settings }) => {
+  //     try {
+  //       const layerType = allLayers[element]?.type;
 
-        if (bitmap && layerType === "DEM" && isElevationEnabledRef.current) {
-          const pixelColor = readPixelsToArray(sourceLayer.props.image, {
-            sourceX: bitmap.pixel[0],
-            sourceY: bitmap.pixel[1],
-            sourceWidth: 1,
-            sourceHeight: 1,
-          });
-          const [r, g, b, a] = pixelColor;
-          const scalarValue = pixelColor[0] / 255.0;
+  //       if (bitmap && layerType === "DEM" && isElevationEnabledRef.current) {
+  //         const pixelColor = readPixelsToArray(sourceLayer.props.image, {
+  //           sourceX: bitmap.pixel[0],
+  //           sourceY: bitmap.pixel[1],
+  //           sourceWidth: 1,
+  //           sourceHeight: 1,
+  //         });
+  //         const [r, g, b, a] = pixelColor;
+  //         const scalarValue = pixelColor[0] / 255.0;
 
-          const elementSettings = settings || allLayers[element]?.settings;
-          const minp = elementSettings?.minp;
-          const maxp = elementSettings?.maxp;
-          const elevation = minp + (maxp - minp) * scalarValue;
+  //         const elementSettings = settings || allLayers[element]?.settings;
+  //         const minp = elementSettings?.minp;
+  //         const maxp = elementSettings?.maxp;
+  //         const elevation = minp + (maxp - minp) * scalarValue;
 
-          setHoverInfo({ r, g, b, x, y, elevation });
-        } else {
-          setHoverInfo(null);
-        }
-      } catch (error) {
-        console.error("Try with the dem layer instead", error);
-      }
-    },
-    [isElevationEnabled]
-  );
+  //         setHoverInfo({ r, g, b, x, y, elevation });
+  //       } else {
+  //         setHoverInfo(null);
+  //       }
+  //     } catch (error) {
+  //       console.error("Try with the dem layer instead", error);
+  //     }
+  //   },
+  //   [isElevationEnabled]
+  // );
 
   const osm = [
     new TileLayer({
@@ -822,22 +825,22 @@ function BaseMap(props) {
             opacity: opcity,
           }),
           showBorder &&
-            new PathLayer({
-              id: `${props.id}-border`,
-              visible: props.visible,
-              data: [
-                [
-                  [west, north],
-                  [west, south],
-                  [east, south],
-                  [east, north],
-                  [west, north],
-                ],
+          new PathLayer({
+            id: `${props.id}-border`,
+            visible: props.visible,
+            data: [
+              [
+                [west, north],
+                [west, south],
+                [east, south],
+                [east, north],
+                [west, north],
               ],
-              getPath: (d) => d,
-              getColor: [255, 0, 0],
-              widthMinPixels: 4,
-            }),
+            ],
+            getPath: (d) => d,
+            getColor: [255, 0, 0],
+            widthMinPixels: 4,
+          }),
         ];
       },
     }),
@@ -854,6 +857,7 @@ function BaseMap(props) {
     },
   };
   const [showPopup, togglePopup] = useState(false);
+  useEffect(() => console.log("SHOW_POPUP: ", showPopup), [showPopup]);
   const [featureData, setFeatureData] = useState<any>([]);
   const [sysId, setSysId] = useState("");
   const [coordinates, setCoordinates] = useState([]);
@@ -1591,7 +1595,7 @@ function BaseMap(props) {
 
   function fetchJSON(file: any) {
     return fetch(file)
-      .then(function (res) {
+      .then(function(res) {
         return res.json();
       })
       .catch((err) => console.log(err));
@@ -2026,6 +2030,7 @@ function BaseMap(props) {
   // };
 
   function handleClose(status: boolean) {
+    console.log("im in the handlecloe function ");
     togglePopup(status);
   }
 
@@ -3130,12 +3135,14 @@ function BaseMap(props) {
   //   return ordering.reverse();
   // };
 
-  const fetchLayerBounds = async (
-    type: string,
-    layerpath: string,
-    flaggedFeatures?: number[]
-  ) => {
-    let bounds: BBox;
+  const fetchLayerBounds = async ({
+    type,
+    layerpath,
+    flaggedFeatures,
+    vector,
+    raster,
+    metadata,
+  }: Layer): [number, number, number, number] => {
     if (type === "Vector") {
       const response = await fetch(STATIC_URL + layerpath);
       const data = await response.json();
@@ -3149,21 +3156,32 @@ function BaseMap(props) {
           }
         });
       }
-      bounds = turf.bbox(turf.featureCollection(features)) as BBox;
-    } else {
+      return turf.bbox(turf.featureCollection(features)) as BBox;
+    } else if (["ORTHO", "DEM", "DTM", "NDVI"].includes(raster.name)) {
       const metaDataURL = `${COG_URL}/cog/info?url=${TITILER_STATIC}${layerpath}`;
       const response = await fetch(metaDataURL, {
         method: "GET",
       });
       const metadata = await response.json();
-      bounds = [
+      return [
         metadata["bounds"][0],
         metadata["bounds"][1],
         metadata["bounds"][2],
         metadata["bounds"][3],
       ] as BBox;
+    } else if (raster.name == "CESIUM_3D") {
+      const res = await http.get<Tileset>(STATIC_URL + metadata);
+      const tileset = res.data;
+      const bounds_rad = [
+        tileset.properties.Longitude.minimum,
+        tileset.properties.Latitude.minimum,
+        tileset.properties.Longitude.maximum,
+        tileset.properties.Latitude.maximum
+      ];
+      return bounds_rad.map(coord => coord * 180 / Math.PI) as [number, number, number, number];
     }
-    return bounds;
+    // Implementation for Cesium_3D pending
+    return [0, 0, 0, 0];
   };
 
   const onCheck = async (checkedKeysValue: any, e) => {
@@ -3317,12 +3335,12 @@ function BaseMap(props) {
         version="1.1"
         id="Smoke"
         xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
         width="68"
         height="68"
         viewBox="64 64 896 896"
         enable-background="new 0 0 256 256"
-        xml:space="preserve"
+        xmlSpace="preserve"
         style={{ padding: "0.5px" }}
       >
         <path
@@ -3777,6 +3795,21 @@ function BaseMap(props) {
     );
   };
 
+  const handleMeshSourceOption = (id: string) => {
+    SetAllLayers((prev) =>
+      prev.map((layer) => {
+        if (layer.type == "Raster" && layer.raster.name == "CESIUM_3D") {
+          if (layer._id == id) {
+            layer._isMeshSource = !layer._isMeshSource;
+          } else {
+            layer._isMeshSource = false;
+          }
+        }
+        return layer;
+      })
+    );
+  };
+
   const toggleElevation = () => {
     setIsElevationEnabled((prevValue) => !prevValue);
     console.log(
@@ -4197,6 +4230,9 @@ function BaseMap(props) {
         case "15":
           toggleElevation();
           break;
+        case "16":
+          handleMeshSourceOption(layer._id);
+          break;
         default:
           break;
       }
@@ -4235,8 +4271,8 @@ function BaseMap(props) {
                       ? "139px"
                       : "160px"
                     : layer.layerGroupId
-                    ? "119px"
-                    : "140px",
+                      ? "119px"
+                      : "140px",
               }}
               ellipsis={true}
               onClick={() => {
@@ -6844,7 +6880,7 @@ function BaseMap(props) {
           status="500"
           title="Oops! You have reached your limit of creating layers!"
           subTitle="Please contact your admin."
-          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
+        //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
@@ -6934,14 +6970,19 @@ function BaseMap(props) {
             }
           );
         }}
-        onDrag={() => {}}
+        onDrag={() => { }}
         onClick={(info, event) => {
           setShowDrawingTools(false);
           if (event.rightButton) {
+            const layerIndex = AllLayers.findIndex(
+              (layer) => info.layer?.id === layer._id
+            );
+            if (layerIndex !== -1) {
+              setSelectedLayerId(AllLayers[layerIndex]._id);
+              setColorChangeFeatureData(info);
+              setShowColorChangeForm(true);
+            }
             if (!info.layer) {
-              // setMode({
-              //   mode: ViewMode,
-              // });
               setToolSelected("");
               setShowDrawingTools(false);
               settoolCoordinates([
@@ -6951,10 +6992,27 @@ function BaseMap(props) {
               setShowDrawingTools(true);
               drawingMenuRef.current.click();
             }
+          } else if (info.layer) {
+            const layer = AllLayers.find((layer) => layer.type === 'Vector' && info.layer?.id === layer._id);
+            if (layer) {
+              InfoWindow(
+                info.index,
+                info.coordinate,
+                layer.name,
+                "PolygonView",
+                info.object,
+                false,
+                layer._id,
+                info.object.properties.sys_id,
+                "Vector"
+              );
+              setSelectedLayerLabel(layer.layerLabel ? layer.layerLabel : "No label selected");
+              setSelectedLayerPopupLabel(layer.layerPopupLabel ? layer.layerPopupLabel : "No label selected");
           } else {
             setShowDrawingTools(false);
           }
-        }}
+        }
+      }}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         {hoverInfo && (
@@ -7017,12 +7075,12 @@ function BaseMap(props) {
           />
         )}
 
-        {showPopup && (
-          <HtmlOverlay>
-            <HtmlOverlayItem coordinates={coordinates}>
+        {
+           showPopup && (
+          <HTMLOverlay>
+            <HTMLOverlayItem coordinates={coordinates}>
               <Popover
                 content={
-                  <>
                     <InfoWindowContent
                       mode={infoWindowMode}
                       coordinates={coordinates}
@@ -7054,7 +7112,6 @@ function BaseMap(props) {
                       isPublic={false}
                       setThumbnail={setThumbnail}
                     />
-                  </>
                 }
                 title={
                   <>
@@ -7076,8 +7133,8 @@ function BaseMap(props) {
                 style={{ position: "relative" }}
                 onOpenChange={() => handleClose(false)}
               />
-            </HtmlOverlayItem>
-          </HtmlOverlay>
+            </HTMLOverlayItem>
+          </HTMLOverlay>
         )}
       </DeckGL>
 
@@ -7473,7 +7530,7 @@ function BaseMap(props) {
                 menu={{ items: filterMenu }}
                 //overlay={filterMenu}
                 disabled={chipsLoading}
-                //overlayStyle={{}}
+              //overlayStyle={{}}
               >
                 <Button style={{ float: "right" }} type="link">
                   Filter <DownOutlined />
@@ -7594,11 +7651,10 @@ function BaseMap(props) {
                   <Card
                     key="1"
                     onClick={() => setSelectedKey(1)}
-                    className={`create-mission-extended-card ${
-                      selectedKey == 1
-                        ? "create-mission-extended-card-selected"
-                        : ""
-                    }`}
+                    className={`create-mission-extended-card ${selectedKey == 1
+                      ? "create-mission-extended-card-selected"
+                      : ""
+                      }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -7620,11 +7676,10 @@ function BaseMap(props) {
                   <Card
                     key="2"
                     onClick={() => setSelectedKey(2)}
-                    className={`create-mission-extended-card ${
-                      selectedKey == 2
-                        ? "create-mission-extended-card-selected"
-                        : ""
-                    }`}
+                    className={`create-mission-extended-card ${selectedKey == 2
+                      ? "create-mission-extended-card-selected"
+                      : ""
+                      }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -8295,7 +8350,7 @@ function BaseMap(props) {
         <Modal
           title="Edit Group"
           open={visibleEditModal}
-          onOk={() => {}}
+          onOk={() => { }}
           onCancel={() => {
             setVisibleEditModal(false);
           }}

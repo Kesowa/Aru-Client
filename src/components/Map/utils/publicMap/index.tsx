@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { v4 as uuid } from "uuid";
 import KesowaNewLogo from "../../../../static/kesowa-black.png";
-import InfoWindowContent from "../infoWindow";
 import { DataFilterExtension } from "@deck.gl/extensions";
 import * as turf from "@turf/turf";
 import {
@@ -19,7 +18,6 @@ import {
   Input,
   Select,
   Space,
-  Popover,
   MenuProps,
 } from "antd";
 import {
@@ -44,8 +42,8 @@ import {
   PathLayer,
 } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-import { HtmlOverlayItem, HtmlOverlay } from "@nebula.gl/overlays";
-import { EditableGeoJsonLayer } from "@nebula.gl/layers";
+import { HTMLOverlayItem, HTMLOverlay } from "../shared/HTMLOverlay";
+import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
   DrawPolygonMode,
   CompositeMode,
@@ -54,7 +52,7 @@ import {
   DrawLineStringMode,
   DrawPointMode,
   GeoJsonEditMode,
-} from "nebula.gl";
+} from "@deck.gl-community/editable-layers";
 import { StaticMap } from "react-map-gl";
 
 import apis from "../../../../services/apis";
@@ -485,7 +483,9 @@ function PublicMap(props) {
     setLayerName(layername);
     setInfoWindowMode(mode);
     setFeatureLayer(id);
+    console.log("togglePopup:", showPopup);
     togglePopup(true);
+    console.log("togglePopup:", showPopup);
     setSaveButtonShow(show);
   }
 
@@ -972,6 +972,7 @@ function PublicMap(props) {
       editMode: null,
       isCompleted: false,
     });
+    console.log("togglePopup:", showPopup);
     togglePopup(false);
     setShowForm(false);
   };
@@ -2121,9 +2122,10 @@ function PublicMap(props) {
                 />
               )}
 
-              {showPopup && (
-                <HtmlOverlay>
-                  <HtmlOverlayItem coordinates={coordinates}>
+              { showPopup &&
+                (
+                <HTMLOverlay>
+                 <HTMLOverlayItem coordinates={coordinates} viewState={setViewport}>
                     <Popover
                       content={
                         <>
@@ -2166,8 +2168,8 @@ function PublicMap(props) {
                       style={{ position: "relative" }}
                       onVisibleChange={() => handleClose(false)}
                     />
-                  </HtmlOverlayItem>
-                </HtmlOverlay>
+                  </HTMLOverlayItem>
+                </HTMLOverlay>
               )}
             </DeckGL>
 

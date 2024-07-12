@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Typography, Spin, Select, Switch, Space } from "antd";
-import ReactJson from "react-json-view";
+import ReactJson from "@uiw/react-json-view";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
@@ -366,7 +366,7 @@ const MapAttributes: React.FC<Props> = (props) => {
                 }}
               >
                 <ReactJson
-                  src={state.rasterMetaData || {}}
+                  value={state.rasterMetaData || {}}
                   name={false}
                   collapsed={true}
                   displayDataTypes={false}
