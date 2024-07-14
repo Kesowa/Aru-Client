@@ -88,7 +88,7 @@ import FourOFour from "src/components/shared/Error/FourOFour";
 import { AxiosResponse } from "axios";
 import { IMission } from "src/types/mission";
 import { ILayer } from "src/types/layer";
-import { BBox, mergeBoundingBoxes } from "src/types/geojson";
+import { BBox, mergeBoundingBoxes, GeoJson } from "src/types/geojson";
 import { Layer, ILayerToDeckLayer } from "../../layerRender";
 import { ILayersToTree } from "../../treeRender";
 import { WebMercatorViewport } from "viewport-mercator-project";
@@ -244,7 +244,12 @@ function PublicMap(props) {
   const [showPopup, togglePopup] = useState(false);
   // const [searching, SetSearching] = useState(false);
   // const [searchValue, setSearchValue] = useState("");
-  const [fuse, setFuse] = useState<Fuse<any> | null>(null);
+  const [fuse, setFuse] = useState<
+    {
+      layerId: string;
+      searchIndex: Fuse<any>;
+    }[]
+  >([]);
   const [featureData, setFeatureData] = useState<any>([]);
   const [sysId, setSysId] = useState("");
   const [coordinates, setCoordinates] = useState([]);
@@ -542,6 +547,10 @@ function PublicMap(props) {
     props.loading(true);
     getAllLayers();
   }, []);
+
+  useEffect(() => {
+    getSearchIndexes();
+  }, [AllLayers]);
 
   //---------------Fetch all layers in mission----------------------------------------
 
@@ -1060,6 +1069,32 @@ function PublicMap(props) {
   //   }
   // }, [searchValue]);
 
+  const getSearchIndexes = async () => {
+    const searchIndexes: {
+      layerId: string;
+      searchIndex: Fuse<any>;
+    }[] = [];
+
+    for (const layer of AllLayers) {
+      const dataResponse = await fetch(STATIC_URL + layer.layerpath);
+      const data = (await dataResponse.json()) as GeoJson;
+      const searchIndexResponse = await fetch(
+        STATIC_URL + String(layer.metadata?.searchIndexPath)
+      );
+      const searchIndex = await searchIndexResponse.json();
+      searchIndexes.push({
+        layerId: layer._id,
+        searchIndex: new Fuse(
+          data.features,
+          { threshold: 0 },
+          Fuse.parseIndex<any>(searchIndex)
+        ),
+      });
+    }
+
+    setFuse(searchIndexes);
+  };
+
   // MAP RENDER
   const renderMap = () => {
     switch (errorState) {
@@ -1103,10 +1138,7 @@ function PublicMap(props) {
 
                 // Tree Menu Layers
                 layers.push(
-                  useMemo(
-                    () => ILayerToDeckLayer(AllLayers, setFuse),
-                    [AllLayers]
-                  )
+                  useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers])
                 );
 
                 return layers;
@@ -1234,10 +1266,20 @@ function PublicMap(props) {
                     }}
                     onSearch={(e) => {
                       const searchValue = e;
-                      if (searchValue && fuse) {
-                        const searchResult = fuse.search(searchValue)[0];
+                      for (const f of fuse) {
+                        const searchResult =
+                          f.searchIndex.search(searchValue)[0];
                         if (searchResult) {
-                          const centerPoint = turf.centroid(searchResult);
+                          // check the layer sothat feature is visible on map
+                          SetAllLayers((prev) =>
+                            prev.map((layer) => {
+                              if (layer._id === f.layerId)
+                                layer._isChecked = true;
+                              return layer;
+                            })
+                          );
+                          // bring the feature to focus
+                          const centerPoint = turf.centroid(searchResult.item);
                           setViewport({
                             longitude: centerPoint.geometry.coordinates[0],
                             latitude: centerPoint.geometry.coordinates[1],
@@ -1249,13 +1291,11 @@ function PublicMap(props) {
                             transitionDuration: 1000,
                             transitionInterpolator: new FlyToInterpolator(),
                           });
-                        } else {
-                          message.warning("No match found!");
+                          message.success("Feature found!");
+                          return;
                         }
-                      } else {
-                        message.error("Couldn't search!");
-                        console.log("Search Index wasn't initialized!");
                       }
+                      message.warn("No match found!");
                     }}
                   />
                 </Col>

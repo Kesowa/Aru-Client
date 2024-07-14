@@ -17,7 +17,6 @@ import { ILayer } from "src/types/layer";
 import http from "src/services/httpCall";
 import { hexToRGB } from "./colorUtils";
 import { MASK_ID } from ".";
-import Fuse from "fuse.js";
 
 export type Layer = ILayer & {
   _isChecked?: boolean;
@@ -74,36 +73,7 @@ const getRasterDataUrl = (layer: Layer) => {
   }
 };
 
-const getGeojsonData = async (
-  layerpath: string,
-  searchIndexPath: string,
-  setFuse?: (f: Fuse<any> | null) => void
-) => {
-  const dataResponse = await fetch(STATIC_URL + layerpath);
-  const data = (await dataResponse.json()) as GeoJson;
-  if (setFuse && searchIndexPath) {
-    try {
-      const searchIndexResponse = await fetch(STATIC_URL + searchIndexPath);
-      const searchIndex = await searchIndexResponse.json();
-      setFuse(
-        new Fuse(
-          data.features,
-          { threshold: 0 },
-          Fuse.parseIndex<any>(searchIndex)
-        )
-      );
-    } catch (error) {
-      console.log(error);
-      console.log("Couldn't fetch search index");
-    }
-  }
-  return data;
-};
-
-export const ILayerToDeckLayer = (
-  layers: Layer[],
-  setFuse?: (f: Fuse<any> | null) => void
-) => {
+export const ILayerToDeckLayer = (layers: Layer[]) => {
   return layers
     .filter((layer) => layer._isChecked === true)
     .map((layer) => {
@@ -176,11 +146,7 @@ export const ILayerToDeckLayer = (
         if (layer.vector.type == "Point")
           return new GeoJsonLayer({
             id: layer._id,
-            data: getGeojsonData(
-              layer.layerpath,
-              layer.metadata?.searchIndexPath,
-              setFuse
-            ),
+            data: STATIC_URL + layer.layerpath,
             pickable: true,
             pointType: "icon",
             iconSizeMinPixels: 6,
@@ -285,11 +251,7 @@ export const ILayerToDeckLayer = (
         else
           return new GeoJsonLayer({
             id: layer._id,
-            data: getGeojsonData(
-              layer.layerpath,
-              layer.metadata?.searchIndexPath,
-              setFuse
-            ),
+            data: STATIC_URL + layer.layerpath,
             pickable: true,
             stroked: ["MultiPolygon", "Polygon"].includes(layer.vector.type),
             filled: ["MultiPolygon", "Polygon"].includes(layer.vector.type),
