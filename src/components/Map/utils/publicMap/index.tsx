@@ -451,7 +451,6 @@ function PublicMap(props) {
   const fetchLayerBounds = async (
     type: string,
     layerpath: string,
-    flaggedFeatures?: number[]
   ) => {
     let bounds: BBox;
     if (type === "Vector") {
@@ -549,7 +548,9 @@ function PublicMap(props) {
   }, []);
 
   useEffect(() => {
-    getSearchIndexes();
+    if (fuse.length !== AllLayers.length) {
+      getSearchIndexes();
+    }
   }, [AllLayers]);
 
   //---------------Fetch all layers in mission----------------------------------------
@@ -1279,16 +1280,20 @@ function PublicMap(props) {
                             })
                           );
                           // bring the feature to focus
-                          const centerPoint = turf.centroid(searchResult.item);
+                          const bounds = turf.bbox(
+                            turf.featureCollection([searchResult.item])
+                          ) as BBox;
+                          const { longitude, latitude, zoom } =
+                            calculateViewport(bounds);
                           setViewport({
-                            longitude: centerPoint.geometry.coordinates[0],
-                            latitude: centerPoint.geometry.coordinates[1],
-                            zoom: 15,
+                            longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+                            latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
+                            zoom,
                             pitch: 0,
                             minZoom: 0,
                             maxZoom: 22,
                             bearing: 0,
-                            transitionDuration: 1000,
+                            transitionDuration: 2000,
                             transitionInterpolator: new FlyToInterpolator(),
                           });
                           message.success("Feature found!");
