@@ -211,6 +211,7 @@ function UserGroupEditPage(props: any) {
                   <Transfer
                     dataSource={allPermissions.map(perm => ({key: perm, title: perm}))}
                     showSearch
+                    filterOption={(inputValue, { title }) => title.toLowerCase().includes(inputValue.toLowerCase())}
                     listStyle={{
                       width: "100%",
                       height: 400,
