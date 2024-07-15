@@ -19,7 +19,7 @@ export default function RenderSideBar(props: any) {
           theme="dark"
           mode="inline"
           className="demo-sidebard"
-          items={menuItems()}
+          items={menuItems}
         ></Menu>
       </Card>
     </div>

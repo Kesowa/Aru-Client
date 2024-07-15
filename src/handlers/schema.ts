@@ -3,6 +3,8 @@
  * Do not make direct changes to the file.
  */
 
+import { permissions } from "src/static/permissions";
+
 export interface paths {
   "/alert/upload-alert-image": {
     /** This should be a multipart form-data */
@@ -833,15 +835,7 @@ export interface components {
       email: string;
       password: string;
     };
-    IPermission: {
-      name: string;
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
-      /** Format: date-time */
-      createdAt: string;
-      /** Format: date-time */
-      updatedAt: string;
-    };
+    IPermission: permissions;
     IUserGroupPermissions: {
       permissions: components["schemas"]["IPermission"][];
       tenantId: components["schemas"]["MongoId"];

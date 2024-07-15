@@ -233,7 +233,7 @@ export const permissionGuardedOptions = [
 export const permissionsToSideBar = (
   permissions: components["schemas"]["IPermission"][]
 ) => {
-  const permissionNames = permissions.map((p) => p.name);
+  const permissionNames = permissions.map((p) => p);
   return permissionGuardedOptions
     .filter((p) => permissionNames.includes(p.permission))
     .map(({ link, icon, label }) => ({
