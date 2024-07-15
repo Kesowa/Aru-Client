@@ -854,7 +854,7 @@ export interface components {
       userGroupId: components["schemas"]["MongoId"];
       createdBy: components["schemas"]["MongoId"];
       updatedBy: components["schemas"]["MongoId"];
-      customPermissions: components["schemas"]["IUserGroupPermissions"][];
+      customPermissions: components["schemas"]["IPermission"][];
       _id: components["schemas"]["MongoId"];
       name: string;
       phoneNo: string;

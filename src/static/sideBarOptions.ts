@@ -256,8 +256,7 @@ export const getSideBar = ({
     case "super-admin":
       return superAdminOptions;
     default: {
-      const userGroup = customPermissions[0];
-      return permissionsToSideBar(userGroup.permissions);
+      return permissionsToSideBar(customPermissions);
     }
   }
 };

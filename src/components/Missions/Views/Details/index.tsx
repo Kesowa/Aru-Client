@@ -66,6 +66,7 @@ import ManageClients from "./Data/ManageClient";
 import { API_URL, PUBLIC_URL, STATIC_URL } from "src/constants";
 import Report_genration from "./Data/report_genration";
 import { IPlotReportError } from "src/types/report";
+import { permissions } from "src/static/permissions";
 
 const { Paragraph } = Typography;
 function MissionView(props) {
@@ -769,17 +770,7 @@ function MissionView(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_update"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-
-      console.log("Filtered Permissions:", permissions);
-
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.includes(permissions.MISSION_UPDATE)) {
         return (
           <Button
             onClick={() => {
@@ -831,14 +822,7 @@ function MissionView(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_update"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.includes(permissions.MISSION_UPDATE)) {
         return (
           <Button
             onClick={() => {
@@ -875,14 +859,7 @@ function MissionView(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_update"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.includes(permissions.MISSION_UPDATE)) {
         return (
           <Button
             onClick={() => {
@@ -946,14 +923,7 @@ function MissionView(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_update"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.includes(permissions.MISSION_UPDATE)) {
         return (
           <Button
             type="primary"

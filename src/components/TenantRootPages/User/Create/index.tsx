@@ -57,7 +57,6 @@ function UserCreatePage(props: any) {
     permissions: string[];
   }>();
   const [errorState, setErrorState] = useState("");
-  const history = useHistory();
   //avatar upload
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
@@ -112,7 +111,7 @@ function UserCreatePage(props: any) {
                   name: ele.name,
                   _id: ele._id,
                   isActive: ele.isActive,
-                  permissions: ele.permissions.map((p) => p.name),
+                  permissions: ele.permissions.map((p) => p),
                 };
               })
               .filter((ele) =>
@@ -265,7 +264,7 @@ function UserCreatePage(props: any) {
                       showSearch
                       placeholder="Select a user group"
                       filterOption={(input, option) =>
-                        option!.children
+                        option.children
                           .toLowerCase()
                           .indexOf(input.toLowerCase()) >= 0
                       }
