@@ -7,7 +7,7 @@ import "./index.less";
 import { login } from "./actions/authAction";
 import Login from "./components/Login";
 import LoginWrapper from "./components/shared/Wrappers/LoginWrapper";
-import Gmap from "./components/shared/Gmap";
+// import Gmap from "./components/shared/Gmap";
 import Socket from "./components/shared/Socket";
 import DashboardWrapper from "./components/shared/Wrappers/DashboardWrapper";
 
@@ -36,7 +36,6 @@ const App = (props) => {
   return (
     <React.Fragment>
       <Socket />
-      <Gmap>
         <Loader />
         <BrowserRouter>
           <Suspense
@@ -76,7 +75,6 @@ const App = (props) => {
             </Switch>
           </Suspense>
         </BrowserRouter>
-      </Gmap>
     </React.Fragment>
   );
 };
