@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { Button, Modal, message, Input, Form } from "antd";
-import ReactCursorPosition, { INTERACTIONS } from "react-cursor-position";
 import ThermalImage from "./thermalImage";
 import "./index.less";
 import { STATIC_URL } from "src/constants";
@@ -226,15 +225,11 @@ const ThermalImaging = (props) => {
       >
         {"filePath" in props.thermalPayload && (
           <div className="diff__modal">
-            <ReactCursorPosition
-              activationInteractionMouse={INTERACTIONS.HOVER}
-            >
-              <ThermalImage
-                filePath={props.thermalPayload?.filePath}
-                data={thermalData}
-                onPixelClick={handlePixelClick}
-              />
-            </ReactCursorPosition>
+            <ThermalImage
+              filePath={props.thermalPayload?.filePath}
+              data={thermalData}
+              onPixelClick={handlePixelClick}
+            />
             <div
               className="widget"
               style={{ marginRight: "10px", padding: "1rem" }}

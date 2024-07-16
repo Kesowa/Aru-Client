@@ -8,6 +8,7 @@ import {
   GatewayOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
+import { featureType, featureTypes } from "src/static/vectorprops";
 
 const { Text } = Typography;
 
@@ -128,17 +129,17 @@ type TreeData = [
   }
 ];
 
-function vectorIcon(type: GLayer["vector"]["type"], color: string) {
+function vectorIcon(type: featureTypes, color: string) {
   switch (type) {
-    case "Point":
+    case featureTypes.POINT:
       return <EnvironmentOutlined style={{ color: color }} />;
-    case "MultiLineString":
+    case featureTypes.MULTI_LINE_STRING:
       return <BranchesOutlined style={{ color: color }} />;
-    case "MultiPolygon":
+    case featureTypes.MULTI_POLYGON:
       return <GatewayOutlined style={{ color: color }} />;
-    case "air_pollution":
+    case featureTypes.AIR_POLLUTION:
       return <AirPollutionIcon color={color} />;
-    case "wind_direction":
+    case featureTypes.WIND_DIRECTION:
       return <WindDirectionIcon color={color} />;
   }
 }
@@ -156,7 +157,7 @@ function groupLayers(
         layer.type == "Raster" ? (
           <FileImageOutlined />
         ) : (
-          vectorIcon(layer.vector.type, layer.color)
+          vectorIcon(featureType[layer.vector], layer.color)
         ),
       key: layer._id,
       title: getTitleElement(layer),
@@ -199,7 +200,7 @@ function missionLayersMenu(renderRangePicker: () => JSX.Element) {
     {
       name: "Alert",
       id: "alert",
-      icon: vectorIcon("Point", "#d0021b"),
+      icon: vectorIcon(featureTypes.POINT, "#d0021b"),
       key: "alert",
       // title: titleElement("Alert", () => {}),
       title: (
@@ -212,7 +213,7 @@ function missionLayersMenu(renderRangePicker: () => JSX.Element) {
     {
       name: "VOD",
       id: "vod",
-      icon: vectorIcon("Point", "#d0021b"),
+      icon: vectorIcon(featureTypes.POINT, "#d0021b"),
       key: "vod",
       // title: titleElement("VOD", () => {}),
       title: (

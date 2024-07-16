@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { v4 as uuid } from "uuid";
 import KesowaNewLogo from "../../../../static/kesowa-black.png";
-import InfoWindowContent from "../infoWindow";
 import { DataFilterExtension } from "@deck.gl/extensions";
 import * as turf from "@turf/turf";
 import {
@@ -19,7 +18,6 @@ import {
   Input,
   Select,
   Space,
-  Popover,
   MenuProps,
 } from "antd";
 import {
@@ -44,8 +42,8 @@ import {
   PathLayer,
 } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-import { HtmlOverlayItem, HtmlOverlay } from "@nebula.gl/overlays";
-import { EditableGeoJsonLayer } from "@nebula.gl/layers";
+import { HTMLOverlayItem, HTMLOverlay } from "src/components/shared/HTMLOverlay";
+import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
   DrawPolygonMode,
   CompositeMode,
@@ -54,7 +52,7 @@ import {
   DrawLineStringMode,
   DrawPointMode,
   GeoJsonEditMode,
-} from "nebula.gl";
+} from "@deck.gl-community/editable-layers";
 import { StaticMap } from "react-map-gl";
 
 import apis from "../../../../services/apis";
@@ -84,6 +82,8 @@ import FourOFour from "src/components/shared/Error/FourOFour";
 import { AxiosResponse } from "axios";
 import { IMission } from "src/types/mission";
 import { ILayer } from "src/types/layer";
+import { featureType } from "src/static/vectorprops";
+import { rasterProps } from "src/static/rasterprops";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -274,9 +274,6 @@ function PublicMap(props) {
   const [mapMode, setMapMode] = useState("mapbox://styles/mapbox/streets-v8");
 
   const [bottomBarHeight, setBottomBarHeight] = useState("240px");
-
-  const [rasterProps, setRasterProps] = useState<any>([]);
-  const [vectorProps, setVectorProps] = useState<any>([]);
 
   const [tenantName, setTenantName] = useState("");
   const [mission, setMission] = useState<IMission>("");
@@ -486,7 +483,9 @@ function PublicMap(props) {
     setLayerName(layername);
     setInfoWindowMode(mode);
     setFeatureLayer(id);
+    console.log("togglePopup:", showPopup);
     togglePopup(true);
+    console.log("togglePopup:", showPopup);
     setSaveButtonShow(show);
   }
 
@@ -973,6 +972,7 @@ function PublicMap(props) {
       editMode: null,
       isCompleted: false,
     });
+    console.log("togglePopup:", showPopup);
     togglePopup(false);
     setShowForm(false);
   };
@@ -1150,7 +1150,7 @@ function PublicMap(props) {
           ),
           key: keyPrefix + "-" + layer._id,
           icon: generateIcon(
-            layer.vector.type,
+            featureType[layer.vector],
             layer.color === "multiColor" ? "#00000" : layer.color
           ),
           captureDate: layer.captureDate,
@@ -1387,9 +1387,13 @@ function PublicMap(props) {
         // -----to merge all rasters paths------------------
         l[data[1]["key"] + "-" + layer._id] = {
           layerPath: layer.layerdataArr,
-          type: layer.raster.name,
+          type: layer.raster,
           settings: {
-            ...layer.raster,
+            bidx: layer._metadata?.bidx || null,
+            bandExp: layer._metadata?.bandExp || null,
+            colorMap: layer._metadata?.colorMap || null,
+            resamplingMethod: layer._metadata?.resamplingMethod || null,
+            overlayId: layer._metadata?.overlayId || null,
           },
           name: layer.name,
           groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
@@ -1397,9 +1401,13 @@ function PublicMap(props) {
       } else {
         l[data[1]["key"] + "-" + layer._id] = {
           layerPath: layer.layerpath,
-          type: layer.raster.name,
+          type: layer.raster,
           settings: {
-            ...layer.raster,
+            bidx: layer._metadata?.bidx || null,
+            bandExp: layer._metadata?.bandExp || null,
+            colorMap: layer._metadata?.colorMap || null,
+            resamplingMethod: layer._metadata?.resamplingMethod || null,
+            overlayId: layer._metadata?.overlayId || null,
             minp: layer.minp,
             maxp: layer.maxp,
           },
@@ -1443,7 +1451,7 @@ function PublicMap(props) {
       const l = {};
       l[data[0]["key"] + "-" + layer._id] = {
         layerPath: layer.layerpath,
-        type: layer.vector.type,
+        type: featureType[layer.vector],
         name: layer.name,
         id: layer._id,
         T3DTranspose: false,
@@ -1482,7 +1490,7 @@ function PublicMap(props) {
     setTreeStructure(data);
     //--------check last ortho-----
     rasters.forEach((element) => {
-      if (element.raster.name === "ORTHO") {
+      if (element.raster === rasterProps.ORTHO) {
         const cl: any = [];
         cl.push(`2-${element._id}`);
         setCheckedKeys(cl);
@@ -1490,87 +1498,6 @@ function PublicMap(props) {
       }
     });
   };
-
-  const options: any = [
-    {
-      value: "raster",
-      title: "RASTER",
-      children: [],
-      selectable: false,
-    },
-    {
-      value: "vector",
-      title: "VECTOR",
-      selectable: false,
-      children: [
-        {
-          value: "MultiLineString",
-          title: "Line",
-          selectable: false,
-          children: [],
-        },
-        {
-          value: "MultiPolygon",
-          title: "Area",
-          children: [],
-          selectable: false,
-        },
-        {
-          value: "Point",
-          title: "Point",
-          children: [],
-          selectable: false,
-        },
-      ],
-    },
-  ];
-
-  if (rasterProps) {
-    options.map((option) => {
-      if (option.value == "raster") {
-        rasterProps.map((rasterProp) => {
-          option.children.push({
-            value: "0-" + rasterProp._id + "-" + rasterProp.name,
-            title: rasterProp.name,
-          });
-        });
-      }
-    });
-  }
-
-  if (vectorProps) {
-    vectorProps.map((vectorProp) => {
-      if (vectorProp.type == "MultiLineString") {
-        options[1].children[0].children.push({
-          title: vectorProp.name,
-          value: "1-0-" + vectorProp._id + "-" + vectorProp.name,
-        });
-      }
-      if (vectorProp.type == "MultiPolygon") {
-        options[1].children[1].children.push({
-          title: vectorProp.name,
-          value: "1-1-" + vectorProp._id + "-" + vectorProp.name,
-        });
-      }
-      if (vectorProp.type == "Point") {
-        options[1].children[2].children.push({
-          title: vectorProp.name,
-          value: "1-2-" + vectorProp._id + "-" + vectorProp.name,
-        });
-      }
-    });
-    options[1].children[0].children.sort(sortAlphabetically);
-    options[1].children[1].children.sort(sortAlphabetically);
-    options[1].children[2].children.sort(sortAlphabetically);
-  }
-
-  function sortAlphabetically(a, b) {
-    const x = a.title.toLowerCase();
-    const y = b.title.toLowerCase();
-    if (x < y) return -1;
-    if (x > y) return 1;
-    return 0;
-  }
 
   // TabPanes
 
@@ -1614,7 +1541,7 @@ function PublicMap(props) {
         const l = {};
         l[data[0]["key"] + "-" + layer._id] = {
           layerPath: layer.layerpath,
-          type: layer.vector.type,
+          type: featureType[layer.vector],
           name: layer.name,
           id: layer._id,
         };
@@ -1640,9 +1567,13 @@ function PublicMap(props) {
 
           l[data[1]["key"] + "-" + layer._id] = {
             layerPath: layer.layerdataArr,
-            type: layer.raster.name,
+            type: layer.raster,
             settings: {
-              ...layer.raster,
+              bidx: layer._metadata?.bidx || null,
+              bandExp: layer._metadata?.bandExp || null,
+              colorMap: layer._metadata?.colorMap || null,
+              resamplingMethod: layer._metadata?.resamplingMethod || null,
+              overlayId: layer._metadata?.overlayId || null,
             },
             name: layer.name,
             id: layer._id,
@@ -1650,9 +1581,13 @@ function PublicMap(props) {
         } else {
           l[data[1]["key"] + "-" + layer._id] = {
             layerPath: layer.layerpath,
-            type: layer.raster.name,
+            type: layer.raster,
             settings: {
-              ...layer.raster,
+              bidx: layer._metadata?.bidx || null,
+              bandExp: layer._metadata?.bandExp || null,
+              colorMap: layer._metadata?.colorMap || null,
+              resamplingMethod: layer._metadata?.resamplingMethod || null,
+              overlayId: layer._metadata?.overlayId || null,
               minp: layer.minp,
               maxp: layer.maxp,
             },
@@ -2187,9 +2122,10 @@ function PublicMap(props) {
                 />
               )}
 
-              {showPopup && (
-                <HtmlOverlay>
-                  <HtmlOverlayItem coordinates={coordinates}>
+              { showPopup &&
+                (
+                <HTMLOverlay>
+                 <HTMLOverlayItem coordinates={coordinates} viewState={setViewport}>
                     <Popover
                       content={
                         <>
@@ -2232,8 +2168,8 @@ function PublicMap(props) {
                       style={{ position: "relative" }}
                       onVisibleChange={() => handleClose(false)}
                     />
-                  </HtmlOverlayItem>
-                </HtmlOverlay>
+                  </HTMLOverlayItem>
+                </HTMLOverlay>
               )}
             </DeckGL>
 

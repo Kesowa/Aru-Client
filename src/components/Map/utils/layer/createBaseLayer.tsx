@@ -38,6 +38,8 @@ import TankIcon from "../../../../static/TankIcon.png";
 import ValveIcon from "../../../../static/ValveIcon.png";
 import DotIcon from "../../../../static/DotIcon.png";
 import { components } from "src/handlers/schema";
+import { featureType, vectorProps } from "src/static/vectorprops";
+import { rasterProps } from "src/static/rasterprops";
 const { Dragger } = Upload;
 const { Item } = Form;
 const { Meta } = Card;
@@ -64,7 +66,9 @@ const CreateBaseLayer = (props) => {
   const [captureDate, setCaptureDate] = useState("");
   const [layerColor, setLayerColor] = useState("");
   const [layerType, setLayerType] = useState("");
-  const [layerTypeId, setLayerTypeId] = useState("");
+  const [layerProp, setLayerProp] = useState<vectorProps | rasterProps | null>(
+    null
+  );
   const [fileList, setFileList] = useState<unknown>([]);
   const [showColorPicker, setShowColorPicker] = useState(true);
   const [inheritColor, setInheritColor] = useState(false);
@@ -124,8 +128,9 @@ const CreateBaseLayer = (props) => {
         layerOptions.map((layer) => {
           if (layer._id == item) {
             layertype.add(layer.type);
-            if (layer.type == "Vector") layertype1.add(layer.vector.type);
-            else layertype2.add(layer.raster.name);
+            if (layer.type == "Vector")
+              layertype1.add(featureType[layer.vector]);
+            else layertype2.add(layer.raster);
           }
         });
       });
@@ -276,7 +281,7 @@ const CreateBaseLayer = (props) => {
     }
 
     if (!props.isUpdate) {
-      if (!layerType || !layerTypeId || !captureDate || !layerName) {
+      if (!layerType || !layerProp || !captureDate || !layerName) {
         message.error("Please fill all the required field");
         return;
       }
@@ -415,7 +420,7 @@ const CreateBaseLayer = (props) => {
             "inHeritOriginalColorFromFile",
             inheritColor.toString()
           );
-          fmData.append("vector", layerTypeId);
+          fmData.append("vector", String(layerProp));
           console.log(
             "Before call",
             fmData.get("name"),
@@ -459,7 +464,7 @@ const CreateBaseLayer = (props) => {
 
         if (layerType === "Raster") {
           // CREATE BASE LAYER BY RASTER UPLOAD
-          fmData.append("raster", layerTypeId);
+          fmData.append("raster", String(layerProp));
 
           const result = await http.post(
             `${apis.UPLOAD_RASTER_BASELAYER}/Raster`,
@@ -495,7 +500,7 @@ const CreateBaseLayer = (props) => {
       setFileList([]);
       setCaptureDate("");
       setLayerName("");
-      setLayerTypeId("");
+      setLayerProp(null);
       form.resetFields();
     }
   };
@@ -683,7 +688,7 @@ const CreateBaseLayer = (props) => {
           setSelectedLayers([]);
           setLayerColor("");
           setLayerType("");
-          setLayerTypeId("");
+          setLayerProp(null);
           setShowAddMissions(false);
           setMissionOptions([]);
           setUIElement([]);
@@ -696,7 +701,7 @@ const CreateBaseLayer = (props) => {
     } else {
       body = {
         name: layerName,
-        vectorTypeId: layerTypeId,
+        vectorType: layerProp,
         color: layerColor,
         pattr: primeAttributes,
         layers: responseArray,
@@ -730,7 +735,7 @@ const CreateBaseLayer = (props) => {
           setSelectedLayers([]);
           setLayerColor("");
           setLayerType("");
-          setLayerTypeId("");
+          setLayerProp(null);
           setShowAddMissions(false);
           setMissionOptions([]);
           setUIElement([]);
@@ -870,18 +875,15 @@ const CreateBaseLayer = (props) => {
     fileList,
   };
 
-  const changeLayerType = (value) => {
-    console.log(value);
-    if (value === undefined) {
-      setLayerTypeId("");
-    } else if (value[0] === "1") {
+  const changeLayerType = (value: string) => {
+    if (Object.values(vectorProps).includes(value as vectorProps)) {
       setShowColorPicker(true);
       setLayerType("Vector");
-      setLayerTypeId(value.substring(4, 28));
-    } else if (value[0] === "0") {
+      setLayerProp(value as vectorProps);
+    } else if (Object.values(rasterProps).includes(value as rasterProps)) {
       setShowColorPicker(false);
       setLayerType("Raster");
-      setLayerTypeId(value.substring(2, 26));
+      setLayerProp(value as rasterProps);
     }
   };
 
@@ -926,7 +928,7 @@ const CreateBaseLayer = (props) => {
                     setCaptureDate("");
                     setLayerName("");
                     setLayerType("");
-                    setLayerTypeId("");
+                    setLayerProp(null);
                     setCurrent1(0);
                   }}
                 >
@@ -993,7 +995,7 @@ const CreateBaseLayer = (props) => {
                     setCaptureDate("");
                     setLayerName("");
                     setLayerType("");
-                    setLayerTypeId("");
+                    setLayerProp(null);
                     setCurrent1(0);
                   }}
                 >
@@ -1121,7 +1123,7 @@ const CreateBaseLayer = (props) => {
                         setCaptureDate("");
                         setLayerName("");
                         setLayerType("");
-                        setLayerTypeId("");
+                        setLayerProp(null);
                         form.resetFields();
                       }}
                     >
@@ -1169,7 +1171,7 @@ const CreateBaseLayer = (props) => {
                       return;
                     }
                     if (layerType1 == "Vector") {
-                      if (layerTypeId == "") {
+                      if (!layerProp) {
                         message.warning("Please select a layer type!");
                         return;
                       }
@@ -1267,7 +1269,6 @@ const CreateBaseLayer = (props) => {
           layerColor={layerColor}
           setLayerColor={setLayerColor}
           onChangeInherit={onChangeInherit}
-          options={props.options}
         />
       ),
     },
@@ -1334,7 +1335,6 @@ const CreateBaseLayer = (props) => {
           uploadProps={uploadProps}
           uploading={uploading}
           progress={progress}
-          options={props.options}
         />
       ),
     },
@@ -1479,8 +1479,8 @@ const CreateBaseLayer = (props) => {
   }
 
   useEffect(
-    () => console.log(layerName, captureDate, layerType, layerTypeId, fileList),
-    [layerName, captureDate, layerType, layerTypeId, fileList]
+    () => console.log(layerName, captureDate, layerType, layerProp, fileList),
+    [layerName, captureDate, layerType, layerProp, fileList]
   );
 
   return (
@@ -1609,7 +1609,7 @@ const CreateBaseLayer = (props) => {
             setCaptureDate("");
             setLayerName("");
             setLayerType("");
-            setLayerTypeId("");
+            setLayerProp(null);
             setCurrent1(0);
             setSelectedAttr({});
             form.resetFields();
@@ -1706,7 +1706,7 @@ const CreateBaseLayer = (props) => {
             setCaptureDate("");
             setLayerName("");
             setLayerType("");
-            setLayerTypeId("");
+            setLayerProp(null);
             setSelectedAttr({});
             form.resetFields();
           } else message.warning("Cannot close window during ongoing process!");
@@ -1726,7 +1726,6 @@ const CreateBaseLayer = (props) => {
           layerColor={layerColor}
           setCaptureDate={setCaptureDate}
           changeLayerType={changeLayerType}
-          options={props.options}
           layerType1={layerType1}
           setLayerName={setLayerName}
           primeAttributes={primeAttributes}
@@ -1741,7 +1740,6 @@ const CreateBaseLayer = (props) => {
           layerOptions={layerOptions}
           uiElement={uiElement}
           onScroll={onScroll}
-          layerOptions={layerOptions}
           current2={current2}
           showAddMissions={showAddMissions}
           setShowAddMissions={setShowAddMissions}

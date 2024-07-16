@@ -57,15 +57,6 @@ class Var {
   }
 }
 
-class WindowVar extends Var {
-  constructor(key: string) {
-    super(key);
-    const val = window["config"][key];
-    if (val === undefined || val.length === 0) throw new EnvError(key, val);
-    this.val = val;
-  }
-}
-
 class EnvVar extends Var {
   constructor(key: string) {
     super(key);
@@ -95,21 +86,21 @@ class CastError extends Error {
 }
 
 export const MAPBOX_API_KEY = new EnvVar("VITE_MAPBOX_API_KEY").toString();
-export const COG_URL = new WindowVar("VITE_COG_URL").isUrl().toString();
-export const TITILER_STATIC = new WindowVar("VITE_TITILER_STATIC")
+export const COG_URL = new EnvVar("VITE_COG_URL").isUrl().toString();
+export const TITILER_STATIC = new EnvVar("VITE_TITILER_STATIC")
   .isUrl()
   .toString();
-export const LIVE_URL = new WindowVar("VITE_LIVE_URL").isUrl().toString();
-export const RTMP_URL = new WindowVar("VITE_RTMP_URL").isUrl().toString();
-export const PUBLIC_URL = new WindowVar("VITE_PUBLIC_URL").isUrl().toString();
-export const STATIC_URL = new WindowVar("VITE_STATIC_URL").isUrl().toString();
-export const API_URL = new WindowVar("VITE_API_URL").isUrl().toString();
+export const LIVE_URL = new EnvVar("VITE_LIVE_URL").isUrl().toString();
+export const RTMP_URL = new EnvVar("VITE_RTMP_URL").isUrl().toString();
+export const PUBLIC_URL = new EnvVar("VITE_PUBLIC_URL").isUrl().toString();
+export const STATIC_URL = new EnvVar("VITE_STATIC_URL").isUrl().toString();
+export const API_URL = new EnvVar("VITE_API_URL").isUrl().toString();
 
 export enum Mode {
   Prod = "production",
   Dev = "development",
 }
-export const ENV = new WindowVar("VITE_ENV").isEnum(Mode).toEnum<Mode>();
+export const ENV = new EnvVar("VITE_ENV").isEnum(Mode).toEnum<Mode>();
 export const SITE_KEY = new EnvVar("VITE_SITE_KEY").toString();
 export const SECRET_KEY = new EnvVar("VITE_SECRET_KEY").toString();
 export const VERSION = new EnvVar("VITE_VERSION").toString();
@@ -118,6 +109,6 @@ export enum Instance {
   ARU = "aru",
   NKDA = "nkda",
 }
-export const INSTANCE = new WindowVar("VITE_INSTANCE")
+export const INSTANCE = new EnvVar("VITE_INSTANCE")
   .isEnum(Instance)
   .toEnum<Instance>();
