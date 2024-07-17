@@ -1,23 +1,23 @@
-import React from "react";
-import ReactDOM from "react-dom";
 import "./index.less";
+import React from "react";
+import { createRoot } from "react-dom/client";
 import * as serviceWorker from "./serviceWorker";
 import { Provider } from "react-redux";
 import store from "./store";
 import { ENV, Mode } from "./constants";
 import App from "./App";
 if (ENV == Mode.Prod) {
-  console.log = () => {};
-  console.error = () => {};
+  console.log = () => { };
+  console.error = () => { };
 }
 
-ReactDOM.render(
-  <React.Fragment>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </React.Fragment>,
-  document.getElementById("root")
+const container = document.getElementById("root")!;
+const root = createRoot(container);
+
+root.render(
+  <Provider store={store}>
+    <App />
+  </Provider>
 );
 
 // If you want your app to work offline and load faster, you can change
