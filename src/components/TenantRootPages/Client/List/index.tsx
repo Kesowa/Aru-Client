@@ -25,6 +25,7 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
+import { PERMS } from "src/static/permissions";
 function UserListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
   const [tenantUserTableData, setTenantUserTableData] = useState([]);
@@ -113,14 +114,7 @@ function UserListPage(props: any) {
   //--------------render delete button based on user perms---------------------
   function renderDeleteBtn(record: any) {
     if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "delete_client"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.includes(PERMS.DELETE_CLIENT)) {
         return (
           <Popconfirm
             title="Are you sure to delete the client？"
@@ -191,14 +185,7 @@ function UserListPage(props: any) {
   //--------------render edit button based on user perms---------------------
   function renderEditBtn(record: any) {
     if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "edit_client"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.includes(PERMS.EDIT_CLIENT)) {
         return (
           <Button
             onClick={() => {
@@ -227,14 +214,7 @@ function UserListPage(props: any) {
   //-------------render create client button-----------------------------------
   function renderCreateClientButton() {
     if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "create_client"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.includes(PERMS.CREATE_CLIENT)) {
         return (
           <Link to="/dashboard/tenant/client/create" key="1">
             <Button key="1" type="primary" icon={<PlusCircleOutlined />}>

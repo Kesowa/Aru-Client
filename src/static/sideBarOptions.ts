@@ -1,5 +1,5 @@
 import { components } from "src/handlers/schema";
-import { permissions } from "./permissions";
+import { PERMS } from "./permissions";
 
 //++++++++++++++++++++++++++++++++ super admin ++++++++++++++++++++++++++++++++++++++
 export const superAdminOptions = [
@@ -169,61 +169,61 @@ export const tenantRootOptions = [
 
 export const permissionGuardedOptions = [
   {
-    permission: permissions.MISSION_CREATE,
+    permission: PERMS.MISSION_CREATE,
     link: "/dashboard/missions/create",
     icon: "PlusCircleOutlined",
     label: "Create mission",
   },
   {
-    permission: permissions.MISSION_LIST,
+    permission: PERMS.MISSION_LIST,
     link: "/dashboard/missions",
     icon: "BorderInnerOutlined",
     label: "Missions",
   },
   {
-    permission: permissions.DATA_PAGE,
+    permission: PERMS.DATA_PAGE,
     link: "/dashboard/data",
     icon: "DatabaseOutlined",
     label: "Data",
   },
   {
-    permission: permissions.ASSET_LIST,
+    permission: PERMS.ASSET_LIST,
     link: "/dashboard/assets",
     icon: "ClusterOutlined",
     label: "Assets",
   },
   {
-    permission: permissions.USER_LIST,
+    permission: PERMS.USER_LIST,
     link: "/dashboard/tenant/user/list",
     icon: "UserOutlined",
     label: "User list",
   },
   {
-    permission: permissions.DASHBOARD,
+    permission: PERMS.DASHBOARD,
     link: "/dashboard",
     icon: "LayoutOutlined",
     label: "Dashboard",
   },
   {
-    permission: permissions.CREATE_CLIENT,
+    permission: PERMS.CREATE_CLIENT,
     link: "/dashboard/tenant/client/create",
     icon: "UserAddOutlined",
     label: "Create Client",
   },
   {
-    permission: permissions.CLIENT_LIST,
+    permission: PERMS.CLIENT_LIST,
     link: "/dashboard/tenant/client/list",
     icon: "SolutionOutlined",
     label: "Client List",
   },
   {
-    permission: permissions.CLIENT_DATA,
+    permission: PERMS.CLIENT_DATA,
     link: "/dashboard/tenant/client/missions",
     icon: "SaveOutlined",
     label: "Client Data",
   },
   {
-    permission: permissions.USER_CREATE,
+    permission: PERMS.USER_CREATE,
     link: "/dashboard/tenant/user/create",
     icon: "UserAddOutlined",
     label: "Create User",

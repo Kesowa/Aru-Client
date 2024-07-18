@@ -16,12 +16,12 @@ import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import FourOhOne from "../../../shared/Error/FourOhOne";
 import InternalServerError from "../../../shared/Error/InternalServerError";
-import { permissions } from "src/static/permissions";
+import { PERMS } from "src/static/permissions";
 
 function UserGroupEditPage(props: any) {
   const [form] = Form.useForm();
-  const [allPermissions, setAllPermissions] = useState<permissions[]>([]);
-  const [selectedPermissions, setSelectedPermissions] = useState<permissions[]>([]);
+  const [allPermissions, setAllPermissions] = useState<PERMS[]>([]);
+  const [selectedPermissions, setSelectedPermissions] = useState<PERMS[]>([]);
   const [errorState, setErrorState] = useState("");
   const [groupName, setGroupName] = useState("");
   const history = useHistory();

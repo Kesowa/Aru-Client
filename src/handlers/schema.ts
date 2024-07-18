@@ -3,7 +3,7 @@
  * Do not make direct changes to the file.
  */
 
-import { permissions } from "src/static/permissions";
+import { PERMS } from "src/static/permissions";
 import { rasterProps } from "src/static/rasterprops";
 import { vectorProps } from "src/static/vectorprops";
 
@@ -471,7 +471,7 @@ export interface components {
       userGroupId: components["schemas"]["MongoId"];
       createdBy: components["schemas"]["MongoId"];
       updatedBy: components["schemas"]["MongoId"];
-      customPermissions: components["schemas"]["MongoId"][];
+      customPermissions: components["schemas"]["IPermission"][];
     };
     IFlight: {
       _id: components["schemas"]["MongoId"];
@@ -837,7 +837,7 @@ export interface components {
       email: string;
       password: string;
     };
-    IPermission: permissions;
+    IPermission: PERMS;
     IUserGroupPermissions: {
       permissions: components["schemas"]["IPermission"][];
       tenantId: components["schemas"]["MongoId"];

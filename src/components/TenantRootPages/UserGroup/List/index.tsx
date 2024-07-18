@@ -114,7 +114,7 @@ function UserGroupListPage(props: any) {
               name: ele.name,
               _id: ele._id,
               isActive: ele.isActive,
-              permissions: ele.permissions.map((e: any) => e),
+              permissions: ele.permissions,
             };
           });
           console.log(data);

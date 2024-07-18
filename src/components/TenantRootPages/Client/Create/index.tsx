@@ -36,7 +36,7 @@ import Expired from "../../restrictions/expiry";
 import moment from "moment";
 import { STATIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
-import { permissions } from "src/static/permissions";
+import { PERMS } from "src/static/permissions";
 
 function UserCreatePage(props: any) {
   const [form] = Form.useForm();
@@ -98,17 +98,10 @@ function UserCreatePage(props: any) {
           const data: components["schemas"]["IUserGroupPermissions"][] = result.data.data;
           setUserGroups(
             data
-              .map((ele) => {
-                return {
-                  name: ele.name,
-                  _id: ele._id,
-                  isActive: ele.isActive,
-                  permissions: ele.permissions.map((p) => p.name),
-                };
-              })
               .filter((ele) =>
-                ele.permissions.includes(permissions.CLIENT_MISSION_LIST)
+                ele.permissions.includes(PERMS.CLIENT_MISSION_LIST)
               )
+              .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }))
           );
         } else {
           switch (result.data.message) {

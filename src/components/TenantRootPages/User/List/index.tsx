@@ -33,6 +33,7 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
+import { PERMS } from "src/static/permissions";
 const { Title } = Typography;
 function UserListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
@@ -117,14 +118,8 @@ function UserListPage(props: any) {
   //--------------render delete button based on user perms---------------------
   function renderDeleteBtn(record: any) {
     if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "delete_user"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      // TODO: "delete_user" === "delete_client" ??
+      if (props.userDetails.customPermissions.includes(PERMS.DELETE_CLIENT)) {
         return (
           <Popconfirm
             title="Are you sure to delete the user"
@@ -195,14 +190,8 @@ function UserListPage(props: any) {
   //--------------render edit button based on user perms---------------------
   function renderEditBtn(record: any) {
     if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "edit_user"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      // TODO: "edit_user" === "edit_client" ?
+      if (props.userDetails.customPermissions.includes(PERMS.EDIT_CLIENT)) {
         return (
           <Button
             onClick={() => {

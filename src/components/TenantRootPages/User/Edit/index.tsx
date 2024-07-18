@@ -35,7 +35,7 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import moment from "moment";
 import { STATIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
-import { permissions } from "src/static/permissions";
+import { PERMS } from "src/static/permissions";
 
 function UserEditPage(props: any) {
   const [form] = Form.useForm();
@@ -106,17 +106,10 @@ function UserEditPage(props: any) {
         if (result.data.status) {
           const data: components["schemas"]["IUserGroupPermissions"][] = result.data.data;
           const groups = data
-            .map((ele) => {
-              return {
-                name: ele.name,
-                _id: ele._id,
-                isActive: ele.isActive,
-                permissions: ele.permissions.map((p) => p.name),
-              };
-            })
             .filter((ele) =>
-              ele.permissions.includes(permissions.CLIENT_MISSION_LIST)
-            );
+              ele.permissions.includes(PERMS.CLIENT_MISSION_LIST)
+            )
+            .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }));
 
           if (!props.user) {
             history.push("/dashboard/tenant/user/list");

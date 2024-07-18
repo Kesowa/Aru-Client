@@ -18,13 +18,13 @@ import FourOhOne from "../../../shared/Error/FourOhOne";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import CountLimit from "../../restrictions/restrictions";
 import Expired from "../../restrictions/expiry";
-import { permissions } from "src/static/permissions";
+import { PERMS } from "src/static/permissions";
 
 function UserGroupCreatePage(props: any) {
   const [form] = Form.useForm();
-  const [allPermissions, setAllPermissions] = useState<permissions[]>([]);
+  const [allPermissions, setAllPermissions] = useState<PERMS[]>([]);
   // const [selectedPermissionsIds, setSelectedPermissionsIds] = useState([]);
-  const [selectedPermissions, setSelectedPermissions] = useState<permissions[]>([]);
+  const [selectedPermissions, setSelectedPermissions] = useState<PERMS[]>([]);
   const [errorState, setErrorState] = useState("");
 
   const fetchAllPermissions = () => {

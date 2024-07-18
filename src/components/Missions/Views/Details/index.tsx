@@ -66,7 +66,7 @@ import ManageClients from "./Data/ManageClient";
 import { API_URL, PUBLIC_URL, STATIC_URL } from "src/constants";
 import Report_genration from "./Data/report_genration";
 import { IPlotReportError } from "src/types/report";
-import { permissions } from "src/static/permissions";
+import { PERMS } from "src/static/permissions";
 
 const { Paragraph } = Typography;
 function MissionView(props) {
@@ -770,7 +770,7 @@ function MissionView(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      if (props.userDetails.customPermissions.includes(permissions.MISSION_UPDATE)) {
+      if (props.userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
         return (
           <Button
             onClick={() => {
@@ -822,7 +822,7 @@ function MissionView(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      if (props.userDetails.customPermissions.includes(permissions.MISSION_UPDATE)) {
+      if (props.userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
         return (
           <Button
             onClick={() => {
@@ -859,7 +859,7 @@ function MissionView(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      if (props.userDetails.customPermissions.includes(permissions.MISSION_UPDATE)) {
+      if (props.userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
         return (
           <Button
             onClick={() => {
@@ -923,7 +923,7 @@ function MissionView(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      if (props.userDetails.customPermissions.includes(permissions.MISSION_UPDATE)) {
+      if (props.userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
         return (
           <Button
             type="primary"
