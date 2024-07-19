@@ -22,7 +22,7 @@ import { useEffect } from "react";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import { logout } from "../../../../../actions/authAction";
-import download from "downloadjs";
+import download from "src/services/download";
 import { connect } from "react-redux";
 import {
   getImageForCircle,
@@ -218,7 +218,7 @@ function Map(props) {
                         <a
                           key={`1.${item._id}`}
                           onClick={() =>
-                            download(`${STATIC_URL}${item.layerpath}`)
+                            download(STATIC_URL + item.layerpath, item.name + item.layerpath.split('.').pop())
                           }
                         >
                           <DownloadOutlined /> Download

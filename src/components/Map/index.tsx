@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
 import { DataFilterExtension } from "@deck.gl/extensions";
-import download from "downloadjs";
+import download from "src/services/download";
 import {
   Row,
   Col,
@@ -3100,7 +3100,7 @@ function BaseMap(props) {
                     <Menu.Item
                       key="3"
                       onClick={() => {
-                        download(STATIC_URL + layer.layerpath);
+                        download(STATIC_URL + layer.layerpath, layer.name + layer.layerpath.split('.').pop());
                       }}
                     >
                       Download
@@ -3511,7 +3511,7 @@ function BaseMap(props) {
                       key="5"
                       onClick={() => {
                         //window.open(API_URL + layer.layerpath);
-                        download(STATIC_URL + layer.layerpath);
+                        download(STATIC_URL + layer.layerpath, layer.name + layer.layerpath.split('.').pop());
                       }}
                     >
                       Download

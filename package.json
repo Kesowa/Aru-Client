@@ -43,7 +43,6 @@
     "classnames": "^2.2.6",
     "date-fns": "^2.21.3",
     "deck.gl": "^8.8.23",
-    "downloadjs": "^1.4.7",
     "env-cmd": "^10.1.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",

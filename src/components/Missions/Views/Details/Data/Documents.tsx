@@ -35,7 +35,7 @@ import Dragger from "antd/lib/upload/Dragger";
 import { useEffect } from "react";
 import io from "socket.io-client";
 import { useMemo } from "react";
-import download from "downloadjs";
+import download from "src/services/download";
 import { API_URL, STATIC_URL } from "src/constants";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
@@ -353,7 +353,7 @@ function Documents(props) {
                     bulkDownload("rawData");
                   } else {
                     //console.log(data.path)
-                    download(data.path);
+                    download(data.path, data.name);
                   }
                 });
               } else if (currentFolderId === "rawData") {
@@ -361,7 +361,7 @@ function Documents(props) {
               } else {
                 data.state.selectedFilesForAction.map((data) => {
                   //console.log(data.path)
-                  download(data.path);
+                  download(data.path, data.name);
                 });
               }
             } else if (data.state.selectedFilesForAction.length === 1) {

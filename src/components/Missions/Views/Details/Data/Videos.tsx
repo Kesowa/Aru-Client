@@ -535,6 +535,7 @@ function Videos(props) {
           link: VodData[0].videoPath,
           missionDetails: VodData[0].missionDetails,
           isSRT: VodData[0].isSRT,
+          videoName: VodData[0].videoName,
         });
       }
     }
@@ -615,12 +616,14 @@ function Videos(props) {
         link: VodData[idx].videoPath,
         missionDetails: VodData[idx],
         isSRT: VodData[idx].isSRT,
+        videoName: VodData[idx].videoName,
       });
     } else {
       setVideoDetails({
         link: data.videoPath,
         missionDetails: data,
         isSRT: data.isSRT,
+        videoName: data.videoName,
       });
     }
     setShowCarousel(true);
@@ -904,7 +907,7 @@ function Videos(props) {
                                   .replace(".m3u8", ".flv")
                               }
                               // target='_blank'
-                              download
+                              download={videoDetails.videoName + ".flv"}
                             >
                               <DownloadOutlined className="btn-icon" />
                             </a>
@@ -1003,7 +1006,7 @@ function Videos(props) {
                                             .replace(".m3u8", ".flv")
                                         }
                                         // target='_blank'
-                                        download
+                                        download={dataa.videoName + ".flv"}
                                       >
                                         <DownloadOutlined /> Download{" "}
                                       </a>
@@ -1146,7 +1149,7 @@ function Videos(props) {
                                             .replace(".m3u8", ".flv")
                                         }
                                         // target='_blank'
-                                        download
+                                        download={dataa.videoName + ".flv"}
                                       >
                                         <DownloadOutlined /> Download{" "}
                                       </a>
@@ -1330,7 +1333,7 @@ function Videos(props) {
                               .replace(".m3u8", ".flv")
                           }
                           // target='_blank'
-                          download
+                          download={videoDetails.videoName + ".flv"}
                         >
                           <DownloadOutlined className="btn-icon" />
                         </a>
@@ -1412,7 +1415,7 @@ function Videos(props) {
                                   .replace(".m3u8", ".flv")
                               }
                               // target='_blank'
-                              download
+                              download={dataa.videoName + ".flv"}
                             >
                               <DownloadOutlined /> Download{" "}
                             </a>
