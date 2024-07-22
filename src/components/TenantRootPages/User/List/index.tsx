@@ -14,7 +14,6 @@ import {
   Button,
   Tag,
   Table,
-  Typography,
   Popconfirm,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
@@ -33,8 +32,7 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
-import { PERMS } from "src/static/permissions";
-const { Title } = Typography;
+
 function UserListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
   const [tenantUserTableData, setTenantUserTableData] = useState([]);
@@ -117,107 +115,54 @@ function UserListPage(props: any) {
 
   //--------------render delete button based on user perms---------------------
   function renderDeleteBtn(record: any) {
-    if (props.userType === "tenant-staff") {
-      // TODO: "delete_user" === "delete_client" ??
-      if (props.userDetails.customPermissions.includes(PERMS.DELETE_CLIENT)) {
-        return (
-          <Popconfirm
-            title="Are you sure to delete the user"
-            okText="Yes"
-            cancelText="No"
-            onConfirm={() => {
-              props.loading(true);
-              http
-                .delete(`${apis.DELETE_USER}`, {
-                  params: {
-                    id: record._id,
-                  },
-                })
-                .then((result) => {
-                  message.success(result.data.message);
-                  fetchAllUsers();
-                })
-                .catch((err) => {
-                  message.error(err.message);
-                  AxiosErrorHandler(err, props.logout);
-                })
-                .finally(() => {
-                  props.loading(false);
-                });
-            }}
-          >
-            <Button style={{ marginLeft: "8px" }} danger>
-              <DeleteOutlined />
-            </Button>
-          </Popconfirm>
-        );
-      }
-    } else {
-      return (
-        <Popconfirm
-          title="Are you sure to delete the user"
-          okText="Yes"
-          cancelText="No"
-          onConfirm={() => {
-            props.loading(true);
-            http
-              .delete(`${apis.DELETE_USER}`, {
-                params: {
-                  id: record._id,
-                },
-              })
-              .then((result) => {
-                message.success(result.data.message);
-                fetchAllUsers();
-              })
-              .catch((err) => {
-                message.error(err.message);
-                AxiosErrorHandler(err, props.logout);
-              })
-              .finally(() => {
-                props.loading(false);
-              });
-          }}
-        >
-          <Button style={{ marginLeft: "8px" }} danger>
-            <DeleteOutlined />
-          </Button>
-        </Popconfirm>
-      );
-    }
+    return (
+      <Popconfirm
+        title="Are you sure to delete the user"
+        okText="Yes"
+        cancelText="No"
+        onConfirm={() => {
+          props.loading(true);
+          http
+            .delete(`${apis.DELETE_USER}`, {
+              params: {
+                id: record._id,
+              },
+            })
+            .then((result) => {
+              message.success(result.data.message);
+              fetchAllUsers();
+            })
+            .catch((err) => {
+              message.error(err.message);
+              AxiosErrorHandler(err, props.logout);
+            })
+            .finally(() => {
+              props.loading(false);
+            });
+        }}
+      >
+        <Button style={{ marginLeft: "8px" }} danger>
+          <DeleteOutlined />
+        </Button>
+      </Popconfirm>
+    );
   }
 
   //--------------render edit button based on user perms---------------------
   function renderEditBtn(record: any) {
-    if (props.userType === "tenant-staff") {
-      // TODO: "edit_user" === "edit_client" ?
-      if (props.userDetails.customPermissions.includes(PERMS.EDIT_CLIENT)) {
-        return (
-          <Button
-            onClick={() => {
-              history.push(`/dashboard/tenant/user/edit/${record._id}`);
-              props.setUserToEdit(record);
-            }}
-          >
-            <EditOutlined />
-          </Button>
-        );
-      }
-    } else {
-      return (
-        <Button
-          onClick={() => {
-            history.push(`/dashboard/tenant/user/edit/${record._id}`);
-            props.setUserToEdit(record);
-          }}
-        >
-          <EditOutlined />
-        </Button>
-      );
-    }
+    return (
+      <Button
+        onClick={() => {
+          history.push(`/dashboard/tenant/user/edit/${record._id}`);
+          props.setUserToEdit(record);
+        }}
+      >
+        <EditOutlined />
+      </Button>
+    );
   }
 
-  const renderActionButtonsIfRoot = (record) => {
+  const renderActionButtons = (record) => {
     return (
       <>
         {renderEditBtn(record)}
@@ -237,31 +182,7 @@ function UserListPage(props: any) {
     );
   };
 
-  const renderActionButtonsIfStaff = (record) => {
-    return (
-      <>
-        {record.userType !== "tenant-root" && (
-          <>
-            {renderEditBtn(record)}
-            {record._id !== props.userDetails._id && renderDeleteBtn(record)}
-            <Button
-              style={{ marginLeft: "10px" }}
-              onClick={() => {
-                history.push(
-                  `/dashboard/tenant/user/change-password/${record._id}`
-                );
-                props.setUserToEdit(record);
-              }}
-            >
-              <LockOutlined />
-            </Button>
-          </>
-        )}
-      </>
-    );
-  };
-
-  const columns: any = [
+  const columns: any[] = [
     {
       title: "Name",
       dataIndex: "name",
@@ -311,9 +232,7 @@ function UserListPage(props: any) {
       render: (text, record) => (
         <>
           {props.userDetails.userType === "tenant-root" &&
-            renderActionButtonsIfRoot(record)}
-          {props.userDetails.userType === "tenant-staff" &&
-            renderActionButtonsIfStaff(record)}
+            renderActionButtons(record)}
         </>
       ),
     },
@@ -340,9 +259,17 @@ function UserListPage(props: any) {
           case "401":
             setErrorState("401");
             break;
-          case "500":
-            AxiosErrorHandler(err, props.logout);
+          case "403":
+            setErrorState("403");
             break;
+          case "503":
+            setErrorState("503");
+            break;
+          case "504":
+            setErrorState("504");
+            break;
+          default:
+            setErrorState("500");
         }
         AxiosErrorHandler(err, props.logout);
       })
@@ -352,7 +279,14 @@ function UserListPage(props: any) {
   };
 
   useEffect(() => {
-    fetchAllUsers();
+    if (!props.Auth.isLoggedIn) {
+      setErrorState("unauthorized");
+    } else if (!["tenant-root","tenant-staff"].includes(props.userDetails.userType)) {
+      // client shouldn't be able to view
+      setErrorState("401");
+    } else {
+      fetchAllUsers();
+    }
   }, []);
 
   switch (errorState) {
@@ -360,6 +294,9 @@ function UserListPage(props: any) {
       return <Unauthorized />;
 
     case "401":
+      return <FourOhOne />;
+    
+    case "403":
       return <FourOhOne />;
 
     case "500":
@@ -380,11 +317,16 @@ function UserListPage(props: any) {
             title="All users"
             subTitle="Here you will find all users under your organization."
             extra={[
-              <Link to="/dashboard/tenant/user/create" key="1">
-                <Button key="1" type="primary" icon={<PlusCircleOutlined />}>
-                  Create User
-                </Button>
-              </Link>,
+              <>
+                {
+                  props.userDetails.userType === "tenant-root" && 
+                  <Link to="/dashboard/tenant/user/create" key="1">
+                    <Button key="1" type="primary" icon={<PlusCircleOutlined />}>
+                      Create User
+                    </Button>
+                  </Link>
+                }
+              </>
             ]}
           ></PageHeader>
           <div className="tenants-user-list padding-after-page-header">
@@ -394,7 +336,11 @@ function UserListPage(props: any) {
               pagination={{ showSizeChanger: true, showQuickJumper: true }}
               loading={isTableLoading}
               dataSource={tenantUserTableData}
-              columns={columns}
+              columns={
+                (props.userDetails.userType === "tenant-root") ?
+                columns :
+                columns.filter(col => !["email","phoneNo","actions"].includes(col.dataIndex))
+              }
               rowKey="_id"
             />
           </div>
@@ -405,7 +351,6 @@ function UserListPage(props: any) {
 
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
-  Theme: state.Theme,
   userDetails: state.Auth.userdetails,
 });
 

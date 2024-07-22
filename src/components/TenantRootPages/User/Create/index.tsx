@@ -36,7 +36,7 @@ import CountExceeded from "../../restrictions/restrictions";
 import Expired from "../../restrictions/expiry";
 import { STATIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
-import { PERMS } from "src/static/permissions";
+import { PERMS, TENANT_STAFF_PERMS } from "src/static/permissions";
 
 function UserCreatePage(props: any) {
   const [form] = Form.useForm();
@@ -107,7 +107,7 @@ function UserCreatePage(props: any) {
           setUserGroups(
             data
               .filter((ele) =>
-                ele.permissions.includes(PERMS.CLIENT_MISSION_LIST)
+                ele.permissions.every(perm => TENANT_STAFF_PERMS.includes(perm)) // only list usergroups assignable to tenant-staff
               )
               .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }))
           );
@@ -141,7 +141,15 @@ function UserCreatePage(props: any) {
       });
   };
   useEffect(() => {
-    fetchAllUserGroupList();
+    if (!props.Auth.isLoggedIn) {
+      setErrorState("unauthorized");
+    } else if (props.userDetails.userType !== "tenant-root") {
+      // only tenant-root can create tenant-staff user
+      setErrorState("401");
+    } else {
+      // current user is tenant-root, proceed to fetching necessary data for user creation
+      fetchAllUserGroupList();
+    }
   }, []);
 
   //subimt form
@@ -388,6 +396,7 @@ function UserCreatePage(props: any) {
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
   Theme: state.Theme,
+  userDetails: state.Auth.userdetails,
 });
 
 export default connect(mapStateToProps, { loading, logout })(UserCreatePage);

@@ -35,7 +35,7 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import moment from "moment";
 import { STATIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
-import { PERMS } from "src/static/permissions";
+import { PERMS, TENANT_STAFF_PERMS } from "src/static/permissions";
 
 function UserEditPage(props: any) {
   const [form] = Form.useForm();
@@ -107,7 +107,7 @@ function UserEditPage(props: any) {
           const data: components["schemas"]["IUserGroupPermissions"][] = result.data.data;
           const groups = data
             .filter((ele) =>
-              ele.permissions.includes(PERMS.CLIENT_MISSION_LIST)
+              ele.permissions.every(perm => TENANT_STAFF_PERMS.includes(perm)) // only list usergroups assignable to tenant-staff
             )
             .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }));
 
@@ -151,7 +151,15 @@ function UserEditPage(props: any) {
       });
   };
   useEffect(() => {
-    fetchAllUserGroupList();
+    if (!props.Auth.isLoggedIn) {
+      setErrorState("unauthorized");
+    } else if (props.userDetails.userType !== "tenant-root") {
+      // only tenant-root can change tenant-staff details
+      setErrorState("401");
+    } else {
+      // current user is tenant-root, proceed to fetching necessary data for user details editing
+      fetchAllUserGroupList();
+    }
   }, []);
 
   useEffect(() => {
@@ -409,6 +417,7 @@ const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
   Theme: state.Theme,
   user: state.User.userToEdit,
+  userDetails: state.Auth.userdetails,
 });
 
 export default connect(mapStateToProps, { loading, logout })(UserEditPage);

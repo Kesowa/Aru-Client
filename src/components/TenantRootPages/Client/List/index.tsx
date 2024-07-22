@@ -26,7 +26,7 @@ import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import { PERMS } from "src/static/permissions";
-function UserListPage(props: any) {
+function ClientListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
   const [tenantUserTableData, setTenantUserTableData] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -486,5 +486,5 @@ const mapStateToProps = (state: any) => ({
 });
 
 export default connect(mapStateToProps, { loading, logout, setClientToEdit })(
-  UserListPage
+  ClientListPage
 );
