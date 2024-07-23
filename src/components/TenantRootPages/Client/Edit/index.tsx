@@ -35,9 +35,9 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import moment from "moment";
 import { STATIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
-import { PERMS } from "src/static/permissions";
+import { PERMS, TENANT_CLIENT_PERMS } from "src/static/permissions";
 
-function UserCreatePage(props: any) {
+function ClientEditPage(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
@@ -103,7 +103,7 @@ function UserCreatePage(props: any) {
           const data: components["schemas"]["IUserGroupPermissions"][] = result.data.data;
           const groups = data
             .filter((ele) =>
-              ele.permissions.includes(PERMS.CLIENT_MISSION_LIST)
+              ele.permissions.every(perm => TENANT_CLIENT_PERMS.includes(perm)) // only list usergroups assignable to tenant-client
             )
             .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }));
 
@@ -145,7 +145,19 @@ function UserCreatePage(props: any) {
       });
   };
   useEffect(() => {
-    fetchAllUserGroupList();
+    if (!props.Auth.isLoggedIn) {
+      setErrorState("unauthorized");
+    } else if (
+      (props.userDetails.userType === "tenant-client") ||
+      (props.userDetails.userType === "tenant-staff" && !props.userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
+    ) {
+      // clients can't edit other clients
+      // staff can edit clients only if have permission
+      setErrorState("401");
+    } else {
+      // tenant-root can edit clients
+      fetchAllUserGroupList();
+    }
   }, []);
 
   useEffect(() => {
@@ -378,6 +390,7 @@ const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
   Theme: state.Theme,
   client: state.Client.clientToEdit,
+  userDetails: state.Auth.userdetails,
 });
 
-export default connect(mapStateToProps, { loading, logout })(UserCreatePage);
+export default connect(mapStateToProps, { loading, logout })(ClientEditPage);

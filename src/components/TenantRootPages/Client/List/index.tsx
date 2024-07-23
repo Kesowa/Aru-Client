@@ -113,41 +113,10 @@ function ClientListPage(props: any) {
 
   //--------------render delete button based on user perms---------------------
   function renderDeleteBtn(record: any) {
-    if (props.userType === "tenant-staff") {
-      if (props.userDetails.customPermissions.includes(PERMS.DELETE_CLIENT)) {
-        return (
-          <Popconfirm
-            title="Are you sure to delete the client？"
-            okText="Yes"
-            cancelText="No"
-            onConfirm={() => {
-              props.loading(true);
-              http
-                .delete(`${apis.DELETE_CLIENT}`, {
-                  data: {
-                    id: record._id,
-                  },
-                })
-                .then((result) => {
-                  message.success(result.data.message);
-                  fetchAllUsers();
-                })
-                .catch((err) => {
-                  message.error(err.message);
-                  AxiosErrorHandler(err, props.logout);
-                })
-                .finally(() => {
-                  props.loading(false);
-                });
-            }}
-          >
-            <Button style={{ marginLeft: "8px" }} danger>
-              <DeleteOutlined />
-            </Button>
-          </Popconfirm>
-        );
-      }
-    } else {
+    if (
+      (props.userType === "tenant-root") ||
+      (props.userType === "tenant-staff" && props.userDetails.customPermissions.includes(PERMS.DELETE_CLIENT))
+    ) {
       return (
         <Popconfirm
           title="Are you sure to delete the client？"
@@ -184,20 +153,10 @@ function ClientListPage(props: any) {
 
   //--------------render edit button based on user perms---------------------
   function renderEditBtn(record: any) {
-    if (props.userType === "tenant-staff") {
-      if (props.userDetails.customPermissions.includes(PERMS.EDIT_CLIENT)) {
-        return (
-          <Button
-            onClick={() => {
-              history.push(`/dashboard/tenant/client/edit/${record._id}`);
-              props.setClientToEdit(record);
-            }}
-          >
-            <EditOutlined />
-          </Button>
-        );
-      }
-    } else {
+    if (
+      (props.userType === "tenant-root") ||
+      (props.userType === "tenant-staff" && props.userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
+    ) {
       return (
         <Button
           onClick={() => {
@@ -213,17 +172,10 @@ function ClientListPage(props: any) {
 
   //-------------render create client button-----------------------------------
   function renderCreateClientButton() {
-    if (props.userType === "tenant-staff") {
-      if (props.userDetails.customPermissions.includes(PERMS.CREATE_CLIENT)) {
-        return (
-          <Link to="/dashboard/tenant/client/create" key="1">
-            <Button key="1" type="primary" icon={<PlusCircleOutlined />}>
-              Create Client
-            </Button>
-          </Link>
-        );
-      }
-    } else {
+    if (
+      (props.userType === "tenant-root") ||
+      (props.userType === "tenant-staff" && props.userDetails.customPermissions.includes(PERMS.CREATE_CLIENT))
+    ) {
       return (
         <Link to="/dashboard/tenant/client/create" key="1">
           <Button key="1" type="primary" icon={<PlusCircleOutlined />}>
@@ -427,6 +379,15 @@ function ClientListPage(props: any) {
     }
   };
 
+  useEffect(() => {
+    if (!props.Auth.isLoggedIn) {
+      setErrorState("unauthorized");
+    } else {
+      // any logged in user (tenant-root / tenant-staff / tenant-client) can view clients
+      fetchAllUsers();
+    }
+  }, []);
+
   switch (errorState) {
     case "unauthorized":
       return <Unauthorized />;
@@ -468,7 +429,11 @@ function ClientListPage(props: any) {
               }}
               loading={isTableLoading}
               dataSource={tenantUserTableData}
-              columns={columns}
+              columns={
+                (props.userDetails.userType === "tenant-client") ?
+                columns.filter(col => !["email","phoneNo","actions"].includes(col.dataIndex)) :
+                columns
+              }
               rowKey="_id"
               onChange={handleTableChange}
             />
