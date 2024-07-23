@@ -54,6 +54,8 @@ import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
 import axios from "axios";
+import { DocModel, uploadFile } from "src/services/fileUpload";
+
 
 type props = {
   missionDetails: any;
@@ -379,18 +381,26 @@ function Videos(props) {
     name: "file",
     multiple: true,
     action: `${apis.UPLOAD_VOD}`,
-    customRequest: (options: any) => {
+    customRequest: async (options: any) => {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       console.log("here");
       setUploading(true);
-      const fData = new FormData();
-      fData.append("video", options.file);
-      fData.append("missionID", props.missionDetails.missionId);
-      fData.append("flightID", props.missionDetails.flightId);
-      if (props.missionDetails.locationId?._id) {
-        fData.append("locationID", props.missionDetails.locationId?._id);
-      }
+      const uploadToken = await uploadFile(options.file, DocModel.VOD, (prog) => console.info("PROGRESS: " + prog));
+        
+      const body = {
+        video : uploadToken,
+        missionID : props.missionDetails.missionId,
+        flightID : props.missionDetails.flightId,
+        locationID : props.missionDetails.locationId?._id ? props.missionDetails.locationId._id : undefined,
+      };
+      // const fData = new FormData();
+      // fData.append("video", options.file);
+      // fData.append("missionID", props.missionDetails.missionId);
+      // fData.append("flightID", props.missionDetails.flightId);
+      // if (props.missionDetails.locationId?._id) {
+      //   fData.append("locationID", props.missionDetails.locationId?._id);
+      // }
 
       const config = {
         headers: {
@@ -417,7 +427,7 @@ function Videos(props) {
           console.log("isvalid", isValidExtension);
           if (isValidExtension) {
             http
-              .post(options.action, fData, config)
+              .post(options.action, body, config)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 console.log("Upload successful! ", res.data);
@@ -472,7 +482,7 @@ function Videos(props) {
           const isValidExtension2 = checkExtension(parts2[parts2.length - 1]);
           if (isValidExtension2) {
             http
-              .post(options.action, fData, config)
+              .post(options.action, body, config)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 console.log("Upload successful! ", res.data);

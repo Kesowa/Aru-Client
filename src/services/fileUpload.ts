@@ -35,6 +35,7 @@ export async function uploadFile(file: RcFile, model: DocModel, progress?: (frac
       progress(event.loaded/event.total);
     }
   })
+  console.log("upload token is here ",getUrlRes.data.data._id);
   return getUrlRes.data.data._id;
 }
 

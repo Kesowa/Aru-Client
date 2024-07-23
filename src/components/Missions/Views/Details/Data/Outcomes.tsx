@@ -48,6 +48,9 @@ import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
 import axios from "axios";
+import { DocModel, uploadFile } from "src/services/fileUpload";
+import { asString } from "html2canvas/dist/types/css/types/color";
+
 
 const { Text, Title } = Typography;
 let plainOptions = new Array<any>();
@@ -666,23 +669,39 @@ function Outcomes(props) {
     name: "file",
     multiple: true,
     action: `${API_URL}${apis.UPLOAD_ALERT}`,
-    customRequest: (options: any) => {
+    customRequest: async(options: any) => {
       setUploading(true);
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
-      const fData = new FormData();
-      const proceed = extractExif(options.file).then((res: any) => {
-        if (res.status) {
+      // const fData = new FormData();
+      const proceed = async (options) => {
+        const res = await extractExif(options.file);
+        
+        const uploadToken = await uploadFile(options.file, DocModel.ALERT_IMAGES, (prog) => console.info("PROGRESS: " + prog));
+
+        const body = {
+          file: uploadToken,
+          missionId: props.missionDetails.missionId,
+          folderName: "photos",
+          locationName: res.address,
+          locationId: props.missionDetails.locationId?._id,
+          pcount: "0",
+          type: "Manual",
+          note: "Alert uploaded from browser!",
+          onSite: "false",
+          flightId: props.missionDetails.flightId
+        };
+        if (res.status) {       
           console.log(res);
-          fData.append("image", options.file);
-          fData.append("locationName", res.address);
-          fData.append("missionId", props.missionDetails.missionId);
-          fData.append("locationId", props.missionDetails.locationId._id);
-          fData.append("pcount", "0");
-          fData.append("type", "Manual");
-          fData.append("note", "Alert uploaded from browser!");
-          fData.append("onSite", "false");
-          fData.append("flightId", props.missionDetails.flightId);
+          // fData.append("image", options.file);
+          // fData.append("locationName", res.address);
+          // fData.append("missionId", props.missionDetails.missionId);
+          // fData.append("locationId", props.missionDetails.locationId._id);
+          // fData.append("pcount", "0");
+          // fData.append("type", "Manual");
+          // fData.append("note", "Alert uploaded from browser!");
+          // fData.append("onSite", "false");
+          // fData.append("flightId", props.missionDetails.flightId);
           const config = {
             headers: {
               "content-type": "multipart/form-data;",
@@ -700,7 +719,7 @@ function Outcomes(props) {
             cancelToken: source.token,
           };
           http
-            .post(options.action, fData, config)
+            .post(options.action, body, config)
             .then((res: any) => {
               if (res.data.status) {
                 console.log("Upload successful! ", res.data);
@@ -751,15 +770,17 @@ function Outcomes(props) {
             });
         } else {
           console.log(res);
-          fData.append("image", options.file);
-          fData.append("locationName", res.address);
-          fData.append("missionId", props.missionDetails.missionId);
-          fData.append("locationId", props.missionDetails.locationId._id);
-          fData.append("pcount", "0");
-          fData.append("type", "Manual");
-          fData.append("note", "Alert uploaded from browser!");
-          fData.append("onSite", "false");
-          fData.append("flightId", props.missionDetails.flightId);
+
+          // fData.append("image", options.file);
+          // fData.append("locationName", res.address);
+          // fData.append("missionId", props.missionDetails.missionId);
+          // fData.append("locationId", props.missionDetails.locationId._id);
+          // fData.append("pcount", "0");
+          // fData.append("type", "Manual");
+          // fData.append("note", "Alert uploaded from browser!");
+          // fData.append("onSite", "false");
+          // fData.append("flightId", props.missionDetails.flightId);
+          
           const config = {
             headers: {
               "content-type": "multipart/form-data;",
@@ -777,7 +798,7 @@ function Outcomes(props) {
             cancelToken: source.token,
           };
           http
-            .post(options.action, fData, config)
+            .post(options.action, body, config)
             .then((res: any) => {
               if (res.data.status) {
                 console.log("Upload successful! ", res.data);
@@ -827,7 +848,7 @@ function Outcomes(props) {
               setUploading(false);
             });
         }
-      });
+      };
       return {
         abort() {
           console.log("Aborting outcome upload");

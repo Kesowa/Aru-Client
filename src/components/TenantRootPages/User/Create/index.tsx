@@ -36,7 +36,6 @@ import CountExceeded from "../../restrictions/restrictions";
 import Expired from "../../restrictions/expiry";
 import { STATIC_URL } from "src/constants";
 import type { RcFile } from "antd/lib/upload";
-import axios from "axios";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 
 function UserCreatePage(props: any) {

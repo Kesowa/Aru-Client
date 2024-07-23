@@ -40,6 +40,9 @@ import { API_URL, STATIC_URL } from "src/constants";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
 import axios from "axios";
+import { DocModel, uploadFile } from "src/services/fileUpload";
+import { RcFile } from "antd/lib/upload";
+
 
 function Documents(props) {
   const [defaultFileList, setDefaultFileList] = useState([]);
@@ -413,48 +416,33 @@ function Documents(props) {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       if (validateFile(options.file)) {
+        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+        const fileExtension = options.file.name.substring(options.file.name.lastIndexOf(".") + 1).toLowerCase();
 
-      const getUrlRes = await http.post<{
-        status: true,
-        message: string,
-        data: {
-          postURL: string,
-          formData: Record<string,string>
-        }
-      }|{
-        status: false,
-        message: string,
-      }>("/apis/v1/common/upload-url", {
-        name: options.file.name,
-        size: options.file.size,
-        type: options.file.type,
-      });
-      if (getUrlRes.data.status == false) {
-        console.error("ERROR GETTING PRESIGNED URL!!!: ", getUrlRes.data.message);
-        return;
-      }
-      const formData = new FormData();
-      Object.entries(getUrlRes.data.data.formData).forEach(([key, val]) => formData.set(key, val));
-      formData.append("file", options.file);
-      await axios
-        .post("http://localhost:9000/aru", formData)
-        return;
-        const fData = new FormData();
-        fData.append("file", options.file);
-        fData.append("missionId", props.missionDetails.missionId);
-        fData.append("folderName", currentFolderId);
-        if (
-          options.file.name.substring(
-            options.file.name.lastIndexOf(".") + 1
-          ) === "las" ||
-          options.file.name.substring(
-            options.file.name.lastIndexOf(".") + 1
-          ) === "LAS"
-        ) {
-          fData.append("type", "pointCloud");
-        } else {
-          fData.append("type", options.file.type);
-        }
+        const body = {
+          type: (fileExtension === "las" || "LAs") ? "pointCloud" : options.file.type,
+          file: uploadToken,
+          missionId: props.missionDetails.missionId,
+          folderName: currentFolderId,
+        };
+
+        // const fData = new FormData();
+        // fData.append("file", options.file);
+        // fData.append("missionId", props.missionDetails.missionId);
+        // fData.append("folderName", currentFolderId);
+        // if (
+        //   options.file.name.substring(
+        //     options.file.name.lastIndexOf(".") + 1
+        //   ) === "las" ||
+        //   options.file.name.substring(
+        //     options.file.name.lastIndexOf(".") + 1
+        //   ) === "LAS"
+        // ) {
+        //   fData.append("type", "pointCloud");  //conditionally need to add the type in the body object that will going to pass to the http request
+        // } else {
+        //   fData.append("type", options.file.type);
+        // }
+        
         const config = {
           headers: {
             "content-type": "multipart/form-data;",
@@ -475,7 +463,7 @@ function Documents(props) {
         ) {
           case "tenant-root": //when user is a tenant root
             http
-              .post(options.action, fData, config)
+              .post(options.action, body, config)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 message.success(
@@ -508,7 +496,7 @@ function Documents(props) {
 
           case "tenant-staff": // when user is tenant staff
             http
-              .post(options.action, fData, config)
+              .post(options.action, body, config)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 message.success(

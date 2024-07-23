@@ -144,6 +144,7 @@ import {
   options,
 } from "./utils/propUtils";
 import Tileset from "src/types/cesium_tileset";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -5224,8 +5225,24 @@ function BaseMap(props) {
 
     try {
       setUploading(true);
+      // Determine the correct DocModel based on layerType
+      const docModel = layerType === "Vector" ? DocModel.VECTOR : layerType === "Raster" ? DocModel.RASTER : DocModel.LAYER_FILES;
+      const uploadToken = await uploadFile(fileList[0], docModel, (prog) => console.info("PROGRESS: " + prog));
 
-      const fmData = new FormData();
+      const body = {
+        file: uploadToken,
+        missionId : id,
+        captureDate: captureDate,
+        name: layerName,
+        type: layerType,
+        color: layerColor,
+        inHeritOriginalColorFromFile: inheritColor.toString(),
+        icon: icon2,
+        ...(layerType === "Vector" ? { vector: layerProp } : {}),
+        ...(layerType === "Raster" ? { raster: layerProp } : {}),
+      };
+
+      // const fmData = new FormData();
       const config = {
         headers: { "content-type": "multipart/form-data" },
         onUploadProgress: (event) => {
@@ -5236,23 +5253,23 @@ function BaseMap(props) {
           }
         },
       };
-      fmData.append("file", fileList[0]);
-      fmData.append("captureDate", captureDate);
-      fmData.append("name", layerName);
-      fmData.append("type", layerType);
-      fmData.append("color", layerColor);
-      fmData.append("missionId", id);
-      fmData.append("inHeritOriginalColorFromFile", inheritColor.toString());
+      // fmData.append("file", fileList[0]);
+      // fmData.append("captureDate", captureDate);
+      // fmData.append("name", layerName);
+      // fmData.append("type", layerType);
+      // fmData.append("color", layerColor);
+      // fmData.append("missionId", id);
+      // fmData.append("inHeritOriginalColorFromFile", inheritColor.toString());
 
-      if (layerType === "Vector") fmData.append("vector", layerProp);
+      // if (layerType === "Vector") fmData.append("vector", layerProp);
 
-      if (layerType === "Raster") fmData.append("raster", layerProp);
+      // if (layerType === "Raster") fmData.append("raster", layerProp);
 
-      fmData.append("icon", icon2);
+      // fmData.append("icon", icon2);
 
       const result = await http.post(
         `${apis.CREATE_LAYER}/${layerType}`,
-        fmData,
+        body,
         config
       );
 

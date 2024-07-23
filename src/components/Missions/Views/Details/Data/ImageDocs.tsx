@@ -47,6 +47,8 @@ import { BsFlagFill } from "react-icons/bs";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
+import { DocModel, uploadFile } from "src/services/fileUpload";
+
 
 let plainOptions = new Array<any>();
 function ImageDocs(props) {
@@ -255,14 +257,22 @@ function ImageDocs(props) {
     name: "file",
     multiple: true,
     action: `${API_URL}${apis.UPLOAD_DOCUMENT}`,
-    customRequest: (options: any) => {
+    customRequest: async (options: any) => {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       if (validateFile(options.file)) {
-        const fData = new FormData();
-        fData.append("file", options.file);
-        fData.append("missionId", props.missionDetails.missionId);
-        fData.append("folderName", "photos");
+        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+
+        const body = {
+          file: uploadToken,
+          missionId :props.missionDetails.missionId,
+          folderName: "photos",
+        };
+
+        // const fData = new FormData();
+        // fData.append("file", options.file);
+        // fData.append("missionId", props.missionDetails.missionId);
+        // fData.append("folderName", "photos");
         console.log("File type: ", options.file.type);
         const config = {
           headers: {
@@ -284,7 +294,7 @@ function ImageDocs(props) {
         ) {
           case "tenant-root": //when user is a tenant root
             http
-              .post(options.action, fData, config)
+              .post(options.action, body, config)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 message.success(
@@ -317,7 +327,7 @@ function ImageDocs(props) {
 
           case "tenant-staff": // when user is tenant staff
             http
-              .post(options.action, fData, config)
+              .post(options.action, body, config) 
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 message.success(

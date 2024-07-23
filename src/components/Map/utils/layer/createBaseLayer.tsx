@@ -40,6 +40,7 @@ import DotIcon from "../../../../static/DotIcon.png";
 import { components } from "src/handlers/schema";
 import { featureType, vectorProps } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 const { Dragger } = Upload;
 const { Item } = Form;
 const { Meta } = Card;
@@ -321,9 +322,16 @@ const CreateBaseLayer = (props) => {
       setUploading(true);
       if (props.isUpdate) {
         if (props.updateType == "Raster") {
+        const uploadToken = await uploadFile(fileList[0], DocModel.RASTER, (prog) => console.info("PROGRESS: " + prog));
+
+        const body = {
+          file: uploadToken,
+          layerId: props.BaseLayerId,
+        };
+
           // UPDATE RASTER BY FILE UPLOAD
           console.log("here");
-          const fmData = new FormData();
+          // const fmData = new FormData();
           const config = {
             headers: { "content-type": "multipart/form-data" },
             onUploadProgress: (event) => {
@@ -334,11 +342,11 @@ const CreateBaseLayer = (props) => {
               }
             },
           };
-          fmData.append("file", fileList[0]);
-          fmData.append("layerId", props.BaseLayerId);
+          // fmData.append("file", fileList[0]);
+          // fmData.append("layerId", props.BaseLayerId);
           const result = await http.patch(
             `${apis.UPDATE_BASE_RASTER_UPLOAD}/Raster`,
-            fmData,
+            body,
             config
           );
 
@@ -352,8 +360,14 @@ const CreateBaseLayer = (props) => {
           }
         } else {
           // UPDATE VECTOR BY FILE UPLOAD
+          const uploadToken = await uploadFile(fileList[0], DocModel.VECTOR, (prog) => console.info("PROGRESS: " + prog));
+
+          const body = {
+            file: uploadToken,
+            baseLayer: props.BaseLayerId,
+          };
           console.log("inside vector update by upload");
-          const fmData = new FormData();
+          // const fmData = new FormData();
           const config = {
             headers: { "content-type": "multipart/form-data" },
             onUploadProgress: (event) => {
@@ -364,11 +378,11 @@ const CreateBaseLayer = (props) => {
               }
             },
           };
-          fmData.append("file", fileList[0]);
-          fmData.append("baseLayer", props.BaseLayerId);
+          // fmData.append("file", fileList[0]);
+          // fmData.append("baseLayer", props.BaseLayerId);
           const result = await http.post(
             `${apis.UPDATE_BASE_VECTOR_UPLOAD}`,
-            fmData,
+            body,
             config
           );
           if (result.data.success) {
@@ -388,7 +402,23 @@ const CreateBaseLayer = (props) => {
         }
       } else {
         // CREATE BASE LAYER BY UPLOAD
-        const fmData = new FormData();
+        const docModel = layerType === "Vector" ? DocModel.VECTOR : layerType === "Raster" ? DocModel.RASTER : DocModel.LAYER_FILES;
+        const uploadToken = await uploadFile(fileList[0], docModel, (prog) => console.info("PROGRESS: " + prog));
+
+          const body = {
+            file: uploadToken,
+            captureDate: captureDate,
+            name: layerName,
+            type: layerType,
+            icon: icon,
+            ...(layerType === "Vector" ? {
+              color: layerColor,
+              inHeritOriginalColorFromFile: inheritColor.toString(),
+              vector: String(layerProp),
+            } : {}),
+            ...(layerType === "Raster" ? { raster: String(layerProp) } : {}),
+          };
+        // const fmData = new FormData();
         const config = {
           headers: { "content-type": "multipart/form-data" },
           onUploadProgress: (event) => {
@@ -399,41 +429,26 @@ const CreateBaseLayer = (props) => {
             }
           },
         };
-        fmData.append("file", fileList[0]);
-        fmData.append("captureDate", captureDate);
-        fmData.append("name", layerName);
-        console.log(layerType);
-        fmData.append("type", layerType);
-        console.log(
-          "Before call",
-          fmData.get("name"),
-          fmData.get("type"),
-          fmData.get("captureDate"),
-          fmData.get("file")
-        );
-        fmData.append("icon", icon);
+        console.log("Before call",body);
+        // fmData.append("file", fileList[0]);
+        // fmData.append("captureDate", captureDate);
+        // fmData.append("name", layerName);
+        // console.log(layerType);
+        // fmData.append("type", layerType);
+        // console.log(
+        //   "Before call",
+        //   fmData.get("name"),
+        //   fmData.get("type"),
+        //   fmData.get("captureDate"),
+        //   fmData.get("file")
+        // );
+        // fmData.append("icon", icon);
 
         if (layerType === "Vector") {
           // CREATE BASE LAYER BY VECTOR UPLOAD
-          fmData.append("color", layerColor);
-          fmData.append(
-            "inHeritOriginalColorFromFile",
-            inheritColor.toString()
-          );
-          fmData.append("vector", String(layerProp));
-          console.log(
-            "Before call",
-            fmData.get("name"),
-            fmData.get("type"),
-            fmData.get("captureDate"),
-            fmData.get("file"),
-            fmData.get("color"),
-            fmData.get("vector")
-          );
-
           const result = await http.post(
             `${apis.CREATE_BASELAYER}/Vector`,
-            fmData,
+            body,
             config
           );
 
@@ -464,11 +479,9 @@ const CreateBaseLayer = (props) => {
 
         if (layerType === "Raster") {
           // CREATE BASE LAYER BY RASTER UPLOAD
-          fmData.append("raster", String(layerProp));
-
           const result = await http.post(
             `${apis.UPLOAD_RASTER_BASELAYER}/Raster`,
-            fmData,
+            body,
             config
           );
 
@@ -751,7 +764,7 @@ const CreateBaseLayer = (props) => {
 
   const updateRasterBaseByImporting = () => {
     setUploading(true);
-    const fmData = new FormData();
+    // const fmData = new FormData();
     let payload: unknown = {};
     if (props.isUpdate) {
       payload = {
