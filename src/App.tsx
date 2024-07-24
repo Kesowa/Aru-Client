@@ -36,45 +36,45 @@ const App = (props) => {
   return (
     <React.Fragment>
       <Socket />
-        <Loader />
-        <BrowserRouter>
-          <Suspense
-            fallback={
-              <div className="example">
-                <Space size="middle">
-                  <Spin size="large" />
-                </Space>
-              </div>
-            }
-          >
-            <Switch>
-              <Route exact path="/">
-                <Redirect to={{ pathname: "/dashboard" }} />
-              </Route>
-              <Route exact path="/map/:id">
-                <PublicMap isBaseMap={true} />
-              </Route>
-              <Route exact path="/map/:tenantId/:missionId">
-                <PublicMap isMissionMap={true} isBaseMap={true} />
-              </Route>
-              <Route exact path="/forgot-password">
-                <ForgotPassword />
-              </Route>
-              <LoginWrapper exact={true} path="/login">
-                <Login />
-              </LoginWrapper>
-              <LoginWrapper exact={true} path="/sign-up">
-                <Register />
-              </LoginWrapper>
-              <PrivateRoute path="/dashboard">
-                <DashboardWrapper />
-              </PrivateRoute>
-              <Route>
-                <Redirect to="/" />
-              </Route>
-            </Switch>
-          </Suspense>
-        </BrowserRouter>
+      <Loader />
+      <BrowserRouter>
+        <Suspense
+          fallback={
+            <div className="example">
+              <Space size="middle">
+                <Spin size="large" />
+              </Space>
+            </div>
+          }
+        >
+          <Switch>
+            <Route exact path="/">
+              <Redirect to={{ pathname: "/dashboard" }} />
+            </Route>
+            <Route exact path="/map/:id">
+              <PublicMap isBaseMap={true} />
+            </Route>
+            <Route exact path="/map/:tenantId/:missionId">
+              <PublicMap isMissionMap={true} isBaseMap={true} />
+            </Route>
+            <Route exact path="/forgot-password">
+              <ForgotPassword />
+            </Route>
+            <LoginWrapper exact={true} path="/login">
+              <Login />
+            </LoginWrapper>
+            <LoginWrapper exact={true} path="/sign-up">
+              <Register />
+            </LoginWrapper>
+            <PrivateRoute path="/dashboard">
+              <DashboardWrapper />
+            </PrivateRoute>
+            <Route>
+              <Redirect to="/" />
+            </Route>
+          </Switch>
+        </Suspense>
+      </BrowserRouter>
     </React.Fragment>
   );
 };
