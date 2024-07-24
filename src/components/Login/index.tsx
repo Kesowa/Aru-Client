@@ -31,31 +31,6 @@ function Login(props: any) {
           //login
           localStorage.setItem("Token", result.data.token);
           localStorage.setItem("UserId", result.data.data._id);
-
-          let sidebarOptions: any = null;
-          if (result.data.data.userType === "tenant-staff") {
-            let permissions: any = [];
-
-            result.data.data.customPermissions.forEach((p) => {
-              const filteredPermissions = p.permissions.filter(
-                (d) => d.isFrontendRoute === true
-              );
-              const k = filteredPermissions.map((e) => {
-                return {
-                  type: "menu",
-                  link: e.frontendRoute.trim(),
-                  icon: e.sideNavOptionIcon.trim(),
-                  text: e.sideNavOptionLabel,
-                };
-              });
-              permissions = [...k, ...permissions];
-            });
-            sidebarOptions = permissions;
-          } else if (result.data.data.userType === "tenant-client") {
-            sidebarOptions = [...clientOptions];
-          }
-          result.data.data.sidebarOptions = sidebarOptions;
-
           props.login(
             result.data.token,
             result.data.data._id,

@@ -35,12 +35,21 @@ import CountExceeded from "../../restrictions/restrictions";
 import Expired from "../../restrictions/expiry";
 import moment from "moment";
 import { STATIC_URL } from "src/constants";
+import { components } from "src/handlers/schema";
+import { PERMS, TENANT_CLIENT_PERMS } from "src/static/permissions";
 
-function UserCreatePage(props: any) {
+function ClientCreatePage(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
-  const [userGroups, setUserGroups]: [any, any] = useState([]);
+  const [userGroups, setUserGroups] = useState<
+    {
+      name: string;
+      _id: string;
+      isActive: boolean;
+      permissions: string[];
+    }[]
+  >([]);
   const [selectedUserGroup, setSelectedusergroup]: [any, any] = useState();
   const [errorState, setErrorState] = useState("");
 
@@ -86,31 +95,14 @@ function UserCreatePage(props: any) {
       .get(apis.FETCH_TENANT_USER_GROUP)
       .then((result) => {
         if (result.data.status) {
-          const data = result.data.data.map((ele: any) => {
-            return {
-              name: ele.name,
-              _id: ele._id,
-              isActive: ele.isActive,
-              permissions: [...ele.permissions],
-            };
-          });
-
-          let groups = data.filter((ele) => {
-            let f = false;
-            ele.permissions.forEach((p) => {
-              if (p.isClient) {
-                f = true;
-              }
-            });
-            return f;
-          });
-
-          groups = groups.map((group) => ({
-            ...group,
-            permissions: group.permissions.map((ele) => ele.name),
-          }));
-
-          setUserGroups(groups);
+          const data: components["schemas"]["IUserGroupPermissions"][] = result.data.data;
+          setUserGroups(
+            data
+              .filter((ele) =>
+                ele.permissions.every(perm => TENANT_CLIENT_PERMS.includes(perm)) // only list usergroups assignable to tenant-client
+              )
+              .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }))
+          );
         } else {
           switch (result.data.message) {
             case "You do not have permission to use this API.":
@@ -141,7 +133,19 @@ function UserCreatePage(props: any) {
   };
 
   useEffect(() => {
-    fetchAllUserGroupList();
+    if (!props.Auth.isLoggedIn) {
+      setErrorState("unauthorized");
+    } else if (
+      (props.userDetails.userType === "tenant-client") ||
+      (props.userDetails.userType === "tenant-staff" && !props.userDetails.customPermissions.includes(PERMS.CREATE_CLIENT))
+    ) {
+      // clients can't create other clients
+      // staff can create clients only if have permission
+      setErrorState("401");
+    } else {
+      // tenant-root can create clients
+      fetchAllUserGroupList();
+    }
   }, []);
 
   //subimt form
@@ -419,6 +423,7 @@ function UserCreatePage(props: any) {
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
   Theme: state.Theme,
+  userDetails: state.Auth.userdetails,
 });
 
-export default connect(mapStateToProps, { loading, logout })(UserCreatePage);
+export default connect(mapStateToProps, { loading, logout })(ClientCreatePage);

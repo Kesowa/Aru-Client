@@ -190,14 +190,7 @@ function SideBar(props: any) {
     );
   };
   function renderHeader() {
-    if (
-      props.UserDetails.userType === "tenant-staff" ||
-      props.UserDetails.userType === "tenant-client"
-    ) {
-      return headerContents(props.UserDetails.customPermissions[0].name);
-    } else {
-      return headerContents(props.UserDetails.userType);
-    }
+    return headerContents(props.UserDetails.userType);
   }
 
   // Connect to app with qr code modal

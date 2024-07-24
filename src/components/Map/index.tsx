@@ -144,6 +144,7 @@ import {
   options,
 } from "./utils/propUtils";
 import Tileset from "src/types/cesium_tileset";
+import { PERMS } from "src/static/permissions";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -376,220 +377,23 @@ function BaseMap(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      console.log("logged in user is tenant-staff");
-      //console.log(props.userDetails);
-      //--------set create layer---------------
-      let createLayer: any = [];
-      let createLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "upload_layer"
-        );
-        createLayer = [...filteredPermissions, ...createLayer];
-      });
-      if (createLayer.length > 0) {
-        createLayerAccess = true;
-      }
-
-      // ------------- can delete layer -----------------
-      let deleteLayer: any = [];
-      let deleteLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "delete_layer"
-        );
-        deleteLayer = [...filteredPermissions, ...deleteLayer];
-      });
-      if (deleteLayer.length > 0) {
-        deleteLayerAccess = true;
-      }
-
-      // -------- Can Edit Layer -------------------------
-      let editLayer: any = [];
-      let editLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "edit_layer"
-        );
-        editLayer = [...filteredPermissions, ...editLayer];
-      });
-      if (editLayer.length > 0) {
-        editLayerAccess = true;
-      }
-
-      //---------set upload file to geojson---------------
-      let uploadFileToGeojson: any = [];
-      let uploadFileToGeojsonAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "Feature_File_upload"
-        );
-        uploadFileToGeojson = [...filteredPermissions, ...uploadFileToGeojson];
-      });
-      if (uploadFileToGeojson.length > 0) {
-        uploadFileToGeojsonAccess = true;
-      }
-
-      //-----------set delete file from geojson-----------
-      let deleteFileToGeojson: any = [];
-      let deleteFileToGeojsonAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "Feature_File_Delete"
-        );
-        deleteFileToGeojson = [...filteredPermissions, ...deleteFileToGeojson];
-      });
-      if (deleteFileToGeojson.length > 0) {
-        deleteFileToGeojsonAccess = true;
-      }
-
-      //----------set cover photo------------------------
-      let coverPhoto: any = [];
-      let coverPhotoAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "set_cover_photo"
-        );
-        coverPhoto = [...filteredPermissions, ...coverPhoto];
-      });
-      if (coverPhoto.length > 0) {
-        coverPhotoAccess = true;
-      }
-
-      //----------add feature------------------------
-      let addFeature: any = [];
-      let addFeatureAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "add_feature"
-        );
-        addFeature = [...filteredPermissions, ...addFeature];
-      });
-      if (addFeature.length > 0) {
-        addFeatureAccess = true;
-      }
-
-      //----------edit feature------------------------
-      let editFeature: any = [];
-      let editFeatureAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "edit_feature"
-        );
-        editFeature = [...filteredPermissions, ...editFeature];
-      });
-      if (editFeature.length > 0) {
-        editFeatureAccess = true;
-      }
-
-      //----------delete feature------------------------
-      let deleteFeature: any = [];
-      let deleteFeatureAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "delete_feature"
-        );
-        deleteFeature = [...filteredPermissions, ...deleteFeature];
-      });
-      if (deleteFeature.length > 0) {
-        deleteFeatureAccess = true;
-      }
-
-      //----------save feature/create vector layer------------------------
-      let saveFeature: any = [];
-      let saveFeatureAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "save_drawings"
-        );
-        saveFeature = [...filteredPermissions, ...saveFeature];
-      });
-      if (saveFeature.length > 0) {
-        saveFeatureAccess = true;
-      }
-
-      // -----------BASE MAP PERMISSIONS---------------------------------
-      //----------save feature/create vector layer------------------------
-      let canCreateBaseLayer: any = [];
-      let canCreateBaseLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "canCreateBaseLayer"
-        );
-        canCreateBaseLayer = [...filteredPermissions, ...canCreateBaseLayer];
-      });
-      if (canCreateBaseLayer.length > 0) {
-        canCreateBaseLayerAccess = true;
-      }
-
-      let canUpdateBaseLayer: any = [];
-      let canUpdateBaseLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "canUpdateBaseLayer"
-        );
-        canUpdateBaseLayer = [...filteredPermissions, ...canUpdateBaseLayer];
-      });
-      if (canUpdateBaseLayer.length > 0) {
-        canUpdateBaseLayerAccess = true;
-      }
-
-      let canDeleteBaseLayer: any = [];
-      let canDeleteBaseLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "canDeleteBaseLayer"
-        );
-        canDeleteBaseLayer = [...filteredPermissions, ...canDeleteBaseLayer];
-      });
-      if (canDeleteBaseLayer.length > 0) {
-        canDeleteBaseLayerAccess = true;
-      }
-
-      let canEditBaseLayer: any = [];
-      let canEditBaseLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "canEditBaseLayer"
-        );
-        canEditBaseLayer = [...filteredPermissions, ...canEditBaseLayer];
-      });
-      if (canEditBaseLayer.length > 0) {
-        canEditBaseLayerAccess = true;
-      }
-
-      let canUploadToBaseLayer: any = [];
-      let canUploadToBaseLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "canUploadToBaseLayer"
-        );
-        canUploadToBaseLayer = [
-          ...filteredPermissions,
-          ...canUploadToBaseLayer,
-        ];
-      });
-      if (canUploadToBaseLayer.length > 0) {
-        canUploadToBaseLayerAccess = true;
-      }
-
       setPerms({
-        canCreateLayer: createLayerAccess,
-        canDeleteLayer: deleteLayerAccess,
-        canEditLayer: editLayerAccess,
-        canCreateVectorLayer: saveFeatureAccess,
+        canCreateLayer: props.userDetails.customPermissions.includes(PERMS.UPLOAD_LAYER),
+        canDeleteLayer: props.userDetails.customPermissions.includes(PERMS.DELETE_LAYER),
+        canEditLayer: props.userDetails.customPermissions.includes(PERMS.EDIT_LAYER),
+        canCreateVectorLayer: props.userDetails.customPermissions.includes(PERMS.SAVE_DRAWINGS),
         canDownloadLayer: true,
-        canEditGeojson: editFeatureAccess,
-        canDeleteFeature: deleteFeatureAccess,
-        canAddFeature: addFeatureAccess,
-        canUploadFileToGeojson: uploadFileToGeojsonAccess,
-        canDeleteFileFromGeojson: deleteFileToGeojsonAccess,
-        canSetCoverPhoto: coverPhotoAccess,
-        canCreateBaseLayer: canCreateBaseLayerAccess,
-        canUpdateBaseLayer: canUpdateBaseLayerAccess,
-        canDeleteBaseLayer: canDeleteBaseLayerAccess,
-        canEditBaseLayer: canEditBaseLayerAccess,
-        canUploadToBaseLayer: canUploadToBaseLayerAccess,
+        canEditGeojson: props.userDetails.customPermissions.includes(PERMS.EDIT_FEATURE),
+        canDeleteFeature: props.userDetails.customPermissions.includes(PERMS.DELETE_FEATURE),
+        canAddFeature: props.userDetails.customPermissions.includes(PERMS.ADD_FEATURE),
+        canUploadFileToGeojson: props.userDetails.customPermissions.includes(PERMS.FEATURE_FILE_UPLOAD),
+        canDeleteFileFromGeojson: props.userDetails.customPermissions.includes(PERMS.FEATURE_FILE_DELETE),
+        canSetCoverPhoto: props.userDetails.customPermissions.includes(PERMS.SET_COVER_PHOTO),
+        canCreateBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_CREATE_BASE_LAYER),
+        canUpdateBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_UPDATE_BASE_LAYER),
+        canDeleteBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_DELETE_BASE_LAYER),
+        canEditBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_EDIT_BASE_LAYER),
+        canUploadToBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_UPLOAD_TO_BASE_LAYER),
       });
     } else if (props.userType === "tenant-root") {
       //console.log(props.userDetails);

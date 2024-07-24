@@ -29,6 +29,7 @@ import { useHistory } from "react-router-dom";
 import mp from "../../../../../static/mapping.svg";
 import { DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import "./index.less";
+import { PERMS } from "src/static/permissions";
 
 interface TableProps {
   filter: any;
@@ -203,14 +204,7 @@ function MissionTable(props: TableProps) {
 
   function renderDeleteBtn(record: any) {
     if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_delete"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.includes(PERMS.MISSION_DELETE)) {
         return (
           <Popconfirm
             title="Are you sure to delete the mission？"

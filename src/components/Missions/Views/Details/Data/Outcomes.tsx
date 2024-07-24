@@ -48,6 +48,7 @@ import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
 import axios from "axios";
+import { PERMS } from "src/static/permissions";
 
 const { Text, Title } = Typography;
 let plainOptions = new Array<any>();
@@ -844,14 +845,7 @@ function Outcomes(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "alert_create"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.includes(PERMS.ALERT_CREATE)) {
         return (
           <Button onClick={() => uploadModal()}>
             <UploadOutlined /> Upload{" "}

@@ -40,6 +40,7 @@ import { API_URL, STATIC_URL } from "src/constants";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
 import axios from "axios";
+import { PERMS } from "src/static/permissions";
 
 function Documents(props) {
   const [defaultFileList, setDefaultFileList] = useState([]);
@@ -91,24 +92,11 @@ function Documents(props) {
       ];
 
       //----checking upload perms--------------------------
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "upload_document"
-        );
-        upload = [...filteredPermissions, ...upload];
-      });
-      if (upload.length > 0) {
+      if (props.userDetails.customPermissions.includes(PERMS.UPLOAD_DOCUMENT)) {
         perms.push(ChonkyActions.UploadFiles);
       }
 
-      //--------checking delete perms------------------------
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "delete_document"
-        );
-        deleteDoc = [...filteredPermissions, ...deleteDoc];
-      });
-      if (deleteDoc.length > 0) {
+      if (props.userDetails.customPermissions.includes(PERMS.DELETE_DOCUMENT)) {
         perms.push(ChonkyActions.DeleteFiles);
       }
 

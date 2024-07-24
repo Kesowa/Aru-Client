@@ -1,4 +1,9 @@
-import { superAdminOptions, tenantRootOptions } from "../static/sideBarOptions";
+import {
+  superAdminOptions,
+  tenantRootOptions,
+  clientOptions,
+  getSideBar,
+} from "../static/sideBarOptions";
 const initialState = {
   isLoggedIn: false,
   token: null,
@@ -19,10 +24,7 @@ export default (state = initialState, action: any) => {
         userdetails: action.userdetails
           ? {
               ...action.userdetails,
-              sideBar:
-                action.userdetails.userType === "tenant-root"
-                  ? tenantRootOptions
-                  : superAdminOptions,
+              sideBar: getSideBar(action.userdetails),
             }
           : null,
       };
@@ -40,11 +42,7 @@ export default (state = initialState, action: any) => {
         ...state,
         userdetails: {
           ...action.payload,
-          sideBar: action.payload.sidebarOptions
-            ? action.payload.sidebarOptions
-            : action.payload.userType === "tenant-root"
-            ? tenantRootOptions
-            : superAdminOptions,
+          sideBar: getSideBar(action.payload),
         },
       };
     default:

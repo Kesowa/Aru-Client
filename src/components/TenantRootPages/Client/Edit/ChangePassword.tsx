@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
@@ -16,8 +16,9 @@ import FourOhOne from "../../../shared/Error/FourOhOne";
 import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
+import { PERMS } from "src/static/permissions";
 
-function ChangePassword(props: any) {
+function ChangeClientPassword(props: any) {
   const [form] = Form.useForm();
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
@@ -62,6 +63,19 @@ function ChangePassword(props: any) {
         props.loading(false);
       });
   };
+
+  useEffect(() => {
+    if (!props.Auth.isLoggedIn) {
+      setErrorState("unauthorized");
+    } else if (
+      (props.userDetails.userType === "tenant-client") ||
+      (props.userDetails.userType === "tenant-staff" && !props.userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
+    ) {
+      // clients can't edit other clients' password
+      // staff can edit clients' password only if have permission
+      setErrorState("401");
+    }
+  }, []);
 
   switch (errorState) {
     case "unauthorized":
@@ -183,6 +197,7 @@ const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
   Theme: state.Theme,
   client: state.Client.clientToEdit,
+  userDetails: state.Auth.userdetails,
 });
 
-export default connect(mapStateToProps, { loading, logout })(ChangePassword);
+export default connect(mapStateToProps, { loading, logout })(ChangeClientPassword);
