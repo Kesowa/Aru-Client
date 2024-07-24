@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { logout, setUserDetails } from "../../../actions/authAction";
 import EntryLoader from "../Loader/Entry";
@@ -7,10 +7,10 @@ import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
-import { message } from "antd";
+import { message, Space, Spin } from "antd";
 import { clientOptions } from "../../../static/sideBarOptions";
 import { components } from "src/handlers/schema";
-import Register from "../../SignUp";
+const Register = lazy(() => import("../../../components/SignUp"));
 
 const themeMap = {
   dark: `/dark-theme.css`,
@@ -47,28 +47,6 @@ function DashboardWrapper(props: any) {
       )
       .then((result) => {
         if (result.data.status) {
-          let sidebarOptions: any = null;
-          if (result.data.data.userType === "tenant-staff") {
-            let permissions: any = [];
-            result.data.data.customPermissions.forEach((p) => {
-              const filteredPermissions = p.permissions.filter(
-                (d) => d.isFrontendRoute === true
-              );
-              const k = filteredPermissions.map((e) => {
-                return {
-                  type: "menu",
-                  link: e.frontendRoute.trim(),
-                  icon: e.sideNavOptionIcon.trim(),
-                  text: e.sideNavOptionLabel,
-                };
-              });
-              permissions = [...k, ...permissions];
-            });
-            sidebarOptions = permissions;
-          } else if (result.data.data.userType === "tenant-client") {
-            sidebarOptions = [...clientOptions];
-          }
-          result.data.data.sidebarOptions = sidebarOptions;
           props.setUserDetails(result.data.data);
         } else {
           message.error(result.status.toString());
@@ -97,7 +75,15 @@ function DashboardWrapper(props: any) {
           hasPaid ? (
             <Dashboard />
           ) : (
-            <Register stage={2} tenantId={props.Auth.userdetails.tenantId} />
+            <Suspense
+              fallback={
+                <div className="example">
+                  <Space size="middle">
+                    <Spin size="large" />
+                  </Space>
+                </div>
+              }
+            > <Register stage={2} tenantId={props.Auth.userdetails.tenantId} /> </Suspense>
           )
         ) : (
           <EntryLoader />

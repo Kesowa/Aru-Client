@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
@@ -57,12 +57,34 @@ function UserChangePassword(props: any) {
       })
       .catch((err) => {
         console.log(err);
+        switch (err.response.status.toString()) {
+          case "401":
+            setErrorState("401");
+            break;
+          case "503":
+            setErrorState("503");
+            break;
+          case "504":
+            setErrorState("504");
+            break;
+          default:
+            setErrorState("500");
+        }
         AxiosErrorHandler(err, props.logout);
       })
       .finally(() => {
         props.loading(false);
       });
   };
+
+  useEffect(() => {
+    if (!props.Auth.isLoggedIn) {
+      setErrorState("unauthorized");
+    } else if (props.userDetails.userType !== "tenant-root") {
+      // only tenant-root can change tenant-staff password
+      setErrorState("401");
+    }
+  }, []);
 
   switch (errorState) {
     case "unauthorized":
@@ -181,8 +203,8 @@ function UserChangePassword(props: any) {
 
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
-  Theme: state.Theme,
   user: state.User.userToEdit,
+  userDetails: state.Auth.userdetails,
 });
 
 export default connect(mapStateToProps, { loading, logout })(

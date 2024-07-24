@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { connect } from "react-redux";
-import { Form, Input, Row, Col, message, Button, Checkbox } from "antd";
+import { Form, Input, Row, Col, message, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { UnorderedListOutlined } from "@ant-design/icons";
 import "../Permission.less";
@@ -13,7 +12,6 @@ import { Link } from "react-router-dom";
 
 function CreatePermission(props: any) {
   const [form] = Form.useForm();
-  const [isFrontendRouteEnabled, setIsFrontendRouteEnabled] = useState(false);
 
   const onFinish = (data: any) => {
     props.loading(true);
@@ -24,7 +22,6 @@ function CreatePermission(props: any) {
         console.log(result.data);
         if (result.data.status) {
           form.resetFields();
-          setIsFrontendRouteEnabled(false);
           message.info("Permission is created sucessfully.");
         } else {
           message.error(result.data.message);
@@ -39,24 +36,16 @@ function CreatePermission(props: any) {
       });
   };
 
-  const onValuesChange = (changedValues: any, allValues: any) => {
-    if (changedValues.isFrontendRoute === false) {
-      setIsFrontendRouteEnabled(false);
-    } else if (changedValues.isFrontendRoute === true) {
-      setIsFrontendRouteEnabled(true);
-    }
-  };
-
   return (
     <div className="permission-add-wrapper full-width-height">
       <PageHeader
         className="site-page-header-responsive"
-        title="Add Package"
-        subTitle="Register a new package"
+        title="Add Permission"
+        subTitle="Register a new permission"
         extra={[
           <Link to="/dashboard/admin/permission/list" key="1">
             <Button key="1" type="primary" icon={<UnorderedListOutlined />}>
-              Package List
+              Permission List
             </Button>
           </Link>,
         ]}
@@ -68,12 +57,6 @@ function CreatePermission(props: any) {
           onFinish={onFinish}
           preserve={false}
           scrollToFirstError={true}
-          onValuesChange={onValuesChange}
-          initialValues={{
-            isFrontendRoute: false,
-            isVisibleToTenant: false,
-            isVisibleToSuperAdmin: false,
-          }}
         >
           <Row gutter={16}>
             <Col span="8">
@@ -81,93 +64,16 @@ function CreatePermission(props: any) {
                 label="Permission Name(must be unique)"
                 name="name"
                 rules={[
-                  { required: true, message: "Please enter the package name!" },
+                  {
+                    required: true,
+                    message: "Please enter the permission name!",
+                  },
                 ]}
               >
-                <Input placeholder="Package Name" />
-              </Form.Item>
-            </Col>
-            <Col span="8">
-              <Form.Item
-                label="visible to Tenant"
-                name="isVisibleToTenant"
-                valuePropName="checked"
-              >
-                <Checkbox></Checkbox>
-              </Form.Item>
-            </Col>
-            <Col span="8">
-              <Form.Item
-                label="visible to Admin"
-                name="isVisibleToSuperAdmin"
-                valuePropName="checked"
-              >
-                <Checkbox></Checkbox>
+                <Input placeholder="Permission Name" />
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={16}>
-            <Col span="12">
-              <Form.Item
-                label="Frontend route"
-                name="isFrontendRoute"
-                valuePropName="checked"
-              >
-                <Checkbox></Checkbox>
-              </Form.Item>
-            </Col>
-            {isFrontendRouteEnabled ? (
-              <Col span="12">
-                <Form.Item
-                  label="Sidebar option"
-                  name="isSideNavOption"
-                  valuePropName="checked"
-                >
-                  <Checkbox></Checkbox>
-                </Form.Item>
-              </Col>
-            ) : null}
-          </Row>
-          {isFrontendRouteEnabled ? (
-            <Row gutter={16}>
-              <Col span="8">
-                <Form.Item
-                  label="Route url"
-                  name="frontendRoute"
-                  rules={[
-                    { required: true, message: "Please enter the route url!" },
-                  ]}
-                >
-                  <Input placeholder="Route link url" />
-                </Form.Item>
-              </Col>
-              <Col span="8">
-                <Form.Item
-                  label="Route icon"
-                  name="sideNavOptionIcon"
-                  rules={[
-                    { required: true, message: "Please enter the route icon!" },
-                  ]}
-                >
-                  <Input placeholder="Route icon" />
-                </Form.Item>
-              </Col>
-              <Col span="8">
-                <Form.Item
-                  label="Route label"
-                  name="sideNavOptionLabel"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please enter the route label!",
-                    },
-                  ]}
-                >
-                  <Input placeholder="Route icon" />
-                </Form.Item>
-              </Col>
-            </Row>
-          ) : null}
           <Row justify="end" gutter={16}>
             <Col>
               <Form.Item>

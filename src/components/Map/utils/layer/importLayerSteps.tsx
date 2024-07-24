@@ -18,6 +18,7 @@ import React from "react";
 import { LayerUpdated } from "./vectorLayerSteps";
 import { SketchPicker } from "react-color";
 import { v4 as uuid } from "uuid";
+import { options } from "../propUtils";
 const { Item } = Form;
 const { Option } = Select;
 const { Text, Title } = Typography;
@@ -54,7 +55,6 @@ export const ImportLayerSteps = ({
   layerColor,
   setCaptureDate,
   changeLayerType,
-  options,
   layerType1,
   setLayerName,
   primeAttributes,

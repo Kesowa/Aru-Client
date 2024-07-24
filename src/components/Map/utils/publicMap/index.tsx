@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { v4 as uuid } from "uuid";
 import KesowaNewLogo from "../../../../static/kesowa-black.png";
-import InfoWindowContent from "../infoWindow";
 import { DataFilterExtension } from "@deck.gl/extensions";
 import * as turf from "@turf/turf";
 import {
@@ -19,7 +18,6 @@ import {
   Input,
   Select,
   Space,
-  Popover,
   MenuProps,
   DatePicker,
   Badge,
@@ -48,8 +46,8 @@ import {
   PathLayer,
 } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-import { HtmlOverlayItem, HtmlOverlay } from "@nebula.gl/overlays";
-import { EditableGeoJsonLayer } from "@nebula.gl/layers";
+import { HTMLOverlayItem, HTMLOverlay } from "src/components/shared/HTMLOverlay";
+import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
   DrawPolygonMode,
   CompositeMode,
@@ -58,7 +56,7 @@ import {
   DrawLineStringMode,
   DrawPointMode,
   GeoJsonEditMode,
-} from "nebula.gl";
+} from "@deck.gl-community/editable-layers";
 import { StaticMap } from "react-map-gl";
 
 import apis from "../../../../services/apis";
@@ -93,6 +91,8 @@ import { Layer, ILayerToDeckLayer } from "../../layerRender";
 import { ILayersToTree } from "../../treeRender";
 import { WebMercatorViewport } from "viewport-mercator-project";
 import Fuse from "fuse.js";
+import { featureType } from "src/static/vectorprops";
+import { rasterProps } from "src/static/rasterprops";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -257,8 +257,7 @@ function PublicMap(props) {
   const [sideBarIcon, setSideBarIcon] = useState(<DoubleRightOutlined />);
   const [mapMode, setMapMode] = useState("mapbox://styles/mapbox/streets-v8");
 
-  // const [rasterProps, setRasterProps] = useState<any>([]); // not being set anyways
-  // const [vectorProps, setVectorProps] = useState<any>([]); // not being set anyways
+  const [bottomBarHeight, setBottomBarHeight] = useState("240px");
 
   const [tenantName, setTenantName] = useState("");
   const [mission, setMission] = useState<IMission>("");
@@ -377,7 +376,9 @@ function PublicMap(props) {
     setLayerName(layername);
     setInfoWindowMode(mode);
     setFeatureLayer(id);
+    console.log("togglePopup:", showPopup);
     togglePopup(true);
+    console.log("togglePopup:", showPopup);
     setSaveButtonShow(show);
   }
 
@@ -521,6 +522,7 @@ function PublicMap(props) {
       editMode: null,
       isCompleted: false,
     });
+    console.log("togglePopup:", showPopup);
     togglePopup(false);
     // setShowForm(false);
   };
@@ -609,9 +611,174 @@ function PublicMap(props) {
     }
   };
 
-  // const [groupToEdit, setgroupToEdit] = useState<any>(null);
-  // const [visibleEditModal, setVisibleEditModal] = useState(false);
-  // const [groupName, setgroupName] = useState("");
+  const getTreeData = (layer, type, keyPrefix) => {
+    switch (type) {
+      case "raster":
+        return {
+          title: (
+            <>
+              <Tooltip
+                mouseLeaveDelay={0.0}
+                mouseEnterDelay={0.0}
+                placement="bottom"
+                title={
+                  <span>
+                    {layer.name} &#8226;{" "}
+                    {moment(layer.captureDate).format("DD/MM/YYYY")}
+                  </span>
+                }
+              >
+                <Text
+                  style={
+                    layer.layerGroupId ? { width: "139px" } : { width: "160px" }
+                  }
+                  ellipsis={true}
+                  onClick={() => {
+                    if (!props.isBaseMap) {
+                      setlayerToAddInAttributeTable({
+                        name: layer.name,
+                        type: layer.type,
+                        id: layer._id,
+                        path: layer.layerpath,
+                        count: layer.featureCount,
+                      });
+                    }
+                  }}
+                >
+                  {layer.name}
+                </Text>
+              </Tooltip>
+            </>
+          ),
+          key: keyPrefix + "-" + layer._id,
+          icon: <FileImageOutlined />,
+          captureDate: layer.captureDate,
+          name: layer.name,
+          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
+          layer: layer,
+        };
+
+        break;
+      case "vector":
+        return {
+          title: (
+            <>
+              <Tooltip
+                mouseLeaveDelay={0.0}
+                mouseEnterDelay={0.0}
+                placement="bottom"
+                title={
+                  <span>
+                    {layer.name} &#8226;{" "}
+                    {moment(layer.captureDate).format("DD/MM/YYYY")}
+                  </span>
+                }
+              >
+                <Text
+                  style={
+                    layer.layerGroupId ? { width: "139px" } : { width: "160px" }
+                  }
+                  ellipsis={true}
+                  onClick={() => {
+                    setlayerToAddInAttributeTable({
+                      name: layer.name,
+                      type: layer.type,
+                      id: layer._id,
+                      path: layer.layerpath,
+                      count: layer.featureCount,
+                    });
+                  }}
+                >
+                  {layer.name}
+                </Text>
+              </Tooltip>
+            </>
+          ),
+          key: keyPrefix + "-" + layer._id,
+          icon: generateIcon(
+            featureType[layer.vector],
+            layer.color === "multiColor" ? "#00000" : layer.color
+          ),
+          captureDate: layer.captureDate,
+          name: layer.name,
+          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
+          layer: layer,
+        };
+    }
+  };
+
+  const [groupToEdit, setgroupToEdit] = useState<any>(null);
+  const [visibleEditModal, setVisibleEditModal] = useState(false);
+  const [groupName, setgroupName] = useState("");
+
+  const getGroupTitle = (value, id) => {
+    const menuOnClick: MenuProps["onClick"] = (e) => {
+      switch (e.key) {
+        case "1":
+          setgroupName(value.name);
+          setgroupToEdit({
+            id: id,
+            name: value.name,
+          });
+          setVisibleEditModal(true);
+          break;
+        case "2":
+          Modal.confirm({
+            title: "Delete Group?",
+            icon: <ExclamationCircleOutlined />,
+            content: (
+              <>
+                <p>Are You Sure To Want To Delete This Group</p>
+                <b>These Layers Will be deleted along with this group</b>
+                <>
+                  {value.children.map((layer) => {
+                    return <p>{layer.name}</p>;
+                  })}
+                </>
+              </>
+            ),
+            okText: "Yes",
+            cancelText: "No",
+            onOk: () => {
+              deleteGroup(id);
+            },
+          });
+          break;
+        default:
+          console.log("Incorrect selection");
+          break;
+      }
+    };
+    const menuItem: MenuProps["items"] = [
+      {
+        key: "1",
+        label: "Rename",
+      },
+      {
+        key: "2",
+        label: "Delete",
+      },
+    ];
+    return {
+      title: (
+        <>
+          <Dropdown
+            menu={{ items: menuItem, onClick: menuOnClick }}
+            trigger={["contextMenu"]}
+          >
+            <Text style={{ width: "160px" }} ellipsis={true}>
+              {value.name}
+            </Text>
+          </Dropdown>
+        </>
+      ),
+      children: [...value.children],
+      key: "group-" + id,
+      group: true,
+      icon: <FolderOutlined />,
+      groupId: id,
+    };
+  };
 
   // ++++++++++++++++++++++++++++++++
   const onRangeChange = (date, dateString) => {
@@ -776,13 +943,217 @@ function PublicMap(props) {
   //   options[1].children[2].children.sort(sortAlphabetically);
   // }
 
-  // function sortAlphabetically(a, b) {
-  //   const x = a.title.toLowerCase();
-  //   const y = b.title.toLowerCase();
-  //   if (x < y) return -1;
-  //   if (x > y) return 1;
-  //   return 0;
-  // }
+    newTreeDataVector = td[0].children.map((layer) => {
+      if (layer.group) {
+        let groupLayers = [];
+        const value = {
+          ...layer.value,
+        };
+        groupLayers = layer.value.children.map((l) => {
+          return getTreeData(l, "vector", td[0]["key"]);
+        });
+
+        value.children = [...groupLayers];
+        return getGroupTitle(value, layer.id);
+      } else {
+        return getTreeData(layer, "vector", td[0]["key"]);
+      }
+    });
+    data[0].children = [...newTreeDataVector];
+
+    newTreeDataRaster = td[1].children.map((layer) => {
+      if (layer.group) {
+        let groupLayers = [];
+        const value = {
+          ...layer.value,
+        };
+        groupLayers = layer.value.children.map((l) => {
+          return getTreeData(l, "raster", td[1]["key"]);
+        });
+        value.children = [...groupLayers];
+        return getGroupTitle(value, layer.id);
+      } else {
+        return getTreeData(layer, "raster", td[1]["key"]);
+      }
+    });
+    data[1].children = [...newTreeDataRaster];
+
+    setTreeDataa(data);
+  };
+
+  const segrigateLayers = (layers: ILayer[]) => {
+    let data = [...treeDataa];
+    console.log("TREE DATA COPY", data);
+    let allLayers = {};
+    if (
+      sortType ||
+      timeEnabled ||
+      selectedRasterProps ||
+      selectedVectorProps ||
+      selectedVectorPropsType
+    ) {
+      data = [
+        {
+          title: "City Data",
+          key: "1",
+          children: [],
+        },
+        data[1],
+      ];
+    }
+    if (!sortType) {
+      layers.sort((a, b) => {
+        return moment(b.captureDate).diff(moment(a.captureDate));
+      });
+    }
+
+    const rasters = layers.filter((layer) => layer.type === "Raster");
+    const vectors = layers.filter((layer) => layer.type === "Vector");
+
+    setvectorLayers(vectors);
+    const rasterGroups = {};
+    const allGroups = {};
+
+    rasters.forEach((layer, i) => {
+      if (!layer.layerGroupId) {
+        data[1].children.push({
+          key: `2-${layer._id}`,
+          ...layer,
+        });
+      } else {
+        if (!rasterGroups[layer.layerGroupId._id]) {
+          rasterGroups[layer.layerGroupId._id] = {
+            name: layer.layerGroupId.name,
+            children: [],
+          };
+          allGroups[layer.layerGroupId._id] = {
+            name: layer.layerGroupId.name,
+            id: layer.layerGroupId._id,
+            groupType: 2,
+          };
+        }
+        rasterGroups[layer.layerGroupId._id].children.push({
+          key: `2-${layer._id}`,
+          ...layer,
+        });
+      }
+
+      const l = {};
+      if (props.isBaseMap && !props.isMissionMap) {
+        // -----to merge all rasters paths------------------
+        l[data[1]["key"] + "-" + layer._id] = {
+          layerPath: layer.layerdataArr,
+          type: layer.raster,
+          settings: {
+            bidx: layer._metadata?.bidx || null,
+            bandExp: layer._metadata?.bandExp || null,
+            colorMap: layer._metadata?.colorMap || null,
+            resamplingMethod: layer._metadata?.resamplingMethod || null,
+            overlayId: layer._metadata?.overlayId || null,
+          },
+          name: layer.name,
+          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
+        };
+      } else {
+        l[data[1]["key"] + "-" + layer._id] = {
+          layerPath: layer.layerpath,
+          type: layer.raster,
+          settings: {
+            bidx: layer._metadata?.bidx || null,
+            bandExp: layer._metadata?.bandExp || null,
+            colorMap: layer._metadata?.colorMap || null,
+            resamplingMethod: layer._metadata?.resamplingMethod || null,
+            overlayId: layer._metadata?.overlayId || null,
+            minp: layer.minp,
+            maxp: layer.maxp,
+          },
+          name: layer.name,
+          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
+        };
+      }
+
+      allLayers = {
+        ...allLayers,
+        ...l,
+      };
+    });
+
+    const vectorGroups = {};
+
+    vectors.forEach((layer, i) => {
+      if (!layer.layerGroupId) {
+        data[0].children.push({
+          key: `1-${layer._id}`,
+          ...layer,
+        });
+      } else {
+        if (!vectorGroups[layer.layerGroupId._id]) {
+          vectorGroups[layer.layerGroupId._id] = {
+            name: layer.layerGroupId.name,
+            children: [],
+          };
+          allGroups[layer.layerGroupId._id] = {
+            name: layer.layerGroupId.name,
+            id: layer.layerGroupId._id,
+            groupType: 1,
+          };
+        }
+        vectorGroups[layer.layerGroupId._id].children.push({
+          key: `1-${layer._id}`,
+          ...layer,
+        });
+      }
+
+      const l = {};
+      l[data[0]["key"] + "-" + layer._id] = {
+        layerPath: layer.layerpath,
+        type: featureType[layer.vector],
+        name: layer.name,
+        id: layer._id,
+        T3DTranspose: false,
+        groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
+        layerLabel: layer.layerLabel,
+      };
+
+      allLayers = {
+        ...allLayers,
+        ...l,
+      };
+    });
+
+    for (const [key, value] of Object.entries(vectorGroups) as any) {
+      data[0].children.push({
+        group: true,
+        value: value,
+        id: key,
+        key: "group-" + key,
+        groupType: 1,
+      });
+    }
+
+    for (const [key, value] of Object.entries(rasterGroups) as any) {
+      data[1].children.push({
+        group: true,
+        value: value,
+        id: key,
+        key: "group-" + key,
+        groupType: 2,
+      });
+    }
+
+    setAllLayerGroups(allGroups);
+    setAllLayers(allLayers);
+    setTreeStructure(data);
+    //--------check last ortho-----
+    rasters.forEach((element) => {
+      if (element.raster === rasterProps.ORTHO) {
+        const cl: any = [];
+        cl.push(`2-${element._id}`);
+        setCheckedKeys(cl);
+        return;
+      }
+    });
+  };
 
   // TabPanes
 
@@ -811,6 +1182,105 @@ function PublicMap(props) {
   }, [layerToAddInAttributeTable]);
 
   // ++++++++++++++++++++++++++++++++++++++++++++++ Add Layer to list after createing new one +++++++++++++++++++++++++++++++++++++++++++++++
+  const addLayer = (layer) => {
+    try {
+      setIsDrawing(false);
+      setFeatureState(myFeatureCollection);
+      const data: any = [...treeStructure];
+      let layers = {
+        ...allLayers,
+      };
+
+      if (layer.type === "Vector") {
+        layer.key = `1-${layer._id}`;
+        data[0].children.push(layer);
+        const l = {};
+        l[data[0]["key"] + "-" + layer._id] = {
+          layerPath: layer.layerpath,
+          type: featureType[layer.vector],
+          name: layer.name,
+          id: layer._id,
+        };
+
+        layers = {
+          ...layers,
+          ...l,
+        };
+
+        data[0].children.sort((a, b) =>
+          moment(b.captureDate).diff(moment(a.captureDate))
+        );
+
+        setvectorLayers([...vectorLayers, layer]);
+      } else {
+        layer.key = `2-${layer._id}`;
+        data[1].children.push(layer);
+
+        const l = {};
+
+        if (props.isBaseMap) {
+          // -----to merge all rasters paths------------------
+
+          l[data[1]["key"] + "-" + layer._id] = {
+            layerPath: layer.layerdataArr,
+            type: layer.raster,
+            settings: {
+              bidx: layer._metadata?.bidx || null,
+              bandExp: layer._metadata?.bandExp || null,
+              colorMap: layer._metadata?.colorMap || null,
+              resamplingMethod: layer._metadata?.resamplingMethod || null,
+              overlayId: layer._metadata?.overlayId || null,
+            },
+            name: layer.name,
+            id: layer._id,
+          };
+        } else {
+          l[data[1]["key"] + "-" + layer._id] = {
+            layerPath: layer.layerpath,
+            type: layer.raster,
+            settings: {
+              bidx: layer._metadata?.bidx || null,
+              bandExp: layer._metadata?.bandExp || null,
+              colorMap: layer._metadata?.colorMap || null,
+              resamplingMethod: layer._metadata?.resamplingMethod || null,
+              overlayId: layer._metadata?.overlayId || null,
+              minp: layer.minp,
+              maxp: layer.maxp,
+            },
+            name: layer.name,
+            id: layer._id,
+          };
+        }
+
+        layers = {
+          ...layers,
+          ...l,
+        };
+
+        data[1].children.sort((a, b) =>
+          moment(b.captureDate).diff(moment(a.captureDate))
+        );
+      }
+
+      while (data[0].children.length && data[0].children[0].group) {
+        data[0].children.push(data[0].children.shift());
+      }
+
+      while (data[1].children.length && data[1].children[0].group) {
+        data[1].children.push(data[1].children.shift());
+      }
+      setAllLayers(layers);
+      setTreeStructure(data);
+
+      if (layer.type === "Vector") {
+        const cl = [...checkedKeys];
+        cl.push(data[0]["key"] + "-" + layer._id);
+        setCheckedKeys(cl);
+      }
+    } catch (error) {
+      message.error(error.message);
+    }
+  };
 
   // DRAW POLYGON FUNCTION
   const drawPolygonTool = new (EditableGeoJsonLayer as any)({
@@ -1186,9 +1656,10 @@ function PublicMap(props) {
                 />
               )}
 
-              {showPopup && (
-                <HtmlOverlay>
-                  <HtmlOverlayItem coordinates={coordinates}>
+              { showPopup &&
+                (
+                <HTMLOverlay>
+                 <HTMLOverlayItem coordinates={coordinates} viewState={setViewport}>
                     <Popover
                       content={
                         <>
@@ -1232,8 +1703,8 @@ function PublicMap(props) {
                       style={{ position: "relative" }}
                       onVisibleChange={() => handleClose(false)}
                     />
-                  </HtmlOverlayItem>
-                </HtmlOverlay>
+                  </HTMLOverlayItem>
+                </HTMLOverlay>
               )}
             </DeckGL>
 

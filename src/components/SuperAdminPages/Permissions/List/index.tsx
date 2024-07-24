@@ -21,62 +21,6 @@ function ListAllPermissions(props: any) {
       dataIndex: "name",
       key: "name",
     },
-    {
-      title: "frontend route",
-      dataIndex: "isFrontendRoute",
-      key: "isFrontendRoute",
-      render: (status: boolean) => (
-        <Tag color={status ? "green" : "volcano"}>{status ? "yes" : "no"}</Tag>
-      ),
-    },
-    {
-      title: "Sidebar Route",
-      dataIndex: "frontendRoute",
-      key: "frontendRoute",
-    },
-    {
-      title: "Sidebar Label",
-      dataIndex: "sideNavOptionLabel",
-      key: "sideNavOptionLabel",
-    },
-    {
-      title: "show in side navigation",
-      dataIndex: "isSideNavOption",
-      key: "isSideNavOption",
-      render: (status: boolean) => (
-        <Tag color={status ? "green" : "volcano"}>{status ? "yes" : "no"}</Tag>
-      ),
-    },
-    {
-      title: "visible to super admin",
-      dataIndex: "isVisibleToSuperAdmin",
-      key: "isVisibleToSuperAdmin",
-      render: (status: boolean) => (
-        <Tag color={status ? "green" : "volcano"}>
-          {status ? "visible" : "not visible"}
-        </Tag>
-      ),
-    },
-    {
-      title: "visible to tenant",
-      dataIndex: "isVisibleToTenant",
-      key: "isVisibleToTenant",
-      render: (status: boolean) => (
-        <Tag color={status ? "green" : "volcano"}>
-          {status ? "visible" : "not visible"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Status",
-      dataIndex: "isActive",
-      key: "isActive",
-      render: (status: boolean) => (
-        <Tag color={status ? "green" : "volcano"}>
-          {status ? "Working" : "Deleted"}
-        </Tag>
-      ),
-    },
   ];
 
   const fetchAllPermissionList = () => {

@@ -20,6 +20,7 @@ import {
 } from "antd";
 import { UploadOutlined, InboxOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
+import { options } from "../propUtils";
 const { Dragger } = Upload;
 const { Item } = Form;
 const { Meta } = Card;
@@ -41,7 +42,6 @@ export const UploadVectorData = ({
   layerColor,
   setLayerColor,
   onChangeInherit,
-  options,
 }) => {
   return (
     <>
