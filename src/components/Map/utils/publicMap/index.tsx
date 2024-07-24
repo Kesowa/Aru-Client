@@ -658,7 +658,6 @@ function PublicMap(props) {
           layer: layer,
         };
 
-        break;
       case "vector":
         return {
           title: (
@@ -979,7 +978,6 @@ function PublicMap(props) {
     data[1].children = [...newTreeDataRaster];
 
     setTreeDataa(data);
-  };
 
   const segrigateLayers = (layers: ILayer[]) => {
     let data = [...treeDataa];
