@@ -1,4 +1,6 @@
+import { vectorProps } from "src/static/vectorprops";
 import { ISODate, ObjectId } from "./common";
+import { rasterProps } from "src/static/rasterprops";
 
 export enum VectorName {
   Zone_Boundary = "Zone Boundary",
@@ -74,40 +76,8 @@ export enum VectorName {
 export type ILayer = {
   _id: ObjectId;
   type: "Vector" | "Raster"; // index
-  raster: {
-    _id: ObjectId;
-    name:
-      | "ORTHO"
-      | "DEM"
-      | "NDVI"
-      | "DTM"
-      | "NDWI"
-      | "POINT_CLOUD"
-      | "CESIUM_3D";
-    bidx?: string;
-    bandExp?: string;
-    colorMap?: string;
-    resamplingMethod?: string;
-    createdBy: ObjectId;
-    updatedBy: ObjectId;
-    createdAt: ISODate;
-    updatedAt: ISODate;
-    overlayId?: string; // only for DEM layers
-  };
-  vector: {
-    _id: ObjectId;
-    name: VectorName;
-    type:
-      | "Point"
-      | "MultiLineString"
-      | "MultiPolygon"
-      | "air_pollution"
-      | "wind_direction";
-    createdBy: ObjectId;
-    updatedBy: ObjectId;
-    createdAt: ISODate;
-    updatedAt: ISODate;
-  };
+  raster: rasterProps;
+  vector: vectorProps;
   missionId: ObjectId; // index
   tenantId: ObjectId; // index
   createdBy: ObjectId;
@@ -144,5 +114,5 @@ export type ILayer = {
   commentCount: Number;
   createdAt: ISODate; // index
   updatedAt: ISODate;
-  metadata: string | Object;
+  metadata: { [key: string]: any };
 };

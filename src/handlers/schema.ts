@@ -3,6 +3,10 @@
  * Do not make direct changes to the file.
  */
 
+import { PERMS } from "src/static/permissions";
+import { rasterProps } from "src/static/rasterprops";
+import { vectorProps } from "src/static/vectorprops";
+
 export interface paths {
   "/alert/upload-alert-image": {
     /** This should be a multipart form-data */
@@ -467,7 +471,7 @@ export interface components {
       userGroupId: components["schemas"]["MongoId"];
       createdBy: components["schemas"]["MongoId"];
       updatedBy: components["schemas"]["MongoId"];
-      customPermissions: components["schemas"]["MongoId"][];
+      customPermissions: components["schemas"]["IPermission"][];
     };
     IFlight: {
       _id: components["schemas"]["MongoId"];
@@ -833,26 +837,7 @@ export interface components {
       email: string;
       password: string;
     };
-    IPermission: {
-      name: string;
-      isSideNavOption: boolean;
-      isFrontendRoute: boolean;
-      isPilot: boolean;
-      isClient: boolean;
-      frontendRoute?: string;
-      isVisibleToTenant: boolean;
-      isVisibleToSuperAdmin: boolean;
-      sideNavOptionLabel: string;
-      sideNavOptionIcon: string;
-      description: string;
-      isActive: boolean;
-      /** Format: date-time */
-      createdAt: string;
-      /** Format: date-time */
-      updatedAt: string;
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
-    };
+    IPermission: PERMS;
     IUserGroupPermissions: {
       permissions: components["schemas"]["IPermission"][];
       tenantId: components["schemas"]["MongoId"];
@@ -871,7 +856,7 @@ export interface components {
       userGroupId: components["schemas"]["MongoId"];
       createdBy: components["schemas"]["MongoId"];
       updatedBy: components["schemas"]["MongoId"];
-      customPermissions: components["schemas"]["IUserGroupPermissions"][];
+      customPermissions: components["schemas"]["IPermission"][];
       _id: components["schemas"]["MongoId"];
       name: string;
       phoneNo: string;
@@ -1018,8 +1003,8 @@ export interface components {
       createdAt: string;
       /** Format: date-time */
       updatedAt: string;
-      raster: components["schemas"]["MongoId"];
-      vector: components["schemas"]["MongoId"];
+      raster: rasterProps;
+      vector: vectorProps;
       missionId: components["schemas"]["MongoId"];
       tenantId: components["schemas"]["MongoId"];
       createdBy: components["schemas"]["MongoId"];
@@ -1112,21 +1097,10 @@ export interface components {
       pattr: components["schemas"]["Attrs"][];
       id: components["schemas"]["MongoId"];
     };
-    IVector: {
-      _id: components["schemas"]["MongoId"];
-      name: string;
-      /** @enum {string} */
-      type: "Point" | "MultiLinestring" | "MultiPolygon";
-      /** Format: date-time */
-      createdAt: string;
-      /** Format: date-time */
-      updatedAt: string;
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
-    };
+    IVector: vectorProps;
     ILayerVector: {
-      raster: components["schemas"]["MongoId"];
-      vector: components["schemas"]["IVector"];
+      raster: rasterProps;
+      vector: vectorProps;
       missionId: components["schemas"]["MongoId"];
       tenantId: components["schemas"]["MongoId"];
       createdBy: components["schemas"]["MongoId"];
@@ -1196,24 +1170,10 @@ export interface components {
       vectorProps?: string[];
       vectorPropsType?: string[];
     };
-    IRaster: {
-      _id: components["schemas"]["MongoId"];
-      /** @enum {string} */
-      name: "ORTHO" | "DEM" | "NDVI" | "DTM" | "NDWI";
-      bidx?: string;
-      bandExp?: string;
-      colorMap?: string;
-      resamplingMethod?: string;
-      /** Format: date-time */
-      createdAt: string;
-      /** Format: date-time */
-      updatedAt: string;
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
-    };
+    IRaster: rasterProps;
     ILayerRasterVector: {
-      raster: components["schemas"]["IRaster"];
-      vector: components["schemas"]["IVector"];
+      raster: rasterProps;
+      vector: vectorProps;
       missionId: components["schemas"]["MongoId"];
       tenantId: components["schemas"]["MongoId"];
       createdBy: components["schemas"]["MongoId"];
@@ -1369,7 +1329,7 @@ export interface components {
       file: components["schemas"]["File"];
       name: string;
       type: string;
-      raster: components["schemas"]["MongoId"];
+      raster: rasterProps;
       /** Format: date */
       captureDate: string;
     };
@@ -1535,8 +1495,8 @@ export interface components {
       upcomingPackages: components["schemas"]["MongoId"][];
     };
     ILayerTenantVector: {
-      raster: components["schemas"]["MongoId"];
-      vector: components["schemas"]["IVector"];
+      raster: rasterProps;
+      vector: vectorProps;
       missionId: components["schemas"]["MongoId"];
       tenantId: components["schemas"]["ITenant"];
       createdBy: components["schemas"]["MongoId"];

@@ -34,13 +34,27 @@ import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import moment from "moment";
 import { STATIC_URL } from "src/constants";
+import { components } from "src/handlers/schema";
+import { PERMS, TENANT_STAFF_PERMS } from "src/static/permissions";
 
 function UserEditPage(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
-  const [userGroups, setUserGroups]: [any, any] = useState([]);
-  const [selectedUserGroup, setSelectedusergroup]: [any, any] = useState();
+  const [userGroups, setUserGroups] = useState<
+    {
+      name: string;
+      _id: string;
+      isActive: boolean;
+      permissions: string[];
+    }[]
+  >([]);
+  const [selectedUserGroup, setSelectedusergroup] = useState<{
+    name: string;
+    _id: string;
+    isActive: boolean;
+    permissions: string[];
+  }>();
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
   //avatar upload
@@ -90,31 +104,12 @@ function UserEditPage(props: any) {
         console.log(result);
 
         if (result.data.status) {
-          const data = result.data.data.map((ele: any) => {
-            return {
-              name: ele.name,
-              _id: ele._id,
-              isActive: ele.isActive,
-              permissions: [...ele.permissions],
-            };
-          });
-
-          let groups = data.filter((ele) => {
-            let f = false;
-            ele.permissions.forEach((p) => {
-              if (!p.isClient) {
-                f = true;
-              }
-            });
-            return f;
-          });
-
-          groups = groups.map((group) => ({
-            ...group,
-            permissions: group.permissions.map((ele) => ele.name),
-          }));
-
-          console.log("groups", groups);
+          const data: components["schemas"]["IUserGroupPermissions"][] = result.data.data;
+          const groups = data
+            .filter((ele) =>
+              ele.permissions.every(perm => TENANT_STAFF_PERMS.includes(perm)) // only list usergroups assignable to tenant-staff
+            )
+            .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }));
 
           if (!props.user) {
             history.push("/dashboard/tenant/user/list");
@@ -156,7 +151,15 @@ function UserEditPage(props: any) {
       });
   };
   useEffect(() => {
-    fetchAllUserGroupList();
+    if (!props.Auth.isLoggedIn) {
+      setErrorState("unauthorized");
+    } else if (props.userDetails.userType !== "tenant-root") {
+      // only tenant-root can change tenant-staff details
+      setErrorState("401");
+    } else {
+      // current user is tenant-root, proceed to fetching necessary data for user details editing
+      fetchAllUserGroupList();
+    }
   }, []);
 
   useEffect(() => {
@@ -414,6 +417,7 @@ const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
   Theme: state.Theme,
   user: state.User.userToEdit,
+  userDetails: state.Auth.userdetails,
 });
 
 export default connect(mapStateToProps, { loading, logout })(UserEditPage);

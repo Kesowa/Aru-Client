@@ -19,6 +19,7 @@ import { logout } from "../../../../../actions/authAction";
 import { connect } from "react-redux";
 import "./data.less";
 import { STATIC_URL } from "src/constants";
+import { PERMS } from "src/static/permissions";
 
 const { Text, Title } = Typography;
 
@@ -112,10 +113,6 @@ function ManageClients(props) {
       });
   }
 
-  useEffect(() => console.log(props.missionClient), [props.missionClient]);
-
-  useEffect(() => console.log(currClientId), [currClientId]);
-
   const onChange = (a) => {
     console.log("value of a", a);
     setCurrClientId(a);
@@ -128,17 +125,7 @@ function ManageClients(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) =>
-            d.name === "create_client" ||
-            d.name === "edit_client" ||
-            d.name === "delete_client"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.some(perm => [PERMS.CREATE_CLIENT, PERMS.EDIT_CLIENT, PERMS.DELETE_CLIENT].includes(perm))) {
         return (
           <>
             <div
@@ -225,17 +212,7 @@ function ManageClients(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) =>
-            d.name === "create_client" ||
-            d.name === "edit_client" ||
-            d.name === "delete_client"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.some(perm => [PERMS.CREATE_CLIENT, PERMS.EDIT_CLIENT, PERMS.DELETE_CLIENT].includes(perm))) {
         return (
           <>
             &nbsp;&nbsp;&nbsp;&nbsp;

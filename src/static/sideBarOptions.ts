@@ -1,3 +1,6 @@
+import { components } from "src/handlers/schema";
+import { PERMS } from "./permissions";
+
 //++++++++++++++++++++++++++++++++ super admin ++++++++++++++++++++++++++++++++++++++
 export const superAdminOptions = [
   {
@@ -163,3 +166,97 @@ export const tenantRootOptions = [
     text: "Assets",
   },
 ];
+
+export const permissionGuardedOptions = [
+  {
+    permission: PERMS.MISSION_CREATE,
+    link: "/dashboard/missions/create",
+    icon: "PlusCircleOutlined",
+    label: "Create mission",
+  },
+  {
+    permission: PERMS.MISSION_LIST,
+    link: "/dashboard/missions",
+    icon: "BorderInnerOutlined",
+    label: "Missions",
+  },
+  {
+    permission: PERMS.DATA_PAGE,
+    link: "/dashboard/data",
+    icon: "DatabaseOutlined",
+    label: "Data",
+  },
+  {
+    permission: PERMS.ASSET_LIST,
+    link: "/dashboard/assets",
+    icon: "ClusterOutlined",
+    label: "Assets",
+  },
+  {
+    permission: PERMS.USER_LIST,
+    link: "/dashboard/tenant/user/list",
+    icon: "UserOutlined",
+    label: "User list",
+  },
+  {
+    permission: PERMS.DASHBOARD,
+    link: "/dashboard",
+    icon: "LayoutOutlined",
+    label: "Dashboard",
+  },
+  {
+    permission: PERMS.CREATE_CLIENT,
+    link: "/dashboard/tenant/client/create",
+    icon: "UserAddOutlined",
+    label: "Create Client",
+  },
+  {
+    permission: PERMS.CLIENT_LIST,
+    link: "/dashboard/tenant/client/list",
+    icon: "SolutionOutlined",
+    label: "Client List",
+  },
+  {
+    permission: PERMS.CLIENT_DATA,
+    link: "/dashboard/tenant/client/missions",
+    icon: "SaveOutlined",
+    label: "Client Data",
+  },
+  {
+    permission: PERMS.USER_CREATE,
+    link: "/dashboard/tenant/user/create",
+    icon: "UserAddOutlined",
+    label: "Create User",
+  },
+];
+
+export const permissionsToSideBar = (
+  permissions: components["schemas"]["IPermission"][]
+) => {
+  const permissionNames = permissions.map((p) => p);
+  return permissionGuardedOptions
+    .filter((p) => permissionNames.includes(p.permission))
+    .map(({ link, icon, label }) => ({
+      type: "menu",
+      link,
+      icon,
+      text: label,
+    }));
+};
+
+export const getSideBar = ({
+  userType,
+  customPermissions,
+}: components["schemas"]["IUserCustomPermission"]) => {
+  switch (userType) {
+    case "tenant-root":
+      return tenantRootOptions;
+    case "tenant-client":
+      return clientOptions;
+    case "super-admin":
+      return superAdminOptions;
+    default: {
+      return permissionsToSideBar(customPermissions);
+    }
+  }
+};

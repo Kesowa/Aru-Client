@@ -114,7 +114,7 @@ function UserGroupListPage(props: any) {
               name: ele.name,
               _id: ele._id,
               isActive: ele.isActive,
-              permissions: ele.permissions.map((e: any) => e.name),
+              permissions: ele.permissions,
             };
           });
           console.log(data);
@@ -207,9 +207,9 @@ function UserGroupListPage(props: any) {
                         }
                         bordered
                         dataSource={activeUserGroup.permissions}
-                        renderItem={(item: any) => (
+                        renderItem={(item: string) => (
                           <List.Item>
-                            <Typography.Text>{item}</Typography.Text>
+                            <span aria-valuetext={item} style={{textTransform: "capitalize"}}>{item.replaceAll('_', ' ')}</span>
                           </List.Item>
                         )}
                       />

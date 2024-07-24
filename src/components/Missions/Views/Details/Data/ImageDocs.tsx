@@ -47,6 +47,7 @@ import { BsFlagFill } from "react-icons/bs";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
+import { PERMS } from "src/static/permissions";
 
 let plainOptions = new Array<any>();
 function ImageDocs(props) {
@@ -107,14 +108,7 @@ function ImageDocs(props) {
       props.missionDetails.userType === "tenant-staff" ||
       props.missionDetails.userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.missionDetails.currentUserDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "vod_delete"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.VOD_DELETE)) {
         item.push(deleteItem);
       }
     } else {
@@ -635,14 +629,7 @@ function ImageDocs(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "upload_document"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.includes(PERMS.UPLOAD_DOCUMENT)) {
         return (
           <div className="upload-btn">
             <Button onClick={() => uploadModal()}>

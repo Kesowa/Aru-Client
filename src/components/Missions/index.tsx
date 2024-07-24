@@ -12,6 +12,7 @@ import { connect } from "react-redux";
 import { setMissionsToState } from "../../actions/missionActions";
 import { logout } from "../../actions/authAction";
 import "./index.less";
+import { PERMS } from "src/static/permissions";
 
 function MissionList(props) {
   const location = useLocation<any>();
@@ -193,14 +194,7 @@ function MissionList(props) {
   //----------------------Render create mission based on permission----------------------------------------
   function renderCreateBtn() {
     if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_create"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.includes(PERMS.MISSION_CREATE)) {
         return (
           <Link to="/dashboard/missions/create" key="1">
             <Button key="1" type="primary" icon={<PlusCircleOutlined />}>

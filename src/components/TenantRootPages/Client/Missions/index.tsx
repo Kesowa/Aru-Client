@@ -38,6 +38,7 @@ import moment from "moment";
 import { useHistory } from "react-router-dom";
 import mp from "../../../../static/mapping.svg";
 import "../../../shared/MissionList.less";
+import { PERMS } from "src/static/permissions";
 
 interface TabOptions {
   filter: any;
@@ -196,14 +197,7 @@ function DataMission(props) {
 
   function renderDeleteBtn(record: any) {
     if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_delete"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.includes(PERMS.MISSION_DELETE)) {
         return (
           <Popconfirm
             title="Are you sure to delete the mission？"
@@ -478,14 +472,7 @@ function DataMission(props) {
   //-------------render create client button-----------------------------------
   function renderCreateListButton() {
     if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "client_list"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (props.userDetails.customPermissions.includes(PERMS.CLIENT_LIST)) {
         return (
           <Link to="/dashboard/tenant/client/list" key="1">
             <Button key="1" type="primary" icon={<SolutionOutlined />}>

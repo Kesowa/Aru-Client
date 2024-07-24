@@ -11,6 +11,8 @@ export type Properties = {
   icon: string;
   sys_id: string;
   Nth: Record<string, string | number>;
+  Id?: string;
+  description?: string;
 };
 
 export interface Feature<Geometry, Property> {
