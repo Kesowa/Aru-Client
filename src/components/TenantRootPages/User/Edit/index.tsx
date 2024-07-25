@@ -158,7 +158,11 @@ function UserEditPage(props: any) {
       setErrorState("401");
     } else {
       // current user is tenant-root, proceed to fetching necessary data for user details editing
-      fetchAllUserGroupList();
+      if (props.user.userType !== "tenant-root") {
+        // when tenant-root is editing their own user details, usergroups need not be fetched 
+        // as tenant-root won't belong to a user group
+        fetchAllUserGroupList();
+      }
     }
   }, []);
 
@@ -173,6 +177,7 @@ function UserEditPage(props: any) {
     if (!data.dob) delete data.dob;
     if (!data.aadhaarNo) delete data.aadhaarNo;
     if (!data.pilotLicenceNo) delete data.pilotLicenceNo;
+    if (!data.userGroupId) delete data.userGroupId;
     console.log(data);
     EditUserAccount(data);
   };
@@ -223,7 +228,7 @@ function UserEditPage(props: any) {
     default:
       return (
         <div className="tenant-root-usercreatepage-wrapper full-width-height">
-          {props.user && selectedUserGroup && (
+          {props.user && (props.user.userType === "tenant-staff" ? selectedUserGroup : true) && (
             <>
               <PageHeader
                 onBack={() => window.history.back()}
@@ -253,7 +258,7 @@ function UserEditPage(props: any) {
                     email: props.user.email,
                     phoneNo: props.user.phoneNo,
                     userType: "tenant-client",
-                    userGroupId: selectedUserGroup._id,
+                    userGroupId: (props.user.userType === "tenant-staff" ? selectedUserGroup._id : null),
                   }}
                   className="user-form"
                 >
@@ -262,43 +267,49 @@ function UserEditPage(props: any) {
                       <Form.Item label="Name" name="name">
                         <Input placeholder="User's name" />
                       </Form.Item>
-                      <Form.Item label="User Group" name="userGroupId">
-                        <Select
-                          onChange={onUserGroupChange}
-                          showSearch
-                          placeholder="Select a user group"
-                          defaultValue={selectedUserGroup.name}
-                          filterOption={(input, option) =>
-                            option!.children
-                              .toLowerCase()
-                              .indexOf(input.toLowerCase()) >= 0
-                          }
-                        >
-                          {userGroups.map((ele: any, i: any) => (
-                            <Select.Option key={ele._id} value={ele._id}>
-                              {ele.name}
-                            </Select.Option>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                      {selectedUserGroup ? (
-                        <Collapse>
-                          <Collapse.Panel header="User Group Details" key="1">
-                            <List
-                              header={
-                                <div>{`User Group : ${selectedUserGroup.name}`}</div>
+                      {
+                        // tenant-root can change their own details, while doing that usergroup option shouldn't be displayed
+                        props.user.userType === "tenant-staff" &&
+                        <>
+                          <Form.Item label="User Group" name="userGroupId">
+                            <Select
+                              onChange={onUserGroupChange}
+                              showSearch
+                              placeholder="Select a user group"
+                              defaultValue={selectedUserGroup.name}
+                              filterOption={(input, option) =>
+                                option!.children
+                                  .toLowerCase()
+                                  .indexOf(input.toLowerCase()) >= 0
                               }
-                              bordered
-                              dataSource={selectedUserGroup.permissions}
-                              renderItem={(item: any) => (
-                                <List.Item>
-                                  <Typography.Text>{item}</Typography.Text>
-                                </List.Item>
-                              )}
-                            />
-                          </Collapse.Panel>
-                        </Collapse>
-                      ) : null}
+                            >
+                              {userGroups.map((ele: any, i: any) => (
+                                <Select.Option key={ele._id} value={ele._id}>
+                                  {ele.name}
+                                </Select.Option>
+                              ))}
+                            </Select>
+                          </Form.Item>
+                          {selectedUserGroup ? (
+                            <Collapse>
+                              <Collapse.Panel header="User Group Details" key="1">
+                                <List
+                                  header={
+                                    <div>{`User Group : ${selectedUserGroup.name}`}</div>
+                                  }
+                                  bordered
+                                  dataSource={selectedUserGroup.permissions}
+                                  renderItem={(item: any) => (
+                                    <List.Item>
+                                      <Typography.Text>{item}</Typography.Text>
+                                    </List.Item>
+                                  )}
+                                />
+                              </Collapse.Panel>
+                            </Collapse>
+                          ) : null}
+                        </>
+                      }
                     </Col>
                     <Col span="12">
                       <ImgCrop grid={true} shape="round">
