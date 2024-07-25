@@ -18,28 +18,7 @@ const themeMap = {
 };
 
 function DashboardWrapper(props: any) {
-  const [hasPaid, setHasPaid] = useState(false);
   const [isFetched, setIsFetched] = useState(false);
-  const fetchPaymentDetails = () => {
-    http
-      .get(apis.GET_TENANT_STATS)
-      .then((result) => {
-        if (result.data.status) {
-          if (String(result.data.packageData.name) !== "Trial") {
-            setHasPaid(true);
-          }
-          setIsFetched(true);
-        } else {
-          message.error(result.status.toString());
-          console.log(result);
-          props.logout();
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        AxiosErrorHandler(err, props.logout);
-      });
-  };
   const fetchUserDetails = () => {
     http
       .get<components["schemas"]["UserDetailsAuthResponse"]>(
@@ -57,34 +36,22 @@ function DashboardWrapper(props: any) {
       .catch((err) => {
         console.log(err);
         AxiosErrorHandler(err, props.logout);
-      });
+      })
+      .finally(() => setIsFetched(true));
   };
 
   //fetching user details on component load
   useEffect(() => {
     if (!props.Auth.userdetails || !isFetched) {
       fetchUserDetails();
-      fetchPaymentDetails();
     }
-  }, [props.Auth.isLoggedIn, hasPaid]);
+  }, [props.Auth.isLoggedIn]);
 
   return (
     <ThemeSwitcherProvider themeMap={themeMap} defaultTheme="light">
       <div>
         {props.Auth.userdetails && isFetched ? (
-          hasPaid ? (
-            <Dashboard />
-          ) : (
-            <Suspense
-              fallback={
-                <div className="example">
-                  <Space size="middle">
-                    <Spin size="large" />
-                  </Space>
-                </div>
-              }
-            > <Register stage={2} tenantId={props.Auth.userdetails.tenantId} /> </Suspense>
-          )
+          <Dashboard />
         ) : (
           <EntryLoader />
         )}

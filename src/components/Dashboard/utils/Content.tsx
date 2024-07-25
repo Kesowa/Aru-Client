@@ -146,7 +146,12 @@ function DashboardContent(props: any) {
     }
   }
 
-  useEffect(() => fetchTenantStats(), [props.UserDetails]);
+  useEffect(() => {
+    if (["tenant-staff","tenant-root"].includes(props.UserDetails.userType)) {
+      fetchTenantStats()
+    }
+  }, [props.UserDetails]);
+
   const renderStorageStats = () => {
     console.log("Fetched stats", storage);
     const storageRes = storage;
