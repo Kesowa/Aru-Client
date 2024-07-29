@@ -8,11 +8,11 @@ import convertDegreeToDirection from "../../../services/convertDegreeToDirection
 
 import { connect } from "react-redux";
 import { setWeather } from "../../../actions/missionCreation";
+import { OPENWEATHER_API_KEY } from "src/constants";
 
 const { Title, Text } = Typography;
 
 function Weather(props) {
-  const apiKey = "005654b6079a36f1533c4e910e478b50";
   const [weatherData, setWeatherData] = useState<any>("");
   const [data, setData] = useState<any>("");
   const [oneCallResData, setOneCallResData] = useState<any>("");
@@ -23,7 +23,7 @@ function Weather(props) {
 
   useEffect(() => {
     fetch(
-      `https://api.openweathermap.org/data/2.5/onecall?lat=${props.location.lat}&lon=${props.location.lng}&appid=${apiKey}`
+      `https://api.openweathermap.org/data/2.5/onecall?lat=${props.location.lat}&lon=${props.location.lng}&appid=${OPENWEATHER_API_KEY}`
     )
       .then((res) => res.json())
       .then((res) => {
@@ -62,7 +62,7 @@ function Weather(props) {
 
   function fetchHistoricalData(time) {
     fetch(
-      `https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${props.location.lat}&lon=${props.location.lng}&dt=${time}&appid=${apiKey}`
+      `https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${props.location.lat}&lon=${props.location.lng}&dt=${time}&appid=${OPENWEATHER_API_KEY}`
     )
       .then((res) => res.json())
       .then((res) => {

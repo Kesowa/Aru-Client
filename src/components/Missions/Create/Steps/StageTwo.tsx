@@ -11,6 +11,7 @@ import convertDegreeToDirection from "../../../../services/convertDegreeToDirect
 import http from "../../../../services/httpCall";
 import { logout } from "../../../../actions/authAction";
 import "../index.less";
+import axios from "axios";
 
 const { Panel } = Collapse;
 const { Title } = Typography;
@@ -61,7 +62,7 @@ const StageTwo: FC<StageTwoProps> = ({
       isoDate.split("T")[1].split(":")[1] +
       ":" +
       isoDate.split("T")[1].split(":")[2];
-    http
+    axios
       .get(
         `https://api.tomorrow.io/v4/timelines?fields=temperature&fields=humidity&fields=windSpeed&fields=windDirection&fields=windGust&fields=visibility&fields=weatherCode&units=metric&apikey=cwzgSdpHOiiFQt8y8I9d2SUpAPQG7X7U&location=${location.lat},${location.lng}&startTime=${isoDate}&endTime=${endTime}`
       )
