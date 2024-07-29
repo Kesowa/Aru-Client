@@ -260,11 +260,13 @@ function MissionView(props) {
         console.log("no clients here bitches");
       }
 
-      await fetchPilots();
       setMissionDetails(details);
-
-      // Get all available mission types from backend
-      await fetchMissionTypes();
+      
+      // if user is able to edit mission, get mission types and pilot list and client list from backend
+      if (props.userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
+        await fetchPilots();
+        await fetchMissionTypes();
+      }
 
       // Set loading status to false
       props.loading(false);
@@ -919,38 +921,18 @@ function MissionView(props) {
   //----------------Render Assign Pilot Button---------------------
 
   function renderAssignPilotBtn(buttonText: string) {
-    if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
-    ) {
-      if (props.userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
-        return (
-          <Button
-            type="primary"
-            icon={<UserAddOutlined />}
-            onClick={() => {
-              setIsPilotModalVisible(true);
-            }}
-            disabled={MissionDetails.missionStatus !== "Upcoming"}
-          >
-            {buttonText}
-          </Button>
-        );
-      }
-    } else {
-      return (
-        <Button
-          type="primary"
-          icon={<UserAddOutlined />}
-          onClick={() => {
-            setIsPilotModalVisible(true);
-          }}
-          disabled={MissionDetails.missionStatus !== "Upcoming"}
-        >
-          {buttonText}
-        </Button>
-      );
-    }
+    return (
+      <Button
+        type="primary"
+        icon={<UserAddOutlined />}
+        onClick={() => {
+          setIsPilotModalVisible(true);
+        }}
+        disabled={MissionDetails.missionStatus !== "Upcoming"}
+      >
+        {buttonText}
+      </Button>
+    );
   }
 
   //--------------Render Generate Report Button-----------
@@ -1106,7 +1088,7 @@ function MissionView(props) {
     return initials;
   }
 
-  function renderPilotAssignButton() {
+  function renderPilotAssignModal() {
     return (
       <Modal
         title="Assign Pilot"
@@ -1170,63 +1152,38 @@ function MissionView(props) {
   }
 
   function renderPilotBadge() {
-    //TO RENDER PILOT BADGE
-    if (initialPilot.name) {
-      return (
-        <>
-          <Avatar
-            key="2"
-            size="large"
-            icon={<UserOutlined />}
-            src={initialPilot.avatar}
-          />
-          <div className="pilot-name">
-            <Title level={5} className="designation">
-              {initialPilot.name}
-            </Title>
-            <Text type="secondary">Pilot assigned</Text>
-          </div>
+    return (
+      <>
+        {
+          (initialPilot.name || (MissionDetails.pilotAssigned !== "no-pilot")) &&
+          <>
+            <Avatar
+              key="2"
+              size="large"
+              icon={<UserOutlined />}
+              src={initialPilot.avatar ? initialPilot.avatar : STATIC_URL + MissionDetails.pilotPhoto}
+            />
+            <div className="pilot-name">
+              <Title level={5} className="designation">
+                {initialPilot.name ? initialPilot.name : MissionDetails.pilotAssigned}
+              </Title>
+              <Text type="secondary">Pilot assigned</Text>
+            </div>
+          </>
+        }
+        {
+          props.userDetails.customPermissions.includes(PERMS.MISSION_UPDATE) &&
           <div className="pilot-assign-btn">
-            {renderAssignPilotBtn("Re-Assign Pilot")}
-            {/* {renderGenerateReportButton()} */}
-            {renderPilotAssignButton()}
+            {renderAssignPilotBtn(
+              (initialPilot.name || (MissionDetails.pilotAssigned !== "no-pilot")) ?
+              "Re-Assign Pilot" :
+              "Assign Pilot"
+            )}
+            {renderPilotAssignModal()}
           </div>
-        </>
-      );
-    } else if (
-      MissionDetails.pilotAssigned == "no-pilot" &&
-      props.userType !== "tenant-client"
-    ) {
-      return (
-        <div>
-          {renderAssignPilotBtn("Assign Pilot")}
-          {/* {renderGenerateReportButton()} */}
-          {renderPilotAssignButton()}
-        </div>
-      );
-    } else {
-      return (
-        <>
-          <Avatar
-            key="2"
-            size="large"
-            icon={<UserOutlined />}
-            src={STATIC_URL + MissionDetails.pilotPhoto}
-          />
-          <div className="pilot-name">
-            <Title level={5} className="designation">
-              {MissionDetails.pilotAssigned}
-            </Title>
-            <Text type="secondary">Pilot assigned</Text>
-          </div>
-          <div className="pilot-assign-btn">
-            {renderAssignPilotBtn("Re-Assign Pilot")}
-            {/* {renderGenerateReportButton()} */}
-            {renderPilotAssignButton()}
-          </div>
-        </>
-      );
-    }
+        }
+      </>
+    );
   }
 
   // +++++++++++++++ E10 Breadcrumb routes ++++++++++++++++++++++++++++++++

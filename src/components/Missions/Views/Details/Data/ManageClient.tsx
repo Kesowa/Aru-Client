@@ -30,6 +30,10 @@ function ManageClients(props) {
   const [currClientId, setCurrClientId] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const canManageClient = props.userDetails.customPermissions.some(
+    perm => [PERMS.CREATE_CLIENT, PERMS.EDIT_CLIENT, PERMS.DELETE_CLIENT].includes(perm)
+  );
+
   const [client, setMissionClient] = useState<any>([
     {
       id: "no-client",
@@ -45,16 +49,18 @@ function ManageClients(props) {
   }, [props.missionClient]);
 
   useEffect(() => {
-    http
-      .get(`${apis.GET_CLIENT_LIST}?page=1&limit=100`)
-      .then((res) => {
-        if (res.data.status) {
-          populateClientList(res.data.data);
-        }
-      })
-      .catch((err) => {
-        console.log("client list error", err);
-      });
+    if (canManageClient) {
+      http
+        .get(`${apis.GET_CLIENT_LIST}?page=1&limit=100`)
+        .then((res) => {
+          if (res.data.status) {
+            populateClientList(res.data.data);
+          }
+        })
+        .catch((err) => {
+          console.log("client list error", err);
+        });
+    }
   }, []);
 
   function getInitials(string) {
@@ -121,62 +127,30 @@ function ManageClients(props) {
 
   // Add Client Buttons
   function renderAddClientBtn() {
-    if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
-    ) {
-      if (props.userDetails.customPermissions.some(perm => [PERMS.CREATE_CLIENT, PERMS.EDIT_CLIENT, PERMS.DELETE_CLIENT].includes(perm))) {
-        return (
-          <>
-            <div
-              style={{ float: "left", cursor: "pointer" }}
-              onClick={() => {
-                setIsClientModalVisible(true);
-                setAddClient(false);
-              }}
-            >
-              <Avatar key="2" size="large" icon={<PlusOutlined />} />
-              <div
-                style={{
-                  float: "right",
-                  marginLeft: "12px",
-                  marginTop: "8px",
-                }}
-              >
-                <Text type="secondary" style={{ fontSize: "16px" }}>
-                  Add Client
-                </Text>
-              </div>
-            </div>
-          </>
-        );
-      }
-    } else {
-      return (
-        <>
+    return (
+      <>
+        <div
+          style={{ float: "left", cursor: "pointer" }}
+          onClick={() => {
+            setIsClientModalVisible(true);
+            setAddClient(false);
+          }}
+        >
+          <Avatar key="2" size="large" icon={<PlusOutlined />} />
           <div
-            style={{ float: "left", cursor: "pointer" }}
-            onClick={() => {
-              setIsClientModalVisible(true);
-              setAddClient(false);
+            style={{
+              float: "right",
+              marginLeft: "12px",
+              marginTop: "8px",
             }}
           >
-            <Avatar key="2" size="large" icon={<PlusOutlined />} />
-            <div
-              style={{
-                float: "right",
-                marginLeft: "12px",
-                marginTop: "8px",
-              }}
-            >
-              <Text type="secondary" style={{ fontSize: "16px" }}>
-                Add Client
-              </Text>
-            </div>
+            <Text type="secondary" style={{ fontSize: "16px" }}>
+              Add Client
+            </Text>
           </div>
-        </>
-      );
-    }
+        </div>
+      </>
+    );
   }
 
   // Remove Client
@@ -212,7 +186,7 @@ function ManageClients(props) {
       props.userType === "tenant-staff" ||
       props.userType === "tenant-client"
     ) {
-      if (props.userDetails.customPermissions.some(perm => [PERMS.CREATE_CLIENT, PERMS.EDIT_CLIENT, PERMS.DELETE_CLIENT].includes(perm))) {
+      if (canManageClient) {
         return (
           <>
             &nbsp;&nbsp;&nbsp;&nbsp;
@@ -272,7 +246,7 @@ function ManageClients(props) {
                         marginLeft: "12px",
                       }}
                     >
-                      {renderClientManageBtns(client.id)}
+                      { canManageClient && renderClientManageBtns(client.id)}
                     </div>
                     <div
                       style={{
@@ -301,7 +275,7 @@ function ManageClients(props) {
           ) : (
             <Empty description="no clients assigned to this mission!" />
           )}
-          {renderAddClientBtn()}
+          { canManageClient && renderAddClientBtn() }
         </Card>
       </Row>
       <Modal

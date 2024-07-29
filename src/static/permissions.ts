@@ -19,7 +19,6 @@ export enum PERMS {
   CAN_UPLOAD_TO_BASE_LAYER = "can_upload_to_base_layer",
   CLIENT_DATA = "client_data",
   CLIENT_LIST = "client_list",
-  CLIENT_MISSION_LIST = "client_mission_list",
   COMMENT_DELETE = "comment_delete",
   CREATE_CLIENT = "create_client",
   DASHBOARD = "dashboard",
@@ -105,7 +104,6 @@ export enum PERMS {
 
 export const TENANT_CLIENT_PERMS = <const>[
   PERMS.ASSET_LIST,
-  PERMS.CLIENT_MISSION_LIST,
   PERMS.DASHBOARD,
   PERMS.LAYER_LIST,
   PERMS.MISSION_LIST,
@@ -160,6 +158,7 @@ export const TENANT_STAFF_PERMS = <const>[
   PERMS.MANUFACTURER_LIST,
   PERMS.MANUFACTURER_UPDATE,
   PERMS.MISSION_CREATE,
+  PERMS.MISSION_UPDATE,
   PERMS.MISSION_DELETE,
   PERMS.MISSION_TYPE_LIST,
   PERMS.MODEL_CREATE,
