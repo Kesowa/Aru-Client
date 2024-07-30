@@ -1386,7 +1386,9 @@ function MissionView(props) {
 
               <Row>
                 <Card title="Flights" bordered={false} className="flight-card">
-                  <Dropdown menu={{ items }} trigger={["contextMenu"]}>
+                  <Dropdown menu={{
+                    items: props.userDetails.customPermissions.includes(PERMS.FLIGHT_UPDATE) ? items : [items[1]]
+                  }} trigger={["contextMenu"]}>
                     <Tooltip
                       placement="bottom"
                       title="Right click to view/edit flight"
