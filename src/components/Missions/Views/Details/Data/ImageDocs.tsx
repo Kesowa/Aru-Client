@@ -276,7 +276,7 @@ function ImageDocs(props) {
         console.log("File type: ", options.file.type);
         const config = {
           headers: {
-            "content-type": "multipart/form-data;",
+            "content-type": "application/json;",
           },
           onUploadProgress: (event) => {
             const percent = Math.floor((event.loaded / event.total) * 100);

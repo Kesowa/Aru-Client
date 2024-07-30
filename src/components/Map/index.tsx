@@ -5244,7 +5244,7 @@ function BaseMap(props) {
 
       // const fmData = new FormData();
       const config = {
-        headers: { "content-type": "multipart/form-data" },
+        headers: { "content-type": "application/json" },
         onUploadProgress: (event) => {
           const percent = Math.floor((event.loaded / event.total) * 100);
           setProgress(percent);

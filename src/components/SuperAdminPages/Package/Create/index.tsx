@@ -17,21 +17,28 @@ import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { Link } from "react-router-dom";
 import { STATIC_URL } from "src/constants";
+import type { RcFile } from "antd/lib/upload";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 
 function CreatePackage(props: any) {
   const [form] = Form.useForm();
   const [poster, setPoster] = useState("");
   const [isPosterUploading, setIsPosterUploading] = useState(false);
 
-  const beforeUploadFunction = (file: any) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
+  const beforeUploadFunction = (file: RcFile) => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
       setIsPosterUploading(true);
-      const formData = new FormData();
-      formData.append("poster", file);
+      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+
+      const body = {
+        file: uploadToken,
+      };
+      // const formData = new FormData();
+      // formData.append("poster", file);
       http
-        .post(apis.UPLOAD_PACKAGE_POSTER, formData, {
+        .post(apis.UPLOAD_PACKAGE_POSTER, body, {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
           },
         })
         .then((result) => {

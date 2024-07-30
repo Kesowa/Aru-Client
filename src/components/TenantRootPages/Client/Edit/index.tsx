@@ -34,6 +34,9 @@ import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import moment from "moment";
 import { STATIC_URL } from "src/constants";
+import { DocModel, uploadFile } from "src/services/fileUpload";
+import { RcFile } from "antd/lib/upload";
+
 
 function UserCreatePage(props: any) {
   const [form] = Form.useForm();
@@ -44,15 +47,20 @@ function UserCreatePage(props: any) {
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
   //avatar upload
-  const beforeUploadFunction = (file: any) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
+  const beforeUploadFunction = (file: RcFile) => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
-      const formData = new FormData();
-      formData.append("avatar", file);
+      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+
+      const body = {
+        file: uploadToken,
+      };
+      // const formData = new FormData();
+      // formData.append("avatar", file);
       http
-        .post(apis.UPLOAD_USER_PROFILE_PICTURE, formData, {
+        .post(apis.UPLOAD_USER_PROFILE_PICTURE, body, {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
           },
         })
         .then((result) => {

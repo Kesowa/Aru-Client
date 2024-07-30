@@ -10,6 +10,10 @@ import { connect } from "react-redux";
 import { loading } from "../../../actions/loadingAction";
 import { logout } from "../../../actions/authAction";
 import { STATIC_URL } from "src/constants";
+import type { RcFile } from "antd/lib/upload";
+import { DocModel, uploadFile } from "src/services/fileUpload";
+
+
 
 function TenantInfo(props: any) {
   const [form] = Form.useForm();
@@ -24,15 +28,20 @@ function TenantInfo(props: any) {
     }
   }, [props.tenantData]);
 
-  const beforeUploadFunction = (file: any) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
+  const beforeUploadFunction = (file: RcFile) => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
       setIsAvatarUploading(true);
-      const formData = new FormData();
-      formData.append("avatar", file);
+      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+
+        const body = {
+          file: uploadToken,
+        };
+      // const formData = new FormData();
+      // formData.append("avatar", file);
       http
-        .post(apis.UPLOAD_TENANT_AVATAR, formData, {
+        .post(apis.UPLOAD_TENANT_AVATAR, body, {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
           },
         })
         .then((result) => {

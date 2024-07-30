@@ -26,6 +26,8 @@ import { beforeUpload } from "../../../../services/imageupload";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { STATIC_URL } from "src/constants";
+import { RcFile } from "antd/lib/upload";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -36,15 +38,20 @@ function EditTenant(props: any) {
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [packages, setPackages] = useState<any>([]);
 
-  const beforeUploadFunction = (file: any) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
+  const beforeUploadFunction = (file: RcFile) => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
-      const formData = new FormData();
-      formData.append("avatar", file);
+      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+
+      const body = {
+        file: uploadToken,
+      };
+      // const formData = new FormData();
+      // formData.append("avatar", file);
       http
-        .post(apis.UPLOAD_TENANT_AVATAR, formData, {
+        .post(apis.UPLOAD_TENANT_AVATAR, body, {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
           },
         })
         .then((result) => {

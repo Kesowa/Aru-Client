@@ -445,7 +445,7 @@ function Documents(props) {
         
         const config = {
           headers: {
-            "content-type": "multipart/form-data;",
+            "content-type": "application/json;",
           },
           onUploadProgress: (event) => {
             const percent = Math.floor((event.loaded / event.total) * 100);
