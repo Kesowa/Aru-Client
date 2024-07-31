@@ -105,17 +105,21 @@ function Outcomes(props) {
         label: "Open Thread",
         icon: <MessageOutlined />,
       },
-      {
+    ];
+    if (props.userDetails.customPermissions.includes(PERMS.ALERT_UPDATE)) {
+      item.push({
         key: "4",
         label: !data.isFlagged ? "Flag" : "Unflag",
         icon: <FlagOutlined />,
-      },
-      {
+      });
+    }
+    if (props.userDetails.customPermissions.includes(PERMS.ALERT_DELETE)) {
+      item.push({
         key: "5",
         label: "Delete",
         icon: <DeleteOutlined />,
-      },
-    ];
+      });
+    }
     return item;
   };
   const outcomeMenuOnClick: MenuProps["onClick"] = (e) => {
@@ -943,6 +947,8 @@ function Outcomes(props) {
         flag={flag}
         updateAPI={apis.UPDATE_MULTI_ALERT}
         thumb={getOutcomeThumbnail}
+        canToggleFlag={props.userDetails.customPermissions.includes(PERMS.ALERT_UPDATE)}
+        canDelete={props.userDetails.customPermissions.includes(PERMS.ALERT_DELETE)}
       />
       {!loading ? (
         <>

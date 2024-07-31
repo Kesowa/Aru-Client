@@ -93,26 +93,20 @@ function ImageDocs(props) {
         label: "Open Thread",
         icon: <MessageOutlined />,
       },
-      {
+    ];
+    if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.UPDATE_DOCUMENT)) {
+      item.push({
         key: "4",
         label: !data.isFlagged ? "Flag" : "Unflag",
         icon: <FlagOutlined />,
-      },
-    ];
-    const deleteItem = {
-      key: "5",
-      label: "Delete Image",
-      icon: <DeleteOutlined />,
-    };
-    if (
-      props.missionDetails.userType === "tenant-staff" ||
-      props.missionDetails.userType === "tenant-client"
-    ) {
-      if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.VOD_DELETE)) {
-        item.push(deleteItem);
-      }
-    } else {
-      item.push(deleteItem);
+      });
+    }
+    if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.DELETE_DOCUMENT)) {
+      item.push({
+        key: "5",
+        label: "Delete Image",
+        icon: <DeleteOutlined />,
+      });
     }
     return item;
   };
@@ -722,6 +716,8 @@ function ImageDocs(props) {
         uploadBtn={renderUploadBtn}
         updateAPI={apis.UPDATE_MULTI_DOC}
         delete={deleteFile}
+        canToggleFlag={props.userDetails.customPermissions.includes(PERMS.UPDATE_DOCUMENT)}
+        canDelete={props.userDetails.customPermissions.includes(PERMS.DELETE_DOCUMENT)}
       />
       {loader ? (
         <div

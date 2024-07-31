@@ -128,31 +128,27 @@ function Videos(props) {
         label: "Open Thread",
         icon: <MessageOutlined />,
       },
-      {
-        key: "3",
-        label: !data.isFlagged ? "Flag" : "Unflag",
-        icon: <FlagOutlined />,
-      },
-      {
-        key: "4",
-        label: "Rename",
-        icon: <EditOutlined />,
-      },
     ];
-    const deleteItem = {
-      key: "5",
-      label: "Delete video",
-      icon: <DeleteOutlined />,
-    };
-    if (
-      props.missionDetails.userType === "tenant-staff" ||
-      props.missionDetails.userType === "tenant-client"
-    ) {
-      if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.VOD_DELETE)) {
-        item.push(deleteItem);
-      }
-    } else {
-      item.push(deleteItem);
+    if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.VOD_UPDATE)) {
+      item.push(
+        {
+          key: "3",
+          label: !data.isFlagged ? "Flag" : "Unflag",
+          icon: <FlagOutlined />,
+        },
+        {
+          key: "4",
+          label: "Rename",
+          icon: <EditOutlined />,
+        },
+      );
+    }
+    if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.VOD_DELETE)) {
+      item.push({
+        key: "5",
+        label: "Delete video",
+        icon: <DeleteOutlined />,
+      });
     }
     return item;
   };
@@ -1525,6 +1521,8 @@ function Videos(props) {
         uploadBtn={renderUploadBtn}
         updateAPI={apis.UPDATE_MULTI_VOD}
         delete={deleteVideo}
+        canToggleFlag={props.userDetails.customPermissions.includes(PERMS.VOD_UPDATE)}
+        canDelete={props.userDetails.customPermissions.includes(PERMS.VOD_DELETE)}
       />
       {loader ? (
         <>

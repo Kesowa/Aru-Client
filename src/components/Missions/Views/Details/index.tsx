@@ -452,7 +452,9 @@ function MissionView(props) {
           />
         ),
       },
-      {
+    ];
+    if (props.userDetails.customPermissions.includes(PERMS.UPLOAD_DOCUMENT)) {
+      items.push({
         key: "6",
         label: <span>Report Generation </span>,
         children: (
@@ -464,8 +466,8 @@ function MissionView(props) {
             setReportErrorCSVPath={setReportErrorCSVPath}
           />
         ),
-      },
-    ];
+      });
+    }
     if (MissionDetails.missionType === "Mapping") {
       return items;
     } else {
