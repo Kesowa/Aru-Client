@@ -145,6 +145,7 @@ import {
 } from "./utils/propUtils";
 import Tileset from "src/types/cesium_tileset";
 import { PERMS } from "src/static/permissions";
+import FourOhOne from "../shared/Error/FourOhOne";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -6658,6 +6659,10 @@ function BaseMap(props) {
   const handleMouseMove = (e) => {
     setCursorPosition({ x: e.clientX, y: e.clientY });
   };
+
+  if (props.isBaseMap && !["tenant-root","tenant-staff"].includes(props.userType)) {
+    return <FourOhOne />;
+  }
 
   return (
     <div
