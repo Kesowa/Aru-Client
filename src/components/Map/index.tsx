@@ -238,7 +238,7 @@ function BaseMap(props) {
 
   const treeMenu = (layer: Layer): MenuProps["items"] => {
     const items: MenuProps["items"] = [];
-    if ((props.isBaseMap && perms.canEditBaseLayer) || !props.isBaseMap) {
+    if (props.isBaseMap ? perms.canEditBaseLayer : perms.canEditLayer) {
       items.push({
         key: "1",
         label: "Edit",
@@ -259,20 +259,22 @@ function BaseMap(props) {
         key: "10",
         label: "Download KML",
       });
-      items.push({
-        key: "flagSubMenu",
-        label: "Toggle Flag",
-        children: [
-          {
-            key: "11",
-            label: "Flag Layer",
-          },
-          {
-            key: "12",
-            label: "Unflag Layer",
-          },
-        ],
-      });
+      if (props.isBaseMap ? perms.canEditBaseLayer : perms.canEditLayer) {
+        items.push({
+          key: "flagSubMenu",
+          label: "Toggle Flag",
+          children: [
+            {
+              key: "11",
+              label: "Flag Layer",
+            },
+            {
+              key: "12",
+              label: "Unflag Layer",
+            },
+          ],
+        });
+      }
     }
 
     if (props.isBaseMap && perms.canUpdateBaseLayer) {
@@ -281,14 +283,7 @@ function BaseMap(props) {
         label: "Update Layer",
       });
     }
-    if (props.isBaseMap && perms.canDeleteBaseLayer) {
-      items.push({
-        key: "5",
-        label: "Delete",
-      });
-    }
-
-    if (!props.isBaseMap && perms.canDeleteLayer) {
+    if (props.isBaseMap ? perms.canDeleteBaseLayer : perms.canDeleteLayer) {
       items.push({
         key: "5",
         label: "Delete",
@@ -296,7 +291,7 @@ function BaseMap(props) {
     }
     if (
       layer.layerGroupId &&
-      ((props.isBaseMap && perms.canCreateBaseLayer) || !props.isBaseMap)
+      (props.isBaseMap ? perms.canCreateBaseLayer : perms.canCreateLayer)
     ) {
       items.push({
         key: "6",
@@ -305,22 +300,19 @@ function BaseMap(props) {
     }
     if (layer._isChecked) {
       const submenuChildren: MenuProps["items"] = [];
-      if ((props.isBaseMap && perms.canCreateBaseLayer) || !props.isBaseMap) {
+      if (props.isBaseMap ? perms.canCreateBaseLayer : perms.canCreateLayer) {
         submenuChildren.push({
           key: "7",
           label: "Group Selected Layers",
         });
       }
-      if (
-        (props.isBaseMap && perms.canDeleteBaseLayer) ||
-        (!props.isBaseMap && perms.canDeleteLayer)
-      ) {
+      if (props.isBaseMap ? perms.canDeleteBaseLayer : perms.canDeleteLayer) {
         submenuChildren.push({
           key: "8",
           label: "Delete Selected Layers",
         });
       }
-      if ((props.isBaseMap && perms.canCreateBaseLayer) || !props.isBaseMap) {
+      if (props.isBaseMap ? perms.canEditBaseLayer : perms.canEditLayer) {
         submenuChildren.push({
           key: "9",
           label: "Move Selected Layers",
@@ -374,50 +366,24 @@ function BaseMap(props) {
   };
   //----------UseEffectBlock to assign permissions--------------
   useEffect(() => {
-    if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
-    ) {
-      setPerms({
-        canCreateLayer: props.userDetails.customPermissions.includes(PERMS.UPLOAD_LAYER),
-        canDeleteLayer: props.userDetails.customPermissions.includes(PERMS.DELETE_LAYER),
-        canEditLayer: props.userDetails.customPermissions.includes(PERMS.EDIT_LAYER),
-        canCreateVectorLayer: props.userDetails.customPermissions.includes(PERMS.SAVE_DRAWINGS),
-        canDownloadLayer: true,
-        canEditGeojson: props.userDetails.customPermissions.includes(PERMS.EDIT_FEATURE),
-        canDeleteFeature: props.userDetails.customPermissions.includes(PERMS.DELETE_FEATURE),
-        canAddFeature: props.userDetails.customPermissions.includes(PERMS.ADD_FEATURE),
-        canUploadFileToGeojson: props.userDetails.customPermissions.includes(PERMS.FEATURE_FILE_UPLOAD),
-        canDeleteFileFromGeojson: props.userDetails.customPermissions.includes(PERMS.FEATURE_FILE_DELETE),
-        canSetCoverPhoto: props.userDetails.customPermissions.includes(PERMS.SET_COVER_PHOTO),
-        canCreateBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_CREATE_BASE_LAYER),
-        canUpdateBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_UPDATE_BASE_LAYER),
-        canDeleteBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_DELETE_BASE_LAYER),
-        canEditBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_EDIT_BASE_LAYER),
-        canUploadToBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_UPLOAD_TO_BASE_LAYER),
-      });
-    } else if (props.userType === "tenant-root") {
-      //console.log(props.userDetails);
-      //console.log("logged in user is tenant-root");
-      setPerms({
-        canCreateLayer: true,
-        canDeleteLayer: true,
-        canEditLayer: true,
-        canCreateVectorLayer: true,
-        canDownloadLayer: true,
-        canEditGeojson: true,
-        canDeleteFeature: true,
-        canAddFeature: true,
-        canUploadFileToGeojson: true,
-        canDeleteFileFromGeojson: true,
-        canSetCoverPhoto: true,
-        canCreateBaseLayer: true,
-        canDeleteBaseLayer: true,
-        canEditBaseLayer: true,
-        canUpdateBaseLayer: true,
-        canUploadToBaseLayer: true,
-      });
-    }
+    setPerms({
+      canCreateLayer: props.userDetails.customPermissions.includes(PERMS.UPLOAD_LAYER),
+      canDeleteLayer: props.userDetails.customPermissions.includes(PERMS.DELETE_LAYER),
+      canEditLayer: props.userDetails.customPermissions.includes(PERMS.EDIT_LAYER),
+      canCreateVectorLayer: props.userDetails.customPermissions.includes(PERMS.SAVE_DRAWINGS),
+      canDownloadLayer: true,
+      canEditGeojson: props.userDetails.customPermissions.includes(PERMS.EDIT_FEATURE),
+      canDeleteFeature: props.userDetails.customPermissions.includes(PERMS.DELETE_FEATURE),
+      canAddFeature: props.userDetails.customPermissions.includes(PERMS.ADD_FEATURE),
+      canUploadFileToGeojson: props.userDetails.customPermissions.includes(PERMS.FEATURE_FILE_UPLOAD),
+      canDeleteFileFromGeojson: props.userDetails.customPermissions.includes(PERMS.FEATURE_FILE_DELETE),
+      canSetCoverPhoto: props.userDetails.customPermissions.includes(PERMS.SET_COVER_PHOTO),
+      canCreateBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_CREATE_BASE_LAYER),
+      canUpdateBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_UPDATE_BASE_LAYER),
+      canDeleteBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_DELETE_BASE_LAYER),
+      canEditBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_EDIT_BASE_LAYER),
+      canUploadToBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_UPLOAD_TO_BASE_LAYER),
+    });
   }, []);
 
   const socket: any = useRef();
@@ -1570,7 +1536,9 @@ function BaseMap(props) {
         },
       ],
     },
-    {
+  ];
+  if (perms.canEditGeojson) {
+    actionMenuItems.push({
       key: "flag",
       label: "Toggle Flag",
       icon: <FlagOutlined />,
@@ -1584,8 +1552,8 @@ function BaseMap(props) {
           label: "Un-flag Selected",
         },
       ],
-    },
-  ];
+    });
+  }
   const toggleLayerFlag = (layerId: string, flag: boolean) => {
     const payload: any = {
       flag: flag,
@@ -8091,6 +8059,8 @@ function BaseMap(props) {
         isBaseMap={props.isBaseMap}
         canUploadToBaseLayer={perms.canUploadToBaseLayer}
         canUpdateBaseLayer={perms.canUpdateBaseLayer}
+        canEditLayer={perms.canEditLayer}
+        canUploadFileToGeojson={perms.canUploadFileToGeojson}
         setViewport={setViewport}
         layer={AllLayers.find((layer) => layer._id === featureLayer)}
         layerPath={featureLayerPath}
