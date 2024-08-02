@@ -420,7 +420,7 @@ function Documents(props) {
         const fileExtension = options.file.name.substring(options.file.name.lastIndexOf(".") + 1).toLowerCase();
 
         const body = {
-          type: (fileExtension === "las" || "LAs") ? "pointCloud" : options.file.type,
+          type: fileExtension === "las" ? "pointCloud" : options.file.type,
           file: uploadToken,
           missionId: props.missionDetails.missionId,
           folderName: currentFolderId,
@@ -444,9 +444,6 @@ function Documents(props) {
         // }
         
         const config = {
-          headers: {
-            "content-type": "application/json;",
-          },
           onUploadProgress: (event) => {
             const percent = Math.floor((event.loaded / event.total) * 100);
             setProgress(percent);

@@ -275,9 +275,6 @@ function ImageDocs(props) {
         // fData.append("folderName", "photos");
         console.log("File type: ", options.file.type);
         const config = {
-          headers: {
-            "content-type": "application/json;",
-          },
           onUploadProgress: (event) => {
             const percent = Math.floor((event.loaded / event.total) * 100);
             setProgress(percent);
