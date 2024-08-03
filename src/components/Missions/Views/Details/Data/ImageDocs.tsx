@@ -267,6 +267,7 @@ function ImageDocs(props) {
           file: uploadToken,
           missionId :props.missionDetails.missionId,
           folderName: "photos",
+          type:options.file.type,
         };
 
         // const fData = new FormData();

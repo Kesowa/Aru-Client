@@ -144,15 +144,7 @@ const CreateLayer = (props: any) => {
       // });
       console.log("create layer data :",body);
 
-
-      if (layerTYpe === vectorProps.OVER_HEAD_TANK) {
-        featureData.features[0].properties["icon"] = "TankIcon";
-      } else {
-        featureData.features[0].properties["icon"] = "MarkerIcon";
-      }
-
       const config = {
-        headers: { "content-type": "application/json" },
         onUploadProgress: (event) => {
           const percent = Math.floor((event.loaded / event.total) * 100);
           setProgress(percent);
@@ -161,7 +153,7 @@ const CreateLayer = (props: any) => {
           }
         },
       };
-      console.log("create layer data :",fData);
+      console.log("create layer data :",body);
 
       http
         .post(`${apis.CREATE_LAYER_FROM_IMAGES}`, body, config)

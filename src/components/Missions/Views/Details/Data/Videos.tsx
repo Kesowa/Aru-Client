@@ -389,7 +389,7 @@ function Videos(props) {
       const uploadToken = await uploadFile(options.file, DocModel.VOD, (prog) => console.info("PROGRESS: " + prog));
         
       const body = {
-        video : uploadToken,
+        file : uploadToken,
         missionID : props.missionDetails.missionId,
         flightID : props.missionDetails.flightId,
         locationID : props.missionDetails.locationId?._id ? props.missionDetails.locationId._id : undefined,
@@ -403,9 +403,6 @@ function Videos(props) {
       // }
 
       const config = {
-        headers: {
-          "content-type": "application/json;",
-        },
         onUploadProgress: (event) => {
           const percent = Math.floor((event.loaded / event.total) * 100);
           setProgress(percent);

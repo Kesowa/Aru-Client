@@ -39,9 +39,6 @@ function EditPackage(props: any) {
       // formData.append("poster", file);
       http
         .post(apis.UPLOAD_PACKAGE_POSTER, body, {
-          headers: {
-            "Content-Type": "application/json",
-          },
         })
         .then((result) => {
           if (result.data.status) {

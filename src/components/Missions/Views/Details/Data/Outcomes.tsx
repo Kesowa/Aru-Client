@@ -703,9 +703,6 @@ function Outcomes(props) {
           // fData.append("onSite", "false");
           // fData.append("flightId", props.missionDetails.flightId);
           const config = {
-            headers: {
-              "content-type": "application/json;",
-            },
             onUploadProgress: (event) => {
               const percent = Math.floor((event.loaded / event.total) * 100);
               setProgress(percent);
@@ -782,9 +779,7 @@ function Outcomes(props) {
           // fData.append("flightId", props.missionDetails.flightId);
           
           const config = {
-            headers: {
-              "content-type": "application/json;",
-            },
+          
             onUploadProgress: (event) => {
               const percent = Math.floor((event.loaded / event.total) * 100);
               setProgress(percent);

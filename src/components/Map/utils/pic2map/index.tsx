@@ -143,10 +143,6 @@ function Pictomap(props) {
       const body = {
         file: uploadTokens,
         Id: props.layerId,
-        missionId: props.isBaseMap ? null : props.missionId,
-        name: layerName,
-        color: layerColor,
-        vectorType: String(layerType),
       }
       
       // const fData = new FormData();
@@ -155,7 +151,6 @@ function Pictomap(props) {
       //   fData.append("file", file.originFileObj);
       // });
       const config = {
-        headers: { "content-type": "application/json"},
         onUploadProgress: (event) => {
           const percent = Math.floor((event.loaded / event.total) * 100);
           setProgress(percent);

@@ -330,10 +330,8 @@ const CreateBaseLayer = (props) => {
         };
 
           // UPDATE RASTER BY FILE UPLOAD
-          console.log("here");
           // const fmData = new FormData();
           const config = {
-            headers: { "content-type": "application/json" },
             onUploadProgress: (event) => {
               const percent = Math.floor((event.loaded / event.total) * 100);
               setProgress(percent);
@@ -366,10 +364,8 @@ const CreateBaseLayer = (props) => {
             file: uploadToken,
             baseLayer: props.BaseLayerId,
           };
-          console.log("inside vector update by upload");
           // const fmData = new FormData();
           const config = {
-            headers: { "content-type": "application/json" },
             onUploadProgress: (event) => {
               const percent = Math.floor((event.loaded / event.total) * 100);
               setProgress(percent);
@@ -420,7 +416,6 @@ const CreateBaseLayer = (props) => {
           };
         // const fmData = new FormData();
         const config = {
-          headers: { "content-type": "application/json" },
           onUploadProgress: (event) => {
             const percent = Math.floor((event.loaded / event.total) * 100);
             setProgress(percent);
@@ -429,7 +424,6 @@ const CreateBaseLayer = (props) => {
             }
           },
         };
-        console.log("Before call",body);
         // fmData.append("file", fileList[0]);
         // fmData.append("captureDate", captureDate);
         // fmData.append("name", layerName);

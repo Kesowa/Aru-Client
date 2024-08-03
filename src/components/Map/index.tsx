@@ -5243,8 +5243,8 @@ function BaseMap(props) {
       };
 
       // const fmData = new FormData();
+
       const config = {
-        headers: { "content-type": "application/json" },
         onUploadProgress: (event) => {
           const percent = Math.floor((event.loaded / event.total) * 100);
           setProgress(percent);
@@ -5272,6 +5272,8 @@ function BaseMap(props) {
         body,
         config
       );
+      console.log("vector layer is uploaded", result);
+
 
       if (result.data.status) {
         console.log("metadata for me:", result.data.data);

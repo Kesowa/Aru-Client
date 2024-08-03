@@ -58,9 +58,6 @@ function UserEditPage(props: any) {
       // formData.append("avatar", file);
       http
         .post(apis.UPLOAD_USER_PROFILE_PICTURE, body, {
-          headers: {
-            "Content-Type": "application/json",
-          },
         })
         .then((result) => {
           console.log(result);

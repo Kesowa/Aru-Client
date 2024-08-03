@@ -50,9 +50,6 @@ function EditTenant(props: any) {
       // formData.append("avatar", file);
       http
         .post(apis.UPLOAD_TENANT_AVATAR, body, {
-          headers: {
-            "Content-Type": "application/json",
-          },
         })
         .then((result) => {
           if (result.data.status) {
