@@ -13,7 +13,6 @@ import {
   setCircleMeasurements,
   setPolygonMeasurements,
   setGeolocation,
-  clearMissionCreationStateWithGeoFence,
   setCenterPoints,
 } from "../../actions/missionCreation";
 
@@ -30,7 +29,6 @@ type mapProps = {
   setCircleMeasurements: any;
   setPolygonMeasurements: any;
   setGeolocation: any;
-  clearMissionCreationStateWithGeoFence: any;
   missionData: any;
   isEditing: any;
   showDrawing: any;
@@ -39,6 +37,8 @@ type mapProps = {
   setlocation: any;
   location: any;
   setCenterPoints: any;
+  geoLocation: any;
+  centerPoints: any;
 };
 
 type mapState = {
@@ -78,7 +78,7 @@ class GoogleMap extends Component<mapProps, mapState> {
     this.googleMap = this.createGoogleMap(loc);
     this.props.setlocation(loc);
 
-    this.setCurrentLocation();
+    // this.setCurrentLocation();
 
     this.drawingManager = this.createDrawingManager();
     this.searchAutoComplete = this.createSearchBar();
@@ -112,12 +112,69 @@ class GoogleMap extends Component<mapProps, mapState> {
     });
 
     if (this.props.isEditing) {
-      const obj = this.createMeasurements(
-        this.props.missionData.flights[0].geoFence
-      );
-
-      if (obj) {
-        this.oldShape = obj;
+      if (this.props.missionData.flights.length) {
+        const obj = this.createMeasurements(
+          this.props.missionData.flights[0].geoFence
+        );
+        if (obj) {
+          this.oldShape = obj;
+        }
+      } else {
+        const shape = this.createMeasurements({
+          polygon: this.props.polygonData,
+          circle: this.props.circleData,
+        });
+    
+        if (shape) {
+          this.oldShape = shape;
+          this.drawingManager.setDrawingMode(null);
+          this.drawingManager.setOptions({
+            drawingControl: false,
+          });
+    
+          const center: any = {};
+          if (this.props.circleData) {
+            center.lat = shape.getCenter().lat();
+            center.lng = shape.getCenter().lng();
+          } else if (this.props.polygonData) {
+            const pathPoints = shape
+              .getPath()
+              .getArray()
+              .map((data) => {
+                return {
+                  lat: data.lat(),
+                  lng: data.lng(),
+                };
+              });
+            [center.lat, center.lng] = this.findPolygonCenter(pathPoints);
+          }
+    
+          getAddressfromLatLong(center.lat, center.lng, (err, address) => {
+            if (!err) {
+              if (
+                (this.props.centerPoints.lat !== center.lat) ||
+                (this.props.centerPoints.lng !== center.lng)
+              ) {
+                this.props.setCenterPoints([center.lat, center.lng]);
+              }
+              if (this.props.geoLocation !== address) {
+                this.props.setGeolocation(address);
+              }
+            } else {
+              message.error("Location could not be fetched");
+            }
+          });
+    
+          this.setState({
+            isCircleActive: !!(this.props.circleData),
+            isPolygonActive: !!(this.props.polygonData),
+            isGeoJSONActive: false,
+            showDrawingButtons: false,
+          });
+          if (!this.props.areaSelected) {
+            this.props.setAreaSelected(true);
+          }
+        }
       }
     }
 
@@ -932,13 +989,10 @@ const mapStateToProps = (state: any) => ({
   missionData: state.MissionCreation,
   isEditing: state.MissionCreation.isEditing,
   showDrawing: state.Gmap.showDrawing,
-  polygonData: state.MissionCreation.geoFence.polygon
-    ? state.MissionCreation.geoFence.polygon
-    : null,
-
-  circleData: state.MissionCreation.geoFence.circle
-    ? state.MissionCreation.geoFence.circle
-    : null,
+  polygonData: state.MissionCreation.geoFence.polygon || null,
+  circleData: state.MissionCreation.geoFence.circle || null,
+  geoLocation: state.MissionCreation.flightDetails.geoLocation, // address of new location
+  centerPoints: state.MissionCreation.flightDetails.centerPoints, // center points of new location
 });
 
 export default connect(mapStateToProps, {
@@ -946,6 +1000,5 @@ export default connect(mapStateToProps, {
   setPolygonMeasurements,
   setGeolocation,
   showDrawing,
-  clearMissionCreationStateWithGeoFence,
   setCenterPoints,
 })(GoogleMap);
