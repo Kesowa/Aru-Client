@@ -75,10 +75,7 @@ const EditFlight: FC<any> = (props) => {
     try {
       const result = await http.get(`${apis.GET_MISSION_BY_ID}${missionId}`);
       const flight = result.data.data.flight;
-      if (
-        flight.geoFence.polygon &&
-        flight.geoFence.polygon.points.length
-      ) {
+      if (flight.geoFence.polygon?.points.length) {
         setlocation({
           lat: flight.geoFence.polygon.points[0].lat,
           lng: flight.geoFence.polygon.points[0].lng,
@@ -110,7 +107,7 @@ const EditFlight: FC<any> = (props) => {
   useEffect(() => {
     if (flightDetails) {
       // global states (for communicating with GoogleMap)
-      if (flightDetails.geoFence.polygon) {
+      if (flightDetails.geoFence.polygon?.points?.length) {
         props.setPolygonMeasurements({
           ...flightDetails.geoFence.polygon,
           pathPoints: flightDetails.geoFence.polygon.points,
