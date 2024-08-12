@@ -5,7 +5,6 @@ import Theme from "./themeReducer";
 import MissionCreation from "./MissionCreationReducer";
 import Gmap from "./gMapReducer";
 import Missions from "./missionReducer";
-import Location from "./locationReducer";
 import Assets from "./assetReducer";
 import Models from "./modelReducer";
 import Manufacturers from "./manufacturerReducer";
@@ -22,7 +21,6 @@ export default combineReducers({
   MissionCreation,
   Gmap,
   Missions,
-  Location,
   Assets,
   Models,
   Manufacturers,

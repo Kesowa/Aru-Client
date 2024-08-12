@@ -3,11 +3,6 @@ import { useHistory } from "react-router-dom";
 import { Form, Input, Button, Select, message, Result, Modal } from "antd";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
-import {
-  setFlightDetails,
-  addFlight,
-  clearMissionCreationStateWithGeoFence,
-} from "../../../../actions/missionCreation";
 import { showDrawing } from "../../../../actions/gmapActions";
 import { loading } from "../../../../actions/loadingAction";
 import { connect } from "react-redux";
@@ -16,37 +11,37 @@ import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 
-const { Option } = Select;
+type CreateOrEditLocationForm = {
+  areaSelected: any;
+  setAreaSelected: any;
+  polygonData: any;
+  setPolygonData: any;
+  geolocation: any;
+  isEditing: any;
+  locationToEdit: any;
+}
 
-const StageTwoForm = (props: any) => {
-  const [formState, setFormState] = useState<any>({});
+const CreateOrEditLocationForm = (props: any) => {
+  const [formState, setFormState] = useState<any>({
+    locationName: props.isEditing ? props.locationToEdit.properties.name : ""
+  });
   const [area, setArea] = useState(0);
   const [selectedPoints, setSelectedPoints] = useState(0);
-  const [location, setLocation] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [form] = Form.useForm();
   const history = useHistory();
 
   useEffect(() => {
-    if (props.geofenceType) {
-      if (props.geofenceType === "polygon" && props.polygonData) {
-        setSelectedPoints(props.polygonData.points.length);
-      }
-
-      if (props.polygonData) {
-        setArea(props.polygonData.area);
-      } else if (props.circleData) {
-        setArea(props.circleData.area);
-      }
-
-      setLocation(props.location);
+    if (props.polygonData) {
+      setSelectedPoints(props.polygonData.points.length);
+      setArea(props.polygonData.area);
     }
   }, [props]);
 
   const createLocation = () => {
     props.loading(true);
-    const data = {
+    const data =  {
       type: "Polygon",
       coordinates: [
         props.polygonData.points.map((point) => {
@@ -86,6 +81,45 @@ const StageTwoForm = (props: any) => {
         props.loading(false);
       });
   };
+  
+  const editLocation = () => {
+    props.loading(true);
+    const data = {
+      id: props.locationToEdit._id,
+      geometry: {
+        coordinates: [
+          props.polygonData
+            ? props.polygonData.points.map((point) => {
+                return [point.lng, point.lat];
+              })
+            : props.locationToEdit.geometry.coordinates[0]
+        ],
+        type: "Polygon",
+      },
+      properties: {
+        name: formState.locationName,
+      },
+    };
+
+    data.geometry.coordinates[0].push(data.geometry.coordinates[0][0]);
+
+    http
+      .patch(`${apis.EDIT_LOCATION}`, data)
+      .then((result) => {
+        if (result.data.status) {
+          message.success(`Location "${formState.locationName}" Edited`);
+          history.push("/dashboard/data");
+        }
+      })
+      .catch((err) => {
+        message.error(err.message);
+        AxiosErrorHandler(err, props.logout);
+      })
+      .finally(() => {
+        props.loading(false);
+        props.setPolygonData(null);
+      });
+  };
 
   const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormState({
@@ -96,10 +130,10 @@ const StageTwoForm = (props: any) => {
 
   const handleFormSubmit = (values) => {
     if (formState.locationName) {
-      props.setFormComplete(true);
       form.resetFields();
       props.setAreaSelected(false);
-      createLocation();
+      if (props.isEditing) editLocation();
+      else createLocation();
     }
   };
 
@@ -136,13 +170,13 @@ const StageTwoForm = (props: any) => {
           subTitle="Please contact admin@kesowa.com to renew our services!"
         />
       </Modal>
-      {props.geofenceType && (
-        <div style={{ marginTop: "20px" }}>
+      <div style={{ marginTop: "20px" }}>
           <Form
             form={form}
             layout="vertical"
             name="create_mission"
             initialValues={{
+              location: props.isEditing ? props.locationToEdit.properties.name : "",
               remember: true,
             }}
             onFinish={handleFormSubmit}
@@ -159,11 +193,20 @@ const StageTwoForm = (props: any) => {
                 },
               ]}
             >
-              <Input
-                className="locationBox"
-                onChange={onNameChange}
-                placeholder="Location Name"
-              />
+              {
+                props.isEditing ?
+                <Input
+                  className="locationBox"
+                  defaultValue={props.locationToEdit.properties.name}
+                  onChange={onNameChange}
+                  placeholder="Location Name"
+                /> :
+                <Input
+                  className="locationBox"
+                  onChange={onNameChange}
+                  placeholder="Location Name"
+                />
+              }
             </Form.Item>
 
             {props.areaSelected && (
@@ -174,8 +217,7 @@ const StageTwoForm = (props: any) => {
                     src={s_m}
                   />
                   <div className="data_selected_inner">
-                    {props.geofenceType === "polygon" ? (
-                      <div>
+                    <div>
                         <p>
                           <strong>Geofence Selected</strong>
                         </p>
@@ -186,26 +228,7 @@ const StageTwoForm = (props: any) => {
                             {`${(area * 0.000247105).toFixed(2)} acres`}
                           </span>
                         </p>
-                      </div>
-                    ) : (
-                      <div>
-                        <p>
-                          <strong>Radius Selected</strong>
-                        </p>
-                        <p>
-                          <span
-                            style={{
-                              fontWeight: "bold",
-                            }}
-                          >
-                            Area :
-                          </span>{" "}
-                          <span>{`${(area * 0.000247105).toFixed(
-                            2
-                          )} acres`}</span>
-                        </p>
-                      </div>
-                    )}
+                    </div>
                   </div>
                 </div>
 
@@ -214,14 +237,14 @@ const StageTwoForm = (props: any) => {
                     <img src={l_a} alt="" style={{ height: "20px" }} />
                     <div>
                       <strong>Location Selected</strong>
-                      <p>{location}</p>
+                      <p>{props.geolocation}</p>
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {(props.polygonData !== null || props.circleData !== null) && (
+            {props.polygonData && (
               <Form.Item>
                 <div className="mission_creation_buttons">
                   <Button
@@ -231,41 +254,27 @@ const StageTwoForm = (props: any) => {
                       form.resetFields();
                       props.setAreaSelected(false);
                       props.showDrawing(false);
-                      props.clearMissionCreationStateWithGeoFence();
+                      props.setPolygonData(null);
+                      history.push("/dashboard/data");
                     }}
                     size="middle"
                   >
                     Cancel
                   </Button>
                   <Button type="primary" htmlType="submit" size="middle">
-                    Add
+                    { props.isEditing ? "Submit" : "Add"}
                   </Button>
                 </div>
               </Form.Item>
             )}
           </Form>
-        </div>
-      )}
+      </div>
     </>
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    geofenceType: state.MissionCreation.geoFence.circle ? "circle" : "polygon",
-    polygonData: state.MissionCreation.geoFence.polygon
-      ? state.MissionCreation.geoFence.polygon
-      : null,
-
-    location: state.MissionCreation.flightDetails.geoLocation,
-  };
-};
-
-export default connect(mapStateToProps, {
-  setFlightDetails,
-  addFlight,
-  clearMissionCreationStateWithGeoFence,
+export default connect(null, {
   showDrawing,
   loading,
   logout,
-})(StageTwoForm);
+})(CreateOrEditLocationForm);

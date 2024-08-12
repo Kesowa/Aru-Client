@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Row, Col, Typography, Table, Button, Card, message } from "antd";
 import { Input } from "antd";
 import {
@@ -17,7 +17,6 @@ import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { logout } from "../../../actions/authAction";
-import { setEditLocation } from "../../../actions/locationAction";
 import { connect } from "react-redux";
 import { loading } from "../../../actions/loadingAction";
 
@@ -221,27 +220,12 @@ function DataLocation(props) {
       render: (data) => (
         <>
           <Link to={`data/location/${data.key}`}>
-            <Button
-              onClick={() => {
-                props.setEditLocation({
-                  location: data,
-                  isEditing: true,
-                });
-              }}
-              style={{ marginRight: "10px" }}
-            >
+            <Button>
               <EyeOutlined />
             </Button>
           </Link>
           <Link to={`data/location/edit/${data.key}`}>
-            <Button
-              onClick={() => {
-                props.setEditLocation({
-                  location: data,
-                  isEditing: true,
-                });
-              }}
-            >
+            <Button>
               <EditOutlined />
             </Button>
           </Link>
@@ -253,10 +237,11 @@ function DataLocation(props) {
               http
                 .delete(`${apis.DELETE_LOCATION}?id=${data.key}`)
                 .then((result) => {
-                  if (result.data.data.status) {
-                    message.success(`LOcation ${data.name} deleted`);
+                  if (result.data.status) {
+                    message.success(`Location ${result.data.data.properties.name} deleted`);
+                    getAllLocations();
                   } else {
-                    message.error(result.data.data.message);
+                    message.error(result.data.message);
                   }
                 })
                 .catch((err) => {
@@ -458,7 +443,6 @@ function DataLocation(props) {
 }
 
 export default connect(() => ({}), {
-  setEditLocation,
   loading,
   logout,
 })(DataLocation);

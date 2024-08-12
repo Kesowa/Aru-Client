@@ -7,12 +7,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import GeoFence from "../../../../static/GeoFence.svg";
 
-import {
-  setPolygonMeasurements,
-  setGeolocation,
-  clearMissionCreationStateWithGeoFence,
-} from "../../../../actions/missionCreation";
-
 import { showDrawing } from "../../../../actions/gmapActions";
 
 import getAddressfromLatLong from "../../../../services/reverseGeocoding";
@@ -22,14 +16,12 @@ type mapProps = {
   setAreaSelected: any;
   drawingToolBtns: any;
   setDrawingToolBtns: any;
-  setPolygonMeasurements: any;
-  clearMissionCreationStateWithGeoFence: any;
   setGeolocation: any;
-  missionData: any;
-  isEditing: any;
   showDrawing: any;
   polygonData: any;
-  location: any;
+  setPolygonData: any;
+  isEditing: any;
+  locationToEdit: any;
 };
 
 type mapState = {
@@ -97,32 +89,71 @@ class LocationMap extends Component<mapProps, mapState> {
       this.props.setDrawingToolBtns(false);
     });
 
-    if (this.props.isEditing) {
-      const obj = this.createMeasurements(
-        this.props.missionData.flights[0].geoFence
-      );
-      if (obj) {
-        this.oldShape = obj;
-      }
-    }
-
-    if (this.props.location.isEditing) {
+    if (this.props.isEditing && this.props.locationToEdit) {
       const obj: any = new Object();
       obj.polygon = {
-        points: this.props.location.location.geofence.map((point) => {
+        points: this.props.locationToEdit.geometry.coordinates[0].map((point) => {
           return {
-            lat: point.lat,
-            lng: point.long,
+            lng: point[0],
+            lat: point[1],
           };
         }),
-        length: this.props.location.location.geofence.length,
+        length: this.props.locationToEdit.geometry.coordinates[0].length,
       };
 
-      const measurement = this.createMeasurements(obj);
+      const shape = this.createMeasurements(obj);
 
-      if (measurement) {
-        this.oldShape = measurement;
+      if (shape) {
+        this.oldShape = shape;
+
+        this.drawingManager.setDrawingMode(null);
+
+        shape.setEditable(true);
+
+        this.setPolygonChangeEvent(shape);
+
+        // Polygon data
+        const pathPoints = shape
+          .getPath()
+          .getArray()
+          .map((data) => {
+            return {
+              lat: data.lat(),
+              lng: data.lng(),
+            };
+          });
+
+        const center = this.findPolygonCenter(pathPoints);
+
+        getAddressfromLatLong(center[0], center[1], (err, address) => {
+          if (!err) {
+            this.props.setGeolocation(address);
+          } else {
+            message.error("Location could not be fetched");
+          }
+        });
+
+        const area = window.google.maps.geometry.spherical.computeArea(
+          shape.getPath()
+        );
+
+        const length = window.google.maps.geometry.spherical.computeLength(
+          shape.getPath()
+        );
+        // Set Polygon data to State
+        this.props.setPolygonData({
+          area,
+          length,
+          points: pathPoints,
+        });
         this.props.setAreaSelected(true);
+        this.drawingManager.setOptions({
+          drawingControl: false,
+        });
+        this.setState({
+          isPolygonActive: true,
+          showDrawingButtons: false,
+        });
       }
     }
   }
@@ -235,7 +266,7 @@ class LocationMap extends Component<mapProps, mapState> {
     const {
       setAreaSelected,
       areaSelected,
-      setPolygonMeasurements,
+      setPolygonData,
       setGeolocation,
     } = this.props;
 
@@ -281,10 +312,10 @@ class LocationMap extends Component<mapProps, mapState> {
           shape.getPath()
         );
         // Set Polygon data to State
-        setPolygonMeasurements({
+        setPolygonData({
           area,
           length,
-          pathPoints,
+          points: pathPoints,
         });
       }
       this.drawingManager.setOptions({
@@ -300,7 +331,7 @@ class LocationMap extends Component<mapProps, mapState> {
   };
 
   setPolygonChangeEvent = (polygon) => {
-    const { setPolygonMeasurements, setGeolocation } = this.props;
+    const { setPolygonData, setGeolocation } = this.props;
     const self = this;
     window.google.maps.event.addListener(
       polygon.getPath(),
@@ -334,10 +365,10 @@ class LocationMap extends Component<mapProps, mapState> {
         );
 
         // Set Polygon data to State
-        setPolygonMeasurements({
+        setPolygonData({
           area,
           length,
-          pathPoints,
+          points: pathPoints,
         });
       }
     );
@@ -374,10 +405,10 @@ class LocationMap extends Component<mapProps, mapState> {
           polygon.getPath()
         );
         // Set Polygon data to State
-        setPolygonMeasurements({
+        setPolygonData({
           area,
           length,
-          pathPoints,
+          points: pathPoints,
         });
       }
     );
@@ -437,7 +468,7 @@ class LocationMap extends Component<mapProps, mapState> {
       this.oldShape = null;
       this.props.setAreaSelected(false);
       this.props.setDrawingToolBtns(false);
-      this.props.clearMissionCreationStateWithGeoFence();
+      this.props.setPolygonData(null);
       this.setState({
         isPolygonActive: false,
       });
@@ -531,19 +562,9 @@ class LocationMap extends Component<mapProps, mapState> {
 }
 
 const mapStateToProps = (state: any) => ({
-  missionData: state.MissionCreation,
-  isEditing: state.MissionCreation.isEditing,
   showDrawing: state.Gmap.showDrawing,
-  polygonData: state.MissionCreation.geoFence.polygon
-    ? state.MissionCreation.geoFence.polygon
-    : null,
-
-  location: state.Location,
 });
 
 export default connect(mapStateToProps, {
-  setPolygonMeasurements,
-  setGeolocation,
   showDrawing,
-  clearMissionCreationStateWithGeoFence,
 })(LocationMap);
