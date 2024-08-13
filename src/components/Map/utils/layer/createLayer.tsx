@@ -115,7 +115,7 @@ const CreateLayer = (props: any) => {
 
       const body = {
         file: uploadTokens,
-        missionId: props.isBaseMap ? undefined : props.missionId,
+        ...(props.isBaseMap ? {}:{ missionId: props.missionId }),
         name: layerName,
         color: layerColor,
         vectorType: String(layerType),

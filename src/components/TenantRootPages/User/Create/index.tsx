@@ -50,7 +50,8 @@ function UserCreatePage(props: any) {
   const beforeUploadFunction = (file: RcFile) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
-      await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
+      const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
+      setAvatar(uploadToken);
       setIsAvatarUploading(false);
     });
     return false;

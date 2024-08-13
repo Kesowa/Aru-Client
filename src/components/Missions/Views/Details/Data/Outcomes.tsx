@@ -669,30 +669,32 @@ function Outcomes(props) {
     name: "file",
     multiple: true,
     action: `${API_URL}${apis.UPLOAD_ALERT}`,
-    customRequest: async(options: any) => {
+    customRequest: async (options: any) => {
+      console.log("Request body:");
       setUploading(true);
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       // const fData = new FormData();
-      const proceed = async (options) => {
-        const res = await extractExif(options.file);
-        
-        const uploadToken = await uploadFile(options.file, DocModel.ALERT_IMAGES, (prog) => console.info("PROGRESS: " + prog));
+      const res = await extractExif(options.file);
+      console.log(res);
+      const uploadToken = await uploadFile(options.file, DocModel.ALERT_IMAGES, (prog) => console.info("PROGRESS: " + prog));
 
-        const body = {
-          file: uploadToken,
-          missionId: props.missionDetails.missionId,
-          folderName: "photos",
-          locationName: res.address,
-          locationId: props.missionDetails.locationId?._id,
-          pcount: "0",
-          type: "Manual",
-          note: "Alert uploaded from browser!",
-          onSite: "false",
-          flightId: props.missionDetails.flightId
-        };
-        if (res.status) {       
-          console.log(res);
+      const body = {
+        file: uploadToken,
+        missionId: props.missionDetails.missionId,
+        folderName: "photos",
+        locationName: res.address,
+        locationId: props.missionDetails.locationId?._id,
+        pcount: "0",
+        type: "Manual",
+        note: "Alert uploaded from browser!",
+        onSite: "false",
+        flightId: props.missionDetails.flightId
+      };
+
+      if (res.status) {   
+          console.log(res.status);
+        
           // fData.append("image", options.file);
           // fData.append("locationName", res.address);
           // fData.append("missionId", props.missionDetails.missionId);
@@ -766,8 +768,8 @@ function Outcomes(props) {
               setUploading(false);
             });
         } else {
+          
           console.log(res);
-
           // fData.append("image", options.file);
           // fData.append("locationName", res.address);
           // fData.append("missionId", props.missionDetails.missionId);
@@ -842,8 +844,7 @@ function Outcomes(props) {
             .finally(() => {
               setUploading(false);
             });
-        }
-      };
+        };
       return {
         abort() {
           console.log("Aborting outcome upload");

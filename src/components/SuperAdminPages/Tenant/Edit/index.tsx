@@ -42,29 +42,28 @@ function EditTenant(props: any) {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
       const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+      setAvatar(uploadToken);
 
-      const body = {
-        file: uploadToken,
-      };
+     
       // const formData = new FormData();
       // formData.append("avatar", file);
-      http
-        .post(apis.UPLOAD_TENANT_AVATAR, body, {
-        })
-        .then((result) => {
-          if (result.data.status) {
-            setAvatar(result.data.file);
-          } else {
-            message.error(result.data.message);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          AxiosErrorHandler(err, props.logout);
-        })
-        .finally(() => {
-          setIsAvatarUploading(false);
-        });
+      // http
+      //   .post(apis.UPLOAD_TENANT_AVATAR, body, {
+      //   })
+      //   .then((result) => {
+      //     if (result.data.status) {
+      //       setAvatar(result.data.file);
+      //     } else {
+      //       message.error(result.data.message);
+      //     }
+      //   })
+      //   .catch((err) => {
+      //     console.log(err);
+      //     AxiosErrorHandler(err, props.logout);
+      //   })
+      //   .finally(() => {
+      //     setIsAvatarUploading(false);
+      //   });
     });
     return false;
   };
