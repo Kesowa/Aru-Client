@@ -4,7 +4,6 @@ import Auth from "./authReducer";
 import MissionCreation from "./MissionCreationReducer";
 import Gmap from "./gMapReducer";
 import Missions from "./missionReducer";
-import Assets from "./assetReducer";
 import Models from "./modelReducer";
 import Manufacturers from "./manufacturerReducer";
 import Client from "./clientReducer";
@@ -19,7 +18,6 @@ export default combineReducers({
   MissionCreation,
   Gmap,
   Missions,
-  Assets,
   Models,
   Manufacturers,
   Client,

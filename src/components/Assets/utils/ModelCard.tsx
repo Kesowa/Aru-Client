@@ -114,9 +114,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
 interface ModelCardProps {
   id: any;
-  models: any[]; // Adjust the type accordingly
   showDate: boolean;
   logout: () => void;
+  Auth: any;
 }
 
 const ModelCard: React.FC<ModelCardProps> = (props) => {
@@ -161,14 +161,6 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
   const handleCancel2 = () => {
     setIsModalVisible2(false);
     setCount(0);
-  };
-
-  const getModelDetails = (id: any) => {
-    let model = props.models.filter((model: any) => {
-      return model._id === id;
-    });
-    model = model[0];
-    setData(model);
   };
 
   useEffect(() => {
