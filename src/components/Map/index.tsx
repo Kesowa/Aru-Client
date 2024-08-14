@@ -221,7 +221,6 @@ function BaseMap(props) {
     canCreateLayer: false,
     canDeleteLayer: true,
     canEditLayer: true,
-    canCreateVectorLayer: false,
     canDownloadLayer: true,
     canEditGeojson: false,
     canDeleteFeature: false,
@@ -370,7 +369,6 @@ function BaseMap(props) {
       canCreateLayer: props.userDetails.customPermissions.includes(PERMS.UPLOAD_LAYER),
       canDeleteLayer: props.userDetails.customPermissions.includes(PERMS.DELETE_LAYER),
       canEditLayer: props.userDetails.customPermissions.includes(PERMS.EDIT_LAYER),
-      canCreateVectorLayer: props.userDetails.customPermissions.includes(PERMS.SAVE_DRAWINGS),
       canDownloadLayer: true,
       canEditGeojson: props.userDetails.customPermissions.includes(PERMS.EDIT_FEATURE),
       canDeleteFeature: props.userDetails.customPermissions.includes(PERMS.DELETE_FEATURE),
@@ -5285,22 +5283,6 @@ function BaseMap(props) {
     },
     pickable: true,
     pickingRadius: 15,
-    onClick: (data, e) => {
-      if (!e.rightButton) {
-        if (modeState.isCompleted) {
-          InfoWindow(
-            "new",
-            data.coordinate,
-            "New Shape",
-            drawMode,
-            data.object,
-            true,
-            "new",
-            "0"
-          );
-        }
-      }
-    },
     pointRadiusUnits: "pixels",
     pointRadiusScale: 1,
     pointRadiusMinPixels: 8,
@@ -6880,7 +6862,7 @@ function BaseMap(props) {
                         setShouldAttributeTableReload
                       }
                       shouldAttributeTableReload={shouldAttributeTableReload}
-                      canDraw={perms.canCreateVectorLayer}
+                      canDraw={perms.canCreateLayer}
                       isBaseMap={props.isBaseMaps}
                       isPublic={false}
                       setThumbnail={setThumbnail}
