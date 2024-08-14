@@ -234,10 +234,6 @@ function ListAllPackages(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout, setPackageToEdit })(
+export default connect(null, { loading, logout, setPackageToEdit })(
   ListAllPackages
 );

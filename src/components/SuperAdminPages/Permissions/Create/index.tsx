@@ -89,8 +89,4 @@ function CreatePermission(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(CreatePermission);
+export default connect(null, { loading, logout })(CreatePermission);

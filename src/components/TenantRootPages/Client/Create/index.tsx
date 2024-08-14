@@ -422,7 +422,6 @@ function ClientCreatePage(props: any) {
 
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
-  Theme: state.Theme,
   userDetails: state.Auth.userdetails,
 });
 

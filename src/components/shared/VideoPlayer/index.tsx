@@ -2266,7 +2266,6 @@ function VideoPlayer(props: any) {
 
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
-  Theme: state.Theme,
   UserDetails: state.Auth.userdetails,
 });
 

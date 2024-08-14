@@ -1778,7 +1778,6 @@ const CreateBaseLayer = (props) => {
 
 const mapStateToProps = (state: unknown) => ({
   Auth: state.Auth,
-  Theme: state.Theme,
 });
 
 export default connect(mapStateToProps, { logout })(CreateBaseLayer);

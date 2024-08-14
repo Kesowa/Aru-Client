@@ -57,7 +57,6 @@ interface IVectorFormProps {
   shouldAttributeTableReload: boolean;
 
   Auth: any;
-  Theme: any;
   logout: (b: boolean) => any;
 }
 
@@ -643,7 +642,6 @@ function VectorForm(props: IVectorFormProps) {
 
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
-  Theme: state.Theme,
 });
 
 export default connect(mapStateToProps, { logout })(VectorForm);

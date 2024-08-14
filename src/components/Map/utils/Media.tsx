@@ -1211,7 +1211,6 @@ function Media(props) {
 
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
-  Theme: state.Theme,
   Thread: state.Thread,
 });
 

@@ -76,10 +76,6 @@ function ListAllPermissions(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(
+export default connect(null, { loading, logout })(
   ListAllPermissions
 );

@@ -268,10 +268,6 @@ function ListAllTanents(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout, setTenantToEdit })(
+export default connect(null, { loading, logout, setTenantToEdit })(
   ListAllTanents
 );

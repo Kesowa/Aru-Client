@@ -158,8 +158,4 @@ function BasicInfo(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { logout })(BasicInfo);
+export default connect(null, { logout })(BasicInfo);

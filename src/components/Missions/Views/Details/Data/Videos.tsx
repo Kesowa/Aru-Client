@@ -1612,7 +1612,6 @@ function Videos(props) {
 }
 
 const mapStateToProps = (state: any) => ({
-  Theme: state.theme,
   Thread: state.Thread,
 });
 

@@ -54,11 +54,7 @@ function ChoosePackage(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(ChoosePackage);
+export default connect(null, { loading, logout })(ChoosePackage);
 
 const PackageCard = (props: any) => {
   return (

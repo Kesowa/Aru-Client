@@ -360,7 +360,6 @@ function EditPackage(props: any) {
 }
 
 const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
   package: state.Package.packageToEdit,
 });
 

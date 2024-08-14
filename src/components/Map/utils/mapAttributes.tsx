@@ -457,7 +457,6 @@ const MapAttributes: React.FC<Props> = (props) => {
 
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
-  Theme: state.Theme,
 });
 
 export default connect(mapStateToProps, { logout })(MapAttributes);

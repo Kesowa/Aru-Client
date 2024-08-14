@@ -445,7 +445,6 @@ function ClientListPage(props: any) {
 
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
-  Theme: state.Theme,
   userType: state.Auth.userdetails.userType,
   userDetails: state.Auth.userdetails,
 });

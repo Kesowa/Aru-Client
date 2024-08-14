@@ -328,7 +328,6 @@ function EditTenant(props: any) {
 }
 
 const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
   tenant: state.Tenant.tenantToEdit,
 });
 

@@ -916,7 +916,6 @@ function InfoWindow(props) {
 
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
-  Theme: state.Theme,
   open: state.Thread.open,
 });
 

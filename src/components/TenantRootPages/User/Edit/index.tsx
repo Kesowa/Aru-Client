@@ -426,7 +426,6 @@ function UserEditPage(props: any) {
 
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
-  Theme: state.Theme,
   user: state.User.userToEdit,
   userDetails: state.Auth.userdetails,
 });

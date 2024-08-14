@@ -331,8 +331,4 @@ function CreatePackage(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(CreatePackage);
+export default connect(null, { loading, logout })(CreatePackage);

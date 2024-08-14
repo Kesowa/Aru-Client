@@ -1,7 +1,6 @@
 import { combineReducers } from "redux";
 import Loader from "./loaderReducer";
 import Auth from "./authReducer";
-import Theme from "./themeReducer";
 import MissionCreation from "./MissionCreationReducer";
 import Gmap from "./gMapReducer";
 import Missions from "./missionReducer";
@@ -17,7 +16,6 @@ import Thread from "./threadReducer";
 export default combineReducers({
   Loader,
   Auth,
-  Theme,
   MissionCreation,
   Gmap,
   Missions,

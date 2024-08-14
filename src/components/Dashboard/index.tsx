@@ -70,7 +70,6 @@ function Dashboard(props: any) {
 }
 
 const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
+  Auth: state.Auth
 });
 export default connect(mapStateToProps, { logout })(Dashboard);

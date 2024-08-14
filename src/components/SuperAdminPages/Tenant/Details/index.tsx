@@ -110,8 +110,4 @@ function TenantDetails(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(TenantDetails);
+export default connect(null, { loading, logout })(TenantDetails);

@@ -125,8 +125,4 @@ function CreateTenant(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(CreateTenant);
+export default connect(null, { loading, logout })(CreateTenant);

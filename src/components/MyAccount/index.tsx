@@ -108,7 +108,6 @@ function Organisation(props: any) {
 
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
-  Theme: state.Theme,
 });
 
 export default connect(mapStateToProps, { loading, logout })(Organisation);

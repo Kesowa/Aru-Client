@@ -195,7 +195,6 @@ function ChangeClientPassword(props: any) {
 
 const mapStateToProps = (state: any) => ({
   Auth: state.Auth,
-  Theme: state.Theme,
   client: state.Client.clientToEdit,
   userDetails: state.Auth.userdetails,
 });

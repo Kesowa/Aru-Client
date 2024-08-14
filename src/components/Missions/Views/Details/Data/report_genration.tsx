@@ -103,7 +103,6 @@ function ReportGenration(props) {
 }
 
 const mapStateToProps = (state: any) => ({
-  Theme: state.theme,
   Thread: state.Thread,
 });
 
