@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { message, Typography, Row, Col } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
@@ -10,6 +10,7 @@ import moment from "moment";
 import http from "src/services/httpCall";
 import apis from "src/services/apis";
 import { AxiosErrorHandler } from "src/services/httpErrorHandle";
+import { AuthContext } from "src/services/authUtils";
 
 const { Title, Text } = Typography;
 
@@ -17,6 +18,8 @@ function AssetView(props) {
   const [data, setData] = useState<any>(null);
   const { id } = useParams<any>();
   const history = useHistory();
+
+  const { logout } = useContext(AuthContext);
 
   const getAssetDetails = (id: string) => {
     props.loading(true);
@@ -43,7 +46,7 @@ function AssetView(props) {
           history.push("/dashboard/assets");
         } else {
           message.error("Unable to fetch asset. Error info: " + err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         }
       })
       .finally(() => {

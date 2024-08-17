@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
 import { loading } from "../../actions/loadingAction";
@@ -6,7 +6,6 @@ import { connect } from "react-redux";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { Typography, Form, Input, Button, Alert } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
-import { login, setUserDetails, logout } from "../../actions/authAction";
 import "./index.less";
 import KesowaLogo from "../../static/kiv_logo_new.png";
 import { clientOptions } from "../../static/sideBarOptions";
@@ -14,6 +13,7 @@ import { Link } from "react-router-dom";
 import { INSTANCE, Instance } from "src/constants";
 import ReactDom from "react-dom";
 import "../shared/login-bg.less";
+import { AuthContext } from "src/services/authUtils";
 
 const OVERLAY_STYLES = {
   position: "fixed",
@@ -26,23 +26,21 @@ const OVERLAY_STYLES = {
   zIndex: 1000,
 };
 function LoginErrorModal(props: any) {
-  console.log("Auth123", props.Auth);
   props.loading(false);
   const [errMessage, setErrMessage] = useState("");
+  const { login, logout } = useContext(AuthContext);
+
   const onFinish = (values: any) => {
     http
       .post(apis.LOGIN, values)
       .then((result) => {
         if (result.data.status) {
           //login
-          localStorage.setItem("Token", result.data.token);
-          localStorage.setItem("UserId", result.data.data._id);
-          props.login(
+          login(
             result.data.token,
             result.data.data._id,
             result.data.data
           );
-          props.setUserDetails(result.data.data);
         } else {
           setErrMessage(result.data.message);
         }
@@ -50,7 +48,7 @@ function LoginErrorModal(props: any) {
       .catch((err) => {
         console.log(err);
         setErrMessage(err?.response?.data?.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -132,13 +130,4 @@ function LoginErrorModal(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, {
-  loading,
-  login,
-  setUserDetails,
-  logout,
-})(LoginErrorModal);
+export default connect(null, { loading })(LoginErrorModal);

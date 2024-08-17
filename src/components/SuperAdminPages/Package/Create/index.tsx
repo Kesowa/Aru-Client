@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { connect } from "react-redux";
 import { Form, Input, Upload, Row, Col, message, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
@@ -14,14 +14,16 @@ import http from "../../../../services/httpCall";
 import { beforeUpload } from "../../../../services/imageupload";
 import ImgCrop from "antd-img-crop";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { Link } from "react-router-dom";
 import { STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 
 function CreatePackage(props: any) {
   const [form] = Form.useForm();
   const [poster, setPoster] = useState("");
   const [isPosterUploading, setIsPosterUploading] = useState(false);
+
+  const { logout } = useContext(AuthContext);
 
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
@@ -43,7 +45,7 @@ function CreatePackage(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsPosterUploading(false);
@@ -74,7 +76,7 @@ function CreatePackage(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           props.loading(false);
@@ -331,4 +333,4 @@ function CreatePackage(props: any) {
   );
 }
 
-export default connect(null, { loading, logout })(CreatePackage);
+export default connect(null, { loading })(CreatePackage);

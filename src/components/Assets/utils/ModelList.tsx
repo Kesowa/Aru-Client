@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { connect } from "react-redux";
 import {
   Row,
@@ -19,17 +19,13 @@ import "../index.less";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
 import { setModelsToState, deleteModel } from "../../../actions/modelAction";
 import ModelCard from "./ModelCard";
+import { AuthContext } from "src/services/authUtils";
 
 const { Title } = Typography;
 
 interface TableProps {
-  userType: any;
-  tenantId: any;
-  userId: any;
-  logout: any;
   setModelsToState: any;
   deleteModel: any;
   models: any;
@@ -41,6 +37,8 @@ function ModelList(props: TableProps) {
   const [isTableLoading, setIsTableLoading] = useState(true);
   const [modelTableData, setModelTableData] = useState<any>([]);
   const [selectedModelID, setSelectedModelID] = useState();
+
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     fetchModels();
@@ -58,7 +56,7 @@ function ModelList(props: TableProps) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -252,9 +250,6 @@ function ModelList(props: TableProps) {
 
 const mapStateToProps = (state) => {
   return {
-    userType: state.Auth.userdetails.userType,
-    tenantId: state.Auth.userdetails.tenantId._id,
-    userId: state.Auth.userdetails._id,
     models: state.Models.models,
   };
 };
@@ -262,5 +257,4 @@ const mapStateToProps = (state) => {
 export default connect(mapStateToProps, {
   setModelsToState,
   deleteModel,
-  logout,
 })(ModelList);

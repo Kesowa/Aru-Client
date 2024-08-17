@@ -1,12 +1,12 @@
-import { useState, Suspense, lazy } from "react";
+import { useState, Suspense, lazy, useContext } from "react";
 import { connect } from "react-redux";
 import { Layout, Row, Col, Typography, Space, Spin } from "antd";
 import { useHistory } from "react-router-dom";
 
-import { logout } from "../../actions/authAction";
 import "./index.less";
 import TermsAndCondition from "./utils/TnC";
 import SideBar from "./SideBar";
+import { AuthContext } from "src/services/authUtils";
 const ProfileDrawer = lazy(() => import("./Profile"));
 const FallbackComponent = lazy(() => import("./utils/Fallback"));
 
@@ -15,6 +15,8 @@ function Dashboard(props: any) {
   const { Paragraph, Text } = Typography;
   const [showProfile, setShowProfile] = useState(false);
   const history = useHistory();
+
+  const { Auth } = useContext(AuthContext);
 
   const toggleSideBar = () => {
     setSideBarCollapsed(!sideBarCollapsed);
@@ -53,7 +55,7 @@ function Dashboard(props: any) {
               >
                 <ProfileDrawer
                   open={showProfile}
-                  userDetails={props.Auth}
+                  userDetails={Auth}
                   showProfile={setShowProfile}
                 />
                 <FallbackComponent
@@ -69,7 +71,4 @@ function Dashboard(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth
-});
-export default connect(mapStateToProps, { logout })(Dashboard);
+export default Dashboard;

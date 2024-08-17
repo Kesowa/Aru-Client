@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import { connect } from "react-redux";
 import {
   Typography,
   Button,
@@ -24,7 +23,7 @@ import moment from "moment";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
+import { AuthContext } from "src/services/authUtils";
 
 const { Title } = Typography;
 
@@ -46,7 +45,6 @@ interface Asset {
 
 interface TableProps {
   filter: string;
-  logout: () => void;
 }
 
 function AssetListing(props: TableProps) {
@@ -56,6 +54,8 @@ function AssetListing(props: TableProps) {
   const [assetTableData, setAssetTableData] = useState<Asset[]>([]);
 
   const history = useHistory();
+
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     fetchAssets();
@@ -80,7 +80,7 @@ function AssetListing(props: TableProps) {
           setAssetTableData([]);
         } else {
           message.error("Unable to fetch assets. Error info: " + err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         }
       })
       .finally(() => {
@@ -109,7 +109,7 @@ function AssetListing(props: TableProps) {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -342,4 +342,4 @@ function AssetListing(props: TableProps) {
   );
 }
 
-export default connect(null, { logout })(AssetListing);
+export default AssetListing;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { connect } from "react-redux";
 import { Steps, Button, message } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
@@ -13,16 +13,18 @@ import ChoosePackage from "./ChoosePackage";
 import BillingDetails from "./BillingDetails";
 import "../Tenant.less";
 import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { Link, useHistory } from "react-router-dom";
+import { AuthContext } from "src/services/authUtils";
 
 function CreateTenant(props: any) {
   const [formState, setFormState] = useState(0);
   const [tenantData, setTenantData] = useState({});
   const history = useHistory();
+
+  const { logout } = useContext(AuthContext);
 
   const goToNextFromBasic = (data: any) => {
     setTenantData({
@@ -64,7 +66,7 @@ function CreateTenant(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -125,4 +127,4 @@ function CreateTenant(props: any) {
   );
 }
 
-export default connect(null, { loading, logout })(CreateTenant);
+export default connect(null, { loading })(CreateTenant);

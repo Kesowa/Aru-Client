@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { FlyToInterpolator } from "deck.gl";
 import {
   Typography,
@@ -26,9 +26,9 @@ import "../index.less";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
 import { connect } from "react-redux";
 import * as turf from "@turf/turf";
+import { AuthContext } from "src/services/authUtils";
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   editing: boolean;
@@ -114,6 +114,8 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
   const [form] = Form.useForm();
   const [form1] = Form.useForm();
   let searchInput: any;
+
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     if (props.contentHeight) {
@@ -209,7 +211,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -253,7 +255,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -302,7 +304,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -489,7 +491,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
         })
         .catch((err) => {
           message.error(err.message);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         });
 
       const newData = [...data];
@@ -847,8 +849,4 @@ const mapStateToProps = (state: {
   };
 };
 
-const mapDispatchToProps = {
-  logout,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(FeatureTable);
+export default connect(mapStateToProps, null)(FeatureTable);

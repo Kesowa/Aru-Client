@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
@@ -19,7 +19,6 @@ import {
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -36,6 +35,7 @@ import moment from "moment";
 import { STATIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
 import { PERMS, TENANT_STAFF_PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
 
 function UserEditPage(props: any) {
   const [form] = Form.useForm();
@@ -57,6 +57,10 @@ function UserEditPage(props: any) {
   }>();
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+
   //avatar upload
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
@@ -80,7 +84,7 @@ function UserEditPage(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsAvatarUploading(false);
@@ -144,16 +148,16 @@ function UserEditPage(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
       });
   };
   useEffect(() => {
-    if (!props.Auth.isLoggedIn) {
+    if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
-    } else if (props.userDetails.userType !== "tenant-root") {
+    } else if (userDetails.userType !== "tenant-root") {
       // only tenant-root can change tenant-staff details
       setErrorState("401");
     } else {
@@ -207,7 +211,7 @@ function UserEditPage(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -425,9 +429,7 @@ function UserEditPage(props: any) {
 }
 
 const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
   user: state.User.userToEdit,
-  userDetails: state.Auth.userdetails,
 });
 
-export default connect(mapStateToProps, { loading, logout })(UserEditPage);
+export default connect(mapStateToProps, { loading })(UserEditPage);

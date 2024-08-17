@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { UnorderedListOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { Row, Col, message, Transfer, Form, Input, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -19,6 +18,7 @@ import InternalServerError from "../../../shared/Error/InternalServerError";
 import CountLimit from "../../restrictions/restrictions";
 import Expired from "../../restrictions/expiry";
 import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
 
 function UserGroupCreatePage(props: any) {
   const [form] = Form.useForm();
@@ -26,6 +26,8 @@ function UserGroupCreatePage(props: any) {
   // const [selectedPermissionsIds, setSelectedPermissionsIds] = useState([]);
   const [selectedPermissions, setSelectedPermissions] = useState<PERMS[]>([]);
   const [errorState, setErrorState] = useState("");
+
+  const { logout } = useContext(AuthContext);
 
   const fetchAllPermissions = () => {
     props.loading(true);
@@ -57,7 +59,7 @@ function UserGroupCreatePage(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -112,13 +114,13 @@ function UserGroupCreatePage(props: any) {
           ) {
             setErrorState("403-expiry");
             window.setTimeout(function() {
-              AxiosErrorHandler(err, props.logout);
+              AxiosErrorHandler(err, logout);
             }, 5000);
           } else {
             setErrorState("403");
           }
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -214,10 +216,6 @@ function UserGroupCreatePage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, { loading, logout })(
+export default connect(null, { loading })(
   UserGroupCreatePage
 );

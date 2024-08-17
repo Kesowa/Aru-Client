@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Typography, Tabs, Button, message } from "antd";
 
@@ -7,11 +7,11 @@ import "./data.less";
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { logout } from "../../../../../actions/authAction";
 import { connect } from "react-redux";
 import { thread } from "../../../../../actions/threadAction";
 
 import "./data.less";
+import { AuthContext } from "src/services/authUtils";
 const boxStyle: React.CSSProperties = {
   width: "100%",
   height: 120,
@@ -22,6 +22,7 @@ const boxStyle: React.CSSProperties = {
 const { Text } = Typography;
 function ReportGenration(props) {
   const [activeKey, setactiveKey] = useState("1");
+  const { logout } = useContext(AuthContext);
 
   function callback(key) {
     setactiveKey(key);
@@ -50,7 +51,7 @@ function ReportGenration(props) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -106,4 +107,4 @@ const mapStateToProps = (state: any) => ({
   Thread: state.Thread,
 });
 
-export default connect(mapStateToProps, { logout, thread })(ReportGenration);
+export default connect(mapStateToProps, { thread })(ReportGenration);

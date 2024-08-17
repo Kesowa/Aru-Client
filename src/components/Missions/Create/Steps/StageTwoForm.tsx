@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from "react";
+import React, { useState, useEffect, FC, useContext } from "react";
 import {
   Form,
   Input,
@@ -12,7 +12,6 @@ import moment from "moment";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { connect, ConnectedProps } from "react-redux";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
@@ -22,6 +21,7 @@ import {
   clearMissionCreationStateWithGeoFence,
 } from "../../../../actions/missionCreation";
 import { showDrawing } from "../../../../actions/gmapActions";
+import { AuthContext } from "src/services/authUtils";
 
 const { Option } = Select;
 
@@ -53,7 +53,6 @@ const StageTwoForm: FC<StageTwoFormProps> = ({
   showDrawing,
   areaSelected,
   setAreaSelected,
-  logout,
 }) => {
   const [formState, setFormState] = useState<any>({
     locationId: "none",
@@ -64,6 +63,8 @@ const StageTwoForm: FC<StageTwoFormProps> = ({
   const [area, setArea] = useState<number>(0);
   const [selectedPoints, setSelectedPoints] = useState<number>(0);
   const [locations, setLocations] = useState<any>(null);
+
+  const { logout } = useContext(AuthContext);
 
   const [form] = Form.useForm();
 
@@ -373,7 +374,6 @@ const connector = connect(mapStateToProps, {
   addFlight,
   clearMissionCreationStateWithGeoFence,
   showDrawing,
-  logout,
 });
 
 type PropsFromRedux = ConnectedProps<typeof connector>;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Row,
   Col,
@@ -22,7 +22,6 @@ import Videos from "./Videos";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { useParams } from "react-router";
 import getAddressfromLatLong from "../../../../services/reverseGeocoding";
 import AloneLogo from "../../../../static/Alone-rafiki.svg";
@@ -30,6 +29,7 @@ import moment from "moment";
 import { connect } from "react-redux";
 import { loading } from "../../../../actions/loadingAction";
 import { STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 const { Panel } = Collapse;
 const { Text, Title } = Typography;
 
@@ -51,6 +51,8 @@ function LocationCard(props) {
   const [once, setonce] = useState(true);
 
   const { id } = useParams<any>();
+  
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     if (once) {
@@ -136,7 +138,7 @@ function LocationCard(props) {
       props.loading(false);
     } catch (err) {
       message.error(err.message);
-      AxiosErrorHandler(err, props.logout);
+      AxiosErrorHandler(err, logout);
     }
   };
 
@@ -179,7 +181,7 @@ function LocationCard(props) {
       })
       .catch((err) => {
         message.error("Mission Could not be fetched");
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setSelectedLoading(false);
@@ -212,7 +214,7 @@ function LocationCard(props) {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -510,10 +512,8 @@ function LocationCard(props) {
 
 const mapStateToProps = (state) => ({
   loading: state.loading,
-  logout: state.logout,
 });
 
 export default connect(mapStateToProps, {
   loading,
-  logout,
 })(LocationCard);

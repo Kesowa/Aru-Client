@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from "react";
+import React, { useState, useEffect, FC, useContext } from "react";
 import {
   Form,
   Input,
@@ -24,9 +24,9 @@ import { loading } from "../../../../actions/loadingAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
+import { AuthContext } from "src/services/authUtils";
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -45,6 +45,8 @@ const EditFlightForm: FC<any> = (props) => {
   const [pilots, setPilots] = useState<any>([]);
   const history = useHistory();
 
+  const { logout } = useContext(AuthContext);
+
   const [form] = Form.useForm();
 
   const getAllLocations = () => {
@@ -57,7 +59,7 @@ const EditFlightForm: FC<any> = (props) => {
       })
       .catch((err) => {
         message.error("Locations could not be fetched");
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -69,9 +71,9 @@ const EditFlightForm: FC<any> = (props) => {
           setPilots(result.data.data);
         }
       })
-      .catch((error) => {
-        console.log(error);
-        AxiosErrorHandler(error, props.logout);
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -139,7 +141,7 @@ const EditFlightForm: FC<any> = (props) => {
         })
         .catch((err) => {
           message.error("Something went wrong");
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         });
 
       http
@@ -154,7 +156,7 @@ const EditFlightForm: FC<any> = (props) => {
         })
         .catch((err) => {
           message.error("Something went wrong");
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           props.loading(false);
@@ -368,7 +370,6 @@ const mapStateToProps = (state: any) => ({
 
 const connector = connect(mapStateToProps, {
   loading,
-  logout,
   // for initializing the global states, so that GoogleMap gets initialized at the existing flight location
   enableFlightEditing,
   setCircleMeasurements,

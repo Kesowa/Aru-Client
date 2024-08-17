@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { Button, Modal, message, Input, Form } from "antd";
 import ThermalImage from "./thermalImage";
 import "./index.less";
@@ -10,6 +10,7 @@ import { Space, Table } from "antd";
 import apis from "../../../services/apis";
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
+import { AuthContext } from "src/services/authUtils";
 
 interface DataType {
   // index: number;
@@ -30,6 +31,8 @@ const ThermalImaging = (props) => {
   const [latestData, setLatestData] = useState(null);
   const [labelInput, setLabelInput] = useState("");
   const [form] = Form.useForm();
+
+  const { logout } = useContext(AuthContext);
 
   const thermalImagingData = async ({ id, doc }) => {
     try {
@@ -64,7 +67,7 @@ const ThermalImaging = (props) => {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -83,7 +86,7 @@ const ThermalImaging = (props) => {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setMissionsLoading(false);

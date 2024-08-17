@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ReactDom from "react-dom";
 import {
   Comment,
@@ -22,13 +22,13 @@ import {
   EditTwoTone,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
-import { logout } from "../../../actions/authAction";
 import { thread } from "../../../actions/threadAction";
 import { connect } from "react-redux";
 import moment from "moment-timezone";
 import "./index.less";
 import Mentions from "../Mentions";
 import VideoPlayer from "../VideoPlayer";
+import { AuthContext } from "src/services/authUtils";
 
 const GET_THREAD = async (docType: any, docID: any) => {
   return await http.get(`${apis.THREAD}/${docType}/${docID}`);
@@ -103,6 +103,9 @@ const Thread = (props) => {
   const [action, setAction] = useState("");
   const [commentId, setCommentId] = useState("");
   const [actionIdx, setActionIdx] = useState("");
+
+  const { Auth } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
 
   const getActions = (comment: any, idx: any) => {
     return [
@@ -397,8 +400,8 @@ const Thread = (props) => {
                     avatar={
                       <Avatar
                         icon={<UserOutlined />}
-                        src={`${STATIC_URL}${props.userDetails.avatar}`}
-                        alt={props.userDetails.name}
+                        src={`${STATIC_URL}${userDetails.avatar}`}
+                        alt={userDetails.name}
                       />
                     }
                     content={
@@ -417,7 +420,7 @@ const Thread = (props) => {
                 ) : (
                   <Comment
                     actions={
-                      props.userDetails.name === comment.authorName &&
+                      userDetails.name === comment.authorName &&
                       getActions(comment, idx)
                     }
                     author={<a>{comment.authorName}</a>}
@@ -459,8 +462,8 @@ const Thread = (props) => {
           avatar={
             <Avatar
               icon={<UserOutlined />}
-              src={`${STATIC_URL}${props.userDetails.avatar}`}
-              alt={props.userDetails.name}
+              src={`${STATIC_URL}${userDetails.avatar}`}
+              alt={userDetails.name}
             />
           }
           content={
@@ -484,11 +487,10 @@ const Thread = (props) => {
 
 const mapStateToProps = (state) => {
   return {
-    userDetails: state.Auth.userdetails,
     open: state.Thread.open,
     Thread: state.Thread,
     tags: state.Thread.tags,
   };
 };
 
-export default connect(mapStateToProps, { thread, logout })(Thread);
+export default connect(mapStateToProps, { thread })(Thread);

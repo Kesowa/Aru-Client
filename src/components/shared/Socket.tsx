@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { connect } from "react-redux";
 import io from "socket.io-client";
 import {
@@ -29,6 +29,7 @@ import moment from "moment";
 import { assignPilot } from "../../actions/flightAction";
 import { deleteMission } from "../../actions/missionActions";
 import { API_URL, STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 
 const { Text, Title } = Typography;
 
@@ -37,6 +38,8 @@ function Socket(props: any) {
   const [refresh, setrefresh] = useState(false);
   const [reload, setReload] = useState(null);
   const [downloadLoading, setDownloadLoading] = useState(false);
+
+  const { Auth } = useContext(AuthContext);
 
   //-----------------Notification Function-------------------------//
   const openNotification = (title, description, isAlert, data, type) => {
@@ -288,17 +291,17 @@ function Socket(props: any) {
 
   //-------------------socket connection for notifications---------------------------------///
   useEffect(() => {
-    if (props.Auth.userdetails) {
+    if (Auth.userdetails) {
       if (
-        props.Auth.userdetails.userType === "tenant-root" ||
-        props.Auth.userdetails.userType === "tenant-staff"
+        Auth.userdetails.userType === "tenant-root" ||
+        Auth.userdetails.userType === "tenant-staff"
       ) {
         if (!socket.current) {
           socket.current = io(
             `${API_URL}/stream/notification?tenantID=${
-              props.Auth.userdetails.tenantId._id
-                ? props.Auth.userdetails.tenantId._id
-                : props.Auth.userdetails.tenantId
+              Auth.userdetails.tenantId._id
+                ? Auth.userdetails.tenantId._id
+                : Auth.userdetails.tenantId
             }`
           );
           // New mission added
@@ -386,19 +389,12 @@ function Socket(props: any) {
         socket.current = null;
       }
     }
-  }, [props.Auth]);
+  }, [Auth]);
 
   return <div></div>;
 }
 
-const mapStateToProps = (state) => {
-  return {
-    Auth: state.Auth,
-    refresh: state.Missions.refresh,
-  };
-};
-
-export default connect(mapStateToProps, {
+export default connect(null, {
   addMission,
   changeMissionStatus,
   assignPilot,

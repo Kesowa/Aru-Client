@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { Form, Input, Button, Select, message, Result, Modal } from "antd";
 import s_m from "../../../../Icons/start_measurement.svg";
@@ -9,7 +9,7 @@ import { connect } from "react-redux";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
+import { AuthContext } from "src/services/authUtils";
 
 type CreateOrEditLocationForm = {
   areaSelected: any;
@@ -31,6 +31,8 @@ const CreateOrEditLocationForm = (props: any) => {
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [form] = Form.useForm();
   const history = useHistory();
+
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     if (props.polygonData) {
@@ -75,7 +77,7 @@ const CreateOrEditLocationForm = (props: any) => {
         } else {
           console.log(err);
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -113,7 +115,7 @@ const CreateOrEditLocationForm = (props: any) => {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -276,5 +278,4 @@ const CreateOrEditLocationForm = (props: any) => {
 export default connect(null, {
   showDrawing,
   loading,
-  logout,
 })(CreateOrEditLocationForm);

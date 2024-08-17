@@ -1,4 +1,4 @@
-import { useState, useEffect, FC } from "react";
+import { useState, useEffect, FC, useContext } from "react";
 import { Steps, message } from "antd";
 import "./index.less";
 import StageOne from "./Steps/StageOne";
@@ -9,12 +9,9 @@ import apis from "../../../services/apis";
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import GoogleMap from "../GoogleMap";
-import { logout } from "../../../actions/authAction";
-import { connect, ConnectedProps } from "react-redux";
+import { AuthContext } from "src/services/authUtils";
 
-type CreateMissionBaseProps = PropsFromRedux;
-
-const CreateMissionBase: FC<CreateMissionBaseProps> = (props) => {
+const CreateMissionBase: FC<any> = (props) => {
   const [currentStage, setCurrentStage] = useState<number>(0);
   const [formData, setFormData] = useState<any>({
     jobType: "",
@@ -25,6 +22,8 @@ const CreateMissionBase: FC<CreateMissionBaseProps> = (props) => {
   const [areaSelected, setAreaSelected] = useState<boolean>(false);
   const [drawingToolBtns, setDrawingToolBtns] = useState<boolean>(false);
   const [location, setlocation] = useState<any>({});
+
+  const { logout } = useContext(AuthContext);
 
   const mapProps: any = {
     areaSelected,
@@ -46,7 +45,7 @@ const CreateMissionBase: FC<CreateMissionBaseProps> = (props) => {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsLoading(false);
@@ -132,19 +131,4 @@ const CreateMissionBase: FC<CreateMissionBaseProps> = (props) => {
   );
 };
 
-// Map state to props
-const mapStateToProps = (state: any) => ({
-  userType: state.Auth.userdetails.userType,
-  refresh: state.Missions.refresh,
-});
-
-// Connect component to Redux store
-const connector = connect(mapStateToProps, {
-  logout,
-});
-
-// Define type for props received from redux
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-// Export the connected component
-export default connector(CreateMissionBase);
+export default CreateMissionBase;

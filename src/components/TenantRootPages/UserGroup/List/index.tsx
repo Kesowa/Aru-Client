@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   EyeOutlined,
   EditOutlined,
@@ -20,7 +20,6 @@ import {
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -30,12 +29,15 @@ import FourOhOne from "../../../shared/Error/FourOhOne";
 import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
+import { AuthContext } from "src/services/authUtils";
 
 function UserGroupListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
   const [userGroupTableData, setUserGroupTableData] = useState([]);
   const [activeUserGroup, setActiveUserGroup]: [any, any] = useState();
   const [errorState, setErrorState] = useState("");
+
+  const { logout } = useContext(AuthContext);
 
   const deleteUsergroup = (id) => {
     props.loading(true);
@@ -141,7 +143,7 @@ function UserGroupListPage(props: any) {
             break;
           default:
             setErrorState("500");
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
         }
       })
       .finally(() => {
@@ -224,8 +226,4 @@ function UserGroupListPage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, { loading, logout })(UserGroupListPage);
+export default connect(null, { loading })(UserGroupListPage);

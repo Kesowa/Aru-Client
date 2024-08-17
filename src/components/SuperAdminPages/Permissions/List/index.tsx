@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { connect } from "react-redux";
 import { message, Button, Table, Tag } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
@@ -8,12 +8,14 @@ import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { Link } from "react-router-dom";
+import { AuthContext } from "src/services/authUtils";
 
 function ListAllPermissions(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
   const [permissiontableData, setPermissiontableData] = useState([]);
+
+  const { logout } = useContext(AuthContext);
 
   const columns = [
     {
@@ -37,7 +39,7 @@ function ListAllPermissions(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIstableLoading(false);
@@ -76,6 +78,6 @@ function ListAllPermissions(props: any) {
   );
 }
 
-export default connect(null, { loading, logout })(
+export default connect(null, { loading })(
   ListAllPermissions
 );

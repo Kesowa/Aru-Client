@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, FC } from "react";
+import React, { useRef, useState, useEffect, FC, useContext } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { message } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,7 +9,7 @@ import { useParams } from "react-router-dom";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
+import { AuthContext } from "src/services/authUtils";
 
 const ViewFlight: FC<ViewFlightProps> = (props) => {
   const [flightDetails, setFlightDetails] = useState<any>(null);
@@ -24,6 +24,8 @@ const ViewFlight: FC<ViewFlightProps> = (props) => {
 
   const { id } = useParams<{ id: string }>();
 
+  const { logout } = useContext(AuthContext);
+
   const getMissionDetails = async (id: string) => {
     let mission = props.missions.filter((mission) => {
       return mission._id === id;
@@ -37,7 +39,7 @@ const ViewFlight: FC<ViewFlightProps> = (props) => {
         mission = result.data.data;
       } catch (err) {
         message.error("Something went wrong");
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
         return;
       }
     }
@@ -226,7 +228,7 @@ const mapStateToProps = (state: any) => {
   };
 };
 
-const connector = connect(mapStateToProps, { logout });
+const connector = connect(mapStateToProps, null);
 
 type ViewFlightProps = ConnectedProps<typeof connector>;
 

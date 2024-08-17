@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { connect } from "react-redux";
 import { message, Button, Tabs } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
@@ -12,16 +12,17 @@ import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import BasicInfo from "./BasicInfo";
 import RootUser from "./RootUser";
 import Stats from "./Stats";
+import { AuthContext } from "src/services/authUtils";
 
 function TenantDetails(props: any) {
   const [tenantDetails, setTenantDetails] = useState(undefined);
   const [loadingTenantDetails, setLoadingTenantDetails] = useState(true);
+  const { logout } = useContext(AuthContext);
   const { id } = useParams<any>();
 
   const fetchTenantDetails = () => {
@@ -38,7 +39,7 @@ function TenantDetails(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setLoadingTenantDetails(false);
@@ -110,4 +111,4 @@ function TenantDetails(props: any) {
   );
 }
 
-export default connect(null, { loading, logout })(TenantDetails);
+export default connect(null, { loading })(TenantDetails);

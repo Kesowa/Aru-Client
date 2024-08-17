@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
 import { loading } from "../../actions/loadingAction";
@@ -6,15 +6,17 @@ import { connect } from "react-redux";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { Typography, Form, Input, Button, Alert } from "antd";
 import { MailOutlined } from "@ant-design/icons";
-import { login, setUserDetails, logout } from "../../actions/authAction";
 import "./index.less";
 import AryaLogo from "../../static/kesowa-logo.svg";
 import { components } from "src/handlers/schema";
 import "../shared/login-bg.less";
+import { AuthContext } from "src/services/authUtils";
 
 function ForgotPassword(props: any) {
   const [messageType, setmessageType] = useState<any>("");
   const [msg, setMsg] = useState("");
+
+  const { logout } = useContext(AuthContext);
 
   const onFinish = (values: any) => {
     props.loading(true);
@@ -35,7 +37,7 @@ function ForgotPassword(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -94,13 +96,6 @@ function ForgotPassword(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, {
+export default connect(null, {
   loading,
-  login,
-  setUserDetails,
-  logout,
 })(ForgotPassword);

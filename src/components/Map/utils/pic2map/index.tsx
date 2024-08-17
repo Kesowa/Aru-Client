@@ -1,10 +1,7 @@
-// @ts-nocheck
 //----lolo--------------------
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
-import { connect } from "react-redux";
 import {
   Image,
   Row,
@@ -30,6 +27,7 @@ import apis from "../../../../services/apis";
 import Dragger from "antd/lib/upload/Dragger";
 import { API_URL, STATIC_URL } from "src/constants";
 import io from "socket.io-client";
+import { AuthContext } from "src/services/authUtils";
 
 const { Title, Text } = Typography;
 
@@ -51,6 +49,7 @@ function Pictomap(props) {
   const [matchMode, setMatchMode] = useState<"LayerLabel" | "GeoCoord">(
     "GeoCoord"
   );
+  const { logout } = useContext(AuthContext);
   const menuItem1 = () => {
     const items = [
       {
@@ -173,7 +172,7 @@ function Pictomap(props) {
               console.log(err.response);
             }
           } else console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setLoader(false);
@@ -495,7 +494,7 @@ function Pictomap(props) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setCurrentStage(3);
@@ -846,8 +845,4 @@ function Pictomap(props) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, { logout })(Pictomap);
+export default Pictomap;

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import React, { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import {
   Typography,
@@ -32,8 +31,8 @@ import ManufacturerList from "./utils/ManufacturerList";
 import http from "../../services/httpCall";
 import apis from "../../services/apis";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
-import { logout } from "../../actions/authAction";
 import "./index.less";
+import { AuthContext } from "src/services/authUtils";
 
 const { Text, Title } = Typography;
 const { Option } = Select;
@@ -155,6 +154,8 @@ function AssetBase(props: any) {
   const [form] = Form.useForm();
   const history = useHistory();
 
+  const { Auth, logout } = useContext(AuthContext);
+
   const showModal = () => {
     setIsModalVisible(true);
     setData(originData);
@@ -218,7 +219,7 @@ function AssetBase(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -234,7 +235,7 @@ function AssetBase(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -250,7 +251,7 @@ function AssetBase(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -266,7 +267,7 @@ function AssetBase(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -314,7 +315,7 @@ function AssetBase(props: any) {
 
     const asset = {
       assetName: values.name,
-      userID: props.Auth.userid,
+      userID: Auth.userid,
       assetInfo: [assetInfo],
       model: values.type[1],
       assetOwner: values.owner,
@@ -333,7 +334,7 @@ function AssetBase(props: any) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         handleCancel();
@@ -370,7 +371,7 @@ function AssetBase(props: any) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         handleCancel2();
@@ -404,7 +405,7 @@ function AssetBase(props: any) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         handleCancel3();
@@ -964,12 +965,4 @@ function AssetBase(props: any) {
   );
 }
 
-const mapStateToProps = (state) => ({
-  Auth: state.auth,
-});
-
-const mapDispatchToProps = {
-  logout,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(AssetBase);
+export default AssetBase;

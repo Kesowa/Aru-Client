@@ -5,6 +5,7 @@ import React, {
   useMemo,
   lazy,
   Suspense,
+  useContext,
 } from "react";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
@@ -104,7 +105,6 @@ import apis from "../../services/apis";
 import http from "../../services/httpCall";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { connect } from "react-redux";
-import { logout } from "../../actions/authAction";
 import { loading } from "../../actions/loadingAction";
 import moment from "moment";
 import { useHistory, useParams } from "react-router-dom";
@@ -146,6 +146,7 @@ import {
 import Tileset from "src/types/cesium_tileset";
 import { PERMS } from "src/static/permissions";
 import FourOhOne from "../shared/Error/FourOhOne";
+import { AuthContext } from "src/services/authUtils";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -234,6 +235,8 @@ function BaseMap(props) {
     canDeleteBaseLayer: false,
     canUploadToBaseLayer: false,
   });
+
+  const { Auth, logout } = useContext(AuthContext);
 
   const treeMenu = (layer: Layer): MenuProps["items"] => {
     const items: MenuProps["items"] = [];
@@ -366,21 +369,21 @@ function BaseMap(props) {
   //----------UseEffectBlock to assign permissions--------------
   useEffect(() => {
     setPerms({
-      canCreateLayer: props.userDetails.customPermissions.includes(PERMS.UPLOAD_LAYER),
-      canDeleteLayer: props.userDetails.customPermissions.includes(PERMS.DELETE_LAYER),
-      canEditLayer: props.userDetails.customPermissions.includes(PERMS.EDIT_LAYER),
+      canCreateLayer: Auth.userdetails.customPermissions.includes(PERMS.UPLOAD_LAYER),
+      canDeleteLayer: Auth.userdetails.customPermissions.includes(PERMS.DELETE_LAYER),
+      canEditLayer: Auth.userdetails.customPermissions.includes(PERMS.EDIT_LAYER),
       canDownloadLayer: true,
-      canEditGeojson: props.userDetails.customPermissions.includes(PERMS.EDIT_FEATURE),
-      canDeleteFeature: props.userDetails.customPermissions.includes(PERMS.DELETE_FEATURE),
-      canAddFeature: props.userDetails.customPermissions.includes(PERMS.ADD_FEATURE),
-      canUploadFileToGeojson: props.userDetails.customPermissions.includes(PERMS.FEATURE_FILE_UPLOAD),
-      canDeleteFileFromGeojson: props.userDetails.customPermissions.includes(PERMS.FEATURE_FILE_DELETE),
-      canSetCoverPhoto: props.userDetails.customPermissions.includes(PERMS.SET_COVER_PHOTO),
-      canCreateBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_CREATE_BASE_LAYER),
-      canUpdateBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_UPDATE_BASE_LAYER),
-      canDeleteBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_DELETE_BASE_LAYER),
-      canEditBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_EDIT_BASE_LAYER),
-      canUploadToBaseLayer: props.userDetails.customPermissions.includes(PERMS.CAN_UPLOAD_TO_BASE_LAYER),
+      canEditGeojson: Auth.userdetails.customPermissions.includes(PERMS.EDIT_FEATURE),
+      canDeleteFeature: Auth.userdetails.customPermissions.includes(PERMS.DELETE_FEATURE),
+      canAddFeature: Auth.userdetails.customPermissions.includes(PERMS.ADD_FEATURE),
+      canUploadFileToGeojson: Auth.userdetails.customPermissions.includes(PERMS.FEATURE_FILE_UPLOAD),
+      canDeleteFileFromGeojson: Auth.userdetails.customPermissions.includes(PERMS.FEATURE_FILE_DELETE),
+      canSetCoverPhoto: Auth.userdetails.customPermissions.includes(PERMS.SET_COVER_PHOTO),
+      canCreateBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_CREATE_BASE_LAYER),
+      canUpdateBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_UPDATE_BASE_LAYER),
+      canDeleteBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_DELETE_BASE_LAYER),
+      canEditBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_EDIT_BASE_LAYER),
+      canUploadToBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_UPLOAD_TO_BASE_LAYER),
     });
   }, []);
 
@@ -859,7 +862,7 @@ function BaseMap(props) {
   //     })
   //     .catch((err) => {
   //       console.log(err);
-  //       AxiosErrorHandler(err, props.logout);
+  //       AxiosErrorHandler(err, logout);
   //     });
   //   http
   //     .get(`${apis.GET_VECTOR_PROPS}`)
@@ -870,7 +873,7 @@ function BaseMap(props) {
   //     })
   //     .catch((err) => {
   //       console.log(err);
-  //       AxiosErrorHandler(err, props.logout);
+  //       AxiosErrorHandler(err, logout);
   //     });
   // }, []);
 
@@ -912,7 +915,7 @@ function BaseMap(props) {
         .catch((err) => {
           console.log(err);
           message.error("Layers couldn't be filtered");
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => setChipsLoading(false));
     } else {
@@ -1137,7 +1140,7 @@ function BaseMap(props) {
   //             })
   //             .catch((err) => {
   //               console.log(err);
-  //               AxiosErrorHandler(err, props.logout);
+  //               AxiosErrorHandler(err, logout);
   //             });
   //         } else {
   //           http
@@ -1152,7 +1155,7 @@ function BaseMap(props) {
   //             })
   //             .catch((err) => {
   //               console.log(err);
-  //               AxiosErrorHandler(err, props.logout);
+  //               AxiosErrorHandler(err, logout);
   //             });
   //         }
   //       } else if (key.split("-")[1] === "3") {
@@ -1170,7 +1173,7 @@ function BaseMap(props) {
   //             })
   //             .catch((err) => {
   //               console.log(err);
-  //               AxiosErrorHandler(err, props.logout);
+  //               AxiosErrorHandler(err, logout);
   //             });
   //         } else {
   //           http
@@ -1186,7 +1189,7 @@ function BaseMap(props) {
   //             })
   //             .catch((err) => {
   //               console.log(err);
-  //               AxiosErrorHandler(err, props.logout);
+  //               AxiosErrorHandler(err, logout);
   //             });
   //         }
   //       }
@@ -1579,7 +1582,7 @@ function BaseMap(props) {
       })
       .catch((err) => {
         message.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
   function toggleFlagSelected(flag: boolean) {
@@ -1616,7 +1619,7 @@ function BaseMap(props) {
       })
       .catch((err) => {
         message.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -1637,7 +1640,7 @@ function BaseMap(props) {
       })
       .catch((err) => {
         message.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -1658,7 +1661,7 @@ function BaseMap(props) {
       })
       .catch((err) => {
         message.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -3252,7 +3255,7 @@ function BaseMap(props) {
       } catch (error) {
         console.log(error);
         message.error("Layers Could Not Be Loaded");
-        AxiosErrorHandler(error, props.logout);
+        AxiosErrorHandler(error);
       } finally {
         props.loading(false);
       }
@@ -3274,7 +3277,7 @@ function BaseMap(props) {
       } catch (error) {
         console.log(error);
         //message.error("errrorrrrr");
-        AxiosErrorHandler(error, props.logout);
+        AxiosErrorHandler(error);
       } finally {
         props.loading(false);
         //message.info("land")
@@ -3377,7 +3380,7 @@ function BaseMap(props) {
           }
         })
         .catch((err) => {
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
           if (err.response?.status === 401) {
             message.warning(
               "Sorry! You are not authorised to delete layer. Please contact admin"
@@ -3432,7 +3435,7 @@ function BaseMap(props) {
               "Sorry! You are not authorised to delete layer. Please contact admin"
             );
           } else console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           props.loading(false);
@@ -3494,7 +3497,7 @@ function BaseMap(props) {
               "Sorry! You are not authorised to delete layer. Please contact admin"
             );
           } else console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           props.loading(false);
@@ -3544,7 +3547,7 @@ function BaseMap(props) {
               "Sorry! You are not authorised to delete layer. Please contact admin"
             );
           } else console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           props.loading(false);
@@ -3678,7 +3681,7 @@ function BaseMap(props) {
   //           })
   //           .catch((err: any) => {
   //             console.log(err);
-  //             AxiosErrorHandler(err, props.logout);
+  //             AxiosErrorHandler(err, logout);
   //           });
   //         break;
   //       case "11":
@@ -3949,7 +3952,7 @@ function BaseMap(props) {
             })
             .catch((err: any) => {
               console.log(err);
-              AxiosErrorHandler(err, props.logout);
+              AxiosErrorHandler(err, logout);
             });
           break;
         case "11":
@@ -4468,7 +4471,7 @@ function BaseMap(props) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -4511,7 +4514,7 @@ function BaseMap(props) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         editForm.resetFields();
@@ -5041,7 +5044,7 @@ function BaseMap(props) {
         ) {
           setExpiryModal(true);
           // window.setTimeout(function () {
-          //   AxiosErrorHandler(err, VideoProps.logout); //needs to be connected with redux
+          //   AxiosErrorHandler(err, logout);
           // }, 5000);
         } else {
           setLimitModal(true);
@@ -5049,7 +5052,7 @@ function BaseMap(props) {
         }
       } else {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       }
     } finally {
       setUploading(false);
@@ -5355,7 +5358,7 @@ function BaseMap(props) {
               "Sorry! You are not authorised to change color. Please contact admin"
             );
           } else console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setLayerColor("#ffaa00"); // default value that was previously also used in first declaration
@@ -5393,7 +5396,7 @@ function BaseMap(props) {
             "Sorry! You are not authorised to edit layer. Please contact admin"
           );
         } else console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         handleCancel1();
@@ -5429,7 +5432,7 @@ function BaseMap(props) {
             "Sorry! You are not authorised to edit feature. Please contact admin"
           );
         } else console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setSelectedLayerId("");
@@ -5939,7 +5942,7 @@ function BaseMap(props) {
     } catch (err) {
       console.log(err);
       message.error(err.message);
-      AxiosErrorHandler(err, props.logout);
+      AxiosErrorHandler(err, logout);
     } finally {
       props.loading(false);
     }
@@ -6014,7 +6017,7 @@ function BaseMap(props) {
     } catch (err) {
       console.log(err);
       message.error(err.message);
-      AxiosErrorHandler(err, props.logout);
+      AxiosErrorHandler(err, logout);
     } finally {
       props.loading(false);
     }
@@ -6436,7 +6439,7 @@ function BaseMap(props) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setVisibleGroupCreateModal(false);
@@ -6484,7 +6487,7 @@ function BaseMap(props) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setMoveToOtherGroupModal(false);
@@ -6610,7 +6613,7 @@ function BaseMap(props) {
     setCursorPosition({ x: e.clientX, y: e.clientY });
   };
 
-  if (props.isBaseMap && !["tenant-root","tenant-staff"].includes(props.userType)) {
+  if (props.isBaseMap && !["tenant-root","tenant-staff"].includes(Auth.userdetails.userType)) {
     return <FourOhOne />;
   }
 
@@ -8182,14 +8185,11 @@ function BaseMap(props) {
 
 const mapStateToProps = (state) => {
   return {
-    userType: state.Auth.userdetails.userType,
-    userDetails: state.Auth.userdetails,
     Thread: state.Thread,
   };
 };
 
 export default connect(mapStateToProps, {
   loading,
-  logout,
   thread,
 })(BaseMap);

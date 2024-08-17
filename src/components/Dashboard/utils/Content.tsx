@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import { connect } from "react-redux";
+import { useState, useEffect, useRef, useContext } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import {
@@ -19,7 +18,6 @@ import { ImportOutlined } from "@ant-design/icons";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
 import io from "socket.io-client";
 import DecideIcon from "../../../services/decideIcon";
 import QRCode from "qrcode";
@@ -32,11 +30,12 @@ import {
   STATIC_URL,
 } from "src/constants";
 import { getSideBar } from "src/static/sideBarOptions";
+import { AuthContext } from "src/services/authUtils";
 
 const { Title, Text } = Typography;
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-function DashboardContent(props: any) {
+function DashboardContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [liveMissions, setLiveMissions] = useState(0);
   const [UpcomingMissions, setUpcomingMissions] = useState(0);
@@ -47,6 +46,8 @@ function DashboardContent(props: any) {
   const [storage, setStorage] = useState<any>({});
   const socket: any = useRef();
   const [statsRefresh, setStatsRefresh] = useState(true);
+
+  const { Auth, logout } = useContext(AuthContext);
 
   ChartJS.register(ArcElement, Tooltip, Legend);
   useEffect(() => {
@@ -133,7 +134,7 @@ function DashboardContent(props: any) {
       })
       .catch((err: any) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setStatsRefresh(false));
   }
@@ -147,10 +148,10 @@ function DashboardContent(props: any) {
   }
 
   useEffect(() => {
-    if (["tenant-staff","tenant-root"].includes(props.UserDetails.userType)) {
+    if (["tenant-staff","tenant-root"].includes(Auth.userdetails.userType)) {
       fetchTenantStats()
     }
-  }, [props.UserDetails]);
+  }, [Auth.userdetails]);
 
   const renderStorageStats = () => {
     console.log("Fetched stats", storage);
@@ -227,8 +228,8 @@ function DashboardContent(props: any) {
   };
 
   const dashboardShortcuts = () => {
-    if (props.UserDetails.userType === "tenant-staff") {
-      return getSideBar(props.UserDetails).map((item) => (
+    if (Auth.userdetails.userType === "tenant-staff") {
+      return getSideBar(Auth.userdetails).map((item) => (
         <>
           <Col md={12}>
             <Link to={item.link} key="1">
@@ -242,7 +243,7 @@ function DashboardContent(props: any) {
           </Col>
         </>
       ));
-    } else if (props.UserDetails.userType === "tenant-client") {
+    } else if (Auth.userdetails.userType === "tenant-client") {
       return (
         <>
           <Col md={6}>
@@ -328,14 +329,14 @@ function DashboardContent(props: any) {
   //socket listening to re-render component
   useEffect(() => {
     if (
-      props.UserDetails.userType === "tenant-root" ||
-      props.UserDetails.userType === "tenant-staff"
+      Auth.userdetails.userType === "tenant-root" ||
+      Auth.userdetails.userType === "tenant-staff"
     ) {
-      if (props.UserDetails.tenantId._id) {
+      if (Auth.userdetails.tenantId._id) {
         console.log("tenantID>_id");
         if (!socket.current) {
           socket.current = io(
-            `${API_URL}/stream/notification?tenantID=${props.UserDetails.tenantId._id}`
+            `${API_URL}/stream/notification?tenantID=${Auth.userdetails.tenantId._id}`
           );
           //new mission listener
           socket.current.on("MISSION_ADDED", ({ mission, flight }) => {
@@ -349,11 +350,11 @@ function DashboardContent(props: any) {
             setAlertSocketEvent("refresh-dashboard");
           });
         }
-      } else if (props.UserDetails.tenantId) {
+      } else if (Auth.userdetails.tenantId) {
         console.log("tenantID");
         if (!socket.current) {
           socket.current = io(
-            `${API_URL}/stream/notification?tenantID=${props.UserDetails.tenantId}`
+            `${API_URL}/stream/notification?tenantID=${Auth.userdetails.tenantId}`
           );
           //new mission listener
           socket.current.on("MISSION_ADDED", ({ mission, flight }) => {
@@ -369,14 +370,14 @@ function DashboardContent(props: any) {
         }
       }
     }
-  }, [props.UserDetails]);
+  }, [Auth.userdetails]);
 
   //fetch missions filtered to show as counter
   function fetchFilterMissions(tenantID: any) {
     //here
     if (
-      props.UserDetails.userType == "tenant-root" ||
-      props.UserDetails.userType == "tenant-staff"
+      Auth.userdetails.userType == "tenant-root" ||
+      Auth.userdetails.userType == "tenant-staff"
     ) {
       setAlertSocketEvent("");
       setIsLoading(true);
@@ -416,7 +417,7 @@ function DashboardContent(props: any) {
         .catch((err) => {
           console.log(err);
           if (err?.response?.status == 500) {
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
           }
         })
         .finally(() => {
@@ -431,11 +432,11 @@ function DashboardContent(props: any) {
   useEffect(() => {
     if (alertSocketEvent == "refresh-dashboard") {
       fetchFilterMissions(
-        props.UserDetails?.tenantId?._id || props.UserDetails?.tenantId
+        Auth.userdetails?.tenantId?._id || Auth.userdetails?.tenantId
       );
     } else {
       fetchFilterMissions(
-        props.UserDetails?.tenantId?._id || props.UserDetails?.tenantId
+        Auth.userdetails?.tenantId?._id || Auth.userdetails?.tenantId
       );
     }
   }, [alertSocketEvent]);
@@ -489,7 +490,7 @@ function DashboardContent(props: any) {
 
         <Row>
           <Title className="welcome-title">
-            Welcome back {props.UserDetails.name}!
+            Welcome back {Auth.userdetails.name}!
           </Title>
         </Row>
 
@@ -550,7 +551,7 @@ function DashboardContent(props: any) {
       <div className="dashboard-wrapper">
         <Row>
           <Title className="welcome-title">
-            Welcome back {props.UserDetails.name}!
+            Welcome back {Auth.userdetails.name}!
           </Title>
         </Row>
         <Title className="shortcuts-title" level={4}>
@@ -563,12 +564,12 @@ function DashboardContent(props: any) {
   }
 
   if (
-    props.UserDetails.userType === "tenant-staff" ||
-    props.UserDetails.userType === "tenant-root"
+    Auth.userdetails.userType === "tenant-staff" ||
+    Auth.userdetails.userType === "tenant-root"
   ) {
     console.log("Tenant user");
     return <>{renderDashboardContents()}</>;
-  } else if (props.UserDetails.userType === "tenant-client") {
+  } else if (Auth.userdetails.userType === "tenant-client") {
     console.log("client user");
     return <>{renderClientDashboardContents()}</>;
   } else {
@@ -577,8 +578,4 @@ function DashboardContent(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  UserDetails: state.Auth.userdetails,
-});
-export default connect(mapStateToProps, { logout })(DashboardContent);
+export default DashboardContent

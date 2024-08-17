@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Row,
   Col,
@@ -15,11 +15,10 @@ import "./data.less";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
-import { connect } from "react-redux";
 import moment from "moment";
 import VideoPlayer from "../../../shared/VideoPlayer";
 import { STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 
 const { Text } = Typography;
 function Videos(VideoProps) {
@@ -28,6 +27,9 @@ function Videos(VideoProps) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
+
+  const { logout } = useContext(AuthContext);
+
   useEffect(() => {
     setLoading(true);
     if (VideoProps.missionID !== 0) {
@@ -46,7 +48,7 @@ function Videos(VideoProps) {
         })
         .catch((err) => {
           message.error("ERROR" + err + "Could not fetch streams");
-          AxiosErrorHandler(err, VideoProps.logout);
+          AxiosErrorHandler(err, logout);
         });
     }
   }, [VideoProps, page, limit]);
@@ -132,8 +134,4 @@ function Videos(VideoProps) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, { logout })(Videos);
+export default Videos;

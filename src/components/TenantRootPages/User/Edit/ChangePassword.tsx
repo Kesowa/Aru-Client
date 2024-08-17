@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Row, Col, message, Form, Input, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -16,11 +15,14 @@ import FourOhOne from "../../../shared/Error/FourOhOne";
 import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
+import { AuthContext } from "src/services/authUtils";
 
 function UserChangePassword(props: any) {
   const [form] = Form.useForm();
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
+
+  const { Auth, logout } = useContext(AuthContext);
 
   //subimt form
   const onFinish = (data: any) => {
@@ -70,7 +72,7 @@ function UserChangePassword(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -78,9 +80,9 @@ function UserChangePassword(props: any) {
   };
 
   useEffect(() => {
-    if (!props.Auth.isLoggedIn) {
+    if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
-    } else if (props.userDetails.userType !== "tenant-root") {
+    } else if (Auth.userdetails.userType !== "tenant-root") {
       // only tenant-root can change tenant-staff password
       setErrorState("401");
     }
@@ -202,11 +204,9 @@ function UserChangePassword(props: any) {
 }
 
 const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
   user: state.User.userToEdit,
-  userDetails: state.Auth.userdetails,
 });
 
-export default connect(mapStateToProps, { loading, logout })(
+export default connect(mapStateToProps, { loading })(
   UserChangePassword
 );

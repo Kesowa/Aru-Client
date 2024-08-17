@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Tag,
   Row,
@@ -28,8 +28,8 @@ import apis from "../../services/apis";
 import moment from "moment";
 import { useHistory } from "react-router-dom";
 import mp from "../../static/mapping.svg";
-import { logout } from "../../actions/authAction";
 import "../shared/MissionList.less";
+import { AuthContext } from "src/services/authUtils";
 
 function DataMission(props) {
   const history = useHistory();
@@ -46,6 +46,8 @@ function DataMission(props) {
   const [missionTypes, populateMissionTypes] = useState([]);
   const [typesLoader, setTypesLoader] = useState(false);
   const [missionType, setMissionType] = useState("");
+
+  const { Auth, logout } = useContext(AuthContext);
 
   const setPaginationPage = (p) => {
     setPage(p);
@@ -156,7 +158,7 @@ function DataMission(props) {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -342,8 +344,8 @@ function DataMission(props) {
 
   // +++++++++++++++++++++++++++++++++++++++++++++++ Fetch Missions ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   function fetchMissions() {
-    const { userType } = props;
-    const { tenantId } = props;
+    const userType = Auth.userdetails.userType;
+    const tenantId = Auth.userdetails.tenantId._id || Auth.userdetails.tenantId;
     setIsTableLoading(true);
     if (userType === "tenant-root" || userType === "tenant-staff") {
       const params = {
@@ -381,7 +383,7 @@ function DataMission(props) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsTableLoading(false);
@@ -408,7 +410,7 @@ function DataMission(props) {
         }
       })
       .catch((err) => {
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setTypesLoader(false));
   }, []);
@@ -480,15 +482,7 @@ function DataMission(props) {
   );
 }
 
-const mapStateToProps = (state) => ({
-  tenantId:
-    state.Auth.userdetails.tenantId._id || state.Auth.userdetails.tenantId,
-  userType: state.Auth.userdetails.userType,
-  missions: state.Missions.missions,
-});
-
-export default connect(mapStateToProps, {
+export default connect(null, {
   setMissionsToState,
   deleteMission,
-  logout,
 })(DataMission);

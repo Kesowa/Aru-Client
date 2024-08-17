@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { message, Button, Table, Tag, Popconfirm } from "antd";
@@ -15,19 +15,20 @@ import { setPackageToEdit } from "../../../../actions/packageAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { Link } from "react-router-dom";
 import Unauthorized from "../../../shared/Error/Unauthorized";
 import FourOhOne from "../../../shared/Error/FourOhOne";
 import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
+import { AuthContext } from "src/services/authUtils";
 
 function ListAllPackages(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
   const [packagetableData, setPackagetableData] = useState([]);
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
+  const { logout } = useContext(AuthContext);
 
   const columns: any = [
     {
@@ -134,7 +135,7 @@ function ListAllPackages(props: any) {
                 })
                 .catch((err) => {
                   message.error(err.message);
-                  AxiosErrorHandler(err, props.logout);
+                  AxiosErrorHandler(err, logout);
                 })
                 .finally(() => {
                   props.loading(false);
@@ -180,7 +181,7 @@ function ListAllPackages(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIstableLoading(false);
@@ -234,6 +235,6 @@ function ListAllPackages(props: any) {
   }
 }
 
-export default connect(null, { loading, logout, setPackageToEdit })(
+export default connect(null, { loading, setPackageToEdit })(
   ListAllPackages
 );

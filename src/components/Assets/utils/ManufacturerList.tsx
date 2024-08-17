@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { connect } from "react-redux";
 import { Row, Col, Typography, Table, message, Button, Input } from "antd";
 import { SearchOutlined, ShakeOutlined } from "@ant-design/icons";
@@ -7,12 +7,12 @@ import moment from "moment";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
 import {
   setManufacturersToState,
   deleteManufacturer,
 } from "../../../actions/manufacturerAction";
 import ManufacturerCard from "./ManufacturerCard";
+import { AuthContext } from "src/services/authUtils";
 
 const { Title } = Typography;
 
@@ -22,12 +22,12 @@ const ManufacturerList = (props) => {
   const [isTableLoading, setIsTableLoading] = useState(true);
   const [selectedManufacturerID, setSelectedManufacturerID] = useState();
 
+  const { logout } = useContext(AuthContext);
+
   useEffect(() => {
     fetchManufacturers();
   }, []);
   const fetchManufacturers = () => {
-    const { userType } = props;
-    const { tenantId } = props;
 
     http
       .get(`${apis.GET_MANUFACTURERS}`)
@@ -42,7 +42,7 @@ const ManufacturerList = (props) => {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -137,7 +137,7 @@ const ManufacturerList = (props) => {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -250,14 +250,10 @@ const ManufacturerList = (props) => {
 };
 
 const mapStateToProps = (state) => ({
-  userType: state.Auth.userdetails.userType,
-  tenantId: state.Auth.userdetails.tenantId._id,
-  userId: state.Auth.userdetails._id,
   manufacturers: state.Manufacturers.manufacturers,
 });
 
 export default connect(mapStateToProps, {
-  logout,
   setManufacturersToState,
   deleteManufacturer,
 })(ManufacturerList);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
 import { loading } from "../../actions/loadingAction";
@@ -7,13 +7,13 @@ import { useHistory, useLocation } from "react-router-dom";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { Typography, Form, Input, Button, Alert } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
-import { login, setUserDetails, logout } from "../../actions/authAction";
 import "./index.less";
 import { clientOptions } from "../../static/sideBarOptions";
 import { Link } from "react-router-dom";
 import { components } from "src/handlers/schema";
 import Logo from "../shared/Logo";
 import "../shared/login-bg.less";
+import { AuthContext } from "src/services/authUtils";
 
 function Login(props: any) {
   const [errMessage, setErrMessage] = useState("");
@@ -21,6 +21,8 @@ function Login(props: any) {
   const history = useHistory();
   console.log("location", location);
   const { from } = location.state || { from: { pathname: "/" } };
+  const { login, logout } = useContext(AuthContext);
+
   const onFinish = (values: any) => {
     props.loading(true);
     http
@@ -29,14 +31,11 @@ function Login(props: any) {
         console.log(result.data);
         if (result.data.status) {
           //login
-          localStorage.setItem("Token", result.data.token);
-          localStorage.setItem("UserId", result.data.data._id);
-          props.login(
+          login(
             result.data.token,
             result.data.data._id,
             result.data.data
           );
-          props.setUserDetails(result.data.data);
           history.replace(from);
         } else {
           setErrMessage(result.data.message);
@@ -45,7 +44,7 @@ function Login(props: any) {
       .catch((err) => {
         console.log(err);
         setErrMessage(err?.response?.data?.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -123,13 +122,4 @@ function Login(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, {
-  loading,
-  login,
-  setUserDetails,
-  logout,
-})(Login);
+export default connect(null, { loading })(Login);

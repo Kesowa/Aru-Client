@@ -1,18 +1,20 @@
-import { useEffect, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import io from "socket.io-client";
-import { connect } from "react-redux";
 import { Button } from "antd";
 import { API_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 
-function MavlinkTest(props) {
+function MavlinkTest() {
   const socket: any = useRef();
 
   const vref: any = useRef();
 
+  const { Auth } = useContext(AuthContext);
+
   useEffect(() => {
     if (!socket.current) {
       socket.current = io(
-        `${API_URL}/stream/mavStats?tenantID=${props.Auth.userdetails.tenantId._id}`
+        `${API_URL}/stream/mavStats?tenantID=${Auth.userdetails.tenantId._id}`
       );
       console.log(socket);
 
@@ -26,7 +28,7 @@ function MavlinkTest(props) {
         console.log("Acknowledgement: ", data);
       });
     }
-  }, [props.Auth]);
+  }, [Auth]);
 
   async function startStream() {
     const assetId = "62010fe84e70b1b79f6228b1";
@@ -87,10 +89,5 @@ function MavlinkTest(props) {
     </div>
   );
 }
-const mapStateToProps = (state) => {
-  return {
-    Auth: state.Auth,
-    refresh: state.Missions.refresh,
-  };
-};
-export default connect(mapStateToProps, {})(MavlinkTest);
+
+export default MavlinkTest;

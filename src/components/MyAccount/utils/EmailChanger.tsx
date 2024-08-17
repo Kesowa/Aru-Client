@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Form, Input, Row, Col, message, Button } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import http from "../../../services/httpCall";
@@ -6,13 +6,15 @@ import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { connect } from "react-redux";
 import { loading } from "../../../actions/loadingAction";
-import { logout } from "../../../actions/authAction";
+import { AuthContext } from "src/services/authUtils";
 
 function EmailChanger(props: any) {
   const [form] = Form.useForm();
   const [isEmailFieldDisabled, setIsEmailFieldDisabled] = useState(true);
   const [isOTPGenerated, setIsOTPGenerated] = useState(false);
   const [isOTPResending, setIsOTPResending] = useState(false);
+
+  const { logout } = useContext(AuthContext);
 
   const makeEmailFieldEditable = (e: any) => {
     e.preventDefault();
@@ -57,7 +59,7 @@ function EmailChanger(props: any) {
         form.setFieldsValue({
           email: props.tenantData.email,
         });
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -77,7 +79,7 @@ function EmailChanger(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsOTPResending(false);
@@ -101,7 +103,7 @@ function EmailChanger(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -191,8 +193,4 @@ function EmailChanger(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, { loading, logout })(EmailChanger);
+export default connect(null, { loading })(EmailChanger);

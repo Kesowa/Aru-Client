@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { message, Button, Table, Tag, Input, Popconfirm } from "antd";
@@ -16,10 +16,10 @@ import { setTenantToEdit } from "../../../../actions/tenantAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
+import { AuthContext } from "src/services/authUtils";
 
 function ListAllTanents(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
@@ -27,6 +27,7 @@ function ListAllTanents(props: any) {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const history = useHistory();
+  const { logout } = useContext(AuthContext);
   let searchInput: any;
 
   const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
@@ -195,7 +196,7 @@ function ListAllTanents(props: any) {
                 })
                 .catch((err) => {
                   message.error(err.message);
-                  AxiosErrorHandler(err, props.logout);
+                  AxiosErrorHandler(err, logout);
                 })
                 .finally(() => {
                   props.loading(false);
@@ -225,7 +226,7 @@ function ListAllTanents(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIstableLoading(false);
@@ -268,6 +269,6 @@ function ListAllTanents(props: any) {
   );
 }
 
-export default connect(null, { loading, logout, setTenantToEdit })(
+export default connect(null, { loading, setTenantToEdit })(
   ListAllTanents
 );

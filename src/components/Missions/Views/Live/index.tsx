@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { Tabs, Row, Col, message, Typography } from "antd";
 import type { TabsProps } from "antd";
@@ -13,11 +13,11 @@ import DroneMap from "../../../shared/DroneMap";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import NoMap from "../../../../static/no-map.svg";
 import streamEnd from "../../../../static/streamended.svg";
 import Weather from "../../../shared/Weather";
 import { LIVE_URL, API_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 
 function LiveViewBase(props: any) {
   const { id } = useParams<any>();
@@ -33,8 +33,10 @@ function LiveViewBase(props: any) {
   const [location, setLocation] = useState({ lat: 0, lng: 0 });
 
   const { Title } = Typography;
-  const { tenantId } = props;
-  const { userDetails } = props;
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  const tenantId = Auth.userdetails.tenantId._id || Auth.userdetails.tenantId;
 
   //socket connectino variable
   const socket: any = useRef();
@@ -68,7 +70,7 @@ function LiveViewBase(props: any) {
       console.log(
         "Could not fetch streams or there is no streamkey in database!"
       );
-      AxiosErrorHandler(err, props.logout);
+      AxiosErrorHandler(err, logout);
     }
   };
 
@@ -99,7 +101,7 @@ function LiveViewBase(props: any) {
         cr = result.data.data;
       } catch (err) {
         message.error("Something went wrong");
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
         return;
       }
     } else {
@@ -251,15 +253,11 @@ function LiveViewBase(props: any) {
 }
 
 const mapStateToProps = (state) => {
-  console.log(state.Auth.userdetails.tenantId);
   return {
     missions: state.Missions.missions,
-    tenantId: state.Auth.userdetails.tenantId,
-    userDetails: state.Auth.userdetails,
   };
 };
 
 export default connect(mapStateToProps, {
   loading,
-  logout,
 })(LiveViewBase);

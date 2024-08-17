@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import {
   Row,
@@ -26,13 +26,12 @@ import { SketchPicker } from "react-color";
 import apis from "../../../services/apis";
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
-import { connect } from "react-redux";
 import { API_URL } from "src/constants";
 import { featureType, featureTypes, vectorProps } from "src/static/vectorprops";
 import { ILayer } from "src/types/layer";
 import { components } from "src/handlers/schema";
 import { Feature, GeoJson, Properties } from "src/types/geojson";
+import { AuthContext } from "src/services/authUtils";
 
 const { TextArea } = Input;
 
@@ -55,9 +54,6 @@ interface IVectorFormProps {
   updateLayerDataAfterEditing: (...args: any) => void;
   setShouldAttributeTableReload: (b: boolean) => void;
   shouldAttributeTableReload: boolean;
-
-  Auth: any;
-  logout: (b: boolean) => any;
 }
 
 interface ILayerNameAutoCompleteOptions {
@@ -106,6 +102,8 @@ function VectorForm(props: IVectorFormProps) {
   const [form] = Form.useForm();
   const [defaultVectorType, setDefaultVectorType] =
     useState<[string, vectorProps]>();
+
+  const { logout } = useContext(AuthContext);
 
   const onClose = () => {
     props.setVisible(false);
@@ -454,7 +452,7 @@ function VectorForm(props: IVectorFormProps) {
           console.log(err);
           console.log(err.response?.data.messsage);
           message.error(err.message);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           props.loading(false);
@@ -490,7 +488,7 @@ function VectorForm(props: IVectorFormProps) {
         })
         .catch((err) => {
           message.error(err.message);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           props.loading(false);
@@ -640,8 +638,4 @@ function VectorForm(props: IVectorFormProps) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, { logout })(VectorForm);
+export default VectorForm;

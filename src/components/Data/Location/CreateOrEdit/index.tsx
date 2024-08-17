@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import LocationMap from "../Map";
 import "../../index.less";
 import { Card, Typography, message } from "antd";
@@ -8,8 +8,7 @@ import http from "src/services/httpCall";
 import apis from "src/services/apis";
 import { AxiosErrorHandler } from "src/services/httpErrorHandle";
 import { useParams } from "react-router-dom";
-import { connect } from "react-redux";
-import { logout } from "src/actions/authAction";
+import { AuthContext } from "src/services/authUtils";
 
 type CreateOrEditLocationProps = {
   isEditing: boolean
@@ -27,6 +26,8 @@ function CreateOrEditLocation(props: CreateOrEditLocationProps) {
   const { id } = useParams<any>();
   const [locationToEdit, setLocationToEdit] = useState(null);
   const { Title } = Typography;
+
+  const { logout } = useContext(AuthContext);
 
   const mapProps: any = {
     areaSelected,
@@ -113,6 +114,4 @@ function CreateOrEditLocation(props: CreateOrEditLocationProps) {
   );
 }
 
-export default connect(null, {
-  logout,
-})(CreateOrEditLocation);
+export default CreateOrEditLocation;

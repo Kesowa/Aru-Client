@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { connect } from "react-redux";
 import {
   Progress,
@@ -10,7 +10,6 @@ import {
   Divider,
 } from "antd";
 import { loading } from "../../../actions/loadingAction";
-import { logout } from "../../../actions/authAction";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
@@ -23,12 +22,15 @@ import {
   VideoCameraOutlined,
 } from "@ant-design/icons";
 import { STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 const today = moment();
 
 function OrganisationPackageDetails(props: any) {
   const [loader, setLoader] = useState(false);
   const [storage, setStorage] = useState<any>({});
   const [packageInfo, setPackageInfo] = useState<any>({});
+
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     setLoader(true);
@@ -44,7 +46,7 @@ function OrganisationPackageDetails(props: any) {
         }
       })
       .catch((err: any) => {
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setLoader(false));
   }, []);
@@ -317,9 +319,6 @@ function OrganisationPackageDetails(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-export default connect(mapStateToProps, { loading, logout })(
+export default connect(null, { loading })(
   OrganisationPackageDetails
 );

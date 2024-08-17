@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Row, Col, message, Form, Input, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -17,11 +16,15 @@ import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
 
 function ChangeClientPassword(props: any) {
   const [form] = Form.useForm();
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
 
   //subimt form
   const onFinish = (data: any) => {
@@ -57,7 +60,7 @@ function ChangeClientPassword(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -65,11 +68,11 @@ function ChangeClientPassword(props: any) {
   };
 
   useEffect(() => {
-    if (!props.Auth.isLoggedIn) {
+    if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
     } else if (
-      (props.userDetails.userType === "tenant-client") ||
-      (props.userDetails.userType === "tenant-staff" && !props.userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
+      (userDetails.userType === "tenant-client") ||
+      (userDetails.userType === "tenant-staff" && !userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
     ) {
       // clients can't edit other clients' password
       // staff can edit clients' password only if have permission
@@ -194,9 +197,7 @@ function ChangeClientPassword(props: any) {
 }
 
 const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
   client: state.Client.clientToEdit,
-  userDetails: state.Auth.userdetails,
 });
 
-export default connect(mapStateToProps, { loading, logout })(ChangeClientPassword);
+export default connect(mapStateToProps, { loading })(ChangeClientPassword);

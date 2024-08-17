@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Tag,
   Row,
@@ -11,7 +11,6 @@ import {
   Popconfirm,
 } from "antd";
 import { Input } from "antd";
-import { logout } from "../../../../../actions/authAction";
 import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -30,13 +29,10 @@ import mp from "../../../../../static/mapping.svg";
 import { DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import "./index.less";
 import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
 
 interface TableProps {
   filter: any;
-  userType: any;
-  tenantId: any;
-  userId: any;
-  logout: any;
   setMissionsToState: any;
   deleteMission: any;
   missions: any;
@@ -53,12 +49,15 @@ interface TableProps {
   usedFilter: any;
   setSortOrder: any;
   setFilters: any;
-  userDetails: any;
 }
 
 function MissionTable(props: TableProps) {
   const history = useHistory();
   const { Title } = Typography;
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  const userType = userDetails.userType;
 
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
@@ -193,7 +192,7 @@ function MissionTable(props: TableProps) {
             "Unable to connect to server, please check your internet connection!"
           );
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.setIsTableLoading(false);
@@ -203,8 +202,8 @@ function MissionTable(props: TableProps) {
   //----------------RenderDeleteButton---------------------
 
   function renderDeleteBtn(record: any) {
-    if (props.userType === "tenant-staff") {
-      if (props.userDetails.customPermissions.includes(PERMS.MISSION_DELETE)) {
+    if (userType === "tenant-staff") {
+      if (userDetails.customPermissions.includes(PERMS.MISSION_DELETE)) {
         return (
           <Popconfirm
             title="Are you sure to delete the mission？"
@@ -521,17 +520,11 @@ function MissionTable(props: TableProps) {
 
 const mapStateToProps = (state) => {
   return {
-    userType: state.Auth.userdetails.userType,
-    tenantId:
-      state.Auth.userdetails.tenantId._id || state.Auth.userdetails.tenantId,
-    userId: state.Auth.userdetails._id,
     missions: state.Missions.missions,
-    userDetails: state.Auth.userdetails,
   };
 };
 
 export default connect(mapStateToProps, {
-  logout,
   setMissionsToState,
   deleteMission,
 })(MissionTable);

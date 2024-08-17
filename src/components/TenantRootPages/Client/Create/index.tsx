@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
@@ -18,7 +18,6 @@ import {
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -37,6 +36,7 @@ import moment from "moment";
 import { STATIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
 import { PERMS, TENANT_CLIENT_PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
 
 function ClientCreatePage(props: any) {
   const [form] = Form.useForm();
@@ -52,6 +52,9 @@ function ClientCreatePage(props: any) {
   >([]);
   const [selectedUserGroup, setSelectedusergroup]: [any, any] = useState();
   const [errorState, setErrorState] = useState("");
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
 
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
@@ -73,7 +76,7 @@ function ClientCreatePage(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsAvatarUploading(false);
@@ -125,7 +128,7 @@ function ClientCreatePage(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -133,11 +136,11 @@ function ClientCreatePage(props: any) {
   };
 
   useEffect(() => {
-    if (!props.Auth.isLoggedIn) {
+    if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
     } else if (
-      (props.userDetails.userType === "tenant-client") ||
-      (props.userDetails.userType === "tenant-staff" && !props.userDetails.customPermissions.includes(PERMS.CREATE_CLIENT))
+      (userDetails.userType === "tenant-client") ||
+      (userDetails.userType === "tenant-staff" && !userDetails.customPermissions.includes(PERMS.CREATE_CLIENT))
     ) {
       // clients can't create other clients
       // staff can create clients only if have permission
@@ -183,7 +186,7 @@ function ClientCreatePage(props: any) {
           ) {
             setErrorState("403-expiry");
             window.setTimeout(function () {
-              AxiosErrorHandler(err, props.logout); //needs to be connected with redux
+              AxiosErrorHandler(err, logout); 
             }, 5000);
           } else {
             setErrorState("403");
@@ -420,9 +423,4 @@ function ClientCreatePage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  userDetails: state.Auth.userdetails,
-});
-
-export default connect(mapStateToProps, { loading, logout })(ClientCreatePage);
+export default connect(null, { loading })(ClientCreatePage);

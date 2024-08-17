@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { connect } from "react-redux";
 import {
   Button,
@@ -24,8 +24,8 @@ import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { beforeUpload } from "../../../../services/imageupload";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -35,6 +35,8 @@ function EditTenant(props: any) {
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [packages, setPackages] = useState<any>([]);
+
+  const { logout } = useContext(AuthContext);
 
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
@@ -56,7 +58,7 @@ function EditTenant(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsAvatarUploading(false);
@@ -79,7 +81,7 @@ function EditTenant(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }, []);
 
@@ -98,7 +100,7 @@ function EditTenant(props: any) {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -331,4 +333,4 @@ const mapStateToProps = (state: any) => ({
   tenant: state.Tenant.tenantToEdit,
 });
 
-export default connect(mapStateToProps, { logout })(EditTenant);
+export default connect(mapStateToProps, null)(EditTenant);

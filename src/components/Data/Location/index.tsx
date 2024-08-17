@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Row, Col, Typography, Table, Button, Card, message } from "antd";
 import { Input } from "antd";
 import {
@@ -16,9 +16,9 @@ import AloneLogo from "../../../static/Alone-rafiki.svg";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
 import { connect } from "react-redux";
 import { loading } from "../../../actions/loadingAction";
+import { AuthContext } from "src/services/authUtils";
 
 interface TabOptions {
   filter: any;
@@ -42,6 +42,8 @@ function DataLocation(props) {
   const [centerPoint, setCenterPoint] = useState({ lat: "", long: "" });
   const [locationData, setLocationData] = useState([]);
   const [isTableLoading, setIsTableLoading] = useState(true);
+
+  const { logout } = useContext(AuthContext);
 
   const getAllLocations = () => {
     http
@@ -77,7 +79,7 @@ function DataLocation(props) {
       })
       .catch((err) => {
         message.error("Locations could not be fetched");
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -246,7 +248,7 @@ function DataLocation(props) {
                 })
                 .catch((err) => {
                   message.error(err.message);
-                  AxiosErrorHandler(err, props.logout);
+                  AxiosErrorHandler(err, logout);
                 })
                 .finally(() => {
                   props.loading(false);
@@ -444,5 +446,4 @@ function DataLocation(props) {
 
 export default connect(() => ({}), {
   loading,
-  logout,
 })(DataLocation);

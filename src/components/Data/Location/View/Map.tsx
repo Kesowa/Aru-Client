@@ -21,7 +21,6 @@ import {
 import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
-import { logout } from "../../../../actions/authAction";
 import "./index.less";
 import {
   UserOutlined,
@@ -613,5 +612,4 @@ const mapStateToProps = (state) => {
 
 export default connect(mapStateToProps, {
   loading,
-  logout,
 })(LocationCardMap);

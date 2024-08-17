@@ -8,8 +8,6 @@ import FlightEditing from "../CreateFlight";
 import Weather from "../../../shared/Weather";
 import Codes from "../../../../static/weatherCodes";
 import convertDegreeToDirection from "../../../../services/convertDegreeToDirection";
-import http from "../../../../services/httpCall";
-import { logout } from "../../../../actions/authAction";
 import "../index.less";
 import axios from "axios";
 
@@ -44,7 +42,6 @@ const StageTwo: FC<StageTwoProps> = ({
   setAreaSelected,
   nextStage,
   isEditing,
-  logout,
 }) => {
   const [formComplete, setFormComplete] = useState(false);
   const [weatherData, setWeatherData] = useState<WeatherData>({});
@@ -150,7 +147,7 @@ const mapStateToProps = (state: any) => ({
   isEditing: state.MissionCreation.isEditing,
 });
 
-const connector = connect(mapStateToProps, { logout });
+const connector = connect(mapStateToProps, null);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

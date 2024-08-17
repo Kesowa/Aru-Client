@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Row, Col, Typography } from "antd";
 import tenantPlaceholder from "../../../../static/tenant-placeholder.svg";
 import Skeleton from "react-loading-skeleton";
@@ -8,12 +8,14 @@ import apis from "src/services/apis";
 import { AxiosErrorHandler } from "src/services/httpErrorHandle";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import { AuthContext } from "src/services/authUtils";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function BasicInfo(props: any) {
   const [storageLoading, setStorageLoading] = useState(true);
   const [storage, setStorage] = useState<any>({});
+  const { logout } = useContext(AuthContext);
   function fetchTenantStats() {
     setStorageLoading(true);
     http
@@ -23,7 +25,7 @@ export default function BasicInfo(props: any) {
       })
       .catch((err: any) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setStorageLoading(false));
   }

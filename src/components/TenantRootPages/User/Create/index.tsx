@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
@@ -19,7 +19,6 @@ import {
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -37,6 +36,7 @@ import Expired from "../../restrictions/expiry";
 import { STATIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
 import { PERMS, TENANT_STAFF_PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
 
 function UserCreatePage(props: any) {
   const [form] = Form.useForm();
@@ -57,6 +57,9 @@ function UserCreatePage(props: any) {
     permissions: string[];
   }>();
   const [errorState, setErrorState] = useState("");
+
+  const { Auth, logout } = useContext(AuthContext);
+
   //avatar upload
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
@@ -78,7 +81,7 @@ function UserCreatePage(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsAvatarUploading(false);
@@ -133,7 +136,7 @@ function UserCreatePage(props: any) {
             break;
           default:
             setErrorState("500");
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
         }
       })
       .finally(() => {
@@ -141,9 +144,9 @@ function UserCreatePage(props: any) {
       });
   };
   useEffect(() => {
-    if (!props.Auth.isLoggedIn) {
+    if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
-    } else if (props.userDetails.userType !== "tenant-root") {
+    } else if (Auth.userdetails.userType !== "tenant-root") {
       // only tenant-root can create tenant-staff user
       setErrorState("401");
     } else {
@@ -191,7 +194,7 @@ function UserCreatePage(props: any) {
             setErrorState("403");
           }
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -393,9 +396,4 @@ function UserCreatePage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  userDetails: state.Auth.userdetails,
-});
-
-export default connect(mapStateToProps, { loading, logout })(UserCreatePage);
+export default connect(null, { loading })(UserCreatePage);

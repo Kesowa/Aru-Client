@@ -7,10 +7,12 @@ import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "src/services/authUtils";
 
 function CreatePermission(props: any) {
+  const { logout } = useContext(AuthContext);
   const [form] = Form.useForm();
 
   const onFinish = (data: any) => {
@@ -29,7 +31,7 @@ function CreatePermission(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -89,4 +91,4 @@ function CreatePermission(props: any) {
   );
 }
 
-export default connect(null, { loading, logout })(CreatePermission);
+export default connect(null, { loading })(CreatePermission);

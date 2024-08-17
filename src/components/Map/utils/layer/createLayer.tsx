@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   Modal,
   Steps,
@@ -19,12 +18,11 @@ import {
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
-import { connect } from "react-redux";
 import { InboxOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
 import { vectorProps } from "src/static/vectorprops";
 import { options } from "../propUtils";
+import { AuthContext } from "src/services/authUtils";
 
 const { Dragger } = Upload;
 const { Text, Paragraph } = Typography;
@@ -43,6 +41,8 @@ const CreateLayer = (props: any) => {
   const [storageModal, setStorageModal] = useState(false);
 
   const [form] = Form.useForm();
+
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     if (current === 1) {
@@ -168,7 +168,7 @@ const CreateLayer = (props: any) => {
               console.log(err.response);
             }
           } else console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setLayerName("");
@@ -401,8 +401,4 @@ const CreateLayer = (props: any) => {
   );
 };
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, { logout })(CreateLayer);
+export default CreateLayer;

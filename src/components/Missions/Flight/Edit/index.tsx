@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from "react";
+import React, { useState, useEffect, FC, useContext } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { useParams } from "react-router-dom";
 import GoogleMap from "../../GoogleMap";
@@ -6,7 +6,6 @@ import EditFlightForm from "./Form";
 import "../../Views/Details/Data/data.less";
 import "../../Create/index.less";
 import Weather from "../../../shared/Weather";
-import { logout } from "../../../../actions/authAction";
 import apis from "src/services/apis";
 import http from "src/services/httpCall";
 import { message } from "antd";
@@ -15,6 +14,7 @@ import axios from "axios";
 import convertDegreeToDirection from "src/services/convertDegreeToDirection";
 import Codes from "../../../../static/weatherCodes";
 import { enableFlightEditing, setCenterPoints, setCircleMeasurements, setGeolocation, setPolygonMeasurements } from "src/actions/missionCreation";
+import { AuthContext } from "src/services/authUtils";
 
 interface WeatherData {
   humidity: number;
@@ -36,6 +36,8 @@ const EditFlight: FC<any> = (props) => {
 
   const [isoDate, setIsoDate] = useState(new Date().toISOString());
   const [weatherData, setWeatherData] = useState<any>({});
+
+  const { logout } = useContext(AuthContext);
 
   const fetchWeatherData = (isoDate: string) => {
     let endTime = JSON.stringify(
@@ -89,7 +91,7 @@ const EditFlight: FC<any> = (props) => {
       setFlightDetails(flight);
     } catch (err) {
       message.error("Something went wrong");
-      AxiosErrorHandler(err, props.logout);
+      AxiosErrorHandler(err, logout);
       return;
     }
   };
@@ -164,8 +166,7 @@ const mapStateToProps = (state: any) => ({
   centerPoints: state.MissionCreation.flightDetails.centerPoints, // center points of new location
 });
 
-const connector = connect(mapStateToProps, { 
-  logout,
+const connector = connect(mapStateToProps, {
   // for initializing the global states, so that GoogleMap gets initialized at the existing flight location
   enableFlightEditing,
   setCircleMeasurements,

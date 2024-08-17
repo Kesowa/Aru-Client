@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { UnorderedListOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
 import { Link, useHistory, useParams } from "react-router-dom";
 import { Row, Col, message, Transfer, Form, Input, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -17,6 +16,7 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import FourOhOne from "../../../shared/Error/FourOhOne";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
 
 function UserGroupEditPage(props: any) {
   const [form] = Form.useForm();
@@ -26,6 +26,7 @@ function UserGroupEditPage(props: any) {
   const [groupName, setGroupName] = useState("");
   const history = useHistory();
   const { id } = useParams<{id: string}>();
+  const { logout } = useContext(AuthContext);
 
   const fetchAllPermissions = () => {
     props.loading(true);
@@ -57,7 +58,7 @@ function UserGroupEditPage(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -98,7 +99,7 @@ function UserGroupEditPage(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -155,7 +156,7 @@ function UserGroupEditPage(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -242,8 +243,4 @@ function UserGroupEditPage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, { loading, logout })(UserGroupEditPage);
+export default connect(null, { loading })(UserGroupEditPage);

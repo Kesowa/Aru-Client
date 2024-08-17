@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useEffect, useState, FC } from "react";
+import React, { useEffect, useState, FC, useContext } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { useHistory } from "react-router-dom";
 import {
@@ -27,7 +26,6 @@ import {
   getImageForPolygon,
 } from "../../../../services/staticMap";
 import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -38,6 +36,7 @@ import {
   setGeolocation,
   clearMissionCreationStateWithGeoFence,
 } from "../../../../actions/missionCreation";
+import { AuthContext } from "src/services/authUtils";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -99,7 +98,6 @@ const StageThree: FC<StageThreeProps> = ({
   missionCreationData,
   jobTypeName,
   loading,
-  logout,
   enableFlightEditing,
   prevStage,
 }) => {
@@ -117,6 +115,8 @@ const StageThree: FC<StageThreeProps> = ({
   const [client, setClient] = useState("");
 
   const history = useHistory();
+
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     // fetch the google map static image
@@ -553,7 +553,6 @@ const mapStateToProps = (state: any) => ({
 
 const connector = connect(mapStateToProps, {
   loading,
-  logout,
   enableFlightEditing,
   setPolygonMeasurements,
   setCircleMeasurements,

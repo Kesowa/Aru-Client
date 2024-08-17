@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Card,
   message,
@@ -26,11 +26,11 @@ import {
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
 import AloneLogo from "../../../static/Alone-rafiki.svg";
 import moment from "moment";
 import { connect } from "react-redux";
 import { FormInstance } from "antd/lib/form";
+import { AuthContext } from "src/services/authUtils";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -115,7 +115,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
 interface ModelCardProps {
   id: any;
   showDate: boolean;
-  logout: () => void;
   Auth: any;
 }
 
@@ -132,6 +131,8 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
   const [manufacturingDate, setManufacturingDate] = useState<any>("");
   const [tableData, setTableData] = useState<Item[]>([]);
   const [modelInfo, setModelInfo] = useState<Item[]>([]);
+
+  const { Auth, logout } = useContext(AuthContext);
 
   const [form] = Form.useForm();
 
@@ -182,7 +183,7 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsCardLoading(false);
@@ -240,7 +241,7 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -256,7 +257,7 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -272,7 +273,7 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -364,7 +365,7 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         handleCancel();
@@ -390,7 +391,7 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
 
     const asset = {
       assetName: values.name,
-      userID: props.Auth.userid,
+      userID: Auth.userid,
       assetInfo: [assetInfo],
       model: values.type[1],
       assetOwner: values.owner,
@@ -410,7 +411,7 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         handleCancel2();
@@ -827,16 +828,4 @@ if (data) {
   );
 };
 
-const mapStateToProps = (state: any) => {
-  return {
-    Auth: state.auth,
-  };
-};
-
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    logout: () => dispatch(logout()),
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(ModelCard);
+export default ModelCard;

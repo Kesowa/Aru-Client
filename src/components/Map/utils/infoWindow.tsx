@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
 import { connect } from "react-redux";
 import {
   Row,
@@ -31,6 +30,7 @@ import getAddressfromLatLong from "../../../services/reverseGeocoding";
 import { STATIC_URL } from "src/constants";
 import { BsFlagFill } from "react-icons/bs";
 import { thread } from "src/actions/threadAction";
+import { AuthContext } from "src/services/authUtils";
 
 const { Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -47,6 +47,8 @@ function InfoWindow(props) {
   );
   const [areaUnit, setAreaUnit] = useState("sq. m");
   const [lengthUnit, setLenghtUnit] = useState("km");
+
+  const { logout } = useContext(AuthContext);
 
   const [fileCount, setFileCount] = useState(0);
   const [imageToShow, setImageToshow] = useState<any>([]);
@@ -276,7 +278,7 @@ function InfoWindow(props) {
       })
       .catch((err) => {
         message.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -405,7 +407,7 @@ function InfoWindow(props) {
           })
           .catch((err) => {
             console.log(err);
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
           })
           .finally(() => setImageLoader(false));
       }
@@ -915,8 +917,7 @@ function InfoWindow(props) {
 }
 
 const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
   open: state.Thread.open,
 });
 
-export default connect(mapStateToProps, { logout, thread })(InfoWindow);
+export default connect(mapStateToProps, { thread })(InfoWindow);

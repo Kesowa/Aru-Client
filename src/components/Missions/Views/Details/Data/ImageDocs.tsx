@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import {
   Alert,
   message,
@@ -23,7 +23,6 @@ import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import axios from "axios";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { logout } from "../../../../../actions/authAction";
 import { connect } from "react-redux";
 import {
   InboxOutlined,
@@ -48,6 +47,7 @@ import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
 import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
 
 let plainOptions = new Array<any>();
 function ImageDocs(props) {
@@ -76,6 +76,11 @@ function ImageDocs(props) {
   const [limit, setLimit] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [selectedImg, setSelectedImg] = useState({});
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  const userType = userDetails.userType;
+
   const imgMenu: MenuProps["items"] = (data) => {
     const item = [
       {
@@ -298,7 +303,7 @@ function ImageDocs(props) {
                   message.error("Unable to upload file!");
                   options.onError({ err });
                 }
-                AxiosErrorHandler(err, props.logout);
+                AxiosErrorHandler(err, logout);
               });
 
             break;
@@ -331,7 +336,7 @@ function ImageDocs(props) {
                   message.error("Unable to upload file!");
                   options.onError({ err });
                 }
-                AxiosErrorHandler(err, props.logout);
+                AxiosErrorHandler(err, logout);
               });
             break;
 
@@ -429,7 +434,7 @@ function ImageDocs(props) {
       })
       .catch((err: Error) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setLoader(false));
   }
@@ -564,7 +569,7 @@ function ImageDocs(props) {
         })
         .catch((err) => {
           message.error("ERROR" + err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         });
     } else {
       message.info("Please select some images to delete!");
@@ -589,7 +594,7 @@ function ImageDocs(props) {
       })
       .catch((err) => {
         message.error("ERROR" + err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -620,10 +625,10 @@ function ImageDocs(props) {
 
   function renderUploadBtn() {
     if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
+      userType === "tenant-staff" ||
+      userType === "tenant-client"
     ) {
-      if (props.userDetails.customPermissions.includes(PERMS.UPLOAD_DOCUMENT)) {
+      if (userDetails.customPermissions.includes(PERMS.UPLOAD_DOCUMENT)) {
         return (
           <div className="upload-btn">
             <Button onClick={() => uploadModal()}>
@@ -716,8 +721,8 @@ function ImageDocs(props) {
         uploadBtn={renderUploadBtn}
         updateAPI={apis.UPDATE_MULTI_DOC}
         delete={deleteFile}
-        canToggleFlag={props.userDetails.customPermissions.includes(PERMS.UPDATE_DOCUMENT)}
-        canDelete={props.userDetails.customPermissions.includes(PERMS.DELETE_DOCUMENT)}
+        canToggleFlag={userDetails.customPermissions.includes(PERMS.UPDATE_DOCUMENT)}
+        canDelete={userDetails.customPermissions.includes(PERMS.DELETE_DOCUMENT)}
       />
       {loader ? (
         <div
@@ -955,8 +960,7 @@ function ImageDocs(props) {
 }
 
 const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
   Thread: state.Thread,
 });
 
-export default connect(mapStateToProps, { logout, thread })(ImageDocs);
+export default connect(mapStateToProps, { thread })(ImageDocs);

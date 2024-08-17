@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import {
   Row,
   Col,
@@ -21,7 +21,6 @@ import { FileTextOutlined, DownloadOutlined } from "@ant-design/icons";
 import { useEffect } from "react";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { logout } from "../../../../../actions/authAction";
 import download from "downloadjs";
 import { connect } from "react-redux";
 import {
@@ -30,12 +29,14 @@ import {
 } from "../../../../../services/staticMap";
 import io from "socket.io-client";
 import { API_URL, STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 
 setChonkyDefaults({ iconComponent: ChonkyIconFA });
 
 const { Title } = Typography;
 function Map(props) {
   const history = useHistory();
+  const { logout } = useContext(AuthContext);
   const [files2, setFiles] = useState([]);
   const [loader, setLoader] = useState(false);
   const [mapImage, setmapImage] = useState("");
@@ -70,7 +71,7 @@ function Map(props) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -137,7 +138,7 @@ function Map(props) {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setLoader(false));
   }, []);
@@ -235,6 +236,5 @@ export default connect(
   },
   {
     loading,
-    logout,
   }
 )(Map);

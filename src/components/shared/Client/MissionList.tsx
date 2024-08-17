@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Tag,
   Row,
@@ -17,17 +17,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
 import { connect } from "react-redux";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
-import {
-  setMissionsToState,
-  deleteMission,
-} from "../../../actions/missionActions";
+import { setMissionsToState } from "../../../actions/missionActions";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import moment from "moment";
 import { useHistory } from "react-router-dom";
 import mp from "../../../static/mapping.svg";
 import "../MissionList.less";
+import { AuthContext } from "src/services/authUtils";
 
 function ClientMission(props) {
   const history = useHistory();
@@ -39,6 +36,8 @@ function ClientMission(props) {
   const [sortOrder, setSortOrder] = useState("createdAt:descend");
   const [searchFilters, setSearchFilters] = useState("");
   const [missionType, setMissionType] = useState("");
+
+  const { Auth, logout } = useContext(AuthContext);
 
   const setPaginationPage = (p) => {
     setPage(p);
@@ -272,9 +271,8 @@ function ClientMission(props) {
 
   // +++++++++++++++++++++++++++++++++++++++++++++++ Fetch Missions ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   function fetchMissions() {
-    const { userType } = props;
-    const { tenantId } = props;
-    const { clientId } = props;
+    const userType = Auth.userdetails.userType;
+    const clientId = Auth.userdetails._id;
     setIsTableLoading(true);
     if (userType === "tenant-client") {
       http
@@ -297,7 +295,7 @@ function ClientMission(props) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsTableLoading(false);
@@ -356,15 +354,9 @@ function ClientMission(props) {
 }
 
 const mapStateToProps = (state) => ({
-  tenantId:
-    state.Auth.userdetails.tenantId._id || state.Auth.userdetails.tenantId,
-  userType: state.Auth.userdetails.userType,
   missions: state.Missions.missions,
-  clientId: state.Auth.userdetails._id,
 });
 
 export default connect(mapStateToProps, {
   setMissionsToState,
-  deleteMission,
-  logout,
 })(ClientMission);

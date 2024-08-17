@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Form, Input, Upload, Row, Col, message, Button, Divider } from "antd";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
@@ -8,14 +8,16 @@ import { beforeUpload } from "../../../services/imageupload";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { connect } from "react-redux";
 import { loading } from "../../../actions/loadingAction";
-import { logout } from "../../../actions/authAction";
 import { STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 
 function TenantInfo(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
+
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     if (props.tenantData) {
@@ -44,7 +46,7 @@ function TenantInfo(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsAvatarUploading(false);
@@ -86,7 +88,7 @@ function TenantInfo(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.loading(false);
@@ -267,8 +269,4 @@ function TenantInfo(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, { loading, logout })(TenantInfo);
+export default connect(null, { loading })(TenantInfo);
