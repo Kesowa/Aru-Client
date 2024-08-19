@@ -29,13 +29,6 @@ import { loading } from "../../../../actions/loadingAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import {
-  enableFlightEditing,
-  setPolygonMeasurements,
-  setCircleMeasurements,
-  setGeolocation,
-  clearMissionCreationStateWithGeoFence,
-} from "../../../../actions/missionCreation";
 import { AuthContext } from "src/services/authUtils";
 
 const { TextArea } = Input;
@@ -91,19 +84,21 @@ interface StageThreeProps extends PropsFromRedux {
     };
   };
   prevStage: Function;
+  flightDetails: any;
+  setIsEditing: any;
 }
 
 const StageThree: FC<StageThreeProps> = ({
   missionType,
-  missionCreationData,
   jobTypeName,
   loading,
-  enableFlightEditing,
   prevStage,
+  flightDetails,
+  setIsEditing
 }) => {
   // Form control states
   const [data, setData] = useState<any>([]);
-  const [missionName, setMissionName] = useState("");
+  const [missionName, setMissionName] = useState(flightDetails.name);
   const [missionDescription, setMissionDescription] = useState("");
   const [deliverables, setDeliverables] = useState<any>([]);
   const [mapImage, setMapImage] = useState("");
@@ -120,62 +115,46 @@ const StageThree: FC<StageThreeProps> = ({
 
   useEffect(() => {
     // fetch the google map static image
-    if (!missionCreationData.flights[0]) {
+    if (!(flightDetails.geoFence.circle || flightDetails.geoFence.polygon)) {
       message.error("Please select the geofence");
       prevStage();
       return;
     }
 
     let mapUrl = "";
-    if (missionCreationData.flights[0].geoFence.circle) {
-      const lat = missionCreationData.flights[0].geoFence.circle.center.lat;
-      const lng = missionCreationData.flights[0].geoFence.circle.center.lng;
-      const radius = missionCreationData.flights[0].geoFence.circle.radius;
+    if (flightDetails.geoFence.circle) {
+      const lat = flightDetails.geoFence.circle.center.lat;
+      const lng = flightDetails.geoFence.circle.center.lng;
+      const radius = flightDetails.geoFence.circle.radius;
       mapUrl = getImageForCircle(lat, lng, radius);
-    } else if (missionCreationData.flights[0].geoFence.polygon) {
-      const points = missionCreationData.flights[0].geoFence.polygon.points;
+    } else if (flightDetails.geoFence.polygon) {
+      const points = flightDetails.geoFence.polygon.points;
       mapUrl = getImageForPolygon(points);
     }
     setMapImage(mapUrl);
 
     // flight details table data
-    const flights = missionCreationData.flights;
-    let tableData: any = [];
 
-    flights.forEach((flightData, index) => {
-      const flightDetails = flightData.flightDetails;
-
-      const flight = {};
-      flight["key"] = index;
-      Object.keys(flightDetails).forEach((x) => {
-        if (x === "flightName") {
-          flight["flight"] = flightDetails["flightName"];
-          setMissionName(flightDetails["flightName"]);
-        } else if (x === "date") {
-          flight["date"] = flightDetails["date"];
-        } else if (x === "time") {
-          flight["time"] = flightDetails["time"];
-        } else if (x === "duration") {
-          flight["duration"] = flightDetails["duration"];
-        }
-
-        if (flightData.geoFence.polygon) {
-          flight["area"] = `${(
-            flightData.geoFence.polygon["area"] * 0.000247105
-          ).toFixed(2)} acres`;
-        } else if (flightData.geoFence.circle) {
-          flight["area"] = `${(
-            flightData.geoFence.circle["area"] * 0.000247105
-          ).toFixed(2)} acres`;
-        } else {
-          flight["area"] = "NA";
-        }
-      });
-      tableData = [...tableData, flight];
-    });
-    console.log("tavle", tableData, flights);
-    setData(tableData);
-  }, [missionCreationData]);
+    const flight = {
+      key: 0, // only one flight per mission
+      flight: flightDetails.name,
+      date: flightDetails.date,
+      time: flightDetails.time,
+      duration: flightDetails.duration,
+    };
+    if (flightDetails.geoFence.polygon) {
+      flight["area"] = `${(
+        flightDetails.geoFence.polygon.area * 0.000247105
+      ).toFixed(2)} acres`;
+    } else if (flightDetails.geoFence.circle) {
+      flight["area"] = `${(
+        flightDetails.geoFence.circle.area * 0.000247105
+      ).toFixed(2)} acres`;
+    } else {
+      flight["area"] = "NA";
+    }
+    setData([flight]);
+  }, [flightDetails]);
 
   useEffect(() => {
     http
@@ -224,34 +203,27 @@ const StageThree: FC<StageThreeProps> = ({
     }
 
     loading(true);
-    let data;
-    console.log("Hiiii");
-    console.log(missionCreationData.flights);
-    if (!client) {
-      data = {
-        name: missionName,
-        deliverables,
-        description: missionDescription,
-        assetID: asset,
-        missionType: missionType,
-        flights: {
-          ...missionCreationData.flights,
-          assetID: asset,
+    let data = {
+      name: missionName,
+      deliverables,
+      description: missionDescription,
+      assetID: asset,
+      missionType,
+      flights: [{
+        flightDetails: {
+          locationId: flightDetails.locationID || "none",
+          flightName: flightDetails.name,
+          date: flightDetails.date,
+          time: flightDetails.time,
+          duration: flightDetails.duration,
+          geoLocation: flightDetails.geolocation,
+          centerPoints: flightDetails.centerPoints,
         },
-      };
-    } else {
-      data = {
-        name: missionName,
-        deliverables,
-        description: missionDescription,
-        assetID: asset,
-        missionType: missionType,
-        flights: {
-          ...missionCreationData.flights,
-          assetID: asset,
-        },
-        clientId: [client],
-      };
+        geoFence: flightDetails.geoFence,
+      }],
+    };
+    if (client) {
+      data["clientId"] = [client];
     }
     try {
       const response = await http.post(apis.CREATE_MISSION, data);
@@ -260,7 +232,6 @@ const StageThree: FC<StageThreeProps> = ({
       } else {
         history.push("/dashboard/missions");
         message.success("Mission Created Successfuly");
-        clearMissionCreationStateWithGeoFence();
       }
     } catch (err: any) {
       console.log(err);
@@ -303,12 +274,14 @@ const StageThree: FC<StageThreeProps> = ({
       key: "weather",
       dataIndex: "weather",
       render: () => {
-        return (
-          <>
-            {missionCreationData.weather?.temperature} <sup>o</sup> C, &nbsp;
-            {missionCreationData.weather?.description}
-          </>
-        );
+        return <></>;
+        // no weather field in missionCreationData anyways
+        // return (
+        //   <>
+        //     {missionCreationData.weather?.temperature} <sup>o</sup> C, &nbsp;
+        //     {missionCreationData.weather?.description}
+        //   </>
+        // );
       },
     },
     {
@@ -370,10 +343,6 @@ const StageThree: FC<StageThreeProps> = ({
         />
       </Modal>
       <React.Fragment>
-        <Row justify="center" align="middle" className="stage_three_heading">
-          <h1>Review and Submit!</h1>
-        </Row>
-
         <Row className="stage_three_main">
           <Col sm={24} md={12}>
             <div className="mission_name_input">
@@ -519,7 +488,7 @@ const StageThree: FC<StageThreeProps> = ({
                 type="primary"
                 icon={<EditOutlined />}
                 onClick={() => {
-                  enableFlightEditing(true);
+                  setIsEditing(true);
                   prevStage();
                 }}
                 style={{
@@ -547,16 +516,8 @@ const StageThree: FC<StageThreeProps> = ({
   );
 };
 
-const mapStateToProps = (state: any) => ({
-  missionCreationData: state.MissionCreation,
-});
-
-const connector = connect(mapStateToProps, {
+const connector = connect(null, {
   loading,
-  enableFlightEditing,
-  setPolygonMeasurements,
-  setCircleMeasurements,
-  setGeolocation,
 });
 
 type PropsFromRedux = ConnectedProps<typeof connector>;

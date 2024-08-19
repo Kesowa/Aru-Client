@@ -1,5 +1,5 @@
 import { useState, useEffect, FC, useContext } from "react";
-import { Steps, message } from "antd";
+import { Row, Steps, message } from "antd";
 import "./index.less";
 import StageOne from "./Steps/StageOne";
 import StageTwo from "./Steps/StageTwo";
@@ -10,6 +10,7 @@ import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import GoogleMap from "../GoogleMap";
 import { AuthContext } from "src/services/authUtils";
+import moment from "moment";
 
 const CreateMissionBase: FC<any> = (props) => {
   const [currentStage, setCurrentStage] = useState<number>(0);
@@ -19,19 +20,25 @@ const CreateMissionBase: FC<any> = (props) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [missionTypes, setMissionTypes] = useState<any[]>([]);
-  const [areaSelected, setAreaSelected] = useState<boolean>(false);
-  const [drawingToolBtns, setDrawingToolBtns] = useState<boolean>(false);
-  const [location, setlocation] = useState<any>({});
+
+  const [flightDetails, setFlightDetails] = useState<any>({
+    name: "MyFlight1",
+    date: moment(new Date()).format("YYYY-MM-DD"),
+    time: moment(new Date()).format("HH:mm:ss A"),
+    duration: "",
+    locationID: null,
+    pilotID: null,
+    geoFence: {
+      polygon: null,
+      circle: null,
+    },
+    geolocation: null,
+    centerPoints: null,
+  });
+
+  const [isEditing, setIsEditing] = useState(false);
 
   const { logout } = useContext(AuthContext);
-
-  const mapProps: any = {
-    areaSelected,
-    setAreaSelected,
-    drawingToolBtns,
-    setDrawingToolBtns,
-    setlocation,
-  };
 
   useEffect(() => {
     http
@@ -69,12 +76,11 @@ const CreateMissionBase: FC<any> = (props) => {
       title: "Schedule Flight",
       content: (
         <StageTwo
-          areaSelected={areaSelected}
-          setAreaSelected={setAreaSelected}
           nextStage={() => setCurrentStage(2)}
           prevStage={() => setCurrentStage(0)}
-          location={location}
-          setlocation={setlocation}
+          flightDetails={flightDetails}
+          setFlightDetails={setFlightDetails}
+          isEditing={isEditing}
         />
       ),
     },
@@ -85,6 +91,8 @@ const CreateMissionBase: FC<any> = (props) => {
           missionType={formData.jobType}
           jobTypeName={formData.typeName}
           prevStage={() => setCurrentStage(1)}
+          flightDetails={flightDetails}
+          setIsEditing={setIsEditing}
         />
       ),
     },
@@ -93,10 +101,15 @@ const CreateMissionBase: FC<any> = (props) => {
   return (
     <div className="container-full">
       {currentStage === 0 ? (
-        <h1 className="text-center">Create a Mission</h1>
+        <Row justify="center" align="middle" className="stage_three_heading">
+          <h1>Create a Mission</h1>
+        </Row>
       ) : null}
-
-      {currentStage === 1 && <GoogleMap {...mapProps} />}
+      {currentStage === 2 ? (
+        <Row justify="center" align="middle" className="stage_three_heading">
+          <h1>Review and Submit!</h1>
+        </Row>
+      ) : null}
       <div
         className="card-base"
         style={{
@@ -125,7 +138,6 @@ const CreateMissionBase: FC<any> = (props) => {
           })}
         />
       </div>
-
       <div className="steps-content">{steps[currentStage].content}</div>
     </div>
   );

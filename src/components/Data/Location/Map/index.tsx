@@ -416,7 +416,7 @@ class LocationMap extends Component<mapProps, mapState> {
 
   createMeasurements = (geofence) => {
     let obj;
-    if (geofence.polygon && geofence.polygon.length) {
+    if (geofence.polygon) {
       const { points } = geofence.polygon;
 
       const geoPoints = points.map((point) => {
