@@ -9,7 +9,6 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import "../Package.less";
-import { loading } from "../../../../actions/loadingAction";
 import { setPackageToEdit } from "../../../../actions/packageAction";
 
 import apis from "../../../../services/apis";
@@ -22,6 +21,7 @@ import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function ListAllPackages(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
@@ -29,6 +29,7 @@ function ListAllPackages(props: any) {
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const columns: any = [
     {
@@ -122,7 +123,7 @@ function ListAllPackages(props: any) {
             okText="Yes"
             cancelText="No"
             onConfirm={() => {
-              props.loading(true);
+              setLoading(true);
               http
                 .delete(`${apis.DELETE_PACKAGE}`, {
                   data: {
@@ -138,7 +139,7 @@ function ListAllPackages(props: any) {
                   AxiosErrorHandler(err, logout);
                 })
                 .finally(() => {
-                  props.loading(false);
+                  setLoading(false);
                 });
             }}
           >
@@ -235,6 +236,6 @@ function ListAllPackages(props: any) {
   }
 }
 
-export default connect(null, { loading, setPackageToEdit })(
+export default connect(null, { setPackageToEdit })(
   ListAllPackages
 );

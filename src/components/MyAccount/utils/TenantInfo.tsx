@@ -6,10 +6,9 @@ import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { beforeUpload } from "../../../services/imageupload";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { connect } from "react-redux";
-import { loading } from "../../../actions/loadingAction";
 import { STATIC_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function TenantInfo(props: any) {
   const [form] = Form.useForm();
@@ -18,6 +17,7 @@ function TenantInfo(props: any) {
   const [isDisabled, setIsDisabled] = useState(true);
 
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   useEffect(() => {
     if (props.tenantData) {
@@ -72,7 +72,7 @@ function TenantInfo(props: any) {
   };
 
   const updateOrganisationBasicInfo = (body: any) => {
-    props.loading(true);
+    setLoading(true);
     http
       .post(apis.UPDATE_ORGANISATION_BASIC_DETAILS, body)
       .then((result) => {
@@ -91,7 +91,7 @@ function TenantInfo(props: any) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -269,4 +269,4 @@ function TenantInfo(props: any) {
   );
 }
 
-export default connect(null, { loading })(TenantInfo);
+export default TenantInfo;

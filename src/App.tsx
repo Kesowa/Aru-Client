@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useEffect } from "react";
-import Loader from "./components/shared/Loader";
+import Loader, { LoaderContext, useLoader } from "./components/shared/Loader";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import { Space, Spin } from "antd";
 import "./index.less";
@@ -22,6 +22,7 @@ const App = () => {
   const UserId = localStorage.getItem("UserId");
 
   const { Auth, login, logout, setUserDetails } = useAuth();
+  const { loading, setLoading } = useLoader(0);
 
   useEffect(() => {
     if (
@@ -40,6 +41,7 @@ const App = () => {
 
   return (
     <React.Fragment>
+      <LoaderContext.Provider value={{ loading, setLoading }}>
       <AuthContext.Provider value={{ Auth, login, logout, setUserDetails }} >
       <Socket />
       <Loader />
@@ -85,6 +87,7 @@ const App = () => {
         </BrowserRouter>
       </Gmap>
       </AuthContext.Provider>
+      </LoaderContext.Provider>
     </React.Fragment>
   );
 };

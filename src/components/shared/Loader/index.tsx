@@ -1,11 +1,26 @@
+import { createContext, useContext, useState } from "react";
 import "./index.less";
-import { connect } from "react-redux";
 
-function Loader(props: any) {
+export const LoaderContext = createContext({
+  loading: 0,
+  setLoading: (l:boolean) => {}
+});
+
+export const useLoader = (init: number) => {
+  const [ loaderCounter, setLoaderCounter ] = useState(0);
+  const setLoading = (l: boolean) => {
+    if (l) setLoaderCounter(prev => prev+1);
+    else setLoaderCounter(prev => Math.max(0,prev-1));
+  }
+  return { loading: loaderCounter, setLoading };
+}
+
+function Loader() {
+  const { loading } = useContext(LoaderContext);
   return (
     <div
       className={
-        props.loader.loading_active > 0
+        loading > 0
           ? "loader-wrapper vsbl"
           : "loader-wrapper nt-vsbl"
       }
@@ -18,8 +33,4 @@ function Loader(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  loader: state.Loader,
-});
-
-export default connect(mapStateToProps, {})(Loader);
+export default Loader;

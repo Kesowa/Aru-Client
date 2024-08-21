@@ -17,7 +17,6 @@ import {
   Popconfirm,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
 import { setUserToEdit } from "../../../../actions/userAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
@@ -32,6 +31,7 @@ import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function UserListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
@@ -43,6 +43,8 @@ function UserListPage(props: any) {
 
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
+
+  const { setLoading } = useContext(LoaderContext);
 
   let searchInput: any;
 
@@ -124,7 +126,7 @@ function UserListPage(props: any) {
         okText="Yes"
         cancelText="No"
         onConfirm={() => {
-          props.loading(true);
+          setLoading(true);
           http
             .delete(`${apis.DELETE_USER}`, {
               params: {
@@ -140,7 +142,7 @@ function UserListPage(props: any) {
               AxiosErrorHandler(err, logout);
             })
             .finally(() => {
-              props.loading(false);
+              setLoading(false);
             });
         }}
       >
@@ -352,6 +354,6 @@ function UserListPage(props: any) {
   }
 }
 
-export default connect(null, { loading, setUserToEdit })(
+export default connect(null, { setUserToEdit })(
   UserListPage
 );

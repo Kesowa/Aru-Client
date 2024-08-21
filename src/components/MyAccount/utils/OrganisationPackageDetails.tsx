@@ -9,7 +9,6 @@ import {
   Skeleton,
   Divider,
 } from "antd";
-import { loading } from "../../../actions/loadingAction";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
@@ -319,6 +318,4 @@ function OrganisationPackageDetails(props: any) {
   );
 }
 
-export default connect(null, { loading })(
-  OrganisationPackageDetails
-);
+export default OrganisationPackageDetails;

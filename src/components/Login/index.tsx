@@ -1,8 +1,6 @@
 import { useContext, useState } from "react";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
-import { loading } from "../../actions/loadingAction";
-import { connect } from "react-redux";
 import { useHistory, useLocation } from "react-router-dom";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { Typography, Form, Input, Button, Alert } from "antd";
@@ -14,17 +12,19 @@ import { components } from "src/handlers/schema";
 import Logo from "../shared/Logo";
 import "../shared/login-bg.less";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "../shared/Loader";
 
-function Login(props: any) {
+function Login() {
   const [errMessage, setErrMessage] = useState("");
   const location = useLocation();
   const history = useHistory();
   console.log("location", location);
   const { from } = location.state || { from: { pathname: "/" } };
   const { login, logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const onFinish = (values: any) => {
-    props.loading(true);
+    setLoading(true);
     http
       .post<components["schemas"]["LoginAuthResponse"]>(apis.LOGIN, values)
       .then((result) => {
@@ -47,7 +47,7 @@ function Login(props: any) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -122,4 +122,4 @@ function Login(props: any) {
   );
 }
 
-export default connect(null, { loading })(Login);
+export default Login;

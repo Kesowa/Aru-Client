@@ -6,7 +6,6 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import { connect } from "react-redux";
 import {
   Row,
   Col,
@@ -19,7 +18,6 @@ import {
   Popconfirm,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -30,6 +28,7 @@ import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function UserGroupListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
@@ -38,9 +37,10 @@ function UserGroupListPage(props: any) {
   const [errorState, setErrorState] = useState("");
 
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const deleteUsergroup = (id) => {
-    props.loading(true);
+    setLoading(true);
     http
       .delete(`${apis.DELETE_USERGROUP}`, {
         params: {
@@ -63,7 +63,7 @@ function UserGroupListPage(props: any) {
         }
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -226,4 +226,4 @@ function UserGroupListPage(props: any) {
   }
 }
 
-export default connect(null, { loading })(UserGroupListPage);
+export default UserGroupListPage;

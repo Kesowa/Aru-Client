@@ -8,7 +8,6 @@ import {
   LoadingOutlined,
 } from "@ant-design/icons";
 import "../Package.less";
-import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { beforeUpload } from "../../../../services/imageupload";
@@ -17,6 +16,7 @@ import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { Link } from "react-router-dom";
 import { STATIC_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function EditPackage(props: any) {
   const [form] = Form.useForm();
@@ -24,6 +24,7 @@ function EditPackage(props: any) {
   const [isPosterUploading, setIsPosterUploading] = useState(false);
 
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   useEffect(() => {}, []);
 
@@ -64,7 +65,7 @@ function EditPackage(props: any) {
 
   const onFinish = (data: any) => {
     if (poster) {
-      props.loading(true);
+      setLoading(true);
       console.log(poster, data);
       const body = {
         ...data,
@@ -88,7 +89,7 @@ function EditPackage(props: any) {
           AxiosErrorHandler(err, logout);
         })
         .finally(() => {
-          props.loading(false);
+          setLoading(false);
         });
     } else {
       message.error("please choose a poster for the package");
@@ -365,4 +366,4 @@ const mapStateToProps = (state: any) => ({
   package: state.Package.packageToEdit,
 });
 
-export default connect(mapStateToProps, { loading })(EditPackage);
+export default connect(mapStateToProps, null)(EditPackage);

@@ -2,8 +2,6 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import PasswordChecklist from "react-password-checklist";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
-import { loading } from "../../actions/loadingAction";
-import { connect } from "react-redux";
 import OtpInput from "react-otp-input";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import {
@@ -843,6 +841,4 @@ function Registration(props: any) {
   );
 }
 
-export default connect(null, {
-  loading,
-})(Registration);
+export default Registration;

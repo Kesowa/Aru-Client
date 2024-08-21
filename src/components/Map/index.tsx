@@ -105,7 +105,6 @@ import apis from "../../services/apis";
 import http from "../../services/httpCall";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { connect } from "react-redux";
-import { loading } from "../../actions/loadingAction";
 import moment from "moment";
 import { useHistory, useParams } from "react-router-dom";
 import VectorForm from "./utils/VectorForm";
@@ -147,6 +146,7 @@ import Tileset from "src/types/cesium_tileset";
 import { PERMS } from "src/static/permissions";
 import FourOhOne from "../shared/Error/FourOhOne";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "../shared/Loader";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -237,6 +237,7 @@ function BaseMap(props) {
   });
 
   const { Auth, logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const treeMenu = (layer: Layer): MenuProps["items"] => {
     const items: MenuProps["items"] = [];
@@ -3169,12 +3170,12 @@ function BaseMap(props) {
   };
 
   useEffect(() => {
-    props.loading(true);
+    setLoading(true);
   }, []);
 
   useEffect(() => {
     if (props.isBaseMap) {
-      props.loading(true);
+      setLoading(true);
       getAllLayers(null);
     }
   }, [props.isBaseMap, refreshLayer, flag]);
@@ -3257,7 +3258,7 @@ function BaseMap(props) {
         message.error("Layers Could Not Be Loaded");
         AxiosErrorHandler(error);
       } finally {
-        props.loading(false);
+        setLoading(false);
       }
     } else {
       try {
@@ -3279,7 +3280,7 @@ function BaseMap(props) {
         //message.error("errrorrrrr");
         AxiosErrorHandler(error);
       } finally {
-        props.loading(false);
+        setLoading(false);
         //message.info("land")
       }
     }
@@ -3339,7 +3340,7 @@ function BaseMap(props) {
   // };
 
   const deleteLayer = (layerId) => {
-    props.loading(true);
+    setLoading(true);
 
     if (props.isBaseMap) {
       http
@@ -3388,7 +3389,7 @@ function BaseMap(props) {
           } else console.log(err);
         })
         .finally(() => {
-          props.loading(false);
+          setLoading(false);
           handleCancel1();
         });
     } else {
@@ -3438,14 +3439,14 @@ function BaseMap(props) {
           AxiosErrorHandler(err, logout);
         })
         .finally(() => {
-          props.loading(false);
+          setLoading(false);
           handleCancel1();
         });
     }
   };
 
   const deleteMultipleLayers = (type) => {
-    props.loading(true);
+    setLoading(true);
 
     const layers = AllLayers.filter(
       (layer) => layer._isChecked && layer.type === type
@@ -3500,7 +3501,7 @@ function BaseMap(props) {
           AxiosErrorHandler(err, logout);
         })
         .finally(() => {
-          props.loading(false);
+          setLoading(false);
           handleCancel1();
         });
     } else {
@@ -3550,7 +3551,7 @@ function BaseMap(props) {
           AxiosErrorHandler(err, logout);
         })
         .finally(() => {
-          props.loading(false);
+          setLoading(false);
           handleCancel1();
         });
     }
@@ -4243,7 +4244,7 @@ function BaseMap(props) {
   // No longer required
   // const updateTreeDataAfterMovingLayers = async (groupid, layerids) => {
   //   // const al = { ...allLayers };
-  //   props.loading(true);
+  //   setLoading(true);
 
   //   const res = await http.patch(`${apis.EDIT_LAYER_GROUP}`, {
   //     _id: groupid,
@@ -4446,7 +4447,7 @@ function BaseMap(props) {
   // };
 
   const deleteGroup = (id: any) => {
-    props.loading(true);
+    setLoading(true);
 
     http
       .delete(`${apis.DELETE_LAYER_GROUP}`, {
@@ -4474,12 +4475,12 @@ function BaseMap(props) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
   const editGroup = (group) => {
-    props.loading(true);
+    setLoading(true);
 
     http
       .patch(`${apis.EDIT_LAYER_GROUP}`, {
@@ -4521,7 +4522,7 @@ function BaseMap(props) {
         setVisibleEditModal(false);
         setgroupName("");
         setgroupToEdit(null);
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -5322,7 +5323,7 @@ function BaseMap(props) {
   // }
 
   const editLayer = () => {
-    props.loading(true);
+    setLoading(true);
     const data: any = {
       name: layerName,
       captureDate: captureDate,
@@ -5365,13 +5366,13 @@ function BaseMap(props) {
           setLayerName("");
           setCaptureDate("");
           setIcon2(iconOptions[0].value); // default value that was previously also used in first declaration
-          props.loading(false);
+          setLoading(false);
         });
 
       // refreshLayers();
     }
 
-    props.loading(true);
+    setLoading(true);
 
     http
       .patch(`${apis.EDIT_LAYER}`, data, {
@@ -5385,7 +5386,7 @@ function BaseMap(props) {
           //console.log(res.data.data);
           // --update layer
           updateLayerDataAfterEditing(res.data.data[0], null, null);
-          props.loading(false);
+          setLoading(false);
         } else {
           message.error(res.data.message);
         }
@@ -5405,7 +5406,7 @@ function BaseMap(props) {
         setCaptureDate("");
         setLayerColor("#ffaa00");
         setLayerProp(null);
-        props.loading(false);
+        setLoading(false);
       });
 
     // refreshLayers();
@@ -5413,7 +5414,7 @@ function BaseMap(props) {
 
   const editFeature = (data, color, index) => {
     data.properties["color"] = color;
-    props.loading(true);
+    setLoading(true);
 
     http
       .patch(`${apis.EDIT_FEATURE}`, {
@@ -5438,7 +5439,7 @@ function BaseMap(props) {
         setSelectedLayerId("");
         setColorChangeFeatureData(null);
         setShowColorChangeForm(false);
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -5854,7 +5855,7 @@ function BaseMap(props) {
 
   const changeGroupOfLayer = async (groupid, layerids, keys) => {
     // const al = { ...allLayers };
-    props.loading(true);
+    setLoading(true);
     //console.log(groupid);
     try {
       const res = await http.patch(`${apis.EDIT_LAYER_GROUP}`, {
@@ -5944,13 +5945,13 @@ function BaseMap(props) {
       message.error(err.message);
       AxiosErrorHandler(err, logout);
     } finally {
-      props.loading(false);
+      setLoading(false);
     }
   };
 
   const removeLayerFromGroup = async (groupId, layerId) => {
     // const al = { ...allLayers };
-    props.loading(true);
+    setLoading(true);
     try {
       const res = await http.post(`${apis.DELETE_LAYER_ID_FROM_GROUP}`, {
         _id: groupId,
@@ -6019,7 +6020,7 @@ function BaseMap(props) {
       message.error(err.message);
       AxiosErrorHandler(err, logout);
     } finally {
-      props.loading(false);
+      setLoading(false);
     }
   };
 
@@ -6393,7 +6394,7 @@ function BaseMap(props) {
   // };
 
   const createLayerGroup = (data) => {
-    props.loading(true);
+    setLoading(true);
     const layersToGroup = AllLayers.filter(
       (layer) =>
         layer._isChecked && layer.type === ["", "Vector", "Raster"][moveType]
@@ -6444,12 +6445,12 @@ function BaseMap(props) {
       .finally(() => {
         setVisibleGroupCreateModal(false);
         resetGroupFormFields();
-        props.loading(false);
+        setLoading(false);
       });
   };
 
   const moveLayers = async (data) => {
-    props.loading(true);
+    setLoading(true);
     const layersToMove = AllLayers.filter(
       (layer) =>
         layer._isChecked && layer.type === ["", "Vector", "Raster"][moveType]
@@ -6492,7 +6493,7 @@ function BaseMap(props) {
       .finally(() => {
         setMoveToOtherGroupModal(false);
         toGroupForm.resetFields();
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -7996,7 +7997,7 @@ function BaseMap(props) {
           vectorLayers={vectorLayers}
           features={featureState}
           missionId={id}
-          loading={props.loading}
+          loading={setLoading}
           isBaseMap={props.isBaseMap}
           setIsDrawing={setIsDrawing}
           forceUpdateLayers={forceUpdateLayers}
@@ -8190,6 +8191,5 @@ const mapStateToProps = (state) => {
 };
 
 export default connect(mapStateToProps, {
-  loading,
   thread,
 })(BaseMap);

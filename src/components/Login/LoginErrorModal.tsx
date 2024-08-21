@@ -1,8 +1,6 @@
 import { useContext, useState } from "react";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
-import { loading } from "../../actions/loadingAction";
-import { connect } from "react-redux";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { Typography, Form, Input, Button, Alert } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
@@ -14,6 +12,7 @@ import { INSTANCE, Instance } from "src/constants";
 import ReactDom from "react-dom";
 import "../shared/login-bg.less";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "../shared/Loader";
 
 const OVERLAY_STYLES = {
   position: "fixed",
@@ -26,9 +25,11 @@ const OVERLAY_STYLES = {
   zIndex: 1000,
 };
 function LoginErrorModal(props: any) {
-  props.loading(false);
   const [errMessage, setErrMessage] = useState("");
   const { login, logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
+
+  setLoading(false);
 
   const onFinish = (values: any) => {
     http
@@ -130,4 +131,4 @@ function LoginErrorModal(props: any) {
   );
 }
 
-export default connect(null, { loading })(LoginErrorModal);
+export default LoginErrorModal;

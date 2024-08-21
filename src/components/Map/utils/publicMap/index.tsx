@@ -61,8 +61,6 @@ import { StaticMap } from "react-map-gl";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { connect } from "react-redux";
-import { loading } from "../../../../actions/loadingAction";
 import moment from "moment";
 import { useParams } from "react-router-dom";
 import MarkerIcon from "../../../../static/MarkerIcon.png";
@@ -92,6 +90,7 @@ import Fuse from "fuse.js";
 import { featureType } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -114,6 +113,7 @@ function PublicMap(props) {
   const [errorState, setErrorState] = useState("");
 
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   // Viewport settings
   const [INITIAL_VIEW_STATE, setViewport] = useState<any>({
@@ -547,7 +547,7 @@ function PublicMap(props) {
   };
 
   useEffect(() => {
-    props.loading(true);
+    setLoading(true);
     getAllLayers();
   }, []);
 
@@ -606,10 +606,10 @@ function PublicMap(props) {
     } catch (err) {
       console.log(err);
       setErrorState(err.response.status);
-      props.loading(false);
+      setLoading(false);
       AxiosErrorHandler(err, logout);
     } finally {
-      props.loading(false);
+      setLoading(false);
     }
   };
 
@@ -1930,6 +1930,4 @@ function PublicMap(props) {
   return <>{renderMap()}</>;
 }
 
-export default connect(null, {
-  loading,
-})(PublicMap);
+export default PublicMap;

@@ -11,7 +11,6 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import "../Tenant.less";
-import { loading } from "../../../../actions/loadingAction";
 import { setTenantToEdit } from "../../../../actions/tenantAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
@@ -20,6 +19,7 @@ import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function ListAllTanents(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
@@ -28,6 +28,7 @@ function ListAllTanents(props: any) {
   const [searchedColumn, setSearchedColumn] = useState("");
   const history = useHistory();
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
   let searchInput: any;
 
   const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
@@ -183,7 +184,7 @@ function ListAllTanents(props: any) {
             okText="Yes"
             cancelText="No"
             onConfirm={() => {
-              props.loading(true);
+              setLoading(true);
               http
                 .delete(`${apis.DELETE_TENANT}`, {
                   data: {
@@ -199,7 +200,7 @@ function ListAllTanents(props: any) {
                   AxiosErrorHandler(err, logout);
                 })
                 .finally(() => {
-                  props.loading(false);
+                  setLoading(false);
                 });
             }}
           >
@@ -269,6 +270,6 @@ function ListAllTanents(props: any) {
   );
 }
 
-export default connect(null, { loading, setTenantToEdit })(
+export default connect(null, { setTenantToEdit })(
   ListAllTanents
 );

@@ -51,14 +51,12 @@ import Map from "./Data/map";
 import Documents from "./Data/Documents";
 import "./../../index.less";
 import moment from "moment";
-import { loading } from "../../../../actions/loadingAction";
 import TextArea from "antd/lib/input/TextArea";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { EditMission } from "../../../../actions/missionActions";
-import { clearMissionCreationState } from "../../../../actions/missionCreation";
 import io from "socket.io-client";
 import ImageDoc from "./Data/ImageDocs";
 import ManageClients from "./Data/ManageClient";
@@ -67,6 +65,7 @@ import Report_genration from "./Data/report_genration";
 import { IPlotReportError } from "src/types/report";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 const { Paragraph } = Typography;
 function MissionView(props) {
@@ -102,6 +101,8 @@ function MissionView(props) {
   const userDetails = Auth.userdetails;
   const userType = userDetails.userType;
   const tenantId = userDetails.tenantId._id || userDetails.tenantId;
+  
+  const { setLoading } = useContext(LoaderContext);
 
   //-----------------Notification Function-------------------------//
   const openNotification = (title, description, type) => {
@@ -112,8 +113,7 @@ function MissionView(props) {
   };
 
   useEffect(() => {
-    props.loading(true);
-    props.clearMissionCreationState();
+    setLoading(true);
     getInitialData(id);
   }, []);
 
@@ -187,7 +187,7 @@ function MissionView(props) {
         } catch (err) {
           message.error("Something went wrong");
           AxiosErrorHandler(err, logout);
-          props.loading(false);
+          setLoading(false);
           return;
         }
       }
@@ -274,12 +274,12 @@ function MissionView(props) {
       }
 
       // Set loading status to false
-      props.loading(false);
+      setLoading(false);
       setIsLoading(false);
     } catch (err) {
       console.log(err);
       AxiosErrorHandler(err, logout);
-      props.loading(false);
+      setLoading(false);
     }
   };
 
@@ -310,7 +310,7 @@ function MissionView(props) {
   };
 
   const EditSubmit = () => {
-    props.loading(true);
+    setLoading(true);
     if (!missionEditFormData.missionName) {
       return message.error("Please enter the mission name");
     }
@@ -351,7 +351,7 @@ function MissionView(props) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
 
     settypeflag(1);
@@ -936,7 +936,7 @@ function MissionView(props) {
 
   //--------------Render Generate Report Button-----------
   function generateReport() {
-    props.loading(true);
+    setLoading(true);
     http
       .post(`${apis.CREATE_REPORT}`, {
         missionId: MissionDetails.missionId,
@@ -955,7 +955,7 @@ function MissionView(props) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   }
   function renderGenerateReportButton() {
@@ -1038,7 +1038,7 @@ function MissionView(props) {
   }
 
   function assignPilot() {
-    props.loading(true);
+    setLoading(true);
     http
       .patch(`${apis.ASSIGN_PILOT}`, {
         pilotID: pilotToAssign._id,
@@ -1068,7 +1068,7 @@ function MissionView(props) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   }
 
@@ -1427,7 +1427,7 @@ function MissionView(props) {
               <ManageClients
                 missionClient={missionClient} // then i passed the same state in this component
                 setClients={setMissionClient} // also the the setState for the same has been passed here
-                loading={props.loading}
+                loading={setLoading}
                 missionId={id.split("-")[1]}
               />
             </Col>
@@ -1685,7 +1685,5 @@ const mapStateToProps = (state) => {
 };
 
 export default connect(mapStateToProps, {
-  loading,
   EditMission,
-  clearMissionCreationState,
 })(MissionView);

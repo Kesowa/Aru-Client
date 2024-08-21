@@ -10,7 +10,6 @@ import {
 } from "@ant-design/icons";
 import { message, Input, Button, Tag, Table, Popconfirm } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
 import { setClientToEdit } from "../../../../actions/cliantActions";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
@@ -26,6 +25,7 @@ import moment from "moment";
 import Highlighter from "react-highlight-words";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 function ClientListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
   const [tenantUserTableData, setTenantUserTableData] = useState([]);
@@ -41,7 +41,9 @@ function ClientListPage(props: any) {
 
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
-
+  
+  const { setLoading } = useContext(LoaderContext);
+  
   let searchInput: any;
 
   const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
@@ -126,7 +128,7 @@ function ClientListPage(props: any) {
           okText="Yes"
           cancelText="No"
           onConfirm={() => {
-            props.loading(true);
+            setLoading(true);
             http
               .delete(`${apis.DELETE_CLIENT}`, {
                 data: {
@@ -142,7 +144,7 @@ function ClientListPage(props: any) {
                 AxiosErrorHandler(err, logout);
               })
               .finally(() => {
-                props.loading(false);
+                setLoading(false);
               });
           }}
         >
@@ -446,6 +448,6 @@ function ClientListPage(props: any) {
   }
 }
 
-export default connect(null, { loading, setClientToEdit })(
+export default connect(null, { setClientToEdit })(
   ClientListPage
 );

@@ -13,7 +13,6 @@ import "./data.less";
 import goToMap from "../../../../../assets/go-to-map.svg";
 import { useHistory } from "react-router-dom";
 import { setChonkyDefaults } from "chonky";
-import { loading } from "../../../../../actions/loadingAction";
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import moment from "moment";
 import apis from "../../../../../services/apis";
@@ -22,7 +21,6 @@ import { useEffect } from "react";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import download from "downloadjs";
-import { connect } from "react-redux";
 import {
   getImageForCircle,
   getImageForPolygon,
@@ -30,6 +28,7 @@ import {
 import io from "socket.io-client";
 import { API_URL, STATIC_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 setChonkyDefaults({ iconComponent: ChonkyIconFA });
 
@@ -37,6 +36,7 @@ const { Title } = Typography;
 function Map(props) {
   const history = useHistory();
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
   const [files2, setFiles] = useState([]);
   const [loader, setLoader] = useState(false);
   const [mapImage, setmapImage] = useState("");
@@ -56,7 +56,7 @@ function Map(props) {
   }, [props]);
 
   const downloadAllLayers = (id) => {
-    props.loading(true);
+    setLoading(true);
     http
       .get(`${apis.DOWNLOAD_ALL_LAYER_FOR_MISSION}`, {
         params: {
@@ -74,7 +74,7 @@ function Map(props) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -230,11 +230,4 @@ function Map(props) {
   );
 }
 
-export default connect(
-  () => {
-    return {};
-  },
-  {
-    loading,
-  }
-)(Map);
+export default Map;

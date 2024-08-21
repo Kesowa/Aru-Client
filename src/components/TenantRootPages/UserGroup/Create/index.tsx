@@ -1,10 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { UnorderedListOutlined } from "@ant-design/icons";
-import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { Row, Col, message, Transfer, Form, Input, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -19,6 +17,7 @@ import CountLimit from "../../restrictions/restrictions";
 import Expired from "../../restrictions/expiry";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function UserGroupCreatePage(props: any) {
   const [form] = Form.useForm();
@@ -28,9 +27,10 @@ function UserGroupCreatePage(props: any) {
   const [errorState, setErrorState] = useState("");
 
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const fetchAllPermissions = () => {
-    props.loading(true);
+    setLoading(true);
     http
       .get(apis.FETCH_TENANT_PERMISSION_LIST)
       .then((result) => {
@@ -62,7 +62,7 @@ function UserGroupCreatePage(props: any) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -90,7 +90,7 @@ function UserGroupCreatePage(props: any) {
   };
 
   const createUserGroup = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
       name: data.name,
       permissions: selectedPermissions,
@@ -123,7 +123,7 @@ function UserGroupCreatePage(props: any) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -216,6 +216,4 @@ function UserGroupCreatePage(props: any) {
   }
 }
 
-export default connect(null, { loading })(
-  UserGroupCreatePage
-);
+export default UserGroupCreatePage;

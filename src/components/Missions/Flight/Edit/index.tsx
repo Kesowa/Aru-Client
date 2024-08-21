@@ -10,8 +10,7 @@ import http from "src/services/httpCall";
 import { message } from "antd";
 import { AxiosErrorHandler } from "src/services/httpErrorHandle";
 import { AuthContext } from "src/services/authUtils";
-import { connect } from "react-redux";
-import { loading } from "src/actions/loadingAction";
+import { LoaderContext } from "src/components/shared/Loader";
 
 const EditFlight: FC<any> = (props) => {
   const { id: missionId } = useParams<{ id: string }>();
@@ -26,6 +25,7 @@ const EditFlight: FC<any> = (props) => {
   const history = useHistory();
 
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const getFlightDetails = async (missionId: string) => {
     try {
@@ -67,7 +67,7 @@ const EditFlight: FC<any> = (props) => {
       geofence: flightDetails?.geoFence,
     };
 
-    props.loading(true);
+    setLoading(true);
 
     http
       .patch(apis.ASSIGN_PILOT, {
@@ -99,7 +99,7 @@ const EditFlight: FC<any> = (props) => {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -145,8 +145,4 @@ const EditFlight: FC<any> = (props) => {
   );
 };
 
-const connector = connect(null, {
-  loading,
-});
-
-export default connector(EditFlight);
+export default EditFlight;

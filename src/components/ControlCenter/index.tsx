@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { connect } from "react-redux";
-import { loading } from "../../actions/loadingAction";
 import {
   Button,
   Row,
@@ -817,8 +815,4 @@ function GridLive(props: any) {
   );
 }
 
-export default connect(null, {
-  loading,
-})(GridLive);
-
-//export default GridLive;
+export default GridLive;

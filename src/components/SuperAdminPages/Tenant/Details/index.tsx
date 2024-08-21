@@ -8,7 +8,6 @@ import {
   CreditCardOutlined,
 } from "@ant-design/icons";
 import "../Tenant.less";
-import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -111,4 +110,4 @@ function TenantDetails(props: any) {
   );
 }
 
-export default connect(null, { loading })(TenantDetails);
+export default TenantDetails;

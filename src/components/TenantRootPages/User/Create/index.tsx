@@ -1,7 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { useHistory } from "react-router-dom";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
-import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import {
   List,
@@ -18,7 +16,6 @@ import {
   Collapse,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -37,6 +34,7 @@ import { STATIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
 import { PERMS, TENANT_STAFF_PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function UserCreatePage(props: any) {
   const [form] = Form.useForm();
@@ -59,6 +57,7 @@ function UserCreatePage(props: any) {
   const [errorState, setErrorState] = useState("");
 
   const { Auth, logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   //avatar upload
   const beforeUploadFunction = (file: any) => {
@@ -98,7 +97,7 @@ function UserCreatePage(props: any) {
 
   //fetch user group
   const fetchAllUserGroupList = () => {
-    props.loading(true);
+    setLoading(true);
     console.info("Fetching user groups...");
     http
       .get(apis.FETCH_TENANT_USER_GROUP)
@@ -140,7 +139,7 @@ function UserCreatePage(props: any) {
         }
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
   useEffect(() => {
@@ -163,7 +162,7 @@ function UserCreatePage(props: any) {
   };
 
   const createUserAccount = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
       ...data,
     };
@@ -197,7 +196,7 @@ function UserCreatePage(props: any) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -396,4 +395,4 @@ function UserCreatePage(props: any) {
   }
 }
 
-export default connect(null, { loading })(UserCreatePage);
+export default UserCreatePage;

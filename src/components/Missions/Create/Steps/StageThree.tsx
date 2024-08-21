@@ -1,5 +1,4 @@
 import React, { useEffect, useState, FC, useContext } from "react";
-import { connect, ConnectedProps } from "react-redux";
 import { useHistory } from "react-router-dom";
 import {
   Button,
@@ -25,11 +24,11 @@ import {
   getImageForCircle,
   getImageForPolygon,
 } from "../../../../services/staticMap";
-import { loading } from "../../../../actions/loadingAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -73,7 +72,7 @@ interface Client {
   name: string;
 }
 
-interface StageThreeProps extends PropsFromRedux {
+interface StageThreeProps {
   jobTypeName: string; // Replace with the appropriate type for jobTypeName
   missionType: string; // Replace with the appropriate type for missionType
   missionCreationData: {
@@ -91,7 +90,6 @@ interface StageThreeProps extends PropsFromRedux {
 const StageThree: FC<StageThreeProps> = ({
   missionType,
   jobTypeName,
-  loading,
   prevStage,
   flightDetails,
   setIsEditing
@@ -112,6 +110,7 @@ const StageThree: FC<StageThreeProps> = ({
   const history = useHistory();
 
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   useEffect(() => {
     // fetch the google map static image
@@ -202,7 +201,7 @@ const StageThree: FC<StageThreeProps> = ({
       return;
     }
 
-    loading(true);
+    setLoading(true);
     let data = {
       name: missionName,
       deliverables,
@@ -249,7 +248,7 @@ const StageThree: FC<StageThreeProps> = ({
       }
       AxiosErrorHandler(err, logout);
     } finally {
-      loading(false);
+      setLoading(false);
     }
   };
 
@@ -516,10 +515,4 @@ const StageThree: FC<StageThreeProps> = ({
   );
 };
 
-const connector = connect(null, {
-  loading,
-});
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export default connector(StageThree);
+export default StageThree;

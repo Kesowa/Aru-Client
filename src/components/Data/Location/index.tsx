@@ -16,9 +16,8 @@ import AloneLogo from "../../../static/Alone-rafiki.svg";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { connect } from "react-redux";
-import { loading } from "../../../actions/loadingAction";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 interface TabOptions {
   filter: any;
@@ -44,6 +43,7 @@ function DataLocation(props) {
   const [isTableLoading, setIsTableLoading] = useState(true);
 
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const getAllLocations = () => {
     http
@@ -235,7 +235,7 @@ function DataLocation(props) {
             style={{ marginLeft: "8px" }}
             danger
             onClick={() => {
-              props.loading(true);
+              setLoading(true);
               http
                 .delete(`${apis.DELETE_LOCATION}?id=${data.key}`)
                 .then((result) => {
@@ -251,7 +251,7 @@ function DataLocation(props) {
                   AxiosErrorHandler(err, logout);
                 })
                 .finally(() => {
-                  props.loading(false);
+                  setLoading(false);
                 });
             }}
           >
@@ -444,6 +444,4 @@ function DataLocation(props) {
   );
 }
 
-export default connect(() => ({}), {
-  loading,
-})(DataLocation);
+export default DataLocation;

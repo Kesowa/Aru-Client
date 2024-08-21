@@ -4,7 +4,6 @@ import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Row, Col, message, Form, Input, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -17,6 +16,7 @@ import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function ChangeClientPassword(props: any) {
   const [form] = Form.useForm();
@@ -25,7 +25,9 @@ function ChangeClientPassword(props: any) {
 
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
-
+  
+  const { setLoading } = useContext(LoaderContext);
+  
   //subimt form
   const onFinish = (data: any) => {
     EditUserAccount(data);
@@ -41,7 +43,7 @@ function ChangeClientPassword(props: any) {
   };
 
   const EditUserAccount = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
       id: props.client._id,
       ...data,
@@ -63,7 +65,7 @@ function ChangeClientPassword(props: any) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -200,4 +202,4 @@ const mapStateToProps = (state: any) => ({
   client: state.Client.clientToEdit,
 });
 
-export default connect(mapStateToProps, { loading })(ChangeClientPassword);
+export default connect(mapStateToProps, null)(ChangeClientPassword);

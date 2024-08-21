@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useContext } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { Tabs, Row, Col, message, Typography } from "antd";
 import type { TabsProps } from "antd";
-import { loading } from "../../../../actions/loadingAction";
 import "./index.less";
 import io from "socket.io-client";
 import About from "./tabContents/about";
@@ -18,6 +17,7 @@ import streamEnd from "../../../../static/streamended.svg";
 import Weather from "../../../shared/Weather";
 import { LIVE_URL, API_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function LiveViewBase(props: any) {
   const { id } = useParams<any>();
@@ -37,7 +37,9 @@ function LiveViewBase(props: any) {
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
   const tenantId = Auth.userdetails.tenantId._id || Auth.userdetails.tenantId;
-
+  
+  const { setLoading } = useContext(LoaderContext);
+  
   //socket connectino variable
   const socket: any = useRef();
   const items: TabsProps["items"] = [
@@ -88,7 +90,7 @@ function LiveViewBase(props: any) {
   }, [missionDetails, streamKey]);
 
   const getMission = async (id) => {
-    props.loading(true);
+    setLoading(true);
 
     const currMission = props.missions.filter((mission) => {
       return mission._id.toString() === id.toString();
@@ -114,7 +116,7 @@ function LiveViewBase(props: any) {
     });
     setMissionId(cr._id);
 
-    props.loading(false);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -258,6 +260,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, {
-  loading,
-})(LiveViewBase);
+export default connect(mapStateToProps, null)(LiveViewBase);

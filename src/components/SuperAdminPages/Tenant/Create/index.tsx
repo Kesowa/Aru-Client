@@ -12,12 +12,12 @@ import BasicInfo from "./BasicInfo";
 import ChoosePackage from "./ChoosePackage";
 import BillingDetails from "./BillingDetails";
 import "../Tenant.less";
-import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { Link, useHistory } from "react-router-dom";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function CreateTenant(props: any) {
   const [formState, setFormState] = useState(0);
@@ -25,6 +25,7 @@ function CreateTenant(props: any) {
   const history = useHistory();
 
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const goToNextFromBasic = (data: any) => {
     setTenantData({
@@ -43,7 +44,7 @@ function CreateTenant(props: any) {
   };
 
   const finalSubmitTenantCreation = (packageId: string) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
       ...tenantData,
       activePackage: packageId,
@@ -69,7 +70,7 @@ function CreateTenant(props: any) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -127,4 +128,4 @@ function CreateTenant(props: any) {
   );
 }
 
-export default connect(null, { loading })(CreateTenant);
+export default CreateTenant;

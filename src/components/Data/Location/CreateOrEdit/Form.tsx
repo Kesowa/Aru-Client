@@ -4,12 +4,12 @@ import { Form, Input, Button, Select, message, Result, Modal } from "antd";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
 import { showDrawing } from "../../../../actions/gmapActions";
-import { loading } from "../../../../actions/loadingAction";
 import { connect } from "react-redux";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 type CreateOrEditLocationForm = {
   areaSelected: any;
@@ -33,6 +33,7 @@ const CreateOrEditLocationForm = (props: any) => {
   const history = useHistory();
 
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   useEffect(() => {
     if (props.polygonData) {
@@ -42,7 +43,7 @@ const CreateOrEditLocationForm = (props: any) => {
   }, [props]);
 
   const createLocation = () => {
-    props.loading(true);
+    setLoading(true);
     const data =  {
       type: "Polygon",
       coordinates: [
@@ -80,12 +81,12 @@ const CreateOrEditLocationForm = (props: any) => {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
   
   const editLocation = () => {
-    props.loading(true);
+    setLoading(true);
     const data = {
       id: props.locationToEdit._id,
       geometry: {
@@ -118,7 +119,7 @@ const CreateOrEditLocationForm = (props: any) => {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
         props.setPolygonData(null);
       });
   };
@@ -277,5 +278,4 @@ const CreateOrEditLocationForm = (props: any) => {
 
 export default connect(null, {
   showDrawing,
-  loading,
 })(CreateOrEditLocationForm);

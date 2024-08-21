@@ -18,7 +18,6 @@ import {
   notification,
   Avatar,
 } from "antd";
-import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import "./index.less";
@@ -30,6 +29,7 @@ import {
 } from "@ant-design/icons";
 import * as htmlToImage from "html-to-image";
 import { STATIC_URL } from "src/constants";
+import { LoaderContext } from "src/components/shared/Loader";
 const { Option } = Select;
 const { Text, Title } = Typography;
 
@@ -41,7 +41,6 @@ type mapProps = {
   outcomes: any;
   shouldRenderOutcomes: any;
   setshouldRenderOutcomes: any;
-  loading: any;
   id: any;
   setoutComesToRender: any;
   selectedMissionDetails: any;
@@ -61,6 +60,9 @@ type mapState = {
 };
 
 class LocationCardMap extends Component<mapProps, mapState> {
+  static contextType = LoaderContext;
+  declare context: React.ContextType<typeof LoaderContext>;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -294,7 +296,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
   }
 
   async fetchAllAlerts() {
-    this.props.loading(true);
+    this.context.setLoading(true);
     try {
       const outcomes = await http.get(`${apis.GET_ALL_ALERTS_BY_LOCATION_ID}`, {
         params: {
@@ -310,11 +312,11 @@ class LocationCardMap extends Component<mapProps, mapState> {
       message.error(error.message);
     }
 
-    this.props.loading(false);
+    this.context.setLoading(false);
   }
 
   async fetchAlertsForTime(value) {
-    this.props.loading(true);
+    this.context.setLoading(true);
     try {
       const outcomes = await http.get(`${apis.FETCH_ALERTS_BY_TIME}`, {
         params: {
@@ -345,7 +347,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
       console.log(error);
     }
 
-    this.props.loading(false);
+    this.context.setLoading(false);
   }
 
   openNotification = (copiedText, placement) => {
@@ -610,6 +612,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, {
-  loading,
-})(LocationCardMap);
+export default connect(mapStateToProps, null)(LocationCardMap);

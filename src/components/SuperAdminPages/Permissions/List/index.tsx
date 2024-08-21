@@ -4,7 +4,6 @@ import { message, Button, Table, Tag } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import "../Permission.less";
-import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -78,6 +77,4 @@ function ListAllPermissions(props: any) {
   );
 }
 
-export default connect(null, { loading })(
-  ListAllPermissions
-);
+export default ListAllPermissions;

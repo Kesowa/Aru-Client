@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from "react";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
-import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import {
   List,
@@ -17,7 +16,6 @@ import {
   Collapse,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -37,6 +35,7 @@ import { STATIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
 import { PERMS, TENANT_CLIENT_PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function ClientCreatePage(props: any) {
   const [form] = Form.useForm();
@@ -55,6 +54,8 @@ function ClientCreatePage(props: any) {
 
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
+  
+  const { setLoading } = useContext(LoaderContext);
 
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
@@ -93,7 +94,7 @@ function ClientCreatePage(props: any) {
 
   //fetch user group
   const fetchAllUserGroupList = () => {
-    props.loading(true);
+    setLoading(true);
     http
       .get(apis.FETCH_TENANT_USER_GROUP)
       .then((result) => {
@@ -131,7 +132,7 @@ function ClientCreatePage(props: any) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -159,7 +160,7 @@ function ClientCreatePage(props: any) {
   };
 
   const createUserAccount = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
       ...data,
       avatar,
@@ -194,7 +195,7 @@ function ClientCreatePage(props: any) {
         }
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -423,4 +424,4 @@ function ClientCreatePage(props: any) {
   }
 }
 
-export default connect(null, { loading })(ClientCreatePage);
+export default ClientCreatePage;

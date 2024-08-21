@@ -10,10 +10,8 @@ import {
   Typography,
 } from "antd";
 import { InfoCircleFilled } from "@ant-design/icons";
-import { connect } from "react-redux";
 import moment, { Moment } from "moment";
 import { useHistory } from "react-router-dom";
-import { loading } from "../../../../actions/loadingAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";

@@ -3,7 +3,6 @@ import { Row, Col, Card, message, Skeleton, Button } from "antd";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { loading } from "../../../../actions/loadingAction";
 import { connect } from "react-redux";
 import { STATIC_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
@@ -55,7 +54,7 @@ function ChoosePackage(props: any) {
   );
 }
 
-export default connect(null, { loading })(ChoosePackage);
+export default ChoosePackage;
 
 const PackageCard = (props: any) => {
   return (

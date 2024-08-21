@@ -4,13 +4,12 @@ import { message, Typography, Row, Col } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import ManufacturerCard from "../utils/ManufacturerCard";
 import ModelCard from "../utils/ModelCard";
-import { connect } from "react-redux";
-import { loading } from "../../../actions/loadingAction";
 import moment from "moment";
 import http from "src/services/httpCall";
 import apis from "src/services/apis";
 import { AxiosErrorHandler } from "src/services/httpErrorHandle";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 const { Title, Text } = Typography;
 
@@ -20,9 +19,10 @@ function AssetView(props) {
   const history = useHistory();
 
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const getAssetDetails = (id: string) => {
-    props.loading(true);
+    setLoading(true);
     http
       .get(`${apis.GET_ASSET_BY_ID}`, {
         params: {
@@ -50,7 +50,7 @@ function AssetView(props) {
         }
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -172,4 +172,4 @@ function AssetView(props) {
   );
 }
 
-export default connect(null, { loading })(AssetView);
+export default AssetView;

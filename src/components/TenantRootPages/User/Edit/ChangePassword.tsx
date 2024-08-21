@@ -4,7 +4,6 @@ import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Row, Col, message, Form, Input, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -16,6 +15,7 @@ import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function UserChangePassword(props: any) {
   const [form] = Form.useForm();
@@ -23,6 +23,7 @@ function UserChangePassword(props: any) {
   const history = useHistory();
 
   const { Auth, logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   //subimt form
   const onFinish = (data: any) => {
@@ -40,7 +41,7 @@ function UserChangePassword(props: any) {
   };
 
   const EditUserAccount = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
       id: props.user._id,
       ...data,
@@ -75,7 +76,7 @@ function UserChangePassword(props: any) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -207,6 +208,6 @@ const mapStateToProps = (state: any) => ({
   user: state.User.userToEdit,
 });
 
-export default connect(mapStateToProps, { loading })(
+export default connect(mapStateToProps, null)(
   UserChangePassword
 );
