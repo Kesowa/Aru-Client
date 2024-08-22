@@ -42,6 +42,7 @@ function UserCreatePage(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [userGroups, setUserGroups]: [any, any] = useState([]);
   const [selectedUserGroup, setSelectedusergroup]: [any, any] = useState();
   const [errorState, setErrorState] = useState("");
@@ -51,7 +52,11 @@ function UserCreatePage(props: any) {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
       const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
-      setAvatar(uploadToken);
+      console.log("uploadtoken: ",uploadToken)
+          // Create a preview URL for the image
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl); // Set the preview URL to the state
+      setAvatar(uploadToken.id);
       setIsAvatarUploading(false);
     });
     return false;
@@ -176,6 +181,7 @@ function UserCreatePage(props: any) {
       });
   };
 
+  console.log("vts:",`${STATIC_URL}${"/"}${avatar}`);
   switch (errorState) {
     case "unauthorized":
       return <Unauthorized />;
@@ -285,8 +291,8 @@ function UserCreatePage(props: any) {
                     >
                       {avatar ? (
                         <img
-                          src={`${STATIC_URL}${avatar}`}
-                          className="uploaded-avatar"
+                        src={avatarPreview}
+                        className="uploaded-avatar"
                         />
                       ) : (
                         <div>

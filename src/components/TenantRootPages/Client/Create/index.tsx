@@ -42,6 +42,7 @@ function UserCreatePage(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [userGroups, setUserGroups]: [any, any] = useState([]);
   const [selectedUserGroup, setSelectedusergroup]: [any, any] = useState();
   const [errorState, setErrorState] = useState("");
@@ -49,30 +50,33 @@ function UserCreatePage(props: any) {
   const beforeUploadFunction = (file: RcFile) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
       setIsAvatarUploading(true);
-      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
-
-      const body = {
-        file: uploadToken,
-      };
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl); // Set the preview URL to the state
+      const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
+      setAvatar(uploadToken?.id);
+      console.log("uploadtoken: ",uploadToken)
+      // const body = {
+      //   file: uploadToken.id,
+      // };
       // const formData = new FormData();
       // formData.append("avatar", file);
-      http
-        .post(apis.UPLOAD_USER_PROFILE_PICTURE, body, {
-        })
-        .then((result) => {
-          if (result.data.status) {
-            setAvatar(result.data.file);
-          } else {
-            message.error(result.data.message);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          AxiosErrorHandler(err, props.logout);
-        })
-        .finally(() => {
-          setIsAvatarUploading(false);
-        });
+      // http
+      //   .post(apis.UPLOAD_USER_PROFILE_PICTURE, body, {
+      //   })
+      //   .then((result) => {
+      //     if (result.data.status) {
+      //       setAvatar(result.data.file);
+      //     } else {
+      //       message.error(result.data.message);
+      //     }
+      //   })
+      //   .catch((err) => {
+      //     console.log(err);
+      //     AxiosErrorHandler(err, props.logout);
+      //   })
+      //   .finally(() => {
+      //     setIsAvatarUploading(false);
+      //   });
     });
     return false;
   };
@@ -194,7 +198,7 @@ function UserCreatePage(props: any) {
         props.loading(false);
       });
   };
-
+  console.log("client:",`${STATIC_URL}${avatar}`)
   switch (errorState) {
     case "unauthorized":
       return <Unauthorized />;
@@ -308,7 +312,7 @@ function UserCreatePage(props: any) {
                     >
                       {avatar ? (
                         <img
-                          src={`${STATIC_URL}${avatar}`}
+                          src={avatarPreview}
                           className="uploaded-avatar"
                         />
                       ) : (

@@ -18,9 +18,10 @@ import { DocModel, uploadFile } from "src/services/fileUpload";
 function TenantInfo(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [path, setPath] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
-
   useEffect(() => {
     if (props.tenantData) {
       form.setFieldsValue(props.tenantData);
@@ -31,9 +32,11 @@ function TenantInfo(props: any) {
   const beforeUploadFunction = (file: RcFile) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
       setIsAvatarUploading(true);
-      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
-      setAvatar(uploadToken);
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl); 
 
+      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+      setAvatar(uploadToken?.objectKey);
       
       // const formData = new FormData();
       // formData.append("avatar", file);
@@ -150,8 +153,8 @@ function TenantInfo(props: any) {
               >
                 {avatar ? (
                   <img
-                    src={`${STATIC_URL}${avatar}`}
-                    className="uploaded-avatar"
+                  src={`${STATIC_URL}${"/"}${avatar}`}
+                  className="uploaded-avatar"
                   />
                 ) : (
                   <div>

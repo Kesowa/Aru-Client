@@ -41,8 +41,9 @@ function EditTenant(props: any) {
   const beforeUploadFunction = (file: RcFile) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
-      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
-      setAvatar(uploadToken);
+
+      const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
+      setAvatar(uploadToken?.objectKey);
 
      
       // const formData = new FormData();
@@ -162,7 +163,7 @@ function EditTenant(props: any) {
                 >
                   {avatar ? (
                     <img
-                      src={`${STATIC_URL}${avatar}`}
+                      src={`${STATIC_URL}${"/"}${avatar}`}
                       className="uploaded-avatar"
                     />
                   ) : (
