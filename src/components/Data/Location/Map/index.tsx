@@ -1,13 +1,10 @@
 import React, { Component } from "react";
 import s_m from "../../../../Icons/start_measurement.svg";
 import "../../../Missions/Create/index.less";
-import { connect } from "react-redux";
 import { message } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import GeoFence from "../../../../static/GeoFence.svg";
-
-import { showDrawing } from "../../../../actions/gmapActions";
 
 import getAddressfromLatLong from "../../../../services/reverseGeocoding";
 
@@ -17,7 +14,6 @@ type mapProps = {
   drawingToolBtns: any;
   setDrawingToolBtns: any;
   setGeolocation: any;
-  showDrawing: any;
   polygonData: any;
   setPolygonData: any;
   isEditing: any;
@@ -155,13 +151,6 @@ class LocationMap extends Component<mapProps, mapState> {
           showDrawingButtons: false,
         });
       }
-    }
-  }
-
-  componentDidUpdate() {
-    if (!this.props.showDrawing) {
-      this.oldShape.setMap(null);
-      this.props.showDrawing(true);
     }
   }
 
@@ -561,10 +550,4 @@ class LocationMap extends Component<mapProps, mapState> {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  showDrawing: state.Gmap.showDrawing,
-});
-
-export default connect(mapStateToProps, {
-  showDrawing,
-})(LocationMap);
+export default LocationMap;

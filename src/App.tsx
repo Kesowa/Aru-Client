@@ -5,10 +5,10 @@ import { Space, Spin } from "antd";
 import "./index.less";
 import Login from "./components/Login";
 import LoginWrapper from "./components/shared/Wrappers/LoginWrapper";
-import Gmap from "./components/shared/Gmap";
 import Socket from "./components/shared/Socket";
 import DashboardWrapper from "./components/shared/Wrappers/DashboardWrapper";
 import { AuthContext, useAuth } from "./services/authUtils";
+import { loadScripts } from "./services/loadScripts";
 
 const ForgotPassword = lazy(() => import("./components/Login/ForgotPassword"));
 const Register = lazy(() => import("./components/SignUp"));
@@ -38,6 +38,8 @@ const App = () => {
       login(Token, UserId, null);
     }
   }, []);
+  
+  const { mapScriptLoaded, paymentScriptLoaded } = loadScripts();
 
   return (
     <React.Fragment>
@@ -45,7 +47,8 @@ const App = () => {
       <AuthContext.Provider value={{ Auth, login, logout, setUserDetails }} >
       <Socket />
       <Loader />
-      <Gmap>
+      {
+        mapScriptLoaded && paymentScriptLoaded &&
         <BrowserRouter>
           <Suspense
             fallback={
@@ -85,7 +88,7 @@ const App = () => {
             </Switch>
           </Suspense>
         </BrowserRouter>
-      </Gmap>
+      }
       </AuthContext.Provider>
       </LoaderContext.Provider>
     </React.Fragment>

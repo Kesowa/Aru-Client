@@ -9,8 +9,6 @@ import { Tooltip } from "antd";
 
 import { UploadOutlined } from "@ant-design/icons";
 
-import { showDrawing } from "../../actions/gmapActions";
-
 import getAddressfromLatLong from "../../services/reverseGeocoding";
 import { PUBLIC_URL } from "src/constants";
 
@@ -20,7 +18,6 @@ type mapProps = {
   drawingToolBtns: any;
   setDrawingToolBtns: any;
   isEditing: any;
-  showDrawing: any;
   setlocation: any;
   location: any;
   geoLocation: any;
@@ -188,11 +185,6 @@ class GoogleMap extends Component<mapProps, mapState> {
   }
 
   componentDidUpdate() {
-    if (!this.props.showDrawing) {
-      this.oldShape.setMap(null);
-      this.props.showDrawing(true);
-    }
-
     if (
       this.props.geoFence == null &&
       !this.props.areaSelected
@@ -964,10 +956,4 @@ class GoogleMap extends Component<mapProps, mapState> {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  showDrawing: state.Gmap.showDrawing,
-});
-
-export default connect(mapStateToProps, {
-  showDrawing,
-})(GoogleMap);
+export default GoogleMap;

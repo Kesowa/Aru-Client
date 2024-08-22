@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { connect } from "react-redux";
 import connectSocket from "../../services/socketConnect";
 import DeckGL, { FlyToInterpolator } from "deck.gl";
 import { IconLayer, PathLayer } from "@deck.gl/layers";
@@ -147,10 +146,4 @@ function DroneMap(props: any) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    gmapLoaded: state.Gmap.gmapLoaded,
-  };
-};
-
-export default connect(mapStateToProps)(DroneMap);
+export default DroneMap;

@@ -34,7 +34,6 @@ const { Option } = Select;
 const { Text, Title } = Typography;
 
 type mapProps = {
-  gmapLoaded: any;
   center: any;
   points: any;
   centerPoints: any;
@@ -215,35 +214,30 @@ class LocationCardMap extends Component<mapProps, mapState> {
 
   // Intialize Google Map
   createGoogleMap = ({ lat, lng }) => {
-    if (this.props.gmapLoaded) {
-      return new window.google.maps.Map(this.googleMapRef.current, {
-        zoom: 16,
-        center: {
-          lat,
-          lng,
-        },
-        disableDefaultUI: true,
-        zoomControl: false,
-        scaleControl: false,
-        disableDoubleClickZoom: true,
-        mapTypeControl: true,
-        mapTypeControlOptions: {
-          style: window.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-          mapTypeIds: ["roadmap", "satellite"],
-        },
-      });
-    }
-    return null;
+    return new window.google.maps.Map(this.googleMapRef.current, {
+      zoom: 16,
+      center: {
+        lat,
+        lng,
+      },
+      disableDefaultUI: true,
+      zoomControl: false,
+      scaleControl: false,
+      disableDoubleClickZoom: true,
+      mapTypeControl: true,
+      mapTypeControlOptions: {
+        style: window.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+        mapTypeIds: ["roadmap", "satellite"],
+      },
+    });
   };
 
   createGoogleMapMarker = (location, map) => {
-    if (this.props.gmapLoaded) {
-      return new window.google.maps.Marker({
-        position: location,
-        map,
-        title: "Drone Location",
-      });
-    }
+    return new window.google.maps.Marker({
+      position: location,
+      map,
+      title: "Drone Location",
+    });
   };
 
   drawMeasurements = (points) => {
@@ -606,10 +600,4 @@ class LocationCardMap extends Component<mapProps, mapState> {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    gmapLoaded: state.Gmap.gmapLoaded,
-  };
-};
-
-export default connect(mapStateToProps, null)(LocationCardMap);
+export default LocationCardMap;

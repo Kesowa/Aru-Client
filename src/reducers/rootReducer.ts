@@ -1,5 +1,4 @@
 import { combineReducers } from "redux";
-import Gmap from "./gMapReducer";
 import Missions from "./missionReducer";
 import Models from "./modelReducer";
 import Manufacturers from "./manufacturerReducer";
@@ -10,7 +9,6 @@ import Tenant from "./tenantReducer";
 import Thread from "./threadReducer";
 
 export default combineReducers({
-  Gmap,
   Missions,
   Models,
   Manufacturers,

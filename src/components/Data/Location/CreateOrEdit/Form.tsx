@@ -3,8 +3,6 @@ import { useHistory } from "react-router-dom";
 import { Form, Input, Button, Select, message, Result, Modal } from "antd";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
-import { showDrawing } from "../../../../actions/gmapActions";
-import { connect } from "react-redux";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -256,7 +254,6 @@ const CreateOrEditLocationForm = (props: any) => {
                     onClick={() => {
                       form.resetFields();
                       props.setAreaSelected(false);
-                      props.showDrawing(false);
                       props.setPolygonData(null);
                       history.push("/dashboard/data");
                     }}
@@ -276,6 +273,4 @@ const CreateOrEditLocationForm = (props: any) => {
   );
 };
 
-export default connect(null, {
-  showDrawing,
-})(CreateOrEditLocationForm);
+export default CreateOrEditLocationForm;
