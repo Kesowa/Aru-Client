@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect, FC, useContext } from "react";
-import { connect, ConnectedProps } from "react-redux";
 import { message } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
@@ -11,7 +10,7 @@ import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { AuthContext } from "src/services/authUtils";
 
-const ViewFlight: FC<ViewFlightProps> = (props) => {
+const ViewFlight: FC<any> = () => {
   const [flightDetails, setFlightDetails] = useState<any>(null);
 
   const googleMapRef: React.RefObject<HTMLDivElement> =
@@ -27,37 +26,28 @@ const ViewFlight: FC<ViewFlightProps> = (props) => {
   const { logout } = useContext(AuthContext);
 
   const getMissionDetails = async (id: string) => {
-    let mission = props.missions.filter((mission) => {
-      return mission._id === id;
-    });
-
-    if (mission.length !== 0) {
-      mission = mission[0];
-    } else {
-      try {
-        const result = await http.get(`${apis.GET_MISSION_BY_ID}${id}`);
-        mission = result.data.data;
-      } catch (err) {
-        message.error("Something went wrong");
-        AxiosErrorHandler(err, logout);
-        return;
+    try {
+      const result = await http.get(`${apis.GET_MISSION_BY_ID}${id}`);
+      const mission = result.data.data;
+      setFlightDetails(mission.flight);
+      const geoFence: any = {};
+  
+      if (mission.flight.geoFence.polygon) {
+        geoFence.shape = "Polygon";
+        geoFence.points = [...mission.flight.geoFence.polygon.points];
+      } else {
+        geoFence.shape = "Circle";
+        geoFence.center = { ...mission.flight.geoFence.circle.center };
+        geoFence.radius = mission.flight.geoFence.circle.radius;
       }
+      setTimeout(() => {
+        createMeasurements(geoFence);
+      }, 0);
+    } catch (err) {
+      message.error("Something went wrong");
+      AxiosErrorHandler(err, logout);
+      return;
     }
-
-    setFlightDetails(mission.flight);
-    const geoFence: any = {};
-
-    if (mission.flight.geoFence.polygon) {
-      geoFence.shape = "Polygon";
-      geoFence.points = [...mission.flight.geoFence.polygon.points];
-    } else {
-      geoFence.shape = "Circle";
-      geoFence.center = { ...mission.flight.geoFence.circle.center };
-      geoFence.radius = mission.flight.geoFence.circle.radius;
-    }
-    setTimeout(() => {
-      createMeasurements(geoFence);
-    }, 0);
   };
 
   useEffect(() => {
@@ -68,7 +58,7 @@ const ViewFlight: FC<ViewFlightProps> = (props) => {
     searchAutoComplete.current = createSearchBar();
     drawingManager.current.setMap(googleMap.current);
     setSearchBarEvent();
-  }, [props.mission]);
+  }, []);
 
   // Intialize Google Map
   const createGoogleMap = ({ lat, lng }: { lat: number; lng: number }) => {
@@ -222,14 +212,4 @@ const ViewFlight: FC<ViewFlightProps> = (props) => {
   );
 };
 
-const mapStateToProps = (state: any) => {
-  return {
-    missions: state.Missions.missions,
-  };
-};
-
-const connector = connect(mapStateToProps, null);
-
-type ViewFlightProps = ConnectedProps<typeof connector>;
-
-export default connector(ViewFlight);
+export default ViewFlight;

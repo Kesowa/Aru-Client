@@ -8,13 +8,11 @@ import MissionTable from "./Views/List/Table";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import http from "../../services/httpCall";
 import apis from "../../services/apis";
-import { connect } from "react-redux";
-import { setMissionsToState } from "../../actions/missionActions";
 import "./index.less";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 
-function MissionList(props) {
+function MissionList() {
   const location = useLocation<any>();
   const [displayedMissionType, setDisplayedMissionType] = useState("");
   const [isTableLoading, setIsTableLoading] = useState(true);
@@ -32,7 +30,6 @@ function MissionList(props) {
   const renderMissionTable = (filter: unknown) => {
     return (
       <MissionTable
-        filter={filter}
         setMissionTableData={setMissionTableData}
         setIsTableLoading={setIsTableLoading}
         isTableLoading={isTableLoading}
@@ -140,7 +137,6 @@ function MissionList(props) {
         })
         .then((result) => {
           if (result.data.status) {
-            props.setMissionsToState(result.data.data);
             setMissionTableData(result.data.data);
             setTotal(result.data.total);
             const count = {};
@@ -190,7 +186,7 @@ function MissionList(props) {
 
   useEffect(() => {
     fetchMissions();
-  }, [page, limit, usedFilter, sortOrder, searchFilters, props.refresh]);
+  }, [page, limit, usedFilter, sortOrder, searchFilters]);
 
   //----------------------Render create mission based on permission----------------------------------------
   function renderCreateBtn() {
@@ -238,13 +234,4 @@ function MissionList(props) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    missions: state.Missions.missions,
-    refresh: state.Missions.refresh,
-  };
-};
-
-export default connect(mapStateToProps, {
-  setMissionsToState,
-})(MissionList);
+export default MissionList;

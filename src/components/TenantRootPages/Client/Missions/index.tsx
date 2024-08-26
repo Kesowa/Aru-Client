@@ -25,12 +25,7 @@ import {
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
-import { connect } from "react-redux";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import {
-  setMissionsToState,
-  deleteMission,
-} from "../../../../actions/missionActions";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import moment from "moment";
@@ -44,7 +39,7 @@ interface TabOptions {
   filter: any;
   deleteMission: any;
 }
-function DataMission(props) {
+function DataMission() {
   const history = useHistory();
   const [completedMissions, setCompletedMissions] = useState([]);
   const [isTableLoading, setIsTableLoading] = useState(true);
@@ -182,7 +177,6 @@ function DataMission(props) {
             );
           });
           setCompletedMissions(newTableData);
-          props.deleteMission(id);
           message.success(`Mission "${name}" deleted`);
         } else {
           message.error(result.data.message);
@@ -412,7 +406,6 @@ function DataMission(props) {
         })
         .then((result) => {
           if (result.data.status) {
-            props.setMissionsToState(result.data.data);
             setCompletedMissions(result.data.data);
             setTotal(result.data.total);
           } else {
@@ -547,11 +540,4 @@ function DataMission(props) {
   );
 }
 
-const mapStateToProps = (state) => ({
-  missions: state.Missions.missions,
-});
-
-export default connect(mapStateToProps, {
-  setMissionsToState,
-  deleteMission,
-})(DataMission);
+export default DataMission;

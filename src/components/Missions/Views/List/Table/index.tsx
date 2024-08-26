@@ -15,15 +15,10 @@ import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
-import { connect } from "react-redux";
 import http from "../../../../../services/httpCall";
 import apis from "../../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import moment from "moment";
-import {
-  setMissionsToState,
-  deleteMission,
-} from "../../../../../actions/missionActions";
 import { useHistory } from "react-router-dom";
 import mp from "../../../../../static/mapping.svg";
 import { DeleteOutlined, EyeOutlined } from "@ant-design/icons";
@@ -32,10 +27,6 @@ import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 
 interface TableProps {
-  filter: any;
-  setMissionsToState: any;
-  deleteMission: any;
-  missions: any;
   setMissionTableData: any;
   setIsTableLoading: any;
   isTableLoading: any;
@@ -143,23 +134,6 @@ function MissionTable(props: TableProps) {
       ),
   });
 
-  // setting tab status filters
-
-  useEffect(() => {
-    if (props.filter === props.usedFilter) {
-      if (props.missions.length) {
-        if (props.filter === "all") {
-          props.setMissionTableData(props.missions);
-        } else {
-          const data = props.missions.filter((row) => {
-            return row.status === props.filter;
-          });
-          props.setMissionTableData(data);
-        }
-      }
-    }
-  }, [props.missions]);
-
   // ++++++++++++++++++++++++++++++++++++++++++++++ Delete mission handler +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   const deleteMission = (name, id) => {
@@ -174,7 +148,6 @@ function MissionTable(props: TableProps) {
             return mission._id.toString() != id.toString();
           });
           props.setMissionTableData(newTableData);
-          props.deleteMission(id);
           message.success(`Mission "${name}" deleted`);
         } else {
           message.error(result.data.message);
@@ -452,32 +425,6 @@ function MissionTable(props: TableProps) {
     },
   ];
 
-  const onSearch = (value) => {
-    props.setIsTableLoading(true);
-    if (!value) {
-      if (props.missions) {
-        props.setMissionTableData(props.missions);
-      }
-    } else {
-      value = value.toLowerCase();
-
-      if (props.missions) {
-        const searchedMissions = props.missions.filter((mission: any) => {
-          return (
-            mission.status.toLowerCase().startsWith(value) ||
-            mission.name.toLowerCase().startsWith(value) ||
-            mission._id.toLowerCase().startsWith(value) ||
-            mission.user.name.toLowerCase().startsWith(value)
-          );
-        });
-
-        props.setMissionTableData(searchedMissions);
-      }
-    }
-
-    props.setIsTableLoading(false);
-  };
-
   const handleTableChange = (pagination, filter, sorter) => {
     props.setPage(pagination.current);
     props.setLimit(pagination.pageSize);
@@ -518,13 +465,4 @@ function MissionTable(props: TableProps) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    missions: state.Missions.missions,
-  };
-};
-
-export default connect(mapStateToProps, {
-  setMissionsToState,
-  deleteMission,
-})(MissionTable);
+export default MissionTable;

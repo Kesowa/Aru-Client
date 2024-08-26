@@ -1,5 +1,4 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { connect } from "react-redux";
 import io from "socket.io-client";
 import {
   Button,
@@ -13,11 +12,6 @@ import {
   Tooltip,
 } from "antd";
 import {
-  addMission,
-  changeMissionStatus,
-  refreshMissions,
-} from "../../actions/missionActions";
-import {
   ShareAltOutlined,
   DownloadOutlined,
   GoogleOutlined,
@@ -26,17 +20,13 @@ import {
 } from "@ant-design/icons";
 import * as htmlToImage from "html-to-image";
 import moment from "moment";
-import { assignPilot } from "../../actions/flightAction";
-import { deleteMission } from "../../actions/missionActions";
 import { API_URL, STATIC_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
 
 const { Text, Title } = Typography;
 
-function Socket(props: any) {
+function Socket() {
   const socket: any = useRef();
-  const [refresh, setrefresh] = useState(false);
-  const [reload, setReload] = useState(null);
   const [downloadLoading, setDownloadLoading] = useState(false);
 
   const { Auth } = useContext(AuthContext);
@@ -64,16 +54,6 @@ function Socket(props: any) {
       },
     });
   };
-
-  useEffect(() => {
-    if (reload) {
-      setrefresh(!refresh);
-      setTimeout(() => {
-        props.refreshMissions(!refresh);
-        setReload(null);
-      }, 50);
-    }
-  }, [reload]);
 
   //-----------------GMAP link Copy notification-------------------------//
   const showNotification = (copiedText, placement) => {
@@ -306,7 +286,6 @@ function Socket(props: any) {
           );
           // New mission added
           socket.current.on("MISSION_ADDED", ({ mission, flight }) => {
-            setReload(mission);
             openNotification(
               "New Mission Added!",
               `Mission with name "${mission.name}" has been added.`,
@@ -318,10 +297,6 @@ function Socket(props: any) {
 
           // Status changed
           socket.current.on("MISSION_COMPLETED", ({ missionID }) => {
-            props.changeMissionStatus({
-              status: "Completed",
-              id: missionID,
-            });
             openNotification(
               "Mission Completed!",
               `${missionID} mission has been completed!`,
@@ -332,10 +307,6 @@ function Socket(props: any) {
           });
 
           socket.current.on("MISSION_LIVE", ({ missionID }) => {
-            props.changeMissionStatus({
-              status: "Live",
-              id: missionID,
-            });
             openNotification(
               "Mission is Live!",
               `MissionID: ${missionID} went live!`,
@@ -357,17 +328,11 @@ function Socket(props: any) {
 
           // pilot assign
           socket.current.on("PILOT_ASSIGNED", ({ mission, name, avatar }) => {
-            console.log(mission, name, avatar);
-            props.assignPilot({
-              mission,
-              name,
-              avatar,
-            });
+            console.log("PILOT ASSIGNED!", mission, name, avatar);
           });
 
           // pilot assign
           socket.current.on("MISSION_DELETED", ({ id, name }) => {
-            setReload(id);
             openNotification(
               "Mission Deleted",
               `Mission: ${name} is deleted!`,
@@ -394,10 +359,4 @@ function Socket(props: any) {
   return <div></div>;
 }
 
-export default connect(null, {
-  addMission,
-  changeMissionStatus,
-  assignPilot,
-  deleteMission,
-  refreshMissions,
-})(Socket);
+export default Socket;

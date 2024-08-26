@@ -1,6 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useParams, useHistory, useLocation } from "react-router-dom";
-import { connect } from "react-redux";
 import EmptyGraphics from "../../../../static/Alone-rafiki.svg";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
 
@@ -56,7 +55,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { EditMission } from "../../../../actions/missionActions";
 import io from "socket.io-client";
 import ImageDoc from "./Data/ImageDocs";
 import ManageClients from "./Data/ManageClient";
@@ -68,7 +66,7 @@ import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
 const { Paragraph } = Typography;
-function MissionView(props) {
+function MissionView() {
   const [MissionDetails, setMissionDetails] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const { id } = useParams<any>();
@@ -330,13 +328,12 @@ function MissionView(props) {
       .post(`${apis.EDIT_MISSION_BY_ID}`, body)
       .then((result) => {
         if (result.data.status) {
-          props.EditMission(result.data.data);
           setEditModalVisible(false);
           setMissionDetails({
             ...MissionDetails,
             missionName: body.name,
             instructions: body.description,
-            type: body.type,
+            missionType: missionTypes.find(mT => mT._id === body.type).name,
             deliverables: body.deliverables,
             isPublic: body.isPublic,
           });
@@ -1308,7 +1305,7 @@ function MissionView(props) {
                 </a>
               </Descriptions.Item>
               <Descriptions.Item label="Mission Type">
-                {typeflag == 0 ? MissionDetails.missionType : missType}
+                {MissionDetails.missionType}
               </Descriptions.Item>
               <Descriptions.Item label="Order date">
                 {MissionDetails.orderDate}
@@ -1677,13 +1674,4 @@ function MissionView(props) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    missions: state.Missions.missions,
-    refresh: state.Missions.refresh,
-  };
-};
-
-export default connect(mapStateToProps, {
-  EditMission,
-})(MissionView);
+export default MissionView;

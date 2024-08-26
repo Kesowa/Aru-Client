@@ -15,9 +15,7 @@ import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
-import { connect } from "react-redux";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { setMissionsToState } from "../../../actions/missionActions";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import moment from "moment";
@@ -26,7 +24,7 @@ import mp from "../../../static/mapping.svg";
 import "../MissionList.less";
 import { AuthContext } from "src/services/authUtils";
 
-function ClientMission(props) {
+function ClientMission() {
   const history = useHistory();
   const [completedMissions, setCompletedMissions] = useState([]);
   const [isTableLoading, setIsTableLoading] = useState(true);
@@ -286,7 +284,6 @@ function ClientMission(props) {
         })
         .then((result) => {
           if (result.data.status) {
-            props.setMissionsToState(result.data.data);
             setCompletedMissions(result.data.data);
             setTotal(result.data.total);
           } else {
@@ -353,10 +350,4 @@ function ClientMission(props) {
   );
 }
 
-const mapStateToProps = (state) => ({
-  missions: state.Missions.missions,
-});
-
-export default connect(mapStateToProps, {
-  setMissionsToState,
-})(ClientMission);
+export default ClientMission;

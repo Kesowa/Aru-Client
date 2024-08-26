@@ -6,7 +6,6 @@ import "./index.less";
 import io from "socket.io-client";
 import About from "./tabContents/about";
 import Outcomes from "./tabContents/outcomes";
-import { connect } from "react-redux";
 import VideoPlayer from "../../../shared/VideoPlayer";
 import DroneMap from "../../../shared/DroneMap";
 import http from "../../../../services/httpCall";
@@ -19,7 +18,7 @@ import { LIVE_URL, API_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function LiveViewBase(props: any) {
+function LiveViewBase() {
   const { id } = useParams<any>();
   const [missionDetails, setMissionDetails] = useState<any>();
   const [missionId, setMissionId] = useState(0);
@@ -92,36 +91,26 @@ function LiveViewBase(props: any) {
   const getMission = async (id) => {
     setLoading(true);
 
-    const currMission = props.missions.filter((mission) => {
-      return mission._id.toString() === id.toString();
-    });
-
-    let cr;
-    if (!currMission.length) {
-      try {
-        const result = await http.get(`${apis.GET_MISSION_BY_ID}${id}`);
-        cr = result.data.data;
-      } catch (err) {
-        message.error("Something went wrong");
-        AxiosErrorHandler(err, logout);
-        return;
-      }
-    } else {
-      cr = currMission[0];
+    try {
+      const result = await http.get(`${apis.GET_MISSION_BY_ID}${id}`);
+      const cr = result.data.data;
+      setMissionDetails(cr);
+      setGeoFence({
+        geoFence: cr.flight.geoFence,
+      });
+      setMissionId(cr._id);
+    } catch (err) {
+      message.error("Something went wrong");
+      AxiosErrorHandler(err, logout);
+      return;
+    } finally {
+      setLoading(false);
     }
-
-    setMissionDetails(cr);
-    setGeoFence({
-      geoFence: cr.flight.geoFence,
-    });
-    setMissionId(cr._id);
-
-    setLoading(false);
   };
 
   useEffect(() => {
     getMission(id);
-  }, [props]);
+  }, []);
 
   useEffect(() => {
     if (missionDetails) {
@@ -254,10 +243,4 @@ function LiveViewBase(props: any) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    missions: state.Missions.missions,
-  };
-};
-
-export default connect(mapStateToProps, null)(LiveViewBase);
+export default LiveViewBase;
