@@ -41,6 +41,7 @@ function UserEditPage(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [userGroups, setUserGroups]: [any, any] = useState([]);
   const [selectedUserGroup, setSelectedusergroup]: [any, any] = useState();
   const [errorState, setErrorState] = useState("");
@@ -50,8 +51,12 @@ function UserEditPage(props: any) {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
       setIsAvatarUploading(true);
 
+      // Create a preview URL for the image
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
+
       const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
-      setAvatar(uploadToken?.objectKey);
+      setAvatar(uploadToken?.id);
 
       // const formData = new FormData();
       // formData.append("avatar", file);
@@ -209,8 +214,6 @@ function UserEditPage(props: any) {
       });
   };
 
-  console.log("props of usre edit:", `${STATIC_URL}${"/"}${avatar}`)
-
   switch (errorState) {
     case "unauthorized":
       return <Unauthorized />;
@@ -313,7 +316,7 @@ function UserEditPage(props: any) {
                         >
                           {avatar ? (
                             <img
-                              src={`${STATIC_URL}${"/"}${avatar}`}
+                              src={avatarPreview ? avatarPreview : `${STATIC_URL}${avatar}`}
                               className="uploaded-avatar"
                             />
                           ) : (

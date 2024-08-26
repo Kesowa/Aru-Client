@@ -51,10 +51,10 @@ function UserCreatePage(props: any) {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
       setIsAvatarUploading(true);
       const previewUrl = URL.createObjectURL(file);
-      setAvatarPreview(previewUrl); // Set the preview URL to the state
+      setAvatarPreview(previewUrl);
       const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
       setAvatar(uploadToken?.id);
-      console.log("uploadtoken: ",uploadToken)
+
       // const body = {
       //   file: uploadToken.id,
       // };
@@ -198,7 +198,7 @@ function UserCreatePage(props: any) {
         props.loading(false);
       });
   };
-  console.log("client:",`${STATIC_URL}${avatar}`)
+
   switch (errorState) {
     case "unauthorized":
       return <Unauthorized />;
