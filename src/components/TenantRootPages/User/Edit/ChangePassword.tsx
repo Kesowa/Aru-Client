@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { connect } from "react-redux";
+import { useHistory, useParams } from "react-router-dom";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Row, Col, message, Form, Input, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
@@ -17,13 +16,41 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function UserChangePassword(props: any) {
+function UserChangePassword() {
   const [form] = Form.useForm();
   const [errorState, setErrorState] = useState("");
+  const [user, setUser] = useState<any>(null);
   const history = useHistory();
+
+  const { id } = useParams<any>();
 
   const { Auth, logout } = useContext(AuthContext);
   const { setLoading } = useContext(LoaderContext);
+
+  const fetchUserDetails = () => {
+    setLoading(true);
+    http
+      .get(apis.FETCH_USER_OF_TENANT_BY_ID, { params: { id } })
+      .then((result) => {
+        if (result.data.status) {
+          console.log(result.data.data);
+          setUser(result.data.data);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchUserDetails();
+  }, []);
 
   //subimt form
   const onFinish = (data: any) => {
@@ -43,7 +70,7 @@ function UserChangePassword(props: any) {
   const EditUserAccount = (data: any) => {
     setLoading(true);
     const body = {
-      id: props.user._id,
+      id: user._id,
       ...data,
     };
     http
@@ -103,12 +130,12 @@ function UserChangePassword(props: any) {
     default:
       return (
         <div className="tenant-root-usercreatepage-wrapper full-width-height">
-          {props.user && (
+          {user && (
             <>
               <PageHeader
                 onBack={() => window.history.back()}
                 className="site-page-header-responsive"
-                title={`Change Password For User - ${props.user.name}`}
+                title={`Change Password For User - ${user.name}`}
                 extra={[
                   <Link to="/dashboard/tenant/user/list" key="1">
                     <Button
@@ -204,10 +231,4 @@ function UserChangePassword(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  user: state.User.userToEdit,
-});
-
-export default connect(mapStateToProps, null)(
-  UserChangePassword
-);
+export default UserChangePassword;

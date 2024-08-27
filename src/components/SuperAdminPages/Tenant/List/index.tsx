@@ -11,7 +11,6 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import "../Tenant.less";
-import { setTenantToEdit } from "../../../../actions/tenantAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -174,7 +173,6 @@ function ListAllTanents(props: any) {
           <Button
             onClick={() => {
               history.push(`/dashboard/admin/tenant/edit/${record._id}`);
-              props.setTenantToEdit(record);
             }}
           >
             <EditOutlined />
@@ -270,6 +268,4 @@ function ListAllTanents(props: any) {
   );
 }
 
-export default connect(null, { setTenantToEdit })(
-  ListAllTanents
-);
+export default ListAllTanents;

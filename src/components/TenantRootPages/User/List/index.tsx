@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from "react";
-import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
 import {
   PlusCircleOutlined,
@@ -17,7 +16,6 @@ import {
   Popconfirm,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { setUserToEdit } from "../../../../actions/userAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -159,7 +157,6 @@ function UserListPage(props: any) {
       <Button
         onClick={() => {
           history.push(`/dashboard/tenant/user/edit/${record._id}`);
-          props.setUserToEdit(record);
         }}
       >
         <EditOutlined />
@@ -178,7 +175,6 @@ function UserListPage(props: any) {
             history.push(
               `/dashboard/tenant/user/change-password/${record._id}`
             );
-            props.setUserToEdit(record);
           }}
         >
           <LockOutlined />
@@ -354,6 +350,4 @@ function UserListPage(props: any) {
   }
 }
 
-export default connect(null, { setUserToEdit })(
-  UserListPage
-);
+export default UserListPage;

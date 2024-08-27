@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from "react";
-import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
 import {
   PlusCircleOutlined,
@@ -10,7 +9,6 @@ import {
 } from "@ant-design/icons";
 import { message, Input, Button, Tag, Table, Popconfirm } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { setClientToEdit } from "../../../../actions/cliantActions";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -166,7 +164,6 @@ function ClientListPage(props: any) {
         <Button
           onClick={() => {
             history.push(`/dashboard/tenant/client/edit/${record._id}`);
-            props.setClientToEdit(record);
           }}
         >
           <EditOutlined />
@@ -300,7 +297,6 @@ function ClientListPage(props: any) {
               history.push(
                 `/dashboard/tenant/client/change-password/${record._id}`
               );
-              props.setClientToEdit(record);
             }}
           >
             <LockOutlined />
@@ -448,6 +444,4 @@ function ClientListPage(props: any) {
   }
 }
 
-export default connect(null, { setClientToEdit })(
-  ClientListPage
-);
+export default ClientListPage;

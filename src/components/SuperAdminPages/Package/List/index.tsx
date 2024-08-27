@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from "react";
-import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { message, Button, Table, Tag, Popconfirm } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
@@ -9,7 +8,6 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import "../Package.less";
-import { setPackageToEdit } from "../../../../actions/packageAction";
 
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
@@ -113,7 +111,6 @@ function ListAllPackages(props: any) {
           <Button
             onClick={() => {
               history.push(`/dashboard/admin/package/edit/${record._id}`);
-              props.setPackageToEdit(record);
             }}
           >
             <EditOutlined />
@@ -236,6 +233,4 @@ function ListAllPackages(props: any) {
   }
 }
 
-export default connect(null, { setPackageToEdit })(
-  ListAllPackages
-);
+export default ListAllPackages;

@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
-import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import {
   List,
@@ -37,7 +36,7 @@ import { PERMS, TENANT_CLIENT_PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function ClientEditPage(props: any) {
+function ClientEditPage() {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
@@ -57,6 +56,10 @@ function ClientEditPage(props: any) {
   }>();
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
+
+  const [client, setClient] = useState<any>(null);
+
+  const { id } = useParams<any>();
 
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
@@ -113,12 +116,7 @@ function ClientEditPage(props: any) {
             )
             .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }));
 
-          if (!props.client) {
-            history.push("/dashboard/tenant/client/list");
-            return;
-          }
-
-          const sug = groups.find((g) => g._id === props.client.userGroupId);
+          const sug = groups.find((g) => g._id === client.userGroupId);
           setSelectedusergroup(sug);
           setUserGroups(groups);
         } else {
@@ -150,6 +148,28 @@ function ClientEditPage(props: any) {
         setLoading(false);
       });
   };
+
+  const fetchClientDetails = () => {
+    setLoading(true);
+    http
+      .get(apis.GET_CLIENT_BY_ID, { params: { id } })
+      .then((result) => {
+        if (result.data.status) {
+          console.log(result.data.data);
+          setClient(result.data.data);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
     if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
@@ -162,15 +182,16 @@ function ClientEditPage(props: any) {
       setErrorState("401");
     } else {
       // tenant-root can edit clients
-      fetchAllUserGroupList();
+      fetchClientDetails();
     }
   }, []);
 
   useEffect(() => {
-    if (props.client) {
-      setAvatar(props.client.avatar);
+    if (client) {
+      fetchAllUserGroupList();
+      setAvatar(client.avatar);
     }
-  }, [props.client]);
+  }, [client]);
 
   //subimt form
   const onFinish = (data: any) => {
@@ -180,7 +201,7 @@ function ClientEditPage(props: any) {
   const EditUserAccount = (data: any) => {
     setLoading(true);
     const body = {
-      id: props.client._id,
+      id: client._id,
       ...data,
       avatar,
     };
@@ -222,7 +243,7 @@ function ClientEditPage(props: any) {
     default:
       return (
         <div className="tenant-root-usercreatepage-wrapper full-width-height">
-          {props.client && selectedUserGroup && (
+          {client && selectedUserGroup && (
             <>
               <PageHeader
                 onBack={() => window.history.back()}
@@ -248,9 +269,9 @@ function ClientEditPage(props: any) {
                   onFinish={onFinish}
                   scrollToFirstError={true}
                   initialValues={{
-                    name: props.client.name,
-                    email: props.client.email,
-                    phoneNo: props.client.phoneNo,
+                    name: client.name,
+                    email: client.email,
+                    phoneNo: client.phoneNo,
                     userType: "tenant-client",
                     userGroupId: selectedUserGroup._id,
                   }}
@@ -369,7 +390,7 @@ function ClientEditPage(props: any) {
                           style={{ width: "100%" }}
                           allowClear={true}
                           format="DD-MM-YYYY"
-                          defaultValue={moment(props.client.expiryDate)}
+                          defaultValue={moment(client.expiryDate)}
                         />
                       </Form.Item>
                     </Col>
@@ -392,8 +413,4 @@ function ClientEditPage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  client: state.Client.clientToEdit,
-});
-
-export default connect(mapStateToProps, null)(ClientEditPage);
+export default ClientEditPage;

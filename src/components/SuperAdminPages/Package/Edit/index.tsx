@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from "react";
-import { connect } from "react-redux";
 import { Form, Input, Upload, Row, Col, message, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import {
@@ -13,7 +12,7 @@ import http from "../../../../services/httpCall";
 import { beforeUpload } from "../../../../services/imageupload";
 import ImgCrop from "antd-img-crop";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { Link } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 import { STATIC_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
@@ -22,6 +21,10 @@ function EditPackage(props: any) {
   const [form] = Form.useForm();
   const [poster, setPoster] = useState("");
   const [isPosterUploading, setIsPosterUploading] = useState(false);
+  const [pckg, setPckg] = useState<any>(null);
+  const history = useHistory();
+
+  const { id } = useParams<any>();
 
   const { logout } = useContext(AuthContext);
   const { setLoading } = useContext(LoaderContext);
@@ -57,11 +60,36 @@ function EditPackage(props: any) {
     return false;
   };
 
+  const fetchPackageDetails = () => {
+    setLoading(true);
+    http
+      .get(apis.FETCH_PACKAGE_BY_ID, { params: { id } })
+      .then((result) => {
+        if (result.data.status) {
+          console.log(result.data.data);
+          setPckg(result.data.data);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
-    if (props.package) {
-      setPoster(props.package.poster);
+    fetchPackageDetails()
+  }, []);
+
+  useEffect(() => {
+    if (pckg) {
+      setPoster(pckg.poster);
     }
-  }, [props.package]);
+  }, [pckg]);
 
   const onFinish = (data: any) => {
     if (poster) {
@@ -69,7 +97,7 @@ function EditPackage(props: any) {
       console.log(poster, data);
       const body = {
         ...data,
-        _id: props.package._id,
+        _id: pckg._id,
         poster: poster,
       };
       http
@@ -90,6 +118,7 @@ function EditPackage(props: any) {
         })
         .finally(() => {
           setLoading(false);
+          history.push("/dashboard/admin/package/list");
         });
     } else {
       message.error("please choose a poster for the package");
@@ -97,6 +126,7 @@ function EditPackage(props: any) {
   };
 
   return (
+    pckg &&
     <div className="package-add-wrapper full-width-height">
       <PageHeader
         onBack={() => window.history.back()}
@@ -117,18 +147,18 @@ function EditPackage(props: any) {
           form={form}
           onFinish={onFinish}
           initialValues={{
-            name: props.package.name,
-            bandwidth: props.package.bandwidth,
-            storage: props.package.storage,
-            duration: props.package.duration,
-            userCount: props.package.userCount,
-            alertCount: props.package.alertCount,
-            clientCount: props.package.clientCount,
-            layerCount: props.package.layerCount,
-            locationCount: props.package.locationCount,
-            missionCount: props.package.missionCount,
-            userGroupCount: props.package.userGroupCount,
-            vodCount: props.package.vodCount,
+            name: pckg.name,
+            bandwidth: pckg.bandwidth,
+            storage: pckg.storage,
+            duration: pckg.duration,
+            userCount: pckg.userCount,
+            alertCount: pckg.alertCount,
+            clientCount: pckg.clientCount,
+            layerCount: pckg.layerCount,
+            locationCount: pckg.locationCount,
+            missionCount: pckg.missionCount,
+            userGroupCount: pckg.userGroupCount,
+            vodCount: pckg.vodCount,
           }}
         >
           <Row gutter={16}>
@@ -362,8 +392,4 @@ function EditPackage(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  package: state.Package.packageToEdit,
-});
-
-export default connect(mapStateToProps, null)(EditPackage);
+export default EditPackage;

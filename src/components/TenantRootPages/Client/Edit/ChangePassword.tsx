@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { connect } from "react-redux";
+import { useHistory, useParams } from "react-router-dom";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Row, Col, message, Form, Input, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
@@ -18,15 +17,43 @@ import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function ChangeClientPassword(props: any) {
+function ChangeClientPassword() {
   const [form] = Form.useForm();
   const [errorState, setErrorState] = useState("");
+  const [client, setClient] = useState<any>(null);
   const history = useHistory();
+
+  const { id } = useParams<any>();
 
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
   
   const { setLoading } = useContext(LoaderContext);
+
+  const fetchClientDetails = () => {
+    setLoading(true);
+    http
+      .get(apis.GET_CLIENT_BY_ID, { params: { id } })
+      .then((result) => {
+        if (result.data.status) {
+          console.log(result.data.data);
+          setClient(result.data.data);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchClientDetails();
+  }, []);
   
   //subimt form
   const onFinish = (data: any) => {
@@ -45,7 +72,7 @@ function ChangeClientPassword(props: any) {
   const EditUserAccount = (data: any) => {
     setLoading(true);
     const body = {
-      id: props.client._id,
+      id: client._id,
       ...data,
     };
     http
@@ -97,12 +124,12 @@ function ChangeClientPassword(props: any) {
     default:
       return (
         <div className="tenant-root-usercreatepage-wrapper full-width-height">
-          {props.client && (
+          {client && (
             <>
               <PageHeader
                 onBack={() => window.history.back()}
                 className="site-page-header-responsive"
-                title={`Change Password For Client - ${props.client.name}`}
+                title={`Change Password For Client - ${client.name}`}
                 extra={[
                   <Link to="/dashboard/tenant/client/list" key="1">
                     <Button
@@ -198,8 +225,4 @@ function ChangeClientPassword(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  client: state.Client.clientToEdit,
-});
-
-export default connect(mapStateToProps, null)(ChangeClientPassword);
+export default ChangeClientPassword;

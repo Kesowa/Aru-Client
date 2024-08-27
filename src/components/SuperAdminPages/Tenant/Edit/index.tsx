@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from "react";
-import { connect } from "react-redux";
 import {
   Button,
   Upload,
@@ -18,7 +17,7 @@ import {
   LoadingOutlined,
 } from "@ant-design/icons";
 import "../Tenant.less";
-import { Link } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 import ImgCrop from "antd-img-crop";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
@@ -26,17 +25,23 @@ import { beforeUpload } from "../../../../services/imageupload";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { STATIC_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 const { Title } = Typography;
 const { Option } = Select;
 
-function EditTenant(props: any) {
+function EditTenant() {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [packages, setPackages] = useState<any>([]);
+  const [tenant, setTenant] = useState<any>(null);
+  const history = useHistory();
+
+  const { id } = useParams<any>();
 
   const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
@@ -68,10 +73,10 @@ function EditTenant(props: any) {
   };
 
   useEffect(() => {
-    if (props.tenant) {
-      setAvatar(props.tenant.avatar);
+    if (tenant) {
+      setAvatar(tenant.avatar);
     }
-  }, [props.tenant]);
+  }, [tenant]);
 
   useEffect(() => {
     http
@@ -85,11 +90,36 @@ function EditTenant(props: any) {
       });
   }, []);
 
+  const fetchTenantDetails = () => {
+    setLoading(true);
+    http
+      .post(apis.FETCH_TENANT_DETAILS, { tenantId: id })
+      .then((result) => {
+        if (result.data.status) {
+          console.log(result.data.data);
+          setTenant(result.data.data);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchTenantDetails();
+  }, []);
+
   const onFinish = (data: any) => {
     console.log(data);
     const body = {
       ...data,
-      tenantId: props.tenant._id,
+      tenantId: tenant._id,
     };
     http
       .patch(`${apis.EDIT_TENANT_BY_ID}`, body)
@@ -101,10 +131,14 @@ function EditTenant(props: any) {
       .catch((err) => {
         message.error(err.message);
         AxiosErrorHandler(err, logout);
+      })
+      .finally(()=> {
+        history.push("/dashboard/admin/tenant/list");
       });
   };
 
   return (
+    tenant &&
     <div className="edit-tenant">
       <PageHeader
         onBack={() => window.history.back()}
@@ -122,7 +156,10 @@ function EditTenant(props: any) {
         form={form}
         onFinish={onFinish}
         layout="vertical"
-        initialValues={props.tenant}
+        initialValues={{
+          ...tenant,
+          activePackage: tenant.activePackage._id,
+        }}
       >
         <div className="basic-info">
           <Title level={5}>Basic Info:</Title>
@@ -329,8 +366,4 @@ function EditTenant(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  tenant: state.Tenant.tenantToEdit,
-});
-
-export default connect(mapStateToProps, null)(EditTenant);
+export default EditTenant;
