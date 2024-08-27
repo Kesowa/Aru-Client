@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from "react";
-import { connect } from "react-redux";
 import { Row, Col, Typography, Table, message, Button, Input } from "antd";
 import { SearchOutlined, ShakeOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
@@ -7,20 +6,18 @@ import moment from "moment";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import {
-  setManufacturersToState,
-  deleteManufacturer,
-} from "../../../actions/manufacturerAction";
 import ManufacturerCard from "./ManufacturerCard";
 import { AuthContext } from "src/services/authUtils";
 
 const { Title } = Typography;
 
-const ManufacturerList = (props) => {
+const ManufacturerList = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [isTableLoading, setIsTableLoading] = useState(true);
   const [selectedManufacturerID, setSelectedManufacturerID] = useState();
+
+  const [manufacturers, setManufacturers] = useState<any[]>([]);
 
   const { logout } = useContext(AuthContext);
 
@@ -34,7 +31,7 @@ const ManufacturerList = (props) => {
       .then((result) => {
         //console.log(result.data);
         if (result.data.status) {
-          props.setManufacturersToState(result.data.data);
+          setManufacturers(result.data.data);
           console.log(result.data.data);
         } else {
           message.error(result.data.message);
@@ -125,11 +122,10 @@ const ManufacturerList = (props) => {
       })
       .then((result) => {
         if (result.data.status) {
-          const newTableData = props.manufacturers.filter(
+          const newTableData = manufacturers.filter(
             (manufacturer) => manufacturer._id.toString() !== id.toString()
           );
-          props.setManufacturersToState(newTableData);
-          props.deleteManufacturer(id);
+          setManufacturers(newTableData);
           message.success(`Manufacturer "${name}" deleted`);
         } else {
           message.error(result.data.message);
@@ -232,7 +228,7 @@ const ManufacturerList = (props) => {
         <Col span={16}>
           <Table
             columns={columns}
-            dataSource={props.manufacturers}
+            dataSource={manufacturers}
             rowKey="_id"
             style={{ cursor: "pointer", width: "100%" }}
             loading={isTableLoading}
@@ -249,11 +245,4 @@ const ManufacturerList = (props) => {
   );
 };
 
-const mapStateToProps = (state) => ({
-  manufacturers: state.Manufacturers.manufacturers,
-});
-
-export default connect(mapStateToProps, {
-  setManufacturersToState,
-  deleteManufacturer,
-})(ManufacturerList);
+export default ManufacturerList;

@@ -115,7 +115,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
 interface ModelCardProps {
   id: any;
   showDate: boolean;
-  Auth: any;
 }
 
 const ModelCard: React.FC<ModelCardProps> = (props) => {

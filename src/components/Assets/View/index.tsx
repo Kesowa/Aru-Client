@@ -162,7 +162,7 @@ function AssetView(props) {
             <Col span={8}>
               <Title level={4}>Manufacturer</Title>
               {data.manufactureID && (
-                <ManufacturerCard id={data.manufactureID} showDate={false} />
+                <ManufacturerCard id={data.manufactureID._id} showDate={false} />
               )}
             </Col>
           </Row>

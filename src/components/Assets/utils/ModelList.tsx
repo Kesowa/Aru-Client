@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from "react";
-import { connect } from "react-redux";
 import {
   Row,
   Col,
@@ -19,24 +18,18 @@ import "../index.less";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { setModelsToState, deleteModel } from "../../../actions/modelAction";
 import ModelCard from "./ModelCard";
 import { AuthContext } from "src/services/authUtils";
 
 const { Title } = Typography;
 
-interface TableProps {
-  setModelsToState: any;
-  deleteModel: any;
-  models: any;
-}
-
-function ModelList(props: TableProps) {
+function ModelList() {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [isTableLoading, setIsTableLoading] = useState(true);
   const [modelTableData, setModelTableData] = useState<any>([]);
   const [selectedModelID, setSelectedModelID] = useState();
+  const [models, setModels] = useState<any[]>([]);
 
   const { logout } = useContext(AuthContext);
 
@@ -49,7 +42,7 @@ function ModelList(props: TableProps) {
       .get(`${apis.GET_MODELS}`)
       .then((result) => {
         if (result.data.status) {
-          props.setModelsToState(result.data.data);
+          setModels(result.data.data);
         } else {
           message.error(result.data.message);
         }
@@ -64,10 +57,10 @@ function ModelList(props: TableProps) {
   };
 
   useEffect(() => {
-    if (props.models.length) {
-      setModelTableData(props.models);
+    if (models.length) {
+      setModelTableData(models);
     }
-  }, [props.models]);
+  }, [models]);
 
   let searchInput: any;
   const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
@@ -248,13 +241,4 @@ function ModelList(props: TableProps) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    models: state.Models.models,
-  };
-};
-
-export default connect(mapStateToProps, {
-  setModelsToState,
-  deleteModel,
-})(ModelList);
+export default ModelList;

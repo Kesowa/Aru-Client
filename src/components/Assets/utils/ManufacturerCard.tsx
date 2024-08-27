@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-import { connect } from "react-redux";
 import {
   Card,
   message,
@@ -31,7 +30,6 @@ import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import AloneLogo from "../../../static/Alone-rafiki.svg";
 import moment from "moment";
-import { setManufacturersToState } from "src/actions/manufacturerAction";
 import { AuthContext } from "src/services/authUtils";
 
 const { Text } = Typography;
@@ -105,13 +103,11 @@ const EditableCell: React.FC<EditableCellProps> = ({
 interface ManufacturerCardProps {
   id: string;
   showDate: boolean;
-  manufacturers: any[];
 }
 
 const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
   id,
   showDate,
-  manufacturers,
 }) => {
   const [selectedID, setSelectedID] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
@@ -123,6 +119,8 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
 
   const [form] = Form.useForm();
   const [assetClasses, setAssetClasses] = useState<any>([]);
+
+  const [manufacturers, setManufacturers] = useState<any[]>([]);
 
   const { logout } = useContext(AuthContext);
 
@@ -159,7 +157,7 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
       .get(`${apis.GET_MANUFACTURERS}`)
       .then((result) => {
         if (result.data.status) {
-          setManufacturersToState(result.data.data);
+          setManufacturers(result.data.data);
         } else {
           message.error(result.data.message);
         }
@@ -737,10 +735,4 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
   return <div style={{ margin: "0 10px" }}>{card}</div>;
 };
 
-const mapStateToProps = (state: any) => {
-  return {
-    manufacturers: state.Manufacturers.manufacturers,
-  };
-};
-
-export default connect(mapStateToProps, null)(ManufacturerCard);
+export default ManufacturerCard;
