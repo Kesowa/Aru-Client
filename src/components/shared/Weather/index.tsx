@@ -9,6 +9,7 @@ import convertDegreeToDirection from "../../../services/convertDegreeToDirection
 import { connect } from "react-redux";
 import { setWeather } from "../../../actions/missionCreation";
 import { OPENWEATHER_API_KEY } from "src/constants";
+import { OpenWeather } from "src/types/openweathermap";
 
 const { Title, Text } = Typography;
 
@@ -23,34 +24,30 @@ function Weather(props) {
 
   useEffect(() => {
     fetch(
-      `https://api.openweathermap.org/data/2.5/onecall?lat=${props.location.lat}&lon=${props.location.lng}&appid=${OPENWEATHER_API_KEY}`
+      `https://api.openweathermap.org/data/2.5/weather?lat=${props.location.lat}&lon=${props.location.lng}&appid=${OPENWEATHER_API_KEY}`
     )
       .then((res) => res.json())
-      .then((res) => {
+      .then((res: OpenWeather) => {
         console.log(res);
         setOneCallResData(res);
-        const forecastData: any = [];
-        res.daily.map((i) => {
-          const obj = {
-            description: capitalize(i.weather[0].description),
-            temperature: (Number(i.temp.day) - 273.16).toFixed(2),
-            icon: i.weather[0].icon,
-            sunset: findSunset(i.sunset),
-            windSpeed: i.wind_speed,
-            windDirection: convertDegreeToDirection(i.wind_deg),
-            windGust: i.wind_gust,
-            humidity: i.humidity,
-          };
-          forecastData.push(obj);
-        });
-        setData(forecastData);
+        const obj = {
+          description: capitalize(res.weather[0].description),
+          temperature: (Number(res.main.temp) - 273.16).toFixed(2),
+          icon: res.weather[0].icon,
+          sunset: findSunset(res.sys.sunset),
+          windSpeed: res.wind.speed,
+          windDirection: convertDegreeToDirection(res.wind.deg),
+          windGust: res.wind.speed,
+          humidity: res.main.humidity,
+        };
+        setData(obj);
         setWeatherData({
-          ...forecastData[0],
-          visibility: res.current.visibility / 1000,
+          ...obj,
+          visibility: res.visibility / 1000,
         });
         setCurrentData({
-          ...forecastData[0],
-          visibility: res.current.visibility / 1000,
+          ...obj,
+          visibility: res.visibility / 1000,
         });
       })
       .catch((err) => console.log(err));
