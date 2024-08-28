@@ -146,7 +146,6 @@ const b64toBlob = (b64Data, contentType) => {
 };
 
 function VideoPlayer(props: any) {
-  console.log("oooo", props);
   const [isAiTaskCompleted, setIsAiTaskCompleted] = useState(false);
   const [aiTaskData, setAiTaskData] = useState({ Keys: [], Values: [] });
   const [aiGraphData, setAiGraphData] = useState({});

@@ -36,7 +36,7 @@ function TenantInfo(props: any) {
       setAvatarPreview(previewUrl); 
 
       const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
-      setAvatar(uploadToken?.objectKey);
+      setAvatar(uploadToken);
       
       // const formData = new FormData();
       // formData.append("avatar", file);
@@ -70,7 +70,7 @@ function TenantInfo(props: any) {
     const body = {
       ...data,
     };
-    if (avatar && avatar !== "") {
+    if (avatar && avatar !== props.tenantData.avatar || "") {
       body["avatar"] = avatar;
     }
     console.log(body);
@@ -153,7 +153,7 @@ function TenantInfo(props: any) {
               >
                 {avatar ? (
                   <img
-                  src={`${STATIC_URL}${"/"}${avatar}`}
+                  src={`${STATIC_URL}${avatar}`}
                   className="uploaded-avatar"
                   />
                 ) : (

@@ -57,7 +57,7 @@ function UserCreatePage(props: any) {
       setAvatarPreview(previewUrl);
 
       const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
-      setAvatar(uploadToken?.id);
+      setAvatar(uploadToken);
 
       // const body = {
       //   file: uploadToken,
@@ -179,8 +179,10 @@ function UserCreatePage(props: any) {
     const body = {
       id: props.client._id,
       ...data,
-      avatar,
     };
+    if (avatar && avatar !== props.client.avatar || "") {
+      body["avatar"] = avatar;
+    }
     console.log(body);
     http
       .patch(`${apis.EDIT_CLIENT}`, body)

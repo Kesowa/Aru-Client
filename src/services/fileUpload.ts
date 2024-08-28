@@ -36,10 +36,7 @@ export async function uploadFile(file: RcFile, model: DocModel, progress?: (frac
     }
   })
   console.log("upload token is here ",getUrlRes.data.data._id,getUrlRes.data.data.metadata.objectkey);
-  return {
-    id: getUrlRes.data.data._id,
-    objectKey: getUrlRes.data.data.metadata.objectkey,
-  };
+  return getUrlRes.data.data._id;
 }
 
 export enum DocModel {

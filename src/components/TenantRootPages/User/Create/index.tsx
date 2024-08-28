@@ -56,7 +56,7 @@ function UserCreatePage(props: any) {
       const previewUrl = URL.createObjectURL(file);
       setAvatarPreview(previewUrl);
 
-      setAvatar(uploadToken?.id);
+      setAvatar(uploadToken);
       setIsAvatarUploading(false);
     });
     return false;

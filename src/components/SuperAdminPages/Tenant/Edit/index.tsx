@@ -43,7 +43,7 @@ function EditTenant(props: any) {
       setIsAvatarUploading(true);
 
       const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
-      setAvatar(uploadToken?.objectKey);
+      setAvatar(uploadToken);
 
      
       // const formData = new FormData();

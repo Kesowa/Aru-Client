@@ -56,7 +56,7 @@ function UserEditPage(props: any) {
       setAvatarPreview(previewUrl);
 
       const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
-      setAvatar(uploadToken?.id);
+      setAvatar(uploadToken);
 
       // const formData = new FormData();
       // formData.append("avatar", file);
@@ -188,7 +188,7 @@ function UserEditPage(props: any) {
       id: props.user._id,
       ...data,
     };
-    if (avatar && avatar !== "") {
+    if (avatar && avatar !== props.user.avatar || "") {
       body["avatar"] = avatar;
     }
     console.log(body);

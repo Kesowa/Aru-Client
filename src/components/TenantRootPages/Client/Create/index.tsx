@@ -53,7 +53,7 @@ function UserCreatePage(props: any) {
       const previewUrl = URL.createObjectURL(file);
       setAvatarPreview(previewUrl);
       const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
-      setAvatar(uploadToken?.id);
+      setAvatar(uploadToken);
 
       // const body = {
       //   file: uploadToken.id,
