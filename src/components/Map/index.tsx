@@ -104,7 +104,6 @@ import MapAttributes from "./utils/mapAttributes";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
-import { connect } from "react-redux";
 import moment from "moment";
 import { useHistory, useParams } from "react-router-dom";
 import VectorForm from "./utils/VectorForm";
@@ -114,7 +113,6 @@ import CreateLayer from "./utils/layer/createLayer";
 import CreateBaseLayer from "./utils/layer/createBaseLayer";
 import io from "socket.io-client";
 import Thread from "../shared/Thread";
-import { thread } from "../../actions/threadAction";
 import {
   COG_URL,
   MAPBOX_API_KEY,
@@ -147,6 +145,7 @@ import { PERMS } from "src/static/permissions";
 import FourOhOne from "../shared/Error/FourOhOne";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "../shared/Loader";
+import { ThreadContext } from "src/services/threadUtils";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -238,6 +237,7 @@ function BaseMap(props) {
 
   const { Auth, logout } = useContext(AuthContext);
   const { setLoading } = useContext(LoaderContext);
+  const { thread, openThread } = useContext(ThreadContext);
 
   const treeMenu = (layer: Layer): MenuProps["items"] => {
     const items: MenuProps["items"] = [];
@@ -3612,10 +3612,7 @@ function BaseMap(props) {
   //         setSelectedLayerType(type.toLowerCase());
   //         break;
   //       case "2":
-  //         props.thread(true, {
-  //           docType: "layer",
-  //           docId: layer._id,
-  //         });
+  //         openThread("layer", layer._id, {});
   //         break;
   //       case "3":
   //         download(STATIC_URL + layer.layerpath);
@@ -3886,10 +3883,7 @@ function BaseMap(props) {
           setSelectedLayerType(type.toLowerCase());
           break;
         case "2":
-          props.thread(true, {
-            docType: "layer",
-            docId: layer._id,
-          });
+          openThread("layer", layer._id, {});
           break;
         case "3":
           download(STATIC_URL + layer.layerpath);
@@ -4582,10 +4576,10 @@ function BaseMap(props) {
   //   refreshLayers();
   // }, [treeStructure, AllLayers, panes, dateRange]);
   useEffect(() => {
-    if (!props.Thread.open) {
+    if (!thread.open) {
       setRefreshLayer(!refreshLayer);
     }
-  }, [props.Thread.open]);
+  }, [thread.open]);
 
   // Should no longer be required
   // const refreshLayers = () => {
@@ -8184,12 +8178,4 @@ function BaseMap(props) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    Thread: state.Thread,
-  };
-};
-
-export default connect(mapStateToProps, {
-  thread,
-})(BaseMap);
+export default BaseMap;

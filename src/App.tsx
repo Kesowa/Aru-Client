@@ -9,6 +9,7 @@ import Socket from "./components/shared/Socket";
 import DashboardWrapper from "./components/shared/Wrappers/DashboardWrapper";
 import { AuthContext, useAuth } from "./services/authUtils";
 import { loadScripts } from "./services/loadScripts";
+import { ThreadContext, useThread } from "./services/threadUtils";
 
 const ForgotPassword = lazy(() => import("./components/Login/ForgotPassword"));
 const Register = lazy(() => import("./components/SignUp"));
@@ -23,6 +24,7 @@ const App = () => {
 
   const { Auth, login, logout, setUserDetails } = useAuth();
   const { loading, setLoading } = useLoader(0);
+  const { thread, openThread, closeThread } = useThread();
 
   useEffect(() => {
     if (
@@ -45,6 +47,7 @@ const App = () => {
     <React.Fragment>
       <LoaderContext.Provider value={{ loading, setLoading }}>
       <AuthContext.Provider value={{ Auth, login, logout, setUserDetails }} >
+      <ThreadContext.Provider value={{ thread, openThread, closeThread }} >
       <Socket />
       <Loader />
       {
@@ -89,6 +92,7 @@ const App = () => {
           </Suspense>
         </BrowserRouter>
       }
+      </ThreadContext.Provider>
       </AuthContext.Provider>
       </LoaderContext.Provider>
     </React.Fragment>

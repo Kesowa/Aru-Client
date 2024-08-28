@@ -24,7 +24,6 @@ import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { connect } from "react-redux";
 import {
   InboxOutlined,
   ExclamationCircleOutlined,
@@ -36,14 +35,15 @@ import io from "socket.io-client";
 import { useMemo } from "react";
 import download from "downloadjs";
 import { API_URL, STATIC_URL } from "src/constants";
-import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
 import axios from "axios";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
+import { ThreadContext } from "src/services/threadUtils";
 
 function Documents(props) {
   const { Auth, logout } = useContext(AuthContext);
+  const { openThread } = useContext(ThreadContext);
   const userDetails = Auth.userdetails;
   const userType = userDetails.userType;
   const [defaultFileList, setDefaultFileList] = useState([]);
@@ -238,10 +238,7 @@ function Documents(props) {
       (data: ChonkyFileActionData) => {
         switch (data.id) {
           case OpenThread.id:
-            props.thread(true, {
-              docType: "document",
-              docId: data.state.selectedFiles[0].id,
-            });
+            openThread("document", data.state.selectedFiles[0].id, {});
             break;
           //-----Changing DIR state--------------------------------------------------
           case ChonkyActions.OpenFiles.id:
@@ -834,4 +831,4 @@ function Documents(props) {
   );
 }
 
-export default connect(null, { thread })(Documents);
+export default Documents;

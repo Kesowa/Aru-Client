@@ -36,19 +36,18 @@ import Dragger from "antd/lib/upload/Dragger";
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { connect } from "react-redux";
 import moment from "moment";
 import "./data.less";
 import OutcomeModal from "./OutcomeModal";
 import { API_URL, STATIC_URL } from "src/constants";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
-import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
 import axios from "axios";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
+import { ThreadContext } from "src/services/threadUtils";
 
 const { Text, Title } = Typography;
 let plainOptions = new Array<any>();
@@ -92,6 +91,8 @@ function Outcomes(props) {
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
   const userType = userDetails.userType;
+
+  const { thread, openThread } = useContext(ThreadContext);
 
   const outcomeMenu: MenuProps["items"] = (data) => {
     const item = [
@@ -141,10 +142,7 @@ function Outcomes(props) {
         break;
       case "3":
         setThumbnail(thumbnailComponent(selectedOutcome));
-        props.thread(true, {
-          docType: "alert",
-          docId: selectedOutcome._id,
-        });
+        openThread("alert", selectedOutcome._id, {});
         break;
       case "4":
         toggleFlag(selectedOutcome);
@@ -239,10 +237,10 @@ function Outcomes(props) {
   ]);
 
   useEffect(() => {
-    if (!props.Thread.open) {
+    if (!thread.open) {
       setRefresh(true);
     }
-  }, [props.Thread.open]);
+  }, [thread.open]);
 
   function fetchOutcomes() {
     if (refresh) {
@@ -1311,8 +1309,4 @@ function Outcomes(props) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Thread: state.Thread,
-});
-
-export default connect(mapStateToProps, { thread })(Outcomes);
+export default Outcomes;

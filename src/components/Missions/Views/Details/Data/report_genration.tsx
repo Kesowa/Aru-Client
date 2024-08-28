@@ -7,8 +7,6 @@ import "./data.less";
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { connect } from "react-redux";
-import { thread } from "../../../../../actions/threadAction";
 
 import "./data.less";
 import { AuthContext } from "src/services/authUtils";
@@ -103,8 +101,4 @@ function ReportGenration(props) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Thread: state.Thread,
-});
-
-export default connect(mapStateToProps, { thread })(ReportGenration);
+export default ReportGenration;

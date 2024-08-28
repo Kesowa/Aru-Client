@@ -45,22 +45,20 @@ import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import moment from "moment";
 import VideoPlayer from "../../../../shared/VideoPlayer";
 import Dragger from "antd/lib/upload/Dragger";
-import { connect } from "react-redux";
 import { API_URL, STATIC_URL } from "src/constants";
 import { io } from "socket.io-client";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
-import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
 import axios from "axios";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
+import { ThreadContext } from "src/services/threadUtils";
 
 type props = {
   missionDetails: any;
   userType: any;
   userDetails: any;
-  thread: any;
 };
 const { Text } = Typography;
 function Videos(props) {
@@ -97,6 +95,8 @@ function Videos(props) {
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
   const userType = userDetails.userType;
+
+  const { thread, openThread } = useContext(ThreadContext);
 
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
@@ -161,15 +161,13 @@ function Videos(props) {
       case "1":
         break;
       case "2":
-        props.thread(true, {
-          docType: "vod",
-          docId: selectedVideo?.data._id,
-          tags: selectedVideo?.data.bookmarks
+        openThread("vod", selectedVideo?.data._id, 
+          selectedVideo?.data.bookmarks
             ? {
                 bookmarks: generateTags(),
               }
-            : {},
-        });
+            : {}
+        );
         setThumbnail(vodThumbnail());
         break;
       case "3":
@@ -362,10 +360,10 @@ function Videos(props) {
     }
   }
   useEffect(() => {
-    if (!props.Thread.open) {
+    if (!thread.open) {
       setRefresh(true);
     }
-  }, [props.Thread.open]);
+  }, [thread.open]);
   //--------------- Upload Props -------------------------
 
   const UploadProps = {
@@ -1614,8 +1612,4 @@ function Videos(props) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Thread: state.Thread,
-});
-
-export default connect(mapStateToProps, { thread })(Videos);
+export default Videos;

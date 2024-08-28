@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { connect } from "react-redux";
 import {
   Row,
   Col,
@@ -29,8 +28,8 @@ import moment from "moment";
 import getAddressfromLatLong from "../../../services/reverseGeocoding";
 import { STATIC_URL } from "src/constants";
 import { BsFlagFill } from "react-icons/bs";
-import { thread } from "src/actions/threadAction";
 import { AuthContext } from "src/services/authUtils";
+import { ThreadContext } from "src/services/threadUtils";
 
 const { Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -49,6 +48,7 @@ function InfoWindow(props) {
   const [lengthUnit, setLenghtUnit] = useState("km");
 
   const { logout } = useContext(AuthContext);
+  const { thread, openThread } = useContext(ThreadContext);
 
   const [fileCount, setFileCount] = useState(0);
   const [imageToShow, setImageToshow] = useState<any>([]);
@@ -557,7 +557,7 @@ function InfoWindow(props) {
                           <Tooltip placement="right" title={"Open Thread"}>
                             <MessageOutlined
                               style={{
-                                color: props.open ? "#3b86ff" : "#000",
+                                color: thread.open ? "#3b86ff" : "#000",
                                 cursor: "pointer",
                                 fontSize: "16px",
                               }}
@@ -565,10 +565,7 @@ function InfoWindow(props) {
                                 props.setThumbnail(
                                   alertThumbnail(props.feature.properties)
                                 );
-                                props.thread(true, {
-                                  docType: "alert",
-                                  docId: props.feature.properties._id,
-                                });
+                                openThread("alert", props.feature.properties._id, {});
                               }}
                             />
                           </Tooltip>
@@ -916,8 +913,4 @@ function InfoWindow(props) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  open: state.Thread.open,
-});
-
-export default connect(mapStateToProps, { thread })(InfoWindow);
+export default InfoWindow;

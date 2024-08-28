@@ -23,7 +23,6 @@ import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import axios from "axios";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { connect } from "react-redux";
 import {
   InboxOutlined,
   ExclamationCircleOutlined,
@@ -43,11 +42,11 @@ import { API_URL, STATIC_URL } from "src/constants";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import { BsFlagFill } from "react-icons/bs";
-import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
+import { ThreadContext } from "src/services/threadUtils";
 
 let plainOptions = new Array<any>();
 function ImageDocs(props) {
@@ -80,6 +79,8 @@ function ImageDocs(props) {
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
   const userType = userDetails.userType;
+
+  const { thread, openThread } = useContext(ThreadContext);
 
   const imgMenu: MenuProps["items"] = (data) => {
     const item = [
@@ -140,10 +141,7 @@ function ImageDocs(props) {
             true
           )
         );
-        props.thread(true, {
-          docType: "document",
-          docId: selectedImg._id,
-        });
+        openThread("document", selectedImg._id, {});
         break;
       case "4":
         toggleFlag(selectedImg);
@@ -389,10 +387,10 @@ function ImageDocs(props) {
     });
   }
   useEffect(() => {
-    if (!props.Thread.open) {
+    if (!thread.open) {
       fetchDocuments();
     }
-  }, [props.Thread.open]);
+  }, [thread.open]);
   //------------------Get Images------------------------------------------
   const getFlaggedFilter = () => {
     if (flaggedFilter) {
@@ -959,8 +957,4 @@ function ImageDocs(props) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Thread: state.Thread,
-});
-
-export default connect(mapStateToProps, { thread })(ImageDocs);
+export default ImageDocs;

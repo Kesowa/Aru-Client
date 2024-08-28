@@ -2,7 +2,6 @@ import { useState, useEffect, useContext } from "react";
 import { default as Shimmer } from "react-loading-skeleton";
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { connect } from "react-redux";
 import {
   Image,
   Row,
@@ -44,8 +43,8 @@ import moment from "moment";
 import { PUBLIC_URL, STATIC_URL } from "src/constants";
 import VideoPlayer from "src/components/shared/VideoPlayer";
 import { BsFlagFill } from "react-icons/bs";
-import { thread } from "../../../actions/threadAction";
 import { AuthContext } from "src/services/authUtils";
+import { ThreadContext } from "src/services/threadUtils";
 
 function Media(props) {
   const [files, populateFiles] = useState<any>([]);
@@ -63,6 +62,7 @@ function Media(props) {
   const [selectedMedia, setSelectedMedia] = useState("");
 
   const { logout } = useContext(AuthContext);
+  const { thread, openThread } = useContext(ThreadContext);
 
   const tabPaneRender = () => {
     const items = [
@@ -166,15 +166,13 @@ function Media(props) {
         toggleFlag(data);
         break;
       case "3":
-        props.thread(true, {
-          docType: "vod",
-          docId: data._id,
-          tags: data.bookmarks
-            ? {
-                bookmarks: generateTags(data.bookmarks),
-              }
-            : {},
-        });
+        openThread("vod", data._id, 
+          data.bookmarks
+          ? {
+              bookmarks: generateTags(data.bookmarks),
+            }
+          : {}
+        );
         props.setThumbnail(vodThumbnail(data, idx));
         break;
       case "4":
@@ -217,10 +215,7 @@ function Media(props) {
         window.open(`${PUBLIC_URL}${selectedMedia.filePath}`);
         break;
       case "2":
-        props.thread(true, {
-          docType: "layerfile",
-          docId: selectedMedia._id,
-        });
+        openThread("layerfile", selectedMedia._id, {});
         break;
       case "3":
         Modal.confirm({
@@ -514,10 +509,10 @@ function Media(props) {
   }, [props.layerId, props.featureIndex, props.visible, refresh]);
 
   useEffect(() => {
-    if (!props.Thread.open) {
+    if (!thread.open) {
       setRefresh(true);
     }
-  }, [props.Thread.open]);
+  }, [thread.open]);
 
   //------------Delete File-----------------------------
   function deleteFile(id: any) {
@@ -1212,8 +1207,4 @@ function Media(props) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Thread: state.Thread,
-});
-
-export default connect(mapStateToProps, { thread })(Media);
+export default Media;
