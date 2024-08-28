@@ -1,5 +1,4 @@
 import React, { useState, useEffect, FC } from "react";
-import { connect, ConnectedProps } from "react-redux";
 import { Card, message, Typography } from "antd";
 import { InfoCircleFilled } from "@ant-design/icons";
 import { Collapse } from "antd";

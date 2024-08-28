@@ -1,5 +1,4 @@
 import { useState, Suspense, lazy, useContext } from "react";
-import { connect } from "react-redux";
 import { Layout, Row, Col, Typography, Space, Spin } from "antd";
 import { useHistory } from "react-router-dom";
 

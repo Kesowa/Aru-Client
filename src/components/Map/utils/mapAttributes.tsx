@@ -414,7 +414,7 @@ const MapAttributes: React.FC<Props> = (props) => {
           bottomBarHeight={props.bottomBarHeight}
           contentHeight={state.contentHeight}
           tableData={state.tableData}
-          // allLayers={props.allLayers} // The FeatureTable component takes the allLayers prop from global state, the value passed here doesn't get used
+          allLayers={props.AllLayers}
           flaggedFilter={props.flaggedFilter}
           unflaggedFilter={props.unflaggedFilter}
           setPage={(page) => setState((prev) => ({ ...prev, page }))}

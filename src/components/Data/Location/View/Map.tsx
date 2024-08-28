@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
 import MarkerClusterer from "@googlemaps/markerclustererplus";
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { subDays, subMonths } from "date-fns";

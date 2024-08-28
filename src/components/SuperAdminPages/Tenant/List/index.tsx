@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from "react";
-import { connect } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { message, Button, Table, Tag, Input, Popconfirm } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";

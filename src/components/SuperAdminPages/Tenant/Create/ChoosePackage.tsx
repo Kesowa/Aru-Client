@@ -3,7 +3,6 @@ import { Row, Col, Card, message, Skeleton, Button } from "antd";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { connect } from "react-redux";
 import { STATIC_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
 

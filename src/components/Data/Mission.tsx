@@ -17,7 +17,6 @@ import { SearchOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
-import { connect } from "react-redux";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import http from "../../services/httpCall";
 import apis from "../../services/apis";

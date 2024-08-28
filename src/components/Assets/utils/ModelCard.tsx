@@ -28,7 +28,6 @@ import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import AloneLogo from "../../../static/Alone-rafiki.svg";
 import moment from "moment";
-import { connect } from "react-redux";
 import { FormInstance } from "antd/lib/form";
 import { AuthContext } from "src/services/authUtils";
 
