@@ -1,6 +1,4 @@
 import React from "react";
-import Hls from "hls.js";
-
 class Video extends React.Component {
   player: any = null;
 

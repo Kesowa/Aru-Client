@@ -43,7 +43,6 @@
     "eslint-plugin-prettier": "^4.2.1",
     "exifreader": "^4.5.0",
     "get-video-duration": "^3.0.2",
-    "hls.js": "^1.5.11",
     "html-to-image": "^1.11.11",
     "html2canvas": "^1.0.0-rc.7",
     "less": "^4.1.3",
