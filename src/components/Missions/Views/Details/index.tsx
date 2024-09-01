@@ -471,7 +471,7 @@ function MissionView(props) {
     if (MissionDetails.missionType === "Mapping") {
       return items;
     } else {
-      return items.filter((item) => item.key !== "1" && item.key !== "2");
+      return items.filter((item) => !["1","2","6"].includes(item.key));
     }
   };
 
