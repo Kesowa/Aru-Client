@@ -54,6 +54,8 @@ function UserCreatePage(props: any) {
       setAvatarPreview(previewUrl);
       const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
       setAvatar(uploadToken);
+      setIsAvatarUploading(false);
+
 
       // const body = {
       //   file: uploadToken.id,
@@ -170,7 +172,7 @@ function UserCreatePage(props: any) {
     http
       .post(apis.CREATE_CLIENT, body)
       .then((result) => {
-        console.log(result.data);
+        console.log("result data:",result.data);
         if (result.data.status) {
           form.resetFields();
           setAvatar("");

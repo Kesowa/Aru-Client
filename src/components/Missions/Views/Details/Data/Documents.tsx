@@ -39,7 +39,7 @@ import download from "downloadjs";
 import { API_URL, STATIC_URL } from "src/constants";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
-import axios from "axios";
+import axios, { AxiosRequestConfig }  from "axios";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 import { RcFile } from "antd/lib/upload";
 
@@ -416,7 +416,19 @@ function Documents(props) {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       if (validateFile(options.file)) {
-        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+        const config:AxiosRequestConfig = {
+          onUploadProgress: (event) => {
+            const percent = Math.floor((event.loaded / event.total) * 100);
+            setProgress(percent);
+            if (percent === 100) {
+              setTimeout(() => setProgress(0), 1000);
+            }
+            options.onProgress({ percent: (event.loaded / event.total) * 100 });
+          },
+          cancelToken: source.token,
+        };
+        
+        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog),config);
         const fileExtension = options.file.name.substring(options.file.name.lastIndexOf(".") + 1).toLowerCase();
 
         const body = {
@@ -442,18 +454,6 @@ function Documents(props) {
         // } else {
         //   fData.append("type", options.file.type);
         // }
-        
-        const config = {
-          onUploadProgress: (event) => {
-            const percent = Math.floor((event.loaded / event.total) * 100);
-            setProgress(percent);
-            if (percent === 100) {
-              setTimeout(() => setProgress(0), 1000);
-            }
-            options.onProgress({ percent: (event.loaded / event.total) * 100 });
-          },
-          cancelToken: source.token,
-        };
 
         switch (
           props.missionDetails.userType //upload priviledge checks

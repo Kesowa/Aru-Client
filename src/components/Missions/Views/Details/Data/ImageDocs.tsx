@@ -21,7 +21,7 @@ import "./checkbox.less";
 
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import { logout } from "../../../../../actions/authAction";
 import { connect } from "react-redux";
@@ -261,7 +261,19 @@ function ImageDocs(props) {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       if (validateFile(options.file)) {
-        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+        const config:AxiosRequestConfig = {
+          onUploadProgress: (event) => {
+            const percent = Math.floor((event.loaded / event.total) * 100);
+            setProgress(percent);
+            if (percent === 100) {
+              setTimeout(() => setProgress(0), 1000);
+            }
+            options.onProgress({ percent: (event.loaded / event.total) * 100 });
+          },
+          cancelToken: source.token,
+        };
+
+        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog),config);
 
         const body = {
           file: uploadToken,
@@ -275,17 +287,6 @@ function ImageDocs(props) {
         // fData.append("missionId", props.missionDetails.missionId);
         // fData.append("folderName", "photos");
         console.log("File type: ", options.file.type);
-        const config = {
-          onUploadProgress: (event) => {
-            const percent = Math.floor((event.loaded / event.total) * 100);
-            setProgress(percent);
-            if (percent === 100) {
-              setTimeout(() => setProgress(0), 1000);
-            }
-            options.onProgress({ percent: (event.loaded / event.total) * 100 });
-          },
-          cancelToken: source.token,
-        };
 
         switch (
           props.missionDetails.userType //upload priviledge checks

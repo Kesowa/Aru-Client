@@ -18,6 +18,7 @@ import {
 } from "antd";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
+import { AxiosRequestConfig } from "axios";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { connect } from "react-redux";
@@ -106,10 +107,21 @@ const CreateLayer = (props: any) => {
         return;
       }
       setIsUploading(true);
+
+      const config:AxiosRequestConfig = {
+        onUploadProgress: (event) => {
+          const percent = Math.floor((event.loaded / event.total) * 100);
+          setProgress(percent);
+          if (percent === 100) {
+            setTimeout(() => setProgress(0), 1000);
+          }
+        },
+      };
+
       const uploadTokenPromises = fileList.map((file) =>
       uploadFile(file.originFileObj, DocModel.LAYER_FILES, (prog) =>
         console.info("PROGRESS: " + prog)
-      )
+      ),config
     );
       const uploadTokens = await Promise.all(uploadTokenPromises);
 
@@ -142,17 +154,6 @@ const CreateLayer = (props: any) => {
       //     return;
       //   }
       // });
-      console.log("create layer data :",body);
-
-      const config = {
-        onUploadProgress: (event) => {
-          const percent = Math.floor((event.loaded / event.total) * 100);
-          setProgress(percent);
-          if (percent === 100) {
-            setTimeout(() => setProgress(0), 1000);
-          }
-        },
-      };
       console.log("create layer data :",body);
 
       http

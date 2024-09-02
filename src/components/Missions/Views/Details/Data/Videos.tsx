@@ -53,7 +53,7 @@ import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 
 
@@ -384,9 +384,23 @@ function Videos(props) {
     customRequest: async (options: any) => {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
-      console.log("here");
       setUploading(true);
-      const uploadToken = await uploadFile(options.file, DocModel.VOD, (prog) => console.info("PROGRESS: " + prog));
+
+      const config:AxiosRequestConfig  = {
+        onUploadProgress: (event) => {
+          const percent = Math.floor((event.loaded / event.total) * 100);
+          setProgress(percent);
+          if (percent === 100) {
+            setTimeout(() => setProgress(0), 1000);
+          }
+          options.onProgress({ percent: (event.loaded / event.total) * 100 });
+        },
+        cancelToken: source.token,
+      };
+      
+      const uploadToken = await uploadFile(options.file, DocModel.VOD, (prog) => {
+        console.info("PROGRESS: " + prog);
+      },config);
         
       const body = {
         file : uploadToken,
@@ -401,18 +415,6 @@ function Videos(props) {
       // if (props.missionDetails.locationId?._id) {
       //   fData.append("locationID", props.missionDetails.locationId?._id);
       // }
-
-      const config = {
-        onUploadProgress: (event) => {
-          const percent = Math.floor((event.loaded / event.total) * 100);
-          setProgress(percent);
-          if (percent === 100) {
-            setTimeout(() => setProgress(0), 1000);
-          }
-          options.onProgress({ percent: (event.loaded / event.total) * 100 });
-        },
-        cancelToken: source.token,
-      };
 
       switch (
         props.missionDetails.userType //upload priviledge checks

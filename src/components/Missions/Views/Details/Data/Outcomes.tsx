@@ -47,7 +47,7 @@ import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 import { asString } from "html2canvas/dist/types/css/types/color";
 
@@ -677,7 +677,22 @@ function Outcomes(props) {
       // const fData = new FormData();
       const res = await extractExif(options.file);
       console.log(res);
-      const uploadToken = await uploadFile(options.file, DocModel.ALERT_IMAGES, (prog) => console.info("PROGRESS: " + prog));
+
+      const config:AxiosRequestConfig = {
+        onUploadProgress: (event) => {
+          const percent = Math.floor((event.loaded / event.total) * 100);
+          setProgress(percent);
+          if (percent === 100) {
+            setTimeout(() => setProgress(0), 1000);
+          }
+          options.onProgress({
+            percent: (event.loaded / event.total) * 100,
+          });
+        },
+        cancelToken: source.token,
+      };
+
+      const uploadToken = await uploadFile(options.file, DocModel.ALERT_IMAGES, (prog) => console.info("PROGRESS: " + prog),config);
 
       const body = {
         file: uploadToken,
@@ -704,19 +719,6 @@ function Outcomes(props) {
           // fData.append("note", "Alert uploaded from browser!");
           // fData.append("onSite", "false");
           // fData.append("flightId", props.missionDetails.flightId);
-          const config = {
-            onUploadProgress: (event) => {
-              const percent = Math.floor((event.loaded / event.total) * 100);
-              setProgress(percent);
-              if (percent === 100) {
-                setTimeout(() => setProgress(0), 1000);
-              }
-              options.onProgress({
-                percent: (event.loaded / event.total) * 100,
-              });
-            },
-            cancelToken: source.token,
-          };
           http
             .post(options.action, body, config)
             .then((res: any) => {

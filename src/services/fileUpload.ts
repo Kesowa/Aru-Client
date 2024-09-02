@@ -1,8 +1,8 @@
 import type { RcFile } from "antd/lib/upload";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import http from "./httpCall";
 
-export async function uploadFile(file: RcFile, model: DocModel, progress?: (frac: number) => void) {
+export async function uploadFile(file: RcFile, model: DocModel, progress?: (frac: number) => void,  config?: AxiosRequestConfig) {
   const getUrlRes = await http.post<{
     status: true,
     message: string,
@@ -31,9 +31,7 @@ export async function uploadFile(file: RcFile, model: DocModel, progress?: (frac
   Object.entries(formData).forEach(([key, val]) => postFormData.set(key, val));
   postFormData.append("file", file);
   await axios.post(postURL, postFormData, progress && {
-    onUploadProgress(event) {
-      progress(event.loaded/event.total);
-    }
+    ...config,
   })
   console.log("upload token is here ",getUrlRes.data.data._id,getUrlRes.data.data.metadata.objectkey);
   return getUrlRes.data.data._id;

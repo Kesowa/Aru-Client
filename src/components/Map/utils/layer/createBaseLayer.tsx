@@ -28,6 +28,7 @@ import {
 } from "antd";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
+import { AxiosRequestConfig } from "axios";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { connect } from "react-redux";
@@ -322,7 +323,17 @@ const CreateBaseLayer = (props) => {
       setUploading(true);
       if (props.isUpdate) {
         if (props.updateType == "Raster") {
-        const uploadToken = await uploadFile(fileList[0], DocModel.RASTER, (prog) => console.info("PROGRESS: " + prog));
+
+        const config:AxiosRequestConfig = {
+          onUploadProgress: (event) => {
+              const percent = Math.floor((event.loaded / event.total) * 100);
+              setProgress(percent);
+            if (percent === 100) {
+                setTimeout(() => setProgress(0), 1000);
+              }
+            },
+          };
+        const uploadToken = await uploadFile(fileList[0], DocModel.RASTER, (prog) => console.info("PROGRESS: " + prog),config);
 
         const body = {
           file: uploadToken,
@@ -331,15 +342,6 @@ const CreateBaseLayer = (props) => {
 
           // UPDATE RASTER BY FILE UPLOAD
           // const fmData = new FormData();
-          const config = {
-            onUploadProgress: (event) => {
-              const percent = Math.floor((event.loaded / event.total) * 100);
-              setProgress(percent);
-              if (percent === 100) {
-                setTimeout(() => setProgress(0), 1000);
-              }
-            },
-          };
           // fmData.append("file", fileList[0]);
           // fmData.append("layerId", props.BaseLayerId);
           const result = await http.patch(
@@ -357,15 +359,8 @@ const CreateBaseLayer = (props) => {
             message.error(result.data.message);
           }
         } else {
-          // UPDATE VECTOR BY FILE UPLOAD
-          const uploadToken = await uploadFile(fileList[0], DocModel.VECTOR, (prog) => console.info("PROGRESS: " + prog));
 
-          const body = {
-            file: uploadToken,
-            baseLayer: props.BaseLayerId,
-          };
-          // const fmData = new FormData();
-          const config = {
+          const config:AxiosRequestConfig = {
             onUploadProgress: (event) => {
               const percent = Math.floor((event.loaded / event.total) * 100);
               setProgress(percent);
@@ -374,6 +369,14 @@ const CreateBaseLayer = (props) => {
               }
             },
           };
+          // UPDATE VECTOR BY FILE UPLOAD
+          const uploadToken = await uploadFile(fileList[0], DocModel.VECTOR, (prog) => console.info("PROGRESS: " + prog),config);
+
+          const body = {
+            file: uploadToken,
+            baseLayer: props.BaseLayerId,
+          };
+          // const fmData = new FormData();
           // fmData.append("file", fileList[0]);
           // fmData.append("baseLayer", props.BaseLayerId);
           const result = await http.post(
@@ -398,8 +401,17 @@ const CreateBaseLayer = (props) => {
         }
       } else {
         // CREATE BASE LAYER BY UPLOAD
+        const config:AxiosRequestConfig = {
+          onUploadProgress: (event) => {
+            const percent = Math.floor((event.loaded / event.total) * 100);
+            setProgress(percent);
+            if (percent === 100) {
+              setTimeout(() => setProgress(0), 1000);
+            }
+          },
+        };
         const docModel = layerType === "Vector" ? DocModel.VECTOR : layerType === "Raster" ? DocModel.RASTER : DocModel.LAYER_FILES;
-        const uploadToken = await uploadFile(fileList[0], docModel, (prog) => console.info("PROGRESS: " + prog));
+        const uploadToken = await uploadFile(fileList[0], docModel, (prog) => console.info("PROGRESS: " + prog),config);
 
           const body = {
             file: uploadToken,
@@ -415,15 +427,6 @@ const CreateBaseLayer = (props) => {
             ...(layerType === "Raster" ? { raster: String(layerProp) } : {}),
           };
         // const fmData = new FormData();
-        const config = {
-          onUploadProgress: (event) => {
-            const percent = Math.floor((event.loaded / event.total) * 100);
-            setProgress(percent);
-            if (percent === 100) {
-              setTimeout(() => setProgress(0), 1000);
-            }
-          },
-        };
         // fmData.append("file", fileList[0]);
         // fmData.append("captureDate", captureDate);
         // fmData.append("name", layerName);

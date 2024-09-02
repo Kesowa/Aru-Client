@@ -102,6 +102,7 @@ import { StaticMap } from "react-map-gl";
 import MapAttributes from "./utils/mapAttributes";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
+import { AxiosRequestConfig } from "axios";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { connect } from "react-redux";
 import { logout } from "../../actions/authAction";
@@ -5226,8 +5227,18 @@ function BaseMap(props) {
     try {
       setUploading(true);
       // Determine the correct DocModel based on layerType
+      const config:AxiosRequestConfig = {
+        onUploadProgress: (event) => {
+          const percent = Math.floor((event.loaded / event.total) * 100);
+          setProgress(percent);
+          if (percent === 100) {
+            setTimeout(() => setProgress(0), 1000);
+          }
+        },
+      };
+
       const docModel = layerType === "Vector" ? DocModel.VECTOR : layerType === "Raster" ? DocModel.RASTER : DocModel.LAYER_FILES;
-      const uploadToken = await uploadFile(fileList[0], docModel, (prog) => console.info("PROGRESS: " + prog));
+      const uploadToken = await uploadFile(fileList[0], docModel, (prog) => console.info("PROGRESS: " + prog),config);
 
       const body = {
         file: uploadToken,
@@ -5243,16 +5254,6 @@ function BaseMap(props) {
       };
 
       // const fmData = new FormData();
-
-      const config = {
-        onUploadProgress: (event) => {
-          const percent = Math.floor((event.loaded / event.total) * 100);
-          setProgress(percent);
-          if (percent === 100) {
-            setTimeout(() => setProgress(0), 1000);
-          }
-        },
-      };
       // fmData.append("file", fileList[0]);
       // fmData.append("captureDate", captureDate);
       // fmData.append("name", layerName);
