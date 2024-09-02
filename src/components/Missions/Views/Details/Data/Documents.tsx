@@ -170,7 +170,12 @@ function Documents(props) {
       const files = currentFolder.childrenIds
         ? currentFolder.childrenIds.map(
             (fileId: string) => fileMap[fileId] ?? null
-          )
+          ).sort((a, b) => {
+            if (!a.modDate || !b.modDate) return 0;
+            if (a.modDate > b.modDate) return -1;
+            if (a.modDate < b.modDate) return 1;
+            return 0;
+          })
         : [];
       return files;
     }, [currentFolderId, filesSystem]);
