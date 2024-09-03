@@ -386,21 +386,23 @@ function Videos(props) {
       const source = cancelToken.source();
       setUploading(true);
 
-      const config:AxiosRequestConfig  = {
+      const config: AxiosRequestConfig = {
         onUploadProgress: (event) => {
           const percent = Math.floor((event.loaded / event.total) * 100);
-          setProgress(percent);
+          // setProgress(percent);
           if (percent === 100) {
-            setTimeout(() => setProgress(0), 1000);
+            // setTimeout(() => setProgress(0), 1000);
           }
-          options.onProgress({ percent: (event.loaded / event.total) * 100 });
+          // options.onProgress({ percent: (event.loaded / event.total) * 100 });
         },
         cancelToken: source.token,
       };
-      
+
       const uploadToken = await uploadFile(options.file, DocModel.VOD, (prog) => {
-        console.info("PROGRESS: " + prog);
-      },config);
+        console.log("PROGRESS: ", prog);
+        setProgress(prog * 100);
+        options.onProgress({ percent: prog * 100 });
+      }, source.token);
         
       const body = {
         file : uploadToken,
