@@ -1845,7 +1845,7 @@ function BaseMap(props) {
     // console.log("it may be by traiin map",checkedKeys);
     setScaleData();
     // drawLayers(checkedKeys);
-    focusSelectedLayers();
+    // focusSelectedLayers();
     console.log("lost");
   }, [
     // checkedKeys,
@@ -3865,7 +3865,7 @@ function BaseMap(props) {
   //   }
   // };
 
-  const getTitleElement = (layer: ILayer) => {
+  const getTitleElement = (layer: Layer) => {
     const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
       const type = layer.type;
       switch (e.key) {
@@ -4043,6 +4043,22 @@ function BaseMap(props) {
               }}
               ellipsis={true}
               onClick={() => {
+                if (layer._isChecked && layer._metadata?.bounds) {
+                  const { longitude, latitude, zoom } = calculateViewport(layer._metadata.bounds);
+                  setViewport({
+                    longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+                    latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
+                    zoom,
+                    pitch: 0,
+                    minZoom: 0,
+                    maxZoom: 22,
+                    bearing: 0,
+                    transitionDuration: 2000,
+                    transitionInterpolator: new FlyToInterpolator(),
+                  });
+                }
+              }}
+              onDoubleClick={() => {
                 if (!props.isBaseMap || layer.type === "Vector") {
                   setlayerToAddInAttributeTable({
                     name: layer.name,
