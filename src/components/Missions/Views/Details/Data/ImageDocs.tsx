@@ -261,19 +261,19 @@ function ImageDocs(props) {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       if (validateFile(options.file)) {
-        const config:AxiosRequestConfig = {
-          onUploadProgress: (event) => {
-            const percent = Math.floor((event.loaded / event.total) * 100);
-            setProgress(percent);
-            if (percent === 100) {
-              setTimeout(() => setProgress(0), 1000);
-            }
-            options.onProgress({ percent: (event.loaded / event.total) * 100 });
-          },
-          cancelToken: source.token,
-        };
+        // const config:AxiosRequestConfig = {
+        //   onUploadProgress: (event) => {
+        //     const percent = Math.floor((event.loaded / event.total) * 100);
+        //     setProgress(percent);
+        //     if (percent === 100) {
+        //       setTimeout(() => setProgress(0), 1000);
+        //     }
+        //     options.onProgress({ percent: (event.loaded / event.total) * 100 });
+        //   },
+        //   cancelToken: source.token,
+        // };
 
-        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog),config);
+        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => { setProgress(prog * 100); options.onProgress({ percent: prog * 100 })}, source.token);
 
         const body = {
           file: uploadToken,
@@ -293,7 +293,7 @@ function ImageDocs(props) {
         ) {
           case "tenant-root": //when user is a tenant root
             http
-              .post(options.action, body, config)
+              .post(options.action, body)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 message.success(
@@ -326,7 +326,7 @@ function ImageDocs(props) {
 
           case "tenant-staff": // when user is tenant staff
             http
-              .post(options.action, body, config) 
+              .post(options.action, body) 
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 message.success(
