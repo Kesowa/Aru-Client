@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
+import { useHistory, useParams } from "react-router-dom";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
-import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import {
   List,
@@ -18,8 +17,6 @@ import {
   Collapse,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -36,8 +33,10 @@ import moment from "moment";
 import { STATIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
 import { PERMS, TENANT_STAFF_PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
-function UserEditPage(props: any) {
+function UserEditPage() {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
@@ -57,6 +56,16 @@ function UserEditPage(props: any) {
   }>();
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
+
+  const [user, setUser] = useState<any>(null);
+
+  const { id } = useParams<any>();
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+
+  const { setLoading } = useContext(LoaderContext);
+
   //avatar upload
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
@@ -80,7 +89,7 @@ function UserEditPage(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsAvatarUploading(false);
@@ -97,7 +106,7 @@ function UserEditPage(props: any) {
 
   //fetch user group
   const fetchAllUserGroupList = () => {
-    props.loading(true);
+    setLoading(true);
     http
       .get(apis.FETCH_TENANT_USER_GROUP)
       .then((result) => {
@@ -111,12 +120,10 @@ function UserEditPage(props: any) {
             )
             .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }));
 
-          if (!props.user) {
-            history.push("/dashboard/tenant/user/list");
-            return;
-          }
+          const sug = groups.find((g) => g._id === user.userGroupId);
 
-          const sug = groups.find((g) => g._id === props.user.userGroupId);
+          console.log("groups", groups);
+          console.log("user", user);
           console.log("sug", sug);
 
           setSelectedusergroup(sug);
@@ -144,33 +151,56 @@ function UserEditPage(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
+
+  const fetchUserDetails = () => {
+    setLoading(true);
+    http
+      .get(apis.FETCH_USER_OF_TENANT_BY_ID, { params: { id } })
+      .then((result) => {
+        if (result.data.status) {
+          console.log(result.data.data);
+          setUser(result.data.data);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
-    if (!props.Auth.isLoggedIn) {
+    if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
-    } else if (props.userDetails.userType !== "tenant-root") {
+    } else if (userDetails.userType !== "tenant-root") {
       // only tenant-root can change tenant-staff details
       setErrorState("401");
     } else {
       // current user is tenant-root, proceed to fetching necessary data for user details editing
-      if (props.user.userType !== "tenant-root") {
-        // when tenant-root is editing their own user details, usergroups need not be fetched 
-        // as tenant-root won't belong to a user group
-        fetchAllUserGroupList();
-      }
+      fetchUserDetails();
     }
   }, []);
 
   useEffect(() => {
-    if (props.user) {
-      setAvatar(props.user.avatar);
+    if (user) {
+      if (user.userType !== "tenant-root") {
+        // when tenant-root is editing their own user details, usergroups need not be fetched 
+        // as tenant-root won't belong to a user group
+        fetchAllUserGroupList();
+      }
+      setAvatar(user.avatar);
     }
-  }, [props.user]);
+  }, [user]);
 
   //subimt form
   const onFinish = (data: any) => {
@@ -183,9 +213,9 @@ function UserEditPage(props: any) {
   };
 
   const EditUserAccount = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
-      id: props.user._id,
+      id: user._id,
       ...data,
     };
     if (avatar && avatar !== "") {
@@ -207,10 +237,10 @@ function UserEditPage(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -228,7 +258,7 @@ function UserEditPage(props: any) {
     default:
       return (
         <div className="tenant-root-usercreatepage-wrapper full-width-height">
-          {props.user && (props.user.userType === "tenant-staff" ? selectedUserGroup : true) && (
+          {user && (user.userType === "tenant-staff" ? selectedUserGroup : true) && (
             <>
               <PageHeader
                 onBack={() => window.history.back()}
@@ -254,11 +284,11 @@ function UserEditPage(props: any) {
                   onFinish={onFinish}
                   scrollToFirstError={true}
                   initialValues={{
-                    name: props.user.name,
-                    email: props.user.email,
-                    phoneNo: props.user.phoneNo,
+                    name: user.name,
+                    email: user.email,
+                    phoneNo: user.phoneNo,
                     userType: "tenant-client",
-                    userGroupId: (props.user.userType === "tenant-staff" ? selectedUserGroup._id : null),
+                    userGroupId: (user.userType === "tenant-staff" ? selectedUserGroup._id : null),
                   }}
                   className="user-form"
                 >
@@ -269,7 +299,7 @@ function UserEditPage(props: any) {
                       </Form.Item>
                       {
                         // tenant-root can change their own details, while doing that usergroup option shouldn't be displayed
-                        props.user.userType === "tenant-staff" &&
+                        user.userType === "tenant-staff" &&
                         <>
                           <Form.Item label="User Group" name="userGroupId">
                             <Select
@@ -381,7 +411,7 @@ function UserEditPage(props: any) {
                           style={{ width: "100%" }}
                           allowClear={true}
                           format="DD-MM-YYYY"
-                          defaultValue={moment(props.user.dob)}
+                          defaultValue={moment(user.dob)}
                         />
                       </Form.Item>
                     </Col>
@@ -389,7 +419,7 @@ function UserEditPage(props: any) {
                       <Form.Item label="Aadhaar Number" name="aadhaarNo">
                         <Input
                           placeholder="Aadhaar Number"
-                          defaultValue={props.user.aadhaarNo}
+                          defaultValue={user.aadhaarNo}
                         />
                       </Form.Item>
                     </Col>
@@ -400,7 +430,7 @@ function UserEditPage(props: any) {
                       >
                         <Input
                           placeholder="Pilot Licence Number"
-                          defaultValue={props.user.pilotLicenceNo}
+                          defaultValue={user.pilotLicenceNo}
                         />
                       </Form.Item>
                     </Col>
@@ -424,11 +454,4 @@ function UserEditPage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-  user: state.User.userToEdit,
-  userDetails: state.Auth.userdetails,
-});
-
-export default connect(mapStateToProps, { loading, logout })(UserEditPage);
+export default UserEditPage;

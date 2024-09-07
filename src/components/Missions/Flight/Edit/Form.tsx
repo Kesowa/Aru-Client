@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from "react";
+import React, { useState, useEffect, FC, useContext } from "react";
 import {
   Form,
   Input,
@@ -10,40 +10,32 @@ import {
   Typography,
 } from "antd";
 import { InfoCircleFilled } from "@ant-design/icons";
-import { connect } from "react-redux";
 import moment, { Moment } from "moment";
 import { useHistory } from "react-router-dom";
-import {
-  enableFlightEditing,
-  setCenterPoints,
-  setCircleMeasurements,
-  setGeolocation,
-  setPolygonMeasurements
-} from "../../../../actions/missionCreation";
-import { loading } from "../../../../actions/loadingAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
+import { AuthContext } from "src/services/authUtils";
 
 const { Option } = Select;
 const { Title } = Typography;
 const { Text } = Typography;
 
-const EditFlightForm: FC<any> = (props) => {
-  const [flightName, setFlightName] = useState<string>("");
-  const [duration, setDuration] = useState<string>("");
-  const [date, setDate] = useState<string>("");
-  const [time, setTime] = useState<string>("");
-  const [location, setLocation] = useState<string>("none");
-  const [initialDataLoaded, setInitialDataLoaded] = useState<boolean>(false);
+const EditFlightForm: FC<any> = ({
+  flightDetails,
+  setFlightDetails,
+  areaSelected,
+  setisoDate,
+  onSubmit,
+  isEditing,
+}) => {
   const [locations, setLocations] = useState<any>(null);
-  const [id, setId] = useState<string>("");
-  const [pilotId, setPilotId] = useState<string>("");
-  const [pilots, setPilots] = useState<any>([]);
+  const [pilots, setPilots] = useState<any>(null);
   const history = useHistory();
+
+  const { logout } = useContext(AuthContext);
 
   const [form] = Form.useForm();
 
@@ -57,7 +49,7 @@ const EditFlightForm: FC<any> = (props) => {
       })
       .catch((err) => {
         message.error("Locations could not be fetched");
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -69,9 +61,9 @@ const EditFlightForm: FC<any> = (props) => {
           setPilots(result.data.data);
         }
       })
-      .catch((error) => {
-        console.log(error);
-        AxiosErrorHandler(error, props.logout);
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -80,113 +72,54 @@ const EditFlightForm: FC<any> = (props) => {
     getAllPilots();
   }, []);
 
-  useEffect(() => {
-    // local states for flight editing form
-    setFlightName(props.flightDetails.name);
-    setDuration(props.flightDetails.duration);
-    setDate(props.flightDetails.date);
-    setTime(props.flightDetails.time);
-    setId(props.flightDetails._id);
-    setLocation(
-      props.flightDetails.locationID ? props.flightDetails.locationID._id : "none"
-    );
-    setPilotId(
-      props.flightDetails.pilotID ? props.flightDetails.pilotID._id : "no pilot assigned"
-    );
-
-    // signifies that all existing data has been loaded
-    setInitialDataLoaded(true);
-  }, [props.flightDetails]);
-
   const handleFormSubmit = () => {
-    if (location && flightName && duration && time && date) {
-      const body = {
-        _id: id,
-        name: flightName,
-        locationId: location,
-        duration,
-        time,
-        date,
-        geoLocation: props.geoLocation,
-        centerPoints: props.centerPoints,
-      };
-
-      if (props.polygonData && props.polygonData.length > 0) {
-        body["geofence"] = {
-          polygon: {
-            ...props.polygonData,
-          },
-        };
-      } else if (props.circleData) {
-        body["geofence"] = {
-          circle: {
-            ...props.circleData,
-          },
-        };
-      }
-
-      props.loading(true);
-
-      http
-        .patch(apis.ASSIGN_PILOT, {
-          pilotID: pilotId,
-          flightID: id,
-        })
-        .then((result) => {
-          if (result.data.status) {
-            message.success("Pilot Reassigned");
-          }
-        })
-        .catch((err) => {
-          message.error("Something went wrong");
-          AxiosErrorHandler(err, props.logout);
-        });
-
-      http
-        .post(`${apis.EDIT_FLIGHT_BY_ID}`, body)
-        .then((result) => {
-          if (result.data.status) {
-            message.success("Flight Edited Successfully");
-            history.goBack();
-          } else {
-            message.error(result.data.message);
-          }
-        })
-        .catch((err) => {
-          message.error("Something went wrong");
-          AxiosErrorHandler(err, props.logout);
-        })
-        .finally(() => {
-          props.loading(false);
-        });
+    if (
+      flightDetails.locationID && 
+      flightDetails.name && 
+      flightDetails.duration && 
+      flightDetails.time && 
+      flightDetails.date
+    ) {
+      onSubmit();
     } else {
       message.error("Please Fill All the fields");
     }
   };
 
   return (
-    initialDataLoaded && (
+    locations && pilots && (
       <div className="edit-flight-form">
         <div>
           <Title className="panel-title" level={5}>
             <InfoCircleFilled />
-            &nbsp;&nbsp;Edit Flight
+            &nbsp;&nbsp;{ isEditing ? "Edit" : "Create"} Flight
           </Title>
-          <Text className="flight-id">ID : {id}</Text>
+          {
+            flightDetails._id && (flightDetails._id !== "") &&
+            <Text className="flight-id">ID : {flightDetails._id}</Text>
+          }
         </div>
         <Form
           form={form}
           layout="vertical"
           name="create_mission"
-          initialValues={{
-            name: flightName,
-            date: moment(date, "YYYY-MM-DD"),
-            time: moment(time, "HH:mm A"),
-            duration: duration,
-            locationId: props.flightDetails.locationID ? props.flightDetails.locationID.properties.name : "none",
-            pilot: pilotId,
-            remember: true,
-          }}
+          initialValues={
+            isEditing ?
+            {
+              name: flightDetails.name,
+              date: moment(flightDetails.date, "YYYY-MM-DD"),
+              time: moment(flightDetails.time, "HH:mm A"),
+              duration: flightDetails.duration,
+              locationId: flightDetails.locationID ? locations.find(location => location._id === flightDetails.locationID)?.properties.name : "none",
+              pilot: flightDetails.pilotID ? pilots.find(pilot => pilot._id === flightDetails.pilotID)?.name : "no pilot assigned",
+              remember: true,
+            } :
+            {
+              name: flightDetails.name,
+              date: moment(flightDetails.date, "YYYY-MM-DD"),
+              time: moment(flightDetails.time, "HH:mm A"),
+            }
+          }
           size="small"
           requiredMark={false}
         >
@@ -198,7 +131,10 @@ const EditFlightForm: FC<any> = (props) => {
             <Input
               className="locationBox"
               onChange={(e) => {
-                setFlightName(e.target.value);
+                setFlightDetails((prev) => ({
+                  ...prev,
+                  name: e.target.value,
+                }));
               }}
             />
           </Form.Item>
@@ -206,11 +142,14 @@ const EditFlightForm: FC<any> = (props) => {
           <Form.Item name="date" hasFeedback>
             <DatePicker
               onChange={(date: Moment | null) => {
-                setDate(date?.format("YYYY-MM-DD") || "");
-                props.setisoDate(
+                setFlightDetails((prev) => ({
+                  ...prev,
+                  date: date?.format("YYYY-MM-DD") || "",
+                }));
+                setisoDate(
                   date?.format("YYYY-MM-DD") +
                     "T" +
-                    (time.split(" ")[0] || "") +
+                    (flightDetails.time.split(" ")[0] || "") +
                     "Z"
                 );
               }}
@@ -221,10 +160,12 @@ const EditFlightForm: FC<any> = (props) => {
             <TimePicker
               use12Hours={true}
               onChange={(value) => {
-                setTime(value?.format("HH:mm:ss A") || "");
-
-                props.setisoDate(
-                  date +
+                setFlightDetails((prev) => ({
+                  ...prev,
+                  time: value?.format("HH:mm:ss A") || "",
+                }));
+                setisoDate(
+                  flightDetails.date +
                     "T" +
                     (value?.format("HH:mm:ss A").split(" ")[0] || "") +
                     "Z"
@@ -238,7 +179,10 @@ const EditFlightForm: FC<any> = (props) => {
               className="selectBox"
               placeholder="Flight Duration"
               onChange={(value) => {
-                setDuration(value.toString());
+                setFlightDetails((prev) => ({
+                  ...prev,
+                  duration: value.toString(),
+                }));
               }}
             >
               <Option value="1hr">1 Hr</Option>
@@ -252,7 +196,10 @@ const EditFlightForm: FC<any> = (props) => {
               className="selectBox"
               placeholder="Select Location"
               onChange={(value) => {
-                setLocation(value.toString());
+                setFlightDetails((prev) => ({
+                  ...prev,
+                  locationID: value.toString(),
+                }));
               }}
             >
               <Option value={"none"}>none</Option>
@@ -274,7 +221,12 @@ const EditFlightForm: FC<any> = (props) => {
             <Select
               className="selectBox"
               placeholder="Select Pilot"
-              onChange={(value) => setPilotId(value)}
+              onChange={(value) => {
+                setFlightDetails((prev) => ({
+                  ...prev,
+                  pilotID: value.toString(),
+                }));
+              }}
             >
               {pilots.map((pilot: any) => (
                 <Option value={pilot._id} key={pilot._id}>{pilot.name}</Option>
@@ -282,21 +234,21 @@ const EditFlightForm: FC<any> = (props) => {
             </Select>
           </Form.Item>
 
-          {props.areaSelected && (
+          {areaSelected && (
             <div>
               <div className="data_selected">
                 <img style={{ height: "20px", marginTop: "-20px" }} src={s_m} />
                 <div className="data_selected_inner">
-                  {props.polygonData ? (
+                  {flightDetails.geoFence.polygon ? (
                     <div>
                       <p>
                         <strong>Geofence Selected</strong>
                       </p>
                       <p>
-                        <span>{props.polygonData.points.length} Points Selected</span>{" "}
+                        <span>{flightDetails.geoFence.polygon.points.length} Points Selected</span>{" "}
                         <span>
                           {" "}
-                          {`${(props.polygonData.area * 0.000247105).toFixed(2)} acres`}
+                          {`${(flightDetails.geoFence.polygon.area * 0.000247105).toFixed(2)} acres`}
                         </span>
                       </p>
                     </div>
@@ -307,7 +259,7 @@ const EditFlightForm: FC<any> = (props) => {
                       </p>
                       <p style={{ marginTop: "-5px" }}>
                         <span style={{ fontWeight: "bold" }}>Area :</span>{" "}
-                        <span>{`${(props.circleData.area * 0.000247105).toFixed(
+                        <span>{`${(flightDetails.geoFence.circle.area * 0.000247105).toFixed(
                           2
                         )} acres`}</span>
                       </p>
@@ -321,7 +273,7 @@ const EditFlightForm: FC<any> = (props) => {
                   <img src={l_a} alt="" style={{ height: "20px" }} />
                   <div style={{ marginTop: "-5px" }}>
                     <strong>Location Selected</strong>
-                    <p>{props.geoLocation}</p>
+                    <p>{flightDetails.geolocation}</p>
                   </div>
                 </div>
               </div>
@@ -358,21 +310,4 @@ const EditFlightForm: FC<any> = (props) => {
   );
 };
 
-const mapStateToProps = (state: any) => ({
-  // global states set by GoogleMap component on selection of new flight region
-  polygonData: state.MissionCreation.geoFence.polygon || null, // properties of newly selected area
-  circleData: state.MissionCreation.geoFence.circle|| null, // properties of newly selected area
-  geoLocation: state.MissionCreation.flightDetails.geoLocation, // address of new location
-  centerPoints: state.MissionCreation.flightDetails.centerPoints, // center points of new location
-});
-
-const connector = connect(mapStateToProps, {
-  loading,
-  logout,
-  // for initializing the global states, so that GoogleMap gets initialized at the existing flight location
-  enableFlightEditing,
-  setCircleMeasurements,
-  setPolygonMeasurements,
-});
-
-export default connector(EditFlightForm);
+export default EditFlightForm;

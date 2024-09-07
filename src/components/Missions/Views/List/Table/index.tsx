@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Tag,
   Row,
@@ -11,35 +11,22 @@ import {
   Popconfirm,
 } from "antd";
 import { Input } from "antd";
-import { logout } from "../../../../../actions/authAction";
 import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
-import { connect } from "react-redux";
 import http from "../../../../../services/httpCall";
 import apis from "../../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import moment from "moment";
-import {
-  setMissionsToState,
-  deleteMission,
-} from "../../../../../actions/missionActions";
 import { useHistory } from "react-router-dom";
 import mp from "../../../../../static/mapping.svg";
 import { DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import "./index.less";
 import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
 
 interface TableProps {
-  filter: any;
-  userType: any;
-  tenantId: any;
-  userId: any;
-  logout: any;
-  setMissionsToState: any;
-  deleteMission: any;
-  missions: any;
   setMissionTableData: any;
   setIsTableLoading: any;
   isTableLoading: any;
@@ -53,12 +40,15 @@ interface TableProps {
   usedFilter: any;
   setSortOrder: any;
   setFilters: any;
-  userDetails: any;
 }
 
 function MissionTable(props: TableProps) {
   const history = useHistory();
   const { Title } = Typography;
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  const userType = userDetails.userType;
 
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
@@ -144,23 +134,6 @@ function MissionTable(props: TableProps) {
       ),
   });
 
-  // setting tab status filters
-
-  useEffect(() => {
-    if (props.filter === props.usedFilter) {
-      if (props.missions.length) {
-        if (props.filter === "all") {
-          props.setMissionTableData(props.missions);
-        } else {
-          const data = props.missions.filter((row) => {
-            return row.status === props.filter;
-          });
-          props.setMissionTableData(data);
-        }
-      }
-    }
-  }, [props.missions]);
-
   // ++++++++++++++++++++++++++++++++++++++++++++++ Delete mission handler +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   const deleteMission = (name, id) => {
@@ -175,7 +148,6 @@ function MissionTable(props: TableProps) {
             return mission._id.toString() != id.toString();
           });
           props.setMissionTableData(newTableData);
-          props.deleteMission(id);
           message.success(`Mission "${name}" deleted`);
         } else {
           message.error(result.data.message);
@@ -193,7 +165,7 @@ function MissionTable(props: TableProps) {
             "Unable to connect to server, please check your internet connection!"
           );
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         props.setIsTableLoading(false);
@@ -203,8 +175,8 @@ function MissionTable(props: TableProps) {
   //----------------RenderDeleteButton---------------------
 
   function renderDeleteBtn(record: any) {
-    if (props.userType === "tenant-staff") {
-      if (props.userDetails.customPermissions.includes(PERMS.MISSION_DELETE)) {
+    if (userType === "tenant-staff") {
+      if (userDetails.customPermissions.includes(PERMS.MISSION_DELETE)) {
         return (
           <Popconfirm
             title="Are you sure to delete the mission？"
@@ -453,32 +425,6 @@ function MissionTable(props: TableProps) {
     },
   ];
 
-  const onSearch = (value) => {
-    props.setIsTableLoading(true);
-    if (!value) {
-      if (props.missions) {
-        props.setMissionTableData(props.missions);
-      }
-    } else {
-      value = value.toLowerCase();
-
-      if (props.missions) {
-        const searchedMissions = props.missions.filter((mission: any) => {
-          return (
-            mission.status.toLowerCase().startsWith(value) ||
-            mission.name.toLowerCase().startsWith(value) ||
-            mission._id.toLowerCase().startsWith(value) ||
-            mission.user.name.toLowerCase().startsWith(value)
-          );
-        });
-
-        props.setMissionTableData(searchedMissions);
-      }
-    }
-
-    props.setIsTableLoading(false);
-  };
-
   const handleTableChange = (pagination, filter, sorter) => {
     props.setPage(pagination.current);
     props.setLimit(pagination.pageSize);
@@ -519,19 +465,4 @@ function MissionTable(props: TableProps) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    userType: state.Auth.userdetails.userType,
-    tenantId:
-      state.Auth.userdetails.tenantId._id || state.Auth.userdetails.tenantId,
-    userId: state.Auth.userdetails._id,
-    missions: state.Missions.missions,
-    userDetails: state.Auth.userdetails,
-  };
-};
-
-export default connect(mapStateToProps, {
-  logout,
-  setMissionsToState,
-  deleteMission,
-})(MissionTable);
+export default MissionTable;

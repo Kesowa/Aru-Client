@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
-import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import {
   List,
@@ -18,8 +16,6 @@ import {
   Collapse,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -37,6 +33,8 @@ import Expired from "../../restrictions/expiry";
 import { STATIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
 import { PERMS, TENANT_STAFF_PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function UserCreatePage(props: any) {
   const [form] = Form.useForm();
@@ -57,6 +55,10 @@ function UserCreatePage(props: any) {
     permissions: string[];
   }>();
   const [errorState, setErrorState] = useState("");
+
+  const { Auth, logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
+
   //avatar upload
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
@@ -78,7 +80,7 @@ function UserCreatePage(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsAvatarUploading(false);
@@ -95,7 +97,7 @@ function UserCreatePage(props: any) {
 
   //fetch user group
   const fetchAllUserGroupList = () => {
-    props.loading(true);
+    setLoading(true);
     console.info("Fetching user groups...");
     http
       .get(apis.FETCH_TENANT_USER_GROUP)
@@ -133,17 +135,17 @@ function UserCreatePage(props: any) {
             break;
           default:
             setErrorState("500");
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
         }
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
   useEffect(() => {
-    if (!props.Auth.isLoggedIn) {
+    if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
-    } else if (props.userDetails.userType !== "tenant-root") {
+    } else if (Auth.userdetails.userType !== "tenant-root") {
       // only tenant-root can create tenant-staff user
       setErrorState("401");
     } else {
@@ -160,7 +162,7 @@ function UserCreatePage(props: any) {
   };
 
   const createUserAccount = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
       ...data,
     };
@@ -191,10 +193,10 @@ function UserCreatePage(props: any) {
             setErrorState("403");
           }
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -393,10 +395,4 @@ function UserCreatePage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-  userDetails: state.Auth.userdetails,
-});
-
-export default connect(mapStateToProps, { loading, logout })(UserCreatePage);
+export default UserCreatePage;

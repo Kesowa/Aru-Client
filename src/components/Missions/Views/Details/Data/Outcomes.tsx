@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { default as Shimmer } from "react-loading-skeleton";
 import { reverseGeocoder as geocoder } from "../../../../../services/MapBoxGeocoder";
 import ExifReader from "exifreader";
@@ -36,19 +36,18 @@ import Dragger from "antd/lib/upload/Dragger";
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { logout } from "../../../../../actions/authAction";
-import { connect } from "react-redux";
 import moment from "moment";
 import "./data.less";
 import OutcomeModal from "./OutcomeModal";
 import { API_URL, STATIC_URL } from "src/constants";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
-import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
 import axios from "axios";
 import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { ThreadContext } from "src/services/threadUtils";
 
 const { Text, Title } = Typography;
 let plainOptions = new Array<any>();
@@ -88,6 +87,13 @@ function Outcomes(props) {
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
   const [selectedOutcome, setSelectedOutcome] = useState({});
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  const userType = userDetails.userType;
+
+  const { thread, openThread } = useContext(ThreadContext);
+
   const outcomeMenu: MenuProps["items"] = (data) => {
     const item = [
       {
@@ -106,14 +112,14 @@ function Outcomes(props) {
         icon: <MessageOutlined />,
       },
     ];
-    if (props.userDetails.customPermissions.includes(PERMS.ALERT_UPDATE)) {
+    if (userDetails.customPermissions.includes(PERMS.ALERT_UPDATE)) {
       item.push({
         key: "4",
         label: !data.isFlagged ? "Flag" : "Unflag",
         icon: <FlagOutlined />,
       });
     }
-    if (props.userDetails.customPermissions.includes(PERMS.ALERT_DELETE)) {
+    if (userDetails.customPermissions.includes(PERMS.ALERT_DELETE)) {
       item.push({
         key: "5",
         label: "Delete",
@@ -136,10 +142,7 @@ function Outcomes(props) {
         break;
       case "3":
         setThumbnail(thumbnailComponent(selectedOutcome));
-        props.thread(true, {
-          docType: "alert",
-          docId: selectedOutcome._id,
-        });
+        openThread("alert", selectedOutcome._id, {});
         break;
       case "4":
         toggleFlag(selectedOutcome);
@@ -213,7 +216,7 @@ function Outcomes(props) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setLoading(false);
@@ -234,10 +237,10 @@ function Outcomes(props) {
   ]);
 
   useEffect(() => {
-    if (!props.Thread.open) {
+    if (!thread.open) {
       setRefresh(true);
     }
-  }, [props.Thread.open]);
+  }, [thread.open]);
 
   function fetchOutcomes() {
     if (refresh) {
@@ -731,7 +734,7 @@ function Outcomes(props) {
                 ) {
                   setIsModalVisible2(true);
                   window.setTimeout(function () {
-                    AxiosErrorHandler(err, props.logout); //needs to be connected with redux
+                    AxiosErrorHandler(err, logout); 
                   }, 5000);
                 } else if (
                   err.response?.data.message ===
@@ -808,7 +811,7 @@ function Outcomes(props) {
                 ) {
                   setIsModalVisible2(true);
                   window.setTimeout(function () {
-                    AxiosErrorHandler(err, props.logout); //needs to be connected with redux
+                    AxiosErrorHandler(err, logout); 
                   }, 5000);
                 } else if (
                   err.response?.data.message ===
@@ -846,10 +849,10 @@ function Outcomes(props) {
   // Render upload alert button based on user permissions
   function renderUploadButton() {
     if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
+      userType === "tenant-staff" ||
+      userType === "tenant-client"
     ) {
-      if (props.userDetails.customPermissions.includes(PERMS.ALERT_CREATE)) {
+      if (userDetails.customPermissions.includes(PERMS.ALERT_CREATE)) {
         return (
           <Button onClick={() => uploadModal()}>
             <UploadOutlined /> Upload{" "}
@@ -947,8 +950,8 @@ function Outcomes(props) {
         flag={flag}
         updateAPI={apis.UPDATE_MULTI_ALERT}
         thumb={getOutcomeThumbnail}
-        canToggleFlag={props.userDetails.customPermissions.includes(PERMS.ALERT_UPDATE)}
-        canDelete={props.userDetails.customPermissions.includes(PERMS.ALERT_DELETE)}
+        canToggleFlag={userDetails.customPermissions.includes(PERMS.ALERT_UPDATE)}
+        canDelete={userDetails.customPermissions.includes(PERMS.ALERT_DELETE)}
       />
       {!loading ? (
         <>
@@ -1306,10 +1309,4 @@ function Outcomes(props) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-  Thread: state.Thread,
-});
-
-export default connect(mapStateToProps, { logout, thread })(Outcomes);
+export default Outcomes;

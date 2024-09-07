@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Avatar,
   Col,
@@ -12,10 +12,8 @@ import {
   Typography,
 } from "antd";
 import { Link, useHistory } from "react-router-dom";
-import { connect } from "react-redux";
 import decideIcon from "../../../services/decideIcon";
 import { MenuOutlined, UserOutlined, LogoutOutlined } from "@ant-design/icons";
-import { logout } from "../../../actions/authAction";
 import {
   API_URL,
   COG_URL,
@@ -28,6 +26,7 @@ import { useThemeSwitcher } from "react-css-theme-switcher";
 import QRCode from "qrcode";
 import "./index.less";
 import Logo from "../../shared/Logo";
+import { AuthContext } from "src/services/authUtils";
 const { Sider } = Layout;
 const { Title } = Typography;
 
@@ -36,6 +35,8 @@ function SideBar(props: any) {
   const [r, setR] = useState(true);
   const { switcher, themes, currentTheme, status } = useThemeSwitcher();
   const history = useHistory();
+
+  const { Auth, logout } = useContext(AuthContext);
 
   useEffect(() => {
     history.listen((location) => {
@@ -78,7 +79,6 @@ function SideBar(props: any) {
   }
 
   const headerContents = (usergroup: any) => {
-    console.log(props.UserDetails);
     return (
       <>
         {props.sidebarState ? (
@@ -103,7 +103,7 @@ function SideBar(props: any) {
                   <Avatar
                     className="user-avatar"
                     icon={<UserOutlined />}
-                    src={STATIC_URL + props.UserDetails.avatar}
+                    src={STATIC_URL + Auth.userdetails.avatar}
                     style={{ marginBottom: "1rem" }}
                   />
                 </Col>
@@ -130,7 +130,7 @@ function SideBar(props: any) {
                     <Popconfirm
                       placement="rightTop"
                       title="Are you sure you want to logout?"
-                      onConfirm={props.logout}
+                      onConfirm={() => { logout() }}
                       okText="Yes"
                       cancelText="No"
                     >
@@ -149,14 +149,14 @@ function SideBar(props: any) {
                 <Col span={8}>
                   <Avatar
                     className="user-avatar"
-                    src={STATIC_URL + props.UserDetails.avatar}
+                    src={STATIC_URL + Auth.userdetails.avatar}
                   >
-                    {getInitials(props.UserDetails.name)}
+                    {getInitials(Auth.userdetails.name)}
                   </Avatar>
                 </Col>
                 <Col span={16}>
                   <div className="username-link">
-                    <Tooltip placement="right" title={props.UserDetails.name}>
+                    <Tooltip placement="right" title={Auth.userdetails.name}>
                       <Typography.Title
                         level={5}
                         className="user-name"
@@ -167,7 +167,7 @@ function SideBar(props: any) {
                           textOverflow: "ellipsis",
                         }}
                       >
-                        {props.UserDetails.name}
+                        {Auth.userdetails.name}
                       </Typography.Title>
                     </Tooltip>
                     <p
@@ -190,7 +190,7 @@ function SideBar(props: any) {
     );
   };
   function renderHeader() {
-    return headerContents(props.UserDetails.userType);
+    return headerContents(Auth.userdetails.userType);
   }
 
   // Connect to app with qr code modal
@@ -272,7 +272,7 @@ function SideBar(props: any) {
   // Final menu items
   const menu: MenuProps["items"] = () => {
     const items: MenuProps["items"] = [];
-    props.Auth.userdetails.sideBar.map((ele: any, i: number) => {
+    Auth.userdetails.sideBar.map((ele: any, i: number) => {
       if (ele.type === "sub_menu") {
         const submenu = {
           key: `sub_menu${i}`,
@@ -305,7 +305,7 @@ function SideBar(props: any) {
         });
       }
     });
-    if (props.UserDetails.userType === "tenant-client") {
+    if (Auth.userdetails.userType === "tenant-client") {
       items.push({
         key: "connect_to_app_sidebar",
         label: (
@@ -331,7 +331,7 @@ function SideBar(props: any) {
             className="menu-items-sidebar"
           >
             <Menu
-              key={props.Auth.userdetails}
+              key={Auth.userdetails}
               style={{ backgroundColor: "#18447A" }}
               theme="dark"
               mode="inline"
@@ -349,11 +349,4 @@ function SideBar(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-  UserDetails: state.Auth.userdetails,
-});
-export default connect(mapStateToProps, {
-  logout,
-})(SideBar);
+export default SideBar;

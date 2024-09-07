@@ -1,9 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import PasswordChecklist from "react-password-checklist";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
-import { loading } from "../../actions/loadingAction";
-import { connect } from "react-redux";
 import OtpInput from "react-otp-input";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import {
@@ -23,10 +21,10 @@ import {
   Result,
 } from "antd";
 import { LockOutlined, CheckOutlined } from "@ant-design/icons";
-import { login, setUserDetails, logout } from "../../actions/authAction";
 import "./index.less";
 import { Link, useHistory } from "react-router-dom";
 import Logo from "../shared/Logo";
+import { AuthContext } from "src/services/authUtils";
 
 const { Meta } = Card;
 const { Title, Text } = Typography;
@@ -48,6 +46,8 @@ function Registration(props: any) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordIsValid, setPasswordValidity] = useState(false);
   const history = useHistory();
+
+  const { logout } = useContext(AuthContext);
 
   const [tenantId, setTenantId] = useState(
     props.tenantId ? props.tenantId : ""
@@ -125,7 +125,7 @@ function Registration(props: any) {
       })
       .catch((err: any) => {
         console.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setResendLoad(false));
   }
@@ -161,7 +161,7 @@ function Registration(props: any) {
       })
       .catch((err: any) => {
         console.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setLoader(false));
   }
@@ -178,7 +178,7 @@ function Registration(props: any) {
         }
       })
       .catch((err: any) => {
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setLoader(false);
@@ -223,7 +223,7 @@ function Registration(props: any) {
         })
         .catch((err: any) => {
           console.error(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setLoader(false);
@@ -349,7 +349,7 @@ function Registration(props: any) {
   };
 
   const backToLogin = () => {
-    props.logout();
+    logout();
     history.replace({ pathname: "/login" });
   };
 
@@ -841,13 +841,4 @@ function Registration(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, {
-  loading,
-  login,
-  setUserDetails,
-  logout,
-})(Registration);
+export default Registration;

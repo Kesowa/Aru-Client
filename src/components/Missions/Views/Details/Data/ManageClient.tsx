@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Row,
   Card,
@@ -15,11 +15,10 @@ import { PlusOutlined, CloseOutlined } from "@ant-design/icons";
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { logout } from "../../../../../actions/authAction";
-import { connect } from "react-redux";
 import "./data.less";
 import { STATIC_URL } from "src/constants";
 import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
 
 const { Text, Title } = Typography;
 
@@ -30,7 +29,11 @@ function ManageClients(props) {
   const [currClientId, setCurrClientId] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const canManageClient = props.userDetails.customPermissions.some(
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  const userType = userDetails.userType;
+
+  const canManageClient = userDetails.customPermissions.some(
     perm => [PERMS.CREATE_CLIENT, PERMS.EDIT_CLIENT, PERMS.DELETE_CLIENT].includes(perm)
   );
 
@@ -112,7 +115,7 @@ function ManageClients(props) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setLoading(false);
@@ -174,7 +177,7 @@ function ManageClients(props) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => props.loading(false));
   }
@@ -183,8 +186,8 @@ function ManageClients(props) {
 
   function renderClientManageBtns(client: any) {
     if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
+      userType === "tenant-staff" ||
+      userType === "tenant-client"
     ) {
       if (canManageClient) {
         return (
@@ -345,9 +348,4 @@ function ManageClients(props) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { logout })(ManageClients);
+export default ManageClients;

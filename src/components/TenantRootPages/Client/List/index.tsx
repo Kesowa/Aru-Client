@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import {
   PlusCircleOutlined,
@@ -10,9 +9,6 @@ import {
 } from "@ant-design/icons";
 import { message, Input, Button, Tag, Table, Popconfirm } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
-import { setClientToEdit } from "../../../../actions/cliantActions";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -26,6 +22,8 @@ import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 function ClientListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
   const [tenantUserTableData, setTenantUserTableData] = useState([]);
@@ -39,6 +37,11 @@ function ClientListPage(props: any) {
   const [searchFilters, setSearchFilters] = useState<any>(null);
   const history = useHistory();
 
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  
+  const { setLoading } = useContext(LoaderContext);
+  
   let searchInput: any;
 
   const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
@@ -114,8 +117,8 @@ function ClientListPage(props: any) {
   //--------------render delete button based on user perms---------------------
   function renderDeleteBtn(record: any) {
     if (
-      (props.userType === "tenant-root") ||
-      (props.userType === "tenant-staff" && props.userDetails.customPermissions.includes(PERMS.DELETE_CLIENT))
+      (userDetails.userType === "tenant-root") ||
+      (userDetails.userType === "tenant-staff" && userDetails.customPermissions.includes(PERMS.DELETE_CLIENT))
     ) {
       return (
         <Popconfirm
@@ -123,7 +126,7 @@ function ClientListPage(props: any) {
           okText="Yes"
           cancelText="No"
           onConfirm={() => {
-            props.loading(true);
+            setLoading(true);
             http
               .delete(`${apis.DELETE_CLIENT}`, {
                 data: {
@@ -136,10 +139,10 @@ function ClientListPage(props: any) {
               })
               .catch((err) => {
                 message.error(err.message);
-                AxiosErrorHandler(err, props.logout);
+                AxiosErrorHandler(err, logout);
               })
               .finally(() => {
-                props.loading(false);
+                setLoading(false);
               });
           }}
         >
@@ -154,14 +157,13 @@ function ClientListPage(props: any) {
   //--------------render edit button based on user perms---------------------
   function renderEditBtn(record: any) {
     if (
-      (props.userType === "tenant-root") ||
-      (props.userType === "tenant-staff" && props.userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
+      (userDetails.userType === "tenant-root") ||
+      (userDetails.userType === "tenant-staff" && userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
     ) {
       return (
         <Button
           onClick={() => {
             history.push(`/dashboard/tenant/client/edit/${record._id}`);
-            props.setClientToEdit(record);
           }}
         >
           <EditOutlined />
@@ -173,8 +175,8 @@ function ClientListPage(props: any) {
   //-------------render create client button-----------------------------------
   function renderCreateClientButton() {
     if (
-      (props.userType === "tenant-root") ||
-      (props.userType === "tenant-staff" && props.userDetails.customPermissions.includes(PERMS.CREATE_CLIENT))
+      (userDetails.userType === "tenant-root") ||
+      (userDetails.userType === "tenant-staff" && userDetails.customPermissions.includes(PERMS.CREATE_CLIENT))
     ) {
       return (
         <Link to="/dashboard/tenant/client/create" key="1">
@@ -295,7 +297,6 @@ function ClientListPage(props: any) {
               history.push(
                 `/dashboard/tenant/client/change-password/${record._id}`
               );
-              props.setClientToEdit(record);
             }}
           >
             <LockOutlined />
@@ -343,11 +344,11 @@ function ClientListPage(props: any) {
             setErrorState("401");
             break;
           case "500":
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
             break;
         }
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIstableLoading(false);
@@ -380,7 +381,7 @@ function ClientListPage(props: any) {
   };
 
   useEffect(() => {
-    if (!props.Auth.isLoggedIn) {
+    if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
     } else {
       // any logged in user (tenant-root / tenant-staff / tenant-client) can view clients
@@ -430,7 +431,7 @@ function ClientListPage(props: any) {
               loading={isTableLoading}
               dataSource={tenantUserTableData}
               columns={
-                (props.userDetails.userType === "tenant-client") ?
+                (userDetails.userType === "tenant-client") ?
                 columns.filter(col => !["email","phoneNo","actions"].includes(col.dataIndex)) :
                 columns
               }
@@ -443,13 +444,4 @@ function ClientListPage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-  userType: state.Auth.userdetails.userType,
-  userDetails: state.Auth.userdetails,
-});
-
-export default connect(mapStateToProps, { loading, logout, setClientToEdit })(
-  ClientListPage
-);
+export default ClientListPage;

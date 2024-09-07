@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Form, Input, Upload, Row, Col, message, Button, Divider } from "antd";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
@@ -6,16 +6,18 @@ import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { beforeUpload } from "../../../services/imageupload";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { connect } from "react-redux";
-import { loading } from "../../../actions/loadingAction";
-import { logout } from "../../../actions/authAction";
 import { STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function TenantInfo(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
+
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   useEffect(() => {
     if (props.tenantData) {
@@ -44,7 +46,7 @@ function TenantInfo(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsAvatarUploading(false);
@@ -70,7 +72,7 @@ function TenantInfo(props: any) {
   };
 
   const updateOrganisationBasicInfo = (body: any) => {
-    props.loading(true);
+    setLoading(true);
     http
       .post(apis.UPDATE_ORGANISATION_BASIC_DETAILS, body)
       .then((result) => {
@@ -86,10 +88,10 @@ function TenantInfo(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -267,9 +269,4 @@ function TenantInfo(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(TenantInfo);
+export default TenantInfo;

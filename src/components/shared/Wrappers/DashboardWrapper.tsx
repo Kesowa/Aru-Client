@@ -1,6 +1,4 @@
-import React, { lazy, Suspense, useEffect, useState } from "react";
-import { connect } from "react-redux";
-import { logout, setUserDetails } from "../../../actions/authAction";
+import React, { lazy, Suspense, useContext, useEffect, useState } from "react";
 import EntryLoader from "../Loader/Entry";
 import Dashboard from "../../Dashboard";
 import http from "../../../services/httpCall";
@@ -10,6 +8,7 @@ import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { message, Space, Spin } from "antd";
 import { clientOptions } from "../../../static/sideBarOptions";
 import { components } from "src/handlers/schema";
+import { AuthContext } from "src/services/authUtils";
 const Register = lazy(() => import("../../../components/SignUp"));
 
 const themeMap = {
@@ -17,8 +16,10 @@ const themeMap = {
   light: `/light-theme.css`,
 };
 
-function DashboardWrapper(props: any) {
+function DashboardWrapper() {
   const [isFetched, setIsFetched] = useState(false);
+  const { Auth, logout, setUserDetails } = useContext(AuthContext);
+
   const fetchUserDetails = () => {
     http
       .get<components["schemas"]["UserDetailsAuthResponse"]>(
@@ -26,31 +27,31 @@ function DashboardWrapper(props: any) {
       )
       .then((result) => {
         if (result.data.status) {
-          props.setUserDetails(result.data.data);
+          setUserDetails(result.data.data);
         } else {
           message.error(result.status.toString());
           console.log(result);
-          props.logout();
+          logout();
         }
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setIsFetched(true));
   };
 
   //fetching user details on component load
   useEffect(() => {
-    if (!props.Auth.userdetails || !isFetched) {
+    if (!Auth.userdetails || !isFetched) {
       fetchUserDetails();
     }
-  }, [props.Auth.isLoggedIn]);
+  }, [Auth.isLoggedIn]);
 
   return (
     <ThemeSwitcherProvider themeMap={themeMap} defaultTheme="light">
       <div>
-        {props.Auth.userdetails && isFetched ? (
+        {Auth.userdetails && isFetched ? (
           <Dashboard />
         ) : (
           <EntryLoader />
@@ -60,10 +61,4 @@ function DashboardWrapper(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, { setUserDetails, logout })(
-  DashboardWrapper
-);
+export default DashboardWrapper;

@@ -1,11 +1,8 @@
-import { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { connect } from "react-redux";
+import { useContext, useEffect, useState } from "react";
+import { useHistory, useParams } from "react-router-dom";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Row, Col, message, Form, Input, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -16,11 +13,44 @@ import FourOhOne from "../../../shared/Error/FourOhOne";
 import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
-function UserChangePassword(props: any) {
+function UserChangePassword() {
   const [form] = Form.useForm();
   const [errorState, setErrorState] = useState("");
+  const [user, setUser] = useState<any>(null);
   const history = useHistory();
+
+  const { id } = useParams<any>();
+
+  const { Auth, logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
+
+  const fetchUserDetails = () => {
+    setLoading(true);
+    http
+      .get(apis.FETCH_USER_OF_TENANT_BY_ID, { params: { id } })
+      .then((result) => {
+        if (result.data.status) {
+          console.log(result.data.data);
+          setUser(result.data.data);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchUserDetails();
+  }, []);
 
   //subimt form
   const onFinish = (data: any) => {
@@ -38,9 +68,9 @@ function UserChangePassword(props: any) {
   };
 
   const EditUserAccount = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
-      id: props.user._id,
+      id: user._id,
       ...data,
     };
     http
@@ -70,17 +100,17 @@ function UserChangePassword(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
   useEffect(() => {
-    if (!props.Auth.isLoggedIn) {
+    if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
-    } else if (props.userDetails.userType !== "tenant-root") {
+    } else if (Auth.userdetails.userType !== "tenant-root") {
       // only tenant-root can change tenant-staff password
       setErrorState("401");
     }
@@ -100,12 +130,12 @@ function UserChangePassword(props: any) {
     default:
       return (
         <div className="tenant-root-usercreatepage-wrapper full-width-height">
-          {props.user && (
+          {user && (
             <>
               <PageHeader
                 onBack={() => window.history.back()}
                 className="site-page-header-responsive"
-                title={`Change Password For User - ${props.user.name}`}
+                title={`Change Password For User - ${user.name}`}
                 extra={[
                   <Link to="/dashboard/tenant/user/list" key="1">
                     <Button
@@ -201,12 +231,4 @@ function UserChangePassword(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  user: state.User.userToEdit,
-  userDetails: state.Auth.userdetails,
-});
-
-export default connect(mapStateToProps, { loading, logout })(
-  UserChangePassword
-);
+export default UserChangePassword;

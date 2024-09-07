@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
+import { useHistory, useParams } from "react-router-dom";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
-import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import {
   List,
@@ -18,8 +17,6 @@ import {
   Collapse,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -36,8 +33,10 @@ import moment from "moment";
 import { STATIC_URL } from "src/constants";
 import { components } from "src/handlers/schema";
 import { PERMS, TENANT_CLIENT_PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
-function ClientEditPage(props: any) {
+function ClientEditPage() {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
@@ -57,6 +56,16 @@ function ClientEditPage(props: any) {
   }>();
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
+
+  const [client, setClient] = useState<any>(null);
+
+  const { id } = useParams<any>();
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  
+  const { setLoading } = useContext(LoaderContext);
+  
   //avatar upload
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
@@ -78,7 +87,7 @@ function ClientEditPage(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsAvatarUploading(false);
@@ -95,7 +104,7 @@ function ClientEditPage(props: any) {
 
   //fetch user group
   const fetchAllUserGroupList = () => {
-    props.loading(true);
+    setLoading(true);
     http
       .get(apis.FETCH_TENANT_USER_GROUP)
       .then((result) => {
@@ -107,12 +116,7 @@ function ClientEditPage(props: any) {
             )
             .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }));
 
-          if (!props.client) {
-            history.push("/dashboard/tenant/client/list");
-            return;
-          }
-
-          const sug = groups.find((g) => g._id === props.client.userGroupId);
+          const sug = groups.find((g) => g._id === client.userGroupId);
           setSelectedusergroup(sug);
           setUserGroups(groups);
         } else {
@@ -138,33 +142,56 @@ function ClientEditPage(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
+
+  const fetchClientDetails = () => {
+    setLoading(true);
+    http
+      .get(apis.GET_CLIENT_BY_ID, { params: { id } })
+      .then((result) => {
+        if (result.data.status) {
+          console.log(result.data.data);
+          setClient(result.data.data);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
-    if (!props.Auth.isLoggedIn) {
+    if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
     } else if (
-      (props.userDetails.userType === "tenant-client") ||
-      (props.userDetails.userType === "tenant-staff" && !props.userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
+      (userDetails.userType === "tenant-client") ||
+      (userDetails.userType === "tenant-staff" && !userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
     ) {
       // clients can't edit other clients
       // staff can edit clients only if have permission
       setErrorState("401");
     } else {
       // tenant-root can edit clients
-      fetchAllUserGroupList();
+      fetchClientDetails();
     }
   }, []);
 
   useEffect(() => {
-    if (props.client) {
-      setAvatar(props.client.avatar);
+    if (client) {
+      fetchAllUserGroupList();
+      setAvatar(client.avatar);
     }
-  }, [props.client]);
+  }, [client]);
 
   //subimt form
   const onFinish = (data: any) => {
@@ -172,9 +199,9 @@ function ClientEditPage(props: any) {
   };
 
   const EditUserAccount = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
-      id: props.client._id,
+      id: client._id,
       ...data,
       avatar,
     };
@@ -194,10 +221,10 @@ function ClientEditPage(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -216,7 +243,7 @@ function ClientEditPage(props: any) {
     default:
       return (
         <div className="tenant-root-usercreatepage-wrapper full-width-height">
-          {props.client && selectedUserGroup && (
+          {client && selectedUserGroup && (
             <>
               <PageHeader
                 onBack={() => window.history.back()}
@@ -242,9 +269,9 @@ function ClientEditPage(props: any) {
                   onFinish={onFinish}
                   scrollToFirstError={true}
                   initialValues={{
-                    name: props.client.name,
-                    email: props.client.email,
-                    phoneNo: props.client.phoneNo,
+                    name: client.name,
+                    email: client.email,
+                    phoneNo: client.phoneNo,
                     userType: "tenant-client",
                     userGroupId: selectedUserGroup._id,
                   }}
@@ -363,7 +390,7 @@ function ClientEditPage(props: any) {
                           style={{ width: "100%" }}
                           allowClear={true}
                           format="DD-MM-YYYY"
-                          defaultValue={moment(props.client.expiryDate)}
+                          defaultValue={moment(client.expiryDate)}
                         />
                       </Form.Item>
                     </Col>
@@ -386,11 +413,4 @@ function ClientEditPage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-  client: state.Client.clientToEdit,
-  userDetails: state.Auth.userdetails,
-});
-
-export default connect(mapStateToProps, { loading, logout })(ClientEditPage);
+export default ClientEditPage;

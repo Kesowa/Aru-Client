@@ -1,5 +1,5 @@
-import { useState, useEffect, FC } from "react";
-import { Steps, message } from "antd";
+import { useState, useEffect, FC, useContext } from "react";
+import { Row, Steps, message } from "antd";
 import "./index.less";
 import StageOne from "./Steps/StageOne";
 import StageTwo from "./Steps/StageTwo";
@@ -8,13 +8,10 @@ import StageThree from "./Steps/StageThree";
 import apis from "../../../services/apis";
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import GoogleMap from "../GoogleMap";
-import { logout } from "../../../actions/authAction";
-import { connect, ConnectedProps } from "react-redux";
+import { AuthContext } from "src/services/authUtils";
+import moment from "moment";
 
-type CreateMissionBaseProps = PropsFromRedux;
-
-const CreateMissionBase: FC<CreateMissionBaseProps> = (props) => {
+const CreateMissionBase: FC<any> = (props) => {
   const [currentStage, setCurrentStage] = useState<number>(0);
   const [formData, setFormData] = useState<any>({
     jobType: "",
@@ -22,17 +19,25 @@ const CreateMissionBase: FC<CreateMissionBaseProps> = (props) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [missionTypes, setMissionTypes] = useState<any[]>([]);
-  const [areaSelected, setAreaSelected] = useState<boolean>(false);
-  const [drawingToolBtns, setDrawingToolBtns] = useState<boolean>(false);
-  const [location, setlocation] = useState<any>({});
 
-  const mapProps: any = {
-    areaSelected,
-    setAreaSelected,
-    drawingToolBtns,
-    setDrawingToolBtns,
-    setlocation,
-  };
+  const [flightDetails, setFlightDetails] = useState<any>({
+    name: "MyFlight1",
+    date: moment(new Date()).format("YYYY-MM-DD"),
+    time: moment(new Date()).format("HH:mm:ss A"),
+    duration: "",
+    locationID: null,
+    pilotID: null,
+    geoFence: {
+      polygon: null,
+      circle: null,
+    },
+    geolocation: null,
+    centerPoints: null,
+  });
+
+  const [isEditing, setIsEditing] = useState(false);
+
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     http
@@ -46,7 +51,7 @@ const CreateMissionBase: FC<CreateMissionBaseProps> = (props) => {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsLoading(false);
@@ -70,12 +75,11 @@ const CreateMissionBase: FC<CreateMissionBaseProps> = (props) => {
       title: "Schedule Flight",
       content: (
         <StageTwo
-          areaSelected={areaSelected}
-          setAreaSelected={setAreaSelected}
           nextStage={() => setCurrentStage(2)}
           prevStage={() => setCurrentStage(0)}
-          location={location}
-          setlocation={setlocation}
+          flightDetails={flightDetails}
+          setFlightDetails={setFlightDetails}
+          isEditing={isEditing}
         />
       ),
     },
@@ -86,6 +90,8 @@ const CreateMissionBase: FC<CreateMissionBaseProps> = (props) => {
           missionType={formData.jobType}
           jobTypeName={formData.typeName}
           prevStage={() => setCurrentStage(1)}
+          flightDetails={flightDetails}
+          setIsEditing={setIsEditing}
         />
       ),
     },
@@ -94,10 +100,15 @@ const CreateMissionBase: FC<CreateMissionBaseProps> = (props) => {
   return (
     <div className="container-full">
       {currentStage === 0 ? (
-        <h1 className="text-center">Create a Mission</h1>
+        <Row justify="center" align="middle" className="stage_three_heading">
+          <h1>Create a Mission</h1>
+        </Row>
       ) : null}
-
-      {currentStage === 1 && <GoogleMap {...mapProps} />}
+      {currentStage === 2 ? (
+        <Row justify="center" align="middle" className="stage_three_heading">
+          <h1>Review and Submit!</h1>
+        </Row>
+      ) : null}
       <div
         className="card-base"
         style={{
@@ -126,25 +137,9 @@ const CreateMissionBase: FC<CreateMissionBaseProps> = (props) => {
           })}
         />
       </div>
-
       <div className="steps-content">{steps[currentStage].content}</div>
     </div>
   );
 };
 
-// Map state to props
-const mapStateToProps = (state: any) => ({
-  userType: state.Auth.userdetails.userType,
-  refresh: state.Missions.refresh,
-});
-
-// Connect component to Redux store
-const connector = connect(mapStateToProps, {
-  logout,
-});
-
-// Define type for props received from redux
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-// Export the connected component
-export default connector(CreateMissionBase);
+export default CreateMissionBase;

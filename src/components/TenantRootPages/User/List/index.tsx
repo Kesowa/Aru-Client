@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import {
   PlusCircleOutlined,
@@ -17,9 +16,6 @@ import {
   Popconfirm,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
-import { setUserToEdit } from "../../../../actions/userAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -32,6 +28,8 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function UserListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
@@ -40,6 +38,11 @@ function UserListPage(props: any) {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [errorState, setErrorState] = useState(""); //used to render the page based on response code and api response
   const history = useHistory();
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+
+  const { setLoading } = useContext(LoaderContext);
 
   let searchInput: any;
 
@@ -121,7 +124,7 @@ function UserListPage(props: any) {
         okText="Yes"
         cancelText="No"
         onConfirm={() => {
-          props.loading(true);
+          setLoading(true);
           http
             .delete(`${apis.DELETE_USER}`, {
               params: {
@@ -134,10 +137,10 @@ function UserListPage(props: any) {
             })
             .catch((err) => {
               message.error(err.message);
-              AxiosErrorHandler(err, props.logout);
+              AxiosErrorHandler(err, logout);
             })
             .finally(() => {
-              props.loading(false);
+              setLoading(false);
             });
         }}
       >
@@ -154,7 +157,6 @@ function UserListPage(props: any) {
       <Button
         onClick={() => {
           history.push(`/dashboard/tenant/user/edit/${record._id}`);
-          props.setUserToEdit(record);
         }}
       >
         <EditOutlined />
@@ -173,7 +175,6 @@ function UserListPage(props: any) {
             history.push(
               `/dashboard/tenant/user/change-password/${record._id}`
             );
-            props.setUserToEdit(record);
           }}
         >
           <LockOutlined />
@@ -231,7 +232,7 @@ function UserListPage(props: any) {
       width: 190,
       render: (text, record) => (
         <>
-          {props.userDetails.userType === "tenant-root" &&
+          {userDetails.userType === "tenant-root" &&
             renderActionButtons(record)}
         </>
       ),
@@ -271,7 +272,7 @@ function UserListPage(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIstableLoading(false);
@@ -279,9 +280,9 @@ function UserListPage(props: any) {
   };
 
   useEffect(() => {
-    if (!props.Auth.isLoggedIn) {
+    if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
-    } else if (!["tenant-root","tenant-staff"].includes(props.userDetails.userType)) {
+    } else if (!["tenant-root","tenant-staff"].includes(userDetails.userType)) {
       // client shouldn't be able to view
       setErrorState("401");
     } else {
@@ -319,7 +320,7 @@ function UserListPage(props: any) {
             extra={[
               <>
                 {
-                  props.userDetails.userType === "tenant-root" && 
+                  userDetails.userType === "tenant-root" && 
                   <Link to="/dashboard/tenant/user/create" key="1">
                     <Button key="1" type="primary" icon={<PlusCircleOutlined />}>
                       Create User
@@ -337,7 +338,7 @@ function UserListPage(props: any) {
               loading={isTableLoading}
               dataSource={tenantUserTableData}
               columns={
-                (props.userDetails.userType === "tenant-root") ?
+                (userDetails.userType === "tenant-root") ?
                 columns :
                 columns.filter(col => !["email","phoneNo","actions"].includes(col.dataIndex))
               }
@@ -349,11 +350,4 @@ function UserListPage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  userDetails: state.Auth.userdetails,
-});
-
-export default connect(mapStateToProps, { loading, logout, setUserToEdit })(
-  UserListPage
-);
+export default UserListPage;

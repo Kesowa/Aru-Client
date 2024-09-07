@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
-import { connect } from "react-redux";
 import { default as Shimmer } from "react-loading-skeleton";
 import { FlyToInterpolator } from "deck.gl";
 import download from "downloadjs";
@@ -50,6 +48,7 @@ import Link from "antd/lib/typography/Link";
 import Paragraph from "antd/lib/typography/Paragraph";
 import { PUBLIC_URL, STATIC_URL } from "../../../../constants";
 import { featureType, featureTypes } from "src/static/vectorprops";
+import { AuthContext } from "src/services/authUtils";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -79,6 +78,9 @@ function LayerDocs(props) {
   const [confirmingFiles, setConfirmingFiles] = useState(false);
   const [documents, fillDocuments] = useState<any>([]);
   const [subHeading, setSubHeading] = useState("");
+
+  const { logout } = useContext(AuthContext);
+
   const menuItem1 = () => {
     const items = [
       {
@@ -789,7 +791,7 @@ function LayerDocs(props) {
           })
           .catch((err) => {
             message.error(err);
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
           })
           .finally(() => setLoader(false));
       } else {
@@ -839,7 +841,7 @@ function LayerDocs(props) {
           })
           .catch((err) => {
             message.error(err);
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
           })
           .finally(() => setLoader(false));
       }
@@ -907,7 +909,7 @@ function LayerDocs(props) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setReviewFilesLoader(false);
@@ -1156,7 +1158,7 @@ function LayerDocs(props) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setFetchReviewFiles(true);
@@ -1187,7 +1189,7 @@ function LayerDocs(props) {
       })
       .catch((err) => {
         message.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setRefresh(true);
@@ -1413,7 +1415,7 @@ function LayerDocs(props) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setSelectLoader(false));
   }
@@ -1437,7 +1439,7 @@ function LayerDocs(props) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -1466,7 +1468,7 @@ function LayerDocs(props) {
       })
       .catch((err: any) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setPublicLoader(false));
   }
@@ -1628,9 +1630,4 @@ function LayerDocs(props) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { logout })(LayerDocs);
+export default LayerDocs;

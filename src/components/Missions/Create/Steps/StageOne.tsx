@@ -1,8 +1,6 @@
-import React, { useEffect, FC } from "react";
-import { connect, ConnectedProps } from "react-redux";
+import React, { FC } from "react";
 import { Button, Row, Col, Card, Avatar } from "antd";
 import { VideoCameraOutlined } from "@ant-design/icons";
-import { clearMissionCreationStateWithGeoFence } from "../../../../actions/missionCreation";
 import "../index.less";
 
 const { Meta } = Card;
@@ -13,7 +11,7 @@ interface MissionType {
   description: string;
 }
 
-interface StageOneProps extends PropsFromRedux {
+interface StageOneProps {
   formData: any; // Replace with the appropriate type for formData
   setFormData: (data: any) => void; // Replace with the appropriate type for setFormData
   isLoading: boolean;
@@ -27,15 +25,10 @@ const StageOne: FC<StageOneProps> = ({
   isLoading,
   missionTypes,
   nextStage,
-  clearMissionCreationStateWithGeoFence,
 }) => {
   const updateSelectedJobType = (jobType: string, name: string) => {
     setFormData((oldData: any) => ({ ...oldData, typeName: name, jobType }));
   };
-
-  useEffect(() => {
-    clearMissionCreationStateWithGeoFence();
-  }, []);
 
   return (
     <div className="stage_one">
@@ -81,14 +74,4 @@ const StageOne: FC<StageOneProps> = ({
   );
 };
 
-const mapStateToProps = (state: any) => ({
-  isLoading: state.Loader.loading_active,
-});
-
-const connector = connect(() => ({}), {
-  clearMissionCreationStateWithGeoFence,
-});
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export default connector(StageOne);
+export default StageOne;

@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import { useState, useEffect, useContext } from "react";
 import { message, Button, Table, Tag } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import "../Permission.less";
-import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { Link } from "react-router-dom";
+import { AuthContext } from "src/services/authUtils";
 
 function ListAllPermissions(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
   const [permissiontableData, setPermissiontableData] = useState([]);
+
+  const { logout } = useContext(AuthContext);
 
   const columns = [
     {
@@ -37,7 +37,7 @@ function ListAllPermissions(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIstableLoading(false);
@@ -76,10 +76,4 @@ function ListAllPermissions(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(
-  ListAllPermissions
-);
+export default ListAllPermissions;

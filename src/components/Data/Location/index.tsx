@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Row, Col, Typography, Table, Button, Card, message } from "antd";
 import { Input } from "antd";
 import {
@@ -16,10 +16,8 @@ import AloneLogo from "../../../static/Alone-rafiki.svg";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
-import { setEditLocation } from "../../../actions/locationAction";
-import { connect } from "react-redux";
-import { loading } from "../../../actions/loadingAction";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 interface TabOptions {
   filter: any;
@@ -43,6 +41,9 @@ function DataLocation(props) {
   const [centerPoint, setCenterPoint] = useState({ lat: "", long: "" });
   const [locationData, setLocationData] = useState([]);
   const [isTableLoading, setIsTableLoading] = useState(true);
+
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const getAllLocations = () => {
     http
@@ -78,7 +79,7 @@ function DataLocation(props) {
       })
       .catch((err) => {
         message.error("Locations could not be fetched");
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -221,27 +222,12 @@ function DataLocation(props) {
       render: (data) => (
         <>
           <Link to={`data/location/${data.key}`}>
-            <Button
-              onClick={() => {
-                props.setEditLocation({
-                  location: data,
-                  isEditing: true,
-                });
-              }}
-              style={{ marginRight: "10px" }}
-            >
+            <Button>
               <EyeOutlined />
             </Button>
           </Link>
           <Link to={`data/location/edit/${data.key}`}>
-            <Button
-              onClick={() => {
-                props.setEditLocation({
-                  location: data,
-                  isEditing: true,
-                });
-              }}
-            >
+            <Button>
               <EditOutlined />
             </Button>
           </Link>
@@ -249,22 +235,23 @@ function DataLocation(props) {
             style={{ marginLeft: "8px" }}
             danger
             onClick={() => {
-              props.loading(true);
+              setLoading(true);
               http
                 .delete(`${apis.DELETE_LOCATION}?id=${data.key}`)
                 .then((result) => {
-                  if (result.data.data.status) {
-                    message.success(`LOcation ${data.name} deleted`);
+                  if (result.data.status) {
+                    message.success(`Location ${result.data.data.properties.name} deleted`);
+                    getAllLocations();
                   } else {
-                    message.error(result.data.data.message);
+                    message.error(result.data.message);
                   }
                 })
                 .catch((err) => {
                   message.error(err.message);
-                  AxiosErrorHandler(err, props.logout);
+                  AxiosErrorHandler(err, logout);
                 })
                 .finally(() => {
-                  props.loading(false);
+                  setLoading(false);
                 });
             }}
           >
@@ -457,8 +444,4 @@ function DataLocation(props) {
   );
 }
 
-export default connect(() => ({}), {
-  setEditLocation,
-  loading,
-  logout,
-})(DataLocation);
+export default DataLocation;

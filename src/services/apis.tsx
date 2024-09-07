@@ -32,6 +32,7 @@ const apis = {
   UPLOAD_PACKAGE_POSTER: "/apis/v1/admin/package/upload-poster",
   CREATE_PACKAGE: "/apis/v1/admin/package/create",
   FETCH_ALL_PACKAGES: "/apis/v1/admin/package/fetchall",
+  FETCH_PACKAGE_BY_ID: "/apis/v1/admin/package/fetch-by-id",
   FETCH_ACTIVE_PACKAGES: "/apis/v1/admin/package/fetchactive",
   DELETE_PACKAGE: "/apis/v1/admin/package/delete-package-for-Id",
   EDIT_PACKAGE_BY_ID: "/apis/v1/admin/package/edit-package-for-Id",
@@ -72,6 +73,7 @@ const apis = {
 
   CREATE_TENANT_USER: "/apis/v1/tenant/user/create-tenant-user",
   FETCH_ALL_USERS_OF_TENANT: "/apis/v1/tenant/user/fetch-all-user",
+  FETCH_USER_OF_TENANT_BY_ID: "/apis/v1/tenant/user/fetch-user-by-id",
   DELETE_USER: "/apis/v1/tenant/user/delete-user",
   EDIT_USER: "/apis/v1/tenant/user/edit-user",
 
@@ -233,6 +235,7 @@ const apis = {
   //Clients
   CREATE_CLIENT: "/apis/v1/client/create",
   GET_CLIENT_LIST: "/apis/v1/client/get-list-client",
+  GET_CLIENT_BY_ID: "/apis/v1/client/get-client-by-id",
   DELETE_CLIENT: "/apis/v1/client/delete-client",
   EDIT_CLIENT: "/apis/v1/client/edit-client-details",
   GET_MISSION_FOR_CLIENT: "/apis/v1/client/get-mission-list-for-Id",

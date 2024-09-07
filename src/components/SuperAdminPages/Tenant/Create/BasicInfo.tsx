@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Form, Input, Upload, Row, Col, message, Button } from "antd";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
@@ -6,9 +6,8 @@ import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { beforeUpload } from "../../../../services/imageupload";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
-import { connect } from "react-redux";
 import { STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 
 function BasicInfo(props: any) {
   const [form] = Form.useForm();
@@ -16,6 +15,8 @@ function BasicInfo(props: any) {
     props.tenantData.avatar ? props.tenantData.avatar : ""
   );
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+
+  const { logout } = useContext(AuthContext);
 
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
@@ -37,7 +38,7 @@ function BasicInfo(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsAvatarUploading(false);
@@ -158,8 +159,4 @@ function BasicInfo(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { logout })(BasicInfo);
+export default BasicInfo;

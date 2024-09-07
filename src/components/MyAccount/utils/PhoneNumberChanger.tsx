@@ -1,8 +1,5 @@
 import { useState } from "react";
 import { Form, Input } from "antd";
-import { connect } from "react-redux";
-import { loading } from "../../../actions/loadingAction";
-import { logout } from "../../../actions/authAction";
 
 function PhoneNumberChanger(props: any) {
   const [form] = Form.useForm();
@@ -39,11 +36,4 @@ function PhoneNumberChanger(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(
-  PhoneNumberChanger
-);
+export default PhoneNumberChanger;

@@ -1,20 +1,22 @@
-import { connect } from "react-redux";
 import { Form, Input, Row, Col, message, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { UnorderedListOutlined } from "@ant-design/icons";
 import "../Permission.less";
-import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function CreatePermission(props: any) {
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
   const [form] = Form.useForm();
 
   const onFinish = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     console.log(data);
     http
       .post(apis.CREATE_PERMISSION, data)
@@ -29,10 +31,10 @@ function CreatePermission(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -89,8 +91,4 @@ function CreatePermission(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(CreatePermission);
+export default CreatePermission;

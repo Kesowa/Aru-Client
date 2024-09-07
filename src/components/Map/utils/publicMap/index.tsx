@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useContext } from "react";
 import { v4 as uuid } from "uuid";
 import KesowaNewLogo from "../../../../static/kesowa-black.png";
 import { DataFilterExtension } from "@deck.gl/extensions";
@@ -62,9 +61,6 @@ import { StaticMap } from "react-map-gl";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { connect } from "react-redux";
-import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import moment from "moment";
 import { useParams } from "react-router-dom";
 import MarkerIcon from "../../../../static/MarkerIcon.png";
@@ -93,6 +89,8 @@ import { WebMercatorViewport } from "viewport-mercator-project";
 import Fuse from "fuse.js";
 import { featureType } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
@@ -113,6 +111,10 @@ function PublicMap(props) {
   const selectedLayer = decodeURI(window.location.hash).slice(1); // Get selected layer from url hashed part
   const [osmState, setOsmState] = useState(false);
   const [errorState, setErrorState] = useState("");
+
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
+
   // Viewport settings
   const [INITIAL_VIEW_STATE, setViewport] = useState<any>({
     longitude: DEFAULT_LOCATION.lng,
@@ -545,7 +547,7 @@ function PublicMap(props) {
   };
 
   useEffect(() => {
-    props.loading(true);
+    setLoading(true);
     getAllLayers();
   }, []);
 
@@ -601,13 +603,13 @@ function PublicMap(props) {
       } else {
         message.error(result.data.message);
       }
-    } catch (error) {
-      console.log(error);
-      setErrorState(error.response.status);
-      props.loading(false);
-      AxiosErrorHandler(error, props.logout);
+    } catch (err) {
+      console.log(err);
+      setErrorState(err.response.status);
+      setLoading(false);
+      AxiosErrorHandler(err, logout);
     } finally {
-      props.loading(false);
+      setLoading(false);
     }
   };
 
@@ -1530,7 +1532,7 @@ function PublicMap(props) {
   //       })
   //       .catch((err: any) => {
   //         console.log(err);
-  //         AxiosErrorHandler(err, props.logout);
+  //         AxiosErrorHandler(err, logout);
   //       })
   //       .finally(() => SetSearching(false));
   //   } else {
@@ -1928,16 +1930,4 @@ function PublicMap(props) {
   return <>{renderMap()}</>;
 }
 
-const mapStateToProps = (state) => {
-  //Review
-  // return {
-  //   userType: state.Auth.userdetails.userType,
-  //   userDetails: state.Auth.userdetails,
-  // };
-  return {};
-};
-
-export default connect(mapStateToProps, {
-  loading,
-  logout,
-})(PublicMap);
+export default PublicMap;

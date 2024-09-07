@@ -1,25 +1,24 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { Tabs, Row, Col, message, Typography } from "antd";
 import type { TabsProps } from "antd";
-import { loading } from "../../../../actions/loadingAction";
 import "./index.less";
 import io from "socket.io-client";
 import About from "./tabContents/about";
 import Outcomes from "./tabContents/outcomes";
-import { connect } from "react-redux";
 import VideoPlayer from "../../../shared/VideoPlayer";
 import DroneMap from "../../../shared/DroneMap";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import NoMap from "../../../../static/no-map.svg";
 import streamEnd from "../../../../static/streamended.svg";
 import Weather from "../../../shared/Weather";
 import { LIVE_URL, API_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
-function LiveViewBase(props: any) {
+function LiveViewBase() {
   const { id } = useParams<any>();
   const [missionDetails, setMissionDetails] = useState<any>();
   const [missionId, setMissionId] = useState(0);
@@ -33,9 +32,13 @@ function LiveViewBase(props: any) {
   const [location, setLocation] = useState({ lat: 0, lng: 0 });
 
   const { Title } = Typography;
-  const { tenantId } = props;
-  const { userDetails } = props;
 
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  const tenantId = Auth.userdetails.tenantId._id || Auth.userdetails.tenantId;
+  
+  const { setLoading } = useContext(LoaderContext);
+  
   //socket connectino variable
   const socket: any = useRef();
   const items: TabsProps["items"] = [
@@ -68,7 +71,7 @@ function LiveViewBase(props: any) {
       console.log(
         "Could not fetch streams or there is no streamkey in database!"
       );
-      AxiosErrorHandler(err, props.logout);
+      AxiosErrorHandler(err, logout);
     }
   };
 
@@ -86,38 +89,28 @@ function LiveViewBase(props: any) {
   }, [missionDetails, streamKey]);
 
   const getMission = async (id) => {
-    props.loading(true);
+    setLoading(true);
 
-    const currMission = props.missions.filter((mission) => {
-      return mission._id.toString() === id.toString();
-    });
-
-    let cr;
-    if (!currMission.length) {
-      try {
-        const result = await http.get(`${apis.GET_MISSION_BY_ID}${id}`);
-        cr = result.data.data;
-      } catch (err) {
-        message.error("Something went wrong");
-        AxiosErrorHandler(err, props.logout);
-        return;
-      }
-    } else {
-      cr = currMission[0];
+    try {
+      const result = await http.get(`${apis.GET_MISSION_BY_ID}${id}`);
+      const cr = result.data.data;
+      setMissionDetails(cr);
+      setGeoFence({
+        geoFence: cr.flight.geoFence,
+      });
+      setMissionId(cr._id);
+    } catch (err) {
+      message.error("Something went wrong");
+      AxiosErrorHandler(err, logout);
+      return;
+    } finally {
+      setLoading(false);
     }
-
-    setMissionDetails(cr);
-    setGeoFence({
-      geoFence: cr.flight.geoFence,
-    });
-    setMissionId(cr._id);
-
-    props.loading(false);
   };
 
   useEffect(() => {
     getMission(id);
-  }, [props]);
+  }, []);
 
   useEffect(() => {
     if (missionDetails) {
@@ -250,16 +243,4 @@ function LiveViewBase(props: any) {
   );
 }
 
-const mapStateToProps = (state) => {
-  console.log(state.Auth.userdetails.tenantId);
-  return {
-    missions: state.Missions.missions,
-    tenantId: state.Auth.userdetails.tenantId,
-    userDetails: state.Auth.userdetails,
-  };
-};
-
-export default connect(mapStateToProps, {
-  loading,
-  logout,
-})(LiveViewBase);
+export default LiveViewBase;

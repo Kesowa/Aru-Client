@@ -15,7 +15,7 @@ const FlightDetails: FC<any> = (props) => {
 
   useEffect(() => {
     if (props.flightDetails) {
-      if (props.flightDetails.geoFence.polygon.points.length) {
+      if (props.flightDetails.geoFence.polygon) {
         setArea(props.flightDetails.geoFence.polygon.area);
         setAreaType("Polygon");
       } else {

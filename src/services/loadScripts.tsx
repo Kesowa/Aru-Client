@@ -1,14 +1,16 @@
-import { useEffect } from "react";
-import { connect } from "react-redux";
-import { gmapLoded } from "../../actions/gmapActions";
+import { useEffect, useState } from "react";
 
-function Gmap(props: any) {
+export const loadScripts = () => {
+  const [mapScriptLoaded, setMapScriptLoaded] = useState(false);
+  const [paymentScriptLoaded, setPaymentScriptLoaded] = useState(false);
+
   useEffect(() => {
     const googleScript = document.createElement("script");
     googleScript.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCYWROYTFQ3XH4bhhLJnmJSV-0k9a-PHY8&libraries=drawing,geometry,places`;
     window.document.body.appendChild(googleScript);
     googleScript.addEventListener("load", () => {
-      props.gmapLoded();
+      console.log("GoogleMap script loaded");
+      setMapScriptLoaded(true);
     });
 
     const razorPayScript = document.createElement("script");
@@ -17,16 +19,9 @@ function Gmap(props: any) {
 
     razorPayScript.addEventListener("load", () => {
       console.log("Razorpay script loaded");
+      setPaymentScriptLoaded(true);
     });
   }, []);
 
-  return <div>{props.children}</div>;
+  return { mapScriptLoaded, paymentScriptLoaded };
 }
-
-const mapStateToProps = (state) => {
-  return {};
-};
-
-export default connect(mapStateToProps, {
-  gmapLoded,
-})(Gmap);
