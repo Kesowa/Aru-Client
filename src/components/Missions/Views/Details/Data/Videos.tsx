@@ -53,7 +53,7 @@ import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
-import axios, { AxiosRequestConfig } from "axios";
+import axios from "axios";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 
 
@@ -386,17 +386,17 @@ function Videos(props) {
       const source = cancelToken.source();
       setUploading(true);
 
-      const config: AxiosRequestConfig = {
-        onUploadProgress: (event) => {
-          const percent = Math.floor((event.loaded / event.total) * 100);
-          // setProgress(percent);
-          if (percent === 100) {
-            // setTimeout(() => setProgress(0), 1000);
-          }
-          // options.onProgress({ percent: (event.loaded / event.total) * 100 });
-        },
-        cancelToken: source.token,
-      };
+      // const config: AxiosRequestConfig = {
+      //   onUploadProgress: (event) => {
+      //     const percent = Math.floor((event.loaded / event.total) * 100);
+      //     // setProgress(percent);
+      //     if (percent === 100) {
+      //       // setTimeout(() => setProgress(0), 1000);
+      //     }
+      //     // options.onProgress({ percent: (event.loaded / event.total) * 100 });
+      //   },
+      //   cancelToken: source.token,
+      // };
 
       const uploadToken = await uploadFile(options.file, DocModel.VOD, (prog) => {
         console.log("PROGRESS: ", prog);
@@ -428,7 +428,7 @@ function Videos(props) {
           console.log("isvalid", isValidExtension);
           if (isValidExtension) {
             http
-              .post(options.action, body, config)
+              .post(options.action, body)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 console.log("Upload successful! ", res.data);
@@ -483,7 +483,7 @@ function Videos(props) {
           const isValidExtension2 = checkExtension(parts2[parts2.length - 1]);
           if (isValidExtension2) {
             http
-              .post(options.action, body, config)
+              .post(options.action, body)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 console.log("Upload successful! ", res.data);

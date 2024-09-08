@@ -47,7 +47,7 @@ import ActionToolbar from "src/components/shared/Toolbar/action";
 import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
-import axios, { AxiosRequestConfig } from "axios";
+import axios from "axios";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 import { asString } from "html2canvas/dist/types/css/types/color";
 
@@ -678,21 +678,25 @@ function Outcomes(props) {
       const res = await extractExif(options.file);
       console.log(res);
 
-      const config:AxiosRequestConfig = {
-        onUploadProgress: (event) => {
-          const percent = Math.floor((event.loaded / event.total) * 100);
-          setProgress(percent);
-          if (percent === 100) {
-            setTimeout(() => setProgress(0), 1000);
-          }
-          options.onProgress({
-            percent: (event.loaded / event.total) * 100,
-          });
-        },
-        cancelToken: source.token,
-      };
+      // const config:AxiosRequestConfig = {
+      //   onUploadProgress: (event) => {
+      //     const percent = Math.floor((event.loaded / event.total) * 100);
+      //     setProgress(percent);
+      //     if (percent === 100) {
+      //       setTimeout(() => setProgress(0), 1000);
+      //     }
+      //     options.onProgress({
+      //       percent: (event.loaded / event.total) * 100,
+      //     });
+      //   },
+      //   cancelToken: source.token,
+      // };
 
-      const uploadToken = await uploadFile(options.file, DocModel.ALERT_IMAGES, (prog) => console.info("PROGRESS: " + prog),config);
+      const uploadToken = await uploadFile(options.file, DocModel.ALERT_IMAGES,(prog) => {
+        console.log("PROGRESS: ", prog);
+        setProgress(prog * 100);
+        options.onProgress({ percent: prog * 100 });
+      },source.token);
 
       const body = {
         file: uploadToken,
@@ -720,7 +724,7 @@ function Outcomes(props) {
           // fData.append("onSite", "false");
           // fData.append("flightId", props.missionDetails.flightId);
           http
-            .post(options.action, body, config)
+            .post(options.action, body)
             .then((res: any) => {
               if (res.data.status) {
                 console.log("Upload successful! ", res.data);
@@ -782,22 +786,22 @@ function Outcomes(props) {
           // fData.append("onSite", "false");
           // fData.append("flightId", props.missionDetails.flightId);
           
-          const config = {
+          // const config = {
           
-            onUploadProgress: (event) => {
-              const percent = Math.floor((event.loaded / event.total) * 100);
-              setProgress(percent);
-              if (percent === 100) {
-                setTimeout(() => setProgress(0), 1000);
-              }
-              options.onProgress({
-                percent: (event.loaded / event.total) * 100,
-              });
-            },
-            cancelToken: source.token,
-          };
+          //   onUploadProgress: (event) => {
+          //     const percent = Math.floor((event.loaded / event.total) * 100);
+          //     setProgress(percent);
+          //     if (percent === 100) {
+          //       setTimeout(() => setProgress(0), 1000);
+          //     }
+          //     options.onProgress({
+          //       percent: (event.loaded / event.total) * 100,
+          //     });
+          //   },
+          //   cancelToken: source.token,
+          // };
           http
-            .post(options.action, body, config)
+            .post(options.action, body)
             .then((res: any) => {
               if (res.data.status) {
                 console.log("Upload successful! ", res.data);
