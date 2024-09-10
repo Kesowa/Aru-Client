@@ -1214,7 +1214,7 @@ function MissionView() {
           console.log("Video processing started: ", data);
           openNotification(
             "Video Processing!",
-            `Processing ${data.originalName}`,
+            `Processing ${data.videoName}`,
             "info"
           );
         },

@@ -540,7 +540,7 @@ function Videos(props) {
         console.log("Video processing finished: ", data);
         openNotification(
           "Finished Processing!",
-          `Processing ${data.originalName} has been complete!`,
+          `Processing ${data.videoName} has been complete!`,
           "success"
         );
         setRefresh(true);
