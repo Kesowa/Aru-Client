@@ -28,7 +28,6 @@ import {
 } from "antd";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
-import { AxiosRequestConfig } from "axios";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { logout } from "../../../../actions/authAction";
 import { connect } from "react-redux";
@@ -324,16 +323,16 @@ const CreateBaseLayer = (props) => {
       if (props.isUpdate) {
         if (props.updateType == "Raster") {
 
-        const config:AxiosRequestConfig = {
-          onUploadProgress: (event) => {
-              const percent = Math.floor((event.loaded / event.total) * 100);
-              setProgress(percent);
-            if (percent === 100) {
-                setTimeout(() => setProgress(0), 1000);
-              }
-            },
-          };
-        const uploadToken = await uploadFile(fileList[0], DocModel.RASTER, (prog) => console.info("PROGRESS: " + prog),config);
+        // const config:AxiosRequestConfig = {
+        //   onUploadProgress: (event) => {
+        //       const percent = Math.floor((event.loaded / event.total) * 100);
+        //       setProgress(percent);
+        //     if (percent === 100) {
+        //         setTimeout(() => setProgress(0), 1000);
+        //       }
+        //     },
+        //   };
+        const uploadToken = await uploadFile(fileList[0], DocModel.RASTER, (prog) => console.info("PROGRESS: " + prog));
 
         const body = {
           file: uploadToken,
@@ -346,8 +345,7 @@ const CreateBaseLayer = (props) => {
           // fmData.append("layerId", props.BaseLayerId);
           const result = await http.patch(
             `${apis.UPDATE_BASE_RASTER_UPLOAD}/Raster`,
-            body,
-            config
+            body
           );
 
           if (result.data.status) {
@@ -360,17 +358,17 @@ const CreateBaseLayer = (props) => {
           }
         } else {
 
-          const config:AxiosRequestConfig = {
-            onUploadProgress: (event) => {
-              const percent = Math.floor((event.loaded / event.total) * 100);
-              setProgress(percent);
-              if (percent === 100) {
-                setTimeout(() => setProgress(0), 1000);
-              }
-            },
-          };
+          // const config:AxiosRequestConfig = {
+          //   onUploadProgress: (event) => {
+          //     const percent = Math.floor((event.loaded / event.total) * 100);
+          //     setProgress(percent);
+          //     if (percent === 100) {
+          //       setTimeout(() => setProgress(0), 1000);
+          //     }
+          //   },
+          // };
           // UPDATE VECTOR BY FILE UPLOAD
-          const uploadToken = await uploadFile(fileList[0], DocModel.VECTOR, (prog) => console.info("PROGRESS: " + prog),config);
+          const uploadToken = await uploadFile(fileList[0], DocModel.VECTOR, (prog) => console.info("PROGRESS: " + prog));
 
           const body = {
             file: uploadToken,
@@ -381,8 +379,7 @@ const CreateBaseLayer = (props) => {
           // fmData.append("baseLayer", props.BaseLayerId);
           const result = await http.post(
             `${apis.UPDATE_BASE_VECTOR_UPLOAD}`,
-            body,
-            config
+            body
           );
           if (result.data.success) {
             console.log("update by file", result.data);
@@ -401,17 +398,17 @@ const CreateBaseLayer = (props) => {
         }
       } else {
         // CREATE BASE LAYER BY UPLOAD
-        const config:AxiosRequestConfig = {
-          onUploadProgress: (event) => {
-            const percent = Math.floor((event.loaded / event.total) * 100);
-            setProgress(percent);
-            if (percent === 100) {
-              setTimeout(() => setProgress(0), 1000);
-            }
-          },
-        };
+        // const config:AxiosRequestConfig = {
+        //   onUploadProgress: (event) => {
+        //     const percent = Math.floor((event.loaded / event.total) * 100);
+        //     setProgress(percent);
+        //     if (percent === 100) {
+        //       setTimeout(() => setProgress(0), 1000);
+        //     }
+        //   },
+        // };
         const docModel = layerType === "Vector" ? DocModel.VECTOR : layerType === "Raster" ? DocModel.RASTER : DocModel.LAYER_FILES;
-        const uploadToken = await uploadFile(fileList[0], docModel, (prog) => console.info("PROGRESS: " + prog),config);
+        const uploadToken = await uploadFile(fileList[0], docModel, (prog) => console.info("PROGRESS: " + prog));
 
           const body = {
             file: uploadToken,
@@ -445,8 +442,7 @@ const CreateBaseLayer = (props) => {
           // CREATE BASE LAYER BY VECTOR UPLOAD
           const result = await http.post(
             `${apis.CREATE_BASELAYER}/Vector`,
-            body,
-            config
+            body
           );
 
           if (result.data.status) {
@@ -478,8 +474,7 @@ const CreateBaseLayer = (props) => {
           // CREATE BASE LAYER BY RASTER UPLOAD
           const result = await http.post(
             `${apis.UPLOAD_RASTER_BASELAYER}/Raster`,
-            body,
-            config
+            body
           );
 
           if (result.data.status) {

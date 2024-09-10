@@ -31,7 +31,6 @@ import Dragger from "antd/lib/upload/Dragger";
 import { API_URL, STATIC_URL } from "src/constants";
 import io from "socket.io-client";
 import { DocModel, uploadFile } from "src/services/fileUpload";
-import { AxiosRequestConfig } from "axios";
 
 const { Title, Text } = Typography;
 
@@ -134,19 +133,19 @@ function Pictomap(props) {
  async function handleUploadFiles() {
     if (fileList.length > 0) {
       setIsUploading(true);
-      const config:AxiosRequestConfig = {
-        onUploadProgress: (event) => {
-          const percent = Math.floor((event.loaded / event.total) * 100);
-          setProgress(percent);
-          if (percent === 100) {
-            setTimeout(() => setProgress(0), 1000);
-          }
-        },
-      };
+      // const config:AxiosRequestConfig = {
+      //   onUploadProgress: (event) => {
+      //     const percent = Math.floor((event.loaded / event.total) * 100);
+      //     setProgress(percent);
+      //     if (percent === 100) {
+      //       setTimeout(() => setProgress(0), 1000);
+      //     }
+      //   },
+      // };
       const uploadTokenPromises = fileList.map((file) =>
       uploadFile(file.originFileObj, DocModel.LAYER_FILES, (prog) =>
         console.info("PROGRESS: " + prog)
-      ),config
+      )
     );
       const uploadTokens = await Promise.all(uploadTokenPromises);
 
@@ -161,7 +160,7 @@ function Pictomap(props) {
       //   fData.append("file", file.originFileObj);
       // });
       http
-        .patch(`${apis.PIC_TO_MAP}?mode=${matchMode}`, body, config)
+        .patch(`${apis.PIC_TO_MAP}?mode=${matchMode}`, body)
         .then((res: any) => {
           if (res.data.status) {
             console.log(res.data.result);
