@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
+import { useHistory, useParams } from "react-router-dom";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
-import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import {
   List,
@@ -18,8 +17,6 @@ import {
   Collapse,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -37,16 +34,42 @@ import { STATIC_URL } from "src/constants";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 import { RcFile } from "antd/lib/upload";
 
+import { components } from "src/handlers/schema";
+import { PERMS, TENANT_CLIENT_PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
-function UserCreatePage(props: any) {
+function ClientEditPage() {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [userGroups, setUserGroups]: [any, any] = useState([]);
-  const [selectedUserGroup, setSelectedusergroup]: [any, any] = useState();
+  const [userGroups, setUserGroups] = useState<
+    {
+      name: string;
+      _id: string;
+      isActive: boolean;
+      permissions: string[];
+    }[]
+  >([]);
+  const [selectedUserGroup, setSelectedusergroup] = useState<{
+    name: string;
+    _id: string;
+    isActive: boolean;
+    permissions: string[];
+  }>();
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
+
+  const [client, setClient] = useState<any>(null);
+
+  const { id } = useParams<any>();
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  
+  const { setLoading } = useContext(LoaderContext);
+  
   //avatar upload
   const beforeUploadFunction = (file: RcFile) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
@@ -93,41 +116,19 @@ function UserCreatePage(props: any) {
 
   //fetch user group
   const fetchAllUserGroupList = () => {
-    props.loading(true);
+    setLoading(true);
     http
       .get(apis.FETCH_TENANT_USER_GROUP)
       .then((result) => {
         if (result.data.status) {
-          const data = result.data.data.map((ele: any) => {
-            return {
-              name: ele.name,
-              _id: ele._id,
-              isActive: ele.isActive,
-              permissions: [...ele.permissions],
-            };
-          });
+          const data: components["schemas"]["IUserGroupPermissions"][] = result.data.data;
+          const groups = data
+            .filter((ele) =>
+              ele.permissions.every(perm => TENANT_CLIENT_PERMS.includes(perm)) // only list usergroups assignable to tenant-client
+            )
+            .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }));
 
-          let groups = data.filter((ele) => {
-            let f = false;
-            ele.permissions.forEach((p) => {
-              if (p.isClient) {
-                f = true;
-              }
-            });
-            return f;
-          });
-
-          groups = groups.map((group) => ({
-            ...group,
-            permissions: group.permissions.map((ele) => ele.name),
-          }));
-
-          if (!props.client) {
-            history.push("/dashboard/tenant/client/list");
-            return;
-          }
-
-          const sug = groups.find((g) => g._id === props.client.userGroupId);
+          const sug = groups.find((g) => g._id === client.userGroupId);
           setSelectedusergroup(sug);
           setUserGroups(groups);
         } else {
@@ -153,21 +154,56 @@ function UserCreatePage(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
+
+  const fetchClientDetails = () => {
+    setLoading(true);
+    http
+      .get(apis.GET_CLIENT_BY_ID, { params: { id } })
+      .then((result) => {
+        if (result.data.status) {
+          console.log(result.data.data);
+          setClient(result.data.data);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
-    fetchAllUserGroupList();
+    if (!Auth.isLoggedIn) {
+      setErrorState("unauthorized");
+    } else if (
+      (userDetails.userType === "tenant-client") ||
+      (userDetails.userType === "tenant-staff" && !userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
+    ) {
+      // clients can't edit other clients
+      // staff can edit clients only if have permission
+      setErrorState("401");
+    } else {
+      // tenant-root can edit clients
+      fetchClientDetails();
+    }
   }, []);
 
   useEffect(() => {
-    if (props.client) {
-      setAvatar(props.client.avatar);
+    if (client) {
+      fetchAllUserGroupList();
+      setAvatar(client.avatar);
     }
-  }, [props.client]);
+  }, [client]);
 
   //subimt form
   const onFinish = (data: any) => {
@@ -175,9 +211,9 @@ function UserCreatePage(props: any) {
   };
 
   const EditUserAccount = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
-      id: props.client._id,
+      id: client._id,
       ...data,
     };
     if (avatar && avatar !== props.client.avatar || "") {
@@ -199,10 +235,10 @@ function UserCreatePage(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -221,7 +257,7 @@ function UserCreatePage(props: any) {
     default:
       return (
         <div className="tenant-root-usercreatepage-wrapper full-width-height">
-          {props.client && selectedUserGroup && (
+          {client && selectedUserGroup && (
             <>
               <PageHeader
                 onBack={() => window.history.back()}
@@ -247,9 +283,9 @@ function UserCreatePage(props: any) {
                   onFinish={onFinish}
                   scrollToFirstError={true}
                   initialValues={{
-                    name: props.client.name,
-                    email: props.client.email,
-                    phoneNo: props.client.phoneNo,
+                    name: client.name,
+                    email: client.email,
+                    phoneNo: client.phoneNo,
                     userType: "tenant-client",
                     userGroupId: selectedUserGroup._id,
                   }}
@@ -368,7 +404,7 @@ function UserCreatePage(props: any) {
                           style={{ width: "100%" }}
                           allowClear={true}
                           format="DD-MM-YYYY"
-                          defaultValue={moment(props.client.expiryDate)}
+                          defaultValue={moment(client.expiryDate)}
                         />
                       </Form.Item>
                     </Col>
@@ -391,10 +427,4 @@ function UserCreatePage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-  client: state.Client.clientToEdit,
-});
-
-export default connect(mapStateToProps, { loading, logout })(UserCreatePage);
+export default ClientEditPage;

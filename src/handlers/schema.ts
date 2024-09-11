@@ -3,6 +3,7 @@
  * Do not make direct changes to the file.
  */
 
+import { PERMS } from "src/static/permissions";
 import { rasterProps } from "src/static/rasterprops";
 import { vectorProps } from "src/static/vectorprops";
 
@@ -470,7 +471,7 @@ export interface components {
       userGroupId: components["schemas"]["MongoId"];
       createdBy: components["schemas"]["MongoId"];
       updatedBy: components["schemas"]["MongoId"];
-      customPermissions: components["schemas"]["MongoId"][];
+      customPermissions: components["schemas"]["IPermission"][];
     };
     IFlight: {
       _id: components["schemas"]["MongoId"];
@@ -836,26 +837,7 @@ export interface components {
       email: string;
       password: string;
     };
-    IPermission: {
-      name: string;
-      isSideNavOption: boolean;
-      isFrontendRoute: boolean;
-      isPilot: boolean;
-      isClient: boolean;
-      frontendRoute?: string;
-      isVisibleToTenant: boolean;
-      isVisibleToSuperAdmin: boolean;
-      sideNavOptionLabel: string;
-      sideNavOptionIcon: string;
-      description: string;
-      isActive: boolean;
-      /** Format: date-time */
-      createdAt: string;
-      /** Format: date-time */
-      updatedAt: string;
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
-    };
+    IPermission: PERMS;
     IUserGroupPermissions: {
       permissions: components["schemas"]["IPermission"][];
       tenantId: components["schemas"]["MongoId"];
@@ -874,7 +856,7 @@ export interface components {
       userGroupId: components["schemas"]["MongoId"];
       createdBy: components["schemas"]["MongoId"];
       updatedBy: components["schemas"]["MongoId"];
-      customPermissions: components["schemas"]["IUserGroupPermissions"][];
+      customPermissions: components["schemas"]["IPermission"][];
       _id: components["schemas"]["MongoId"];
       name: string;
       phoneNo: string;

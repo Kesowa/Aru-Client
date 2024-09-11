@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useParams, useHistory, useLocation } from "react-router-dom";
-import { connect } from "react-redux";
 import EmptyGraphics from "../../../../static/Alone-rafiki.svg";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
 
@@ -51,24 +50,23 @@ import Map from "./Data/map";
 import Documents from "./Data/Documents";
 import "./../../index.less";
 import moment from "moment";
-import { loading } from "../../../../actions/loadingAction";
 import TextArea from "antd/lib/input/TextArea";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
-import { EditMission } from "../../../../actions/missionActions";
-import { clearMissionCreationState } from "../../../../actions/missionCreation";
 import io from "socket.io-client";
 import ImageDoc from "./Data/ImageDocs";
 import ManageClients from "./Data/ManageClient";
 import { API_URL, PUBLIC_URL, STATIC_URL } from "src/constants";
 import Report_genration from "./Data/report_genration";
 import { IPlotReportError } from "src/types/report";
+import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 const { Paragraph } = Typography;
-function MissionView(props) {
+function MissionView() {
   const [MissionDetails, setMissionDetails] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const { id } = useParams<any>();
@@ -97,6 +95,13 @@ function MissionView(props) {
   );
   const [reportErrorCSVPath, setReportErrorCSVPath] = useState("");
 
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  const userType = userDetails.userType;
+  const tenantId = userDetails.tenantId._id || userDetails.tenantId;
+  
+  const { setLoading } = useContext(LoaderContext);
+
   //-----------------Notification Function-------------------------//
   const openNotification = (title, description, type) => {
     notification[type]({
@@ -106,8 +111,7 @@ function MissionView(props) {
   };
 
   useEffect(() => {
-    props.loading(true);
-    props.clearMissionCreationState();
+    setLoading(true);
     getInitialData(id);
   }, []);
 
@@ -180,8 +184,8 @@ function MissionView(props) {
           mission = result.data.data;
         } catch (err) {
           message.error("Something went wrong");
-          AxiosErrorHandler(err, props.logout);
-          props.loading(false);
+          AxiosErrorHandler(err, logout);
+          setLoading(false);
           return;
         }
       }
@@ -221,10 +225,10 @@ function MissionView(props) {
         fDate: mission.flight ? mission.flight.date : "",
         fDuration: mission.flight ? mission.flight.duration : "",
         locationId: mission.flight ? mission.flight.locationID : null,
-        missionTenantId: props.tenantId ? props.tenantId : "",
-        userType: props.userDetails ? props.userDetails.userType : "",
-        currentUser: props.userDetails ? props.userDetails.name : "",
-        currentUserDetails: props.userDetails,
+        missionTenantId: tenantId ? tenantId : "",
+        userType: userDetails ? userDetails.userType : "",
+        currentUser: userDetails ? userDetails.name : "",
+        currentUserDetails: userDetails,
         refresh: vodRefresh,
         missionType: mission.missionType ? mission.missionType.name : "",
         isPublic: mission.isPublic,
@@ -259,19 +263,21 @@ function MissionView(props) {
         console.log("no clients here bitches");
       }
 
-      await fetchPilots();
       setMissionDetails(details);
-
-      // Get all available mission types from backend
-      await fetchMissionTypes();
+      
+      // if user is able to edit mission, get mission types and pilot list and client list from backend
+      if (userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
+        await fetchPilots();
+        await fetchMissionTypes();
+      }
 
       // Set loading status to false
-      props.loading(false);
+      setLoading(false);
       setIsLoading(false);
     } catch (err) {
       console.log(err);
-      AxiosErrorHandler(err, props.logout);
-      props.loading(false);
+      AxiosErrorHandler(err, logout);
+      setLoading(false);
     }
   };
 
@@ -302,7 +308,7 @@ function MissionView(props) {
   };
 
   const EditSubmit = () => {
-    props.loading(true);
+    setLoading(true);
     if (!missionEditFormData.missionName) {
       return message.error("Please enter the mission name");
     }
@@ -322,13 +328,12 @@ function MissionView(props) {
       .post(`${apis.EDIT_MISSION_BY_ID}`, body)
       .then((result) => {
         if (result.data.status) {
-          props.EditMission(result.data.data);
           setEditModalVisible(false);
           setMissionDetails({
             ...MissionDetails,
             missionName: body.name,
             instructions: body.description,
-            type: body.type,
+            missionType: missionTypes.find(mT => mT._id === body.type).name,
             deliverables: body.deliverables,
             isPublic: body.isPublic,
           });
@@ -340,10 +345,10 @@ function MissionView(props) {
       })
       .catch((err) => {
         message.error("Something went wrong");
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
 
     settypeflag(1);
@@ -379,8 +384,6 @@ function MissionView(props) {
             missionName={MissionDetails.missionName}
             missionId={MissionDetails.missionId}
             missionDetails={MissionDetails}
-            userDetails={props.userDetails}
-            userType={props.userType}
             refreshDoc={docRefresh}
             setRefreshDoc={setDocRefresh}
           />
@@ -400,8 +403,6 @@ function MissionView(props) {
         children: (
           <Videos
             missionDetails={MissionDetails}
-            userType={props.userType}
-            userDetails={props.userDetails}
             setCount={setTotalVOD}
             totalVOD={totalVOD}
           />
@@ -423,8 +424,6 @@ function MissionView(props) {
             id={id}
             count={totalAlerts}
             missionDetails={MissionDetails}
-            userType={props.userType}
-            userDetails={props.userDetails}
           />
         ),
       },
@@ -444,12 +443,12 @@ function MissionView(props) {
             missionName={MissionDetails.missionName}
             missionId={MissionDetails.missionId}
             missionDetails={MissionDetails}
-            userType={props.userType}
-            userDetails={props.userDetails}
           />
         ),
       },
-      {
+    ];
+    if (userDetails.customPermissions.includes(PERMS.UPLOAD_DOCUMENT)) {
+      items.push({
         key: "6",
         label: <span>Report Generation </span>,
         children: (
@@ -461,12 +460,12 @@ function MissionView(props) {
             setReportErrorCSVPath={setReportErrorCSVPath}
           />
         ),
-      },
-    ];
+      });
+    }
     if (MissionDetails.missionType === "Mapping") {
       return items;
     } else {
-      return items.filter((item) => item.key !== "1" && item.key !== "2");
+      return items.filter((item) => !["1","2","6"].includes(item.key));
     }
   };
 
@@ -722,7 +721,7 @@ function MissionView(props) {
         .catch((err) => {
           console.log(err.response.status);
           setCompleteButtonState(false);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         });
     }
   };
@@ -755,7 +754,7 @@ function MissionView(props) {
         .catch((err) => {
           console.log(err.response.status);
           setCompleteButtonState(false);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         });
     }
   };
@@ -763,23 +762,13 @@ function MissionView(props) {
   //----------------Render edit mission details Button---------------------
 
   function renderMissionDetailsBtn() {
-    console.log("User Type:", props.userType);
-    console.log("Custom Permissions:", props.userDetails.customPermissions);
+    console.log("User Type:", userType);
+    console.log("Custom Permissions:", userDetails.customPermissions);
     if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
+      userType === "tenant-staff" ||
+      userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_update"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-
-      console.log("Filtered Permissions:", permissions);
-
-      if (permissions.length > 0) {
+      if (userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
         return (
           <Button
             onClick={() => {
@@ -828,17 +817,10 @@ function MissionView(props) {
 
   function renderReviewBtn() {
     if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
+      userType === "tenant-staff" ||
+      userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_update"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
         return (
           <Button
             onClick={() => {
@@ -872,17 +854,10 @@ function MissionView(props) {
 
   function renderCompleteBtn() {
     if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
+      userType === "tenant-staff" ||
+      userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_update"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
         return (
           <Button
             onClick={() => {
@@ -942,50 +917,23 @@ function MissionView(props) {
   //----------------Render Assign Pilot Button---------------------
 
   function renderAssignPilotBtn(buttonText: string) {
-    if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
-    ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_update"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
-        return (
-          <Button
-            type="primary"
-            icon={<UserAddOutlined />}
-            onClick={() => {
-              setIsPilotModalVisible(true);
-            }}
-            disabled={MissionDetails.missionStatus !== "Upcoming"}
-          >
-            {buttonText}
-          </Button>
-        );
-      }
-    } else {
-      return (
-        <Button
-          type="primary"
-          icon={<UserAddOutlined />}
-          onClick={() => {
-            setIsPilotModalVisible(true);
-          }}
-          disabled={MissionDetails.missionStatus !== "Upcoming"}
-        >
-          {buttonText}
-        </Button>
-      );
-    }
+    return (
+      <Button
+        type="primary"
+        icon={<UserAddOutlined />}
+        onClick={() => {
+          setIsPilotModalVisible(true);
+        }}
+        disabled={MissionDetails.missionStatus !== "Upcoming"}
+      >
+        {buttonText}
+      </Button>
+    );
   }
 
   //--------------Render Generate Report Button-----------
   function generateReport() {
-    props.loading(true);
+    setLoading(true);
     http
       .post(`${apis.CREATE_REPORT}`, {
         missionId: MissionDetails.missionId,
@@ -1001,10 +949,10 @@ function MissionView(props) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   }
   function renderGenerateReportButton() {
@@ -1087,7 +1035,7 @@ function MissionView(props) {
   }
 
   function assignPilot() {
-    props.loading(true);
+    setLoading(true);
     http
       .patch(`${apis.ASSIGN_PILOT}`, {
         pilotID: pilotToAssign._id,
@@ -1114,10 +1062,10 @@ function MissionView(props) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   }
 
@@ -1136,7 +1084,7 @@ function MissionView(props) {
     return initials;
   }
 
-  function renderPilotAssignButton() {
+  function renderPilotAssignModal() {
     return (
       <Modal
         title="Assign Pilot"
@@ -1200,63 +1148,38 @@ function MissionView(props) {
   }
 
   function renderPilotBadge() {
-    //TO RENDER PILOT BADGE
-    if (initialPilot.name) {
-      return (
-        <>
-          <Avatar
-            key="2"
-            size="large"
-            icon={<UserOutlined />}
-            src={initialPilot.avatar}
-          />
-          <div className="pilot-name">
-            <Title level={5} className="designation">
-              {initialPilot.name}
-            </Title>
-            <Text type="secondary">Pilot assigned</Text>
-          </div>
+    return (
+      <>
+        {
+          (initialPilot.name || (MissionDetails.pilotAssigned !== "no-pilot")) &&
+          <>
+            <Avatar
+              key="2"
+              size="large"
+              icon={<UserOutlined />}
+              src={initialPilot.avatar ? initialPilot.avatar : STATIC_URL + MissionDetails.pilotPhoto}
+            />
+            <div className="pilot-name">
+              <Title level={5} className="designation">
+                {initialPilot.name ? initialPilot.name : MissionDetails.pilotAssigned}
+              </Title>
+              <Text type="secondary">Pilot assigned</Text>
+            </div>
+          </>
+        }
+        {
+          userDetails.customPermissions.includes(PERMS.MISSION_UPDATE) &&
           <div className="pilot-assign-btn">
-            {renderAssignPilotBtn("Re-Assign Pilot")}
-            {/* {renderGenerateReportButton()} */}
-            {renderPilotAssignButton()}
+            {renderAssignPilotBtn(
+              (initialPilot.name || (MissionDetails.pilotAssigned !== "no-pilot")) ?
+              "Re-Assign Pilot" :
+              "Assign Pilot"
+            )}
+            {renderPilotAssignModal()}
           </div>
-        </>
-      );
-    } else if (
-      MissionDetails.pilotAssigned == "no-pilot" &&
-      props.userType !== "tenant-client"
-    ) {
-      return (
-        <div>
-          {renderAssignPilotBtn("Assign Pilot")}
-          {/* {renderGenerateReportButton()} */}
-          {renderPilotAssignButton()}
-        </div>
-      );
-    } else {
-      return (
-        <>
-          <Avatar
-            key="2"
-            size="large"
-            icon={<UserOutlined />}
-            src={STATIC_URL + MissionDetails.pilotPhoto}
-          />
-          <div className="pilot-name">
-            <Title level={5} className="designation">
-              {MissionDetails.pilotAssigned}
-            </Title>
-            <Text type="secondary">Pilot assigned</Text>
-          </div>
-          <div className="pilot-assign-btn">
-            {renderAssignPilotBtn("Re-Assign Pilot")}
-            {/* {renderGenerateReportButton()} */}
-            {renderPilotAssignButton()}
-          </div>
-        </>
-      );
-    }
+        }
+      </>
+    );
   }
 
   // +++++++++++++++ E10 Breadcrumb routes ++++++++++++++++++++++++++++++++
@@ -1382,7 +1305,7 @@ function MissionView(props) {
                 </a>
               </Descriptions.Item>
               <Descriptions.Item label="Mission Type">
-                {typeflag == 0 ? MissionDetails.missionType : missType}
+                {MissionDetails.missionType}
               </Descriptions.Item>
               <Descriptions.Item label="Order date">
                 {MissionDetails.orderDate}
@@ -1459,7 +1382,9 @@ function MissionView(props) {
 
               <Row>
                 <Card title="Flights" bordered={false} className="flight-card">
-                  <Dropdown menu={{ items }} trigger={["contextMenu"]}>
+                  <Dropdown menu={{
+                    items: userDetails.customPermissions.includes(PERMS.FLIGHT_UPDATE) ? items : [items[1]]
+                  }} trigger={["contextMenu"]}>
                     <Tooltip
                       placement="bottom"
                       title="Right click to view/edit flight"
@@ -1499,10 +1424,8 @@ function MissionView(props) {
               <ManageClients
                 missionClient={missionClient} // then i passed the same state in this component
                 setClients={setMissionClient} // also the the setState for the same has been passed here
-                loading={props.loading}
+                loading={setLoading}
                 missionId={id.split("-")[1]}
-                userType={props.userType}
-                userDetails={props.userDetails}
               />
             </Col>
           </Row>
@@ -1751,21 +1674,4 @@ function MissionView(props) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    userType: state.Auth.userdetails.userType,
-    tenantId:
-      state.Auth.userdetails.tenantId._id || state.Auth.userdetails.tenantId,
-    userId: state.Auth.userdetails._id,
-    missions: state.Missions.missions,
-    userDetails: state.Auth.userdetails,
-    refresh: state.Missions.refresh,
-  };
-};
-
-export default connect(mapStateToProps, {
-  loading,
-  EditMission,
-  clearMissionCreationState,
-  logout,
-})(MissionView);
+export default MissionView;

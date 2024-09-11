@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { FlyToInterpolator } from "deck.gl";
 import {
   Typography,
@@ -26,9 +26,8 @@ import "../index.less";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
-import { connect } from "react-redux";
 import * as turf from "@turf/turf";
+import { AuthContext } from "src/services/authUtils";
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   editing: boolean;
@@ -77,7 +76,6 @@ interface FeatureTableProps {
   limit: number;
   setLimit: (number) => void;
   id: string;
-  pointMarkerColour: string;
   canEditGeojson: boolean;
   canDeleteFeature: boolean;
   flaggedFilter: boolean;
@@ -114,6 +112,8 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
   const [form] = Form.useForm();
   const [form1] = Form.useForm();
   let searchInput: any;
+
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     if (props.contentHeight) {
@@ -155,7 +155,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
 
   useEffect(() => {
     if (data) formTable();
-  }, [data, editingKey, props.pointMarkerColour]);
+  }, [data, editingKey]);
 
   const setPaginationPage = (page) => {
     setPage(page);
@@ -209,7 +209,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -253,7 +253,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -302,7 +302,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -489,7 +489,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
         })
         .catch((err) => {
           message.error(err.message);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         });
 
       const newData = [...data];
@@ -806,49 +806,4 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
   );
 };
 
-const mapStateToProps = (state: {
-  app: {
-    tableData: any;
-    total: any;
-    page: any;
-    setPage: (page: number) => void;
-    limit: any;
-    setLimit: (limit: number) => void;
-    pointMarkerColour: any;
-    canEditGeojson: any;
-    canDeleteFeature: any;
-    flaggedFilter: any;
-    unflaggedFilter: any;
-    allLayers: any;
-    refreshLayer: any;
-    shouldAttributeTableReload: any;
-  };
-}) => {
-  if (!state || !state.app) {
-    // Handle the case where state or state.app is undefined or null
-    return {};
-  }
-
-  return {
-    tableData: state.app.tableData,
-    total: state.app.total,
-    page: state.app.page,
-    setPage: state.app.setPage,
-    limit: state.app.limit,
-    setLimit: state.app.setLimit,
-    pointMarkerColour: state.app.pointMarkerColour,
-    canEditGeojson: state.app.canEditGeojson,
-    canDeleteFeature: state.app.canDeleteFeature,
-    flaggedFilter: state.app.flaggedFilter,
-    unflaggedFilter: state.app.unflaggedFilter,
-    allLayers: state.app.allLayers,
-    refreshLayer: state.app.refreshLayer,
-    shouldAttributeTableReload: state.app.shouldAttributeTableReload,
-  };
-};
-
-const mapDispatchToProps = {
-  logout,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(FeatureTable);
+export default FeatureTable;

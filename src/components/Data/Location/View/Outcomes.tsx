@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Row,
   Col,
@@ -33,12 +33,11 @@ import {
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
-import { connect } from "react-redux";
 import moment from "moment";
 import * as htmlToImage from "html-to-image";
 import "./data.less";
 import { STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -56,6 +55,8 @@ function Outcomes(outcomeProps) {
   const [total, setTotal] = useState(0);
   const [downloadLoading, setDownloadLoading] = useState(false);
 
+  const { logout } = useContext(AuthContext);
+
   useEffect(() => {
     setLoading(true);
     http
@@ -69,7 +70,7 @@ function Outcomes(outcomeProps) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, outcomeProps.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setLoading(false);
@@ -579,9 +580,4 @@ function Outcomes(outcomeProps) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { logout })(Outcomes);
+export default Outcomes;

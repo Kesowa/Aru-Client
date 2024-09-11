@@ -63,8 +63,7 @@ const CreateMissionBase = lazy(() => import("../../Missions/Create"));
 const EditFlight = lazy(() => import("../../Missions/Flight/Edit"));
 const ViewFlight = lazy(() => import("../../Missions/Flight/View"));
 const AssetBase = lazy(() => import("../../Assets"));
-const CreateLocation = lazy(() => import("../../Data/Location/Create"));
-const EditLocation = lazy(() => import("../../Data/Location/Edit"));
+const CreateOrEditLocation = lazy(() => import("../../Data/Location/CreateOrEdit"));
 const DashboardContent = lazy(() => import("./Content"));
 const AssetView = lazy(() => import("../../Assets/View"));
 const LocationCard = lazy(() => import("../../Data/Location/View"));
@@ -204,10 +203,10 @@ const FallbackComponent = (props: any) => {
             <ViewFlight />
           </Route>
           <Route path="/dashboard/data/locations/create">
-            <CreateLocation />
+            <CreateOrEditLocation isEditing={false} />
           </Route>
           <Route path="/dashboard/data/location/edit/:id">
-            <EditLocation />
+            <CreateOrEditLocation isEditing={true} />
           </Route>
           <Route path="/dashboard/data" exact>
             <DataList />

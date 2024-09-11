@@ -1,67 +1,41 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
-import { loading } from "../../actions/loadingAction";
-import { connect } from "react-redux";
 import { useHistory, useLocation } from "react-router-dom";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { Typography, Form, Input, Button, Alert } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
-import { login, setUserDetails, logout } from "../../actions/authAction";
 import "./index.less";
 import { clientOptions } from "../../static/sideBarOptions";
 import { Link } from "react-router-dom";
 import { components } from "src/handlers/schema";
 import Logo from "../shared/Logo";
 import "../shared/login-bg.less";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "../shared/Loader";
 
-function Login(props: any) {
+function Login() {
   const [errMessage, setErrMessage] = useState("");
   const location = useLocation();
   const history = useHistory();
   console.log("location", location);
   const { from } = location.state || { from: { pathname: "/" } };
+  const { login, logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
+
   const onFinish = (values: any) => {
-    props.loading(true);
+    setLoading(true);
     http
       .post<components["schemas"]["LoginAuthResponse"]>(apis.LOGIN, values)
       .then((result) => {
         console.log(result.data);
         if (result.data.status) {
           //login
-          localStorage.setItem("Token", result.data.token);
-          localStorage.setItem("UserId", result.data.data._id);
-
-          let sidebarOptions: any = null;
-          if (result.data.data.userType === "tenant-staff") {
-            let permissions: any = [];
-
-            result.data.data.customPermissions.forEach((p) => {
-              const filteredPermissions = p.permissions.filter(
-                (d) => d.isFrontendRoute === true
-              );
-              const k = filteredPermissions.map((e) => {
-                return {
-                  type: "menu",
-                  link: e.frontendRoute.trim(),
-                  icon: e.sideNavOptionIcon.trim(),
-                  text: e.sideNavOptionLabel,
-                };
-              });
-              permissions = [...k, ...permissions];
-            });
-            sidebarOptions = permissions;
-          } else if (result.data.data.userType === "tenant-client") {
-            sidebarOptions = [...clientOptions];
-          }
-          result.data.data.sidebarOptions = sidebarOptions;
-
-          props.login(
+          login(
             result.data.token,
             result.data.data._id,
             result.data.data
           );
-          props.setUserDetails(result.data.data);
           history.replace(from);
         } else {
           setErrMessage(result.data.message);
@@ -70,10 +44,10 @@ function Login(props: any) {
       .catch((err) => {
         console.log(err);
         setErrMessage(err?.response?.data?.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -148,13 +122,4 @@ function Login(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, {
-  loading,
-  login,
-  setUserDetails,
-  logout,
-})(Login);
+export default Login;

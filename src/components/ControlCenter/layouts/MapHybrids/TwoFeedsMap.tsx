@@ -1,9 +1,7 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
 import connectSocket from "../../../../services/socketConnect";
 
 type mapProps = {
-  gmapLoaded: boolean;
   feeds: object;
 };
 
@@ -90,17 +88,6 @@ class TwoFeedsMap extends Component<mapProps, mapState> {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (!prevProps.gmapLoaded && this.props.gmapLoaded) {
-      const loc = { lat: 43.642567, lng: -79.387054 };
-      this.googleMap = this.createGoogleMap(loc);
-
-      if (this.googleMap) {
-        this.googleMap.addListener("click", (e) => {
-          console.log("clicked");
-        });
-      }
-    }
-
     if (this.state.position_1 !== prevState.position_1) {
       this.googleMap.panTo({
         lat: this.state.position_1.lat,
@@ -158,25 +145,22 @@ class TwoFeedsMap extends Component<mapProps, mapState> {
 
   // Intialize Google Map
   createGoogleMap = ({ lat, lng }) => {
-    if (this.props.gmapLoaded) {
-      return new window.google.maps.Map(this.googleMapRef.current, {
-        zoom: 16,
-        center: {
-          lat,
-          lng,
-        },
-        disableDefaultUI: true,
-        zoomControl: false,
-        scaleControl: false,
-        disableDoubleClickZoom: true,
-        mapTypeControl: false,
-        mapTypeControlOptions: {
-          style: window.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-          mapTypeIds: ["roadmap", "satellite"],
-        },
-      });
-    }
-    return null;
+    return new window.google.maps.Map(this.googleMapRef.current, {
+      zoom: 16,
+      center: {
+        lat,
+        lng,
+      },
+      disableDefaultUI: true,
+      zoomControl: false,
+      scaleControl: false,
+      disableDoubleClickZoom: true,
+      mapTypeControl: false,
+      mapTypeControlOptions: {
+        style: window.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+        mapTypeIds: ["roadmap", "satellite"],
+      },
+    });
   };
 
   render() {
@@ -197,10 +181,4 @@ class TwoFeedsMap extends Component<mapProps, mapState> {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    gmapLoaded: state.Gmap.gmapLoaded,
-  };
-};
-
-export default connect(mapStateToProps)(TwoFeedsMap);
+export default TwoFeedsMap;

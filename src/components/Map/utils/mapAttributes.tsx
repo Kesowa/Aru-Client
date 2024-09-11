@@ -1,17 +1,16 @@
 // MapAttributes.tsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Typography, Spin, Select, Switch, Space } from "antd";
 import ReactJson from "@uiw/react-json-view";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
-import { connect } from "react-redux";
 import FeatureTable from "./featureTable";
 import { COG_URL, TITILER_STATIC } from "src/constants";
 import { Layer } from "../layerRender";
 import { rasterProps } from "src/static/rasterprops";
+import { AuthContext } from "src/services/authUtils";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -35,7 +34,6 @@ interface Props {
   shouldAttributeTableReload: boolean;
   setRefreshLayer: (refresh: boolean) => void;
   refreshLayer: boolean;
-  logout: () => void;
   setViewport: (viewport: any) => void;
   setSelectedIndexes: (indexes: number[]) => void;
   defaultKeys: any;
@@ -94,6 +92,8 @@ const MapAttributes: React.FC<Props> = (props) => {
       layer.type === "Raster" &&
       [rasterProps.DEM, rasterProps.ORTHO].includes(layer.raster)
   );
+
+  const { logout } = useContext(AuthContext);
 
   const onChange = (checked: boolean) => {
     props.setTerrainMap(checked);
@@ -206,7 +206,7 @@ const MapAttributes: React.FC<Props> = (props) => {
       })
       .catch((err) => {
         setState((prevState) => ({ ...prevState, error: true }));
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() =>
         setState((prevState) => ({ ...prevState, loading: false }))
@@ -243,7 +243,7 @@ const MapAttributes: React.FC<Props> = (props) => {
           }
         })
         .catch((err) => {
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() =>
           setState((prevState) => ({
@@ -414,7 +414,7 @@ const MapAttributes: React.FC<Props> = (props) => {
           bottomBarHeight={props.bottomBarHeight}
           contentHeight={state.contentHeight}
           tableData={state.tableData}
-          // allLayers={props.allLayers} // The FeatureTable component takes the allLayers prop from global state, the value passed here doesn't get used
+          allLayers={props.AllLayers}
           flaggedFilter={props.flaggedFilter}
           unflaggedFilter={props.unflaggedFilter}
           setPage={(page) => setState((prev) => ({ ...prev, page }))}
@@ -455,9 +455,4 @@ const MapAttributes: React.FC<Props> = (props) => {
   }
 };
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { logout })(MapAttributes);
+export default MapAttributes;

@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { connect } from "react-redux";
+import { useContext, useState } from "react";
 import { Form, Input, Upload, Row, Col, message, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import {
@@ -8,25 +7,27 @@ import {
   LoadingOutlined,
 } from "@ant-design/icons";
 import "../Package.less";
-import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { beforeUpload } from "../../../../services/imageupload";
 import ImgCrop from "antd-img-crop";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { Link } from "react-router-dom";
 import { STATIC_URL } from "src/constants";
-import type { RcFile } from "antd/lib/upload";
 import { DocModel, uploadFile } from "src/services/fileUpload";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function CreatePackage(props: any) {
   const [form] = Form.useForm();
   const [poster, setPoster] = useState("");
   const [isPosterUploading, setIsPosterUploading] = useState(false);
 
-  const beforeUploadFunction = (file: RcFile) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
+
+  const beforeUploadFunction = (file: any) => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsPosterUploading(true);
       const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
 
@@ -47,7 +48,7 @@ function CreatePackage(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsPosterUploading(false);
@@ -58,7 +59,7 @@ function CreatePackage(props: any) {
 
   const onFinish = (data: any) => {
     if (poster) {
-      props.loading(true);
+      setLoading(true);
       console.log(poster, data);
       const body = {
         ...data,
@@ -78,10 +79,10 @@ function CreatePackage(props: any) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
-          props.loading(false);
+          setLoading(false);
         });
     } else {
       message.error("please choose a poster for the package");
@@ -335,8 +336,4 @@ function CreatePackage(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(CreatePackage);
+export default CreatePackage;

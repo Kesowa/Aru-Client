@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ReactDom from "react-dom";
 import {
   Comment,
@@ -22,13 +22,12 @@ import {
   EditTwoTone,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
-import { logout } from "../../../actions/authAction";
-import { thread } from "../../../actions/threadAction";
-import { connect } from "react-redux";
 import moment from "moment-timezone";
 import "./index.less";
 import Mentions from "../Mentions";
 import VideoPlayer from "../VideoPlayer";
+import { AuthContext } from "src/services/authUtils";
+import { ThreadContext } from "src/services/threadUtils";
 
 const GET_THREAD = async (docType: any, docID: any) => {
   return await http.get(`${apis.THREAD}/${docType}/${docID}`);
@@ -103,6 +102,11 @@ const Thread = (props) => {
   const [action, setAction] = useState("");
   const [commentId, setCommentId] = useState("");
   const [actionIdx, setActionIdx] = useState("");
+
+  const { Auth } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+
+  const { thread, closeThread } = useContext(ThreadContext);
 
   const getActions = (comment: any, idx: any) => {
     return [
@@ -216,34 +220,34 @@ const Thread = (props) => {
   };
 
   const fetchThread = async () => {
-    const response = await GET_THREAD(props.Thread.docType, props.Thread.docId);
+    const response = await GET_THREAD(thread.docType, thread.docId);
     extractMentionsAndFormatText(response.data.data.comments);
   };
   const deleteComment = async () => {
     const response = await DELETE_COMMENT(
-      props.Thread.docType,
-      props.Thread.docId,
+      thread.docType,
+      thread.docId,
       commentId
     );
     console.log(response);
   };
   useEffect(() => {
-    console.log("Thread", props.Thread);
-    if (props.open || refresh) {
+    console.log("Thread", thread);
+    if (thread.open || refresh) {
       fetchThread();
       if (refresh) {
         setRefresh(false);
       }
     }
-  }, [props.open, refresh]);
+  }, [thread.open, refresh]);
   const onClose = () => {
     if (props.thumbnail) {
       props.setThumbnail("");
     }
-    if (props.Thread.docType === "vod") {
+    if (thread.docType === "vod") {
       setOpenVOD({ status: false, seek: 0 });
     }
-    props.thread(false);
+    closeThread();
   };
 
   useEffect(() => {
@@ -287,8 +291,8 @@ const Thread = (props) => {
       }
       setAddSubmitting(true);
       const response = await ADD_COMMENT(
-        props.Thread.docType,
-        props.Thread.docId,
+        thread.docType,
+        thread.docId,
         addCommentValue
       );
       message.success("Comment submitted successfuly!");
@@ -320,8 +324,8 @@ const Thread = (props) => {
       }
       setEditSubmitting(true);
       const response = await EDIT_COMMENT(
-        props.Thread.docType,
-        props.Thread.docId,
+        thread.docType,
+        thread.docId,
         editCommentValue,
         commentId
       );
@@ -344,7 +348,7 @@ const Thread = (props) => {
   };
   return ReactDom.createPortal(
     <div id="thread">
-      {props.Thread.docType === "vod" && props.data && openVOD.status && (
+      {thread.docType === "vod" && props.data && openVOD.status && (
         <>
           <div
             style={{
@@ -374,7 +378,7 @@ const Thread = (props) => {
         className="thread"
         placement="right"
         onClose={onClose}
-        open={props.open}
+        open={thread.open}
         bodyStyle={{
           overflow: "hidden",
         }}
@@ -397,8 +401,8 @@ const Thread = (props) => {
                     avatar={
                       <Avatar
                         icon={<UserOutlined />}
-                        src={`${STATIC_URL}${props.userDetails.avatar}`}
-                        alt={props.userDetails.name}
+                        src={`${STATIC_URL}${userDetails.avatar}`}
+                        alt={userDetails.name}
                       />
                     }
                     content={
@@ -410,14 +414,14 @@ const Thread = (props) => {
                         type="Edit"
                         action={action}
                         setAction={setAction}
-                        tags={props.tags?.bookmarks ? props.tags.bookmarks : {}}
+                        tags={thread.tags?.bookmarks ? thread.tags.bookmarks : {}}
                       />
                     }
                   />
                 ) : (
                   <Comment
                     actions={
-                      props.userDetails.name === comment.authorName &&
+                      userDetails.name === comment.authorName &&
                       getActions(comment, idx)
                     }
                     author={<a>{comment.authorName}</a>}
@@ -459,8 +463,8 @@ const Thread = (props) => {
           avatar={
             <Avatar
               icon={<UserOutlined />}
-              src={`${STATIC_URL}${props.userDetails.avatar}`}
-              alt={props.userDetails.name}
+              src={`${STATIC_URL}${userDetails.avatar}`}
+              alt={userDetails.name}
             />
           }
           content={
@@ -470,7 +474,7 @@ const Thread = (props) => {
                 onSubmit={addHandleSubmit}
                 submitting={addSubmitting}
                 value={addCommentValue}
-                tags={props.tags?.bookmarks ? props.tags.bookmarks : {}}
+                tags={thread.tags?.bookmarks ? thread.tags.bookmarks : {}}
                 type="Add"
               />
             </>
@@ -482,13 +486,4 @@ const Thread = (props) => {
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    userDetails: state.Auth.userdetails,
-    open: state.Thread.open,
-    Thread: state.Thread,
-    tags: state.Thread.tags,
-  };
-};
-
-export default connect(mapStateToProps, { thread, logout })(Thread);
+export default Thread;

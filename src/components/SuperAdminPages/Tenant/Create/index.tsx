@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import { useState, useEffect, useContext } from "react";
 import { Steps, Button, message } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import {
@@ -12,17 +11,20 @@ import BasicInfo from "./BasicInfo";
 import ChoosePackage from "./ChoosePackage";
 import BillingDetails from "./BillingDetails";
 import "../Tenant.less";
-import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { Link, useHistory } from "react-router-dom";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function CreateTenant(props: any) {
   const [formState, setFormState] = useState(0);
   const [tenantData, setTenantData] = useState({});
   const history = useHistory();
+
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const goToNextFromBasic = (data: any) => {
     setTenantData({
@@ -41,7 +43,7 @@ function CreateTenant(props: any) {
   };
 
   const finalSubmitTenantCreation = (packageId: string) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
       ...tenantData,
       activePackage: packageId,
@@ -64,10 +66,10 @@ function CreateTenant(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -125,8 +127,4 @@ function CreateTenant(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(CreateTenant);
+export default CreateTenant;

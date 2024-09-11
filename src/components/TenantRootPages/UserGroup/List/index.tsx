@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   EyeOutlined,
   EditOutlined,
@@ -6,7 +6,6 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import { connect } from "react-redux";
 import {
   Row,
   Col,
@@ -19,8 +18,6 @@ import {
   Popconfirm,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -30,6 +27,8 @@ import FourOhOne from "../../../shared/Error/FourOhOne";
 import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function UserGroupListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
@@ -37,8 +36,11 @@ function UserGroupListPage(props: any) {
   const [activeUserGroup, setActiveUserGroup]: [any, any] = useState();
   const [errorState, setErrorState] = useState("");
 
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
+
   const deleteUsergroup = (id) => {
-    props.loading(true);
+    setLoading(true);
     http
       .delete(`${apis.DELETE_USERGROUP}`, {
         params: {
@@ -61,7 +63,7 @@ function UserGroupListPage(props: any) {
         }
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -114,7 +116,7 @@ function UserGroupListPage(props: any) {
               name: ele.name,
               _id: ele._id,
               isActive: ele.isActive,
-              permissions: ele.permissions.map((e: any) => e.name),
+              permissions: ele.permissions,
             };
           });
           console.log(data);
@@ -141,7 +143,7 @@ function UserGroupListPage(props: any) {
             break;
           default:
             setErrorState("500");
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
         }
       })
       .finally(() => {
@@ -207,9 +209,9 @@ function UserGroupListPage(props: any) {
                         }
                         bordered
                         dataSource={activeUserGroup.permissions}
-                        renderItem={(item: any) => (
+                        renderItem={(item: string) => (
                           <List.Item>
-                            <Typography.Text>{item}</Typography.Text>
+                            <span aria-valuetext={item} style={{textTransform: "capitalize"}}>{item.replaceAll('_', ' ')}</span>
                           </List.Item>
                         )}
                       />
@@ -224,9 +226,4 @@ function UserGroupListPage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(UserGroupListPage);
+export default UserGroupListPage;

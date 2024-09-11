@@ -169,9 +169,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
         if (featureType[layer.vector] === featureTypes.POINT)
           return new GeoJsonLayer({
             id: layer._id,
-            data: fetch(STATIC_URL + layer.layerpath).then((response) =>
-              response.json()
-            ),
+            data: STATIC_URL + layer.layerpath,
             pickable: true,
             pointType: "icon",
             iconSizeMinPixels: 6,

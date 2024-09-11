@@ -1,9 +1,7 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
 import connectSocket from "../../../../services/socketConnect";
 
 type mapProps = {
-  gmapLoaded: boolean;
   streamKey: string;
 };
 
@@ -59,17 +57,6 @@ class GridMap extends Component<mapProps, mapState> {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (!prevProps.gmapLoaded && this.props.gmapLoaded) {
-      const loc = { lat: 43.642567, lng: -79.387054 };
-      this.googleMap = this.createGoogleMap(loc);
-
-      if (this.googleMap) {
-        this.googleMap.addListener("click", (e) => {
-          console.log("clicked");
-        });
-      }
-    }
-
     if (this.state.position !== prevState.position) {
       this.googleMap.panTo({
         lat: this.state.position.lat,
@@ -109,25 +96,22 @@ class GridMap extends Component<mapProps, mapState> {
 
   // Intialize Google Map
   createGoogleMap = ({ lat, lng }) => {
-    if (this.props.gmapLoaded) {
-      return new window.google.maps.Map(this.googleMapRef.current, {
-        zoom: 16,
-        center: {
-          lat,
-          lng,
-        },
-        disableDefaultUI: true,
-        zoomControl: false,
-        scaleControl: false,
-        disableDoubleClickZoom: true,
-        mapTypeControl: false,
-        mapTypeControlOptions: {
-          style: window.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-          mapTypeIds: ["roadmap", "satellite"],
-        },
-      });
-    }
-    return null;
+    return new window.google.maps.Map(this.googleMapRef.current, {
+      zoom: 16,
+      center: {
+        lat,
+        lng,
+      },
+      disableDefaultUI: true,
+      zoomControl: false,
+      scaleControl: false,
+      disableDoubleClickZoom: true,
+      mapTypeControl: false,
+      mapTypeControlOptions: {
+        style: window.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+        mapTypeIds: ["roadmap", "satellite"],
+      },
+    });
   };
 
   createMarker = (location, compass) => {
@@ -174,10 +158,4 @@ class GridMap extends Component<mapProps, mapState> {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    gmapLoaded: state.Gmap.gmapLoaded,
-  };
-};
-
-export default connect(mapStateToProps)(GridMap);
+export default GridMap;

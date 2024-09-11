@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
-import { connect } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import {
   List,
@@ -17,8 +16,6 @@ import {
   Collapse,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -37,17 +34,33 @@ import moment from "moment";
 import { STATIC_URL } from "src/constants";
 import { RcFile } from "antd/lib/upload";
 import { DocModel, uploadFile } from "src/services/fileUpload";
+import { components } from "src/handlers/schema";
+import { PERMS, TENANT_CLIENT_PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
-function UserCreatePage(props: any) {
+function ClientCreatePage(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [userGroups, setUserGroups]: [any, any] = useState([]);
+  const [userGroups, setUserGroups] = useState<
+    {
+      name: string;
+      _id: string;
+      isActive: boolean;
+      permissions: string[];
+    }[]
+  >([]);
   const [selectedUserGroup, setSelectedusergroup]: [any, any] = useState();
   const [errorState, setErrorState] = useState("");
 
-  const beforeUploadFunction = (file: RcFile) => {
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  
+  const { setLoading } = useContext(LoaderContext);
+
+  const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
       setIsAvatarUploading(true);
       const previewUrl = URL.createObjectURL(file);
@@ -55,30 +68,6 @@ function UserCreatePage(props: any) {
       const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
       setAvatar(uploadToken);
       setIsAvatarUploading(false);
-
-
-      // const body = {
-      //   file: uploadToken.id,
-      // };
-      // const formData = new FormData();
-      // formData.append("avatar", file);
-      // http
-      //   .post(apis.UPLOAD_USER_PROFILE_PICTURE, body, {
-      //   })
-      //   .then((result) => {
-      //     if (result.data.status) {
-      //       setAvatar(result.data.file);
-      //     } else {
-      //       message.error(result.data.message);
-      //     }
-      //   })
-      //   .catch((err) => {
-      //     console.log(err);
-      //     AxiosErrorHandler(err, props.logout);
-      //   })
-      //   .finally(() => {
-      //     setIsAvatarUploading(false);
-      //   });
     });
     return false;
   };
@@ -91,36 +80,19 @@ function UserCreatePage(props: any) {
 
   //fetch user group
   const fetchAllUserGroupList = () => {
-    props.loading(true);
+    setLoading(true);
     http
       .get(apis.FETCH_TENANT_USER_GROUP)
       .then((result) => {
         if (result.data.status) {
-          const data = result.data.data.map((ele: any) => {
-            return {
-              name: ele.name,
-              _id: ele._id,
-              isActive: ele.isActive,
-              permissions: [...ele.permissions],
-            };
-          });
-
-          let groups = data.filter((ele) => {
-            let f = false;
-            ele.permissions.forEach((p) => {
-              if (p.isClient) {
-                f = true;
-              }
-            });
-            return f;
-          });
-
-          groups = groups.map((group) => ({
-            ...group,
-            permissions: group.permissions.map((ele) => ele.name),
-          }));
-
-          setUserGroups(groups);
+          const data: components["schemas"]["IUserGroupPermissions"][] = result.data.data;
+          setUserGroups(
+            data
+              .filter((ele) =>
+                ele.permissions.every(perm => TENANT_CLIENT_PERMS.includes(perm)) // only list usergroups assignable to tenant-client
+              )
+              .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }))
+          );
         } else {
           switch (result.data.message) {
             case "You do not have permission to use this API.":
@@ -143,15 +115,27 @@ function UserCreatePage(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
   useEffect(() => {
-    fetchAllUserGroupList();
+    if (!Auth.isLoggedIn) {
+      setErrorState("unauthorized");
+    } else if (
+      (userDetails.userType === "tenant-client") ||
+      (userDetails.userType === "tenant-staff" && !userDetails.customPermissions.includes(PERMS.CREATE_CLIENT))
+    ) {
+      // clients can't create other clients
+      // staff can create clients only if have permission
+      setErrorState("401");
+    } else {
+      // tenant-root can create clients
+      fetchAllUserGroupList();
+    }
   }, []);
 
   //subimt form
@@ -162,7 +146,7 @@ function UserCreatePage(props: any) {
   };
 
   const createUserAccount = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
       ...data,
       avatar,
@@ -189,7 +173,7 @@ function UserCreatePage(props: any) {
           ) {
             setErrorState("403-expiry");
             window.setTimeout(function () {
-              AxiosErrorHandler(err, props.logout); //needs to be connected with redux
+              AxiosErrorHandler(err, logout); 
             }, 5000);
           } else {
             setErrorState("403");
@@ -197,7 +181,7 @@ function UserCreatePage(props: any) {
         }
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -426,9 +410,4 @@ function UserCreatePage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(UserCreatePage);
+export default ClientCreatePage;

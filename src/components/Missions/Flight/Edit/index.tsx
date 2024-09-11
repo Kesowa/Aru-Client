@@ -1,105 +1,148 @@
-import React, { useState, useEffect, FC } from "react";
-import { connect, ConnectedProps } from "react-redux";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect, FC, useContext } from "react";
+import { useHistory, useParams } from "react-router-dom";
 import GoogleMap from "../../GoogleMap";
 import EditFlightForm from "./Form";
 import "../../Views/Details/Data/data.less";
+import "../../Create/index.less";
 import Weather from "../../../shared/Weather";
-import { logout } from "../../../../actions/authAction";
+import apis from "src/services/apis";
+import http from "src/services/httpCall";
+import { message } from "antd";
+import { AxiosErrorHandler } from "src/services/httpErrorHandle";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
-const EditFlight: FC<EditFlightProps> = (props) => {
+const EditFlight: FC<any> = (props) => {
+  const { id: missionId } = useParams<{ id: string }>();
+  const [flightDetails, setFlightDetails] = useState<any>(null);
+
   const [areaSelected, setAreaSelected] = useState(false);
   const [drawingToolBtns, setDrawingToolBtns] = useState(false);
-  const [flightEditing, setFlightEditing] = useState(false);
-  const [flightDetails, setFlightDetails] = useState<any>(null);
-  const { id } = useParams<{ id: string }>();
-  const [location, setLocation] = useState<any>({});
+  const [location, setlocation] = useState<any>(null);
+
   const [isoDate, setIsoDate] = useState(new Date().toISOString());
-  const [weatherData, setWeatherData] = useState<any>({});
 
-  const fetchWeatherData = (isoDate: string) => {
-    // ... (rest of the function remains unchanged)
-  };
+  const history = useHistory();
 
-  useEffect(() => {
-    fetchWeatherData(isoDate);
-  }, [isoDate, location]);
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
-  const setMissionByApi = async (id: string) => {
-    // ... (rest of the function remains unchanged)
-  };
-
-  useEffect(() => {
-    const mission = props.missions.filter((mission) => {
-      return mission._id === id;
-    });
-
-    if (mission.length === 0) {
-      setMissionByApi(id);
-    } else {
-      setFlightDetails(mission[0].flight);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    if (flightDetails) {
-      if (
-        flightDetails.geoFence.polygon &&
-        flightDetails.geoFence.polygon.points.length
-      ) {
-        setLocation({
-          lat: flightDetails.geoFence.polygon.points[0].lat,
-          lng: flightDetails.geoFence.polygon.points[0].lng,
+  const getFlightDetails = async (missionId: string) => {
+    try {
+      const result = await http.get(`${apis.GET_MISSION_BY_ID}${missionId}`);
+      const flight = result.data.data.flight;
+      if (flight.geoFence.polygon) {
+        setlocation({
+          lat: flight.geoFence.polygon.points[0].lat,
+          lng: flight.geoFence.polygon.points[0].lng,
         });
       } else {
-        setLocation({
-          lat: flightDetails.geoFence.circle.center.lat,
-          lng: flightDetails.geoFence.circle.center.lng,
+        setlocation({
+          lat: flight.geoFence.circle.center.lat,
+          lng: flight.geoFence.circle.center.lng,
         });
       }
+      setFlightDetails({
+        ...flight,
+        locationID: flight.locationID ? flight.locationID._id : null,
+        pilotID: flight.pilotID ? flight.pilotID._id : null,
+      });
+    } catch (err) {
+      message.error("Something went wrong");
+      AxiosErrorHandler(err, logout);
+      return;
     }
-  }, [flightDetails]);
-
-  const mapProps = {
-    areaSelected,
-    setAreaSelected,
-    drawingToolBtns,
-    setDrawingToolBtns,
-    setlocation: setLocation,
-    location,
   };
 
+  const editFlight = async () => {
+    const body = {
+      _id: flightDetails?._id,
+      name: flightDetails?.name,
+      locationId: flightDetails?.locationID,
+      duration: flightDetails?.duration,
+      time: flightDetails?.time,
+      date: flightDetails?.date,
+      geoLocation: flightDetails?.geolocation,
+      centerPoints: flightDetails?.centerPoints,
+      geofence: flightDetails?.geoFence,
+    };
+
+    setLoading(true);
+
+    http
+      .patch(apis.ASSIGN_PILOT, {
+        pilotID: flightDetails?.pilotID,
+        flightID: flightDetails?._id,
+      })
+      .then((result) => {
+        if (result.data.status) {
+          message.success("Pilot Reassigned");
+        }
+      })
+      .catch((err) => {
+        message.error("Something went wrong");
+        AxiosErrorHandler(err, logout);
+      });
+
+    http
+      .post(`${apis.EDIT_FLIGHT_BY_ID}`, body)
+      .then((result) => {
+        if (result.data.status) {
+          message.success("Flight Edited Successfully");
+          history.goBack();
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        message.error("Something went wrong");
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    getFlightDetails(missionId);
+  }, []);
+
   return (
-    props.isMapLoaded && (
-      <React.Fragment>
-        <div
-          className="edit-mission-container"
-          style={{ position: "relative" }}
-        >
-          {flightEditing && <GoogleMap {...mapProps} />}
-          <EditFlightForm
-            setAreaSelected={setAreaSelected}
-            areaSelected={areaSelected}
-            flight={flightDetails}
-            setFlightEditing={setFlightEditing}
-            setisoDate={setIsoDate}
-          />
-        </div>{" "}
-        {location && (
-          <Weather data={weatherData} isoDate={isoDate} location={location} />
-        )}
-      </React.Fragment>
-    )
+    flightDetails &&
+    <React.Fragment>
+      <div
+        className="edit-mission-container"
+        style={{ position: "relative" }}
+      >
+        <GoogleMap 
+          areaSelected={areaSelected}
+          setAreaSelected={setAreaSelected}
+          drawingToolBtns={drawingToolBtns}
+          setDrawingToolBtns={setDrawingToolBtns}
+          isEditing={true}
+          setlocation={setlocation}
+          location={location}
+          geoLocation={flightDetails.geolocation}
+          setGeolocation={(geolocation: string) => setFlightDetails((prev) => ({ ...prev, geolocation }))}
+          centerPoints={flightDetails.centerPoints}
+          setCenterPoints={(centerPoints: { lat:number; lng:number; }) => setFlightDetails((prev) => ({ ...prev, centerPoints }))}
+          geoFence={flightDetails.geoFence}
+          setGeoFence={(geoFence: any) => setFlightDetails((prev) => ({ ...prev, geoFence }))}
+        />
+        <EditFlightForm
+          flightDetails={flightDetails}
+          setFlightDetails={setFlightDetails}
+          areaSelected={areaSelected}
+          setisoDate={setIsoDate}
+          onSubmit={editFlight}
+          isEditing={true}
+        />
+      </div>{" "}
+      {location && (
+        <Weather isoDate={isoDate} location={location} />
+      )}
+    </React.Fragment>
   );
 };
 
-const mapStateToProps = (state: any) => ({
-  isMapLoaded: state.Gmap.gmapLoaded,
-  missions: state.Missions.missions,
-});
-
-const connector = connect(mapStateToProps, { logout });
-
-type EditFlightProps = ConnectedProps<typeof connector>;
-
-export default connector(EditFlight);
+export default EditFlight;

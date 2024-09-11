@@ -1,18 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Form, Input, Row, Col, message, Button } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { connect } from "react-redux";
-import { loading } from "../../../actions/loadingAction";
-import { logout } from "../../../actions/authAction";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function EmailChanger(props: any) {
   const [form] = Form.useForm();
   const [isEmailFieldDisabled, setIsEmailFieldDisabled] = useState(true);
   const [isOTPGenerated, setIsOTPGenerated] = useState(false);
   const [isOTPResending, setIsOTPResending] = useState(false);
+
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const makeEmailFieldEditable = (e: any) => {
     e.preventDefault();
@@ -37,7 +39,7 @@ function EmailChanger(props: any) {
   //get otp
   const getOTP = (data: any) => {
     setIsEmailFieldDisabled(true);
-    props.loading(true);
+    setLoading(true);
     http
       .post(apis.REQUEST_OTP_FOR_TEANT_EMAIL_CHANGE, {
         email: data.email,
@@ -57,10 +59,10 @@ function EmailChanger(props: any) {
         form.setFieldsValue({
           email: props.tenantData.email,
         });
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -77,7 +79,7 @@ function EmailChanger(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsOTPResending(false);
@@ -85,7 +87,7 @@ function EmailChanger(props: any) {
   };
 
   const validateOtp = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     http
       .post(apis.VALIDATE_OTP_FOR_TENANT_EMAIL_CHANGE, {
         otp: data.otp,
@@ -101,10 +103,10 @@ function EmailChanger(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
         form.setFieldsValue({ otp: "" });
       });
   };
@@ -191,9 +193,4 @@ function EmailChanger(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(EmailChanger);
+export default EmailChanger;

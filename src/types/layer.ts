@@ -114,5 +114,5 @@ export type ILayer = {
   commentCount: Number;
   createdAt: ISODate; // index
   updatedAt: ISODate;
-  metadata: string | Object;
+  metadata: { [key: string]: any };
 };

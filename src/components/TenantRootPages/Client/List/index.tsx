@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import {
   PlusCircleOutlined,
@@ -10,9 +9,6 @@ import {
 } from "@ant-design/icons";
 import { message, Input, Button, Tag, Table, Popconfirm } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
-import { setClientToEdit } from "../../../../actions/cliantActions";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -25,7 +21,10 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
-function UserListPage(props: any) {
+import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
+function ClientListPage(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
   const [tenantUserTableData, setTenantUserTableData] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -38,6 +37,11 @@ function UserListPage(props: any) {
   const [searchFilters, setSearchFilters] = useState<any>(null);
   const history = useHistory();
 
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  
+  const { setLoading } = useContext(LoaderContext);
+  
   let searchInput: any;
 
   const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
@@ -112,55 +116,17 @@ function UserListPage(props: any) {
 
   //--------------render delete button based on user perms---------------------
   function renderDeleteBtn(record: any) {
-    if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "delete_client"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
-        return (
-          <Popconfirm
-            title="Are you sure to delete the client？"
-            okText="Yes"
-            cancelText="No"
-            onConfirm={() => {
-              props.loading(true);
-              http
-                .delete(`${apis.DELETE_CLIENT}`, {
-                  data: {
-                    id: record._id,
-                  },
-                })
-                .then((result) => {
-                  message.success(result.data.message);
-                  fetchAllUsers();
-                })
-                .catch((err) => {
-                  message.error(err.message);
-                  AxiosErrorHandler(err, props.logout);
-                })
-                .finally(() => {
-                  props.loading(false);
-                });
-            }}
-          >
-            <Button style={{ marginLeft: "8px" }} danger>
-              <DeleteOutlined />
-            </Button>
-          </Popconfirm>
-        );
-      }
-    } else {
+    if (
+      (userDetails.userType === "tenant-root") ||
+      (userDetails.userType === "tenant-staff" && userDetails.customPermissions.includes(PERMS.DELETE_CLIENT))
+    ) {
       return (
         <Popconfirm
           title="Are you sure to delete the client？"
           okText="Yes"
           cancelText="No"
           onConfirm={() => {
-            props.loading(true);
+            setLoading(true);
             http
               .delete(`${apis.DELETE_CLIENT}`, {
                 data: {
@@ -173,10 +139,10 @@ function UserListPage(props: any) {
               })
               .catch((err) => {
                 message.error(err.message);
-                AxiosErrorHandler(err, props.logout);
+                AxiosErrorHandler(err, logout);
               })
               .finally(() => {
-                props.loading(false);
+                setLoading(false);
               });
           }}
         >
@@ -190,32 +156,14 @@ function UserListPage(props: any) {
 
   //--------------render edit button based on user perms---------------------
   function renderEditBtn(record: any) {
-    if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "edit_client"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
-        return (
-          <Button
-            onClick={() => {
-              history.push(`/dashboard/tenant/client/edit/${record._id}`);
-              props.setClientToEdit(record);
-            }}
-          >
-            <EditOutlined />
-          </Button>
-        );
-      }
-    } else {
+    if (
+      (userDetails.userType === "tenant-root") ||
+      (userDetails.userType === "tenant-staff" && userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
+    ) {
       return (
         <Button
           onClick={() => {
             history.push(`/dashboard/tenant/client/edit/${record._id}`);
-            props.setClientToEdit(record);
           }}
         >
           <EditOutlined />
@@ -226,24 +174,10 @@ function UserListPage(props: any) {
 
   //-------------render create client button-----------------------------------
   function renderCreateClientButton() {
-    if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "create_client"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
-        return (
-          <Link to="/dashboard/tenant/client/create" key="1">
-            <Button key="1" type="primary" icon={<PlusCircleOutlined />}>
-              Create Client
-            </Button>
-          </Link>
-        );
-      }
-    } else {
+    if (
+      (userDetails.userType === "tenant-root") ||
+      (userDetails.userType === "tenant-staff" && userDetails.customPermissions.includes(PERMS.CREATE_CLIENT))
+    ) {
       return (
         <Link to="/dashboard/tenant/client/create" key="1">
           <Button key="1" type="primary" icon={<PlusCircleOutlined />}>
@@ -363,7 +297,6 @@ function UserListPage(props: any) {
               history.push(
                 `/dashboard/tenant/client/change-password/${record._id}`
               );
-              props.setClientToEdit(record);
             }}
           >
             <LockOutlined />
@@ -411,11 +344,11 @@ function UserListPage(props: any) {
             setErrorState("401");
             break;
           case "500":
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
             break;
         }
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIstableLoading(false);
@@ -446,6 +379,15 @@ function UserListPage(props: any) {
       setSortOrder("");
     }
   };
+
+  useEffect(() => {
+    if (!Auth.isLoggedIn) {
+      setErrorState("unauthorized");
+    } else {
+      // any logged in user (tenant-root / tenant-staff / tenant-client) can view clients
+      fetchAllUsers();
+    }
+  }, []);
 
   switch (errorState) {
     case "unauthorized":
@@ -488,7 +430,11 @@ function UserListPage(props: any) {
               }}
               loading={isTableLoading}
               dataSource={tenantUserTableData}
-              columns={columns}
+              columns={
+                (userDetails.userType === "tenant-client") ?
+                columns.filter(col => !["email","phoneNo","actions"].includes(col.dataIndex)) :
+                columns
+              }
               rowKey="_id"
               onChange={handleTableChange}
             />
@@ -498,13 +444,4 @@ function UserListPage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-  userType: state.Auth.userdetails.userType,
-  userDetails: state.Auth.userdetails,
-});
-
-export default connect(mapStateToProps, { loading, logout, setClientToEdit })(
-  UserListPage
-);
+export default ClientListPage;

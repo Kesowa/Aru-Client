@@ -3,20 +3,19 @@ import { Button, Card, Typography, Collapse } from "antd";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
 import { InfoCircleFilled } from "@ant-design/icons";
-import { connect, ConnectedProps } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 const { Panel } = Collapse;
 const { Title, Text } = Typography;
 
-const FlightDetails: FC<FlightDetailsProps> = (props) => {
+const FlightDetails: FC<any> = (props) => {
   const [area, setArea] = useState(0);
   const [areaType, setAreaType] = useState("");
   const history = useHistory();
 
   useEffect(() => {
     if (props.flightDetails) {
-      if (props.flightDetails.geoFence.polygon.points.length) {
+      if (props.flightDetails.geoFence.polygon) {
         setArea(props.flightDetails.geoFence.polygon.area);
         setAreaType("Polygon");
       } else {
@@ -148,12 +147,4 @@ const FlightDetails: FC<FlightDetailsProps> = (props) => {
   );
 };
 
-const mapStateToProps = (state: any) => ({
-  flightDetails: state.MissionCreation.flightDetails,
-});
-
-const connector = connect(mapStateToProps);
-
-type FlightDetailsProps = ConnectedProps<typeof connector>;
-
-export default connector(FlightDetails);
+export default FlightDetails;

@@ -1,9 +1,6 @@
-import { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import { useState, useEffect, useContext } from "react";
 import { Tabs } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../actions/loadingAction";
-import { logout } from "../../actions/authAction";
 import http from "../../services/httpCall";
 import apis from "../../services/apis";
 import TenantInfo from "./utils/TenantInfo";
@@ -16,10 +13,14 @@ import GatewayTimeout from "../shared/Error/GatewayTimeout";
 import InternalServerError from "../shared/Error/InternalServerError";
 import ServiceUnavailable from "../shared/Error/ServiceUnavailable";
 import type { TabsProps } from "antd";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "../shared/Loader";
 
-function Organisation(props: any) {
+function Organisation() {
   const [tenantData, setTenantData] = useState();
   const [errorState, setErrorState] = useState("");
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
   const items: TabsProps["items"] = [
     {
       key: "1",
@@ -35,7 +36,7 @@ function Organisation(props: any) {
     },
   ];
   const fetchTenantData = () => {
-    props.loading(true);
+    setLoading(true);
     http
       .get(apis.FETCH_ORGANISATION_BASIC_DETAILS)
       .then((result) => {
@@ -66,10 +67,10 @@ function Organisation(props: any) {
         //     default:
         //         setErrorState("500");
         // }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -106,9 +107,4 @@ function Organisation(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(Organisation);
+export default Organisation;

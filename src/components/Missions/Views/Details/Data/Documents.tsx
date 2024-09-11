@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useContext } from "react";
 import {
   Alert,
   Button,
@@ -24,8 +24,6 @@ import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { logout } from "../../../../../actions/authAction";
-import { connect } from "react-redux";
 import {
   InboxOutlined,
   ExclamationCircleOutlined,
@@ -37,14 +35,18 @@ import io from "socket.io-client";
 import { useMemo } from "react";
 import download from "downloadjs";
 import { API_URL, STATIC_URL } from "src/constants";
-import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
-import axios, { AxiosRequestConfig }  from "axios";
 import { DocModel, uploadFile } from "src/services/fileUpload";
-import { RcFile } from "antd/lib/upload";
-
+import axios from "axios";
+import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { ThreadContext } from "src/services/threadUtils";
 
 function Documents(props) {
+  const { Auth, logout } = useContext(AuthContext);
+  const { openThread } = useContext(ThreadContext);
+  const userDetails = Auth.userdetails;
+  const userType = userDetails.userType;
   const [defaultFileList, setDefaultFileList] = useState([]);
   const [progress, setProgress] = useState(0);
   const [refreshState, setRefreshState] = useState(false);
@@ -75,8 +77,8 @@ function Documents(props) {
   //----------------Set Perms----------------------------
   useEffect(() => {
     if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
+      userType === "tenant-staff" ||
+      userType === "tenant-client"
     ) {
       let upload: any = [];
       let deleteDoc: any = [];
@@ -94,24 +96,11 @@ function Documents(props) {
       ];
 
       //----checking upload perms--------------------------
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "upload_document"
-        );
-        upload = [...filteredPermissions, ...upload];
-      });
-      if (upload.length > 0) {
+      if (userDetails.customPermissions.includes(PERMS.UPLOAD_DOCUMENT)) {
         perms.push(ChonkyActions.UploadFiles);
       }
 
-      //--------checking delete perms------------------------
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "delete_document"
-        );
-        deleteDoc = [...filteredPermissions, ...deleteDoc];
-      });
-      if (deleteDoc.length > 0) {
+      if (userDetails.customPermissions.includes(PERMS.DELETE_DOCUMENT)) {
         perms.push(ChonkyActions.DeleteFiles);
       }
 
@@ -185,7 +174,12 @@ function Documents(props) {
       const files = currentFolder.childrenIds
         ? currentFolder.childrenIds.map(
             (fileId: string) => fileMap[fileId] ?? null
-          )
+          ).sort((a, b) => {
+            if (!a.modDate || !b.modDate) return 0;
+            if (a.modDate > b.modDate) return -1;
+            if (a.modDate < b.modDate) return 1;
+            return 0;
+          })
         : [];
       return files;
     }, [currentFolderId, filesSystem]);
@@ -239,7 +233,7 @@ function Documents(props) {
       })
       .catch((err) => {
         message.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
   //------------File actions handler--------------------------------------
@@ -250,10 +244,7 @@ function Documents(props) {
       (data: ChonkyFileActionData) => {
         switch (data.id) {
           case OpenThread.id:
-            props.thread(true, {
-              docType: "document",
-              docId: data.state.selectedFiles[0].id,
-            });
+            openThread("document", data.state.selectedFiles[0].id, {});
             break;
           //-----Changing DIR state--------------------------------------------------
           case ChonkyActions.OpenFiles.id:
@@ -486,7 +477,7 @@ function Documents(props) {
                   message.error("Unable to upload file!");
                   options.onError({ err });
                 }
-                AxiosErrorHandler(err, props.logout);
+                AxiosErrorHandler(err, logout);
               });
 
             break;
@@ -519,7 +510,7 @@ function Documents(props) {
                   message.error("Unable to upload file!");
                   options.onError({ err });
                 }
-                AxiosErrorHandler(err, props.logout);
+                AxiosErrorHandler(err, logout);
               });
             break;
 
@@ -713,7 +704,7 @@ function Documents(props) {
         }
       })
       .catch((err: Error) => {
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
         console.log(err);
       })
       .finally(() => setLoader(false));
@@ -743,7 +734,7 @@ function Documents(props) {
       })
       .catch((err) => {
         message.error("ERROR" + err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -771,7 +762,7 @@ function Documents(props) {
       })
       .catch((err) => {
         message.error("API Error: Please report bug!");
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -854,9 +845,4 @@ function Documents(props) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { logout, thread })(Documents);
+export default Documents;

@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { message, Button, Table, Tag, Input, Popconfirm } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
@@ -11,15 +10,14 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import "../Tenant.less";
-import { loading } from "../../../../actions/loadingAction";
-import { setTenantToEdit } from "../../../../actions/tenantAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function ListAllTanents(props: any) {
   const [isTableLoading, setIstableLoading] = useState(false);
@@ -27,6 +25,8 @@ function ListAllTanents(props: any) {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const history = useHistory();
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
   let searchInput: any;
 
   const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
@@ -172,7 +172,6 @@ function ListAllTanents(props: any) {
           <Button
             onClick={() => {
               history.push(`/dashboard/admin/tenant/edit/${record._id}`);
-              props.setTenantToEdit(record);
             }}
           >
             <EditOutlined />
@@ -182,7 +181,7 @@ function ListAllTanents(props: any) {
             okText="Yes"
             cancelText="No"
             onConfirm={() => {
-              props.loading(true);
+              setLoading(true);
               http
                 .delete(`${apis.DELETE_TENANT}`, {
                   data: {
@@ -195,10 +194,10 @@ function ListAllTanents(props: any) {
                 })
                 .catch((err) => {
                   message.error(err.message);
-                  AxiosErrorHandler(err, props.logout);
+                  AxiosErrorHandler(err, logout);
                 })
                 .finally(() => {
-                  props.loading(false);
+                  setLoading(false);
                 });
             }}
           >
@@ -225,7 +224,7 @@ function ListAllTanents(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIstableLoading(false);
@@ -268,10 +267,4 @@ function ListAllTanents(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout, setTenantToEdit })(
-  ListAllTanents
-);
+export default ListAllTanents;

@@ -1,22 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { Modal, Button, Typography } from "antd";
+import { AuthContext } from "src/services/authUtils";
 
-const TermsAndCondition = (props: any) => {
+const TermsAndCondition = () => {
   const [termsModal, setTermsModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const { Title, Paragraph } = Typography;
+  const { Auth, logout } = useContext(AuthContext);
   useEffect(() => {
-    if (props.Auth !== undefined) {
-      if (!props.Auth.userdetails.isTermsAccepted) {
-        setTermsModal(true);
-      }
-    } else {
-      props.logout();
+    if (Auth.userdetails && !Auth.userdetails.isTermsAccepted) {
+      setTermsModal(true);
     }
-  }, [props.Auth]);
+  }, [Auth]);
   function submitTerms() {
     setLoading(true);
     http
@@ -26,7 +24,7 @@ const TermsAndCondition = (props: any) => {
       })
       .catch((err: any) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setLoading(false));
   }
@@ -38,13 +36,13 @@ const TermsAndCondition = (props: any) => {
       onOk={() => {}}
       onCancel={() => {
         setTermsModal(false);
-        props.logout();
+        logout();
       }}
       footer={[
         <Button
           key="back"
           onClick={() => {
-            props.logout();
+            logout();
           }}
         >
           Do not accept

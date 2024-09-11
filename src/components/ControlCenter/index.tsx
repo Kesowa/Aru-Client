@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { connect } from "react-redux";
-import { loading } from "../../actions/loadingAction";
 import {
   Button,
   Row,
@@ -32,7 +30,6 @@ import MapHybrids from "./layouts/MapHybrids"; //TwoStreamWithMap
 import FocusHybrids from "./layouts/FocusHybrids"; //ThreeStreamsView
 import http from "../../services/httpCall";
 import apis from "../../services/apis";
-import { logout } from "../../actions/authAction";
 import moment from "moment";
 import Video from "./utils/thumbnailVideo";
 import { STATIC_URL } from "src/constants";
@@ -818,15 +815,4 @@ function GridLive(props: any) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    userID: state.Auth.userid,
-  };
-};
-
-export default connect(mapStateToProps, {
-  loading,
-  logout,
-})(GridLive);
-
-//export default GridLive;
+export default GridLive;

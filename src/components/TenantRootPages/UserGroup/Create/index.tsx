@@ -1,11 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { UnorderedListOutlined } from "@ant-design/icons";
-import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { Row, Col, message, Transfer, Form, Input, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -18,20 +15,25 @@ import FourOhOne from "../../../shared/Error/FourOhOne";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import CountLimit from "../../restrictions/restrictions";
 import Expired from "../../restrictions/expiry";
+import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 function UserGroupCreatePage(props: any) {
   const [form] = Form.useForm();
-  const [allPermissions, setAllPermissions] = useState([]);
-  const [selectedPermissionsIds, setSelectedPermissionsIds] = useState([]);
-  const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const [allPermissions, setAllPermissions] = useState<PERMS[]>([]);
+  // const [selectedPermissionsIds, setSelectedPermissionsIds] = useState([]);
+  const [selectedPermissions, setSelectedPermissions] = useState<PERMS[]>([]);
   const [errorState, setErrorState] = useState("");
 
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
+
   const fetchAllPermissions = () => {
-    props.loading(true);
+    setLoading(true);
     http
       .get(apis.FETCH_TENANT_PERMISSION_LIST)
       .then((result) => {
-        console.log(result.data);
         if (result.data.status) {
           setAllPermissions(result.data.data);
         } else {
@@ -57,10 +59,10 @@ function UserGroupCreatePage(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -69,21 +71,16 @@ function UserGroupCreatePage(props: any) {
   }, []);
 
   const transferchange = (targetKeys: any) => {
-    const arr = allPermissions.filter((ele: any, i) =>
-      targetKeys.includes(ele._id)
+    const arr = allPermissions.filter((ele: string) =>
+      targetKeys.includes(ele)
     );
-    setSelectedPermissionsIds(targetKeys);
+    // setSelectedPermissionsIds(targetKeys);
     setSelectedPermissions(arr);
   };
 
-  useEffect(() => {
-    console.log(selectedPermissions);
-  }, [selectedPermissions]);
-
   //subimt form
   const onFinish = (data: any) => {
-    console.log(data, selectedPermissionsIds);
-    if (selectedPermissionsIds.length > 0) {
+    if (selectedPermissions.length > 0) {
       createUserGroup(data);
     } else {
       message.error(
@@ -93,20 +90,17 @@ function UserGroupCreatePage(props: any) {
   };
 
   const createUserGroup = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
       name: data.name,
-      permissions: selectedPermissionsIds,
+      permissions: selectedPermissions,
     };
-    console.log(body);
     http
       .post(apis.CREATE_TENANT_USER_GROUP, body)
       .then((result) => {
-        console.log(result.data);
         if (result.data.status) {
           message.info(result.data.message);
           form.resetFields();
-          setSelectedPermissionsIds([]);
           setSelectedPermissions([]);
         } else {
           message.error(result.data.message);
@@ -119,17 +113,17 @@ function UserGroupCreatePage(props: any) {
             err.response.data.message === "Package has expired! Please renew!"
           ) {
             setErrorState("403-expiry");
-            window.setTimeout(function () {
-              AxiosErrorHandler(err, props.logout);
+            window.setTimeout(function() {
+              AxiosErrorHandler(err, logout);
             }, 5000);
           } else {
             setErrorState("403");
           }
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -189,16 +183,16 @@ function UserGroupCreatePage(props: any) {
                     <Input type="text" />
                   </Form.Item>
                   <Transfer
-                    dataSource={allPermissions}
+                    dataSource={allPermissions.map(perm => ({ key: perm, title: perm }))}
                     showSearch
+                    filterOption={(inputValue, { title }) => title.toLowerCase().includes(inputValue.toLowerCase())}
                     listStyle={{
                       width: "100%",
                       height: 400,
                     }}
                     onChange={transferchange}
-                    render={(item: any) => `${item.name}`}
-                    rowKey={(record) => record._id}
-                    targetKeys={selectedPermissionsIds}
+                    render={(item) => <span aria-valuetext={item.key} style={{ textTransform: "capitalize" }}>{item.title.replaceAll('_', ' ')}</span>}
+                    targetKeys={selectedPermissions}
                     oneWay
                   />
                 </Col>
@@ -222,11 +216,4 @@ function UserGroupCreatePage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(
-  UserGroupCreatePage
-);
+export default UserGroupCreatePage;

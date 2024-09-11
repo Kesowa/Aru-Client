@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import {
   Alert,
   message,
@@ -23,8 +23,6 @@ import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import axios, { AxiosRequestConfig } from "axios";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { logout } from "../../../../../actions/authAction";
-import { connect } from "react-redux";
 import {
   InboxOutlined,
   ExclamationCircleOutlined,
@@ -44,11 +42,13 @@ import { API_URL, STATIC_URL } from "src/constants";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import { BsFlagFill } from "react-icons/bs";
-import { thread } from "../../../../../actions/threadAction";
 import Thread from "src/components/shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 
+import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { ThreadContext } from "src/services/threadUtils";
 
 let plainOptions = new Array<any>();
 function ImageDocs(props) {
@@ -77,6 +77,13 @@ function ImageDocs(props) {
   const [limit, setLimit] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [selectedImg, setSelectedImg] = useState({});
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  const userType = userDetails.userType;
+
+  const { thread, openThread } = useContext(ThreadContext);
+
   const imgMenu: MenuProps["items"] = (data) => {
     const item = [
       {
@@ -94,33 +101,20 @@ function ImageDocs(props) {
         label: "Open Thread",
         icon: <MessageOutlined />,
       },
-      {
+    ];
+    if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.UPDATE_DOCUMENT)) {
+      item.push({
         key: "4",
         label: !data.isFlagged ? "Flag" : "Unflag",
         icon: <FlagOutlined />,
-      },
-    ];
-    const deleteItem = {
-      key: "5",
-      label: "Delete Image",
-      icon: <DeleteOutlined />,
-    };
-    if (
-      props.missionDetails.userType === "tenant-staff" ||
-      props.missionDetails.userType === "tenant-client"
-    ) {
-      let permissions: any = [];
-      props.missionDetails.currentUserDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "vod_delete"
-        );
-        permissions = [...filteredPermissions, ...permissions];
       });
-      if (permissions.length > 0) {
-        item.push(deleteItem);
-      }
-    } else {
-      item.push(deleteItem);
+    }
+    if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.DELETE_DOCUMENT)) {
+      item.push({
+        key: "5",
+        label: "Delete Image",
+        icon: <DeleteOutlined />,
+      });
     }
     return item;
   };
@@ -149,10 +143,7 @@ function ImageDocs(props) {
             true
           )
         );
-        props.thread(true, {
-          docType: "document",
-          docId: selectedImg._id,
-        });
+        openThread("document", selectedImg._id, {});
         break;
       case "4":
         toggleFlag(selectedImg);
@@ -319,7 +310,7 @@ function ImageDocs(props) {
                   message.error("Unable to upload file!");
                   options.onError({ err });
                 }
-                AxiosErrorHandler(err, props.logout);
+                AxiosErrorHandler(err, logout);
               });
 
             break;
@@ -352,7 +343,7 @@ function ImageDocs(props) {
                   message.error("Unable to upload file!");
                   options.onError({ err });
                 }
-                AxiosErrorHandler(err, props.logout);
+                AxiosErrorHandler(err, logout);
               });
             break;
 
@@ -405,10 +396,10 @@ function ImageDocs(props) {
     });
   }
   useEffect(() => {
-    if (!props.Thread.open) {
+    if (!thread.open) {
       fetchDocuments();
     }
-  }, [props.Thread.open]);
+  }, [thread.open]);
   //------------------Get Images------------------------------------------
   const getFlaggedFilter = () => {
     if (flaggedFilter) {
@@ -450,7 +441,7 @@ function ImageDocs(props) {
       })
       .catch((err: Error) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setLoader(false));
   }
@@ -585,7 +576,7 @@ function ImageDocs(props) {
         })
         .catch((err) => {
           message.error("ERROR" + err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         });
     } else {
       message.info("Please select some images to delete!");
@@ -610,7 +601,7 @@ function ImageDocs(props) {
       })
       .catch((err) => {
         message.error("ERROR" + err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -641,17 +632,10 @@ function ImageDocs(props) {
 
   function renderUploadBtn() {
     if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
+      userType === "tenant-staff" ||
+      userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "upload_document"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (userDetails.customPermissions.includes(PERMS.UPLOAD_DOCUMENT)) {
         return (
           <div className="upload-btn">
             <Button onClick={() => uploadModal()}>
@@ -744,6 +728,8 @@ function ImageDocs(props) {
         uploadBtn={renderUploadBtn}
         updateAPI={apis.UPDATE_MULTI_DOC}
         delete={deleteFile}
+        canToggleFlag={userDetails.customPermissions.includes(PERMS.UPDATE_DOCUMENT)}
+        canDelete={userDetails.customPermissions.includes(PERMS.DELETE_DOCUMENT)}
       />
       {loader ? (
         <div
@@ -980,10 +966,4 @@ function ImageDocs(props) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-  Thread: state.Thread,
-});
-
-export default connect(mapStateToProps, { logout, thread })(ImageDocs);
+export default ImageDocs;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Tag,
   Row,
@@ -25,25 +25,21 @@ import {
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
-import { connect } from "react-redux";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
-import {
-  setMissionsToState,
-  deleteMission,
-} from "../../../../actions/missionActions";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import moment from "moment";
 import { useHistory } from "react-router-dom";
 import mp from "../../../../static/mapping.svg";
 import "../../../shared/MissionList.less";
+import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
 
 interface TabOptions {
   filter: any;
   deleteMission: any;
 }
-function DataMission(props) {
+function DataMission() {
   const history = useHistory();
   const [completedMissions, setCompletedMissions] = useState([]);
   const [isTableLoading, setIsTableLoading] = useState(true);
@@ -57,6 +53,10 @@ function DataMission(props) {
   const [missionTypes, populateMissionTypes] = useState([]);
   const [typesLoader, setTypesLoader] = useState(false);
   const [missionType, setMissionType] = useState("");
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  const tenantId = userDetails.tenantId._id || userDetails.tenantId;
 
   const setPaginationPage = (p) => {
     setPage(p);
@@ -177,7 +177,6 @@ function DataMission(props) {
             );
           });
           setCompletedMissions(newTableData);
-          props.deleteMission(id);
           message.success(`Mission "${name}" deleted`);
         } else {
           message.error(result.data.message);
@@ -185,7 +184,7 @@ function DataMission(props) {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -195,15 +194,8 @@ function DataMission(props) {
   //----------------RenderDeleteButton---------------------
 
   function renderDeleteBtn(record: any) {
-    if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_delete"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+    if (userDetails.userType === "tenant-staff") {
+      if (userDetails.userDetails.customPermissions.includes(PERMS.MISSION_DELETE)) {
         return (
           <Popconfirm
             title="Are you sure to delete the mission？"
@@ -393,8 +385,7 @@ function DataMission(props) {
 
   // +++++++++++++++++++++++++++++++++++++++++++++++ Fetch Missions ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   function fetchMissions() {
-    const { userType } = props;
-    const { tenantId } = props;
+    const { userType } = userDetails;
     setIsTableLoading(true);
     if (userType === "tenant-root" || userType === "tenant-staff") {
       const params = {
@@ -415,7 +406,6 @@ function DataMission(props) {
         })
         .then((result) => {
           if (result.data.status) {
-            props.setMissionsToState(result.data.data);
             setCompletedMissions(result.data.data);
             setTotal(result.data.total);
           } else {
@@ -424,7 +414,7 @@ function DataMission(props) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsTableLoading(false);
@@ -453,7 +443,7 @@ function DataMission(props) {
       })
       .catch((err) => {
         message.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setTypesLoader(false));
   }, []);
@@ -477,15 +467,8 @@ function DataMission(props) {
 
   //-------------render create client button-----------------------------------
   function renderCreateListButton() {
-    if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "client_list"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+    if (userDetails.userType === "tenant-staff") {
+      if (userDetails.customPermissions.includes(PERMS.CLIENT_LIST)) {
         return (
           <Link to="/dashboard/tenant/client/list" key="1">
             <Button key="1" type="primary" icon={<SolutionOutlined />}>
@@ -557,16 +540,4 @@ function DataMission(props) {
   );
 }
 
-const mapStateToProps = (state) => ({
-  tenantId:
-    state.Auth.userdetails.tenantId._id || state.Auth.userdetails.tenantId,
-  userType: state.Auth.userdetails.userType,
-  userDetails: state.Auth.userdetails,
-  missions: state.Missions.missions,
-});
-
-export default connect(mapStateToProps, {
-  setMissionsToState,
-  deleteMission,
-  logout,
-})(DataMission);
+export default DataMission;

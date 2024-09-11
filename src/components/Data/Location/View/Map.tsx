@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
 import MarkerClusterer from "@googlemaps/markerclustererplus";
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { subDays, subMonths } from "date-fns";
@@ -18,10 +17,8 @@ import {
   notification,
   Avatar,
 } from "antd";
-import { loading } from "../../../../actions/loadingAction";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
-import { logout } from "../../../../actions/authAction";
 import "./index.less";
 import {
   UserOutlined,
@@ -31,18 +28,17 @@ import {
 } from "@ant-design/icons";
 import * as htmlToImage from "html-to-image";
 import { STATIC_URL } from "src/constants";
+import { LoaderContext } from "src/components/shared/Loader";
 const { Option } = Select;
 const { Text, Title } = Typography;
 
 type mapProps = {
-  gmapLoaded: any;
   center: any;
   points: any;
   centerPoints: any;
   outcomes: any;
   shouldRenderOutcomes: any;
   setshouldRenderOutcomes: any;
-  loading: any;
   id: any;
   setoutComesToRender: any;
   selectedMissionDetails: any;
@@ -62,6 +58,9 @@ type mapState = {
 };
 
 class LocationCardMap extends Component<mapProps, mapState> {
+  static contextType = LoaderContext;
+  declare context: React.ContextType<typeof LoaderContext>;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -214,35 +213,30 @@ class LocationCardMap extends Component<mapProps, mapState> {
 
   // Intialize Google Map
   createGoogleMap = ({ lat, lng }) => {
-    if (this.props.gmapLoaded) {
-      return new window.google.maps.Map(this.googleMapRef.current, {
-        zoom: 16,
-        center: {
-          lat,
-          lng,
-        },
-        disableDefaultUI: true,
-        zoomControl: false,
-        scaleControl: false,
-        disableDoubleClickZoom: true,
-        mapTypeControl: true,
-        mapTypeControlOptions: {
-          style: window.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-          mapTypeIds: ["roadmap", "satellite"],
-        },
-      });
-    }
-    return null;
+    return new window.google.maps.Map(this.googleMapRef.current, {
+      zoom: 16,
+      center: {
+        lat,
+        lng,
+      },
+      disableDefaultUI: true,
+      zoomControl: false,
+      scaleControl: false,
+      disableDoubleClickZoom: true,
+      mapTypeControl: true,
+      mapTypeControlOptions: {
+        style: window.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+        mapTypeIds: ["roadmap", "satellite"],
+      },
+    });
   };
 
   createGoogleMapMarker = (location, map) => {
-    if (this.props.gmapLoaded) {
-      return new window.google.maps.Marker({
-        position: location,
-        map,
-        title: "Drone Location",
-      });
-    }
+    return new window.google.maps.Marker({
+      position: location,
+      map,
+      title: "Drone Location",
+    });
   };
 
   drawMeasurements = (points) => {
@@ -295,7 +289,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
   }
 
   async fetchAllAlerts() {
-    this.props.loading(true);
+    this.context.setLoading(true);
     try {
       const outcomes = await http.get(`${apis.GET_ALL_ALERTS_BY_LOCATION_ID}`, {
         params: {
@@ -311,11 +305,11 @@ class LocationCardMap extends Component<mapProps, mapState> {
       message.error(error.message);
     }
 
-    this.props.loading(false);
+    this.context.setLoading(false);
   }
 
   async fetchAlertsForTime(value) {
-    this.props.loading(true);
+    this.context.setLoading(true);
     try {
       const outcomes = await http.get(`${apis.FETCH_ALERTS_BY_TIME}`, {
         params: {
@@ -346,7 +340,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
       console.log(error);
     }
 
-    this.props.loading(false);
+    this.context.setLoading(false);
   }
 
   openNotification = (copiedText, placement) => {
@@ -605,13 +599,4 @@ class LocationCardMap extends Component<mapProps, mapState> {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    gmapLoaded: state.Gmap.gmapLoaded,
-  };
-};
-
-export default connect(mapStateToProps, {
-  loading,
-  logout,
-})(LocationCardMap);
+export default LocationCardMap;

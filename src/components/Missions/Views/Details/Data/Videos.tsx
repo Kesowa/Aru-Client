@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { default as Shimmer } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import {
@@ -42,27 +42,25 @@ import "./data.less";
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { logout } from "../../../../../actions/authAction";
 import moment from "moment";
 import VideoPlayer from "../../../../shared/VideoPlayer";
 import Dragger from "antd/lib/upload/Dragger";
-import { connect } from "react-redux";
 import { API_URL, STATIC_URL } from "src/constants";
 import { io } from "socket.io-client";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
-import { thread } from "../../../../../actions/threadAction";
 import Thread from "../../../../shared/Thread";
 import axios from "axios";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 
+import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { ThreadContext } from "src/services/threadUtils";
 
 type props = {
   missionDetails: any;
   userType: any;
   userDetails: any;
-  logout: any;
-  thread: any;
 };
 const { Text } = Typography;
 function Videos(props) {
@@ -95,6 +93,12 @@ function Videos(props) {
   const [flag, setFlag] = useState(false);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
+
+  const { Auth, logout } = useContext(AuthContext);
+  const userDetails = Auth.userdetails;
+  const userType = userDetails.userType;
+
+  const { thread, openThread } = useContext(ThreadContext);
 
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
@@ -129,38 +133,27 @@ function Videos(props) {
         label: "Open Thread",
         icon: <MessageOutlined />,
       },
-      {
-        key: "3",
-        label: !data.isFlagged ? "Flag" : "Unflag",
-        icon: <FlagOutlined />,
-      },
-      {
-        key: "4",
-        label: "Rename",
-        icon: <EditOutlined />,
-      },
     ];
-    const deleteItem = {
-      key: "5",
-      label: "Delete video",
-      icon: <DeleteOutlined />,
-    };
-    if (
-      props.missionDetails.userType === "tenant-staff" ||
-      props.missionDetails.userType === "tenant-client"
-    ) {
-      let permissions: any = [];
-      props.missionDetails.currentUserDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "vod_delete"
-        );
-        permissions = [...filteredPermissions, ...permissions];
+    if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.VOD_UPDATE)) {
+      item.push(
+        {
+          key: "3",
+          label: !data.isFlagged ? "Flag" : "Unflag",
+          icon: <FlagOutlined />,
+        },
+        {
+          key: "4",
+          label: "Rename",
+          icon: <EditOutlined />,
+        },
+      );
+    }
+    if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.VOD_DELETE)) {
+      item.push({
+        key: "5",
+        label: "Delete video",
+        icon: <DeleteOutlined />,
       });
-      if (permissions.length > 0) {
-        item.push(deleteItem);
-      }
-    } else {
-      item.push(deleteItem);
     }
     return item;
   };
@@ -170,15 +163,13 @@ function Videos(props) {
       case "1":
         break;
       case "2":
-        props.thread(true, {
-          docType: "vod",
-          docId: selectedVideo?.data._id,
-          tags: selectedVideo?.data.bookmarks
+        openThread("vod", selectedVideo?.data._id, 
+          selectedVideo?.data.bookmarks
             ? {
                 bookmarks: generateTags(),
               }
-            : {},
-        });
+            : {}
+        );
         setThumbnail(vodThumbnail());
         break;
       case "3":
@@ -371,10 +362,10 @@ function Videos(props) {
     }
   }
   useEffect(() => {
-    if (!props.Thread.open) {
+    if (!thread.open) {
       setRefresh(true);
     }
-  }, [props.Thread.open]);
+  }, [thread.open]);
   //--------------- Upload Props -------------------------
 
   const UploadProps = {
@@ -449,7 +440,7 @@ function Videos(props) {
                   ) {
                     setIsModalVisible2(true);
                     window.setTimeout(function () {
-                      AxiosErrorHandler(err, props.logout); //needs to be connected with redux
+                      AxiosErrorHandler(err, logout); 
                     }, 5000);
                   } else if (
                     err.response?.data.message ===
@@ -504,7 +495,7 @@ function Videos(props) {
                   ) {
                     setIsModalVisible2(true);
                     window.setTimeout(function () {
-                      AxiosErrorHandler(err, props.logout); //needs to be connected with redux
+                      AxiosErrorHandler(err, logout); 
                     }, 5000);
                   } else if (
                     err.response?.data.message ===
@@ -638,7 +629,7 @@ function Videos(props) {
           setLoader(false);
           setVodData([]);
         } else if (err.response.status == 500) {
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         } else {
           message.error("API Call failed! " + err);
         }
@@ -1421,17 +1412,10 @@ function Videos(props) {
 
   function renderUploadBtn() {
     if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
+      userType === "tenant-staff" ||
+      userType === "tenant-client"
     ) {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "vod_create"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+      if (userDetails.customPermissions.includes(PERMS.VOD_CREATE)) {
         return (
           <div className="upload-btn">
             <Button onClick={() => uploadModal()}>
@@ -1549,6 +1533,8 @@ function Videos(props) {
         uploadBtn={renderUploadBtn}
         updateAPI={apis.UPDATE_MULTI_VOD}
         delete={deleteVideo}
+        canToggleFlag={userDetails.customPermissions.includes(PERMS.VOD_UPDATE)}
+        canDelete={userDetails.customPermissions.includes(PERMS.VOD_DELETE)}
       />
       {loader ? (
         <>
@@ -1637,9 +1623,4 @@ function Videos(props) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.theme,
-  Thread: state.Thread,
-});
-
-export default connect(mapStateToProps, { logout, thread })(Videos);
+export default Videos;

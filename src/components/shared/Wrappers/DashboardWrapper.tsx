@@ -1,15 +1,13 @@
-import React, { lazy, Suspense, useEffect, useState } from "react";
-import { connect } from "react-redux";
-import { logout, setUserDetails } from "../../../actions/authAction";
+import React, { lazy, useContext, useEffect, useState } from "react";
 import EntryLoader from "../Loader/Entry";
 import Dashboard from "../../Dashboard";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
-import { message, Space, Spin } from "antd";
-import { clientOptions } from "../../../static/sideBarOptions";
+import { message } from "antd";
 import { components } from "src/handlers/schema";
+import { AuthContext } from "src/services/authUtils";
 const Register = lazy(() => import("../../../components/SignUp"));
 
 const themeMap = {
@@ -17,29 +15,10 @@ const themeMap = {
   light: `/light-theme.css`,
 };
 
-function DashboardWrapper(props: any) {
-  const [hasPaid, setHasPaid] = useState(false);
+function DashboardWrapper() {
   const [isFetched, setIsFetched] = useState(false);
-  const fetchPaymentDetails = () => {
-    http
-      .get(apis.GET_TENANT_STATS)
-      .then((result) => {
-        if (result.data.status) {
-          if (String(result.data.packageData.name) !== "Trial") {
-            setHasPaid(true);
-          }
-          setIsFetched(true);
-        } else {
-          message.error(result.status.toString());
-          console.log(result);
-          props.logout();
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        AxiosErrorHandler(err, props.logout);
-      });
-  };
+  const { Auth, logout, setUserDetails } = useContext(AuthContext);
+
   const fetchUserDetails = () => {
     http
       .get<components["schemas"]["UserDetailsAuthResponse"]>(
@@ -47,66 +26,32 @@ function DashboardWrapper(props: any) {
       )
       .then((result) => {
         if (result.data.status) {
-          let sidebarOptions: any = null;
-          if (result.data.data.userType === "tenant-staff") {
-            let permissions: any = [];
-            result.data.data.customPermissions.forEach((p) => {
-              const filteredPermissions = p.permissions.filter(
-                (d) => d.isFrontendRoute === true
-              );
-              const k = filteredPermissions.map((e) => {
-                return {
-                  type: "menu",
-                  link: e.frontendRoute.trim(),
-                  icon: e.sideNavOptionIcon.trim(),
-                  text: e.sideNavOptionLabel,
-                };
-              });
-              permissions = [...k, ...permissions];
-            });
-            sidebarOptions = permissions;
-          } else if (result.data.data.userType === "tenant-client") {
-            sidebarOptions = [...clientOptions];
-          }
-          result.data.data.sidebarOptions = sidebarOptions;
-          props.setUserDetails(result.data.data);
+          setUserDetails(result.data.data);
         } else {
           message.error(result.status.toString());
           console.log(result);
-          props.logout();
+          logout();
         }
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
-      });
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => setIsFetched(true));
   };
 
   //fetching user details on component load
   useEffect(() => {
-    if (!props.Auth.userdetails || !isFetched) {
+    if (!Auth.userdetails || !isFetched) {
       fetchUserDetails();
-      fetchPaymentDetails();
     }
-  }, [props.Auth.isLoggedIn, hasPaid]);
+  }, [Auth.isLoggedIn]);
 
   return (
     <ThemeSwitcherProvider themeMap={themeMap} defaultTheme="light">
       <div>
-        {props.Auth.userdetails && isFetched ? (
-          hasPaid ? (
-            <Dashboard />
-          ) : (
-            <Suspense
-              fallback={
-                <div className="example">
-                  <Space size="middle">
-                    <Spin size="large" />
-                  </Space>
-                </div>
-              }
-            > <Register stage={2} tenantId={props.Auth.userdetails.tenantId} /> </Suspense>
-          )
+        {Auth.userdetails && isFetched ? (
+          <Dashboard />
         ) : (
           <EntryLoader />
         )}
@@ -115,10 +60,4 @@ function DashboardWrapper(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, { setUserDetails, logout })(
-  DashboardWrapper
-);
+export default DashboardWrapper;

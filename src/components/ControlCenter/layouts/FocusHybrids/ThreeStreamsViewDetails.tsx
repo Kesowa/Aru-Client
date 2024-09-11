@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Row, Col, Avatar, message } from "antd";
 import "./threeStreamsView.less";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,6 +13,7 @@ import { AxiosErrorHandler } from "src/services/httpErrorHandle";
 import apis from "src/services/apis";
 import http from "src/services/httpCall";
 import { STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 
 let socket;
 
@@ -20,6 +21,9 @@ function ThreeStreamViewDetails(props) {
   const [uptime, setUptime] = useState("00 : 00 : 00");
   const [battery, setbattery] = useState(0);
   const [missionData, setMissionData] = useState<any>(null);
+
+  const { logout } = useContext(AuthContext);
+
   const printDate = () => {
     const startTime = props.feed.createdAt.split(".")[0];
     const flightStarted = moment(startTime);
@@ -47,7 +51,7 @@ function ThreeStreamViewDetails(props) {
       setMissionData(mission.data.data);
     } catch (err) {
       message.error("Something went wrong");
-      AxiosErrorHandler(err, props.logout);
+      AxiosErrorHandler(err, logout);
       return;
     }
   };

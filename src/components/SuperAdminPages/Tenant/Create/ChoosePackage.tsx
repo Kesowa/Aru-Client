@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Row, Col, Card, message, Skeleton, Button } from "antd";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
-import { loading } from "../../../../actions/loadingAction";
-import { connect } from "react-redux";
 import { STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
 
 function ChoosePackage(props: any) {
   const [packages, setPackages] = useState([undefined, undefined, undefined]);
+  const { logout } = useContext(AuthContext);
 
   const fetchActivePackages = () => {
     http
@@ -23,7 +22,7 @@ function ChoosePackage(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -54,11 +53,7 @@ function ChoosePackage(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(ChoosePackage);
+export default ChoosePackage;
 
 const PackageCard = (props: any) => {
   return (

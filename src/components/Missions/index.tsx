@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button, Tabs, message, Badge } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
@@ -8,12 +8,11 @@ import MissionTable from "./Views/List/Table";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import http from "../../services/httpCall";
 import apis from "../../services/apis";
-import { connect } from "react-redux";
-import { setMissionsToState } from "../../actions/missionActions";
-import { logout } from "../../actions/authAction";
 import "./index.less";
+import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
 
-function MissionList(props) {
+function MissionList() {
   const location = useLocation<any>();
   const [displayedMissionType, setDisplayedMissionType] = useState("");
   const [isTableLoading, setIsTableLoading] = useState(true);
@@ -26,11 +25,11 @@ function MissionList(props) {
   const [totalMissions, settotalMissions] = useState(0);
   const [sortOrder, setSortOrder] = useState("createdAt:descend");
   const [searchFilters, setSearchFilters] = useState("");
+  const { Auth, logout } = useContext(AuthContext);
 
   const renderMissionTable = (filter: unknown) => {
     return (
       <MissionTable
-        filter={filter}
         setMissionTableData={setMissionTableData}
         setIsTableLoading={setIsTableLoading}
         isTableLoading={isTableLoading}
@@ -121,8 +120,8 @@ function MissionList(props) {
 
   function fetchMissions() {
     if (usedFilter.length === 0) return;
-    const { userType } = props;
-    const { tenantId } = props;
+    const userType= Auth.userdetails.userType;
+    const tenantId = Auth.userdetails.tenantId._id || Auth.userdetails.tenantId;
     setIsTableLoading(true);
     if (userType === "tenant-root" || userType === "tenant-staff") {
       http
@@ -138,7 +137,6 @@ function MissionList(props) {
         })
         .then((result) => {
           if (result.data.status) {
-            props.setMissionsToState(result.data.data);
             setMissionTableData(result.data.data);
             setTotal(result.data.total);
             const count = {};
@@ -155,7 +153,7 @@ function MissionList(props) {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setIsTableLoading(false);
@@ -188,19 +186,12 @@ function MissionList(props) {
 
   useEffect(() => {
     fetchMissions();
-  }, [page, limit, usedFilter, sortOrder, searchFilters, props.refresh]);
+  }, [page, limit, usedFilter, sortOrder, searchFilters]);
 
   //----------------------Render create mission based on permission----------------------------------------
   function renderCreateBtn() {
-    if (props.userType === "tenant-staff") {
-      let permissions: any = [];
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "mission_create"
-        );
-        permissions = [...filteredPermissions, ...permissions];
-      });
-      if (permissions.length > 0) {
+    if (Auth.userdetails.userType === "tenant-staff") {
+      if (Auth.userdetails.customPermissions.includes(PERMS.MISSION_CREATE)) {
         return (
           <Link to="/dashboard/missions/create" key="1">
             <Button key="1" type="primary" icon={<PlusCircleOutlined />}>
@@ -243,19 +234,4 @@ function MissionList(props) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    userType: state.Auth.userdetails.userType,
-    tenantId:
-      state.Auth.userdetails.tenantId._id || state.Auth.userdetails.tenantId,
-    userId: state.Auth.userdetails._id,
-    missions: state.Missions.missions,
-    userDetails: state.Auth.userdetails,
-    refresh: state.Missions.refresh,
-  };
-};
-
-export default connect(mapStateToProps, {
-  setMissionsToState,
-  logout,
-})(MissionList);
+export default MissionList;

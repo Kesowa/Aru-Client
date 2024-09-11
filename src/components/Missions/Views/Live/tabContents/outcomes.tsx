@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import {
   Row,
   Col,
@@ -26,18 +26,17 @@ import {
   SortDescendingOutlined,
   LoadingOutlined,
 } from "@ant-design/icons";
-import { connect } from "react-redux";
 import { API_URL, STATIC_URL } from "src/constants";
 import "../index.less";
 import * as htmlToImage from "html-to-image";
 import http from "../../../../../services/httpCall";
 import apis from "../../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
-import { logout } from "../../../../../actions/authAction";
 import Alone from "../../../../../static/Alone-rafiki.svg";
 import moment from "moment";
 import io from "socket.io-client";
 import { components } from "src/handlers/schema";
+import { AuthContext } from "src/services/authUtils";
 const { Title, Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
@@ -92,6 +91,8 @@ function Outcomes(props: any) {
   const [downloadLoading, setDownloadLoading] = useState(false);
   const socket: any = useRef();
 
+  const { logout } = useContext(AuthContext);
+
   useEffect(() => {
     if (missionId !== 0) {
       if (tenantId) {
@@ -125,7 +126,7 @@ function Outcomes(props: any) {
           })
           .catch((err) => {
             console.log(err);
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
           })
           .finally(() => {
             setLoading(false);
@@ -144,7 +145,7 @@ function Outcomes(props: any) {
           })
           .catch((err) => {
             console.log(err);
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
           })
           .finally(() => {
             setLoading(false);
@@ -561,8 +562,4 @@ function Outcomes(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-export default connect(mapStateToProps, { logout })(Outcomes);
+export default Outcomes;

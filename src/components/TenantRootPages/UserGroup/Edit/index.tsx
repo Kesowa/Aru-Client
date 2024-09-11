@@ -1,11 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { UnorderedListOutlined } from "@ant-design/icons";
-import { connect } from "react-redux";
 import { Link, useHistory, useParams } from "react-router-dom";
 import { Row, Col, message, Transfer, Form, Input, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -16,19 +13,23 @@ import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import FourOhOne from "../../../shared/Error/FourOhOne";
 import InternalServerError from "../../../shared/Error/InternalServerError";
+import { PERMS } from "src/static/permissions";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
-function UserGroupEditPage(props: any) {
+function UserGroupEditPage() {
   const [form] = Form.useForm();
-  const [allPermissions, setAllPermissions] = useState([]);
-  const [selectedPermissionsIds, setSelectedPermissionsIds] = useState([]);
-  const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const [allPermissions, setAllPermissions] = useState<PERMS[]>([]);
+  const [selectedPermissions, setSelectedPermissions] = useState<PERMS[]>([]);
   const [errorState, setErrorState] = useState("");
   const [groupName, setGroupName] = useState("");
   const history = useHistory();
-  const { id } = useParams();
+  const { id } = useParams<{id: string}>();
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   const fetchAllPermissions = () => {
-    props.loading(true);
+    setLoading(true);
     http
       .get(apis.FETCH_TENANT_PERMISSION_LIST)
       .then((result) => {
@@ -57,7 +58,7 @@ function UserGroupEditPage(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
 
@@ -71,11 +72,9 @@ function UserGroupEditPage(props: any) {
           });
 
           setGroupName(data[0].name);
-          const prIds = data[0].permissions.map((ele) => ele._id);
-          const permissions = allPermissions.filter((ele: any) =>
-            prIds.includes(ele._id)
+          const permissions = allPermissions.filter((ele) =>
+            data[0].permissions.includes(ele)
           );
-          setSelectedPermissionsIds(prIds);
           setSelectedPermissions(permissions);
         } else {
           switch (result.data.message) {
@@ -100,10 +99,10 @@ function UserGroupEditPage(props: any) {
           default:
             setErrorState("500");
         }
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -118,21 +117,15 @@ function UserGroupEditPage(props: any) {
   }, [allPermissions]);
 
   const transferchange = (targetKeys: any) => {
-    const arr = allPermissions.filter((ele: any, i) =>
-      targetKeys.includes(ele._id)
+    const arr = allPermissions.filter((ele) =>
+      targetKeys.includes(ele)
     );
-    setSelectedPermissionsIds(targetKeys);
     setSelectedPermissions(arr);
   };
 
-  useEffect(() => {
-    console.log(selectedPermissions);
-  }, [selectedPermissions]);
-
   //subimt form
   const onFinish = (data: any) => {
-    console.log(data, selectedPermissionsIds);
-    if (selectedPermissionsIds.length > 0) {
+    if (selectedPermissions.length > 0) {
       editUserGroup(data);
     } else {
       message.error(
@@ -142,22 +135,19 @@ function UserGroupEditPage(props: any) {
   };
 
   const editUserGroup = (data: any) => {
-    props.loading(true);
+    setLoading(true);
     const body = {
       id: id,
       name: groupName,
       isActive: true,
-      permissions: selectedPermissionsIds,
+      permissions: selectedPermissions,
     };
-    console.log(body);
     http
       .patch(apis.EDIT_USERGROUP, body)
       .then((result) => {
-        console.log(result.data);
         if (result.data.status) {
           message.info(result.data.message);
           form.resetFields();
-          setSelectedPermissionsIds([]);
           setSelectedPermissions([]);
           history.goBack();
         } else {
@@ -166,10 +156,10 @@ function UserGroupEditPage(props: any) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -220,16 +210,16 @@ function UserGroupEditPage(props: any) {
                     )}
                   </Form.Item>
                   <Transfer
-                    dataSource={allPermissions}
+                    dataSource={allPermissions.map(perm => ({key: perm, title: perm}))}
                     showSearch
+                    filterOption={(inputValue, { title }) => title.toLowerCase().includes(inputValue.toLowerCase())}
                     listStyle={{
                       width: "100%",
                       height: 400,
                     }}
                     onChange={transferchange}
-                    render={(item: any) => `${item.name}`}
-                    rowKey={(record) => record._id}
-                    targetKeys={selectedPermissionsIds}
+                    render={(item) => <span aria-valuetext={item.key} style={{textTransform: "capitalize"}}>{item.title.replaceAll('_', ' ')}</span>}
+                    targetKeys={selectedPermissions}
                     oneWay
                   />
                 </Col>
@@ -253,9 +243,4 @@ function UserGroupEditPage(props: any) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { loading, logout })(UserGroupEditPage);
+export default UserGroupEditPage;

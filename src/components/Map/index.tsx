@@ -5,6 +5,7 @@ import React, {
   useMemo,
   lazy,
   Suspense,
+  useContext,
 } from "react";
 import InfoWindowContent from "./utils/infoWindow";
 import Colorscale from "./utils/ColorScale";
@@ -103,9 +104,6 @@ import MapAttributes from "./utils/mapAttributes";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
-import { connect } from "react-redux";
-import { logout } from "../../actions/authAction";
-import { loading } from "../../actions/loadingAction";
 import moment from "moment";
 import { useHistory, useParams } from "react-router-dom";
 import VectorForm from "./utils/VectorForm";
@@ -115,7 +113,6 @@ import CreateLayer from "./utils/layer/createLayer";
 import CreateBaseLayer from "./utils/layer/createBaseLayer";
 import io from "socket.io-client";
 import Thread from "../shared/Thread";
-import { thread } from "../../actions/threadAction";
 import {
   COG_URL,
   MAPBOX_API_KEY,
@@ -145,6 +142,11 @@ import {
 } from "./utils/propUtils";
 import Tileset from "src/types/cesium_tileset";
 import { DocModel, uploadFile } from "src/services/fileUpload";
+import { PERMS } from "src/static/permissions";
+import FourOhOne from "../shared/Error/FourOhOne";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "../shared/Loader";
+import { ThreadContext } from "src/services/threadUtils";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -220,7 +222,6 @@ function BaseMap(props) {
     canCreateLayer: false,
     canDeleteLayer: true,
     canEditLayer: true,
-    canCreateVectorLayer: false,
     canDownloadLayer: true,
     canEditGeojson: false,
     canDeleteFeature: false,
@@ -235,9 +236,13 @@ function BaseMap(props) {
     canUploadToBaseLayer: false,
   });
 
+  const { Auth, logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
+  const { thread, openThread } = useContext(ThreadContext);
+
   const treeMenu = (layer: Layer): MenuProps["items"] => {
     const items: MenuProps["items"] = [];
-    if ((props.isBaseMap && perms.canEditBaseLayer) || !props.isBaseMap) {
+    if (props.isBaseMap ? perms.canEditBaseLayer : perms.canEditLayer) {
       items.push({
         key: "1",
         label: "Edit",
@@ -258,20 +263,22 @@ function BaseMap(props) {
         key: "10",
         label: "Download KML",
       });
-      items.push({
-        key: "flagSubMenu",
-        label: "Toggle Flag",
-        children: [
-          {
-            key: "11",
-            label: "Flag Layer",
-          },
-          {
-            key: "12",
-            label: "Unflag Layer",
-          },
-        ],
-      });
+      if (props.isBaseMap ? perms.canEditBaseLayer : perms.canEditLayer) {
+        items.push({
+          key: "flagSubMenu",
+          label: "Toggle Flag",
+          children: [
+            {
+              key: "11",
+              label: "Flag Layer",
+            },
+            {
+              key: "12",
+              label: "Unflag Layer",
+            },
+          ],
+        });
+      }
     }
 
     if (props.isBaseMap && perms.canUpdateBaseLayer) {
@@ -280,14 +287,7 @@ function BaseMap(props) {
         label: "Update Layer",
       });
     }
-    if (props.isBaseMap && perms.canDeleteBaseLayer) {
-      items.push({
-        key: "5",
-        label: "Delete",
-      });
-    }
-
-    if (!props.isBaseMap && perms.canDeleteLayer) {
+    if (props.isBaseMap ? perms.canDeleteBaseLayer : perms.canDeleteLayer) {
       items.push({
         key: "5",
         label: "Delete",
@@ -295,7 +295,7 @@ function BaseMap(props) {
     }
     if (
       layer.layerGroupId &&
-      ((props.isBaseMap && perms.canCreateBaseLayer) || !props.isBaseMap)
+      (props.isBaseMap ? perms.canCreateBaseLayer : perms.canCreateLayer)
     ) {
       items.push({
         key: "6",
@@ -304,22 +304,19 @@ function BaseMap(props) {
     }
     if (layer._isChecked) {
       const submenuChildren: MenuProps["items"] = [];
-      if ((props.isBaseMap && perms.canCreateBaseLayer) || !props.isBaseMap) {
+      if (props.isBaseMap ? perms.canCreateBaseLayer : perms.canCreateLayer) {
         submenuChildren.push({
           key: "7",
           label: "Group Selected Layers",
         });
       }
-      if (
-        (props.isBaseMap && perms.canDeleteBaseLayer) ||
-        (!props.isBaseMap && perms.canDeleteLayer)
-      ) {
+      if (props.isBaseMap ? perms.canDeleteBaseLayer : perms.canDeleteLayer) {
         submenuChildren.push({
           key: "8",
           label: "Delete Selected Layers",
         });
       }
-      if ((props.isBaseMap && perms.canCreateBaseLayer) || !props.isBaseMap) {
+      if (props.isBaseMap ? perms.canEditBaseLayer : perms.canEditLayer) {
         submenuChildren.push({
           key: "9",
           label: "Move Selected Layers",
@@ -373,247 +370,23 @@ function BaseMap(props) {
   };
   //----------UseEffectBlock to assign permissions--------------
   useEffect(() => {
-    if (
-      props.userType === "tenant-staff" ||
-      props.userType === "tenant-client"
-    ) {
-      console.log("logged in user is tenant-staff");
-      //console.log(props.userDetails);
-      //--------set create layer---------------
-      let createLayer: any = [];
-      let createLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "upload_layer"
-        );
-        createLayer = [...filteredPermissions, ...createLayer];
-      });
-      if (createLayer.length > 0) {
-        createLayerAccess = true;
-      }
-
-      // ------------- can delete layer -----------------
-      let deleteLayer: any = [];
-      let deleteLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "delete_layer"
-        );
-        deleteLayer = [...filteredPermissions, ...deleteLayer];
-      });
-      if (deleteLayer.length > 0) {
-        deleteLayerAccess = true;
-      }
-
-      // -------- Can Edit Layer -------------------------
-      let editLayer: any = [];
-      let editLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "edit_layer"
-        );
-        editLayer = [...filteredPermissions, ...editLayer];
-      });
-      if (editLayer.length > 0) {
-        editLayerAccess = true;
-      }
-
-      //---------set upload file to geojson---------------
-      let uploadFileToGeojson: any = [];
-      let uploadFileToGeojsonAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "Feature_File_upload"
-        );
-        uploadFileToGeojson = [...filteredPermissions, ...uploadFileToGeojson];
-      });
-      if (uploadFileToGeojson.length > 0) {
-        uploadFileToGeojsonAccess = true;
-      }
-
-      //-----------set delete file from geojson-----------
-      let deleteFileToGeojson: any = [];
-      let deleteFileToGeojsonAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "Feature_File_Delete"
-        );
-        deleteFileToGeojson = [...filteredPermissions, ...deleteFileToGeojson];
-      });
-      if (deleteFileToGeojson.length > 0) {
-        deleteFileToGeojsonAccess = true;
-      }
-
-      //----------set cover photo------------------------
-      let coverPhoto: any = [];
-      let coverPhotoAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "set_cover_photo"
-        );
-        coverPhoto = [...filteredPermissions, ...coverPhoto];
-      });
-      if (coverPhoto.length > 0) {
-        coverPhotoAccess = true;
-      }
-
-      //----------add feature------------------------
-      let addFeature: any = [];
-      let addFeatureAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "add_feature"
-        );
-        addFeature = [...filteredPermissions, ...addFeature];
-      });
-      if (addFeature.length > 0) {
-        addFeatureAccess = true;
-      }
-
-      //----------edit feature------------------------
-      let editFeature: any = [];
-      let editFeatureAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "edit_feature"
-        );
-        editFeature = [...filteredPermissions, ...editFeature];
-      });
-      if (editFeature.length > 0) {
-        editFeatureAccess = true;
-      }
-
-      //----------delete feature------------------------
-      let deleteFeature: any = [];
-      let deleteFeatureAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "delete_feature"
-        );
-        deleteFeature = [...filteredPermissions, ...deleteFeature];
-      });
-      if (deleteFeature.length > 0) {
-        deleteFeatureAccess = true;
-      }
-
-      //----------save feature/create vector layer------------------------
-      let saveFeature: any = [];
-      let saveFeatureAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "save_drawings"
-        );
-        saveFeature = [...filteredPermissions, ...saveFeature];
-      });
-      if (saveFeature.length > 0) {
-        saveFeatureAccess = true;
-      }
-
-      // -----------BASE MAP PERMISSIONS---------------------------------
-      //----------save feature/create vector layer------------------------
-      let canCreateBaseLayer: any = [];
-      let canCreateBaseLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "canCreateBaseLayer"
-        );
-        canCreateBaseLayer = [...filteredPermissions, ...canCreateBaseLayer];
-      });
-      if (canCreateBaseLayer.length > 0) {
-        canCreateBaseLayerAccess = true;
-      }
-
-      let canUpdateBaseLayer: any = [];
-      let canUpdateBaseLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "canUpdateBaseLayer"
-        );
-        canUpdateBaseLayer = [...filteredPermissions, ...canUpdateBaseLayer];
-      });
-      if (canUpdateBaseLayer.length > 0) {
-        canUpdateBaseLayerAccess = true;
-      }
-
-      let canDeleteBaseLayer: any = [];
-      let canDeleteBaseLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "canDeleteBaseLayer"
-        );
-        canDeleteBaseLayer = [...filteredPermissions, ...canDeleteBaseLayer];
-      });
-      if (canDeleteBaseLayer.length > 0) {
-        canDeleteBaseLayerAccess = true;
-      }
-
-      let canEditBaseLayer: any = [];
-      let canEditBaseLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "canEditBaseLayer"
-        );
-        canEditBaseLayer = [...filteredPermissions, ...canEditBaseLayer];
-      });
-      if (canEditBaseLayer.length > 0) {
-        canEditBaseLayerAccess = true;
-      }
-
-      let canUploadToBaseLayer: any = [];
-      let canUploadToBaseLayerAccess = false;
-      props.userDetails.customPermissions.forEach((p) => {
-        const filteredPermissions = p.permissions.filter(
-          (d) => d.name === "canUploadToBaseLayer"
-        );
-        canUploadToBaseLayer = [
-          ...filteredPermissions,
-          ...canUploadToBaseLayer,
-        ];
-      });
-      if (canUploadToBaseLayer.length > 0) {
-        canUploadToBaseLayerAccess = true;
-      }
-
-      setPerms({
-        canCreateLayer: createLayerAccess,
-        canDeleteLayer: deleteLayerAccess,
-        canEditLayer: editLayerAccess,
-        canCreateVectorLayer: saveFeatureAccess,
-        canDownloadLayer: true,
-        canEditGeojson: editFeatureAccess,
-        canDeleteFeature: deleteFeatureAccess,
-        canAddFeature: addFeatureAccess,
-        canUploadFileToGeojson: uploadFileToGeojsonAccess,
-        canDeleteFileFromGeojson: deleteFileToGeojsonAccess,
-        canSetCoverPhoto: coverPhotoAccess,
-        canCreateBaseLayer: canCreateBaseLayerAccess,
-        canUpdateBaseLayer: canUpdateBaseLayerAccess,
-        canDeleteBaseLayer: canDeleteBaseLayerAccess,
-        canEditBaseLayer: canEditBaseLayerAccess,
-        canUploadToBaseLayer: canUploadToBaseLayerAccess,
-      });
-    } else if (props.userType === "tenant-root") {
-      //console.log(props.userDetails);
-      //console.log("logged in user is tenant-root");
-      setPerms({
-        canCreateLayer: true,
-        canDeleteLayer: true,
-        canEditLayer: true,
-        canCreateVectorLayer: true,
-        canDownloadLayer: true,
-        canEditGeojson: true,
-        canDeleteFeature: true,
-        canAddFeature: true,
-        canUploadFileToGeojson: true,
-        canDeleteFileFromGeojson: true,
-        canSetCoverPhoto: true,
-        canCreateBaseLayer: true,
-        canDeleteBaseLayer: true,
-        canEditBaseLayer: true,
-        canUpdateBaseLayer: true,
-        canUploadToBaseLayer: true,
-      });
-    }
+    setPerms({
+      canCreateLayer: Auth.userdetails.customPermissions.includes(PERMS.UPLOAD_LAYER),
+      canDeleteLayer: Auth.userdetails.customPermissions.includes(PERMS.DELETE_LAYER),
+      canEditLayer: Auth.userdetails.customPermissions.includes(PERMS.EDIT_LAYER),
+      canDownloadLayer: true,
+      canEditGeojson: Auth.userdetails.customPermissions.includes(PERMS.EDIT_FEATURE),
+      canDeleteFeature: Auth.userdetails.customPermissions.includes(PERMS.DELETE_FEATURE),
+      canAddFeature: Auth.userdetails.customPermissions.includes(PERMS.ADD_FEATURE),
+      canUploadFileToGeojson: Auth.userdetails.customPermissions.includes(PERMS.FEATURE_FILE_UPLOAD),
+      canDeleteFileFromGeojson: Auth.userdetails.customPermissions.includes(PERMS.FEATURE_FILE_DELETE),
+      canSetCoverPhoto: Auth.userdetails.customPermissions.includes(PERMS.SET_COVER_PHOTO),
+      canCreateBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_CREATE_BASE_LAYER),
+      canUpdateBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_UPDATE_BASE_LAYER),
+      canDeleteBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_DELETE_BASE_LAYER),
+      canEditBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_EDIT_BASE_LAYER),
+      canUploadToBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_UPLOAD_TO_BASE_LAYER),
+    });
   }, []);
 
   const socket: any = useRef();
@@ -1091,7 +864,7 @@ function BaseMap(props) {
   //     })
   //     .catch((err) => {
   //       console.log(err);
-  //       AxiosErrorHandler(err, props.logout);
+  //       AxiosErrorHandler(err, logout);
   //     });
   //   http
   //     .get(`${apis.GET_VECTOR_PROPS}`)
@@ -1102,7 +875,7 @@ function BaseMap(props) {
   //     })
   //     .catch((err) => {
   //       console.log(err);
-  //       AxiosErrorHandler(err, props.logout);
+  //       AxiosErrorHandler(err, logout);
   //     });
   // }, []);
 
@@ -1144,7 +917,7 @@ function BaseMap(props) {
         .catch((err) => {
           console.log(err);
           message.error("Layers couldn't be filtered");
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => setChipsLoading(false));
     } else {
@@ -1369,7 +1142,7 @@ function BaseMap(props) {
   //             })
   //             .catch((err) => {
   //               console.log(err);
-  //               AxiosErrorHandler(err, props.logout);
+  //               AxiosErrorHandler(err, logout);
   //             });
   //         } else {
   //           http
@@ -1384,7 +1157,7 @@ function BaseMap(props) {
   //             })
   //             .catch((err) => {
   //               console.log(err);
-  //               AxiosErrorHandler(err, props.logout);
+  //               AxiosErrorHandler(err, logout);
   //             });
   //         }
   //       } else if (key.split("-")[1] === "3") {
@@ -1402,7 +1175,7 @@ function BaseMap(props) {
   //             })
   //             .catch((err) => {
   //               console.log(err);
-  //               AxiosErrorHandler(err, props.logout);
+  //               AxiosErrorHandler(err, logout);
   //             });
   //         } else {
   //           http
@@ -1418,7 +1191,7 @@ function BaseMap(props) {
   //             })
   //             .catch((err) => {
   //               console.log(err);
-  //               AxiosErrorHandler(err, props.logout);
+  //               AxiosErrorHandler(err, logout);
   //             });
   //         }
   //       }
@@ -1766,7 +1539,9 @@ function BaseMap(props) {
         },
       ],
     },
-    {
+  ];
+  if (perms.canEditGeojson) {
+    actionMenuItems.push({
       key: "flag",
       label: "Toggle Flag",
       icon: <FlagOutlined />,
@@ -1780,8 +1555,8 @@ function BaseMap(props) {
           label: "Un-flag Selected",
         },
       ],
-    },
-  ];
+    });
+  }
   const toggleLayerFlag = (layerId: string, flag: boolean) => {
     const payload: any = {
       flag: flag,
@@ -1809,7 +1584,7 @@ function BaseMap(props) {
       })
       .catch((err) => {
         message.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   };
   function toggleFlagSelected(flag: boolean) {
@@ -1846,7 +1621,7 @@ function BaseMap(props) {
       })
       .catch((err) => {
         message.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -1867,7 +1642,7 @@ function BaseMap(props) {
       })
       .catch((err) => {
         message.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -1888,7 +1663,7 @@ function BaseMap(props) {
       })
       .catch((err) => {
         message.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -2075,7 +1850,7 @@ function BaseMap(props) {
     // console.log("it may be by traiin map",checkedKeys);
     setScaleData();
     // drawLayers(checkedKeys);
-    focusSelectedLayers();
+    // focusSelectedLayers();
     console.log("lost");
   }, [
     // checkedKeys,
@@ -3396,12 +3171,12 @@ function BaseMap(props) {
   };
 
   useEffect(() => {
-    props.loading(true);
+    setLoading(true);
   }, []);
 
   useEffect(() => {
     if (props.isBaseMap) {
-      props.loading(true);
+      setLoading(true);
       getAllLayers(null);
     }
   }, [props.isBaseMap, refreshLayer, flag]);
@@ -3482,9 +3257,9 @@ function BaseMap(props) {
       } catch (error) {
         console.log(error);
         message.error("Layers Could Not Be Loaded");
-        AxiosErrorHandler(error, props.logout);
+        AxiosErrorHandler(error);
       } finally {
-        props.loading(false);
+        setLoading(false);
       }
     } else {
       try {
@@ -3504,9 +3279,9 @@ function BaseMap(props) {
       } catch (error) {
         console.log(error);
         //message.error("errrorrrrr");
-        AxiosErrorHandler(error, props.logout);
+        AxiosErrorHandler(error);
       } finally {
-        props.loading(false);
+        setLoading(false);
         //message.info("land")
       }
     }
@@ -3566,7 +3341,7 @@ function BaseMap(props) {
   // };
 
   const deleteLayer = (layerId) => {
-    props.loading(true);
+    setLoading(true);
 
     if (props.isBaseMap) {
       http
@@ -3607,7 +3382,7 @@ function BaseMap(props) {
           }
         })
         .catch((err) => {
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
           if (err.response?.status === 401) {
             message.warning(
               "Sorry! You are not authorised to delete layer. Please contact admin"
@@ -3615,7 +3390,7 @@ function BaseMap(props) {
           } else console.log(err);
         })
         .finally(() => {
-          props.loading(false);
+          setLoading(false);
           handleCancel1();
         });
     } else {
@@ -3662,17 +3437,17 @@ function BaseMap(props) {
               "Sorry! You are not authorised to delete layer. Please contact admin"
             );
           } else console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
-          props.loading(false);
+          setLoading(false);
           handleCancel1();
         });
     }
   };
 
   const deleteMultipleLayers = (type) => {
-    props.loading(true);
+    setLoading(true);
 
     const layers = AllLayers.filter(
       (layer) => layer._isChecked && layer.type === type
@@ -3724,10 +3499,10 @@ function BaseMap(props) {
               "Sorry! You are not authorised to delete layer. Please contact admin"
             );
           } else console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
-          props.loading(false);
+          setLoading(false);
           handleCancel1();
         });
     } else {
@@ -3774,10 +3549,10 @@ function BaseMap(props) {
               "Sorry! You are not authorised to delete layer. Please contact admin"
             );
           } else console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
-          props.loading(false);
+          setLoading(false);
           handleCancel1();
         });
     }
@@ -3838,10 +3613,7 @@ function BaseMap(props) {
   //         setSelectedLayerType(type.toLowerCase());
   //         break;
   //       case "2":
-  //         props.thread(true, {
-  //           docType: "layer",
-  //           docId: layer._id,
-  //         });
+  //         openThread("layer", layer._id, {});
   //         break;
   //       case "3":
   //         download(STATIC_URL + layer.layerpath);
@@ -3908,7 +3680,7 @@ function BaseMap(props) {
   //           })
   //           .catch((err: any) => {
   //             console.log(err);
-  //             AxiosErrorHandler(err, props.logout);
+  //             AxiosErrorHandler(err, logout);
   //           });
   //         break;
   //       case "11":
@@ -4095,7 +3867,7 @@ function BaseMap(props) {
   //   }
   // };
 
-  const getTitleElement = (layer: ILayer) => {
+  const getTitleElement = (layer: Layer) => {
     const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
       const type = layer.type;
       switch (e.key) {
@@ -4112,10 +3884,7 @@ function BaseMap(props) {
           setSelectedLayerType(type.toLowerCase());
           break;
         case "2":
-          props.thread(true, {
-            docType: "layer",
-            docId: layer._id,
-          });
+          openThread("layer", layer._id, {});
           break;
         case "3":
           download(STATIC_URL + layer.layerpath);
@@ -4179,7 +3948,7 @@ function BaseMap(props) {
             })
             .catch((err: any) => {
               console.log(err);
-              AxiosErrorHandler(err, props.logout);
+              AxiosErrorHandler(err, logout);
             });
           break;
         case "11":
@@ -4273,6 +4042,22 @@ function BaseMap(props) {
               }}
               ellipsis={true}
               onClick={() => {
+                if (layer._isChecked && layer._metadata?.bounds) {
+                  const { longitude, latitude, zoom } = calculateViewport(layer._metadata.bounds);
+                  setViewport({
+                    longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+                    latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
+                    zoom,
+                    pitch: 0,
+                    minZoom: 0,
+                    maxZoom: 22,
+                    bearing: 0,
+                    transitionDuration: 2000,
+                    transitionInterpolator: new FlyToInterpolator(),
+                  });
+                }
+              }}
+              onDoubleClick={() => {
                 if (!props.isBaseMap || layer.type === "Vector") {
                   setlayerToAddInAttributeTable({
                     name: layer.name,
@@ -4470,7 +4255,7 @@ function BaseMap(props) {
   // No longer required
   // const updateTreeDataAfterMovingLayers = async (groupid, layerids) => {
   //   // const al = { ...allLayers };
-  //   props.loading(true);
+  //   setLoading(true);
 
   //   const res = await http.patch(`${apis.EDIT_LAYER_GROUP}`, {
   //     _id: groupid,
@@ -4673,7 +4458,7 @@ function BaseMap(props) {
   // };
 
   const deleteGroup = (id: any) => {
-    props.loading(true);
+    setLoading(true);
 
     http
       .delete(`${apis.DELETE_LAYER_GROUP}`, {
@@ -4698,15 +4483,15 @@ function BaseMap(props) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
   const editGroup = (group) => {
-    props.loading(true);
+    setLoading(true);
 
     http
       .patch(`${apis.EDIT_LAYER_GROUP}`, {
@@ -4741,14 +4526,14 @@ function BaseMap(props) {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         editForm.resetFields();
         setVisibleEditModal(false);
         setgroupName("");
         setgroupToEdit(null);
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -4808,10 +4593,10 @@ function BaseMap(props) {
   //   refreshLayers();
   // }, [treeStructure, AllLayers, panes, dateRange]);
   useEffect(() => {
-    if (!props.Thread.open) {
+    if (!thread.open) {
       setRefreshLayer(!refreshLayer);
     }
-  }, [props.Thread.open]);
+  }, [thread.open]);
 
   // Should no longer be required
   // const refreshLayers = () => {
@@ -5288,7 +5073,7 @@ function BaseMap(props) {
         ) {
           setExpiryModal(true);
           // window.setTimeout(function () {
-          //   AxiosErrorHandler(err, VideoProps.logout); //needs to be connected with redux
+          //   AxiosErrorHandler(err, logout);
           // }, 5000);
         } else {
           setLimitModal(true);
@@ -5296,7 +5081,7 @@ function BaseMap(props) {
         }
       } else {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       }
     } finally {
       setUploading(false);
@@ -5530,22 +5315,6 @@ function BaseMap(props) {
     },
     pickable: true,
     pickingRadius: 15,
-    onClick: (data, e) => {
-      if (!e.rightButton) {
-        if (modeState.isCompleted) {
-          InfoWindow(
-            "new",
-            data.coordinate,
-            "New Shape",
-            drawMode,
-            data.object,
-            true,
-            "new",
-            "0"
-          );
-        }
-      }
-    },
     pointRadiusUnits: "pixels",
     pointRadiusScale: 1,
     pointRadiusMinPixels: 8,
@@ -5582,7 +5351,7 @@ function BaseMap(props) {
   // }
 
   const editLayer = () => {
-    props.loading(true);
+    setLoading(true);
     const data: any = {
       name: layerName,
       captureDate: captureDate,
@@ -5618,20 +5387,20 @@ function BaseMap(props) {
               "Sorry! You are not authorised to change color. Please contact admin"
             );
           } else console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setLayerColor("#ffaa00"); // default value that was previously also used in first declaration
           setLayerName("");
           setCaptureDate("");
           setIcon2(iconOptions[0].value); // default value that was previously also used in first declaration
-          props.loading(false);
+          setLoading(false);
         });
 
       // refreshLayers();
     }
 
-    props.loading(true);
+    setLoading(true);
 
     http
       .patch(`${apis.EDIT_LAYER}`, data, {
@@ -5645,7 +5414,7 @@ function BaseMap(props) {
           //console.log(res.data.data);
           // --update layer
           updateLayerDataAfterEditing(res.data.data[0], null, null);
-          props.loading(false);
+          setLoading(false);
         } else {
           message.error(res.data.message);
         }
@@ -5656,7 +5425,7 @@ function BaseMap(props) {
             "Sorry! You are not authorised to edit layer. Please contact admin"
           );
         } else console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         handleCancel1();
@@ -5666,6 +5435,7 @@ function BaseMap(props) {
         setLayerColor("#ffaa00");
         setLayerProp(null);
         props.loading(false);
+        setLoading(false);
       });
 
     // refreshLayers();
@@ -5673,7 +5443,7 @@ function BaseMap(props) {
 
   const editFeature = (data, color, index) => {
     data.properties["color"] = color;
-    props.loading(true);
+    setLoading(true);
 
     http
       .patch(`${apis.EDIT_FEATURE}`, {
@@ -5692,13 +5462,13 @@ function BaseMap(props) {
             "Sorry! You are not authorised to edit feature. Please contact admin"
           );
         } else console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setSelectedLayerId("");
         setColorChangeFeatureData(null);
         setShowColorChangeForm(false);
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -6114,7 +5884,7 @@ function BaseMap(props) {
 
   const changeGroupOfLayer = async (groupid, layerids, keys) => {
     // const al = { ...allLayers };
-    props.loading(true);
+    setLoading(true);
     //console.log(groupid);
     try {
       const res = await http.patch(`${apis.EDIT_LAYER_GROUP}`, {
@@ -6202,15 +5972,15 @@ function BaseMap(props) {
     } catch (err) {
       console.log(err);
       message.error(err.message);
-      AxiosErrorHandler(err, props.logout);
+      AxiosErrorHandler(err, logout);
     } finally {
-      props.loading(false);
+      setLoading(false);
     }
   };
 
   const removeLayerFromGroup = async (groupId, layerId) => {
     // const al = { ...allLayers };
-    props.loading(true);
+    setLoading(true);
     try {
       const res = await http.post(`${apis.DELETE_LAYER_ID_FROM_GROUP}`, {
         _id: groupId,
@@ -6277,9 +6047,9 @@ function BaseMap(props) {
     } catch (err) {
       console.log(err);
       message.error(err.message);
-      AxiosErrorHandler(err, props.logout);
+      AxiosErrorHandler(err, logout);
     } finally {
-      props.loading(false);
+      setLoading(false);
     }
   };
 
@@ -6653,7 +6423,7 @@ function BaseMap(props) {
   // };
 
   const createLayerGroup = (data) => {
-    props.loading(true);
+    setLoading(true);
     const layersToGroup = AllLayers.filter(
       (layer) =>
         layer._isChecked && layer.type === ["", "Vector", "Raster"][moveType]
@@ -6699,17 +6469,17 @@ function BaseMap(props) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setVisibleGroupCreateModal(false);
         resetGroupFormFields();
-        props.loading(false);
+        setLoading(false);
       });
   };
 
   const moveLayers = async (data) => {
-    props.loading(true);
+    setLoading(true);
     const layersToMove = AllLayers.filter(
       (layer) =>
         layer._isChecked && layer.type === ["", "Vector", "Raster"][moveType]
@@ -6747,12 +6517,12 @@ function BaseMap(props) {
       .catch((err) => {
         console.log(err);
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setMoveToOtherGroupModal(false);
         toGroupForm.resetFields();
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -6872,6 +6642,10 @@ function BaseMap(props) {
   const handleMouseMove = (e) => {
     setCursorPosition({ x: e.clientX, y: e.clientY });
   };
+
+  if (props.isBaseMap && !["tenant-root","tenant-staff"].includes(Auth.userdetails.userType)) {
+    return <FourOhOne />;
+  }
 
   return (
     <div
@@ -7121,7 +6895,7 @@ function BaseMap(props) {
                         setShouldAttributeTableReload
                       }
                       shouldAttributeTableReload={shouldAttributeTableReload}
-                      canDraw={perms.canCreateVectorLayer}
+                      canDraw={perms.canCreateLayer}
                       isBaseMap={props.isBaseMaps}
                       isPublic={false}
                       setThumbnail={setThumbnail}
@@ -8252,7 +8026,7 @@ function BaseMap(props) {
           vectorLayers={vectorLayers}
           features={featureState}
           missionId={id}
-          loading={props.loading}
+          loading={setLoading}
           isBaseMap={props.isBaseMap}
           setIsDrawing={setIsDrawing}
           forceUpdateLayers={forceUpdateLayers}
@@ -8300,6 +8074,8 @@ function BaseMap(props) {
         isBaseMap={props.isBaseMap}
         canUploadToBaseLayer={perms.canUploadToBaseLayer}
         canUpdateBaseLayer={perms.canUpdateBaseLayer}
+        canEditLayer={perms.canEditLayer}
+        canUploadFileToGeojson={perms.canUploadFileToGeojson}
         setViewport={setViewport}
         layer={AllLayers.find((layer) => layer._id === featureLayer)}
         layerPath={featureLayerPath}
@@ -8437,16 +8213,4 @@ function BaseMap(props) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    userType: state.Auth.userdetails.userType,
-    userDetails: state.Auth.userdetails,
-    Thread: state.Thread,
-  };
-};
-
-export default connect(mapStateToProps, {
-  loading,
-  logout,
-  thread,
-})(BaseMap);
+export default BaseMap;

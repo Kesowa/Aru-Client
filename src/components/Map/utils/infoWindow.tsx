@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
-import { connect } from "react-redux";
 import {
   Row,
   Col,
@@ -30,7 +28,8 @@ import moment from "moment";
 import getAddressfromLatLong from "../../../services/reverseGeocoding";
 import { STATIC_URL } from "src/constants";
 import { BsFlagFill } from "react-icons/bs";
-import { thread } from "src/actions/threadAction";
+import { AuthContext } from "src/services/authUtils";
+import { ThreadContext } from "src/services/threadUtils";
 
 const { Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -47,6 +46,9 @@ function InfoWindow(props) {
   );
   const [areaUnit, setAreaUnit] = useState("sq. m");
   const [lengthUnit, setLenghtUnit] = useState("km");
+
+  const { logout } = useContext(AuthContext);
+  const { thread, openThread } = useContext(ThreadContext);
 
   const [fileCount, setFileCount] = useState(0);
   const [imageToShow, setImageToshow] = useState<any>([]);
@@ -276,7 +278,7 @@ function InfoWindow(props) {
       })
       .catch((err) => {
         message.error(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       });
   }
 
@@ -405,7 +407,7 @@ function InfoWindow(props) {
           })
           .catch((err) => {
             console.log(err);
-            AxiosErrorHandler(err, props.logout);
+            AxiosErrorHandler(err, logout);
           })
           .finally(() => setImageLoader(false));
       }
@@ -555,7 +557,7 @@ function InfoWindow(props) {
                           <Tooltip placement="right" title={"Open Thread"}>
                             <MessageOutlined
                               style={{
-                                color: props.open ? "#3b86ff" : "#000",
+                                color: thread.open ? "#3b86ff" : "#000",
                                 cursor: "pointer",
                                 fontSize: "16px",
                               }}
@@ -563,10 +565,7 @@ function InfoWindow(props) {
                                 props.setThumbnail(
                                   alertThumbnail(props.feature.properties)
                                 );
-                                props.thread(true, {
-                                  docType: "alert",
-                                  docId: props.feature.properties._id,
-                                });
+                                openThread("alert", props.feature.properties._id, {});
                               }}
                             />
                           </Tooltip>
@@ -914,10 +913,4 @@ function InfoWindow(props) {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-  open: state.Thread.open,
-});
-
-export default connect(mapStateToProps, { logout, thread })(InfoWindow);
+export default InfoWindow;

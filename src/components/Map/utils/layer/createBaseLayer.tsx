@@ -8,7 +8,7 @@ import {
   LayerCreated,
   LayerUpdated,
 } from "./vectorLayerSteps";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { v4 as uuid } from "uuid";
 import {
   Modal,
@@ -29,8 +29,6 @@ import {
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
-import { connect } from "react-redux";
 import { UploadOutlined, ImportOutlined } from "@ant-design/icons";
 import "../../index.less";
 import MarkerIcon from "../../../../static/MarkerIcon.png";
@@ -41,6 +39,7 @@ import { components } from "src/handlers/schema";
 import { featureType, vectorProps } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
 import { DocModel, uploadFile } from "src/services/fileUpload";
+import { AuthContext } from "src/services/authUtils";
 const { Dragger } = Upload;
 const { Item } = Form;
 const { Meta } = Card;
@@ -92,6 +91,8 @@ const CreateBaseLayer = (props) => {
   const [selectedAttr, setSelectedAttr] = useState({});
   const [activeTab, setActiveTab] = useState<unknown>([]);
   const [icon, setIcon] = useState<unknown>("MarkerIcon");
+
+  const { logout } = useContext(AuthContext);
 
   const iconOptions = [
     {
@@ -207,7 +208,7 @@ const CreateBaseLayer = (props) => {
             })
             .catch((err) => {
               console.log(err);
-              AxiosErrorHandler(err, props.logout);
+              AxiosErrorHandler(err, logout);
             })
             .finally(() => {
               setMissionsLoading(false);
@@ -230,7 +231,7 @@ const CreateBaseLayer = (props) => {
             })
             .catch((err) => {
               console.log(err);
-              AxiosErrorHandler(err, props.logout);
+              AxiosErrorHandler(err, logout);
             })
             .finally(() => {
               setMissionsLoading(false);
@@ -263,7 +264,7 @@ const CreateBaseLayer = (props) => {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => setLayersLoading(false));
     }
@@ -610,7 +611,7 @@ const CreateBaseLayer = (props) => {
         })
         .catch((err) => {
           console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setUploading(false);
@@ -651,7 +652,7 @@ const CreateBaseLayer = (props) => {
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setUploading(false));
   };
@@ -685,7 +686,7 @@ const CreateBaseLayer = (props) => {
               console.log(err.response);
             }
           } else console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setLayerName("");
@@ -732,7 +733,7 @@ const CreateBaseLayer = (props) => {
               console.log(err.response);
             }
           } else console.log(err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         })
         .finally(() => {
           setLayerName("");
@@ -789,7 +790,7 @@ const CreateBaseLayer = (props) => {
             console.log(err.response);
           }
         } else console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setLayerName("");
@@ -838,7 +839,7 @@ const CreateBaseLayer = (props) => {
             console.log(err.response);
           }
         } else console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setLayerName("");
@@ -1397,7 +1398,7 @@ const CreateBaseLayer = (props) => {
       })
       .catch((err: unknown) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setCurrent1(2);
@@ -1781,9 +1782,4 @@ const CreateBaseLayer = (props) => {
   );
 };
 
-const mapStateToProps = (state: unknown) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-});
-
-export default connect(mapStateToProps, { logout })(CreateBaseLayer);
+export default CreateBaseLayer;

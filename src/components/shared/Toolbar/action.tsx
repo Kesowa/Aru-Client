@@ -29,12 +29,14 @@ const ActionToolbar = (props) => {
       label: "Select all files",
       disabled: props.data.length > 0 ? false : true,
     },
-    {
+  ];
+  if (props.canDelete) {
+    actionMenu.push({
       key: "3",
       label: "Delete files",
       disabled: props.checkedList.length > 0 ? false : true,
-    },
-  ];
+    });
+  }
   const handleAction = (e) => {
     if (e.key == 0) {
       props.setActivateSelection(!props.activateSelection);
@@ -116,26 +118,29 @@ const ActionToolbar = (props) => {
             } ${props.type}s`}
       </Text>
       <div className="upload-btn">
-        <Tooltip
-          title={`${
-            !(props.activateSelection && props.checkedList.length > 0)
-              ? "Toggle Flag"
-              : !props.flag
-              ? `Flag ${props.type}`
-              : `Un-flag ${props.type}`
-          }`}
-          placement="bottom"
-        >
-          <Switch
-            disabled={
+        {
+          props.canToggleFlag &&
+          <Tooltip
+            title={`${
               !(props.activateSelection && props.checkedList.length > 0)
-            }
-            checkedChildren={<TbFlag size={16} />}
-            unCheckedChildren={<TbFlagOff size={16} color="#da1c5c" />}
-            onChange={toggleFlag}
-            checked={props.flag}
-          />
-        </Tooltip>
+                ? "Toggle Flag"
+                : !props.flag
+                ? `Flag ${props.type}`
+                : `Un-flag ${props.type}`
+            }`}
+            placement="bottom"
+          >
+            <Switch
+              disabled={
+                !(props.activateSelection && props.checkedList.length > 0)
+              }
+              checkedChildren={<TbFlag size={16} />}
+              unCheckedChildren={<TbFlagOff size={16} color="#da1c5c" />}
+              onChange={toggleFlag}
+              checked={props.flag}
+            />
+          </Tooltip>
+        }
         <Dropdown
           menu={{ items: actionMenu, onClick: handleAction }}
           trigger={["click"]}

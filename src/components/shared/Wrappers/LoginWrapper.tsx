@@ -1,15 +1,15 @@
-import { ReactNode } from "react";
+import { ReactNode, useContext } from "react";
 import { Route, Redirect } from "react-router-dom";
-import { connect } from "react-redux";
+import { AuthContext } from "src/services/authUtils";
 
 interface IProps {
   children?: ReactNode;
-  Auth?: any;
   exact?: boolean;
   path?: string;
 }
 
-function LoginWrapper({ children, Auth, ...rest }: IProps) {
+function LoginWrapper({ children, ...rest }: IProps) {
+  const { Auth } = useContext(AuthContext);
   return (
     <Route
       {...rest}
@@ -29,8 +29,4 @@ function LoginWrapper({ children, Auth, ...rest }: IProps) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-});
-
-export default connect(mapStateToProps, {})(LoginWrapper);
+export default LoginWrapper;

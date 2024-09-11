@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Row,
   Col,
@@ -22,14 +22,13 @@ import Videos from "./Videos";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { logout } from "../../../../actions/authAction";
 import { useParams } from "react-router";
 import getAddressfromLatLong from "../../../../services/reverseGeocoding";
 import AloneLogo from "../../../../static/Alone-rafiki.svg";
 import moment from "moment";
-import { connect } from "react-redux";
-import { loading } from "../../../../actions/loadingAction";
 import { STATIC_URL } from "src/constants";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 const { Panel } = Collapse;
 const { Text, Title } = Typography;
 
@@ -51,6 +50,9 @@ function LocationCard(props) {
   const [once, setonce] = useState(true);
 
   const { id } = useParams<any>();
+  
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
 
   useEffect(() => {
     if (once) {
@@ -62,7 +64,7 @@ function LocationCard(props) {
   }, [isChecked]);
 
   const fetchAllAlertsForLocation = async () => {
-    props.loading(true);
+    setLoading(true);
     const outcomes = await http.get(`${apis.GET_ALL_ALERTS_BY_LOCATION_ID}`, {
       params: {
         id,
@@ -75,13 +77,13 @@ function LocationCard(props) {
       message.error("Outcomes could not be fetched");
     }
 
-    props.loading(false);
+    setLoading(false);
   };
 
   ///-------------------------- fetch missions and location data -----------------------------------------------------
   const fetchData = async () => {
     try {
-      props.loading(true);
+      setLoading(true);
       const result = await http.get(`${apis.GET_MISSION_BY_LOCATION_MAP_REF}`, {
         params: {
           id,
@@ -133,10 +135,10 @@ function LocationCard(props) {
       await fetchAllAlertsForLocation();
 
       setisMissionsLoading(false);
-      props.loading(false);
+      setLoading(false);
     } catch (err) {
       message.error(err.message);
-      AxiosErrorHandler(err, props.logout);
+      AxiosErrorHandler(err, logout);
     }
   };
 
@@ -179,13 +181,13 @@ function LocationCard(props) {
       })
       .catch((err) => {
         message.error("Mission Could not be fetched");
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setSelectedLoading(false);
       });
 
-    props.loading(true);
+    setLoading(true);
     http
       .get(`${apis.GET_ALL_ALERTS_FOR_MISSION}`, {
         params: {
@@ -212,10 +214,10 @@ function LocationCard(props) {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        props.loading(false);
+        setLoading(false);
       });
   };
 
@@ -508,12 +510,4 @@ function LocationCard(props) {
   );
 }
 
-const mapStateToProps = (state) => ({
-  loading: state.loading,
-  logout: state.logout,
-});
-
-export default connect(mapStateToProps, {
-  loading,
-  logout,
-})(LocationCard);
+export default LocationCard;

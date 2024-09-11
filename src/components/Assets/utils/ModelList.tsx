@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import { useState, useEffect, useContext } from "react";
 import {
   Row,
   Col,
@@ -19,28 +18,20 @@ import "../index.less";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
-import { setModelsToState, deleteModel } from "../../../actions/modelAction";
 import ModelCard from "./ModelCard";
+import { AuthContext } from "src/services/authUtils";
 
 const { Title } = Typography;
 
-interface TableProps {
-  userType: any;
-  tenantId: any;
-  userId: any;
-  logout: any;
-  setModelsToState: any;
-  deleteModel: any;
-  models: any;
-}
-
-function ModelList(props: TableProps) {
+function ModelList() {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [isTableLoading, setIsTableLoading] = useState(true);
   const [modelTableData, setModelTableData] = useState<any>([]);
   const [selectedModelID, setSelectedModelID] = useState();
+  const [models, setModels] = useState<any[]>([]);
+
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     fetchModels();
@@ -51,14 +42,14 @@ function ModelList(props: TableProps) {
       .get(`${apis.GET_MODELS}`)
       .then((result) => {
         if (result.data.status) {
-          props.setModelsToState(result.data.data);
+          setModels(result.data.data);
         } else {
           message.error(result.data.message);
         }
       })
       .catch((err) => {
         console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -66,10 +57,10 @@ function ModelList(props: TableProps) {
   };
 
   useEffect(() => {
-    if (props.models.length) {
-      setModelTableData(props.models);
+    if (models.length) {
+      setModelTableData(models);
     }
-  }, [props.models]);
+  }, [models]);
 
   let searchInput: any;
   const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
@@ -250,17 +241,4 @@ function ModelList(props: TableProps) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    userType: state.Auth.userdetails.userType,
-    tenantId: state.Auth.userdetails.tenantId._id,
-    userId: state.Auth.userdetails._id,
-    models: state.Models.models,
-  };
-};
-
-export default connect(mapStateToProps, {
-  setModelsToState,
-  deleteModel,
-  logout,
-})(ModelList);
+export default ModelList;

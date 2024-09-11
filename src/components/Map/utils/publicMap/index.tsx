@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo, useContext } from "react";
 import { v4 as uuid } from "uuid";
 import KesowaNewLogo from "../../../../static/kesowa-black.png";
 import { DataFilterExtension } from "@deck.gl/extensions";
@@ -19,6 +18,8 @@ import {
   Select,
   Space,
   MenuProps,
+  DatePicker,
+  Badge,
 } from "antd";
 import {
   DoubleRightOutlined,
@@ -31,6 +32,8 @@ import {
   SortDescendingOutlined,
   ExclamationCircleOutlined,
   FolderOutlined,
+  FlagOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import "../../index.less";
 import DeckGL from "@deck.gl/react";
@@ -58,9 +61,6 @@ import { StaticMap } from "react-map-gl";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { connect } from "react-redux";
-import { loading } from "../../../../actions/loadingAction";
-import { logout } from "../../../../actions/authAction";
 import moment from "moment";
 import { useParams } from "react-router-dom";
 import MarkerIcon from "../../../../static/MarkerIcon.png";
@@ -82,25 +82,19 @@ import FourOFour from "src/components/shared/Error/FourOFour";
 import { AxiosResponse } from "axios";
 import { IMission } from "src/types/mission";
 import { ILayer } from "src/types/layer";
+import { BBox, mergeBoundingBoxes, GeoJson } from "src/types/geojson";
+import { Layer, ILayerToDeckLayer } from "../../layerRender";
+import { ILayersToTree } from "../../treeRender";
+import { WebMercatorViewport } from "viewport-mercator-project";
+import Fuse from "fuse.js";
 import { featureType } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
+import { AuthContext } from "src/services/authUtils";
+import { LoaderContext } from "src/components/shared/Loader";
 
 interface Config {
   mode: typeof GeoJsonEditMode;
 }
-
-const DRAW_EDIT_POLYGON = new CompositeMode([
-  new DrawPolygonMode(),
-  new ModifyMode(),
-]);
-const DRAW_EDIT_LINE = new CompositeMode([
-  new DrawLineStringMode(),
-  new ModifyMode(),
-]);
-const DRAW_EDIT_POINT = new CompositeMode([
-  new DrawPointMode(),
-  new ModifyMode(),
-]);
 
 const { Title, Text } = Typography;
 
@@ -108,20 +102,23 @@ const { Option } = Select;
 
 const { Search } = Input;
 
+const DEFAULT_LOCATION = {
+  lat: 22.571194159512256,
+  lng: 88.49175358524279,
+};
+
 function PublicMap(props) {
   const selectedLayer = decodeURI(window.location.hash).slice(1); // Get selected layer from url hashed part
-
-  const [showBorder, setShowBorder] = useState(false);
   const [osmState, setOsmState] = useState(false);
   const [errorState, setErrorState] = useState("");
-  const [defaultLocation, setDefaultLocation] = useState({
-    lat: 22.571194159512256,
-    lng: 88.49175358524279,
-  });
+
+  const { logout } = useContext(AuthContext);
+  const { setLoading } = useContext(LoaderContext);
+
   // Viewport settings
   const [INITIAL_VIEW_STATE, setViewport] = useState<any>({
-    longitude: defaultLocation.lng,
-    latitude: defaultLocation.lat,
+    longitude: DEFAULT_LOCATION.lng,
+    latitude: DEFAULT_LOCATION.lat,
     zoom: 13,
     pitch: 0,
     minZoom: 0,
@@ -223,7 +220,7 @@ function PublicMap(props) {
       maxRequests: 20,
       pickable: true,
       onViewportLoad: null,
-      autoHighlight: showBorder,
+      autoHighlight: false,
       highlightColor: [60, 60, 60, 40],
       minZoom: 0,
       maxZoom: 19,
@@ -241,31 +238,20 @@ function PublicMap(props) {
             image: props.data,
             bounds: [west, south, east, north],
           }),
-          showBorder &&
-            new PathLayer({
-              id: `${props.id}-border`,
-              visible: props.visible,
-              data: [
-                [
-                  [west, north],
-                  [west, south],
-                  [east, south],
-                  [east, north],
-                  [west, north],
-                ],
-              ],
-              getPath: (d) => d,
-              getColor: [255, 0, 0],
-              widthMinPixels: 4,
-            }),
         ];
       },
     }),
   ];
 
   const [showPopup, togglePopup] = useState(false);
-  const [searching, SetSearching] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
+  // const [searching, SetSearching] = useState(false);
+  // const [searchValue, setSearchValue] = useState("");
+  const [fuse, setFuse] = useState<
+    {
+      layerId: string;
+      searchIndex: Fuse<any>;
+    }[]
+  >([]);
   const [featureData, setFeatureData] = useState<any>([]);
   const [sysId, setSysId] = useState("");
   const [coordinates, setCoordinates] = useState([]);
@@ -283,41 +269,20 @@ function PublicMap(props) {
   const [activeKey, setActiveKey] = useState<any>();
   const [panes, setPanes] = useState<any>([]);
   const [tabKeys, setTabKeys] = useState<any>([]);
-  const [drawMode, setdrawMode] = useState("");
-  const [formDrawerVisible, setformDrawerVisible] = useState(false);
-  const [viewImages, setViewImages] = useState(false);
+  // const [drawMode, setdrawMode] = useState("");
+  // const [formDrawerVisible, setformDrawerVisible] = useState(false);
+  // const [viewImages, setViewImages] = useState(false);
 
-  const [vectorLayers, setvectorLayers] = useState<
-    (ILayer & { type: "Vector" })[]
-  >([]);
   const [saveButtonShow, setSaveButtonShow] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [toolSelected, setToolSelected] = useState("");
+  // const [showForm, setShowForm] = useState(false);
+  // const [toolSelected, setToolSelected] = useState("");
 
-  const [activeType, setActiveType] = useState(false);
-  const [totalLayers, setTotalLayers] = useState(0);
-  const [time, setTime] = useState("100 days");
-  const [timeEnabled, setTimeEnabled] = useState<any>();
+  // const [activeType, setActiveType] = useState(false);
   const [sortType, setSortType] = useState("");
-  const [isAscending, setIsAscending] = useState(true);
+  // const [isAscending, setIsAscending] = useState(true);
+  const isAscending = true;
 
-  const [selectedRasterProps, setSelectedRasterProps] = useState<any>([]);
-  const [selectedVectorProps, setSelectedVectorProps] = useState<any>([]);
-  const [selectedVectorPropsType, setSelectedVectorPropsType] = useState<any>(
-    []
-  );
   const [layerLoading, setLayerLoading] = useState(false);
-  const [threeDState, set3DState] = useState("");
-
-  const [layerz, setlayerz] = useState<ILayer[]>([]);
-  const [activeGroupButton, setActiveGroupButton] = useState(true);
-
-  //----------------auto detect browser height---------------------
-  // let initHeight = window.screen.height;
-  // if(initHeight === 1080){
-  //   setBottomBarHeight("500px");
-
-  // }
 
   useEffect(() => {
     setTimeout(() => {
@@ -326,13 +291,6 @@ function PublicMap(props) {
       }
     }, 1000);
   }, [layerLoading]);
-
-  useEffect(() => {
-    const initHeight = window.screen.height;
-    if (initHeight >= 1080) {
-      setBottomBarHeight("480px");
-    }
-  }, []);
 
   const [modeState, setModeState] = useState({
     editMode: null,
@@ -353,12 +311,8 @@ function PublicMap(props) {
     data: myFeatureCollection,
   });
 
-  const [selectedLayerId, setSelectedLayerId] = useState<any>();
-
   const [layerToAddInAttributeTable, setlayerToAddInAttributeTable] =
     useState<any>(null);
-
-  const [scaleVisible, setScaleVisible] = useState(false);
 
   const { id, tenantId, missionId } = useParams<any>(); // fetch id from url
 
@@ -368,51 +322,26 @@ function PublicMap(props) {
   }, []);
 
   useEffect(() => {
-    if (sortType == "createdAt") {
-      const data: any = [...treeDataa];
-      if (isAscending) {
-        data[0].children.sort((a, b) =>
-          moment(a.captureDate).diff(moment(b.captureDate))
-        );
-        data[1].children.sort((a, b) =>
-          moment(a.captureDate).diff(moment(b.captureDate))
-        );
-      } else {
-        data[0].children.sort((a, b) =>
-          moment(b.captureDate).diff(moment(a.captureDate))
-        );
-        data[1].children.sort((a, b) =>
-          moment(b.captureDate).diff(moment(a.captureDate))
-        );
-      }
-      setTreeDataa(data);
-    }
-    if (sortType == "name") {
-      const data: any = [...treeDataa];
-      if (isAscending) {
-        data[0].children.sort((a, b) => a.name.localeCompare(b.name));
-        data[1].children.sort((a, b) => a.name.localeCompare(b.name));
-      } else {
-        data[0].children.sort((a, b) => b.name.localeCompare(a.name));
-        data[1].children.sort((a, b) => b.name.localeCompare(a.name));
-      }
-      setTreeDataa(data);
-    }
+    SetAllLayers((prev) => [
+      ...prev.sort((a, b) => {
+        if (sortType === "createdAt") {
+          if (isAscending) return moment(a.createdAt).diff(moment(b.createdAt));
+          else return moment(b.createdAt).diff(moment(a.createdAt));
+        } else {
+          // sortType is "name"
+          if (isAscending) return a.name.localeCompare(b.name);
+          else return b.name.localeCompare(a.name);
+        }
+      }),
+    ]);
   }, [sortType, isAscending]);
 
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
-  const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
-  const [colorMap, SetColorMap] = useState("plasma");
   const [featureLayer, setFeatureLayer] = useState("");
 
-  const [selectedLayerLabel, setSelectedLayerLabel] = useState("");
-  const [activeID, setActiveID] = useState("");
-  const [selectedIndexes, setSelectedIndexes] = useState<React.Key[]>([]);
-  const [showSelectedIndexes, setshowSelectedIndexes] = useState([]);
-  const [key, setKey] = useState("");
-  const [defaultKeys, setDefaultKeys] = useState<React.Key[]>([]);
+  // const [activeID, setActiveID] = useState("");
   const onExpand = (expandedKeysValue: React.Key[]) => {
     // if not set autoExpandParent to false, if children expanded, parent can not collapse.
     // or, you can remove all expanded children keys.
@@ -420,51 +349,17 @@ function PublicMap(props) {
     setAutoExpandParent(false);
   };
 
-  const [allLayers, setAllLayers] = useState({});
-  const [visibleLayers, setVisibleLayers] = useState([]);
-  const [colorChangeFeatureData, setColorChangeFeatureData] =
-    useState<any>(null);
-  const [showColorChangeForm, setShowColorChangeForm] = useState(false);
-  const [color, setColor] = useState("");
-  const [scales, setScales] = useState([]);
-
-  useEffect(() => console.log("All layers: ", allLayers), [allLayers]); //---printing all layers in state
-
-  //--------Generate Fill Color----------------------------------------------
-  function hexToRGB(hex, o) {
-    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, function (m, r, g, b) {
-      return r + r + g + g + b + b;
-    });
-
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    const opacity = o ? 150 : 50;
-    return result
-      ? [
-          parseInt(result[1], 16),
-          parseInt(result[2], 16),
-          parseInt(result[3], 16),
-          opacity,
-        ]
-      : null;
-  }
-
-  function hexToRGB2(hex, o) {
-    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, function (m, r, g, b) {
-      return r + r + g + g + b + b;
-    });
-
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    const opacity = o ? 150 : 50;
-    return result
-      ? [
-          parseInt(result[1], 16),
-          parseInt(result[2], 16),
-          parseInt(result[3], 16),
-        ]
-      : null;
-  }
+  const [AllLayers, SetAllLayers] = useState<Layer[]>([]);
+  const [dateRange, setDateRange] = useState([
+    moment(
+      moment().subtract(7, "d").format("YYYY-MM-DD") + " " + "00:00",
+      "YYYY-MM-DD HH:mm"
+    ).format(),
+    moment(
+      moment().format("YYYY-MM-DD") + " " + "23:59",
+      "YYYY-MM-DD HH:mm"
+    ).format(),
+  ]);
 
   //----------------------------INFO WINDOW handeller------------------------
   function InfoWindow(
@@ -489,469 +384,126 @@ function PublicMap(props) {
     setSaveButtonShow(show);
   }
 
-  //-----------------------Fetch Raster URL----------------------------------
-  const getRasterURL = (rasterType, path, settings) => {
-    switch (rasterType) {
-      case "NDVI":
-        return (
-          `${COG_URL}` +
-          `/cog/tiles` +
-          `/{z}/{x}/{y}%401x?url=${TITILER_STATIC}` +
-          path
-        );
-
-      case "NDWI":
-        return (
-          `${COG_URL}` +
-          `/cog/tiles` +
-          `/{z}/{x}/{y}%401x?url=${TITILER_STATIC}` +
-          path +
-          `&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}`
-        );
-
-      case "DEM":
-        return (
-          `${COG_URL}` +
-          `/cog/tiles` +
-          `/{z}/{x}/{y}@1x?url=${TITILER_STATIC}` +
-          path +
-          `&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${settings.minp}%2C${settings.maxp}&colormap_name=${colorMap}`
-        );
-
-      default:
-        return (
-          `${COG_URL}` +
-          `/cog/tiles` +
-          `/{z}/{x}/{y}.png?url=${TITILER_STATIC}` +
-          path
-        );
-    }
-  };
-
   function handleClose(status: boolean) {
     togglePopup(status);
   }
 
-  //geojson to json
-  async function parseGeoJson(file: any) {
-    console.log(file);
-    const GeoJson: any = await fetch(file);
-    const data = await GeoJson.json();
-    const features = data.features;
-    return features;
-  }
-
   //-------------on layer check-------------------------------
 
-  useEffect(() => {
-    setScaleData(checkedKeys);
-    drawLayers(checkedKeys);
-    console.log(checkedKeys, allLayers);
-  }, [checkedKeys, allLayers]);
+  const calculateViewport = (bbox: BBox) => {
+    const [minLon, minLat, maxLon, maxLat] = bbox;
+    const mapContainer = document.getElementById("view-default-view");
 
-  useEffect(() => {
-    forceUpdateAllLayers();
-  }, [colorMap, selectedIndexes, showSelectedIndexes]);
+    if (mapContainer) {
+      const mapWidth = mapContainer.clientWidth; // Get the actual width of the map container
+      const mapHeight = mapContainer.clientHeight;
+      // Replace with the actual height of your map container
 
-  useEffect(() => {
-    if (threeDState === "Enabled") {
-      const al = { ...allLayers };
-      al[`1-${featureLayer}`].T3DTranspose = true;
-      setAllLayers(al);
-      forceUpdateLayers(featureLayer);
-    } else if (threeDState === "Disabled") {
-      const al = { ...allLayers };
-      al[`1-${featureLayer}`].T3DTranspose = false;
-      setAllLayers(al);
-      forceUpdateLayers(featureLayer);
-    }
-  }, [threeDState]);
-
-  // ++++++++++++++++++++++++++++++++++++ force updation of layers after creating or adding features +++++++++++++++++++++++++++++++++++++++++++
-  const forceUpdateLayers = (id: any) => {
-    const cv = [...checkedKeys];
-
-    if (cv.length == 0) {
-      cv.push("1" + "-" + id);
-    } else {
-      setCheckedKeys([]);
-      const idx = cv.findIndex((key) => key === "1" + "-" + id);
-
-      if (idx === -1) cv.push("1" + "-" + id);
-    }
-
-    setTimeout(() => {
-      setCheckedKeys(cv);
-    }, 0);
-  };
-
-  const forceUpdateAllLayers = () => {
-    const cv = [...checkedKeys];
-    setCheckedKeys([]);
-
-    setTimeout(() => {
-      setCheckedKeys(cv);
-    });
-  };
-
-  const setScaleData = (checkedKeys) => {
-    const demKeys = checkedKeys.filter((key) => allLayers[key]?.type === "DEM");
-    const demLayers: any = [];
-    demKeys.forEach((element) => {
-      let obj;
-      if (allLayers[element]) {
-        obj = {
-          ...allLayers[element],
-        };
-      }
-      demLayers.push(obj);
-    });
-    setScales(demLayers);
-    if (demLayers.length) {
-      setScaleVisible(true);
-    } else {
-      setScaleVisible(false);
-    }
-  };
-
-  const drawLayers = (checkedKeysValue: any) => {
-    console.log(checkedKeysValue);
-    const vlayers: any = [];
-    checkedKeysValue.forEach((element) => {
-      if (element.split("-")[0] === "2" && element !== "2") {
-        if (props.isBaseMap && !props.isMissionMap) {
-          const layer: any = allLayers[element];
-          layer?.layerPath.map((layerr: any) => {
-            const settings: any = {
-              minp: layerr[0].minp,
-              maxp: layerr[0].maxp,
-              resamplingMethod: layer.settings.resamplingMethod,
-              bidx: layer.settings.bidx,
-            };
-            // ---pushing tiler layers
-            vlayers.push(
-              new TileLayer({
-                id: `${element}-${uuid()}`,
-                // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-                data: getRasterURL(layer?.type, layerr[0].path, settings),
-
-                minZoom: 0,
-                maxZoom: 24,
-                tileSize: 256,
-                onDataLoad: () => {
-                  setLayerLoading(false);
-                },
-                renderSubLayers: (props) => {
-                  const {
-                    bbox: { west, south, east, north },
-                  } = props.tile;
-
-                  return new BitmapLayer(props, {
-                    data: null,
-                    image: props.data,
-                    bounds: [west, south, east, north],
-                  });
-                },
-              })
-            );
-          });
-        } else {
-          console.debug("RENDERING RASTER LAYERS!!!");
-          vlayers.push(
-            new TileLayer({
-              id: element,
-              // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-              data: getRasterURL(
-                allLayers[element]?.type,
-                allLayers[element]?.layerPath,
-                allLayers[element]?.settings
-              ),
-
-              minZoom: 0,
-              maxZoom: 24,
-              tileSize: 256,
-              onDataLoad: () => {
-                setLayerLoading(false);
-              },
-              renderSubLayers: (props) => {
-                const {
-                  bbox: { west, south, east, north },
-                } = props.tile;
-
-                return new BitmapLayer(props, {
-                  data: null,
-                  image: props.data,
-                  bounds: [west, south, east, north],
-                });
-              },
-            })
-          );
-        }
-      } else if (element.split("-")[0] === "1" && element !== "1") {
-        console.log("vector", allLayers[element]);
-        switch (allLayers[element]?.type) {
-          case "MultiLineString":
-            vlayers.push(
-              new GeoJsonLayer({
-                id: element,
-                data: STATIC_URL + allLayers[element]?.layerPath,
-                pickable: true,
-                extruded: false,
-                lineWidthUnits: "pixels",
-                lineWidthScale: 4,
-                lineWidthMinPixels: 2,
-                lineJoinRounded: true,
-                onDataLoad: () => {
-                  setLayerLoading(false);
-                },
-                getLineColor: (d, i) => {
-                  if (activeID === element.split("-")[1]) {
-                    if (selectedIndexes.includes(i.index)) {
-                      return hexToRGB2("#ffaa00", true);
-                    }
-                  }
-                  return hexToRGB2(d.properties.color, false);
-                },
-                onClick: (data, e) => {
-                  if (e.leftButton) {
-                    InfoWindow(
-                      data.coordinate,
-                      allLayers[element]?.name,
-                      "LineView",
-                      data.object,
-                      false,
-                      allLayers[element]?.id,
-                      data.object.properties.sys_id
-                    );
-                    setSelectedLayerLabel(
-                      allLayers[element]?.layerLabel
-                        ? allLayers[element]?.layerLabel
-                        : "No label selected"
-                    );
-                  } else {
-                    setSelectedLayerId(element.split("-")[1]);
-                    setColorChangeFeatureData(data);
-                    setShowColorChangeForm(true);
-                  }
-                },
-              })
-            );
-            break;
-          case "MultiPolygon":
-            vlayers.push(
-              new GeoJsonLayer({
-                id: element,
-                data: STATIC_URL + allLayers[element]?.layerPath,
-                pickable: true,
-                stroked: true,
-                filled: true,
-                extruded: allLayers[element]?.T3DTranspose,
-                lineWidthUnits: "pixels",
-                lineWidthScale: 4,
-                lineWidthMinPixels: 2,
-                lineJoinRounded: true,
-                onDataLoad: () => {
-                  setLayerLoading(false);
-                },
-                getFillColor: (d, i) => {
-                  if (allLayers[element]?.T3DTranspose) {
-                    if (activeID === element.split("-")[1]) {
-                      if (selectedIndexes.includes(i.index)) {
-                        return hexToRGB2("#ffaa00", true);
-                      }
-                    }
-                    return hexToRGB2(d.properties.color, false);
-                  } else {
-                    if (activeID === element.split("-")[1]) {
-                      if (selectedIndexes.includes(i.index)) {
-                        return hexToRGB("#ffaa00", true);
-                      }
-                    }
-                    return hexToRGB(d.properties.color, false);
-                  }
-                },
-                getLineColor: (d, i) => {
-                  if (allLayers[element]?.T3DTranspose) {
-                    if (activeID === element.split("-")[1]) {
-                      if (selectedIndexes.includes(i.index)) {
-                        return hexToRGB2("#ffaa00", true);
-                      }
-                    }
-                    return hexToRGB2(d.properties.color, false);
-                  } else {
-                    if (activeID === element.split("-")[1]) {
-                      if (selectedIndexes.includes(i.index)) {
-                        return hexToRGB2("#ffaa00", true);
-                      }
-                    }
-                    return hexToRGB2(d.properties.color, true);
-                  }
-                },
-                getElevation: (d) => {
-                  if (d.properties?.height) {
-                    return d.properties.height;
-                  }
-                },
-                onClick: (data, e) => {
-                  if (e.leftButton) {
-                    InfoWindow(
-                      data.coordinate,
-                      allLayers[element]?.name,
-                      "PolygonView",
-                      data.object,
-                      false,
-                      allLayers[element]?.id,
-                      data.object.properties.sys_id
-                    );
-                    setSelectedLayerLabel(
-                      allLayers[element]?.layerLabel
-                        ? allLayers[element]?.layerLabel
-                        : "No label selected"
-                    );
-                  } else {
-                    setSelectedLayerId(element.split("-")[1]);
-                    setColorChangeFeatureData(data);
-                    setShowColorChangeForm(true);
-                  }
-                },
-                extensions: [new DataFilterExtension({ filterSize: 1 })],
-                getFilterValue: (f, i) => {
-                  return showSelectedIndexes.length
-                    ? Number(f.properties[key])
-                    : null;
-                },
-                filterRange: showSelectedIndexes,
-              })
-            );
-            break;
-          case "Point":
-            vlayers.push(
-              new IconLayer({
-                id: element,
-                data: parseGeoJson(STATIC_URL + allLayers[element]?.layerPath),
-                pickable: true,
-                getIcon: (d) => {
-                  const iconSelector = (iconType) => {
-                    let icon = "";
-                    switch (iconType) {
-                      case "MarkerIcon":
-                        icon = MarkerIcon;
-                        break;
-                      case "TankIcon":
-                        icon = TankIcon;
-                        break;
-                      case "DotIcon":
-                        icon = DotIcon;
-                        break;
-                      case "ValveIcon":
-                        icon = ValveIcon;
-                        break;
-                    }
-                    return icon;
-                  };
-                  return {
-                    url: `${iconSelector(d.properties.icon)}`,
-                    width: 100,
-                    height: 129,
-                    anchorY: 125,
-                    mask: true,
-                  };
-                },
-                onDataLoad: () => {
-                  setLayerLoading(false);
-                },
-                sizeScale: 12,
-                getPosition: (d) => d.geometry.coordinates,
-                getSize: (d) => 5,
-                getColor: (d, i) => {
-                  if (activeID === element.split("-")[1]) {
-                    if (selectedIndexes.includes(i.index)) {
-                      return hexToRGB2("#ffaa00", true);
-                    }
-                  }
-                  return hexToRGB2(d.properties.color, false);
-                },
-                onClick: (data, e) => {
-                  if (e.leftButton) {
-                    InfoWindow(
-                      data.coordinate,
-                      allLayers[element]?.name,
-                      "PointView",
-                      data.object,
-                      false,
-                      allLayers[element]?.id,
-                      data.object.properties.sys_id
-                    );
-                    setSelectedLayerLabel(
-                      allLayers[element]?.layerLabel
-                        ? allLayers[element]?.layerLabel
-                        : "No label selected"
-                    );
-                  } else {
-                    setSelectedLayerId(element.split("-")[1]);
-                    setColorChangeFeatureData(data);
-                    setShowColorChangeForm(true);
-                  }
-                },
-              })
-            );
-            break;
-        }
-      }
-    });
-    setVisibleLayers(vlayers);
-  };
-
-  const [lastCount, setLastCount] = useState(0);
-
-  const sortLayersBySidebarOrdering = (checkedKeys, type) => {
-    if (!checkedKeys.length) return [];
-    const layerType = type === "raster" ? 1 : 0;
-    const ordering: any = [];
-
-    treeDataa[layerType].children.forEach((layer: any) => {
-      checkedKeys.forEach((key) => {
-        if (!layer.group) {
-          if (key === layer.key) {
-            ordering.push(key);
-            return;
-          }
-        } else {
-          layer.children.forEach((l) => {
-            if (key === l.key) {
-              ordering.push(key);
-              return;
-            }
-          });
-        }
+      // Calculate the new viewport using getViewState
+      const viewport = new WebMercatorViewport({
+        width: mapWidth,
+        height: mapHeight,
       });
-    });
 
-    return ordering.reverse();
+      // Get the new zoom and center to fit the layer on the screen
+      const { longitude, latitude, zoom } = viewport.fitBounds(
+        [
+          [minLon, minLat],
+          [maxLon, maxLat],
+        ],
+        {
+          padding: 10,
+          offset: [0, 0],
+        }
+      );
+
+      return {
+        longitude,
+        latitude,
+        zoom,
+      };
+    }
   };
-
-  const onCheck = (checkedKeysValue: any, e) => {
-    if (
-      checkedKeysValue.length > lastCount &&
-      checkedKeysValue[checkedKeysValue.length - 1].split("-")[0] === "1"
-    ) {
-      setLayerLoading(true);
+  const focusSelectedLayers = () => {
+    const boundingBoxes: BBox[] = [];
+    for (const layer of AllLayers) {
+      if (layer._isChecked && layer._metadata?.bounds) {
+        boundingBoxes.push(layer._metadata.bounds);
+      }
     }
+    if (boundingBoxes.length > 0) {
+      const finalBounds = mergeBoundingBoxes(boundingBoxes);
+      const { longitude, latitude, zoom } = calculateViewport(finalBounds);
+      setViewport({
+        longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+        latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
+        zoom,
+        pitch: 0,
+        minZoom: 0,
+        maxZoom: 22,
+        bearing: 0,
+        transitionDuration: 2000,
+        transitionInterpolator: new FlyToInterpolator(),
+      });
+    }
+  };
+  useEffect(() => {
+    focusSelectedLayers();
+  }, [AllLayers]);
 
-    if (checkedKeysValue.length) {
-      setActiveGroupButton(false);
+  const fetchLayerBounds = async (
+    type: string,
+    layerpath: string,
+  ) => {
+    let bounds: BBox;
+    if (type === "Vector") {
+      const response = await fetch(STATIC_URL + layerpath);
+      const data = await response.json();
+      let features = data.features;
+      bounds = turf.bbox(turf.featureCollection(features)) as BBox;
     } else {
-      setActiveGroupButton(true);
+      const metaDataURL = `${COG_URL}/cog/info?url=${TITILER_STATIC}${layerpath}`;
+      const response = await fetch(metaDataURL, {
+        method: "GET",
+      });
+      const metadata = await response.json();
+      bounds = [
+        metadata["bounds"][0],
+        metadata["bounds"][1],
+        metadata["bounds"][2],
+        metadata["bounds"][3],
+      ] as BBox;
+    }
+    return bounds;
+  };
+  const onCheck = async (checkedKeysValue: any[], e) => {
+    const layersWithBounds: Layer[] = [];
+
+    for (const layer of AllLayers) {
+      const _isChecked = checkedKeysValue.includes(layer._id);
+      if (_isChecked && !layer._metadata?.bounds) {
+        const bounds = await fetchLayerBounds(
+          layer.type,
+          layer.layerpath,
+          layer.flaggedFeatures
+        );
+        layersWithBounds.push({
+          ...layer,
+          _isChecked,
+          _metadata: {
+            ...layer._metadata,
+            bounds,
+          },
+        });
+      } else {
+        layersWithBounds.push({
+          ...layer,
+          _isChecked,
+        });
+      }
     }
 
-    const rasters = checkedKeysValue.filter((key) => key.split("-")[0] === "2");
-    const vectors = checkedKeysValue.filter((key) => key.split("-")[0] === "1");
-
-    const rasterOrdering: any = sortLayersBySidebarOrdering(rasters, "raster");
-    const vectorOrdering: any = sortLayersBySidebarOrdering(vectors, "vector");
-
-    setLastCount(checkedKeysValue.length);
-    setCheckedKeys([...rasterOrdering, ...vectorOrdering]);
+    SetAllLayers(layersWithBounds);
   };
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++ Start Drawing +++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -974,7 +526,7 @@ function PublicMap(props) {
     });
     console.log("togglePopup:", showPopup);
     togglePopup(false);
-    setShowForm(false);
+    // setShowForm(false);
   };
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -995,9 +547,15 @@ function PublicMap(props) {
   };
 
   useEffect(() => {
-    props.loading(true);
+    setLoading(true);
     getAllLayers();
   }, []);
+
+  useEffect(() => {
+    if (fuse.length !== AllLayers.length) {
+      getSearchIndexes();
+    }
+  }, [AllLayers]);
 
   //---------------Fetch all layers in mission----------------------------------------
 
@@ -1021,19 +579,13 @@ function PublicMap(props) {
           },
         });
       }
-      console.log("I am inside getAllLayers", result);
       if (result.data.status) {
-        const selectedLayerObject: ILayer = result.data.data.find(
-          (layer) => layer.name == selectedLayer
+        SetAllLayers(
+          result.data.data.map((layer) => ({
+            ...layer,
+            _isChecked: layer.name == selectedLayer,
+          }))
         );
-        if (selectedLayerObject) {
-          const key =
-            selectedLayerObject.type == "Vector"
-              ? `1-${selectedLayerObject._id}`
-              : `2-${selectedLayerObject._id}`;
-          console.log("Selecte layer is", key);
-          setCheckedKeys([key]);
-        }
         if (props.isMissionMap) {
           setViewport({
             latitude: result.data.centerPoints.lat,
@@ -1047,21 +599,17 @@ function PublicMap(props) {
             transitionInterpolator: new FlyToInterpolator(),
           });
         }
-        console.log("Base map result", result.data);
         setTenantName(result.data.data[0].tenantId.name);
-        setTotalLayers(0);
-        setlayerz(result.data.data);
-        segrigateLayers(result.data.data);
       } else {
         message.error(result.data.message);
       }
-    } catch (error) {
-      console.log(error);
-      setErrorState(error.response.status);
-      props.loading(false);
-      AxiosErrorHandler(error, props.logout);
+    } catch (err) {
+      console.log(err);
+      setErrorState(err.response.status);
+      setLoading(false);
+      AxiosErrorHandler(err, logout);
     } finally {
-      props.loading(false);
+      setLoading(false);
     }
   };
 
@@ -1112,7 +660,6 @@ function PublicMap(props) {
           layer: layer,
         };
 
-        break;
       case "vector":
         return {
           title: (
@@ -1235,57 +782,167 @@ function PublicMap(props) {
   };
 
   // ++++++++++++++++++++++++++++++++
+  const onRangeChange = (date, dateString) => {
+    const startDate = moment(
+      dateString[0] + " " + "00:00",
+      "DD-MM-YYYY HH:mm"
+    ).format();
+    const endDate = moment(
+      dateString[1] + " " + "23:59",
+      "DD-MM-YYYY HH:mm"
+    ).format();
+    setDateRange([startDate, endDate]);
+  };
+  const renderRangePicker = () => {
+    const disabledDate = (current) => {
+      return current && current > moment();
+    };
+    return (
+      <DatePicker.RangePicker
+        defaultValue={[moment(dateRange[0]), moment(dateRange[1])]}
+        disabledDate={disabledDate}
+        disabled={false}
+        format="DD-MM-YYYY"
+        onChange={onRangeChange}
+      />
+    );
+  };
 
-  const treeData = [
-    {
-      title: "Vector",
-      key: "1",
-      children: [],
-    },
-    {
-      title: "Raster",
-      key: "2",
-      children: [],
-    },
-  ];
+  const getTitleElement = (layer: ILayer) => {
+    return (
+      <Dropdown menu={{ items: [] }} trigger={["contextMenu"]}>
+        <Tooltip
+          mouseLeaveDelay={0.0}
+          mouseEnterDelay={0.0}
+          placement="bottom"
+          title={
+            <span>
+              {layer.name} &#8226;{" "}
+              {moment(layer.captureDate).format("DD/MM/YYYY")}
+            </span>
+          }
+        >
+          <Badge
+            style={{
+              backgroundColor: "#3b86ff",
+              boxShadow: "0 0 3px 1px black",
+              zIndex: 10,
+            }}
+            offset={[25, 6]}
+            count={<>{layer.isThreadExist ? layer.commentCount : ""}</>}
+            overflowCount={9}
+          >
+            <Text
+              style={{
+                width:
+                  layer.type === "Raster"
+                    ? layer.layerGroupId
+                      ? "139px"
+                      : "160px"
+                    : layer.layerGroupId
+                    ? "119px"
+                    : "140px",
+              }}
+              ellipsis={true}
+            >
+              {layer.name}
+            </Text>
+            {layer.type === "Vector" && layer.isFlagged && (
+              <FlagOutlined style={{ color: "#da1c5c" }} />
+            )}
+            {layer.type === "Vector" && layer.isPublic && (
+              <EyeOutlined style={{ color: "#3b86ff" }} />
+            )}
+          </Badge>
+        </Tooltip>
+      </Dropdown>
+    );
+  };
 
-  const [treeDataa, setTreeDataa] = useState<
-    | {
-        title: "Vector";
-        key: "1";
-        children: (ILayer & { type: "Vector" })[];
-      }
-    | {
-        title: "Raster";
-        key: "2";
-        children: (ILayer & { type: "Raster" })[];
-      }
-  >(treeData);
-  const [treeStructure, setTreeStructure] = useState(treeData);
-  const [allLayerGroups, setAllLayerGroups] = useState({});
+  const getGroupTitleElement = (layerGroup: Layer["layerGroupId"]) => {
+    return (
+      <Dropdown menu={{ items: [] }} trigger={["contextMenu"]}>
+        <Text style={{ width: "160px" }} ellipsis={true}>
+          {layerGroup.name}
+        </Text>
+      </Dropdown>
+    );
+  };
+
   //----------------------Segrigate layers-------------------------------------------------------
 
-  useEffect(() => {
-    refreshLayers();
-  }, [treeStructure, checkedKeys, panes]);
+  // const options: any = [
+  //   {
+  //     value: "raster",
+  //     title: "RASTER",
+  //     children: [],
+  //     selectable: false,
+  //   },
+  //   {
+  //     value: "vector",
+  //     title: "VECTOR",
+  //     selectable: false,
+  //     children: [
+  //       {
+  //         value: "MultiLineString",
+  //         title: "Line",
+  //         selectable: false,
+  //         children: [],
+  //       },
+  //       {
+  //         value: "MultiPolygon",
+  //         title: "Area",
+  //         children: [],
+  //         selectable: false,
+  //       },
+  //       {
+  //         value: "Point",
+  //         title: "Point",
+  //         children: [],
+  //         selectable: false,
+  //       },
+  //     ],
+  //   },
+  // ];
 
-  const refreshLayers = () => {
-    const td: any = [...treeStructure];
-    let newTreeDataVector: any = [];
-    let newTreeDataRaster: any = [];
+  // if (rasterProps) {
+  //   options.map((option) => {
+  //     if (option.value == "raster") {
+  //       rasterProps.map((rasterProp) => {
+  //         option.children.push({
+  //           value: "0-" + rasterProp._id + "-" + rasterProp.name,
+  //           title: rasterProp.name,
+  //         });
+  //       });
+  //     }
+  //   });
+  // }
 
-    const data: any = [
-      {
-        title: `${props.isMissionMap ? "Mission" : "City"} Vector`,
-        key: "1",
-        children: [],
-      },
-      {
-        title: `${props.isMissionMap ? "Mission" : "City"} Raster`,
-        key: "2",
-        children: [],
-      },
-    ];
+  // if (vectorProps) {
+  //   vectorProps.map((vectorProp) => {
+  //     if (vectorProp.type == "MultiLineString") {
+  //       options[1].children[0].children.push({
+  //         title: vectorProp.name,
+  //         value: "1-0-" + vectorProp._id + "-" + vectorProp.name,
+  //       });
+  //     }
+  //     if (vectorProp.type == "MultiPolygon") {
+  //       options[1].children[1].children.push({
+  //         title: vectorProp.name,
+  //         value: "1-1-" + vectorProp._id + "-" + vectorProp.name,
+  //       });
+  //     }
+  //     if (vectorProp.type == "Point") {
+  //       options[1].children[2].children.push({
+  //         title: vectorProp.name,
+  //         value: "1-2-" + vectorProp._id + "-" + vectorProp.name,
+  //       });
+  //     }
+  //   });
+  //   options[1].children[0].children.sort(sortAlphabetically);
+  //   options[1].children[1].children.sort(sortAlphabetically);
+  //   options[1].children[2].children.sort(sortAlphabetically);
+  // }
 
     newTreeDataVector = td[0].children.map((layer) => {
       if (layer.group) {
@@ -1323,7 +980,6 @@ function PublicMap(props) {
     data[1].children = [...newTreeDataRaster];
 
     setTreeDataa(data);
-  };
 
   const segrigateLayers = (layers: ILayer[]) => {
     let data = [...treeDataa];
@@ -1706,7 +1362,7 @@ function PublicMap(props) {
           editMode: null,
           isCompleted: true,
         });
-        setToolSelected("");
+        // setToolSelected("");
 
         InfoWindow(
           centerPoint,
@@ -1728,7 +1384,8 @@ function PublicMap(props) {
           InfoWindow(
             data.coordinate,
             "New Shape",
-            drawMode,
+            "",
+            // drawMode,
             data.object,
             true,
             "new",
@@ -1770,19 +1427,11 @@ function PublicMap(props) {
   useEffect(() => {
     panes.map((pane) => {
       if (pane.id === activeKey && pane.type === "vector") {
-        setActiveID(pane.id);
+        // setActiveID(pane.id);
       }
-      if (pane.id === activeKey) setActiveType(pane.type === "vector");
+      // if (pane.id === activeKey) setActiveType(pane.type === "vector");
     });
   }, [activeKey]);
-
-  //-----------------Date Formatting for Time Filter--------------------------
-  const dateFormat = () => {
-    const t = Number(time.split(" ")[0]);
-    const dt = new Date();
-    dt.setDate(dt.getDate() - t);
-    return moment(dt).format("DD MMM");
-  };
 
   //----------------SideBar state handeller function-----------------------------
   function sideBarHandeller() {
@@ -1796,188 +1445,38 @@ function PublicMap(props) {
   }
 
   // ANTD TREE DROP FUNCTION
-  const onDrop = async (info) => {
-    const dropKey = info.node.key;
-    const dragKey = info.dragNode.key;
-    const dropPos = info.node.pos.split("-");
-    const dropPosition =
-      info.dropPosition - Number(dropPos[dropPos.length - 1]);
+  // Is layer group changing allowed in public map ?
+  // const onDrop = (info) => {
+  //   try {
+  //     if (info.dragNode && !info.dragNode.group) {
+  //       // allow only individual layers to be dragged and dropped, not entire layer groups
+  //       const key = info.dragNode.key;
+  //       const layerId = info.dragNode._id;
+  //       const oldGroupId = info.dragNode.groupId;
+  //       const newGroupId = info.node.groupId;
 
-    try {
-      if (
-        info.dragNode.key.split("-")[0] !== "group" &&
-        !info.dragNode.groupId &&
-        info.node.key.split("-")[0] === "group" &&
-        !info.node.expanded
-      ) {
-      } else if (
-        info.dragNode.key.split("-")[0] !== "group" &&
-        info.dragNode.groupId &&
-        info.node.key.split("-")[0] === "group" &&
-        !info.node.expanded &&
-        info.node.groupId !== info.dragNode.groupId
-      ) {
-        const key = info.dragNode.key;
-        await removeLayerFromGroup(
-          info.dragNode.groupId,
-          info.dragNode.layer._id,
-          key
-        );
-      } else if (
-        info.dragNode.key.split("-")[0] === "group" &&
-        info.node.key.split("-")[0] === "group" &&
-        !info.node.expanded
-      ) {
-      } else if (
-        info.dragNode.key.split("-")[0] === "group" &&
-        info.node.key.split("-")[0] === "group" &&
-        info.node.expanded
-      ) {
-        return message.info("Please Collapse The Group Before Dropping");
-      } else if (info.dragNode.groupId === info.node.groupId) {
-        if (info.node.group) {
-          return;
-        }
-      } else if (
-        (info.dragNode.key.split("-")[0] === "group" && info.node.groupId) ||
-        (info.dragNode.key.split("-")[0] !== "group" &&
-          info.node.key.split("-")[0] === "group")
-      ) {
-        return;
-      } else if (
-        info.dragNode.key.split("-")[0] === "group" &&
-        !info.node.groupId &&
-        info.node.pos === "0-0-0"
-      ) {
-        return;
-      } else {
-        const groupid = info.node.groupId;
-        if (!groupid && !info.dragNode.group) {
-          if (info.node.pos === "0-0") return;
-          const key = info.dragNode.key;
-          await removeLayerFromGroup(
-            info.dragNode.groupId,
-            info.dragNode.layer._id,
-            key
-          );
-        } else if (info.dragNode.layer) {
-          const layerid = info.dragNode.layer._id;
-          const key = info.dragNode.key;
-          await changeGroupOfLayer(groupid, [layerid], [key]);
-        }
-      }
+  //       if (!newGroupId) {
+  //         if (info.node.pos === "0-0") return;
+  //         // the node under which it was dragged is not a layer group, so it must have been dragged under "Vector" or "Raster"
+  //         // this means it was actually ungrouped
+  //         await removeLayerFromGroup(oldGroupId, layerId);
+  //       } else {
+  //         // layer was moved under a new group
+  //         //console.log(layerid, newGroupId);
+  //         await changeGroupOfLayer(newGroupId, [layerId], [key]);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
-      const loop = (data, key, callback) => {
-        for (let i = 0; i < data.length; i++) {
-          if (data[i].key === key) {
-            return callback(data[i], i, data);
-          }
-          if (data[i].children) {
-            loop(data[i].children, key, callback);
-          }
-          if (data[i].group) {
-            loop(data[i].value.children, key, callback);
-          }
-        }
-      };
-
-      const data = [...treeStructure];
-
-      // Find dragObject
-      let dragObj;
-      loop(data, dragKey, (item, index, arr) => {
-        arr.splice(index, 1);
-        dragObj = item;
-      });
-
-      if (!info.dropToGap) {
-        // Drop on the content
-        loop(data, dropKey, (item) => {
-          item.children = item.children || [];
-          // where to insert
-          item.children.unshift(dragObj);
-        });
-      } else if (
-        (info.node.props.children || []).length > 0 && // Has children
-        info.node.props.expanded && // Is expanded
-        dropPosition === 1 // On the bottom gap
-      ) {
-        loop(data, dropKey, (item) => {
-          item.children = item.children || [];
-          item.children.unshift(dragObj);
-        });
-      } else {
-        let ar;
-        let i;
-        loop(data, dropKey, (item, index, arr) => {
-          ar = arr;
-          i = index;
-        });
-        if (dropPosition === -1) {
-          ar.splice(i, 0, dragObj);
-        } else {
-          ar.splice(i + 1, 0, dragObj);
-        }
-      }
-
-      const dropc = info.dragNode.checked;
-
-      if (dropc) {
-        const cv = [...checkedKeys];
-
-        const rasters: any = [];
-
-        data[1].children.forEach((node: any) => {
-          if (node.group) {
-            node.value.children.forEach((n) => {
-              if (cv.includes(n.key)) {
-                rasters.push(n.key);
-              }
-            });
-          } else {
-            if (cv.includes(node.key)) {
-              rasters.push(node.key);
-            }
-          }
-        });
-
-        const vectors: any = [];
-
-        data[0].children.forEach((node: any) => {
-          if (node.group) {
-            node.value.children.forEach((n) => {
-              if (cv.includes(n.key)) {
-                rasters.push(n.key);
-              }
-            });
-          } else {
-            if (cv.includes(node.key)) {
-              rasters.push(node.key);
-            }
-          }
-        });
-
-        vectors.reverse();
-        rasters.reverse();
-        setCheckedKeys([]);
-        setTimeout(() => {
-          setCheckedKeys([...rasters, ...vectors]);
-        }, 0);
-      }
-
-      setTreeStructure(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const [showDrawingTools, setShowDrawingTools] = useState(false);
-  const [toolCoordinates, settoolCoordinates] = useState([0, 0]);
+  // const [showDrawingTools, setShowDrawingTools] = useState(false);
+  // const [toolCoordinates, settoolCoordinates] = useState([0, 0]);
   const drawingMenuRef: any = useRef<HTMLElement>();
   //---------------Handle map modes-------------------------------
   function handleMapMode(value) {
     if (value === "osm") {
-      const currenViewPort: any = INITIAL_VIEW_STATE;
       setViewport({
         longitude: INITIAL_VIEW_STATE.longitude,
         latitude: INITIAL_VIEW_STATE.latitude,
@@ -1996,52 +1495,76 @@ function PublicMap(props) {
   // Handle Current Layer
 
   // Public map search
-  useEffect(() => {
-    if (searchValue) {
-      SetSearching(true);
-      http
-        .get<components["schemas"]["SearchPublicLayerResponse"]>(
-          `${apis.PUBLIC_SEARCH}`,
-          {
-            params: {
-              mapRef: id,
-              key: "PremisesNo",
-              value: searchValue,
-            },
-          }
-        )
-        .then((res: any) => {
-          if (res.data.status) {
-            console.log("search successful", res.data);
-            setSelectedIndexes([res.data.data[0].index]);
-            setActiveID(res.data.layerId);
-            const centerPoint = turf.centroid(res.data.data[0]);
-            setViewport({
-              longitude: centerPoint.geometry.coordinates[0],
-              latitude: centerPoint.geometry.coordinates[1],
-              zoom: 15,
-              pitch: 0,
-              minZoom: 0,
-              maxZoom: 22,
-              bearing: 0,
-              transitionDuration: 1000,
-              transitionInterpolator: new FlyToInterpolator(),
-            });
-          } else {
-            console.log("search failed", res.data);
-            message.warning("No match found!");
-          }
-        })
-        .catch((err: any) => {
-          console.log(err);
-          AxiosErrorHandler(err, props.logout);
-        })
-        .finally(() => SetSearching(false));
-    } else {
-      setSelectedIndexes([]);
-      setActiveID("");
+  // useEffect(() => {
+  //   if (searchValue) {
+  //     SetSearching(true);
+  //     http
+  //       .get<components["schemas"]["SearchPublicLayerResponse"]>(
+  //         `${apis.PUBLIC_SEARCH}`,
+  //         {
+  //           params: {
+  //             mapRef: id,
+  //             key: "PremisesNo",
+  //             value: searchValue,
+  //           },
+  //         }
+  //       )
+  //       .then((res: any) => {
+  //         if (res.data.status) {
+  //           console.log("search successful", res.data);
+  //           // setActiveID(res.data.layerId);
+  //           const centerPoint = turf.centroid(res.data.data[0]);
+  //           setViewport({
+  //             longitude: centerPoint.geometry.coordinates[0],
+  //             latitude: centerPoint.geometry.coordinates[1],
+  //             zoom: 15,
+  //             pitch: 0,
+  //             minZoom: 0,
+  //             maxZoom: 22,
+  //             bearing: 0,
+  //             transitionDuration: 1000,
+  //             transitionInterpolator: new FlyToInterpolator(),
+  //           });
+  //         } else {
+  //           console.log("search failed", res.data);
+  //           message.warning("No match found!");
+  //         }
+  //       })
+  //       .catch((err: any) => {
+  //         console.log(err);
+  //         AxiosErrorHandler(err, logout);
+  //       })
+  //       .finally(() => SetSearching(false));
+  //   } else {
+  //     // setActiveID("");
+  //   }
+  // }, [searchValue]);
+
+  const getSearchIndexes = async () => {
+    const searchIndexes: {
+      layerId: string;
+      searchIndex: Fuse<any>;
+    }[] = [];
+
+    for (const layer of AllLayers) {
+      const dataResponse = await fetch(STATIC_URL + layer.layerpath);
+      const data = (await dataResponse.json()) as GeoJson;
+      const searchIndexResponse = await fetch(
+        STATIC_URL + String(layer.metadata?.searchIndexPath)
+      );
+      const searchIndex = await searchIndexResponse.json();
+      searchIndexes.push({
+        layerId: layer._id,
+        searchIndex: new Fuse(
+          data.features,
+          { threshold: 0 },
+          Fuse.parseIndex<any>(searchIndex)
+        ),
+      });
     }
-  }, [searchValue]);
+
+    setFuse(searchIndexes);
+  };
 
   // MAP RENDER
   const renderMap = () => {
@@ -2071,34 +1594,45 @@ function PublicMap(props) {
             <DeckGL
               initialViewState={INITIAL_VIEW_STATE}
               controller={true}
-              layers={
-                isDrawing
-                  ? osmState
-                    ? [osm, visibleLayers, drawPolygonTool]
-                    : [visibleLayers, drawPolygonTool]
-                  : osmState
-                  ? [osm, visibleLayers]
-                  : [visibleLayers]
-              }
+              layers={(() => {
+                const layers: any[] = [];
+
+                // OSMState Layers
+                if (osmState) layers.push(osm);
+
+                // Drawing State Layers
+                if (isDrawing) {
+                  layers.push(drawPolygonTool);
+                } else {
+                  // layers.push(maskLayer);
+                }
+
+                // Tree Menu Layers
+                layers.push(
+                  useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers])
+                );
+
+                return layers;
+              })()}
               style={{ height: "100vh", width: "100%" }}
               onClick={(info, event) => {
-                setShowDrawingTools(false);
+                // setShowDrawingTools(false);
                 if (event.rightButton) {
                   if (!info.layer) {
                     setMode({
                       mode: ViewMode,
                     });
-                    setToolSelected("");
-                    setShowDrawingTools(false);
-                    settoolCoordinates([
-                      event.offsetCenter.x,
-                      event.offsetCenter.y - 50,
-                    ]);
-                    setShowDrawingTools(true);
+                    // setToolSelected("");
+                    // setShowDrawingTools(false);
+                    // settoolCoordinates([
+                    //   event.offsetCenter.x,
+                    //   event.offsetCenter.y - 50,
+                    // ]);
+                    // setShowDrawingTools(true);
                     drawingMenuRef.current.click();
                   }
                 } else {
-                  setShowDrawingTools(false);
+                  // setShowDrawingTools(false);
                 }
               }}
             >
@@ -2135,16 +1669,17 @@ function PublicMap(props) {
                             token={MAPBOX_API_KEY}
                             feature={featureData}
                             featureIndex={sysId}
-                            setformDrawerVisible={setformDrawerVisible}
-                            setImagesDrawer={setViewImages}
+                            setformDrawerVisible={(arg: boolean) => {}}
+                            setImagesDrawer={(arg: boolean) => {}}
                             show={saveButtonShow}
-                            setShowForm={setShowForm}
+                            setShowForm={(arg: boolean) => {}}
                             cancelDrawing={cancelDrawing}
                             togglePopup={togglePopup}
                             layerId={featureLayer}
                             canDraw={null}
                             isPublic={true}
-                            isBaseMap={props.isBaseMaps}
+                            isBaseMap={false}
+                            AllLayers={AllLayers}
                           />
                         </>
                       }
@@ -2201,10 +1736,42 @@ function PublicMap(props) {
                       right: "8px",
                       top: "8px",
                     }}
-                    loading={searching}
                     onSearch={(e) => {
-                      console.log(e);
-                      setSearchValue(e);
+                      const searchValue = e;
+                      for (const f of fuse) {
+                        const searchResult =
+                          f.searchIndex.search(searchValue)[0];
+                        if (searchResult) {
+                          // check the layer sothat feature is visible on map
+                          SetAllLayers((prev) =>
+                            prev.map((layer) => {
+                              if (layer._id === f.layerId)
+                                layer._isChecked = true;
+                              return layer;
+                            })
+                          );
+                          // bring the feature to focus
+                          const bounds = turf.bbox(
+                            turf.featureCollection([searchResult.item])
+                          ) as BBox;
+                          const { longitude, latitude, zoom } =
+                            calculateViewport(bounds);
+                          setViewport({
+                            longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+                            latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
+                            zoom,
+                            pitch: 0,
+                            minZoom: 0,
+                            maxZoom: 22,
+                            bearing: 0,
+                            transitionDuration: 2000,
+                            transitionInterpolator: new FlyToInterpolator(),
+                          });
+                          message.success("Feature found!");
+                          return;
+                        }
+                      }
+                      message.warn("No match found!");
                     }}
                   />
                 </Col>
@@ -2315,15 +1882,28 @@ function PublicMap(props) {
                     expandedKeys={expandedKeys}
                     autoExpandParent={autoExpandParent}
                     onCheck={onCheck}
-                    checkedKeys={checkedKeys}
+                    checkedKeys={(() => {
+                      const checked = AllLayers.filter(
+                        (layer) => layer._isChecked
+                      ).map((layer) => layer._id);
+                      return checked;
+                    })()}
                     onSelect={onSelect}
                     selectedKeys={selectedKeys}
-                    treeData={treeDataa}
-                    onDrop={onDrop}
-                    draggable={(node: any) => {
-                      if (node.key === "1" || node.key === "2") return false;
-                      return true;
-                    }}
+                    treeData={ILayersToTree(
+                      AllLayers,
+                      getTitleElement,
+                      getGroupTitleElement,
+                      renderRangePicker,
+                      sortType,
+                      isAscending
+                    )}
+                    // onDrop={onDrop}
+                    // draggable={(node: any) => {
+                    //   if (node.key === "1" || node.key === "2") return false;
+                    //   return true;
+                    // }}
+                    draggable={false}
                     blockNode
                   />
                 </div>
@@ -2350,15 +1930,4 @@ function PublicMap(props) {
   return <>{renderMap()}</>;
 }
 
-const mapStateToProps = (state) => {
-  //Review
-  // return {
-  //   userType: state.Auth.userdetails.userType,
-  //   userDetails: state.Auth.userdetails,
-  // };
-};
-
-export default connect(mapStateToProps, {
-  loading,
-  logout,
-})(PublicMap);
+export default PublicMap;

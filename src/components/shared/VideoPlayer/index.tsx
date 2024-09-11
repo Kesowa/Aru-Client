@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import ReactPlayer from "react-player";
 import "./index.less";
 import "./hud.less";
@@ -54,8 +54,6 @@ import connectSocket from "../../../services/socketConnect";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
-import { connect } from "react-redux";
 import * as turf from "@turf/turf";
 import { API_URL, LIVE_URL, STATIC_URL } from "src/constants";
 import { FlightPath } from "src/types/FlightPath";
@@ -72,6 +70,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { io } from "socket.io-client";
+import { AuthContext } from "src/services/authUtils";
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -145,6 +144,8 @@ const b64toBlob = (b64Data, contentType) => {
 };
 
 function VideoPlayer(props: any) {
+  console.log("oooo", props);
+  const { Auth, logout } = useContext(AuthContext);
   const [isAiTaskCompleted, setIsAiTaskCompleted] = useState(false);
   const [aiTaskData, setAiTaskData] = useState({ Keys: [], Values: [] });
   const [aiGraphData, setAiGraphData] = useState({});
@@ -465,20 +466,20 @@ function VideoPlayer(props: any) {
         fetchAITasks();
       } else {
         if (
-          props.UserDetails.userType === "tenant-root" ||
-          props.UserDetails.userType === "tenant-staff"
+          Auth.userdetails.userType === "tenant-root" ||
+          Auth.userdetails.userType === "tenant-staff"
         ) {
-          if (props.UserDetails.tenantId._id) {
+          if (Auth.userdetails.tenantId._id) {
             console.log("tenantID>_id");
-            socketFetchTaskStatus(props.UserDetails.tenantId._id);
-          } else if (props.UserDetails.tenantId) {
+            socketFetchTaskStatus(Auth.userdetails.tenantId._id);
+          } else if (Auth.userdetails.tenantId) {
             console.log("tenantID");
-            socketFetchTaskStatus(props.UserDetails.tenantId);
+            socketFetchTaskStatus(Auth.userdetails.tenantId);
           }
         }
       }
     }
-  }, [props.UserDetails, props.mission, isAiTaskCompleted, aiTask]);
+  }, [Auth.userdetails, props.mission, isAiTaskCompleted, aiTask]);
   useEffect(() => {
     if (aiTask) {
       generateGraphData(aiTask);
@@ -695,7 +696,7 @@ function VideoPlayer(props: any) {
             console.log(err.response);
           }
         } else console.log(err);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => setLoader(false));
   };
@@ -2269,10 +2270,4 @@ function VideoPlayer(props: any) {
   );
 }
 
-const mapStateToProps = (state: any) => ({
-  Auth: state.Auth,
-  Theme: state.Theme,
-  UserDetails: state.Auth.userdetails,
-});
-
-export default connect(mapStateToProps, { logout })(VideoPlayer);
+export default VideoPlayer;

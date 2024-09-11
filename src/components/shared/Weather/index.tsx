@@ -6,13 +6,12 @@ import { Row, Col, Spin, Typography } from "antd";
 import "./index.less";
 import convertDegreeToDirection from "../../../services/convertDegreeToDirection";
 
-import { connect } from "react-redux";
-import { setWeather } from "../../../actions/missionCreation";
+import { OPENWEATHER_API_KEY } from "src/constants";
+import { OpenWeather } from "src/types/openweathermap";
 
 const { Title, Text } = Typography;
 
 function Weather(props) {
-  const apiKey = "005654b6079a36f1533c4e910e478b50";
   const [weatherData, setWeatherData] = useState<any>("");
   const [data, setData] = useState<any>("");
   const [oneCallResData, setOneCallResData] = useState<any>("");
@@ -23,46 +22,38 @@ function Weather(props) {
 
   useEffect(() => {
     fetch(
-      `https://api.openweathermap.org/data/2.5/onecall?lat=${props.location.lat}&lon=${props.location.lng}&appid=${apiKey}`
+      `https://api.openweathermap.org/data/2.5/weather?lat=${props.location.lat}&lon=${props.location.lng}&appid=${OPENWEATHER_API_KEY}`
     )
       .then((res) => res.json())
-      .then((res) => {
+      .then((res: OpenWeather) => {
         console.log(res);
         setOneCallResData(res);
-        const forecastData: any = [];
-        res.daily.map((i) => {
-          const obj = {
-            description: capitalize(i.weather[0].description),
-            temperature: (Number(i.temp.day) - 273.16).toFixed(2),
-            icon: i.weather[0].icon,
-            sunset: findSunset(i.sunset),
-            windSpeed: i.wind_speed,
-            windDirection: convertDegreeToDirection(i.wind_deg),
-            windGust: i.wind_gust,
-            humidity: i.humidity,
-          };
-          forecastData.push(obj);
-        });
-        setData(forecastData);
+        const obj = {
+          description: capitalize(res.weather[0].description),
+          temperature: (Number(res.main.temp) - 273.16).toFixed(2),
+          icon: res.weather[0].icon,
+          sunset: findSunset(res.sys.sunset),
+          windSpeed: res.wind.speed,
+          windDirection: convertDegreeToDirection(res.wind.deg),
+          windGust: res.wind.speed,
+          humidity: res.main.humidity,
+        };
+        setData(obj);
         setWeatherData({
-          ...forecastData[0],
-          visibility: res.current.visibility / 1000,
+          ...obj,
+          visibility: res.visibility / 1000,
         });
         setCurrentData({
-          ...forecastData[0],
-          visibility: res.current.visibility / 1000,
+          ...obj,
+          visibility: res.visibility / 1000,
         });
       })
       .catch((err) => console.log(err));
   }, [props.location]);
 
-  useEffect(() => {
-    props.setWeather(weatherData);
-  }, [weatherData]);
-
   function fetchHistoricalData(time) {
     fetch(
-      `https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${props.location.lat}&lon=${props.location.lng}&dt=${time}&appid=${apiKey}`
+      `https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${props.location.lat}&lon=${props.location.lng}&dt=${time}&appid=${OPENWEATHER_API_KEY}`
     )
       .then((res) => res.json())
       .then((res) => {
@@ -452,13 +443,61 @@ function Weather(props) {
     </div>
   );
 
+  // ========== SIMILAR APPROACH USING API.TOMORROW.IO INSTEAD OF OPENWEATHERMAP (NOT USED CURRENTLY) ==========
+
+  // interface WeatherData {
+  //   humidity: number;
+  //   temperature: number;
+  //   visibility: number;
+  //   weatherCode: string;
+  //   windDirection: string;
+  //   windGust: number;
+  //   windSpeed: number;
+  // }
+
+  // const fetchWeatherData = (isoDate: string) => {
+  //   let endTime = JSON.stringify(
+  //     parseInt(isoDate.split("T")[1].split(":")[0]) + 1
+  //   );
+  //   endTime =
+  //     isoDate.split("T")[0] +
+  //     "T" +
+  //     ("0" + endTime).slice(-2) +
+  //     ":" +
+  //     isoDate.split("T")[1].split(":")[1] +
+  //     ":" +
+  //     isoDate.split("T")[1].split(":")[2];
+  //   axios
+  //     .get(
+  //       `https://api.tomorrow.io/v4/timelines?fields=temperature&fields=humidity&fields=windSpeed&fields=windDirection&fields=windGust&fields=visibility&fields=weatherCode&units=metric&apikey=cwzgSdpHOiiFQt8y8I9d2SUpAPQG7X7U&location=${location.lat},${location.lng}&startTime=${isoDate}&endTime=${endTime}`
+  //     )
+  //     .then((result) => {
+  //       const data = result.data.data.timelines[0].intervals[0].values;
+  //       const wData: WeatherData = {
+  //         humidity: data.humidity,
+  //         temperature: data.temperature,
+  //         visibility: data.visibility,
+  //         weatherCode: Codes[data.weatherCode],
+  //         windDirection: convertDegreeToDirection(data.windDirection),
+  //         windGust: data.windGust,
+  //         windSpeed: data.windSpeed,
+  //       };
+  //       setWeatherData(wData);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err.message);
+  //     });
+  // };
+
+  // useEffect(() => {
+  //   if (props.location) {
+  //     fetchWeatherData(props.isoDate);
+  //   }
+  // }, [props.isoDate,props.location]);
+
+  // ========== X ==========
+
   return <> {props.type == "live" ? liveBox : weatherBox}</>;
 }
 
-const mapStateToProps = (state: any) => ({
-  weather: state.MissionCreation.weather,
-});
-
-export default connect(mapStateToProps, {
-  setWeather,
-})(Weather);
+export default Weather;

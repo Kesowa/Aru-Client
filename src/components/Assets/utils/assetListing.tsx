@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import { connect } from "react-redux";
 import {
   Typography,
   Button,
@@ -24,8 +23,7 @@ import moment from "moment";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { logout } from "../../../actions/authAction";
-import { setAssetsToState, deleteAsset } from "../../../actions/assetAction";
+import { AuthContext } from "src/services/authUtils";
 
 const { Title } = Typography;
 
@@ -47,13 +45,6 @@ interface Asset {
 
 interface TableProps {
   filter: string;
-  userType: string;
-  tenantId: string;
-  userId: string;
-  logout: () => void;
-  setAssetsToState: (assets: Asset[]) => void;
-  deleteAsset: (id: string) => void;
-  assets: Asset[];
 }
 
 function AssetListing(props: TableProps) {
@@ -63,6 +54,8 @@ function AssetListing(props: TableProps) {
   const [assetTableData, setAssetTableData] = useState<Asset[]>([]);
 
   const history = useHistory();
+
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     fetchAssets();
@@ -75,7 +68,7 @@ function AssetListing(props: TableProps) {
       .get(`${apis.GET_ALL_ASSETS}`)
       .then((result) => {
         if (result.data.status) {
-          props.setAssetsToState(result.data.data.gotDoc);
+          setAssetTableData(result.data.data.gotDoc);
         } else {
           message.error(
             "Unable to fetch assets. API response: " + result.data.message
@@ -84,29 +77,16 @@ function AssetListing(props: TableProps) {
       })
       .catch((err) => {
         if (err.response.status === 404) {
-          props.setAssetsToState([]);
+          setAssetTableData([]);
         } else {
           message.error("Unable to fetch assets. Error info: " + err);
-          AxiosErrorHandler(err, props.logout);
+          AxiosErrorHandler(err, logout);
         }
       })
       .finally(() => {
         setIsTableLoading(false);
       });
   };
-
-  useEffect(() => {
-    if (props.assets.length) {
-      if (props.filter === "all") {
-        setAssetTableData(props.assets);
-      } else {
-        const data = props.assets.filter((row) => {
-          return row.isActive === props.filter;
-        });
-        setAssetTableData(data);
-      }
-    }
-  }, [props.assets, props.filter]);
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++ Delete Assets +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -122,7 +102,6 @@ function AssetListing(props: TableProps) {
             (asset: Asset) => asset._id !== id
           );
           setAssetTableData(newTableData);
-          props.deleteAsset(id);
           message.success(`Asset "${name}" deleted`);
         } else {
           message.error(result.data.message);
@@ -130,7 +109,7 @@ function AssetListing(props: TableProps) {
       })
       .catch((err) => {
         message.error(err.message);
-        AxiosErrorHandler(err, props.logout);
+        AxiosErrorHandler(err, logout);
       })
       .finally(() => {
         setIsTableLoading(false);
@@ -348,7 +327,13 @@ function AssetListing(props: TableProps) {
     <div>
       <Table
         columns={columns}
-        dataSource={assetTableData}
+        dataSource={
+          (props.filter === "all") ?
+          assetTableData :
+          assetTableData.filter((row) => {
+            return row.isActive === props.filter;
+          })
+        }
         rowKey="_id"
         style={{ cursor: "pointer" }}
         loading={isTableLoading}
@@ -357,17 +342,4 @@ function AssetListing(props: TableProps) {
   );
 }
 
-const mapStateToProps = (state: any) => {
-  return {
-    userType: state.Auth.userdetails.userType,
-    tenantId: state.Auth.userdetails.tenantId._id,
-    userId: state.Auth.userdetails._id,
-    assets: state.Assets.assets,
-  };
-};
-
-export default connect(mapStateToProps, {
-  logout,
-  setAssetsToState,
-  deleteAsset,
-})(AssetListing);
+export default AssetListing;
