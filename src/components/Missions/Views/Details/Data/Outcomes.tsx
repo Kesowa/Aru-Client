@@ -667,7 +667,7 @@ function Outcomes(props) {
     } else
       return {
         status: false,
-        address: props.missionDetails.location,
+        address: "Address not found",
       };
   }
 

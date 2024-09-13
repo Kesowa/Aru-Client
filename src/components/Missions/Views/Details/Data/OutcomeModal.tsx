@@ -19,6 +19,7 @@ import {
 import moment from "moment";
 import * as htmlToImage from "html-to-image";
 import "./data.less";
+import "./../../Live/index.less";
 import { STATIC_URL } from "src/constants";
 
 const { Text, Title } = Typography;

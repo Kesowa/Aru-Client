@@ -23,6 +23,8 @@ import moment from "moment";
 import { API_URL, STATIC_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
 
+import "../Missions/Views/Live/index.less";
+
 const { Text, Title } = Typography;
 
 function Socket() {
@@ -114,19 +116,17 @@ function Socket() {
                       {geoCode}
                     </Title>
                   </Row>
-                  {coor.lat === 0 ? (
-                    <></>
-                  ) : (
+                  {
+                    !(coor.lat === 0 && coor.long === 0) &&
                     <Row>
                       <Text className="p-coord">
                         {coor.lat}, {coor.long}
                       </Text>
                     </Row>
-                  )}
+                  }
                 </div>
-                {coor.lat === 0 ? (
-                  <></>
-                ) : (
+                {
+                  !(coor.lat === 0 && coor.long === 0) &&
                   <div className="static-map-div">
                     <a
                       href={`https://www.google.com/maps/?q=${coor.lat},${coor.long}`}
@@ -139,7 +139,7 @@ function Socket() {
                       />
                     </a>
                   </div>
-                )}
+                }
               </div>
             </Col>
             <Col span={7}>
@@ -178,9 +178,8 @@ function Socket() {
                   />
                 </Tooltip>
                 &nbsp;&nbsp;
-                {coor.lat === 0 ? (
-                  <></>
-                ) : (
+                {
+                  !(coor.lat === 0 && coor.long === 0) &&
                   <Tooltip placement="bottom" title="Google map link">
                     <Button
                       type="default"
@@ -197,7 +196,7 @@ function Socket() {
                       Copy Link
                     </Button>
                   </Tooltip>
-                )}
+                }
               </Row>
               <div className="outcome-specific-view-info">
                 <Row>
@@ -218,9 +217,8 @@ function Socket() {
                 <Row>
                   <Text strong>{geoCode}</Text>
                 </Row>
-                {coor.lat === 0 ? (
-                  <></>
-                ) : (
+                {
+                  !(coor.lat === 0 && coor.long === 0) &&
                   <>
                     <Row style={{ marginTop: 8 }}>
                       <Text type="secondary">Coordinates</Text>
@@ -231,7 +229,7 @@ function Socket() {
                       </Text>
                     </Row>
                   </>
-                )}
+                }
                 <div className="outcome-specific-view-created-by">
                   <Row>
                     <Text type="secondary">Snapshot Captured by</Text>

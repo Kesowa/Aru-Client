@@ -36,6 +36,7 @@ import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import moment from "moment";
 import * as htmlToImage from "html-to-image";
 import "./data.less";
+import "../../../Missions/Views/Live/index.less";
 import { STATIC_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
 
@@ -205,24 +206,30 @@ function Outcomes(outcomeProps) {
                       {geoCode}
                     </Title>
                   </Row>
-                  <Row>
-                    <Text className="p-coord">
-                      {coor.lat}, {coor.long}
-                    </Text>
-                  </Row>
+                  {
+                    !(coor.lat === 0 && coor.long === 0) &&
+                    <Row>
+                      <Text className="p-coord">
+                        {coor.lat}, {coor.long}
+                      </Text>
+                    </Row>
+                  }
                 </div>
-                <div className="static-map-div">
-                  <a
-                    href={`https://www.google.com/maps/?q=${coor.lat},${coor.long}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <img
-                      className="static-map"
-                      src={`https://maps.googleapis.com/maps/api/staticmap?center=${coor.lat},${coor.long}&zoom=16&size=200x130&markers=size:mid|color:red|${coor.lat},${coor.long}&maptype=roadmap&key=AIzaSyCYWROYTFQ3XH4bhhLJnmJSV-0k9a-PHY8`}
-                    />
-                  </a>
-                </div>
+                {
+                  !(coor.lat === 0 && coor.long === 0) &&
+                  <div className="static-map-div">
+                    <a
+                      href={`https://www.google.com/maps/?q=${coor.lat},${coor.long}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <img
+                        className="static-map"
+                        src={`https://maps.googleapis.com/maps/api/staticmap?center=${coor.lat},${coor.long}&zoom=16&size=200x130&markers=size:mid|color:red|${coor.lat},${coor.long}&maptype=roadmap&key=AIzaSyCYWROYTFQ3XH4bhhLJnmJSV-0k9a-PHY8`}
+                      />
+                    </a>
+                  </div>
+                }
               </div>
             </Col>
             <Col span={7}>
@@ -261,22 +268,25 @@ function Outcomes(outcomeProps) {
                   />
                 </Tooltip>
                 &nbsp;&nbsp;
-                <Tooltip placement="bottom" title="Google map link">
-                  <Button
-                    type="default"
-                    onClick={() =>
-                      openNotification(
-                        `https://www.google.com/maps/?q=${coor.lat},${coor.long}`,
-                        "bottomRight"
-                      )
-                    }
-                    shape="round"
-                    icon={<GoogleOutlined />}
-                    size="large"
-                  >
-                    Copy Link
-                  </Button>
-                </Tooltip>
+                {
+                  !(coor.lat === 0 && coor.long === 0) &&
+                  <Tooltip placement="bottom" title="Google map link">
+                    <Button
+                      type="default"
+                      onClick={() =>
+                        openNotification(
+                          `https://www.google.com/maps/?q=${coor.lat},${coor.long}`,
+                          "bottomRight"
+                        )
+                      }
+                      shape="round"
+                      icon={<GoogleOutlined />}
+                      size="large"
+                    >
+                      Copy Link
+                    </Button>
+                  </Tooltip>
+                }
               </Row>
               <div className="outcome-specific-view-info">
                 <Row>
@@ -297,14 +307,19 @@ function Outcomes(outcomeProps) {
                 <Row>
                   <Text strong>{geoCode}</Text>
                 </Row>
-                <Row style={{ marginTop: 8 }}>
-                  <Text type="secondary">Coordinates</Text>
-                </Row>
-                <Row>
-                  <Text keyboard copyable>
-                    {`${coor.lat}, ${coor.long}`}
-                  </Text>
-                </Row>
+                {
+                  !(coor.lat === 0 && coor.long === 0) &&
+                  <>
+                    <Row style={{ marginTop: 8 }}>
+                      <Text type="secondary">Coordinates</Text>
+                    </Row>
+                    <Row>
+                      <Text keyboard copyable>
+                        {`${coor.lat}, ${coor.long}`}
+                      </Text>
+                    </Row>
+                  </>
+                }
                 <div className="outcome-specific-view-created-by">
                   <Row>
                     <Text type="secondary">Snapshot Captured by</Text>
