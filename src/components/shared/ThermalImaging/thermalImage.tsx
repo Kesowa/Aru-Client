@@ -26,7 +26,10 @@ const ThermalImage = (props: {
     const x = Math.floor(event.clientX - rect.left);
     const y = Math.floor(event.clientY - rect.top);
     const pixel = ctx.getImageData(x, y, 1, 1).data;
-    const color = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
+    let color = "#";
+    for (let i = 0; i < 3; i++) {
+      color += pixel[i].toString(16).padStart(2, "0");
+    }
     const pixelData = {
       x: x,
       y: y,
