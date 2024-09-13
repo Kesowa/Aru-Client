@@ -22,6 +22,8 @@ import { InboxOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
 import { vectorProps } from "src/static/vectorprops";
 import { options } from "../propUtils";
+import { DocModel, uploadFile } from "src/services/fileUpload";
+
 import { AuthContext } from "src/services/authUtils";
 
 const { Dragger } = Upload;
@@ -96,7 +98,7 @@ const CreateLayer = (props: any) => {
     }
   }
 
-  function handleUploadFiles() {
+  async function handleUploadFiles() {
     if (fileList.length > 0) {
       if (!layerName || !layerType) {
         message.error("Please fill all the required fields!");
@@ -104,45 +106,57 @@ const CreateLayer = (props: any) => {
         return;
       }
       setIsUploading(true);
-      const fData = new FormData();
-      if (props.isBaseMap) {
-        //fData.append("missionId", null);
-      } else {
-        fData.append("missionId", props.missionId);
-      }
-      fData.append("name", layerName);
-      fData.append("color", layerColor);
-      fData.append("vectorType", String(layerType));
-      fileList.forEach((file) => {
-        if (validateFile(file)) {
-          fData.append("file", file.originFileObj);
-        } else {
-          message.warning("Please upload a jpeg/jpg or png file!");
-          setIsUploading(false);
-          form.resetFields();
-          return;
-        }
-      });
 
-      if (layerTYpe === vectorProps.OVER_HEAD_TANK) {
-        featureData.features[0].properties["icon"] = "TankIcon";
-      } else {
-        featureData.features[0].properties["icon"] = "MarkerIcon";
-      }
+      // const config:AxiosRequestConfig = {
+      //   onUploadProgress: (event) => {
+      //     const percent = Math.floor((event.loaded / event.total) * 100);
+      //     setProgress(percent);
+      //     if (percent === 100) {
+      //       setTimeout(() => setProgress(0), 1000);
+      //     }
+      //   },
+      // };
 
-      const config = {
-        headers: { "content-type": "multipart/form-data" },
-        onUploadProgress: (event) => {
-          const percent = Math.floor((event.loaded / event.total) * 100);
-          setProgress(percent);
-          if (percent === 100) {
-            setTimeout(() => setProgress(0), 1000);
-          }
-        },
-      };
+      const uploadTokenPromises = fileList.map((file) =>
+      uploadFile(file.originFileObj, DocModel.LAYER_FILES, (prog) =>
+        console.info("PROGRESS: " + prog)
+      )
+    );
+      const uploadTokens = await Promise.all(uploadTokenPromises);
+
+      const body = {
+        file: uploadTokens,
+        ...(props.isBaseMap ? {}:{ missionId: props.missionId }),
+        name: layerName,
+        color: layerColor,
+        vectorType: String(layerType),
+      }
+      setIsUploading(false);
+
+      // const fData = new FormData();
+
+      // if (props.isBaseMap) {
+      //   //fData.append("missionId", null);
+      // } else {
+      //   fData.append("missionId", props.missionId);
+      // }
+      // fData.append("name", layerName);
+      // fData.append("color", layerColor);
+      // fData.append("vectorType", String(layerType));
+      // fileList.forEach((file) => {
+      //   if (validateFile(file)) {
+      //     fData.append("file", file.originFileObj);
+      //   } else {
+      //     message.warning("Please upload a jpeg/jpg or png file!");
+      //     setIsUploading(false);
+      //     form.resetFields();
+      //     return;
+      //   }
+      // });
+      console.log("create layer data :",body);
 
       http
-        .post(`${apis.CREATE_LAYER_FROM_IMAGES}`, fData, config)
+        .post(`${apis.CREATE_LAYER_FROM_IMAGES}`, body)
         .then((res) => {
           console.log(res);
           if (res.data.status) {

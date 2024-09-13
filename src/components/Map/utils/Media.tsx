@@ -43,6 +43,7 @@ import moment from "moment";
 import { PUBLIC_URL, STATIC_URL } from "src/constants";
 import VideoPlayer from "src/components/shared/VideoPlayer";
 import { BsFlagFill } from "react-icons/bs";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 import { AuthContext } from "src/services/authUtils";
 import { ThreadContext } from "src/services/threadUtils";
 
@@ -386,7 +387,7 @@ function Media(props) {
     name: "file",
     multiple: true,
     action: `${apis.UPLOAD_FILE_TO_FEATURE}`,
-    customRequest: (options: any) => {
+    customRequest: async (options: any) => {
       if (props.layerLabel === "No label selected") {
         message.warning(
           "Please select a layer label before uploading to a node!"
@@ -394,22 +395,31 @@ function Media(props) {
         options.onError("File not Supported!");
       } else {
         if (validateFile(options.file)) {
-          const fData = new FormData();
-          fData.append("file", options.file);
-          fData.append("layerId", props.layerId);
-          fData.append("sys_Id", props.featureIndex);
-          fData.append("centerPoints[lat]", props.coordinates[1]);
-          fData.append("centerPoints[lng]", props.coordinates[0]);
-          fData.append("type", options.file.type);
-          fData.append(
-            "featureLabel",
-            props.feature.properties[props.layerLabel]
-          );
+          const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+
+          const body = {
+            file: uploadToken,
+            layerId: props.layerId,
+            sys_Id: props.featureIndex,
+            centerPointsLat: props.coordinates[1],
+            centerPointsLng: props.coordinates[0],
+            type: options.file.type,
+            featureLabel:props.feature.properties[props.layerLabel],
+          };
+
+          // const fData = new FormData();
+          // fData.append("file", options.file);
+          // fData.append("layerId", props.layerId);
+          // fData.append("sys_Id", props.featureIndex);
+          // fData.append("centerPoints[lat]", props.coordinates[1]);
+          // fData.append("centerPoints[lng]", props.coordinates[0]);
+          // fData.append("type", options.file.type);
+          // fData.append(
+          //   "featureLabel",
+          //   props.feature.properties[props.layerLabel]
+          // );
 
           const config = {
-            headers: {
-              "content-type": "multipart/form-data;",
-            },
             onUploadProgress: (event) => {
               const percent = Math.floor((event.loaded / event.total) * 100);
               setProgress(percent);
@@ -424,7 +434,7 @@ function Media(props) {
           let uploadedFile: any = [];
           uploadedFile = files;
           http
-            .patch(options.action, fData, config)
+            .patch(options.action, body, config)
             .then((res: any) => {
               if (res.data.status) {
                 options.onSuccess(res.data, options.file);

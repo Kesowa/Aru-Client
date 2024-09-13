@@ -46,6 +46,7 @@ import {
   BsBookmarkDashFill,
   BsFlagFill,
 } from "react-icons/bs";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 import screenfull from "screenfull";
 import DroneMap from "../DroneMap";
 import FlightLogMap from "../FlightLogMap";
@@ -620,7 +621,7 @@ function VideoPlayer(props: any) {
   };
 
   // Upload alert api
-  const saveAlert = () => {
+  const saveAlert = async() => {
     const body = {
       locationName: captAddress,
       location: isLive
@@ -644,12 +645,18 @@ function VideoPlayer(props: any) {
     const contentType = block[0].split(":")[1];
     const realData = block[1].split(",")[1];
     const blob = b64toBlob(realData, contentType);
+    const rcFile = new File([blob], "image.png", { type: contentType });
 
-    const formDataToUpload = new FormData(form);
-    formDataToUpload.append("image", blob);
+    const uploadToken = await uploadFile(rcFile, DocModel.ALERT_IMAGES, (prog) => console.info("PROGRESS: " + prog));
+
+      const data = {
+        file: uploadToken,
+      };
+    // const formDataToUpload = new FormData(form);
+    // formDataToUpload.append("image", blob);
     setLoader(true);
     http
-      .post(`${apis.UPLOAD_ALERT_IMAGE}`, formDataToUpload)
+      .post(`${apis.UPLOAD_ALERT_IMAGE}`, data)
       .then((res) => {
         body.image = res.data.file;
 

@@ -36,6 +36,7 @@ import { useMemo } from "react";
 import download from "downloadjs";
 import { API_URL, STATIC_URL } from "src/constants";
 import Thread from "src/components/shared/Thread";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 import axios from "axios";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
@@ -402,47 +403,55 @@ function Documents(props) {
     name: "file",
     multiple: true,
     action: `${API_URL}${apis.UPLOAD_DOCUMENT}`,
-    customRequest: (options: any) => {
+    customRequest: async (options: any) => {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       if (validateFile(options.file)) {
-        const fData = new FormData();
-        fData.append("file", options.file);
-        fData.append("missionId", props.missionDetails.missionId);
-        fData.append("folderName", currentFolderId);
-        if (
-          options.file.name.substring(
-            options.file.name.lastIndexOf(".") + 1
-          ) === "las" ||
-          options.file.name.substring(
-            options.file.name.lastIndexOf(".") + 1
-          ) === "LAS"
-        ) {
-          fData.append("type", "pointCloud");
-        } else {
-          fData.append("type", options.file.type);
-        }
-        const config = {
-          headers: {
-            "content-type": "multipart/form-data;",
-          },
-          onUploadProgress: (event) => {
-            const percent = Math.floor((event.loaded / event.total) * 100);
-            setProgress(percent);
-            if (percent === 100) {
-              setTimeout(() => setProgress(0), 1000);
-            }
-            options.onProgress({ percent: (event.loaded / event.total) * 100 });
-          },
-          cancelToken: source.token,
+        // const config:AxiosRequestConfig = {
+        //   onUploadProgress: (event) => {
+        //     const percent = Math.floor((event.loaded / event.total) * 100);
+        //     setProgress(percent);
+        //     if (percent === 100) {
+        //       setTimeout(() => setProgress(0), 1000);
+        //     }
+        //     options.onProgress({ percent: (event.loaded / event.total) * 100 });
+        //   },
+        //   cancelToken: source.token,
+        // };
+        
+        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => {setProgress(prog * 100); options.onProgress({ percent: prog * 100 })}, source.token);
+        const fileExtension = options.file.name.substring(options.file.name.lastIndexOf(".") + 1).toLowerCase();
+
+        const body = {
+          type: fileExtension === "las" ? "pointCloud" : options.file.type,
+          file: uploadToken,
+          missionId: props.missionDetails.missionId,
+          folderName: currentFolderId,
         };
+
+        // const fData = new FormData();
+        // fData.append("file", options.file);
+        // fData.append("missionId", props.missionDetails.missionId);
+        // fData.append("folderName", currentFolderId);
+        // if (
+        //   options.file.name.substring(
+        //     options.file.name.lastIndexOf(".") + 1
+        //   ) === "las" ||
+        //   options.file.name.substring(
+        //     options.file.name.lastIndexOf(".") + 1
+        //   ) === "LAS"
+        // ) {
+        //   fData.append("type", "pointCloud");  //conditionally need to add the type in the body object that will going to pass to the http request
+        // } else {
+        //   fData.append("type", options.file.type);
+        // }
 
         switch (
           props.missionDetails.userType //upload priviledge checks
         ) {
           case "tenant-root": //when user is a tenant root
             http
-              .post(options.action, fData, config)
+              .post(options.action, body)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 message.success(
@@ -475,7 +484,7 @@ function Documents(props) {
 
           case "tenant-staff": // when user is tenant staff
             http
-              .post(options.action, fData, config)
+              .post(options.action, body)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 message.success(

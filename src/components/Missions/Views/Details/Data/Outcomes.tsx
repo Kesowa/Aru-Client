@@ -45,6 +45,7 @@ import ActionToolbar from "src/components/shared/Toolbar/action";
 import Thread from "../../../../shared/Thread";
 import ThermalImaging from "src/components/shared/ThermalImaging";
 import axios from "axios";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 import { ThreadContext } from "src/services/threadUtils";
@@ -674,41 +675,62 @@ function Outcomes(props) {
     name: "file",
     multiple: true,
     action: `${API_URL}${apis.UPLOAD_ALERT}`,
-    customRequest: (options: any) => {
+    customRequest: async (options: any) => {
+      console.log("Request body:");
       setUploading(true);
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
-      const fData = new FormData();
-      const proceed = extractExif(options.file).then((res: any) => {
-        if (res.status) {
-          console.log(res);
-          fData.append("image", options.file);
-          fData.append("locationName", res.address);
-          fData.append("missionId", props.missionDetails.missionId);
-          fData.append("locationId", props.missionDetails.locationId._id);
-          fData.append("pcount", "0");
-          fData.append("type", "Manual");
-          fData.append("note", "Alert uploaded from browser!");
-          fData.append("onSite", "false");
-          fData.append("flightId", props.missionDetails.flightId);
-          const config = {
-            headers: {
-              "content-type": "multipart/form-data;",
-            },
-            onUploadProgress: (event) => {
-              const percent = Math.floor((event.loaded / event.total) * 100);
-              setProgress(percent);
-              if (percent === 100) {
-                setTimeout(() => setProgress(0), 1000);
-              }
-              options.onProgress({
-                percent: (event.loaded / event.total) * 100,
-              });
-            },
-            cancelToken: source.token,
-          };
+      // const fData = new FormData();
+      const res = await extractExif(options.file);
+      console.log(res);
+
+      // const config:AxiosRequestConfig = {
+      //   onUploadProgress: (event) => {
+      //     const percent = Math.floor((event.loaded / event.total) * 100);
+      //     setProgress(percent);
+      //     if (percent === 100) {
+      //       setTimeout(() => setProgress(0), 1000);
+      //     }
+      //     options.onProgress({
+      //       percent: (event.loaded / event.total) * 100,
+      //     });
+      //   },
+      //   cancelToken: source.token,
+      // };
+
+      const uploadToken = await uploadFile(options.file, DocModel.ALERT_IMAGES,(prog) => {
+        console.log("PROGRESS: ", prog);
+        setProgress(prog * 100);
+        options.onProgress({ percent: prog * 100 });
+      },source.token);
+
+      const body = {
+        file: uploadToken,
+        missionId: props.missionDetails.missionId,
+        folderName: "photos",
+        locationName: res.address,
+        locationId: props.missionDetails.locationId?._id,
+        pcount: "0",
+        type: "Manual",
+        note: "Alert uploaded from browser!",
+        onSite: "false",
+        flightId: props.missionDetails.flightId
+      };
+
+      if (res.status) {   
+          console.log(res.status);
+        
+          // fData.append("image", options.file);
+          // fData.append("locationName", res.address);
+          // fData.append("missionId", props.missionDetails.missionId);
+          // fData.append("locationId", props.missionDetails.locationId._id);
+          // fData.append("pcount", "0");
+          // fData.append("type", "Manual");
+          // fData.append("note", "Alert uploaded from browser!");
+          // fData.append("onSite", "false");
+          // fData.append("flightId", props.missionDetails.flightId);
           http
-            .post(options.action, fData, config)
+            .post(options.action, body)
             .then((res: any) => {
               if (res.data.status) {
                 console.log("Upload successful! ", res.data);
@@ -758,34 +780,34 @@ function Outcomes(props) {
               setUploading(false);
             });
         } else {
+          
           console.log(res);
-          fData.append("image", options.file);
-          fData.append("locationName", res.address);
-          fData.append("missionId", props.missionDetails.missionId);
-          fData.append("locationId", props.missionDetails.locationId._id);
-          fData.append("pcount", "0");
-          fData.append("type", "Manual");
-          fData.append("note", "Alert uploaded from browser!");
-          fData.append("onSite", "false");
-          fData.append("flightId", props.missionDetails.flightId);
-          const config = {
-            headers: {
-              "content-type": "multipart/form-data;",
-            },
-            onUploadProgress: (event) => {
-              const percent = Math.floor((event.loaded / event.total) * 100);
-              setProgress(percent);
-              if (percent === 100) {
-                setTimeout(() => setProgress(0), 1000);
-              }
-              options.onProgress({
-                percent: (event.loaded / event.total) * 100,
-              });
-            },
-            cancelToken: source.token,
-          };
+          // fData.append("image", options.file);
+          // fData.append("locationName", res.address);
+          // fData.append("missionId", props.missionDetails.missionId);
+          // fData.append("locationId", props.missionDetails.locationId._id);
+          // fData.append("pcount", "0");
+          // fData.append("type", "Manual");
+          // fData.append("note", "Alert uploaded from browser!");
+          // fData.append("onSite", "false");
+          // fData.append("flightId", props.missionDetails.flightId);
+          
+          // const config = {
+          
+          //   onUploadProgress: (event) => {
+          //     const percent = Math.floor((event.loaded / event.total) * 100);
+          //     setProgress(percent);
+          //     if (percent === 100) {
+          //       setTimeout(() => setProgress(0), 1000);
+          //     }
+          //     options.onProgress({
+          //       percent: (event.loaded / event.total) * 100,
+          //     });
+          //   },
+          //   cancelToken: source.token,
+          // };
           http
-            .post(options.action, fData, config)
+            .post(options.action, body)
             .then((res: any) => {
               if (res.data.status) {
                 console.log("Upload successful! ", res.data);
@@ -834,8 +856,7 @@ function Outcomes(props) {
             .finally(() => {
               setUploading(false);
             });
-        }
-      });
+        };
       return {
         abort() {
           console.log("Aborting outcome upload");

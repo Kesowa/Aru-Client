@@ -14,6 +14,7 @@ import ImgCrop from "antd-img-crop";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { Link } from "react-router-dom";
 import { STATIC_URL } from "src/constants";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
@@ -26,15 +27,17 @@ function CreatePackage(props: any) {
   const { setLoading } = useContext(LoaderContext);
 
   const beforeUploadFunction = (file: any) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsPosterUploading(true);
-      const formData = new FormData();
-      formData.append("poster", file);
+      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+
+      const body = {
+        file: uploadToken,
+      };
+      // const formData = new FormData();
+      // formData.append("poster", file);
       http
-        .post(apis.UPLOAD_PACKAGE_POSTER, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+        .post(apis.UPLOAD_PACKAGE_POSTER, body, {
         })
         .then((result) => {
           if (result.data.status) {

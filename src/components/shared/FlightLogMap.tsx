@@ -7,7 +7,7 @@ import { MAPBOX_API_KEY } from "src/constants";
 import NavIcon from "../../static/nav_icon.png";
 
 function FlightLogMap(props) {
-  const [marker, setMarker] = useState([]);
+  const [marker, setMarker] = useState<number[]>([]);
   const [bearing, setBearing] = useState(0);
   const [dronePath, setDronePath] = useState<any>([]);
   const [INITIAL_VIEW_STATE, setViewport] = useState<any>(undefined);
@@ -62,7 +62,7 @@ function FlightLogMap(props) {
     if (props.flight) {
       const filterArray: any = props.flight.filter(
         (i: any) => i[0] !== null && i[1] !== null
-      );
+      ).map((i: any) => [i[0],i[1]]); // keeping the third element, altiude, causes layer to disappear on zooming in
       setDronePath([
         {
           path: filterArray,
@@ -83,7 +83,7 @@ function FlightLogMap(props) {
           props.flight[x][0] !== null &&
           props.flight[x][1] !== null
         ) {
-          setMarker(props.flight[x]);
+          setMarker([props.flight[x][0], props.flight[x][1]]); // keeping the third element, altiude, causes layer to disappear on zooming in
           const startPoint: any = props.flight[x];
           const endPoint: any = props.flight[x + 1];
           console.log("start", startPoint, "end", endPoint);
@@ -138,7 +138,7 @@ function FlightLogMap(props) {
         anchorY: 70,
         mask: false,
       }),
-      sizeScale: 15,
+      sizeScale: 10, // hard coded currently, couldn't find a way to make flexible
       getPosition: (d) => {
         return d.coordinates;
       },

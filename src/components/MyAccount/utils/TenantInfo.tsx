@@ -7,12 +7,18 @@ import apis from "../../../services/apis";
 import { beforeUpload } from "../../../services/imageupload";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { STATIC_URL } from "src/constants";
+import type { RcFile } from "antd/lib/upload";
+import { DocModel, uploadFile } from "src/services/fileUpload";
+
+
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
 function TenantInfo(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [path, setPath] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
 
@@ -26,31 +32,34 @@ function TenantInfo(props: any) {
     }
   }, [props.tenantData]);
 
-  const beforeUploadFunction = (file: any) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
+  const beforeUploadFunction = (file: RcFile) => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
       setIsAvatarUploading(true);
-      const formData = new FormData();
-      formData.append("avatar", file);
-      http
-        .post(apis.UPLOAD_TENANT_AVATAR, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((result) => {
-          if (result.data.status) {
-            setAvatar(result.data.file);
-          } else {
-            message.error(result.data.message);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          AxiosErrorHandler(err, logout);
-        })
-        .finally(() => {
-          setIsAvatarUploading(false);
-        });
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl); 
+
+      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+      setAvatar(uploadToken);
+      
+      // const formData = new FormData();
+      // formData.append("avatar", file);
+      // http
+      //   .post(apis.UPLOAD_TENANT_AVATAR, body, {
+      //   })
+      //   .then((result) => {
+      //     if (result.data.status) {
+      //       setAvatar(result.data.file);
+      //     } else {
+      //       message.error(result.data.message);
+      //     }
+      //   })
+      //   .catch((err) => {
+      //     console.log(err);
+      //     AxiosErrorHandler(err, props.logout);
+      //   })
+      //   .finally(() => {
+      //     setIsAvatarUploading(false);
+      //   });
     });
     return false;
   };
@@ -64,7 +73,7 @@ function TenantInfo(props: any) {
     const body = {
       ...data,
     };
-    if (avatar && avatar !== "") {
+    if (avatar && avatar !== props.tenantData.avatar || "") {
       body["avatar"] = avatar;
     }
     console.log(body);
@@ -147,8 +156,8 @@ function TenantInfo(props: any) {
               >
                 {avatar ? (
                   <img
-                    src={`${STATIC_URL}${avatar}`}
-                    className="uploaded-avatar"
+                  src={`${STATIC_URL}${avatar}`}
+                  className="uploaded-avatar"
                   />
                 ) : (
                   <div>

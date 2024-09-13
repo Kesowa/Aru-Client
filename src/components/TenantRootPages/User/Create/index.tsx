@@ -31,6 +31,8 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import CountExceeded from "../../restrictions/restrictions";
 import Expired from "../../restrictions/expiry";
 import { STATIC_URL } from "src/constants";
+import type { RcFile } from "antd/lib/upload";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 import { components } from "src/handlers/schema";
 import { PERMS, TENANT_STAFF_PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
@@ -40,6 +42,7 @@ function UserCreatePage(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [userGroups, setUserGroups] = useState<
     {
       name: string;
@@ -60,31 +63,16 @@ function UserCreatePage(props: any) {
   const { setLoading } = useContext(LoaderContext);
 
   //avatar upload
-  const beforeUploadFunction = (file: any) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
+  const beforeUploadFunction = (file: RcFile) => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
-      const formData = new FormData();
-      formData.append("avatar", file);
-      http
-        .post(apis.UPLOAD_USER_PROFILE_PICTURE, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((result) => {
-          if (result.data.status) {
-            setAvatar(result.data.file);
-          } else {
-            message.error(result.data.message);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          AxiosErrorHandler(err, logout);
-        })
-        .finally(() => {
-          setIsAvatarUploading(false);
-        });
+      const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
+      // Create a preview URL for the image
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
+
+      setAvatar(uploadToken);
+      setIsAvatarUploading(false);
     });
     return false;
   };
@@ -309,8 +297,8 @@ function UserCreatePage(props: any) {
                     >
                       {avatar ? (
                         <img
-                          src={`${STATIC_URL}${avatar}`}
-                          className="uploaded-avatar"
+                        src={avatarPreview}
+                        className="uploaded-avatar"
                         />
                       ) : (
                         <div>

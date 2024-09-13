@@ -24,6 +24,8 @@ import apis from "../../../../services/apis";
 import { beforeUpload } from "../../../../services/imageupload";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { STATIC_URL } from "src/constants";
+import { RcFile } from "antd/lib/upload";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
@@ -43,31 +45,33 @@ function EditTenant() {
   const { logout } = useContext(AuthContext);
   const { setLoading } = useContext(LoaderContext);
 
-  const beforeUploadFunction = (file: any) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
+  const beforeUploadFunction = (file: RcFile) => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
-      const formData = new FormData();
-      formData.append("avatar", file);
-      http
-        .post(apis.UPLOAD_TENANT_AVATAR, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((result) => {
-          if (result.data.status) {
-            setAvatar(result.data.file);
-          } else {
-            message.error(result.data.message);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          AxiosErrorHandler(err, logout);
-        })
-        .finally(() => {
-          setIsAvatarUploading(false);
-        });
+
+      const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
+      setAvatar(uploadToken);
+
+     
+      // const formData = new FormData();
+      // formData.append("avatar", file);
+      // http
+      //   .post(apis.UPLOAD_TENANT_AVATAR, body, {
+      //   })
+      //   .then((result) => {
+      //     if (result.data.status) {
+      //       setAvatar(result.data.file);
+      //     } else {
+      //       message.error(result.data.message);
+      //     }
+      //   })
+      //   .catch((err) => {
+      //     console.log(err);
+      //     AxiosErrorHandler(err, props.logout);
+      //   })
+      //   .finally(() => {
+      //     setIsAvatarUploading(false);
+      //   });
     });
     return false;
   };
@@ -198,7 +202,7 @@ function EditTenant() {
                 >
                   {avatar ? (
                     <img
-                      src={`${STATIC_URL}${avatar}`}
+                      src={`${STATIC_URL}${"/"}${avatar}`}
                       className="uploaded-avatar"
                     />
                   ) : (

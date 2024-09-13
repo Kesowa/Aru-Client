@@ -31,6 +31,8 @@ import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import moment from "moment";
 import { STATIC_URL } from "src/constants";
+import { RcFile } from "antd/lib/upload";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 import { components } from "src/handlers/schema";
 import { PERMS, TENANT_STAFF_PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
@@ -40,6 +42,7 @@ function UserEditPage() {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [userGroups, setUserGroups] = useState<
     {
       name: string;
@@ -67,33 +70,38 @@ function UserEditPage() {
   const { setLoading } = useContext(LoaderContext);
 
   //avatar upload
-  const beforeUploadFunction = (file: any) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
+  const beforeUploadFunction = (file: RcFile) => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
       setIsAvatarUploading(true);
-      const formData = new FormData();
-      formData.append("avatar", file);
-      http
-        .post(apis.UPLOAD_USER_PROFILE_PICTURE, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((result) => {
-          console.log(result);
 
-          if (result.data.status) {
-            setAvatar(result.data.file);
-          } else {
-            message.error(result.data.message);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          AxiosErrorHandler(err, logout);
-        })
-        .finally(() => {
-          setIsAvatarUploading(false);
-        });
+      // Create a preview URL for the image
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
+
+      const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
+      setAvatar(uploadToken);
+
+      // const formData = new FormData();
+      // formData.append("avatar", file);
+      // http
+      //   .post(apis.UPLOAD_USER_PROFILE_PICTURE, body, {
+      //   })
+      //   .then((result) => {
+      //     console.log(result);
+
+      //     if (result.data.status) {
+      //       setAvatar(result.data.file);
+      //     } else {
+      //       message.error(result.data.message);
+      //     }
+      //   })
+      //   .catch((err) => {
+      //     console.log(err);
+      //     AxiosErrorHandler(err, props.logout);
+      //   })
+      //   .finally(() => {
+      //     setIsAvatarUploading(false);
+      //   });
     });
     return false;
   };
@@ -218,7 +226,7 @@ function UserEditPage() {
       id: user._id,
       ...data,
     };
-    if (avatar && avatar !== "") {
+    if (avatar && avatar !== props.user.avatar || "") {
       body["avatar"] = avatar;
     }
     console.log(body);
@@ -352,7 +360,7 @@ function UserEditPage() {
                         >
                           {avatar ? (
                             <img
-                              src={`${STATIC_URL}${avatar}`}
+                              src={avatarPreview ? avatarPreview : `${STATIC_URL}${avatar}`}
                               className="uploaded-avatar"
                             />
                           ) : (

@@ -2,11 +2,11 @@ import { useContext, useState } from "react";
 import { Form, Input, Upload, Row, Col, message, Button } from "antd";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
-import http from "../../../../services/httpCall";
-import apis from "../../../../services/apis";
 import { beforeUpload } from "../../../../services/imageupload";
-import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { STATIC_URL } from "src/constants";
+import { RcFile } from "antd/lib/upload";
+import { DocModel, uploadFile } from "src/services/fileUpload";
+
 import { AuthContext } from "src/services/authUtils";
 
 function BasicInfo(props: any) {
@@ -15,34 +15,13 @@ function BasicInfo(props: any) {
     props.tenantData.avatar ? props.tenantData.avatar : ""
   );
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
-
   const { logout } = useContext(AuthContext);
 
-  const beforeUploadFunction = (file: any) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
+  const beforeUploadFunction = (file: RcFile) => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
-      const formData = new FormData();
-      formData.append("avatar", file);
-      http
-        .post(apis.UPLOAD_TENANT_AVATAR, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((result) => {
-          if (result.data.status) {
-            setAvatar(result.data.file);
-          } else {
-            message.error(result.data.message);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          AxiosErrorHandler(err, logout);
-        })
-        .finally(() => {
-          setIsAvatarUploading(false);
-        });
+      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+      setAvatar(uploadToken);
     });
     return false;
   };

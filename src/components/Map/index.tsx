@@ -141,6 +141,7 @@ import {
   options,
 } from "./utils/propUtils";
 import Tileset from "src/types/cesium_tileset";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 import { PERMS } from "src/static/permissions";
 import FourOhOne from "../shared/Error/FourOhOne";
 import { AuthContext } from "src/services/authUtils";
@@ -5009,37 +5010,54 @@ function BaseMap(props) {
 
     try {
       setUploading(true);
+      // Determine the correct DocModel based on layerType
+      // const config:AxiosRequestConfig = {
+      //   onUploadProgress: (event) => {
+      //     const percent = Math.floor((event.loaded / event.total) * 100);
+      //     setProgress(percent);
+      //     if (percent === 100) {
+      //       setTimeout(() => setProgress(0), 1000);
+      //     }
+      //   },
+      // };
 
-      const fmData = new FormData();
-      const config = {
-        headers: { "content-type": "multipart/form-data" },
-        onUploadProgress: (event) => {
-          const percent = Math.floor((event.loaded / event.total) * 100);
-          setProgress(percent);
-          if (percent === 100) {
-            setTimeout(() => setProgress(0), 1000);
-          }
-        },
+      const docModel = layerType === "Vector" ? DocModel.VECTOR : layerType === "Raster" ? DocModel.RASTER : DocModel.LAYER_FILES;
+      const uploadToken = await uploadFile(fileList[0], docModel, (prog) => console.info("PROGRESS: " + prog));
+
+      const body = {
+        file: uploadToken,
+        missionId : id,
+        captureDate: captureDate,
+        name: layerName,
+        type: layerType,
+        color: layerColor,
+        inHeritOriginalColorFromFile: inheritColor.toString(),
+        icon: icon2,
+        ...(layerType === "Vector" ? { vector: layerProp } : {}),
+        ...(layerType === "Raster" ? { raster: layerProp } : {}),
       };
-      fmData.append("file", fileList[0]);
-      fmData.append("captureDate", captureDate);
-      fmData.append("name", layerName);
-      fmData.append("type", layerType);
-      fmData.append("color", layerColor);
-      fmData.append("missionId", id);
-      fmData.append("inHeritOriginalColorFromFile", inheritColor.toString());
 
-      if (layerType === "Vector") fmData.append("vector", layerProp);
+      // const fmData = new FormData();
+      // fmData.append("file", fileList[0]);
+      // fmData.append("captureDate", captureDate);
+      // fmData.append("name", layerName);
+      // fmData.append("type", layerType);
+      // fmData.append("color", layerColor);
+      // fmData.append("missionId", id);
+      // fmData.append("inHeritOriginalColorFromFile", inheritColor.toString());
 
-      if (layerType === "Raster") fmData.append("raster", layerProp);
+      // if (layerType === "Vector") fmData.append("vector", layerProp);
 
-      fmData.append("icon", icon2);
+      // if (layerType === "Raster") fmData.append("raster", layerProp);
+
+      // fmData.append("icon", icon2);
 
       const result = await http.post(
         `${apis.CREATE_LAYER}/${layerType}`,
-        fmData,
-        config
+        body
       );
+      console.log("vector layer is uploaded", result);
+
 
       if (result.data.status) {
         console.log("metadata for me:", result.data.data);
@@ -5416,6 +5434,7 @@ function BaseMap(props) {
         setCaptureDate("");
         setLayerColor("#ffaa00");
         setLayerProp(null);
+        props.loading(false);
         setLoading(false);
       });
 

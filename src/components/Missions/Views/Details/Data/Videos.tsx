@@ -51,6 +51,8 @@ import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import Thread from "../../../../shared/Thread";
 import axios from "axios";
+import { DocModel, uploadFile } from "src/services/fileUpload";
+
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 import { ThreadContext } from "src/services/threadUtils";
@@ -370,33 +372,42 @@ function Videos(props) {
     name: "file",
     multiple: true,
     action: `${apis.UPLOAD_VOD}`,
-    customRequest: (options: any) => {
+    customRequest: async (options: any) => {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
-      console.log("here");
       setUploading(true);
-      const fData = new FormData();
-      fData.append("video", options.file);
-      fData.append("missionID", props.missionDetails.missionId);
-      fData.append("flightID", props.missionDetails.flightId);
-      if (props.missionDetails.locationId?._id) {
-        fData.append("locationID", props.missionDetails.locationId?._id);
-      }
 
-      const config = {
-        headers: {
-          "content-type": "multipart/form-data;",
-        },
-        onUploadProgress: (event) => {
-          const percent = Math.floor((event.loaded / event.total) * 100);
-          setProgress(percent);
-          if (percent === 100) {
-            setTimeout(() => setProgress(0), 1000);
-          }
-          options.onProgress({ percent: (event.loaded / event.total) * 100 });
-        },
-        cancelToken: source.token,
+      // const config: AxiosRequestConfig = {
+      //   onUploadProgress: (event) => {
+      //     const percent = Math.floor((event.loaded / event.total) * 100);
+      //     // setProgress(percent);
+      //     if (percent === 100) {
+      //       // setTimeout(() => setProgress(0), 1000);
+      //     }
+      //     // options.onProgress({ percent: (event.loaded / event.total) * 100 });
+      //   },
+      //   cancelToken: source.token,
+      // };
+
+      const uploadToken = await uploadFile(options.file, DocModel.VOD, (prog) => {
+        console.log("PROGRESS: ", prog);
+        setProgress(prog * 100);
+        options.onProgress({ percent: prog * 100 });
+      }, source.token);
+        
+      const body = {
+        file : uploadToken,
+        missionID : props.missionDetails.missionId,
+        flightID : props.missionDetails.flightId,
+        locationID : props.missionDetails.locationId?._id ? props.missionDetails.locationId._id : undefined,
       };
+      // const fData = new FormData();
+      // fData.append("video", options.file);
+      // fData.append("missionID", props.missionDetails.missionId);
+      // fData.append("flightID", props.missionDetails.flightId);
+      // if (props.missionDetails.locationId?._id) {
+      //   fData.append("locationID", props.missionDetails.locationId?._id);
+      // }
 
       switch (
         props.missionDetails.userType //upload priviledge checks
@@ -408,7 +419,7 @@ function Videos(props) {
           console.log("isvalid", isValidExtension);
           if (isValidExtension) {
             http
-              .post(options.action, fData, config)
+              .post(options.action, body)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 console.log("Upload successful! ", res.data);
@@ -463,7 +474,7 @@ function Videos(props) {
           const isValidExtension2 = checkExtension(parts2[parts2.length - 1]);
           if (isValidExtension2) {
             http
-              .post(options.action, fData, config)
+              .post(options.action, body)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 console.log("Upload successful! ", res.data);

@@ -1,12 +1,11 @@
-import React, { lazy, Suspense, useContext, useEffect, useState } from "react";
+import React, { lazy, useContext, useEffect, useState } from "react";
 import EntryLoader from "../Loader/Entry";
 import Dashboard from "../../Dashboard";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
-import { message, Space, Spin } from "antd";
-import { clientOptions } from "../../../static/sideBarOptions";
+import { message } from "antd";
 import { components } from "src/handlers/schema";
 import { AuthContext } from "src/services/authUtils";
 const Register = lazy(() => import("../../../components/SignUp"));

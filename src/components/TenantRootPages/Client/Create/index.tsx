@@ -32,6 +32,8 @@ import CountExceeded from "../../restrictions/restrictions";
 import Expired from "../../restrictions/expiry";
 import moment from "moment";
 import { STATIC_URL } from "src/constants";
+import { RcFile } from "antd/lib/upload";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 import { components } from "src/handlers/schema";
 import { PERMS, TENANT_CLIENT_PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
@@ -40,6 +42,7 @@ import { LoaderContext } from "src/components/shared/Loader";
 function ClientCreatePage(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [userGroups, setUserGroups] = useState<
     {
@@ -58,30 +61,13 @@ function ClientCreatePage(props: any) {
   const { setLoading } = useContext(LoaderContext);
 
   const beforeUploadFunction = (file: any) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, () => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
       setIsAvatarUploading(true);
-      const formData = new FormData();
-      formData.append("avatar", file);
-      http
-        .post(apis.UPLOAD_USER_PROFILE_PICTURE, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((result) => {
-          if (result.data.status) {
-            setAvatar(result.data.file);
-          } else {
-            message.error(result.data.message);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          AxiosErrorHandler(err, logout);
-        })
-        .finally(() => {
-          setIsAvatarUploading(false);
-        });
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
+      const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
+      setAvatar(uploadToken);
+      setIsAvatarUploading(false);
     });
     return false;
   };
@@ -170,7 +156,7 @@ function ClientCreatePage(props: any) {
     http
       .post(apis.CREATE_CLIENT, body)
       .then((result) => {
-        console.log(result.data);
+        console.log("result data:",result.data);
         if (result.data.status) {
           form.resetFields();
           setAvatar("");
@@ -312,7 +298,7 @@ function ClientCreatePage(props: any) {
                     >
                       {avatar ? (
                         <img
-                          src={`${STATIC_URL}${avatar}`}
+                          src={avatarPreview}
                           className="uploaded-avatar"
                         />
                       ) : (

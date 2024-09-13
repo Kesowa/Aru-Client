@@ -27,6 +27,7 @@ import apis from "../../../../services/apis";
 import Dragger from "antd/lib/upload/Dragger";
 import { API_URL, STATIC_URL } from "src/constants";
 import io from "socket.io-client";
+import { DocModel, uploadFile } from "src/services/fileUpload";
 import { AuthContext } from "src/services/authUtils";
 
 const { Title, Text } = Typography;
@@ -128,26 +129,37 @@ function Pictomap(props) {
     });
   };
 
-  function handleUploadFiles() {
+ async function handleUploadFiles() {
     if (fileList.length > 0) {
       setIsUploading(true);
-      const fData = new FormData();
-      fData.append("Id", props.layerId);
-      fileList.forEach((file) => {
-        fData.append("file", file.originFileObj);
-      });
-      const config = {
-        headers: { "content-type": "multipart/form-data" },
-        onUploadProgress: (event) => {
-          const percent = Math.floor((event.loaded / event.total) * 100);
-          setProgress(percent);
-          if (percent === 100) {
-            setTimeout(() => setProgress(0), 1000);
-          }
-        },
-      };
+      // const config:AxiosRequestConfig = {
+      //   onUploadProgress: (event) => {
+      //     const percent = Math.floor((event.loaded / event.total) * 100);
+      //     setProgress(percent);
+      //     if (percent === 100) {
+      //       setTimeout(() => setProgress(0), 1000);
+      //     }
+      //   },
+      // };
+      const uploadTokenPromises = fileList.map((file) =>
+      uploadFile(file.originFileObj, DocModel.LAYER_FILES, (prog) =>
+        console.info("PROGRESS: " + prog)
+      )
+    );
+      const uploadTokens = await Promise.all(uploadTokenPromises);
+
+      const body = {
+        file: uploadTokens,
+        Id: props.layerId,
+      }
+      
+      // const fData = new FormData();
+      // fData.append("Id", props.layerId);
+      // fileList.forEach((file) => {
+      //   fData.append("file", file.originFileObj);
+      // });
       http
-        .patch(`${apis.PIC_TO_MAP}?mode=${matchMode}`, fData, config)
+        .patch(`${apis.PIC_TO_MAP}?mode=${matchMode}`, body)
         .then((res: any) => {
           if (res.data.status) {
             console.log(res.data.result);
