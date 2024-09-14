@@ -8,6 +8,7 @@ import {
   Tooltip,
   Button,
   Avatar,
+  notification
 } from "antd";
 import {
   UserOutlined,
@@ -41,7 +42,7 @@ function OutcomeModal(props) {
         setLocationNull(false);
       } else setLocationNull(true);
     } else setLocationNull(true);
-  }, [currIndex]);
+  }, [currIndex, props.data]);
 
   const nextIndex = () => {
     setcurrIndex((currIndex + 1) % props.data.length);
@@ -50,6 +51,22 @@ function OutcomeModal(props) {
   const previousIndex = () => {
     const ind = currIndex - 1;
     setcurrIndex(ind < 0 ? props.data.length - 1 : ind);
+  };
+
+  const openNotification = (copiedText, placement) => {
+    const el = document.createElement("textarea");
+    el.value = copiedText;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand("copy");
+    document.body.removeChild(el);
+
+    notification.info({
+      message: `Link Copied!`,
+      description:
+        "Google map location link has been copied to your clipboard.",
+      placement,
+    });
   };
 
   return (
@@ -166,7 +183,7 @@ function OutcomeModal(props) {
                       <Button
                         type="default"
                         onClick={() =>
-                          props.openNotification(
+                          openNotification(
                             `https://www.google.com/maps/?q=${dataa.location.lat},${dataa.location.long}`,
                             "bottomRight"
                           )
@@ -191,11 +208,17 @@ function OutcomeModal(props) {
                     <Text type="secondary">Mission ID</Text>
                   </Row>
                   <Row>
-                    <Text strong>{props.missionId}</Text>
+                    <Text strong>{dataa.missionId._id}</Text>
                   </Row>
 
                   {!locationNull && (
                     <>
+                      <Row style={{ marginTop: 8 }}>
+                        <Text type="secondary">Location</Text>
+                      </Row>
+                      <Row>
+                        <Text strong>{dataa.locationName}</Text>
+                      </Row>
                       <Row style={{ marginTop: 8 }}>
                         <Text type="secondary">Coordinates</Text>
                       </Row>
@@ -248,16 +271,24 @@ function OutcomeModal(props) {
               marginTop: "20px",
             }}
           >
-            <Button
-              type="primary"
-              onClick={() => previousIndex()}
-              style={{ marginRight: "15px" }}
-            >
-              Previous
-            </Button>
-            <Button type="primary" onClick={() => nextIndex()}>
-              Next
-            </Button>
+            {
+              props.data.length > 1 ?
+              <>
+                <Button
+                  type="primary"
+                  onClick={() => previousIndex()}
+                  style={{ marginRight: "15px" }}
+                >
+                  Previous
+                </Button>
+                <Button type="primary" onClick={() => nextIndex()}>
+                  Next
+                </Button>
+              </> :
+              <Button type="primary" onClick={() => props.closeModal()}>
+                OK
+              </Button>
+            }
           </div>
         </Modal>
       )}

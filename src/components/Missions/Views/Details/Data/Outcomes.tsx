@@ -532,22 +532,6 @@ function Outcomes(props) {
     console.log("dsifhfhihfoihsdifh :" + checkedList);
   }, [checkedList]);
 
-  const openNotification = (copiedText, placement) => {
-    const el = document.createElement("textarea");
-    el.value = copiedText;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand("copy");
-    document.body.removeChild(el);
-
-    notification.info({
-      message: `Link Copied!`,
-      description:
-        "Google map location link has been copied to your clipboard.",
-      placement,
-    });
-  };
-
   const handleSortChange = (value) => {
     setSortType(value);
   };
@@ -1278,8 +1262,6 @@ function Outcomes(props) {
             closeModal={setShowOutcomeModal}
             index={modalIndex}
             data={outcomeData}
-            missionId={props.id}
-            openNotification={openNotification}
           />
         </>
       ) : (

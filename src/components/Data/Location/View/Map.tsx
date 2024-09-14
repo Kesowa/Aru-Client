@@ -30,6 +30,7 @@ import {
 import * as htmlToImage from "html-to-image";
 import { STATIC_URL } from "src/constants";
 import { LoaderContext } from "src/components/shared/Loader";
+import OutcomeModal from "src/components/Missions/Views/Details/Data/OutcomeModal";
 const { Option } = Select;
 const { Text, Title } = Typography;
 
@@ -56,6 +57,7 @@ type mapState = {
   startDate: any;
   endDate: any;
   alertLoading: any;
+  selectedAlert: any;
 };
 
 class LocationCardMap extends Component<mapProps, mapState> {
@@ -71,6 +73,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
       startDate: "",
       endDate: "",
       alertLoading: false,
+      selectedAlert: null,
     };
   }
 
@@ -169,20 +172,10 @@ class LocationCardMap extends Component<mapProps, mapState> {
       })
       .then((result) => {
         if (result.data.status) {
-          this.showModal(
-            result.data.data[0]._id,
-            result.data.data[0].missionId,
-            result.data.data[0].flightId,
-            result.data.data[0].createdBy.name,
-            result.data.data[0].createdBy.avatar,
-            result.data.data[0].createdAt,
-            STATIC_URL + result.data.data[0].image,
-            result.data.data[0].location,
-            result.data.data[0].locationName
-              ? result.data.data[0].locationName
-              : "Default Location",
-            result.data.data[0].pcount
-          );
+          this.setState({
+            ...this.state,
+            selectedAlert: result.data.data[0], 
+          });
         } else {
           message.error(result.data.message);
         }
@@ -344,207 +337,20 @@ class LocationCardMap extends Component<mapProps, mapState> {
     this.context.setLoading(false);
   }
 
-  openNotification = (copiedText, placement) => {
-    const el = document.createElement("textarea");
-    el.value = copiedText;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand("copy");
-    document.body.removeChild(el);
-
-    notification.info({
-      message: `Link Copied!`,
-      description:
-        "Google map location link has been copied to your clipboard.",
-      placement,
-    });
-  };
-
-  showModal(
-    id: any,
-    mID: any,
-    fID: any,
-    crBy: any,
-    crByPhoto: any,
-    crAt: any,
-    thumb: any,
-    coor: any,
-    geoCode: any,
-    pcount: any
-  ) {
-    const self = this;
-    Modal.info({
-      title: "Outcome ID: " + id,
-      content: (
-        <div>
-          <Row style={{ marginTop: 16 }}>
-            <Col span={17}>
-              <div id="image" className="outcome-view">
-                <Image
-                  style={{ width: "100%", height: "auto", cursor: "pointer" }}
-                  src={thumb}
-                />
-                <div className="p-mission">
-                  <Row>
-                    <Text className="text">mission ID: {mID}</Text>
-                  </Row>
-                  <Row>
-                    <Text className="text">flight ID: {fID}</Text>
-                  </Row>
-                  <Row>
-                    <Text className="text">People Detected: {pcount}</Text>
-                  </Row>
-                </div>
-                <div className="preview-location-name">
-                  <Row>
-                    <Title className="p-name" level={4}>
-                      {geoCode}
-                    </Title>
-                  </Row>
-                  {
-                    !(coor.lat === 0 && coor.long === 0) &&
-                    <Row>
-                      <Text className="p-coord">
-                        {coor.lat}, {coor.long}
-                      </Text>
-                    </Row>
-                  }
-                </div>
-                {
-                  !(coor.lat === 0 && coor.long === 0) &&
-                  <div className="static-map-div">
-                    <a
-                      href={`https://www.google.com/maps/?q=${coor.lat},${coor.long}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <img
-                        className="static-map"
-                        src={`https://maps.googleapis.com/maps/api/staticmap?center=${coor.lat},${coor.long}&zoom=16&size=200x130&markers=size:mid|color:red|${coor.lat},${coor.long}&maptype=roadmap&key=AIzaSyCYWROYTFQ3XH4bhhLJnmJSV-0k9a-PHY8`}
-                      />
-                    </a>
-                  </div>
-                }
-              </div>
-            </Col>
-            <Col span={7}>
-              <Row style={{ marginLeft: "8px" }}>
-                <Title level={5}>
-                  <ShareAltOutlined style={{ fontSize: "24px" }} />
-                  &nbsp;&nbsp;&nbsp;Share
-                </Title>
-              </Row>
-              <Row>
-                &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
-                <Tooltip placement="bottom" title="download image">
-                  <Button
-                    type="primary"
-                    onClick={() => {
-                      htmlToImage
-                        .toPng(document.getElementById("image")!)
-                        .then(function (dataUrl) {
-                          const a = document.createElement("a");
-                          a.href = dataUrl;
-                          a.download = `${geoCode}_3355.png`;
-                          a.click();
-                        });
-                    }}
-                    shape="round"
-                    icon={<DownloadOutlined />}
-                    size="large"
-                  />
-                </Tooltip>
-                &nbsp;&nbsp;
-                {
-                  !(coor.lat === 0 && coor.long === 0) &&
-                  <Tooltip placement="bottom" title="Google map link">
-                    <Button
-                      type="default"
-                      onClick={() =>
-                        this.openNotification(
-                          `https://www.google.com/maps/?q=${coor.lat},${coor.long}`,
-                          "bottomRight"
-                        )
-                      }
-                      shape="round"
-                      icon={<GoogleOutlined />}
-                      size="large"
-                    >
-                      Copy Link
-                    </Button>
-                  </Tooltip>
-                }
-              </Row>
-              <div className="outcome-specific-view-info">
-                <Row>
-                  <Text type="secondary">Inference generated</Text>
-                </Row>
-                <Row>
-                  <Text strong>{pcount}</Text>
-                </Row>
-                <Row>
-                  <Text type="secondary">Mission ID</Text>
-                </Row>
-                <Row>
-                  <Text strong>{mID}</Text>
-                </Row>
-                <Row style={{ marginTop: 8 }}>
-                  <Text type="secondary">Location</Text>
-                </Row>
-                <Row>
-                  <Text strong>{geoCode}</Text>
-                </Row>
-                {
-                  !(coor.lat === 0 && coor.long === 0) &&
-                  <>
-                    <Row style={{ marginTop: 8 }}>
-                      <Text type="secondary">Coordinates</Text>
-                    </Row>
-                    <Row>
-                      <Text keyboard copyable>
-                        {`${coor.lat}, ${coor.long}`}
-                      </Text>
-                    </Row>
-                  </>
-                }
-                <div className="outcome-specific-view-created-by">
-                  <Row>
-                    <Text type="secondary">Snapshot Captured by</Text>
-                  </Row>
-                  <Row>
-                    <div
-                      className="pilot-profile-badge"
-                      style={{ marginTop: 8 }}
-                    >
-                      <Avatar
-                        key="2"
-                        size="large"
-                        icon={<UserOutlined />}
-                        src={STATIC_URL + crByPhoto}
-                      />
-                      <div className="pilot-name">
-                        <Title level={5} className="designation">
-                          {crBy}
-                        </Title>
-                        <Text type="secondary">{crAt}</Text>
-                      </div>
-                    </div>
-                  </Row>
-                </div>
-              </div>
-            </Col>
-          </Row>
-        </div>
-      ),
-      centered: true,
-      width: 1200,
-      onOk() {},
-    });
-  }
-
   render() {
     return (
       <React.Fragment>
+        <OutcomeModal 
+          index={0}
+          data={[this.state.selectedAlert]}
+          visible={!!this.state.selectedAlert}
+          closeModal={() => {
+            this.setState({
+              ...this.state,
+              selectedAlert: null,
+            });
+          }}
+        />
         <div
           id="gmap_container"
           style={{ borderRadius: "8px", position: "relative" }}
