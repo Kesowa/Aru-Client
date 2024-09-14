@@ -6,7 +6,7 @@ This folder contain the client codes of the ARU streaming platform.
 
 ## Steps
 
-- Install dependencies using `yarn install`
+- Install dependencies using `npm install`
 - create a .env file and write the credintials
-- run `yarn start` to start development server.
-- run `yarn build` to create production bundle
+- run `npm start` to start development server.
+- run `npm build` to create production bundle
