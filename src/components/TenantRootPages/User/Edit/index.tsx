@@ -226,7 +226,7 @@ function UserEditPage() {
       id: user._id,
       ...data,
     };
-    if (avatar && avatar !== props.user.avatar || "") {
+    if (avatar && avatar !== user.avatar || "") {
       body["avatar"] = avatar;
     }
     console.log(body);

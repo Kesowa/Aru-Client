@@ -216,7 +216,7 @@ function ClientEditPage() {
       id: client._id,
       ...data,
     };
-    if (avatar && avatar !== props.client.avatar || "") {
+    if (avatar && avatar !== client.avatar || "") {
       body["avatar"] = avatar;
     }
     console.log(body);
