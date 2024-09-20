@@ -15,7 +15,7 @@ type mapProps = {
   drawingToolBtns: any;
   setDrawingToolBtns: any;
   setGeolocation: any;
-  polygonData: any;
+  geoData: any;
   setPolygonData: any;
   isEditing: any;
   locationToEdit: any;
@@ -190,7 +190,7 @@ class LocationMap extends Component<mapProps, mapState> {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.polygonData !== null && nextProps.polygonData === null) {
+    if (this.props.geoData !== null && nextProps.geoData === null) {
       this.clearDrawing();
       this.drawingManager.setOptions({
         drawingControl: false,
@@ -489,7 +489,7 @@ class LocationMap extends Component<mapProps, mapState> {
   };
 
   clearDrawing = () => {
-    if (this.oldShape || this.props.polygonData === null) {
+    if (this.oldShape || this.props.geoData === null) {
       this.oldShape.setMap(null);
       this.oldShape = null;
       this.props.setAreaSelected(false);
@@ -502,7 +502,7 @@ class LocationMap extends Component<mapProps, mapState> {
   };
 
   clearIncompleteDrawing = () => {
-    if (this.oldShape || this.props.polygonData === null) {
+    if (this.oldShape || this.props.geoData === null) {
       this.drawingManager.setDrawingMode(null);
       this.oldShape.setMap(null);
       this.oldShape = null;
@@ -590,18 +590,19 @@ class LocationMap extends Component<mapProps, mapState> {
             />
           </div>
           <div className="control-icons-container">
-            {(this.state.isPolygonActive || this.state.isPointActive) && (
+            {(this.state.isPolygonActive || this.state.isPointActive) && (this.oldShape) && (
               <div
                 className="control-clear-button"
                 onClick={this.clearIncompleteDrawing}
               >
-                <p>Clear Selection</p>
+                <p style={{ whiteSpace: "nowrap" }}>Clear Selection</p>
               </div>
             )}
             <img
               src={MarkerIcon}
               style={{
                 background: this.state.isPointActive ? "#1890ff" : "#fff",
+                marginRight: "5px"
               }}
               className="control-icons"
               onClick={this.setPointDrawing}
