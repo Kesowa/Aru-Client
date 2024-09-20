@@ -55,12 +55,11 @@ function LocationCard(props) {
   const { setLoading } = useContext(LoaderContext);
 
   useEffect(() => {
-    if (once) {
-      fetchData();
-      setonce(false);
-    } else if (isChecked) {
-      fetchAllAlertsForLocation();
-    }
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (isChecked) fetchAllAlertsForLocation();
   }, [isChecked]);
 
   const fetchAllAlertsForLocation = async () => {
@@ -104,17 +103,27 @@ function LocationCard(props) {
       });
 
       if (location.data.status) {
-        const points = location.data.data.geometry.coordinates[0].map(
-          (point) => {
-            return {
-              lat: point[1],
-              lng: point[0],
-            };
-          }
-        );
+        let centerOfLocation: number[];
+        let points: any;
+        if (location.data.data.geometry.type === "Point") {
+          points = [{
+            lat: location.data.data.geometry.coordinates[1],
+            lng: location.data.data.geometry.coordinates[0]
+          }];
+          centerOfLocation = location.data.data.geometry.coordinates;
+        } else {
+          points = location.data.data.geometry.coordinates[0].map(
+            (point) => {
+              return {
+                lat: point[1],
+                lng: point[0],
+              };
+            }
+          );
+          centerOfLocation = findPolygonCenter(points);
+        }
         setLocationName(location.data.data.properties.name);
         setPoints(points);
-        const centerOfLocation = findPolygonCenter(points);
         setlocationCenter(centerOfLocation);
         getAddressfromLatLong(
           centerOfLocation[0],

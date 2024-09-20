@@ -82,7 +82,11 @@ class LocationCardMap extends Component<mapProps, mapState> {
   componentDidMount() {
     const loc = { lat: this.props.center[0], lng: this.props.center[1] };
     this.googleMap = this.createGoogleMap(loc);
-    this.drawMeasurements(this.props.points);
+    if (this.props.points.length > 1) {
+      this.drawMeasurements(this.props.points);
+    } else {
+      this.createGoogleMapMarker(this.props.points[0]);
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -231,12 +235,13 @@ class LocationCardMap extends Component<mapProps, mapState> {
     });
   };
 
-  createGoogleMapMarker = (location, map) => {
-    return new window.google.maps.Marker({
-      position: location,
-      map,
+  createGoogleMapMarker = (point: { lat: number, lng: number }) => {
+    const obj = new window.google.maps.Marker({
+      position: point,
+      map: this.googleMap,
       title: "Drone Location",
     });
+    obj.setMap(this.googleMap);
   };
 
   drawMeasurements = (points) => {
