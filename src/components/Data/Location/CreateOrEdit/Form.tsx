@@ -42,19 +42,22 @@ const CreateOrEditLocationForm = (props: any) => {
 
   const createLocation = () => {
     setLoading(true);
-    const data =  {
-      type: "Polygon",
-      coordinates: [
-        props.polygonData.points.map((point) => {
-          return [point.lng, point.lat];
-        }),
-      ],
+    const isPolygon = (props.polygonData.points.length > 1);
+    const firstPoint = [props.polygonData.points[0].lng, props.polygonData.points[0].lat];
+    const data = {
+      type: isPolygon ? "Polygon" : "Point",
+      coordinates: isPolygon ? [
+        [
+          ...props.polygonData.points.map((point) => {
+            return [point.lng, point.lat];
+          }),
+          firstPoint
+        ]
+      ] : firstPoint,
       properties: {
         name: formState.locationName,
       },
     };
-
-    data.coordinates[0].push(data.coordinates[0][0]);
 
     http
       .post(`${apis.CREATE_LOCATION}`, data)
@@ -85,24 +88,30 @@ const CreateOrEditLocationForm = (props: any) => {
   
   const editLocation = () => {
     setLoading(true);
+    const isPolygon = (props.polygonData?.points.length > 1);
+    const firstPoint = [props.polygonData?.points[0].lng, props.polygonData?.points[0].lat];
     const data = {
       id: props.locationToEdit._id,
       geometry: {
-        coordinates: [
-          props.polygonData
-            ? props.polygonData.points.map((point) => {
-                return [point.lng, point.lat];
-              })
-            : props.locationToEdit.geometry.coordinates[0]
-        ],
-        type: "Polygon",
+        coordinates: 
+          props.polygonData ? (
+            isPolygon ?
+              [[
+                ...props.polygonData.points.map((point) => {
+                  return [point.lng, point.lat];
+                }),
+                firstPoint
+              ]]
+              : firstPoint
+          ) : props.locationToEdit.geometry.coordinates,
+        type: props.polygonData ? (
+            isPolygon ? "Polygon" : "Point"
+          ) : props.locationToEdit.geometry.type,
       },
       properties: {
         name: formState.locationName,
       },
     };
-
-    data.geometry.coordinates[0].push(data.geometry.coordinates[0][0]);
 
     http
       .patch(`${apis.EDIT_LOCATION}`, data)
