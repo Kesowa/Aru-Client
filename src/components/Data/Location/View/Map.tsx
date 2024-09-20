@@ -536,7 +536,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
     return (
       <React.Fragment>
         <div
-          id="gmap_container"
+          id="data_gmap_container"
           style={{ borderRadius: "8px", position: "relative" }}
         >
           <div
@@ -544,7 +544,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
             ref={this.googleMapRef}
             style={{
               width: "100%",
-              height: "100%",
+              height: "74vh",
             }}
           />
           <div className="checkbox_container" style={{ marginLeft: "20px" }}>

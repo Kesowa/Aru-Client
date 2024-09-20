@@ -110,7 +110,8 @@ function LocationCard(props) {
             lat: location.data.data.geometry.coordinates[1],
             lng: location.data.data.geometry.coordinates[0]
           }];
-          centerOfLocation = location.data.data.geometry.coordinates;
+          // map component expects [lat,lng] instead of [lng,lat] in locationCenter
+          centerOfLocation = location.data.data.geometry.coordinates.reverse();
         } else {
           points = location.data.data.geometry.coordinates[0].map(
             (point) => {
