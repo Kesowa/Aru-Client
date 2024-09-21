@@ -82,7 +82,11 @@ class LocationCardMap extends Component<mapProps, mapState> {
   componentDidMount() {
     const loc = { lat: this.props.center[0], lng: this.props.center[1] };
     this.googleMap = this.createGoogleMap(loc);
-    this.drawMeasurements(this.props.points);
+    if (this.props.points.length > 1) {
+      this.drawMeasurements(this.props.points);
+    } else {
+      this.createGoogleMapMarker(this.props.points[0]);
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -231,12 +235,13 @@ class LocationCardMap extends Component<mapProps, mapState> {
     });
   };
 
-  createGoogleMapMarker = (location, map) => {
-    return new window.google.maps.Marker({
-      position: location,
-      map,
+  createGoogleMapMarker = (point: { lat: number, lng: number }) => {
+    const obj = new window.google.maps.Marker({
+      position: point,
+      map: this.googleMap,
       title: "Drone Location",
     });
+    obj.setMap(this.googleMap);
   };
 
   drawMeasurements = (points) => {
@@ -531,7 +536,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
     return (
       <React.Fragment>
         <div
-          id="gmap_container"
+          id="data_gmap_container"
           style={{ borderRadius: "8px", position: "relative" }}
         >
           <div
@@ -539,7 +544,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
             ref={this.googleMapRef}
             style={{
               width: "100%",
-              height: "100%",
+              height: "74vh",
             }}
           />
           <div className="checkbox_container" style={{ marginLeft: "20px" }}>

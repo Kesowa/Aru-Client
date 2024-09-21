@@ -12,7 +12,7 @@ import { LoaderContext } from "src/components/shared/Loader";
 type CreateOrEditLocationForm = {
   areaSelected: any;
   setAreaSelected: any;
-  polygonData: any;
+  geoData: any;
   setPolygonData: any;
   geolocation: any;
   isEditing: any;
@@ -34,27 +34,30 @@ const CreateOrEditLocationForm = (props: any) => {
   const { setLoading } = useContext(LoaderContext);
 
   useEffect(() => {
-    if (props.polygonData) {
-      setSelectedPoints(props.polygonData.points.length);
-      setArea(props.polygonData.area);
+    if (props.geoData) {
+      setSelectedPoints(props.geoData.points.length);
+      setArea(props.geoData.area);
     }
   }, [props]);
 
   const createLocation = () => {
     setLoading(true);
-    const data =  {
-      type: "Polygon",
-      coordinates: [
-        props.polygonData.points.map((point) => {
-          return [point.lng, point.lat];
-        }),
-      ],
+    const isPolygon = (props.geoData.points.length > 1);
+    const firstPoint = [props.geoData.points[0].lng, props.geoData.points[0].lat];
+    const data = {
+      type: isPolygon ? "Polygon" : "Point",
+      coordinates: isPolygon ? [
+        [
+          ...props.geoData.points.map((point) => {
+            return [point.lng, point.lat];
+          }),
+          firstPoint
+        ]
+      ] : firstPoint,
       properties: {
         name: formState.locationName,
       },
     };
-
-    data.coordinates[0].push(data.coordinates[0][0]);
 
     http
       .post(`${apis.CREATE_LOCATION}`, data)
@@ -85,24 +88,30 @@ const CreateOrEditLocationForm = (props: any) => {
   
   const editLocation = () => {
     setLoading(true);
+    const isPolygon = (props.geoData?.points.length > 1);
+    const firstPoint = [props.geoData?.points[0].lng, props.geoData?.points[0].lat];
     const data = {
       id: props.locationToEdit._id,
       geometry: {
-        coordinates: [
-          props.polygonData
-            ? props.polygonData.points.map((point) => {
-                return [point.lng, point.lat];
-              })
-            : props.locationToEdit.geometry.coordinates[0]
-        ],
-        type: "Polygon",
+        coordinates: 
+          props.geoData ? (
+            isPolygon ?
+              [[
+                ...props.geoData.points.map((point) => {
+                  return [point.lng, point.lat];
+                }),
+                firstPoint
+              ]]
+              : firstPoint
+          ) : props.locationToEdit.geometry.coordinates,
+        type: props.geoData ? (
+            isPolygon ? "Polygon" : "Point"
+          ) : props.locationToEdit.geometry.type,
       },
       properties: {
         name: formState.locationName,
       },
     };
-
-    data.geometry.coordinates[0].push(data.geometry.coordinates[0][0]);
 
     http
       .patch(`${apis.EDIT_LOCATION}`, data)
@@ -212,26 +221,29 @@ const CreateOrEditLocationForm = (props: any) => {
 
             {props.areaSelected && (
               <div>
-                <div className="data_selected" style={{ marginTop: "20px" }}>
-                  <img
-                    style={{ height: "20px", marginTop: "-20px" }}
-                    src={s_m}
-                  />
-                  <div className="data_selected_inner">
-                    <div>
-                        <p>
-                          <strong>Geofence Selected</strong>
-                        </p>
-                        <p>
-                          <span>{selectedPoints} Points Selected</span>{" "}
-                          <span>
-                            {" "}
-                            {`${(area * 0.000247105).toFixed(2)} acres`}
-                          </span>
-                        </p>
+                {
+                  (selectedPoints > 1) &&
+                  <div className="data_selected" style={{ marginTop: "20px" }}>
+                    <img
+                      style={{ height: "20px", marginTop: "-20px" }}
+                      src={s_m}
+                    />
+                    <div className="data_selected_inner">
+                      <div>
+                          <p>
+                            <strong>Geofence Selected</strong>
+                          </p>
+                          <p>
+                            <span>{selectedPoints} Points Selected</span>{" "}
+                            <span>
+                              {" "}
+                              {`${(area * 0.000247105).toFixed(2)} acres`}
+                            </span>
+                          </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                }
 
                 <div className="data_selcted_2" style={{ marginTop: "20px" }}>
                   <div className="location_details">
@@ -245,7 +257,7 @@ const CreateOrEditLocationForm = (props: any) => {
               </div>
             )}
 
-            {props.polygonData && (
+            {props.geoData && (
               <Form.Item>
                 <div className="mission_creation_buttons">
                   <Button
