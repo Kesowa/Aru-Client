@@ -5031,7 +5031,7 @@ function BaseMap(props) {
         name: layerName,
         type: layerType,
         color: layerColor,
-        inHeritOriginalColorFromFile: inheritColor.toString(),
+        inHeritOriginalColorFromFile: inheritColor,
         icon: icon2,
         ...(layerType === "Vector" ? { vector: layerProp } : {}),
         ...(layerType === "Raster" ? { raster: layerProp } : {}),
