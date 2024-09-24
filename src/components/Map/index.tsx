@@ -2946,8 +2946,8 @@ function BaseMap(props) {
         metadata["bounds"][3],
       ] as BBox;
     } else if (raster == "CESIUM_3D") {
-      const res = await http.get<Tileset>(STATIC_URL + metadata);
-      const tileset = res.data;
+      const res = await fetch(STATIC_URL + metadata);
+      const tileset = await res.json() as Tileset;
       const bounds_rad = [
         tileset.properties.Longitude.minimum,
         tileset.properties.Latitude.minimum,
