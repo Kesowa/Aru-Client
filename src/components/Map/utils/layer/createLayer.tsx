@@ -118,9 +118,10 @@ const CreateLayer = (props: any) => {
       // };
 
       const uploadTokenPromises = fileList.map((file) =>
-      uploadFile(file.originFileObj, DocModel.LAYER_FILES, (prog) =>
-        console.info("PROGRESS: " + prog)
-      )
+      uploadFile(file.originFileObj, DocModel.LAYER_FILES, (prog) => {
+        console.info("PROGRESS: " + prog);
+        setProgress(prog * 100);
+      } )
     );
       const uploadTokens = await Promise.all(uploadTokenPromises);
 
@@ -249,7 +250,6 @@ const CreateLayer = (props: any) => {
           <>
             {isUploading ? (
               <Progress
-                width="100%"
                 strokeLinecap="square"
                 percent={progress}
               />

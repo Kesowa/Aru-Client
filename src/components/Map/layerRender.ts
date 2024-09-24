@@ -172,10 +172,10 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             data: STATIC_URL + layer.layerpath,
             pickable: true,
             pointType: "icon",
-            iconSizeMinPixels: 6,
-            iconSizeUnits: "meters",
+            iconSizeMinPixels: 4,
+            iconSizeUnits: "pixels",
             iconSizeScale: 10,
-            getIconSize: 2,
+            getIconSize: 4,
             getIcon: (d) => {
               const iconSelector = (iconType) => {
                 let icon = "";
