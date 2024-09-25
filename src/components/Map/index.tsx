@@ -5022,7 +5022,10 @@ function BaseMap(props) {
       // };
 
       const docModel = layerType === "Vector" ? DocModel.VECTOR : layerType === "Raster" ? DocModel.RASTER : DocModel.LAYER_FILES;
-      const uploadToken = await uploadFile(fileList[0], docModel, (prog) => console.info("PROGRESS: " + prog));
+      const uploadToken = await uploadFile(fileList[0], docModel, (prog) => {
+        console.info("PROGRESS: " + prog);
+        setProgress(prog * 100);
+      });
 
       const body = {
         file: uploadToken,
