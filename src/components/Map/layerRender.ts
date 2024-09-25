@@ -18,6 +18,7 @@ import { hexToRGB } from "./colorUtils";
 import { MASK_ID } from ".";
 import { featureType, featureTypes } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
+import { LayerExtension } from "deck.gl";
 
 export type Layer = ILayer & {
   _isChecked?: boolean;
@@ -92,21 +93,21 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
   return layers
     .filter((layer) => layer._isChecked === true)
     .map((layer) => {
-      let maskProps: Record<string, any> = layer._isMasked
+      const maskProps: Record<string, any> = layer._isMasked
         ? {
           // enable masking
-          extensions: [new MaskExtension()],
           maskId: MASK_ID,
           // bring masked layers above others
           zIndex: 9999,
         }
         : {};
 
-      // Overrides previous mask settings
-      if (meshOverlayActive && layer.type == "Vector") {
-        maskProps = {
-          extensions: [new TerrainExtension()],
-        };
+      const getExtensions = (layer: Layer) : LayerExtension[] => {
+        if (meshOverlayActive && layer.type === "Vector") {
+          return [new MaskExtension(), new TerrainExtension()];
+        } else {
+          return [new MaskExtension()];
+        }
       }
 
       if (layer.type == "Raster") {
@@ -161,9 +162,10 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               data: null,
               image: props.data,
               bounds: [west, south, east, north],
-              ...maskProps,
             });
           },
+          ...maskProps,
+          extensions: getExtensions(layer),
         });
       } else if (layer.type === "Vector") {
         if (featureType[layer.vector] === featureTypes.POINT)
@@ -208,6 +210,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
                 ? hexToRGB(d.properties?.color as string)
                 : hexToRGB("#ff0000"),
             ...maskProps,
+            extensions: getExtensions(layer),
           });
         else if (featureType[layer.vector] === featureTypes.AIR_POLLUTION)
           return new HeatmapLayer({
@@ -270,6 +273,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             getAngle: (d) => 90 - d.properties.windDirection,
 
             ...maskProps,
+            extensions: getExtensions(layer),
           });
         else
           return new GeoJsonLayer({
@@ -296,6 +300,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
                 ? hexToRGB(d.properties?.color as string, 50)
                 : hexToRGB("#000000"),
             ...maskProps,
+            extensions: getExtensions(layer),
           });
       }
     });
