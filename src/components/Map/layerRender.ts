@@ -146,7 +146,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
           });
         }
         return new TileLayer({
-          id: layer._id,
+          id: maskProps.extensions ? layer._id +".ext" : layer._id,
           data: getRasterDataUrl(layer),
           minZoom: 0,
           maxZoom: 24,
@@ -168,7 +168,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
       } else if (layer.type === "Vector") {
         if (featureType[layer.vector] === featureTypes.POINT)
           return new GeoJsonLayer({
-            id: layer._id,
+            id: maskProps.extensions ? layer._id +".ext" : layer._id,
             data: STATIC_URL + layer.layerpath,
             pickable: true,
             pointType: "icon",
@@ -224,7 +224,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
           });
         else if (featureType[layer.vector] === featureTypes.WIND_DIRECTION)
           return new IconLayer({
-            id: layer._id,
+            id: maskProps.extensions ? layer._id +".ext" : layer._id,
             data: fetch(STATIC_URL + layer.layerpath)
               .then((response) => response.json())
               .then((data: GeoJson<Feature<Point, { windSpeed: number }>>) => {
@@ -273,7 +273,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
           });
         else
           return new GeoJsonLayer({
-            id: layer._id,
+            id: maskProps.extensions ? layer._id + ".ext" : layer._id,
             data: STATIC_URL + layer.layerpath,
             pickable: true,
             stroked: [
