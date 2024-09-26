@@ -5455,7 +5455,7 @@ function BaseMap(props) {
         feature: data,
       })
       .then((result) => {
-        updateLayerDataAfterEditing(result.data.result, null, selectedLayerId);
+        updateLayerDataAfterEditing(result.data.data, null, selectedLayerId);
         forceUpdateLayers(selectedLayerId);
         message.success(result.data.message);
       })
