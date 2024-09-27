@@ -45,9 +45,10 @@ interface Asset {
 
 interface TableProps {
   filter: string;
+  refreshAssets: boolean;
 }
 
-function AssetListing(props: TableProps) {
+function AssetListing({ filter, refreshAssets }: TableProps) {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [isTableLoading, setIsTableLoading] = useState(true);
@@ -59,7 +60,7 @@ function AssetListing(props: TableProps) {
 
   useEffect(() => {
     fetchAssets();
-  }, []);
+  }, [refreshAssets]);
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++ Fetch Assets +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -328,10 +329,10 @@ function AssetListing(props: TableProps) {
       <Table
         columns={columns}
         dataSource={
-          (props.filter === "all") ?
+          (filter === "all") ?
           assetTableData :
           assetTableData.filter((row) => {
-            return row.isActive === props.filter;
+            return row.isActive === filter;
           })
         }
         rowKey="_id"
