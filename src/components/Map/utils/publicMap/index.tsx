@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useMemo, useContext } from "react";
-import { v4 as uuid } from "uuid";
 import KesowaNewLogo from "../../../../static/kesowa-black.png";
 import { DataFilterExtension } from "@deck.gl/extensions";
 import * as turf from "@turf/turf";
@@ -20,6 +19,7 @@ import {
   MenuProps,
   DatePicker,
   Badge,
+  Popover,
 } from "antd";
 import {
   DoubleRightOutlined,
@@ -38,35 +38,25 @@ import {
 import "../../index.less";
 import DeckGL from "@deck.gl/react";
 import { FlyToInterpolator } from "deck.gl";
-import {
-  BitmapLayer,
-  GeoJsonLayer,
-  IconLayer,
-  PathLayer,
-} from "@deck.gl/layers";
+import { BitmapLayer, } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
 import { HTMLOverlayItem, HTMLOverlay } from "src/components/shared/HTMLOverlay";
 import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
   DrawPolygonMode,
-  CompositeMode,
   ModifyMode,
   ViewMode,
   DrawLineStringMode,
-  DrawPointMode,
   GeoJsonEditMode,
 } from "@deck.gl-community/editable-layers";
 import { StaticMap } from "react-map-gl";
+import InfoWindowContent from "../../utils/infoWindow";
 
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import moment from "moment";
 import { useParams } from "react-router-dom";
-import MarkerIcon from "../../../../static/MarkerIcon.png";
-import TankIcon from "../../../../static/TankIcon.png";
-import ValveIcon from "../../../../static/ValveIcon.png";
-import DotIcon from "../../../../static/DotIcon.png";
 
 import {
   COG_URL,
@@ -88,7 +78,6 @@ import { ILayersToTree } from "../../treeRender";
 import { WebMercatorViewport } from "viewport-mercator-project";
 import Fuse from "fuse.js";
 import { featureType } from "src/static/vectorprops";
-import { rasterProps } from "src/static/rasterprops";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
@@ -447,9 +436,6 @@ function PublicMap(props) {
       });
     }
   };
-  useEffect(() => {
-    focusSelectedLayers();
-  }, [AllLayers]);
 
   const fetchLayerBounds = async (
     type: string,
@@ -485,7 +471,6 @@ function PublicMap(props) {
         const bounds = await fetchLayerBounds(
           layer.type,
           layer.layerpath,
-          layer.flaggedFeatures
         );
         layersWithBounds.push({
           ...layer,
@@ -741,7 +726,7 @@ function PublicMap(props) {
             okText: "Yes",
             cancelText: "No",
             onOk: () => {
-              deleteGroup(id);
+              console.error("something tried to delete group:" + id);
             },
           });
           break;
@@ -808,7 +793,7 @@ function PublicMap(props) {
     );
   };
 
-  const getTitleElement = (layer: ILayer) => {
+  const getTitleElement = (layer: Layer) => {
     return (
       <Dropdown menu={{ items: [] }} trigger={["contextMenu"]}>
         <Tooltip
@@ -844,6 +829,22 @@ function PublicMap(props) {
                     : "140px",
               }}
               ellipsis={true}
+              onClick={() => {
+                if (layer._isChecked && layer._metadata?.bounds) {
+                  const { longitude, latitude, zoom } = calculateViewport(layer._metadata.bounds);
+                  setViewport({
+                    longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
+                    latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
+                    zoom,
+                    pitch: 0,
+                    minZoom: 0,
+                    maxZoom: 22,
+                    bearing: 0,
+                    transitionDuration: 2000,
+                    transitionInterpolator: new FlyToInterpolator(),
+                  });
+                }
+              }}
             >
               {layer.name}
             </Text>
@@ -867,292 +868,6 @@ function PublicMap(props) {
         </Text>
       </Dropdown>
     );
-  };
-
-  //----------------------Segrigate layers-------------------------------------------------------
-
-  // const options: any = [
-  //   {
-  //     value: "raster",
-  //     title: "RASTER",
-  //     children: [],
-  //     selectable: false,
-  //   },
-  //   {
-  //     value: "vector",
-  //     title: "VECTOR",
-  //     selectable: false,
-  //     children: [
-  //       {
-  //         value: "MultiLineString",
-  //         title: "Line",
-  //         selectable: false,
-  //         children: [],
-  //       },
-  //       {
-  //         value: "MultiPolygon",
-  //         title: "Area",
-  //         children: [],
-  //         selectable: false,
-  //       },
-  //       {
-  //         value: "Point",
-  //         title: "Point",
-  //         children: [],
-  //         selectable: false,
-  //       },
-  //     ],
-  //   },
-  // ];
-
-  // if (rasterProps) {
-  //   options.map((option) => {
-  //     if (option.value == "raster") {
-  //       rasterProps.map((rasterProp) => {
-  //         option.children.push({
-  //           value: "0-" + rasterProp._id + "-" + rasterProp.name,
-  //           title: rasterProp.name,
-  //         });
-  //       });
-  //     }
-  //   });
-  // }
-
-  // if (vectorProps) {
-  //   vectorProps.map((vectorProp) => {
-  //     if (vectorProp.type == "MultiLineString") {
-  //       options[1].children[0].children.push({
-  //         title: vectorProp.name,
-  //         value: "1-0-" + vectorProp._id + "-" + vectorProp.name,
-  //       });
-  //     }
-  //     if (vectorProp.type == "MultiPolygon") {
-  //       options[1].children[1].children.push({
-  //         title: vectorProp.name,
-  //         value: "1-1-" + vectorProp._id + "-" + vectorProp.name,
-  //       });
-  //     }
-  //     if (vectorProp.type == "Point") {
-  //       options[1].children[2].children.push({
-  //         title: vectorProp.name,
-  //         value: "1-2-" + vectorProp._id + "-" + vectorProp.name,
-  //       });
-  //     }
-  //   });
-  //   options[1].children[0].children.sort(sortAlphabetically);
-  //   options[1].children[1].children.sort(sortAlphabetically);
-  //   options[1].children[2].children.sort(sortAlphabetically);
-  // }
-
-    newTreeDataVector = td[0].children.map((layer) => {
-      if (layer.group) {
-        let groupLayers = [];
-        const value = {
-          ...layer.value,
-        };
-        groupLayers = layer.value.children.map((l) => {
-          return getTreeData(l, "vector", td[0]["key"]);
-        });
-
-        value.children = [...groupLayers];
-        return getGroupTitle(value, layer.id);
-      } else {
-        return getTreeData(layer, "vector", td[0]["key"]);
-      }
-    });
-    data[0].children = [...newTreeDataVector];
-
-    newTreeDataRaster = td[1].children.map((layer) => {
-      if (layer.group) {
-        let groupLayers = [];
-        const value = {
-          ...layer.value,
-        };
-        groupLayers = layer.value.children.map((l) => {
-          return getTreeData(l, "raster", td[1]["key"]);
-        });
-        value.children = [...groupLayers];
-        return getGroupTitle(value, layer.id);
-      } else {
-        return getTreeData(layer, "raster", td[1]["key"]);
-      }
-    });
-    data[1].children = [...newTreeDataRaster];
-
-    setTreeDataa(data);
-
-  const segrigateLayers = (layers: ILayer[]) => {
-    let data = [...treeDataa];
-    console.log("TREE DATA COPY", data);
-    let allLayers = {};
-    if (
-      sortType ||
-      timeEnabled ||
-      selectedRasterProps ||
-      selectedVectorProps ||
-      selectedVectorPropsType
-    ) {
-      data = [
-        {
-          title: "City Data",
-          key: "1",
-          children: [],
-        },
-        data[1],
-      ];
-    }
-    if (!sortType) {
-      layers.sort((a, b) => {
-        return moment(b.captureDate).diff(moment(a.captureDate));
-      });
-    }
-
-    const rasters = layers.filter((layer) => layer.type === "Raster");
-    const vectors = layers.filter((layer) => layer.type === "Vector");
-
-    setvectorLayers(vectors);
-    const rasterGroups = {};
-    const allGroups = {};
-
-    rasters.forEach((layer, i) => {
-      if (!layer.layerGroupId) {
-        data[1].children.push({
-          key: `2-${layer._id}`,
-          ...layer,
-        });
-      } else {
-        if (!rasterGroups[layer.layerGroupId._id]) {
-          rasterGroups[layer.layerGroupId._id] = {
-            name: layer.layerGroupId.name,
-            children: [],
-          };
-          allGroups[layer.layerGroupId._id] = {
-            name: layer.layerGroupId.name,
-            id: layer.layerGroupId._id,
-            groupType: 2,
-          };
-        }
-        rasterGroups[layer.layerGroupId._id].children.push({
-          key: `2-${layer._id}`,
-          ...layer,
-        });
-      }
-
-      const l = {};
-      if (props.isBaseMap && !props.isMissionMap) {
-        // -----to merge all rasters paths------------------
-        l[data[1]["key"] + "-" + layer._id] = {
-          layerPath: layer.layerdataArr,
-          type: layer.raster,
-          settings: {
-            bidx: layer._metadata?.bidx || null,
-            bandExp: layer._metadata?.bandExp || null,
-            colorMap: layer._metadata?.colorMap || null,
-            resamplingMethod: layer._metadata?.resamplingMethod || null,
-            overlayId: layer._metadata?.overlayId || null,
-          },
-          name: layer.name,
-          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
-        };
-      } else {
-        l[data[1]["key"] + "-" + layer._id] = {
-          layerPath: layer.layerpath,
-          type: layer.raster,
-          settings: {
-            bidx: layer._metadata?.bidx || null,
-            bandExp: layer._metadata?.bandExp || null,
-            colorMap: layer._metadata?.colorMap || null,
-            resamplingMethod: layer._metadata?.resamplingMethod || null,
-            overlayId: layer._metadata?.overlayId || null,
-            minp: layer.minp,
-            maxp: layer.maxp,
-          },
-          name: layer.name,
-          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
-        };
-      }
-
-      allLayers = {
-        ...allLayers,
-        ...l,
-      };
-    });
-
-    const vectorGroups = {};
-
-    vectors.forEach((layer, i) => {
-      if (!layer.layerGroupId) {
-        data[0].children.push({
-          key: `1-${layer._id}`,
-          ...layer,
-        });
-      } else {
-        if (!vectorGroups[layer.layerGroupId._id]) {
-          vectorGroups[layer.layerGroupId._id] = {
-            name: layer.layerGroupId.name,
-            children: [],
-          };
-          allGroups[layer.layerGroupId._id] = {
-            name: layer.layerGroupId.name,
-            id: layer.layerGroupId._id,
-            groupType: 1,
-          };
-        }
-        vectorGroups[layer.layerGroupId._id].children.push({
-          key: `1-${layer._id}`,
-          ...layer,
-        });
-      }
-
-      const l = {};
-      l[data[0]["key"] + "-" + layer._id] = {
-        layerPath: layer.layerpath,
-        type: featureType[layer.vector],
-        name: layer.name,
-        id: layer._id,
-        T3DTranspose: false,
-        groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
-        layerLabel: layer.layerLabel,
-      };
-
-      allLayers = {
-        ...allLayers,
-        ...l,
-      };
-    });
-
-    for (const [key, value] of Object.entries(vectorGroups) as any) {
-      data[0].children.push({
-        group: true,
-        value: value,
-        id: key,
-        key: "group-" + key,
-        groupType: 1,
-      });
-    }
-
-    for (const [key, value] of Object.entries(rasterGroups) as any) {
-      data[1].children.push({
-        group: true,
-        value: value,
-        id: key,
-        key: "group-" + key,
-        groupType: 2,
-      });
-    }
-
-    setAllLayerGroups(allGroups);
-    setAllLayers(allLayers);
-    setTreeStructure(data);
-    //--------check last ortho-----
-    rasters.forEach((element) => {
-      if (element.raster === rasterProps.ORTHO) {
-        const cl: any = [];
-        cl.push(`2-${element._id}`);
-        setCheckedKeys(cl);
-        return;
-      }
-    });
   };
 
   // TabPanes
@@ -1181,106 +896,6 @@ function PublicMap(props) {
     }
   }, [layerToAddInAttributeTable]);
 
-  // ++++++++++++++++++++++++++++++++++++++++++++++ Add Layer to list after createing new one +++++++++++++++++++++++++++++++++++++++++++++++
-  const addLayer = (layer) => {
-    try {
-      setIsDrawing(false);
-      setFeatureState(myFeatureCollection);
-      const data: any = [...treeStructure];
-      let layers = {
-        ...allLayers,
-      };
-
-      if (layer.type === "Vector") {
-        layer.key = `1-${layer._id}`;
-        data[0].children.push(layer);
-        const l = {};
-        l[data[0]["key"] + "-" + layer._id] = {
-          layerPath: layer.layerpath,
-          type: featureType[layer.vector],
-          name: layer.name,
-          id: layer._id,
-        };
-
-        layers = {
-          ...layers,
-          ...l,
-        };
-
-        data[0].children.sort((a, b) =>
-          moment(b.captureDate).diff(moment(a.captureDate))
-        );
-
-        setvectorLayers([...vectorLayers, layer]);
-      } else {
-        layer.key = `2-${layer._id}`;
-        data[1].children.push(layer);
-
-        const l = {};
-
-        if (props.isBaseMap) {
-          // -----to merge all rasters paths------------------
-
-          l[data[1]["key"] + "-" + layer._id] = {
-            layerPath: layer.layerdataArr,
-            type: layer.raster,
-            settings: {
-              bidx: layer._metadata?.bidx || null,
-              bandExp: layer._metadata?.bandExp || null,
-              colorMap: layer._metadata?.colorMap || null,
-              resamplingMethod: layer._metadata?.resamplingMethod || null,
-              overlayId: layer._metadata?.overlayId || null,
-            },
-            name: layer.name,
-            id: layer._id,
-          };
-        } else {
-          l[data[1]["key"] + "-" + layer._id] = {
-            layerPath: layer.layerpath,
-            type: layer.raster,
-            settings: {
-              bidx: layer._metadata?.bidx || null,
-              bandExp: layer._metadata?.bandExp || null,
-              colorMap: layer._metadata?.colorMap || null,
-              resamplingMethod: layer._metadata?.resamplingMethod || null,
-              overlayId: layer._metadata?.overlayId || null,
-              minp: layer.minp,
-              maxp: layer.maxp,
-            },
-            name: layer.name,
-            id: layer._id,
-          };
-        }
-
-        layers = {
-          ...layers,
-          ...l,
-        };
-
-        data[1].children.sort((a, b) =>
-          moment(b.captureDate).diff(moment(a.captureDate))
-        );
-      }
-
-      while (data[0].children.length && data[0].children[0].group) {
-        data[0].children.push(data[0].children.shift());
-      }
-
-      while (data[1].children.length && data[1].children[0].group) {
-        data[1].children.push(data[1].children.shift());
-      }
-      setAllLayers(layers);
-      setTreeStructure(data);
-
-      if (layer.type === "Vector") {
-        const cl = [...checkedKeys];
-        cl.push(data[0]["key"] + "-" + layer._id);
-        setCheckedKeys(cl);
-      }
-    } catch (error) {
-      message.error(error.message);
-    }
-  };
 
   // DRAW POLYGON FUNCTION
   const drawPolygonTool = new (EditableGeoJsonLayer as any)({
@@ -1659,7 +1274,7 @@ function PublicMap(props) {
               { showPopup &&
                 (
                 <HTMLOverlay>
-                 <HTMLOverlayItem coordinates={coordinates} viewState={setViewport}>
+                 <HTMLOverlayItem coordinates={coordinates}>
                     <Popover
                       content={
                         <>
@@ -1842,7 +1457,7 @@ function PublicMap(props) {
                         {sortType && (
                           <div style={{ float: "right" }}>
                             <SortAscendingOutlined
-                              onClick={() => changeSortArrange(true)}
+                              onClick={() => console.error("Something tried to sort:" + false)}
                               style={{
                                 color: isAscending ? "#1890ff" : "#000",
                                 fontSize: "1.2rem",
@@ -1851,7 +1466,7 @@ function PublicMap(props) {
                               }}
                             />
                             <SortDescendingOutlined
-                              onClick={() => changeSortArrange(false)}
+                              onClick={() => console.error("Something tried to sort:" + false)}
                               style={{
                                 color: !isAscending ? "#1890ff" : "#000",
                                 fontSize: "1.2rem",
