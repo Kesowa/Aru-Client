@@ -217,7 +217,6 @@ function BaseMap(props) {
   const [featureIdx, setFeatureIdx] = useState(null);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
-  const [flag, setFlag] = useState(false);
   const [perms, setPerms] = useState({
     canCreateLayer: false,
     canDeleteLayer: true,
@@ -1861,7 +1860,6 @@ function BaseMap(props) {
     geoJsonAlert,
     flaggedFilter,
     unflaggedFilter,
-    flag,
     pointMarkerSize,
     opcity,
   ]);
@@ -3179,7 +3177,7 @@ function BaseMap(props) {
       setLoading(true);
       getAllLayers(null);
     }
-  }, [props.isBaseMap, refreshLayer, flag]);
+  }, [props.isBaseMap, refreshLayer]);
 
   //---------------Fetch all layers in mission----------------------------------------
 
@@ -6790,7 +6788,7 @@ function BaseMap(props) {
                 info.index,
                 info.coordinate,
                 layer.name,
-                "PolygonView",
+                (featureType[layer.vector] === featureTypes.POINT) ? "PointView" : "PolygonView",
                 info.object,
                 false,
                 layer._id,
@@ -6892,8 +6890,7 @@ function BaseMap(props) {
                       missionLayer={missionLayer}
                       setMissionLayer={setMissionLayer}
                       AllLayers={AllLayers}
-                      flag={flag}
-                      setFlag={setFlag}
+                      SetAllLayers={SetAllLayers}
                       setShouldAttributeTableReload={
                         setShouldAttributeTableReload
                       }
