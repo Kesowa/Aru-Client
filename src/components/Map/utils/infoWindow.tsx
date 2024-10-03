@@ -30,6 +30,7 @@ import { STATIC_URL } from "src/constants";
 import { BsFlagFill } from "react-icons/bs";
 import { AuthContext } from "src/services/authUtils";
 import { ThreadContext } from "src/services/threadUtils";
+import { Layer } from "../layerRender";
 
 const { Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -46,6 +47,7 @@ function InfoWindow(props) {
   );
   const [areaUnit, setAreaUnit] = useState("sq. m");
   const [lengthUnit, setLenghtUnit] = useState("km");
+  const [flag, setFlag] = useState(false);
 
   const { logout } = useContext(AuthContext);
   const { thread, openThread } = useContext(ThreadContext);
@@ -382,7 +384,7 @@ function InfoWindow(props) {
         .then((result) => {
           if (result.data.status) {
             console.log("Alert data", result.data.data);
-            props.setFlag(result.data.data[0].isFlagged);
+            setFlag(result.data.data[0].isFlagged);
           } else {
             message.error(result.data.message);
           }
@@ -396,9 +398,9 @@ function InfoWindow(props) {
           (layer) => layer._id === props.layerId
         )?.flaggedFeatures.includes(props.featureIdx)
       ) {
-        props.setFlag(true);
+        setFlag(true);
       } else {
-        props.setFlag(false);
+        setFlag(false);
       }
     }
   };
@@ -412,7 +414,7 @@ function InfoWindow(props) {
   function updateLayerFlag() {
     const body = {
       featureIndex: [props.featureIdx],
-      flag: !props.flag,
+      flag: !flag,
     };
     http
       .patch(`${apis.FLAG_FEATURE}/${props.layerId}`, body)
@@ -421,10 +423,17 @@ function InfoWindow(props) {
           message.success(
             `Feature ${!body.flag ? "un-flagged" : "flagged"} successfully!`
           );
-          props.setFlag((prev) => !prev);
+          props.SetAllLayers((prev: Layer[]) => prev.map((layer) => {
+            if (layer._id === props.layerId) {
+              if (body.flag) layer.flaggedFeatures.push(props.featureIdx);
+              else layer.flaggedFeatures = layer.flaggedFeatures.filter(idx => idx !== props.featureIdx);
+            }
+            return layer;
+          }));
           props.setShouldAttributeTableReload(
             !props.shouldAttributeTableReload
           );
+          setFlag(body.flag);
         } else {
           message.error(res.data.message);
         }
@@ -438,7 +447,7 @@ function InfoWindow(props) {
   const updateAlert = () => {
     const body = {
       id: props.feature.properties._id,
-      update: { isFlagged: !props.flag },
+      update: { isFlagged: !flag },
     };
     http
       .patch(`${apis.UPDATE_ALERT}`, body)
@@ -449,7 +458,7 @@ function InfoWindow(props) {
               !body.update.isFlagged ? "un-flagged" : "flagged"
             } successfully!`
           );
-          props.setFlag((prev) => !prev);
+          setFlag((prev) => !prev);
         } else message.error(res.data.message);
       })
       .catch((err) => {
@@ -488,7 +497,7 @@ function InfoWindow(props) {
     Object.keys(object).filter((key: any) => {
       if (type === "Alert") {
         if (key === "isFlagged") {
-          props.setFlag(object[key]);
+          setFlag(object[key]);
         }
         if (!missionAlertKeys.includes(key)) {
           filtered[key] = object[key];
