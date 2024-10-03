@@ -829,8 +829,13 @@ function PublicMap(props) {
                           // check the layer sothat feature is visible on map
                           SetAllLayers((prev) =>
                             prev.map((layer) => {
-                              if (layer._id === f.layerId)
+                              if (layer._id === f.layerId) {
                                 layer._isChecked = true;
+                                layer._metadata = {
+                                  ...layer._metadata,
+                                  searchedFeatureIndex: searchResult.refIndex,
+                                }
+                              }
                               return layer;
                             })
                           );
@@ -855,7 +860,17 @@ function PublicMap(props) {
                           return;
                         }
                       }
-                      message.warn("No match found!");
+                      // this section is reached both when search failed AND when search cleared
+                      if (searchValue !== "") message.warn("No match found!");
+                      SetAllLayers((prev) =>
+                        prev.map((layer) => {
+                          layer._metadata = {
+                            ...layer._metadata,
+                            searchedFeatureIndex: null,
+                          }
+                          return layer;
+                        })
+                      );
                     }}
                   />
                 </Col>

@@ -14,7 +14,7 @@ import { COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
 import { Feature, GeoJson, Point } from "src/types/geojson";
 import { ILayer } from "src/types/layer";
 import http from "src/services/httpCall";
-import { hexToRGB } from "./colorUtils";
+import { hexToRGB, invertColor } from "./colorUtils";
 import { MASK_ID } from ".";
 import { featureType, featureTypes } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
@@ -30,6 +30,7 @@ export type Layer = ILayer & {
     colorMap?: string;
     resamplingMethod?: string;
     overlayId?: string;
+    searchedFeatureIndex?: number | null;
   };
   _isMeshSource?: boolean;
 };
@@ -276,7 +277,21 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
         else
           return new GeoJsonLayer({
             id: maskProps.extensions ? layer._id + ".ext" : layer._id,
-            data: STATIC_URL + layer.layerpath,
+            data: fetch(STATIC_URL + layer.layerpath)
+            .then((response) => response.json())
+            .then((data) => {
+              const idx = layer._metadata?.searchedFeatureIndex;
+              if (idx) {
+                const oldColor = data.features[idx].properties?.color;
+                if (oldColor)
+                  data.features[idx].properties.color = invertColor(oldColor);
+                else
+                  data.features[idx].properties.color = "808080"; // light grey
+                // if property has no color, it would get assigned black ("000000") as default
+                // so to highlight property, light grey used
+              }
+              return data.features;
+            }),
             pickable: true,
             stroked: [
               featureTypes.MULTI_POLYGON,
