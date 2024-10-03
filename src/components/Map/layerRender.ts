@@ -68,13 +68,15 @@ const getRasterDataUrl = (layer: Layer) => {
   };
   switch (layer.raster) {
     case rasterProps.NDVI:
-      return `${COG_URL}/cog/tiles/{z}/{x}/{y}%401x?url=${TITILER_STATIC}${layer.layerpath}`;
+      return `${COG_URL}/cog/tiles/WebMercatorQuad/{z}/{x}/{y}%401x?url=${TITILER_STATIC}${layer.layerpath}`;
 
     case rasterProps.NDWI:
-      return `${COG_URL}/cog/tiles/{z}/{x}/{y}%401x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}`;
+      return `${COG_URL}/cog/tiles/WebMercatorQuad/{z}/{x}/{y}%401x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}`;
 
     case rasterProps.DEM:
-      return `${COG_URL}/cog/tiles/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${layer.minp}%2C${layer.maxp}&colormap_name=${settings.colorMap}`;
+      if (layer._render3D)
+        return `${COG_URL}/cog/tiles/WebMercatorQuad/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${settings.resamplingMethod}&algorithm=terrainrgb`;
+      return `${COG_URL}/cog/tiles/WebMercatorQuad/{z}/{x}/{y}@1x?url=${TITILER_STATIC}${layer.layerpath}&resampling_method=${settings.resamplingMethod}&bidx=${settings.bidx}&rescale=${layer.minp}%2C${layer.maxp}&colormap_name=${settings.colorMap}`;
 
     case rasterProps.POINT_CLOUD:
       return `${STATIC_URL}${layer.metadata}`;
@@ -83,7 +85,7 @@ const getRasterDataUrl = (layer: Layer) => {
       return `${STATIC_URL}${layer.metadata}`;
 
     default:
-      return `${COG_URL}/cog/tiles/{z}/{x}/{y}.png?url=${TITILER_STATIC}${layer.layerpath}`;
+      return `${COG_URL}/cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png?url=${TITILER_STATIC}${layer.layerpath}`;
   }
 };
 
@@ -131,10 +133,10 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
           return new TerrainLayer({
             id: layer._id,
             elevationDecoder: {
-              rScaler: 0.299,
-              gScaler: 0.587,
-              bScaler: 0.114,
-              offset: 0,
+              rScaler: 6553.6,
+              gScaler: 25.6,
+              bScaler: 0.1,
+              offset: -10000,
             },
             minZoom: 13,
             maxZoom: 19,

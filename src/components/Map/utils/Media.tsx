@@ -400,11 +400,13 @@ function Media(props) {
           const body = {
             file: uploadToken,
             layerId: props.layerId,
-            sys_Id: props.featureIndex,
-            centerPointsLat: props.coordinates[1],
-            centerPointsLng: props.coordinates[0],
+            sys_Id:  props.feature.properties.sys_id,
+            centerPoints: { 
+              lat: props.coordinates[1],
+              lng: props.coordinates[0],
+            },
             type: options.file.type,
-            featureLabel:props.feature.properties[props.layerLabel],
+            featureLabel: props.feature.properties[props.layerLabel],
           };
 
           // const fData = new FormData();

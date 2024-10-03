@@ -222,6 +222,157 @@ function InfoWindow(props) {
     );
   };
 
+  const renderFeatureAddress = () => {
+    return (
+      <div className="address-content">
+        {loader ? (
+          <div className="spinner">
+            <Spin />
+          </div>
+        ) : (
+          <>
+            <Paragraph copyable>{address}</Paragraph>
+            <a
+              href={`https://www.google.com/maps/?q=${props.coordinates[1]},${props.coordinates[0]}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Show on google maps
+            </a>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  const renderFeatureOptions = () => {
+    return (
+      <>
+        {!props.show && (
+          <div style={{ float: "right", marginTop: "4px" }}>
+            <Row>
+              {
+                props.missionLayer === "Alert" ?
+                (<Tooltip placement="right" title={"Open Thread"}>
+                  <MessageOutlined
+                    style={{
+                      color: thread.open ? "#3b86ff" : "#000",
+                      cursor: "pointer",
+                      fontSize: "16px",
+                    }}
+                    onClick={() => {
+                      props.setThumbnail(
+                        alertThumbnail(props.feature.properties)
+                      );
+                      openThread("alert", props.feature.properties._id, {});
+                    }}
+                  />
+                </Tooltip>) :
+                (<Tooltip placement="bottom" title="Open Media">
+                  <Badge
+                    size="small"
+                    count={fileCount}
+                    className="site-badge-count-4"
+                  >
+                    <CameraOutlined
+                      style={{ marginRight: "6px" }}
+                      onClick={() => openImages()}
+                    />
+                  </Badge>
+                </Tooltip>)
+              }
+              {
+                props.missionLayer !== "VOD" &&
+                <Tooltip
+                  placement={props.missionLayer === "Alert" ? "right" : "bottom"}
+                  title={props.flag ? "Unflag" : "Flag"}
+                >
+                  <BsFlagFill
+                    style={{
+                      color: props.flag ? "#da1c5c" : "#000",
+                      cursor: "pointer",
+                      [(props.missionLayer === "Alert") ? "fontSize" : ""]: "16px",
+                      [(props.missionLayer === "Alert") ? "marginLeft" : ""]: "5px",
+                    }}
+                    onClick={() => {
+                      toggleFlag();
+                    }}
+                  />
+                </Tooltip>
+              }
+            </Row>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  const renderAttributeContent = () => {
+    return (
+      <div className="attribute-content">
+        {props.show ? (
+          <></>
+        ) : (
+          <>
+            {imageToShow.length > 0 || props.videoToShow?.length > 0 ? (
+              <Row>
+                <Col span={15} className="properties">
+                  {Object.keys(properties).map((key: any, i: any) => (
+                    <Row key={i}>
+                      <Col md={10}>
+                        <Text className="key" strong>
+                          {key}
+                        </Text>
+                      </Col>
+                      <Col md={14}>
+                        <span className="value">{properties[key]}</span>
+                      </Col>
+                    </Row>
+                  ))}
+                </Col>
+                <Col span={9} className="image-part">
+                  <Spin spinning={imageLoader}>
+                    {props.missionLayer === "Alert" ? (
+                      <Image src={STATIC_URL + imageToShow[0]} />
+                    ) : props.missionLayer === "VOD" ? (
+                      <img
+                        src={STATIC_URL + props.videoToShow[0].thumbnail}
+                        style={{ cursor: "pointer" }}
+                      />
+                    ) : (
+                      <img
+                        src={`${STATIC_URL}/images/geojson/1x_${
+                          imageToShow[0].filePath.split("/")[3]
+                        }`}
+                        onClick={() => openImages()}
+                        style={{ cursor: "pointer" }}
+                      />
+                    )}
+                  </Spin>
+                </Col>
+              </Row>
+            ) : (
+              <>
+                {Object.keys(properties).map((key: any, i: any) => (
+                  <Row key={i}>
+                    <Col md={10}>
+                      <Text className="key" strong>
+                        {key}
+                      </Text>
+                    </Col>
+                    <Col md={14}>
+                      <span className="value">{properties[key]}</span>
+                    </Col>
+                  </Row>
+                ))}
+              </>
+            )}
+          </>
+        )}
+      </div>
+    );
+  }
+
   const initFlag = () => {
     if (props.missionLayer === "Alert") {
       http
@@ -255,7 +406,9 @@ function InfoWindow(props) {
   };
 
   useEffect(() => {
-    initFlag();
+    if (!props.isPublic) {
+      initFlag();
+    }
   }, []);
 
   function updateLayerFlag() {
@@ -431,87 +584,8 @@ function InfoWindow(props) {
       return (
         <>
           <div className="infoWindowContent">
-            <div className="attribute-content">
-              {props.show ? (
-                <></>
-              ) : (
-                <>
-                  {imageToShow.length > 0 || props.videoToShow.length > 0 ? (
-                    <Row>
-                      <Col span={15} className="properties">
-                        {Object.keys(properties).map((key: any, i: any) => (
-                          <Row key={i}>
-                            <Col md={10}>
-                              <Text className="key" strong>
-                                {key}
-                              </Text>
-                            </Col>
-                            <Col md={14}>
-                              <span className="value">{properties[key]}</span>
-                            </Col>
-                          </Row>
-                        ))}
-                      </Col>
-                      <Col span={9} className="image-part">
-                        <Spin spinning={imageLoader}>
-                          {props.missionLayer === "Alert" ? (
-                            <Image src={STATIC_URL + imageToShow[0]} />
-                          ) : props.missionLayer === "VOD" ? (
-                            <img
-                              src={STATIC_URL + props.videoToShow[0].thumbnail}
-                              style={{ cursor: "pointer" }}
-                            />
-                          ) : (
-                            <img
-                              src={`${STATIC_URL}/images/geojson/1x_${
-                                imageToShow[0].filePath.split("/")[3]
-                              }`}
-                              onClick={() => openImages()}
-                              style={{ cursor: "pointer" }}
-                            />
-                          )}
-                        </Spin>
-                      </Col>
-                    </Row>
-                  ) : (
-                    <>
-                      {Object.keys(properties).map((key: any, i: any) => (
-                        <Row key={i}>
-                          <Col md={10}>
-                            <Text className="key" strong>
-                              {key}
-                            </Text>
-                          </Col>
-                          <Col md={14}>
-                            <span className="value">{properties[key]}</span>
-                          </Col>
-                        </Row>
-                      ))}
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-            {!props.isPublic && (
-              <div className="address-content">
-                {loader ? (
-                  <div className="spinner">
-                    <Spin />
-                  </div>
-                ) : (
-                  <>
-                    <Paragraph copyable>{address}</Paragraph>
-                    <a
-                      href={`https://www.google.com/maps/?q=${props.coordinates[1]},${props.coordinates[0]}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Show on google maps
-                    </a>
-                  </>
-                )}
-              </div>
-            )}
+            {renderAttributeContent()}
+            {renderFeatureAddress()}
             <div className="sub-info">
               <span className="coordinates">
                 <Text copyable>
@@ -520,85 +594,7 @@ function InfoWindow(props) {
                 </Text>
               </span>
               <span>
-                {!props.isPublic && (
-                  <>
-                    <div
-                      style={{
-                        float: "right",
-                        marginTop: "4px",
-                        display: "flex",
-                      }}
-                    >
-                      {!props.show && props.missionLayer !== "Alert" && (
-                        <Row>
-                          <Tooltip placement="bottom" title="Open Media">
-                            <Badge
-                              size="small"
-                              count={fileCount}
-                              className="site-badge-count-4"
-                            >
-                              <CameraOutlined
-                                style={{ marginRight: "6px" }}
-                                onClick={() => openImages()}
-                              />
-                            </Badge>
-                          </Tooltip>
-                          {props.missionLayer !== "VOD" && (
-                            <Tooltip
-                              placement="bottom"
-                              title={flag ? "Unflag" : "Flag"}
-                            >
-                              <BsFlagFill
-                                style={{
-                                  color: flag ? "#da1c5c" : "#000",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() => {
-                                  toggleFlag();
-                                }}
-                              />
-                            </Tooltip>
-                          )}
-                        </Row>
-                      )}
-                      {props.missionLayer === "Alert" && (
-                        <>
-                          <Tooltip placement="right" title={"Open Thread"}>
-                            <MessageOutlined
-                              style={{
-                                color: thread.open ? "#3b86ff" : "#000",
-                                cursor: "pointer",
-                                fontSize: "16px",
-                              }}
-                              onClick={() => {
-                                props.setThumbnail(
-                                  alertThumbnail(props.feature.properties)
-                                );
-                                openThread("alert", props.feature.properties._id, {});
-                              }}
-                            />
-                          </Tooltip>
-                          <Tooltip
-                            placement="right"
-                            title={flag ? "Unflag" : "Flag"}
-                          >
-                            <BsFlagFill
-                              style={{
-                                color: flag ? "#da1c5c" : "#000",
-                                cursor: "pointer",
-                                fontSize: "16px",
-                                marginLeft: "5px",
-                              }}
-                              onClick={() => {
-                                toggleFlag();
-                              }}
-                            />
-                          </Tooltip>
-                        </>
-                      )}
-                    </div>
-                  </>
-                )}
+                {!props.isPublic && renderFeatureOptions()}
               </span>
             </div>
             {props.show && saveDrawingButton()}
@@ -611,78 +607,8 @@ function InfoWindow(props) {
       return (
         <>
           <div className="infoWindowContent">
-            <div className="attribute-content">
-              {props.show ? (
-                <></>
-              ) : (
-                <>
-                  {imageToShow.length > 0 ? (
-                    <Row>
-                      <Col span={15} className="properties">
-                        {Object.keys(properties).map((key: any, i: any) => (
-                          <Row key={i}>
-                            <Col md={10}>
-                              <Text className="key" strong>
-                                {key}
-                              </Text>
-                            </Col>
-                            <Col md={14}>
-                              <span className="value">{properties[key]}</span>
-                            </Col>
-                          </Row>
-                        ))}
-                      </Col>
-                      <Col span={9} className="image-part">
-                        <Spin spinning={imageLoader}>
-                          <img
-                            src={`${STATIC_URL}/images/geojson/1x_${
-                              imageToShow[0].filePath.split("/")[3]
-                            }`}
-                            onClick={() => openImages()}
-                            style={{ cursor: "pointer" }}
-                          />
-                        </Spin>
-                      </Col>
-                    </Row>
-                  ) : (
-                    <>
-                      {Object.keys(properties).map((key: any, i: any) => (
-                        <Row key={i}>
-                          <Col md={10}>
-                            <Text className="key" strong>
-                              {key}
-                            </Text>
-                          </Col>
-                          <Col md={14}>
-                            <span className="value">{properties[key]}</span>
-                          </Col>
-                        </Row>
-                      ))}
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-            {!props.isPublic && (
-              <div className="address-content">
-                {loader ? (
-                  <div className="spinner">
-                    <Spin />
-                  </div>
-                ) : (
-                  <>
-                    <Paragraph copyable>{address}</Paragraph>
-                    <a
-                      href={`https://www.google.com/maps/?q=${props.coordinates[1]},${props.coordinates[0]}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Show on google maps
-                    </a>
-                  </>
-                )}
-              </div>
-            )}
+            {renderAttributeContent()}
+            {renderFeatureAddress()}
             <div className="sub-info">
               <span className="coordinates">
                 <Text>
@@ -731,42 +657,7 @@ function InfoWindow(props) {
                 </Text>
               </span>
               <span>
-                {!props.isPublic && (
-                  <>
-                    {!props.show && (
-                      <div style={{ float: "right", marginTop: "4px" }}>
-                        <Row>
-                          <Tooltip placement="bottom" title="Open Media">
-                            <Badge
-                              size="small"
-                              count={fileCount}
-                              className="site-badge-count-4"
-                            >
-                              <CameraOutlined
-                                style={{ marginRight: "6px" }}
-                                onClick={() => openImages()}
-                              />
-                            </Badge>
-                          </Tooltip>
-                          <Tooltip
-                            placement="bottom"
-                            title={flag ? "Unflag" : "Flag"}
-                          >
-                            <BsFlagFill
-                              style={{
-                                color: flag ? "#da1c5c" : "#000",
-                                cursor: "pointer",
-                              }}
-                              onClick={() => {
-                                toggleFlag();
-                              }}
-                            />
-                          </Tooltip>
-                        </Row>
-                      </div>
-                    )}
-                  </>
-                )}
+                {!props.isPublic && renderFeatureOptions()}
               </span>
             </div>
             {props.show && saveDrawingButton()}
@@ -778,78 +669,8 @@ function InfoWindow(props) {
       return (
         <>
           <div className="infoWindowContent">
-            <div className="attribute-content">
-              {props.show ? (
-                <></>
-              ) : (
-                <>
-                  {imageToShow.length > 0 ? (
-                    <Row>
-                      <Col span={15} className="properties">
-                        {Object.keys(properties).map((key: any, i: any) => (
-                          <Row key={i}>
-                            <Col md={10}>
-                              <Text className="key" strong>
-                                {key}
-                              </Text>
-                            </Col>
-                            <Col md={14}>
-                              <span className="value">{properties[key]}</span>
-                            </Col>
-                          </Row>
-                        ))}
-                      </Col>
-                      <Col span={9} className="image-part">
-                        <Spin spinning={imageLoader}>
-                          <img
-                            src={`${STATIC_URL}/images/geojson/1x_${
-                              imageToShow[0].filePath.split("/")[3]
-                            }`}
-                            onClick={() => openImages()}
-                            style={{ cursor: "pointer" }}
-                          />
-                        </Spin>
-                      </Col>
-                    </Row>
-                  ) : (
-                    <>
-                      {Object.keys(properties).map((key: any, i: any) => (
-                        <Row key={i}>
-                          <Col md={10}>
-                            <Text className="key" strong>
-                              {key}
-                            </Text>
-                          </Col>
-                          <Col md={14}>
-                            <span className="value">{properties[key]}</span>
-                          </Col>
-                        </Row>
-                      ))}
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-            {!props.isPublic && (
-              <div className="address-content">
-                {loader ? (
-                  <div className="spinner">
-                    <Spin />
-                  </div>
-                ) : (
-                  <>
-                    <Paragraph copyable>{address}</Paragraph>
-                    <a
-                      href={`https://www.google.com/maps/?q=${props.coordinates[1]},${props.coordinates[0]}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Show on google maps
-                    </a>
-                  </>
-                )}
-              </div>
-            )}
+            {renderAttributeContent()}
+            {renderFeatureAddress()}
             <div className="sub-info">
               <span className="coordinates">
                 <Text>
@@ -874,42 +695,7 @@ function InfoWindow(props) {
                 </Text>
               </span>
               <span>
-                {!props.isPublic && (
-                  <>
-                    {!props.show && (
-                      <div style={{ float: "right", marginTop: "4px" }}>
-                        <Row>
-                          <Tooltip placement="bottom" title="Open Media">
-                            <Badge
-                              size="small"
-                              count={fileCount}
-                              className="site-badge-count-4"
-                            >
-                              <CameraOutlined
-                                style={{ marginRight: "6px" }}
-                                onClick={() => openImages()}
-                              />
-                            </Badge>
-                          </Tooltip>
-                          <Tooltip
-                            placement="bottom"
-                            title={flag ? "Unflag" : "Flag"}
-                          >
-                            <BsFlagFill
-                              style={{
-                                color: flag ? "#da1c5c" : "#000",
-                                cursor: "pointer",
-                              }}
-                              onClick={() => {
-                                toggleFlag();
-                              }}
-                            />
-                          </Tooltip>
-                        </Row>
-                      </div>
-                    )}
-                  </>
-                )}
+                {!props.isPublic && renderFeatureOptions()}
               </span>
             </div>
             {props.show && saveDrawingButton()}
