@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useContext } from "react";
 import KesowaNewLogo from "../../../../static/kesowa-black.png";
-import { DataFilterExtension } from "@deck.gl/extensions";
 import * as turf from "@turf/turf";
 import {
   Row,
@@ -41,12 +40,8 @@ import { FlyToInterpolator } from "deck.gl";
 import { BitmapLayer, } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
 import { HTMLOverlayItem, HTMLOverlay } from "src/components/shared/HTMLOverlay";
-import { EditableGeoJsonLayer } from "@deck.gl-community/editable-layers";
 import {
-  DrawPolygonMode,
-  ModifyMode,
   ViewMode,
-  DrawLineStringMode,
   GeoJsonEditMode,
 } from "@deck.gl-community/editable-layers";
 import { StaticMap } from "react-map-gl";
@@ -77,7 +72,7 @@ import { Layer, ILayerToDeckLayer } from "../../layerRender";
 import { ILayersToTree } from "../../treeRender";
 import { WebMercatorViewport } from "viewport-mercator-project";
 import Fuse from "fuse.js";
-import { featureType } from "src/static/vectorprops";
+import { featureType, featureTypes } from "src/static/vectorprops";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
@@ -99,7 +94,7 @@ const DEFAULT_LOCATION = {
 function PublicMap(props) {
   const selectedLayer = decodeURI(window.location.hash).slice(1); // Get selected layer from url hashed part
   const [osmState, setOsmState] = useState(false);
-  const [errorState, setErrorState] = useState("");
+  const [errorState, setErrorState] = useState(-1);
 
   const { logout } = useContext(AuthContext);
   const { setLoading } = useContext(LoaderContext);
@@ -233,8 +228,6 @@ function PublicMap(props) {
   ];
 
   const [showPopup, togglePopup] = useState(false);
-  // const [searching, SetSearching] = useState(false);
-  // const [searchValue, setSearchValue] = useState("");
   const [fuse, setFuse] = useState<
     {
       layerId: string;
@@ -242,34 +235,19 @@ function PublicMap(props) {
     }[]
   >([]);
   const [featureData, setFeatureData] = useState<any>([]);
-  const [sysId, setSysId] = useState("");
   const [coordinates, setCoordinates] = useState([]);
   const [sideBarState, setSideBarState] = useState(true);
   const [sideBarIcon, setSideBarIcon] = useState(<DoubleRightOutlined />);
   const [mapMode, setMapMode] = useState("mapbox://styles/mapbox/streets-v8");
-
-  const [bottomBarHeight, setBottomBarHeight] = useState("240px");
 
   const [tenantName, setTenantName] = useState("");
   const [mission, setMission] = useState<IMission>("");
 
   const [layerName, setLayerName] = useState("");
   const [infoWindowMode, setInfoWindowMode] = useState("");
-  const [activeKey, setActiveKey] = useState<any>();
-  const [panes, setPanes] = useState<any>([]);
-  const [tabKeys, setTabKeys] = useState<any>([]);
-  // const [drawMode, setdrawMode] = useState("");
-  // const [formDrawerVisible, setformDrawerVisible] = useState(false);
-  // const [viewImages, setViewImages] = useState(false);
 
-  const [saveButtonShow, setSaveButtonShow] = useState(false);
-  // const [showForm, setShowForm] = useState(false);
-  // const [toolSelected, setToolSelected] = useState("");
-
-  // const [activeType, setActiveType] = useState(false);
   const [sortType, setSortType] = useState("");
-  // const [isAscending, setIsAscending] = useState(true);
-  const isAscending = true;
+  const [isAscending, setIsAscending] = useState(true);
 
   const [layerLoading, setLayerLoading] = useState(false);
 
@@ -280,28 +258,6 @@ function PublicMap(props) {
       }
     }, 1000);
   }, [layerLoading]);
-
-  const [modeState, setModeState] = useState({
-    editMode: null,
-    isCompleted: false,
-  });
-
-  const [mode, setMode] = useState<Config>({
-    mode: ViewMode,
-  });
-
-  const myFeatureCollection: any = {
-    type: "FeatureCollection",
-    features: [],
-  };
-
-  const [selectedFeatureIndexes, setselectedFeatureIndexes] = useState([]);
-  const [featureState, setFeatureState] = useState({
-    data: myFeatureCollection,
-  });
-
-  const [layerToAddInAttributeTable, setlayerToAddInAttributeTable] =
-    useState<any>(null);
 
   const { id, tenantId, missionId } = useParams<any>(); // fetch id from url
 
@@ -356,21 +312,14 @@ function PublicMap(props) {
     layername: any,
     mode: any,
     feature: any,
-    show: any,
     id: any,
-    sysId: any
   ) {
-    console.log("sysid:", sysId);
     setCoordinates(coordinate);
-    setSysId(sysId);
     setFeatureData(feature);
     setLayerName(layername);
     setInfoWindowMode(mode);
     setFeatureLayer(id);
-    console.log("togglePopup:", showPopup);
     togglePopup(true);
-    console.log("togglePopup:", showPopup);
-    setSaveButtonShow(show);
   }
 
   function handleClose(status: boolean) {
@@ -411,29 +360,6 @@ function PublicMap(props) {
         latitude,
         zoom,
       };
-    }
-  };
-  const focusSelectedLayers = () => {
-    const boundingBoxes: BBox[] = [];
-    for (const layer of AllLayers) {
-      if (layer._isChecked && layer._metadata?.bounds) {
-        boundingBoxes.push(layer._metadata.bounds);
-      }
-    }
-    if (boundingBoxes.length > 0) {
-      const finalBounds = mergeBoundingBoxes(boundingBoxes);
-      const { longitude, latitude, zoom } = calculateViewport(finalBounds);
-      setViewport({
-        longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
-        latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
-        zoom,
-        pitch: 0,
-        minZoom: 0,
-        maxZoom: 22,
-        bearing: 0,
-        transitionDuration: 2000,
-        transitionInterpolator: new FlyToInterpolator(),
-      });
     }
   };
 
@@ -491,44 +417,8 @@ function PublicMap(props) {
     SetAllLayers(layersWithBounds);
   };
 
-  // ++++++++++++++++++++++++++++++++++++++++++++++++ Start Drawing +++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-  const [isDrawing, setIsDrawing] = useState(false);
-
-  const cancelDrawing = () => {
-    setIsDrawing(false);
-    setFeatureState({
-      data: myFeatureCollection,
-    });
-
-    setMode({
-      mode: ViewMode,
-    });
-
-    setModeState({
-      editMode: null,
-      isCompleted: false,
-    });
-    console.log("togglePopup:", showPopup);
-    togglePopup(false);
-    // setShowForm(false);
-  };
-
-  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
   const onSelect = (selectedKeysValue: React.Key[], info: any) => {
     setSelectedKeys(selectedKeysValue);
-  };
-
-  const generateIcon = (type: any, color: any) => {
-    switch (type) {
-      case "Point":
-        return <EnvironmentOutlined style={{ color: color }} />;
-      case "MultiLineString":
-        return <BranchesOutlined style={{ color: color }} />;
-      case "MultiPolygon":
-        return <GatewayOutlined style={{ color: color }} />;
-    }
   };
 
   useEffect(() => {
@@ -596,174 +486,6 @@ function PublicMap(props) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getTreeData = (layer, type, keyPrefix) => {
-    switch (type) {
-      case "raster":
-        return {
-          title: (
-            <>
-              <Tooltip
-                mouseLeaveDelay={0.0}
-                mouseEnterDelay={0.0}
-                placement="bottom"
-                title={
-                  <span>
-                    {layer.name} &#8226;{" "}
-                    {moment(layer.captureDate).format("DD/MM/YYYY")}
-                  </span>
-                }
-              >
-                <Text
-                  style={
-                    layer.layerGroupId ? { width: "139px" } : { width: "160px" }
-                  }
-                  ellipsis={true}
-                  onClick={() => {
-                    if (!props.isBaseMap) {
-                      setlayerToAddInAttributeTable({
-                        name: layer.name,
-                        type: layer.type,
-                        id: layer._id,
-                        path: layer.layerpath,
-                        count: layer.featureCount,
-                      });
-                    }
-                  }}
-                >
-                  {layer.name}
-                </Text>
-              </Tooltip>
-            </>
-          ),
-          key: keyPrefix + "-" + layer._id,
-          icon: <FileImageOutlined />,
-          captureDate: layer.captureDate,
-          name: layer.name,
-          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
-          layer: layer,
-        };
-
-      case "vector":
-        return {
-          title: (
-            <>
-              <Tooltip
-                mouseLeaveDelay={0.0}
-                mouseEnterDelay={0.0}
-                placement="bottom"
-                title={
-                  <span>
-                    {layer.name} &#8226;{" "}
-                    {moment(layer.captureDate).format("DD/MM/YYYY")}
-                  </span>
-                }
-              >
-                <Text
-                  style={
-                    layer.layerGroupId ? { width: "139px" } : { width: "160px" }
-                  }
-                  ellipsis={true}
-                  onClick={() => {
-                    setlayerToAddInAttributeTable({
-                      name: layer.name,
-                      type: layer.type,
-                      id: layer._id,
-                      path: layer.layerpath,
-                      count: layer.featureCount,
-                    });
-                  }}
-                >
-                  {layer.name}
-                </Text>
-              </Tooltip>
-            </>
-          ),
-          key: keyPrefix + "-" + layer._id,
-          icon: generateIcon(
-            featureType[layer.vector],
-            layer.color === "multiColor" ? "#00000" : layer.color
-          ),
-          captureDate: layer.captureDate,
-          name: layer.name,
-          groupId: layer.layerGroupId ? layer.layerGroupId._id : null,
-          layer: layer,
-        };
-    }
-  };
-
-  const [groupToEdit, setgroupToEdit] = useState<any>(null);
-  const [visibleEditModal, setVisibleEditModal] = useState(false);
-  const [groupName, setgroupName] = useState("");
-
-  const getGroupTitle = (value, id) => {
-    const menuOnClick: MenuProps["onClick"] = (e) => {
-      switch (e.key) {
-        case "1":
-          setgroupName(value.name);
-          setgroupToEdit({
-            id: id,
-            name: value.name,
-          });
-          setVisibleEditModal(true);
-          break;
-        case "2":
-          Modal.confirm({
-            title: "Delete Group?",
-            icon: <ExclamationCircleOutlined />,
-            content: (
-              <>
-                <p>Are You Sure To Want To Delete This Group</p>
-                <b>These Layers Will be deleted along with this group</b>
-                <>
-                  {value.children.map((layer) => {
-                    return <p>{layer.name}</p>;
-                  })}
-                </>
-              </>
-            ),
-            okText: "Yes",
-            cancelText: "No",
-            onOk: () => {
-              console.error("something tried to delete group:" + id);
-            },
-          });
-          break;
-        default:
-          console.log("Incorrect selection");
-          break;
-      }
-    };
-    const menuItem: MenuProps["items"] = [
-      {
-        key: "1",
-        label: "Rename",
-      },
-      {
-        key: "2",
-        label: "Delete",
-      },
-    ];
-    return {
-      title: (
-        <>
-          <Dropdown
-            menu={{ items: menuItem, onClick: menuOnClick }}
-            trigger={["contextMenu"]}
-          >
-            <Text style={{ width: "160px" }} ellipsis={true}>
-              {value.name}
-            </Text>
-          </Dropdown>
-        </>
-      ),
-      children: [...value.children],
-      key: "group-" + id,
-      group: true,
-      icon: <FolderOutlined />,
-      groupId: id,
-    };
   };
 
   // ++++++++++++++++++++++++++++++++
@@ -870,151 +592,6 @@ function PublicMap(props) {
     );
   };
 
-  // TabPanes
-
-  const add = (name, type, id, path, count) => {
-    if (!tabKeys.find((key) => key == id)) {
-      tabKeys.push(id);
-      setTabKeys(tabKeys);
-      panes.push({
-        title: name,
-        type: type == "Raster" ? "raster" : "vector",
-        key: id,
-        id: id,
-        path: path,
-        count: count,
-      });
-      setPanes(panes);
-      setActiveKey(id);
-    } else setActiveKey(id);
-  };
-
-  useEffect(() => {
-    if (layerToAddInAttributeTable) {
-      const { name, type, id, path, count } = layerToAddInAttributeTable;
-      add(name, type, id, path, count);
-    }
-  }, [layerToAddInAttributeTable]);
-
-
-  // DRAW POLYGON FUNCTION
-  const drawPolygonTool = new (EditableGeoJsonLayer as any)({
-    id: "geojson",
-    data: featureState.data,
-    mode: mode.mode,
-    selectedFeatureIndexes,
-    onEdit: ({ updatedData, editType, editContext }): any => {
-      let updatedSelectedFeatureIndexes: any = selectedFeatureIndexes;
-      setFeatureState({
-        ...featureState,
-        data: updatedData,
-      });
-      if (editType === "addFeature") {
-        //event to fire up infowindow for registering new vector layer/shape
-        const { featureIndexes } = editContext;
-        updatedSelectedFeatureIndexes = [
-          ...selectedFeatureIndexes,
-          ...featureIndexes,
-        ];
-        let modee;
-        let centerPoint;
-
-        if (mode.mode === DrawPolygonMode) {
-          modee = "PolygonView";
-
-          var fLat: any = 0;
-          var fLng: any = 0;
-          for (
-            var i = 0;
-            i < updatedData.features[0].geometry.coordinates[0].length;
-            i++
-          ) {
-            fLng += updatedData.features[0].geometry.coordinates[0][i][0];
-          }
-          fLng = fLng / updatedData.features[0].geometry.coordinates[0].length;
-          for (
-            var i = 0;
-            i < updatedData.features[0].geometry.coordinates[0].length;
-            i++
-          ) {
-            fLat += updatedData.features[0].geometry.coordinates[0][i][1];
-          }
-          fLat = fLat / updatedData.features[0].geometry.coordinates[0].length;
-          centerPoint = [fLng, fLat];
-        } else if (mode.mode === DrawLineStringMode) {
-          modee = "LineView";
-
-          var fLat: any = 0;
-          var fLng: any = 0;
-          for (
-            var i = 0;
-            i < updatedData.features[0].geometry.coordinates.length;
-            i++
-          ) {
-            fLng += updatedData.features[0].geometry.coordinates[i][0];
-          }
-          fLng = fLng / updatedData.features[0].geometry.coordinates.length;
-          for (
-            var i = 0;
-            i < updatedData.features[0].geometry.coordinates.length;
-            i++
-          ) {
-            fLat += updatedData.features[0].geometry.coordinates[i][1];
-          }
-          fLat = fLat / updatedData.features[0].geometry.coordinates.length;
-          centerPoint = [fLng, fLat];
-        } else {
-          modee = "PointView";
-          centerPoint = [
-            ...updatedData.features[updatedData.features.length - 1].geometry
-              .coordinates,
-          ];
-        }
-        setMode({
-          mode: ModifyMode,
-        });
-        setModeState({
-          editMode: null,
-          isCompleted: true,
-        });
-        // setToolSelected("");
-
-        InfoWindow(
-          centerPoint,
-          "New Shape",
-          modee,
-          updatedData.features[0],
-          true,
-          "new",
-          "0"
-        );
-      }
-      setselectedFeatureIndexes(updatedSelectedFeatureIndexes);
-    },
-    pickable: true,
-    pickingRadius: 15,
-    onClick: (data, e) => {
-      if (!e.rightButton) {
-        if (modeState.isCompleted) {
-          InfoWindow(
-            data.coordinate,
-            "New Shape",
-            "",
-            // drawMode,
-            data.object,
-            true,
-            "new",
-            "0"
-          );
-        }
-      }
-    },
-    pointRadiusUnits: "pixels",
-    pointRadiusScale: 1,
-    pointRadiusMinPixels: 8,
-  });
-
-  //----------sorting menu
   const menu = [
     {
       key: "0",
@@ -1038,16 +615,6 @@ function PublicMap(props) {
     }
   };
 
-  // Set Active Layer Type
-  useEffect(() => {
-    panes.map((pane) => {
-      if (pane.id === activeKey && pane.type === "vector") {
-        // setActiveID(pane.id);
-      }
-      // if (pane.id === activeKey) setActiveType(pane.type === "vector");
-    });
-  }, [activeKey]);
-
   //----------------SideBar state handeller function-----------------------------
   function sideBarHandeller() {
     if (sideBarState) {
@@ -1059,36 +626,6 @@ function PublicMap(props) {
     }
   }
 
-  // ANTD TREE DROP FUNCTION
-  // Is layer group changing allowed in public map ?
-  // const onDrop = (info) => {
-  //   try {
-  //     if (info.dragNode && !info.dragNode.group) {
-  //       // allow only individual layers to be dragged and dropped, not entire layer groups
-  //       const key = info.dragNode.key;
-  //       const layerId = info.dragNode._id;
-  //       const oldGroupId = info.dragNode.groupId;
-  //       const newGroupId = info.node.groupId;
-
-  //       if (!newGroupId) {
-  //         if (info.node.pos === "0-0") return;
-  //         // the node under which it was dragged is not a layer group, so it must have been dragged under "Vector" or "Raster"
-  //         // this means it was actually ungrouped
-  //         await removeLayerFromGroup(oldGroupId, layerId);
-  //       } else {
-  //         // layer was moved under a new group
-  //         //console.log(layerid, newGroupId);
-  //         await changeGroupOfLayer(newGroupId, [layerId], [key]);
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
-  // const [showDrawingTools, setShowDrawingTools] = useState(false);
-  // const [toolCoordinates, settoolCoordinates] = useState([0, 0]);
-  const drawingMenuRef: any = useRef<HTMLElement>();
   //---------------Handle map modes-------------------------------
   function handleMapMode(value) {
     if (value === "osm") {
@@ -1106,54 +643,6 @@ function PublicMap(props) {
       setMapMode(`mapbox://styles/mapbox/${value}-v8`);
     }
   }
-
-  // Handle Current Layer
-
-  // Public map search
-  // useEffect(() => {
-  //   if (searchValue) {
-  //     SetSearching(true);
-  //     http
-  //       .get<components["schemas"]["SearchPublicLayerResponse"]>(
-  //         `${apis.PUBLIC_SEARCH}`,
-  //         {
-  //           params: {
-  //             mapRef: id,
-  //             key: "PremisesNo",
-  //             value: searchValue,
-  //           },
-  //         }
-  //       )
-  //       .then((res: any) => {
-  //         if (res.data.status) {
-  //           console.log("search successful", res.data);
-  //           // setActiveID(res.data.layerId);
-  //           const centerPoint = turf.centroid(res.data.data[0]);
-  //           setViewport({
-  //             longitude: centerPoint.geometry.coordinates[0],
-  //             latitude: centerPoint.geometry.coordinates[1],
-  //             zoom: 15,
-  //             pitch: 0,
-  //             minZoom: 0,
-  //             maxZoom: 22,
-  //             bearing: 0,
-  //             transitionDuration: 1000,
-  //             transitionInterpolator: new FlyToInterpolator(),
-  //           });
-  //         } else {
-  //           console.log("search failed", res.data);
-  //           message.warning("No match found!");
-  //         }
-  //       })
-  //       .catch((err: any) => {
-  //         console.log(err);
-  //         AxiosErrorHandler(err, logout);
-  //       })
-  //       .finally(() => SetSearching(false));
-  //   } else {
-  //     // setActiveID("");
-  //   }
-  // }, [searchValue]);
 
   const getSearchIndexes = async () => {
     const searchIndexes: {
@@ -1215,13 +704,6 @@ function PublicMap(props) {
                 // OSMState Layers
                 if (osmState) layers.push(osm);
 
-                // Drawing State Layers
-                if (isDrawing) {
-                  layers.push(drawPolygonTool);
-                } else {
-                  // layers.push(maskLayer);
-                }
-
                 // Tree Menu Layers
                 layers.push(
                   useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers])
@@ -1230,26 +712,19 @@ function PublicMap(props) {
                 return layers;
               })()}
               style={{ height: "100vh", width: "100%" }}
-              onClick={(info, event) => {
-                // setShowDrawingTools(false);
-                if (event.rightButton) {
-                  if (!info.layer) {
-                    setMode({
-                      mode: ViewMode,
-                    });
-                    // setToolSelected("");
-                    // setShowDrawingTools(false);
-                    // settoolCoordinates([
-                    //   event.offsetCenter.x,
-                    //   event.offsetCenter.y - 50,
-                    // ]);
-                    // setShowDrawingTools(true);
-                    drawingMenuRef.current.click();
-                  }
-                } else {
-                  // setShowDrawingTools(false);
+              onClick={(info, _) => {
+                if (info.layer) {
+                  const layer = AllLayers.find((layer) => layer.type === 'Vector' && info.layer?.id === layer._id);
+                  if (layer) {
+                    InfoWindow(
+                      info.coordinate,
+                      layer.name,
+                      (featureType[layer.vector] === featureTypes.POINT) ? "PointView" : "PolygonView",
+                      info.object,
+                      layer._id,
+                    );
                 }
-              }}
+              }}}
             >
               {osmState ? (
                 <>
@@ -1283,18 +758,12 @@ function PublicMap(props) {
                             coordinates={coordinates}
                             token={MAPBOX_API_KEY}
                             feature={featureData}
-                            featureIndex={sysId}
-                            setformDrawerVisible={(arg: boolean) => {}}
-                            setImagesDrawer={(arg: boolean) => {}}
-                            show={saveButtonShow}
-                            setShowForm={(arg: boolean) => {}}
-                            cancelDrawing={cancelDrawing}
-                            togglePopup={togglePopup}
                             layerId={featureLayer}
-                            canDraw={null}
+                            show={false}
+                            canDraw={false}
                             isPublic={true}
                             isBaseMap={false}
-                            AllLayers={AllLayers}
+                            missionLayer={"Vector"}
                           />
                         </>
                       }
@@ -1457,7 +926,7 @@ function PublicMap(props) {
                         {sortType && (
                           <div style={{ float: "right" }}>
                             <SortAscendingOutlined
-                              onClick={() => console.error("Something tried to sort:" + false)}
+                              onClick={() => setIsAscending(true)}
                               style={{
                                 color: isAscending ? "#1890ff" : "#000",
                                 fontSize: "1.2rem",
@@ -1466,7 +935,7 @@ function PublicMap(props) {
                               }}
                             />
                             <SortDescendingOutlined
-                              onClick={() => console.error("Something tried to sort:" + false)}
+                              onClick={() => setIsAscending(false)}
                               style={{
                                 color: !isAscending ? "#1890ff" : "#000",
                                 fontSize: "1.2rem",
@@ -1513,11 +982,6 @@ function PublicMap(props) {
                       sortType,
                       isAscending
                     )}
-                    // onDrop={onDrop}
-                    // draggable={(node: any) => {
-                    //   if (node.key === "1" || node.key === "2") return false;
-                    //   return true;
-                    // }}
                     draggable={false}
                     blockNode
                   />
