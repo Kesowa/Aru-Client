@@ -156,7 +156,7 @@ function TenantInfo(props: any) {
               >
                 {avatar ? (
                   <img
-                  src={`${STATIC_URL}${avatar}`}
+                  src={avatarPreview ? avatarPreview : `${STATIC_URL}${avatar}`}
                   className="uploaded-avatar"
                   />
                 ) : (
