@@ -30,7 +30,7 @@ export type Layer = ILayer & {
     colorMap?: string;
     resamplingMethod?: string;
     overlayId?: string;
-    searchedFeatureIndex?: number | null;
+    highlightIndexes?: number[];
   };
   _isMeshSource?: boolean;
 };
@@ -280,15 +280,18 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             data: fetch(STATIC_URL + layer.layerpath)
             .then((response) => response.json())
             .then((data) => {
-              const idx = layer._metadata?.searchedFeatureIndex;
-              if (idx) {
-                const oldColor = data.features[idx].properties?.color;
-                if (oldColor)
-                  data.features[idx].properties.color = invertColor(oldColor);
-                else
-                  data.features[idx].properties.color = "808080"; // light grey
-                // if property has no color, it would get assigned black ("000000") as default
-                // so to highlight property, light grey used
+              if (layer._metadata?.highlightIndexes) {
+                for (const idx of layer._metadata?.highlightIndexes) {
+                  if (idx) {
+                    const oldColor = data.features[idx].properties?.color;
+                    if (oldColor)
+                      data.features[idx].properties.color = invertColor(oldColor);
+                    else
+                      data.features[idx].properties.color = "808080"; // light grey
+                    // if property has no color, it would get assigned black ("000000") as default
+                    // so to highlight property, light grey used
+                  }
+                }
               }
               return data.features;
             }),

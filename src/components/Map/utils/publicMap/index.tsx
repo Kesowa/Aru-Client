@@ -833,7 +833,7 @@ function PublicMap(props) {
                                 layer._isChecked = true;
                                 layer._metadata = {
                                   ...layer._metadata,
-                                  searchedFeatureIndex: searchResult.refIndex,
+                                  highlightIndexes: [searchResult.refIndex],
                                 }
                               }
                               return layer;
@@ -866,7 +866,7 @@ function PublicMap(props) {
                         prev.map((layer) => {
                           layer._metadata = {
                             ...layer._metadata,
-                            searchedFeatureIndex: null,
+                            highlightIndexes: [],
                           }
                           return layer;
                         })

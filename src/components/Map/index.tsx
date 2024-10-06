@@ -1066,6 +1066,7 @@ function BaseMap(props) {
   const [selectedLayerPopupLabel, setSelectedLayerPopupLabel] = useState("");
   const [activeID, setActiveID] = useState("");
   const [selectedIndexes, setSelectedIndexes] = useState<React.Key[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<Feature<any,any>[]>([]);
   const [showSelectedIndexes, setshowSelectedIndexes] = useState([]);
   const [key, setKey] = useState("");
   const [defaultKeys, setDefaultKeys] = useState<React.Key[]>([]);
@@ -1461,15 +1462,36 @@ function BaseMap(props) {
     setColor(color.hex);
   };
 
-  // //-------------export Function------------------------------------
-  // useEffect(() => {
-  //   console.log(
-  //     "Selected indexes: ",
-  //     selectedIndexes,
-  //     "Active layerID: ",
-  //     activeID,
-  //   );
-  // }, [selectedIndexes, activeID]);
+  useEffect(() => {
+    SetAllLayers((prev) =>
+      prev.map((layer) => {
+        if (layer._id === activeID) {
+          layer._isChecked = true;
+          layer._metadata = {
+            ...layer._metadata,
+            highlightIndexes: selectedIndexes as number[],
+          }
+        }
+        return layer;
+      })
+    );
+    if (selectedFeatures.length > 0) {
+      const bounds = turf.bbox(turf.featureCollection(selectedFeatures));
+      const { longitude, latitude, zoom } = calculateViewport(bounds);
+      setViewport({
+        longitude,
+        latitude,
+        zoom,
+        pitch: 0,
+        minZoom: 0,
+        maxZoom: 22,
+        bearing: 0,
+        transitionDuration: 2000,
+        transitionInterpolator: new FlyToInterpolator(),
+      });
+    }
+  }, [selectedIndexes, activeID]);
+
   const actionMenuOnClick = ({ key }) => {
     console.log("key", key);
     switch (key) {
@@ -7887,6 +7909,7 @@ function BaseMap(props) {
                     setOverlayID={setOverlayID}
                     setTerrainMap={setTerrainMap}
                     setSelectedIndexes={setSelectedIndexes}
+                    setSelectedFeatures={setSelectedFeatures}
                     setshowSelectedIndexes={setshowSelectedIndexes}
                     selectedIndexes={selectedIndexes}
                     setKey={setKey}
