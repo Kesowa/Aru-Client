@@ -58,6 +58,38 @@ const createSVGIcon = (color: string) => {
 const svgToDataURL = (svg: string) => {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 };
+
+export const handleHover =
+    async ({ x, y, layer,bitmap,sourceLayer,color}) => {
+      try {
+        const layerType = layer.raster;
+        const {device} = sourceLayer.context;
+        if (bitmap && layerType === "DEM") {
+          const pixelColor = device.readPixelsToArrayWebGL(sourceLayer.props.image,{
+            sourceX: bitmap.pixel[0],
+            sourceY: bitmap.pixel[1],
+            sourceWidth: 1,
+            sourceHeight: 1,
+          });
+          console.log("pixel data",pixelColor);
+          // const [R, G, B] = color;
+          // console.log(R,G,B)
+          // const elevation = -10000 + ((R * 256 * 256 + G * 256 + B) * 0.1);  This will not provide the accurate elevation
+          const [R, G, B] = pixelColor;
+          const scalarValue = pixelColor[0]/ 255.0;
+          const minp = layer.minp;
+          const maxp = layer.maxp;
+          const elevation = minp + (maxp - minp) * scalarValue;
+          console.log(elevation);
+
+          return {R,G,B, x, y, elevation };
+        } else {
+          return null;
+        }
+      } catch (error) {
+        console.error("Try with the dem layer instead", error);
+      }
+    }
 const getRasterDataUrl = (layer: Layer) => {
   const settings = {
     bidx: layer._metadata?.bidx || null,
@@ -142,6 +174,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             maxZoom: 19,
             elevationData: getRasterDataUrl(layer),
             tileSize: 256,
+            pickable: true,
             texture: overlayLayer
               ? getRasterDataUrl(overlayLayer)
               : getRasterDataUrl(layer),
@@ -154,6 +187,9 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
           maxZoom: 24,
           tileSize: 256,
           pickable: true,
+          onHover:(event) =>{
+           handleHover({ ...event, layer })
+          },
           extent: layer._metadata?.bounds,
           renderSubLayers: (props) => {
             const {
