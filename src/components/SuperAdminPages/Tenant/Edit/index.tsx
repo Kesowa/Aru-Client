@@ -36,6 +36,7 @@ function EditTenant() {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [packages, setPackages] = useState<any>([]);
   const [tenant, setTenant] = useState<any>(null);
   const history = useHistory();
@@ -48,6 +49,10 @@ function EditTenant() {
   const beforeUploadFunction = (file: RcFile) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
+      
+      // Create a preview URL for the image
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
 
       const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
       setAvatar(uploadToken);
@@ -202,8 +207,8 @@ function EditTenant() {
                 >
                   {avatar ? (
                     <img
-                      src={`${STATIC_URL}${"/"}${avatar}`}
-                      className="uploaded-avatar"
+                    src={avatarPreview ? avatarPreview : `${STATIC_URL}${avatar}`}
+                    className="uploaded-avatar"
                     />
                   ) : (
                     <div>
