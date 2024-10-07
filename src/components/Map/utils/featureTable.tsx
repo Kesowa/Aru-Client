@@ -85,6 +85,7 @@ interface FeatureTableProps {
   setshowSelectedIndexes: (values: number[]) => void;
   setKey: (key: string) => void;
   setSelectedIndexes: (values: number[]) => void;
+  setSelectedFeatures: (features: any[]) => void;
   setViewport: (viewport: any) => void;
   refreshLayer: boolean;
   setRefreshLayer: (refresh: boolean) => void;
@@ -280,8 +281,10 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
         console.log("row:", row);
         return row.index; // changed featureindex to index
       });
+      const features = selectedRows.map(({ type, coordinates }) => ({ geometry: { type, coordinates } }));
       console.log(index);
       props.setSelectedIndexes(index);
+      props.setSelectedFeatures(features);
     },
   };
 

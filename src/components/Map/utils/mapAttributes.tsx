@@ -11,6 +11,7 @@ import { COG_URL, TITILER_STATIC } from "src/constants";
 import { Layer } from "../layerRender";
 import { rasterProps } from "src/static/rasterprops";
 import { AuthContext } from "src/services/authUtils";
+import { Feature } from "src/types/geojson";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -36,6 +37,7 @@ interface Props {
   refreshLayer: boolean;
   setViewport: (viewport: any) => void;
   setSelectedIndexes: (indexes: number[]) => void;
+  setSelectedFeatures: (features: Feature<any,any>[]) => void;
   defaultKeys: any;
   selectedIndexes: number[];
   setColorMap: (color: string) => void;
@@ -427,6 +429,7 @@ const MapAttributes: React.FC<Props> = (props) => {
           setTotal={(total) => setState((prev) => ({ ...prev, total }))}
           setViewport={props.setViewport}
           setSelectedIndexes={props.setSelectedIndexes}
+          setSelectedFeatures={props.setSelectedFeatures}
           defaultKeys={props.defaultKeys}
           selectedIndexes={props.selectedIndexes}
           canEditGeojson={props.canEditGeojson}
