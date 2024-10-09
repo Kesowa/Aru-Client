@@ -140,6 +140,7 @@ import {
   getEditLayerTypeOptions,
   options,
 } from "./utils/propUtils";
+import {valueChangeEmitter} from "./layerRender"
 import Tileset from "src/types/cesium_tileset";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 import { PERMS } from "src/static/permissions";
@@ -500,7 +501,15 @@ function BaseMap(props) {
   const [selectedKey, setSelectedKey] = useState<any>();
 
   //---------------------Open Stree Maps Layer ----------------------------------------------------
-  const [hoverInfo, setHoverInfo] = useState(null);
+  interface HoverInfo {
+    R: number;
+    G: number;
+    B: number;
+    x: number;
+    y: number;
+    elevation: number;
+  }
+  const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null);
   const deckRef = useRef(null);
   const [polygonSize, setPolygonSize] = useState(150);
   const [opcity, setOpcity] = useState(1);
@@ -533,36 +542,15 @@ function BaseMap(props) {
     });
   }, [polygon, isMaskLayerVisible]);
 
-  // const handleHover = useCallback(
-  //   ({ x, y, allLayers, element, bitmap, sourceLayer, settings }) => {
-  //     try {
-  //       const layerType = allLayers[element]?.type;
-
-  //       if (bitmap && layerType === "DEM" && isElevationEnabledRef.current) {
-  //         const pixelColor = readPixelsToArray(sourceLayer.props.image, {
-  //           sourceX: bitmap.pixel[0],
-  //           sourceY: bitmap.pixel[1],
-  //           sourceWidth: 1,
-  //           sourceHeight: 1,
-  //         });
-  //         const [r, g, b, a] = pixelColor;
-  //         const scalarValue = pixelColor[0] / 255.0;
-
-  //         const elementSettings = settings || allLayers[element]?.settings;
-  //         const minp = elementSettings?.minp;
-  //         const maxp = elementSettings?.maxp;
-  //         const elevation = minp + (maxp - minp) * scalarValue;
-
-  //         setHoverInfo({ r, g, b, x, y, elevation });
-  //       } else {
-  //         setHoverInfo(null);
-  //       }
-  //     } catch (error) {
-  //       console.error("Try with the dem layer instead", error);
-  //     }
-  //   },
-  //   [isElevationEnabled]
-  // );
+  useEffect(() => {
+    const handleValueChange = (newValue: HoverInfo) => {
+        setHoverInfo(newValue);
+    }
+    valueChangeEmitter.on('valueChanged', handleValueChange);
+    return () => {
+      valueChangeEmitter.off('valueChanged', handleValueChange);
+    };
+  }, []);
 
   const osm = [
     new TileLayer({
@@ -6808,8 +6796,8 @@ function BaseMap(props) {
           <div
             style={{
               position: "absolute",
-              left: hoverInfo.x + 7,
-              top: hoverInfo.y + 7,
+              left: hoverInfo.x + 15,
+              top: hoverInfo.y ,
               background: "white",
               padding: "4px",
               borderRadius: "10px",
@@ -6824,7 +6812,7 @@ function BaseMap(props) {
           >
             <div
               style={{
-                background: `rgb(${hoverInfo.r}, ${hoverInfo.g}, ${hoverInfo.b})`,
+                background: `rgb(${hoverInfo.R}, ${hoverInfo.G}, ${hoverInfo.B})`,
                 width: "25px",
                 height: "30px",
                 marginRight: "8px",

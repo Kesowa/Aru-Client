@@ -18,6 +18,9 @@ import { hexToRGB } from "./colorUtils";
 import { MASK_ID } from ".";
 import { featureType, featureTypes } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
+import EventEmitter from 'events';
+
+export const valueChangeEmitter = new EventEmitter();
 
 export type Layer = ILayer & {
   _isChecked?: boolean;
@@ -59,8 +62,8 @@ const svgToDataURL = (svg: string) => {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 };
 
-export const handleHover =
-    async ({ x, y, layer,bitmap,sourceLayer,color}) => {
+const handleHover =
+ ({ x, y, layer,bitmap,sourceLayer}) => {
       try {
         const layerType = layer.raster;
         const {device} = sourceLayer.context;
@@ -71,18 +74,13 @@ export const handleHover =
             sourceWidth: 1,
             sourceHeight: 1,
           });
-          console.log("pixel data",pixelColor);
-          // const [R, G, B] = color;
-          // console.log(R,G,B)
-          // const elevation = -10000 + ((R * 256 * 256 + G * 256 + B) * 0.1);  This will not provide the accurate elevation
           const [R, G, B] = pixelColor;
           const scalarValue = pixelColor[0]/ 255.0;
           const minp = layer.minp;
           const maxp = layer.maxp;
           const elevation = minp + (maxp - minp) * scalarValue;
-          console.log(elevation);
-
-          return {R,G,B, x, y, elevation };
+          const elevationInfo = {R,G,B, x, y, elevation }
+          valueChangeEmitter.emit('valueChanged', elevationInfo);
         } else {
           return null;
         }
