@@ -150,7 +150,7 @@ export const UploadVectorData = ({
                 </Upload>
 
                 {uploading ? (
-                  <Progress strokeLinecap="square" percent={progress} />
+                  <Progress strokeLinecap="square" percent={Math.floor(progress)} />
                 ) : null}
               </Form.Item>
             </Row>
@@ -265,7 +265,7 @@ export const UpdateVectorData = ({ uploadProps, uploading, progress }) => {
           </Dragger>
 
           {uploading ? (
-            <Progress strokeLinecap="square" percent={progress} />
+            <Progress strokeLinecap="square" percent={Math.floor(progress)} />
           ) : null}
         </div>
       </Row>

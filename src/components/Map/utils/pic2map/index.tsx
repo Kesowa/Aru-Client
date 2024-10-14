@@ -551,7 +551,7 @@ function Pictomap(props) {
 
           <>
             {isUploading ? (
-              <Progress strokeLinecap="square" percent={progress} />
+              <Progress strokeLinecap="square" percent={Math.floor(progress)} />
             ) : null}
           </>
         </>

@@ -7608,7 +7608,7 @@ function BaseMap(props) {
                         </Upload>
 
                         {uploading ? (
-                          <Progress strokeLinecap="square" percent={progress} />
+                          <Progress strokeLinecap="square" percent={Math.floor(progress)} />
                         ) : null}
                       </Form.Item>
                     </Row>
