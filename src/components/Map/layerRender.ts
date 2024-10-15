@@ -18,7 +18,7 @@ import { hexToRGB } from "./colorUtils";
 import { MASK_ID } from ".";
 import { featureType, featureTypes } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
-import { handleHover } from "./elevationUtils";
+import { handleHover } from "./utils/elevationTooltip";
 
 export type Layer = ILayer & {
   _isChecked?: boolean;

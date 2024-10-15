@@ -140,7 +140,7 @@ import {
   getEditLayerTypeOptions,
   options,
 } from "./utils/propUtils";
-import {valueChangeEmitter} from "./elevationUtils"
+import {valueChangeEmitter} from "./utils/elevationTooltip"
 import Tileset from "src/types/cesium_tileset";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 import { PERMS } from "src/static/permissions";
@@ -148,6 +148,7 @@ import FourOhOne from "../shared/Error/FourOhOne";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "../shared/Loader";
 import { ThreadContext } from "src/services/threadUtils";
+import ElevationBlock from "./utils/elevationTooltip";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -6792,44 +6793,7 @@ function BaseMap(props) {
       }}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
-        { hoverInfo && isElevationEnabled && (
-          <div
-            style={{
-              position: "absolute",
-              left: hoverInfo.x + 15,
-              top: hoverInfo.y ,
-              background: "white",
-              padding: "4px",
-              borderRadius: "10px",
-              boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-              zIndex: 1000,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: "-15px",
-              marginBottom: "-15px",
-            }}
-          >
-            <div
-              style={{
-                background: `rgb(${hoverInfo.R}, ${hoverInfo.G}, ${hoverInfo.B})`,
-                width: "25px",
-                height: "30px",
-                marginRight: "8px",
-                borderRadius: "7px",
-              }}
-            ></div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "-15px",
-              }}
-            >
-              <p>{hoverInfo.elevation.toFixed(2)} Meter</p>
-            </div>
-          </div>
-        )}
+        <ElevationBlock hoverInfo={hoverInfo} isElevationEnabled={isElevationEnabled} />
 
         {osmState ? (
           <>
