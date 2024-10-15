@@ -140,7 +140,7 @@ import {
   getEditLayerTypeOptions,
   options,
 } from "./utils/propUtils";
-import {valueChangeEmitter} from "./layerRender"
+import {valueChangeEmitter} from "./elevationUtils"
 import Tileset from "src/types/cesium_tileset";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 import { PERMS } from "src/static/permissions";
@@ -6792,7 +6792,7 @@ function BaseMap(props) {
       }}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
-        {hoverInfo && (
+        { hoverInfo && isElevationEnabled && (
           <div
             style={{
               position: "absolute",
