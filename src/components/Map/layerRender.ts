@@ -31,6 +31,7 @@ export type Layer = ILayer & {
     resamplingMethod?: string;
     overlayId?: string;
     highlightIndexes?: number[];
+    layerOpacity?:number;
   };
   _isMeshSource?: boolean;
 };
@@ -105,6 +106,8 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
         }
         : {};
 
+      const opacity = layer._metadata?.layerOpacity ?? 1;
+
       // Overrides previous mask settings
       if (meshOverlayActive && layer.type == "Vector") {
         maskProps = {
@@ -140,6 +143,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               offset: -10000,
             },
             minZoom: 13,
+            opacity:opacity,
             maxZoom: 19,
             elevationData: getRasterDataUrl(layer),
             tileSize: 256,
@@ -164,8 +168,12 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               data: null,
               image: props.data,
               bounds: [west, south, east, north],
+              opacity:opacity,
               ...maskProps,
             });
+          },
+          updateTriggers: {
+            renderSubLayers: [opacity],
           },
         });
       } else if (layer.type === "Vector") {
@@ -174,6 +182,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             id: maskProps.extensions ? layer._id +".ext" : layer._id,
             data: STATIC_URL + layer.layerpath,
             pickable: true,
+            opacity:opacity,
             pointType: "icon",
             iconSizeMinPixels: 4,
             iconSizeUnits: "pixels",
@@ -296,6 +305,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               return data.features;
             }),
             pickable: true,
+            opacity:opacity,
             stroked: [
               featureTypes.MULTI_POLYGON,
               featureTypes.POLYGON,
