@@ -149,9 +149,11 @@ function ClientCreatePage(props: any) {
     setLoading(true);
     const body = {
       ...data,
-      avatar,
       userType: "tenant-client",
     };
+    if (avatar) {
+      body.avatar = avatar;
+    }
     console.log(body);
     http
       .post(apis.CREATE_CLIENT, body)
