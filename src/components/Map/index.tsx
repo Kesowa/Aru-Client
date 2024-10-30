@@ -503,7 +503,7 @@ function BaseMap(props) {
   const [hoverInfo, setHoverInfo] = useState(null);
   const deckRef = useRef(null);
   const [polygonSize, setPolygonSize] = useState(150);
-  const [opcity, setOpcity] = useState(1);
+  const [layerOpacity, setLayerOpacity] = useState(1);
   const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
   const [digitizer, setDigitizer] = useState(false);
   const [digitizerLayer, setDigitizerLayer] = useState(null);
@@ -517,7 +517,7 @@ function BaseMap(props) {
     setPolygonSize(value);
   };
   const changeOpacity = (value) => {
-    setOpcity(value);
+    setLayerOpacity(value);
   };
 
   const maskLayer = useMemo(() => {
@@ -529,7 +529,7 @@ function BaseMap(props) {
       getColor: [255, 0, 0],
       visible: isMaskLayerVisible,
       zIndex: 9999,
-      opacity: opcity,
+      opacity: layerOpacity,
     });
   }, [polygon, isMaskLayerVisible]);
 
@@ -595,7 +595,7 @@ function BaseMap(props) {
             bounds: [west, south, east, north],
             extensions: [new MaskExtension()],
             maskId: MASK_ID,
-            opacity: opcity,
+            opacity: layerOpacity,
           }),
           showBorder &&
           new PathLayer({
@@ -1883,7 +1883,7 @@ function BaseMap(props) {
     flaggedFilter,
     unflaggedFilter,
     pointMarkerSize,
-    opcity,
+    layerOpacity,
   ]);
 
   useEffect(() => {
@@ -1907,10 +1907,13 @@ function BaseMap(props) {
           layer._render3D = terrainmap;
           layer._metadata = { ...layer._metadata, colorMap };
         }
+        if (layerOpacity) {
+          layer._metadata = { ...layer._metadata, layerOpacity };
+        }
         return layer;
       })
     );
-  }, [terrainmap, colorMap]);
+  }, [terrainmap, colorMap,layerOpacity]);
 
   useEffect(() => {
     //console.log("current 3d", threeDState);
@@ -3582,6 +3585,7 @@ function BaseMap(props) {
     SetAllLayers((prev) =>
       prev.map((layer) => {
         if (layer._id === id) layer._isMasked = !layer._isMasked;
+        setLayerOpacity(1);
         return layer;
       })
     );
@@ -6649,7 +6653,7 @@ function BaseMap(props) {
 
   const handleShowMaskLayer = () => {
     setisMaskLayerVisible(false);
-    setOpcity(1);
+    setLayerOpacity(1);
   };
 
   const resetGroupFormFields = () => {
@@ -7069,7 +7073,7 @@ function BaseMap(props) {
                         onChange={changeOpacity}
                         step={0.1}
                         defaultValue={1}
-                        value={opcity}
+                        value={layerOpacity}
                         tooltip={{ placement: "right" }}
                         style={{
                           width: "100px",
