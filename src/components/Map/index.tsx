@@ -140,6 +140,7 @@ import {
   getEditLayerTypeOptions,
   options,
 } from "./utils/propUtils";
+import {valueChangeEmitter} from "./utils/elevationTooltip"
 import Tileset from "src/types/cesium_tileset";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 import { PERMS } from "src/static/permissions";
@@ -147,6 +148,7 @@ import FourOhOne from "../shared/Error/FourOhOne";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "../shared/Loader";
 import { ThreadContext } from "src/services/threadUtils";
+import ElevationBlock from "./utils/elevationTooltip";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -500,7 +502,15 @@ function BaseMap(props) {
   const [selectedKey, setSelectedKey] = useState<any>();
 
   //---------------------Open Stree Maps Layer ----------------------------------------------------
-  const [hoverInfo, setHoverInfo] = useState(null);
+  interface HoverInfo {
+    R: number;
+    G: number;
+    B: number;
+    x: number;
+    y: number;
+    elevation: number;
+  }
+  const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null);
   const deckRef = useRef(null);
   const [polygonSize, setPolygonSize] = useState(150);
   const [layerOpacity, setLayerOpacity] = useState(1);
@@ -533,36 +543,15 @@ function BaseMap(props) {
     });
   }, [polygon, isMaskLayerVisible]);
 
-  // const handleHover = useCallback(
-  //   ({ x, y, allLayers, element, bitmap, sourceLayer, settings }) => {
-  //     try {
-  //       const layerType = allLayers[element]?.type;
-
-  //       if (bitmap && layerType === "DEM" && isElevationEnabledRef.current) {
-  //         const pixelColor = readPixelsToArray(sourceLayer.props.image, {
-  //           sourceX: bitmap.pixel[0],
-  //           sourceY: bitmap.pixel[1],
-  //           sourceWidth: 1,
-  //           sourceHeight: 1,
-  //         });
-  //         const [r, g, b, a] = pixelColor;
-  //         const scalarValue = pixelColor[0] / 255.0;
-
-  //         const elementSettings = settings || allLayers[element]?.settings;
-  //         const minp = elementSettings?.minp;
-  //         const maxp = elementSettings?.maxp;
-  //         const elevation = minp + (maxp - minp) * scalarValue;
-
-  //         setHoverInfo({ r, g, b, x, y, elevation });
-  //       } else {
-  //         setHoverInfo(null);
-  //       }
-  //     } catch (error) {
-  //       console.error("Try with the dem layer instead", error);
-  //     }
-  //   },
-  //   [isElevationEnabled]
-  // );
+  useEffect(() => {
+    const handleValueChange = (newValue: HoverInfo) => {
+        setHoverInfo(newValue);
+    }
+    valueChangeEmitter.on('valueChanged', handleValueChange);
+    return () => {
+      valueChangeEmitter.off('valueChanged', handleValueChange);
+    };
+  }, []);
 
   const osm = [
     new TileLayer({
@@ -6830,44 +6819,7 @@ function BaseMap(props) {
       }}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
-        {hoverInfo && (
-          <div
-            style={{
-              position: "absolute",
-              left: hoverInfo.x + 7,
-              top: hoverInfo.y + 7,
-              background: "white",
-              padding: "4px",
-              borderRadius: "10px",
-              boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-              zIndex: 1000,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: "-15px",
-              marginBottom: "-15px",
-            }}
-          >
-            <div
-              style={{
-                background: `rgb(${hoverInfo.r}, ${hoverInfo.g}, ${hoverInfo.b})`,
-                width: "25px",
-                height: "30px",
-                marginRight: "8px",
-                borderRadius: "7px",
-              }}
-            ></div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "-15px",
-              }}
-            >
-              <p>{hoverInfo.elevation.toFixed(2)} Meter</p>
-            </div>
-          </div>
-        )}
+        <ElevationBlock hoverInfo={hoverInfo} isElevationEnabled={isElevationEnabled} />
 
         {osmState ? (
           <>
