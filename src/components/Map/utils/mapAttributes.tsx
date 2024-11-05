@@ -328,6 +328,7 @@ const MapAttributes: React.FC<Props> = (props) => {
             display: "flex",
             flexWrap: "wrap",
             justifyContent: "space-between",
+            padding: "10px",
           }}
         >
           <div>
@@ -341,7 +342,7 @@ const MapAttributes: React.FC<Props> = (props) => {
               </Text>
               <Select
                 defaultValue="plasma"
-                style={{ width: 120, float: "right" }}
+                style={{ width: 120, float: "right" ,marginLeft:"12px"}}
                 onChange={changeColor}
               >
                 <Option value="plasma">plasma</Option>
