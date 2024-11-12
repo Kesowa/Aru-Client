@@ -8,7 +8,7 @@ import { parse, stringify } from "svgson";
 import svgpath from "svgpath";
 import "./index.less";
 
-const SvgToGeojson = ({ deckRef, onValueChange }) => {
+const SvgToGeojson = ({ deckRef, onValueChange, fileUpload}) => {
   const [canvas, setCanvas] = useState(null);
   const [ctx, setCtx] = useState(null);
   const [svg, setSvg] = useState(null);
@@ -38,6 +38,7 @@ const SvgToGeojson = ({ deckRef, onValueChange }) => {
   const [canvasRotation, setCanvasRotation] = useState(0);
   const [canvasImageOpacity, setCanvasImageOpacity] = useState(1);
   const [flattenedBounds, setFlattenedBounds] = useState([]);
+  const [fileName, setFileName] = useState(null);
 
   useEffect(() => {
     if (canvas) {
@@ -210,6 +211,9 @@ const SvgToGeojson = ({ deckRef, onValueChange }) => {
 
   const handleFileInputChange = (info) => {
     const file = info.file.originFileObj;
+    let name = info.file.name;
+    const modifiedName = name.replace(/\.(png|jpg|jpeg|gif|bmp|tiff)$/, ".geojson"); // Replace any image extension with .geojson
+    setFileName(modifiedName);
     const reader = new FileReader();
     reader.onload = (e) => {
       const source = e.target.result;
@@ -451,7 +455,16 @@ const SvgToGeojson = ({ deckRef, onValueChange }) => {
             });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = "output.geojson";
+            link.download = fileName;
+
+            // Call upload function or set the file to be used in the upload modal
+            const geoJsonBlob = new Blob([geoJsonString], { type: "application/json" });
+            const geoJsonFile = new File([geoJsonBlob], fileName , {
+              type: "application/json;",
+            });
+            console.log("blob file",geoJsonFile);
+            fileUpload(geoJsonFile);
+
             link.click();
             URL.revokeObjectURL(link.href);
             resolve();
