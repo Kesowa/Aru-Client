@@ -7037,19 +7037,12 @@ function BaseMap(props) {
                   </div>
                 </Tooltip>
               )}
-              <Tooltip
-                title="digitize image to map"
-                placement="bottom"
+              <Button
+                style={{ marginRight: "10px" }}
+                onClick={() => setDigitizer((digitizer) => !digitizer)}
               >
-                 <div
-                  className="time-filter-tool"
-                  onClick={() => setDigitizer((digitizer) => !digitizer)}
-                >
-                  <Text strong>
-                      Digitizer
-                  </Text>
-                </div>
-              </Tooltip>
+                Digitizer
+              </Button>
               <Tooltip title="Time" placement="bottom">
                 <div
                   className="time-filter-tool"
