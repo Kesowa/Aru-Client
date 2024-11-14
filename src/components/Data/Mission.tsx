@@ -310,7 +310,6 @@ function DataMission(props) {
       title: "ACTIONS",
       dataIndex: "actions",
       className: "mission-actions",
-      fixed: "right",
       render: (text, record) => (
         <>
           <Button
