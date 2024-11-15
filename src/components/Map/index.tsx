@@ -517,24 +517,11 @@ function BaseMap(props) {
   const [polygon, setPolygon] = useState(getPolygon(88, 22, 1));
   const [digitizer, setDigitizer] = useState(false);
   const [digitizerLayer, setDigitizerLayer] = useState(null);
-  const [fileToUpload, setFileToUpload] = useState(null);
 
   const handleFileUpload = (file) => {
-    setFileToUpload(file);
     setIsModalVisible(true);
-    console.log("fileupload:",fileToUpload);
-    if(fileToUpload){
-      setFileList([
-        {
-          lastModified: fileToUpload.lastModified,
-          name: fileToUpload.name,
-          size: fileToUpload.size,
-          type: fileToUpload.type,
-          uid: "rc-upload-1731409007463-3", //still need to figure out how the regular file upload append the uid when file get uploaded 
-          // webkitRelativePath: "",
-          url: URL.createObjectURL(fileToUpload),
-        },
-      ]);
+    if(file){
+       setFileList([file]);
     }
   };
 
@@ -4924,7 +4911,6 @@ function BaseMap(props) {
     fileList,
     onRemove: (file) => {
       setFileList([]);
-      setFileToUpload(null);
     },
     beforeUpload: (file) => {
       // console.log("digi files:",file);

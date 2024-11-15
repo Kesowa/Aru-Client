@@ -212,7 +212,7 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload}) => {
   const handleFileInputChange = (info) => {
     const file = info.file.originFileObj;
     let name = info.file.name;
-    const modifiedName = name.replace(/\.(png|jpg|jpeg|gif|bmp|tiff)$/, ".geojson"); // Replace any image extension with .geojson
+    const modifiedName = name.replace(/\.(png|jpg|JPG|PNG|JPEG|jpeg|gif|bmp|tiff)$/, ".geojson");
     setFileName(modifiedName);
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -460,9 +460,8 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload}) => {
             // Call upload function or set the file to be used in the upload modal
             const geoJsonBlob = new Blob([geoJsonString], { type: "application/json" });
             const geoJsonFile = new File([geoJsonBlob], fileName , {
-              type: "application/json;",
+              type: "application/json",
             });
-            console.log("blob file",geoJsonFile);
             fileUpload(geoJsonFile);
 
             link.click();
