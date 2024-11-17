@@ -443,26 +443,24 @@ function MissionTable(props: TableProps) {
   };
 
   return (
-    <div>
-      {/* +++++++++++++++++++++++++++++++++MISION LISTING+++++++++++++++++++++++++++++++++++++++++ */}
-      <Row style={{ marginTop: "1rem" }}>
-        <Col span={24}>
-          <Table
-            columns={columns}
-            dataSource={props.missionTableData}
-            loading={props.isTableLoading}
-            rowKey="_id"
-            className="mission-table"
-            pagination={{
-              total: props.total,
-              pageSize: props.limit,
-              current: props.page,
-            }}
-            onChange={handleTableChange}
-          />
-        </Col>
-      </Row>
-    </div>
+    
+      <div style={{ padding: "1rem", width: "100%", overflowX: "auto" }}>
+         {/* +++++++++++++++++++++++++++++++++MISION LISTING+++++++++++++++++++++++++++++++++++++++++ */}
+        <Table
+          columns={columns}
+          dataSource={props.missionTableData}
+          loading={props.isTableLoading}
+          pagination={{
+            current: props.page,
+            pageSize: props.limit,
+            total: props.total,
+            showSizeChanger: true,
+          }}
+          onChange={handleTableChange}
+          rowKey="_id"
+          bordered
+        />
+      </div>
   );
 }
 
