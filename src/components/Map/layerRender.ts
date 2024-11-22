@@ -150,7 +150,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
           layer.raster === rasterProps.CESIUM_3D
         ) {
           return new Tile3DLayer({
-            id: layer._id,
+            id: `${layer._id}-${layer._isMeshSource}`,
             data: getRasterDataUrl(layer),
             loader: Tiles3DLoader,
             _subLayerProps: {

@@ -3580,16 +3580,15 @@ function BaseMap(props) {
     );
   };
 
-  const handleMeshSourceOption = (id: string) => {
+  const handleMeshSourceOption = (layers: Layer[]) => {
     SetAllLayers((prev) =>
       prev.map((layer) => {
         if (layer.type == "Raster" && layer.raster == "CESIUM_3D") {
-          if (layer._id == id) {
+          // add this logic in future get the id from layer if (layer._id == id) {
             layer._isMeshSource = !layer._isMeshSource;
           } else {
             layer._isMeshSource = false;
           }
-        }
         return layer;
       })
     );
@@ -7883,6 +7882,7 @@ function BaseMap(props) {
                     refreshLayer={refreshLayer}
                     setRefreshLayer={setRefreshLayer}
                     invertColor={invertColor}
+                    handleMeshSourceOption={handleMeshSourceOption}
                   />
                 ),
                 closeable: true,
