@@ -345,11 +345,11 @@ function BaseMap(props) {
       label: "Elevation",
     });
 
-    if (layer.type == "Raster" && layer.raster == "CESIUM_3D")
-      items.push({
-        key: "16",
-        label: layer._isMeshSource ? "Remove Mesh" : "Add Mesh",
-      });
+    // if (layer.type == "Raster" && layer.raster == "CESIUM_3D")
+    //   items.push({
+    //     key: "16",
+    //     label: layer._isMeshSource ? "Remove Mesh" : "Add Mesh",
+    //   });
 
     return items;
   };
@@ -3580,15 +3580,16 @@ function BaseMap(props) {
     );
   };
 
-  const handleMeshSourceOption = (layers: Layer[]) => {
+  const handleMeshSourceOption = (id:string) => {
     SetAllLayers((prev) =>
       prev.map((layer) => {
         if (layer.type == "Raster" && layer.raster == "CESIUM_3D") {
-          // add this logic in future get the id from layer if (layer._id == id) {
+          if (layer._id == id) {
             layer._isMeshSource = !layer._isMeshSource;
           } else {
             layer._isMeshSource = false;
           }
+        }
         return layer;
       })
     );
@@ -4008,9 +4009,9 @@ function BaseMap(props) {
         case "15":
           toggleElevation();
           break;
-        case "16":
-          handleMeshSourceOption(layer._id);
-          break;
+        // case "16":
+        //   handleMeshSourceOption(layer._id);
+        //   break;
         default:
           break;
       }
