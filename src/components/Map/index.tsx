@@ -518,6 +518,13 @@ function BaseMap(props) {
   const [digitizer, setDigitizer] = useState(false);
   const [digitizerLayer, setDigitizerLayer] = useState(null);
 
+  const handleFileUpload = (file) => {
+    setIsModalVisible(true);
+    if(file){
+       setFileList([file]);
+    }
+  };
+
   const handleChildValueChange = (newValue) => {
     console.log(newValue);
     setDigitizerLayer(newValue);
@@ -4901,15 +4908,15 @@ function BaseMap(props) {
   const uploadProps = {
     name: "file",
     multiple: false,
+    fileList,
     onRemove: (file) => {
       setFileList([]);
     },
     beforeUpload: (file) => {
-      //console.log(file);
+      // console.log("digi files:",file);
       setFileList([file]);
       return false;
     },
-    fileList,
   };
   useEffect(() => {
     console.log("panes", panes);
@@ -7037,12 +7044,19 @@ function BaseMap(props) {
                   </div>
                 </Tooltip>
               )}
-              <Button
-                style={{ marginRight: "10px" }}
-                onClick={() => setDigitizer((digitizer) => !digitizer)}
+              <Tooltip
+                title="digitize image to map"
+                placement="bottom"
               >
-                Digitizer
-              </Button>
+                 <div
+                  className="time-filter-tool"
+                  onClick={() => setDigitizer((digitizer) => !digitizer)}
+                >
+                  <Text strong>
+                      Digitizer
+                  </Text>
+                </div>
+              </Tooltip>
               <Tooltip title="Time" placement="bottom">
                 <div
                   className="time-filter-tool"
@@ -7809,6 +7823,7 @@ function BaseMap(props) {
           <SvgToGeojson
             deckRef={deckRef}
             onValueChange={handleChildValueChange}
+            fileUpload={handleFileUpload}
           />
         )}
       </Suspense>

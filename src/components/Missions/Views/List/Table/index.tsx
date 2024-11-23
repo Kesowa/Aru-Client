@@ -400,6 +400,7 @@ function MissionTable(props: TableProps) {
       title: "Actions",
       dataIndex: "actions",
       className: "mission-actions",
+      fixed: "right",
       render: (text, record) => (
         <>
           <Button
