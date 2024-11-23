@@ -320,10 +320,6 @@ function AssetBase(props: any) {
     
     form.resetFields();
 
-    for (let i = 0; i < data.length; ++i) {
-      assetInfo[data[i].key] = data[i].value;
-    }
-
     const asset = {
       assetName: values.name,
       userID: Auth.userid,
