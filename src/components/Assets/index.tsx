@@ -146,6 +146,7 @@ function AssetBase(props: any) {
   const [manufacturingDate, setManufacturingDate] = useState<any>("");
   const [data, setData] = useState(originData);
   const [editingKey, setEditingKey] = useState("");
+  const [refreshAssets, setRefreshAssets] = useState(false);
 
   const [assetButton, setAssetButton] = useState(true);
   const [modelButton, setModelButton] = useState(true);
@@ -306,12 +307,18 @@ function AssetBase(props: any) {
       return;
     }
 
-    form.resetFields();
-
     const assetInfo = {};
     for (let i = 0; i < data.length; ++i) {
-      assetInfo[data[i].key] = data[i].value;
+      const key = data[i].key;
+      const value = data[i].value;
+      assetInfo[key] = value;
+      if (key === "FCID" && !value || key === "serialNo" && !value || key === "UIN" && !value) {
+        message.error("AssetInfo is required");
+        return;
+      }
     }
+    
+    form.resetFields();
 
     const asset = {
       assetName: values.name,
@@ -328,6 +335,7 @@ function AssetBase(props: any) {
       .then((result) => {
         if (result.data.status) {
           history.push("/dashboard/assets");
+          setRefreshAssets((prev) => !prev); 
           message.success("Asset Created Successfully");
         }
       })
@@ -952,7 +960,7 @@ function AssetBase(props: any) {
 
       <Tabs defaultActiveKey="1" onTabClick={onTabClick}>
         <TabPane tab="Assets" key="1">
-        <AssetList filter="all"/>
+        <AssetList filter="all" refreshAssets={refreshAssets}/>
         </TabPane>
         <TabPane tab="Models" key="2">
           <ModelList />
