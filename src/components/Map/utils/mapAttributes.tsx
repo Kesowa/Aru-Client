@@ -52,6 +52,7 @@ interface Props {
   setKey: (key: number) => void;
   setShouldAttributeTableReload: (reload: boolean) => void;
   invertColor: any;
+  handleMeshSourceOption: (id: string) => void;
 }
 
 interface State {
@@ -378,11 +379,27 @@ const MapAttributes: React.FC<Props> = (props) => {
             </div>
           </div>
           <div style={{ marginRight: "20rem" }}>
-            <div>
-              <Space size="large">
-                <Text>Terrain: </Text>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "50px",
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <Text>Terrain:</Text>
                 <Switch onChange={onChange} />
-              </Space>
+              </div>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <Text>3D-Overlay:</Text>
+                <Switch
+                  onChange={() => props.handleMeshSourceOption(props.id)}
+                />
+              </div>
             </div>
             <div style={{ marginTop: "1.5rem" }}>
               <Space size="large">
