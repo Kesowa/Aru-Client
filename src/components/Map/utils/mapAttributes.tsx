@@ -1,7 +1,7 @@
 // MapAttributes.tsx
 
 import React, { useState, useEffect, useContext } from "react";
-import { Typography, Spin, Select, Switch, Space, Button, Progress } from "antd";
+import { Typography, Spin, Select, Switch, Space, Button, Progress,message } from "antd";
 import ReactJson from "@uiw/react-json-view";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
@@ -111,9 +111,9 @@ const MapAttributes: React.FC<Props> = (props) => {
     .post(`${apis.BASE_TREE_COUNT_INFERENCE}layer/${layerId}/treecount/infer`)
     .then((res) => {
       if (res.data.status) {
-        console.log("Tree count inference has started successfully!");
+        message.success("Tree count inference has started successfully!");
       } else {
-        console.log("Something went wrong!");
+        message.error( req.message.success ||"Something went wrong!");
       }
     })
     .catch((err) => {
