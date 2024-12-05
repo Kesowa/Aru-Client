@@ -1,7 +1,7 @@
 // MapAttributes.tsx
 
 import React, { useState, useEffect, useContext } from "react";
-import { Typography, Spin, Select, Switch, Space } from "antd";
+import { Typography, Spin, Select, Switch, Space, Button, Progress } from "antd";
 import ReactJson from "@uiw/react-json-view";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
@@ -97,6 +97,29 @@ const MapAttributes: React.FC<Props> = (props) => {
   );
 
   const { logout } = useContext(AuthContext);
+
+  //AIML inference api implementation 
+  const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState<boolean>(false);
+  
+  const layerId = props.id;
+
+  const invokeInference = async () => {
+    console.log("all good")
+    setLoading(true);
+    http
+    .post(`${apis.BASE_TREE_COUNT_INFERENCE}layer/${layerId}/treecount/infer`)
+    .then((res) => {
+      if (res.data.status) {
+        console.log("Tree count inference has started successfully!");
+      } else {
+        console.log("Something went wrong!");
+      }
+    })
+    .catch((err) => {
+      console.error("Error starting treecount inference:", err);
+    });
+  };
 
   const onChange = (checked: boolean) => {
     props.setTerrainMap(checked);
@@ -343,7 +366,7 @@ const MapAttributes: React.FC<Props> = (props) => {
               </Text>
               <Select
                 defaultValue="plasma"
-                style={{ width: 120, float: "right" ,marginLeft:"12px"}}
+                style={{ width: 120, float: "right", marginLeft: "12px" }}
                 onChange={changeColor}
               >
                 <Option value="plasma">plasma</Option>
@@ -401,7 +424,23 @@ const MapAttributes: React.FC<Props> = (props) => {
                 />
               </div>
             </div>
-            <div style={{ marginTop: "1.5rem" }}>
+            <div style={{ marginTop: "20px"}}>
+              <Button
+                type="primary"
+                onClick={invokeInference}
+                loading={loading}
+                style={{
+                  marginBottom: 16,
+                  background:
+                    "linear-gradient(90deg, #6a11cb 0%, #2575fc 100%)",
+                  border: "none",
+                }}
+              >
+                Tree count Inference
+              </Button>
+              {/* {loading && <Progress percent={progress} />} */}
+            </div>
+            <div style={{ marginTop: "1.1rem" }}>
               <Space size="large">
                 <Text>Overlay: </Text>
                 <Select
