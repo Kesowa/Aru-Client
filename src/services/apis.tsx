@@ -140,8 +140,8 @@ const apis = {
   GET_LOCATION_BY_ID: "/apis/v1/location/get-by-id",
 
   //AIML 
-  BASE_VOD_VOILATION_INFERENCE: "/apis/v1/VOD/",
-  BASE_TREE_COUNT_INFERENCE:"/apis/v1/layer/",
+  BASE_VOD_VOILATION_INFERENCE: "/apis/v1/aiml/",
+  BASE_TREE_COUNT_INFERENCE:"/apis/v1/aiml/",
 
 
   //ASSETS
