@@ -3602,6 +3602,11 @@ function BaseMap(props) {
     );
   };
 
+  const refreshVectorLayer = () => {
+    filterLayers();
+    message.success("Checkout the vector section for Inference Layer");  
+  }
+
   const toggleElevation = () => {
     setIsElevationEnabled((prevValue) => !prevValue);
     console.log(
@@ -7899,6 +7904,7 @@ function BaseMap(props) {
                     setRefreshLayer={setRefreshLayer}
                     invertColor={invertColor}
                     handleMeshSourceOption={handleMeshSourceOption}
+                    refreshVectorLayers={refreshVectorLayer}
                   />
                 ),
                 closeable: true,

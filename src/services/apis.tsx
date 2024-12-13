@@ -139,10 +139,6 @@ const apis = {
   DELETE_LOCATION: "/apis/v1/location/delete",
   GET_LOCATION_BY_ID: "/apis/v1/location/get-by-id",
 
-  //AIML 
-  BASE_VOD_VOILATION_INFERENCE: "/apis/v1/aiml/",
-  BASE_TREE_COUNT_INFERENCE:"/apis/v1/aiml/",
-
 
   //ASSETS
   GET_MANUFACTURERS: "/apis/v1/manufacturer/get",
@@ -260,6 +256,7 @@ const apis = {
   THREAD: "/apis/v1/thread",
 
   //AIML
+  BASE_AIML_API: "/apis/v1/aiml/",
   INFER_VOD_VIOLENCE: "apis/v1/aiml/vod/:vodId/violence/infer",
   FETCH_AI_TASK: "apis/v1/aiml", //  /:docModel/:docId?infer=
 
