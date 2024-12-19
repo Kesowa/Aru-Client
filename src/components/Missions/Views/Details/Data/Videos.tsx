@@ -609,47 +609,6 @@ function Videos(props) {
     };
   }, [props?.missionDetails?.missionId]);
 
-  const tenantId = props.missionDetails?.locationId.tenantId;
-  const [loading, setLoading] = useState(false);
-  const [status ,setStatus] = useState("Idle");
-
-  useEffect(() => {
-    let socketInstance = null;
-
-    if (tenantId) {
-      if (socket.current) {
-        socket.current.disconnect();
-      }
-
-      socketInstance = io(
-        `${API_URL}/stream/notification?tenantID=${tenantId}`
-      );
-
-      socket.current = socketInstance;
-
-      socketInstance.on("AI_TASK_PROGRESS", (data) => {
-        console.log(data);
-        const { inferId, status, progress } = data;
-        setProgress(progress);
-
-        if (progress === 100) {
-          setProgress(0);
-          setLoading(false);
-          setStatus("Complete");
-        }
-
-        console.log(`Inference ${inferId} progress: ${progress}%`);
-      });
-    }
-
-    return () => {
-      if (socketInstance) {
-        socketInstance.disconnect();
-      }
-    };
-  }, [tenantId]);
-
-
   //----------- Fetching video data for mission --------------------
   const getFlaggedFilter = () => {
     if (flaggedFilter) {
@@ -1616,14 +1575,6 @@ function Videos(props) {
         canToggleFlag={userDetails.customPermissions.includes(PERMS.VOD_UPDATE)}
         canDelete={userDetails.customPermissions.includes(PERMS.VOD_DELETE)}
       />
-      {status === "Complete" && (
-        <p style={{ color: "green", fontWeight: "bold" }}>
-          Violence Inference: Complete 🎉
-        </p>
-      )}
-      {loading &&
-      <><Text>Inference Progress:</Text><Progress percent={progress} /></>
-      }
       {loader ? (
         <>
           {!listView ? (
