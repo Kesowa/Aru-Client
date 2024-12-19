@@ -1,7 +1,7 @@
-import React, { lazy, Suspense, useEffect } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import Loader, { LoaderContext, useLoader } from "./components/shared/Loader";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
-import { Space, Spin } from "antd";
+import { message, Space, Spin } from "antd";
 import "./index.less";
 import Login from "./components/Login";
 import LoginWrapper from "./components/shared/Wrappers/LoginWrapper";
@@ -10,6 +10,11 @@ import DashboardWrapper from "./components/shared/Wrappers/DashboardWrapper";
 import { AuthContext, useAuth } from "./services/authUtils";
 import { loadScripts } from "./services/loadScripts";
 import { ThreadContext, useThread } from "./services/threadUtils";
+import http from "./services/httpCall";
+import { components } from "./handlers/schema";
+import apis from "./services/apis";
+import { AxiosErrorHandler } from "./services/httpErrorHandle";
+import EntryLoader from "./components/shared/Loader/Entry";
 
 const ForgotPassword = lazy(() => import("./components/Login/ForgotPassword"));
 const Register = lazy(() => import("./components/SignUp"));
@@ -19,31 +24,50 @@ const PrivateRoute = lazy(
 const PublicMap = lazy(() => import("./components/Map/utils/publicMap"));
 
 const App = () => {
-  const Token = localStorage.getItem("Token");
-  const UserId = localStorage.getItem("UserId");
-
   const { Auth, login, logout, setUserDetails } = useAuth();
   const { loading, setLoading } = useLoader(0);
   const { thread, openThread, closeThread } = useThread();
 
+  const [userDetailsFetched, setUserDetailsFetched] = useState(false);
+
+  const fetchUserDetails = () => {
+    setLoading(true);
+    http
+      .get<components["schemas"]["UserDetailsAuthResponse"]>(
+        apis.GET_USER_DETAILS
+      )
+      .then((result) => {
+        if (result.data.status) {
+          login(result.data.data._id, result.data.data);
+        } else {
+          message.error(result.status.toString());
+          console.log(result);
+          logout();
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => {
+        setUserDetailsFetched(true);
+        setLoading(false);
+      });
+  };
+
+  //fetching user details on component load
   useEffect(() => {
-    if (
-      Token &&
-      UserId &&
-      Token !== "null" &&
-      Token !== "undefined" &&
-      UserId !== "null" &&
-      UserId !== "undefined" &&
-      Auth.token === null &&
-      Auth.userid === null
-    ) {
-      login(Token, UserId, null);
+    if (Auth.userdetails) {
+      setUserDetailsFetched(true);
+    } else {
+      fetchUserDetails();
     }
   }, []);
   
   const { mapScriptLoaded, paymentScriptLoaded } = loadScripts();
 
   return (
+    userDetailsFetched ?
     <React.Fragment>
       <LoaderContext.Provider value={{ loading, setLoading }}>
       <AuthContext.Provider value={{ Auth, login, logout, setUserDetails }} >
@@ -96,6 +120,8 @@ const App = () => {
       </AuthContext.Provider>
       </LoaderContext.Provider>
     </React.Fragment>
+    :
+    <EntryLoader />
   );
 };
 
