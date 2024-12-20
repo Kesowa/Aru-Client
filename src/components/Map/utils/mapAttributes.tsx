@@ -482,19 +482,12 @@ const MapAttributes: React.FC<Props> = (props) => {
             <div style={{ marginTop: "20px" }}>
               {status === "Complete" ? (
                 <p style={{ color: "green", fontWeight: "bold" }}>
-                  Tree count Inference: Complete 🎉
+                  Tree count Inference: Complete
                 </p>
               ) : (
                 <Button
-                  type="primary"
                   onClick={invokeInference}
                   loading={loading}
-                  style={{
-                    marginBottom: 16,
-                    background:
-                      "linear-gradient(90deg, #6a11cb 0%, #2575fc 100%)",
-                    border: "none",
-                  }}
                 >
                   Tree count Inference
                 </Button>

@@ -2302,7 +2302,7 @@ function VideoPlayer(props: any) {
       </Dropdown>
       {status === "Complete" && (
         <p style={{ color: "green", fontWeight: "bold" }}>
-          Violence Inference: Complete 🎉
+          Violence Inference: Complete
         </p>
       )}
       {loading &&

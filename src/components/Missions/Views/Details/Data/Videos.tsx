@@ -135,22 +135,6 @@ function Videos(props) {
         label: "Open Thread",
         icon: <MessageOutlined />,
       },
-      {
-        key: "6",
-        label: (
-          <span
-            style={{
-              background: "linear-gradient(90deg, #6a11cb 0%, #2575fc 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              fontWeight: "bold",
-            }}
-          >
-            Violence Inference
-          </span>
-        ),
-        icon: <AimOutlined style={{ color: "#6a11cb" }} />,
-      },
     ];
     if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.VOD_UPDATE)) {
       item.push(
@@ -212,9 +196,6 @@ function Videos(props) {
           },
         });
         break;
-      case "6":
-        handleVoilenceInference(selectedVideo?.data._id);
-        break;
       default:
         break;
     }
@@ -244,22 +225,22 @@ function Videos(props) {
       });
   };
 
-  const handleVoilenceInference = (vodId) => {
-    http
-      .post(`${apis.BASE_AIML_API}vod/${vodId}/violence/infer`)
-      .then((res) => {
-        if (res.data.status) {
-            setLoading(true);
-            message.success("Violence inference started successfully!");    
-        } else {
-          message.error(res.data.message || "Something went wrong!");
-        }
-      })
-      .catch((err) => {
-        console.error("Error starting violence inference:", err.message);
-        message.error("Failed to start violence inference. Please try again.");
-      });
-  };
+  // const handleVoilenceInference = (vodId) => {
+  //   http
+  //     .post(`${apis.BASE_AIML_API}vod/${vodId}/violence/infer`)
+  //     .then((res) => {
+  //       if (res.data.status) {
+  //           setLoading(true);
+  //           message.success("Violence inference started successfully!");    
+  //       } else {
+  //         message.error(res.data.message || "Something went wrong!");
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.error("Error starting violence inference:", err.message);
+  //       message.error("Failed to start violence inference. Please try again.");
+  //     });
+  // };
 
   const toggleFlag = () => {
     const { data } = selectedVideo;
