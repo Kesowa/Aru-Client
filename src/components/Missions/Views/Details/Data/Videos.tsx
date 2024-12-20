@@ -19,6 +19,7 @@ import {
   Skeleton,
   Badge,
   Pagination,
+  Progress,
   MenuProps,
   notification,
 } from "antd";
@@ -30,6 +31,7 @@ import {
   UploadOutlined,
   UserOutlined,
   VideoCameraOutlined,
+  AimOutlined,
   DownloadOutlined,
   MessageOutlined,
   CloseOutlined,
@@ -222,6 +224,24 @@ function Videos(props) {
         console.error(err.message);
       });
   };
+
+  // const handleVoilenceInference = (vodId) => {
+  //   http
+  //     .post(`${apis.BASE_AIML_API}vod/${vodId}/violence/infer`)
+  //     .then((res) => {
+  //       if (res.data.status) {
+  //           setLoading(true);
+  //           message.success("Violence inference started successfully!");    
+  //       } else {
+  //         message.error(res.data.message || "Something went wrong!");
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.error("Error starting violence inference:", err.message);
+  //       message.error("Failed to start violence inference. Please try again.");
+  //     });
+  // };
+
   const toggleFlag = () => {
     const { data } = selectedVideo;
     const body = {

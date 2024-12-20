@@ -18,6 +18,7 @@ import {
   Tooltip,
   Switch,
   Modal,
+  Progress,
   Image,
   Result,
   message,
@@ -144,7 +145,6 @@ const b64toBlob = (b64Data, contentType) => {
 };
 
 function VideoPlayer(props: any) {
-  console.log("oooo", props);
   const { Auth, logout } = useContext(AuthContext);
   const [isAiTaskCompleted, setIsAiTaskCompleted] = useState(false);
   const [aiTaskData, setAiTaskData] = useState({ Keys: [], Values: [] });
@@ -261,6 +261,54 @@ function VideoPlayer(props: any) {
 
   let socket;
   const aiSocket: any = useRef();
+
+  const tenantId = props.mission.tenantId;
+  const [loading, setLoading] = useState(false);
+  const [status ,setStatus] = useState("Idle");
+  const [inferenceProgress, setInferenceProgress] = useState(0);
+
+  useEffect(() => {
+    let socketInstance = null;
+
+    if (tenantId) {
+      if (aiSocket.current) {
+        aiSocket.current.disconnect();
+      }
+
+      socketInstance = io(
+        `${API_URL}/stream/notification?tenantID=${tenantId}`
+      );
+
+      aiSocket.current = socketInstance;
+
+      socketInstance.on("AI_TASK_PROGRESS", (data) => {
+        console.log(data);
+        setLoading(true);
+        const { inferId, status, progress } = data;
+        setInferenceProgress(progress);
+
+        if (progress === 100) {
+          setInferenceProgress(0);
+          setLoading(false);
+          setStatus("Complete");
+          openVODNotification(
+            `Finished Processing!`,
+            `AI has ${aiTaskStatus} processing video: ${props.mission._id}`,
+            "success"
+          );
+        }
+
+        console.log(`Inference ${inferId} progress: ${progress}%`);
+      });
+    }
+
+    return () => {
+      if (socketInstance) {
+        socketInstance.disconnect();
+      }
+    };
+  }, [tenantId]);
+
 
   useEffect(() => {
     setIsFlagged(props.mission?.isFlagged);
@@ -2252,6 +2300,14 @@ function VideoPlayer(props: any) {
           )}
         </div>
       </Dropdown>
+      {status === "Complete" && (
+        <p style={{ color: "green", fontWeight: "bold" }}>
+          Violence Inference: Complete
+        </p>
+      )}
+      {loading &&
+      <><Text>Inference Progress:</Text><Progress percent={inferenceProgress} /></>
+      }
 
       <canvas ref={canvasRef} />
       <Modal

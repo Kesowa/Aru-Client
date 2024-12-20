@@ -1,17 +1,18 @@
 // MapAttributes.tsx
 
-import React, { useState, useEffect, useContext } from "react";
-import { Typography, Spin, Select, Switch, Space } from "antd";
+import React, { useState, useEffect, useContext, useRef} from "react";
+import { Typography, Spin, Select, Switch, Space, Button, Progress,message } from "antd";
 import ReactJson from "@uiw/react-json-view";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import FeatureTable from "./featureTable";
-import { COG_URL, TITILER_STATIC } from "src/constants";
+import { API_URL, COG_URL, TITILER_STATIC } from "src/constants";
 import { Layer } from "../layerRender";
 import { rasterProps } from "src/static/rasterprops";
 import { AuthContext } from "src/services/authUtils";
 import { Feature } from "src/types/geojson";
+import io from "socket.io-client";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -53,6 +54,7 @@ interface Props {
   setShouldAttributeTableReload: (reload: boolean) => void;
   invertColor: any;
   handleMeshSourceOption: (id: string) => void;
+  refreshVectorLayers: (refresh: boolean) => void;
 }
 
 interface State {
@@ -97,6 +99,82 @@ const MapAttributes: React.FC<Props> = (props) => {
   );
 
   const { logout } = useContext(AuthContext);
+
+  //AIML inference api implementation 
+  const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [status, setStatus] = useState("Idle");
+  const socket = useRef(null); 
+
+  const layerId = props.id;
+  const tenantId = props.AllLayers[0].tenantId
+
+  useEffect(() => {
+    let socketInstance = null;
+
+    if (tenantId) {
+      if (socket.current) {
+        socket.current.disconnect();
+      }
+
+      socketInstance = io(
+        `${API_URL}/stream/notification?tenantID=${tenantId}`
+      );
+
+      socket.current = socketInstance;
+
+      socketInstance.on("AI_TASK", (data)=>{
+        console.log("AI_TASK:",data);
+        if (data.status === "completed"){
+          props.refreshVectorLayers(!props.refreshLayer)
+        }
+      })
+
+      socketInstance.on("AI_TASK_PROGRESS", (data) => {
+        console.log(data);
+        const { inferId, status, progress } = data;
+        setProgress(progress);
+
+        if (progress === 100) {
+          setProgress(null);
+          setLoading(false);
+          setStatus("Complete");
+        }
+
+        console.log(`Inference ${inferId} progress: ${progress}%`);
+      });
+    }
+
+    return () => {
+      if (socketInstance) {
+        socketInstance.disconnect();
+      }
+    };
+  }, [tenantId]);
+
+
+  const invokeInference = async () => {
+    setLoading(true);
+    http
+    .post(`${apis.BASE_AIML_API}layer/${layerId}/treecount/infer`)
+    .then((res) => {
+      if (res.data.status) {
+        if (res.data.message === "Task is already completed"){
+          setLoading(false);
+          setProgress(null);
+          setStatus("Complete");
+          
+        }else{
+          message.success("Tree count inference has started successfully!"); 
+        }
+      } else {
+        message.error( req.message.success ||"Something went wrong!");
+      }
+    })
+    .catch((err) => {
+      console.error("Error starting treecount inference:", err);
+    });
+  };
 
   const onChange = (checked: boolean) => {
     props.setTerrainMap(checked);
@@ -343,7 +421,7 @@ const MapAttributes: React.FC<Props> = (props) => {
               </Text>
               <Select
                 defaultValue="plasma"
-                style={{ width: 120, float: "right" ,marginLeft:"12px"}}
+                style={{ width: 120, float: "right", marginLeft: "12px" }}
                 onChange={changeColor}
               >
                 <Option value="plasma">plasma</Option>
@@ -401,7 +479,22 @@ const MapAttributes: React.FC<Props> = (props) => {
                 />
               </div>
             </div>
-            <div style={{ marginTop: "1.5rem" }}>
+            <div style={{ marginTop: "20px" }}>
+              {status === "Complete" ? (
+                <p style={{ color: "green", fontWeight: "bold" }}>
+                  Tree count Inference: Complete
+                </p>
+              ) : (
+                <Button
+                  onClick={invokeInference}
+                  loading={loading}
+                >
+                  Tree count Inference
+                </Button>
+              )}
+              {loading && <Progress percent={progress} />}
+            </div>
+            <div style={{ marginTop: "1.1rem" }}>
               <Space size="large">
                 <Text>Overlay: </Text>
                 <Select
