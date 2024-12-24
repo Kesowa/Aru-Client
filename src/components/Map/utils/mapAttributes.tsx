@@ -106,6 +106,7 @@ const MapAttributes: React.FC<Props> = (props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [status, setStatus] = useState("Idle");
   const socket = useRef(null); 
+  const [inferenceType, setInferenceType] = useState(null);
 
   const layerId = props.id;
   const tenantId = props.AllLayers[0].tenantId
@@ -157,8 +158,8 @@ const MapAttributes: React.FC<Props> = (props) => {
     <Menu
       onClick={({ key }) => invokeInference(key)} 
     >
-      <Menu.Item key="treecount">Tree Count Inference</Menu.Item>
-      <Menu.Item key="rooftopsegmentation">Rooftop Segmentation</Menu.Item>
+      <Menu.Item key="treecount">Tree Count</Menu.Item>
+      <Menu.Item key="rooftopsegmentation">Rooftop Segmentation </Menu.Item>
       {/* Add more inference types as needed */}
     </Menu>
   );
@@ -169,6 +170,7 @@ const MapAttributes: React.FC<Props> = (props) => {
       message.warning("Please select an inference type!");
       return;
     }
+    setInferenceType(selectedInference);
     const apiEndpoint = `${apis.BASE_AIML_API}layer/${layerId}/${selectedInference}/infer`;
 
     http
@@ -502,7 +504,7 @@ const MapAttributes: React.FC<Props> = (props) => {
             <div style={{ marginTop: "20px" }}>
               {status === "Complete" ? (
                 <p style={{ color: "green", fontWeight: "bold" }}>
-                  Tree count Inference: Complete
+                  {inferenceType} Inference : Complete
                 </p>
               ) : (
                 <Dropdown overlay={menu} trigger={["click"]}>
