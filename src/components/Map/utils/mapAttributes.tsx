@@ -158,7 +158,7 @@ const MapAttributes: React.FC<Props> = (props) => {
     <Menu
       onClick={({ key }) => invokeInference(key)} 
     >
-      <Menu.Item key="treecount">Tree Count</Menu.Item>
+      <Menu.Item key="deepforest">Tree Count</Menu.Item>
       <Menu.Item key="rooftopsegmentation">Rooftop Segmentation </Menu.Item>
       {/* Add more inference types as needed */}
     </Menu>
