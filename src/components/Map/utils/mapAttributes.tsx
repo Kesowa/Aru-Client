@@ -1,7 +1,8 @@
 // MapAttributes.tsx
 
 import React, { useState, useEffect, useContext, useRef} from "react";
-import { Typography, Spin, Select, Switch, Space, Button, Progress,message } from "antd";
+import { DownOutlined } from '@ant-design/icons';
+import { Typography, Spin, Select, Switch, Space, Button, Progress,message,Dropdown, Menu} from "antd";
 import ReactJson from "@uiw/react-json-view";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
@@ -105,6 +106,7 @@ const MapAttributes: React.FC<Props> = (props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [status, setStatus] = useState("Idle");
   const socket = useRef(null); 
+  const [inferenceType, setInferenceType] = useState(null);
 
   const layerId = props.id;
   const tenantId = props.AllLayers[0].tenantId
@@ -152,28 +154,48 @@ const MapAttributes: React.FC<Props> = (props) => {
     };
   }, [tenantId]);
 
+  const menu = (
+    <Menu
+      onClick={({ key }) => invokeInference(key)} 
+    >
+      <Menu.Item key="deepforest">Tree Count</Menu.Item>
+      <Menu.Item key="rooftopsegmentation">Rooftop Segmentation </Menu.Item>
+      {/* Add more inference types as needed */}
+    </Menu>
+  );
 
-  const invokeInference = async () => {
+  const invokeInference = async (selectedInference) => {
     setLoading(true);
+    if (!selectedInference) {
+      message.warning("Please select an inference type!");
+      return;
+    }
+    setInferenceType(selectedInference);
+    const apiEndpoint = `${apis.BASE_AIML_API}layer/${layerId}/${selectedInference}/infer`;
+
     http
-    .post(`${apis.BASE_AIML_API}layer/${layerId}/treecount/infer`)
-    .then((res) => {
-      if (res.data.status) {
-        if (res.data.message === "Task is already completed"){
-          setLoading(false);
-          setProgress(null);
-          setStatus("Complete");
-          
-        }else{
-          message.success("Tree count inference has started successfully!"); 
+      .post(apiEndpoint)
+      .then((res) => {
+        if (res.data.status) {
+          if (res.data.message === "Task is already completed") {
+            setLoading(false);
+            setProgress(null);
+            setStatus("Complete");
+            message.info("Inference task is already complete!");
+          } else {
+            message.success(`${selectedInference} inference has started successfully!`);
+          }
+        } else {
+          message.error(res.data.message || "Something went wrong!");
         }
-      } else {
-        message.error( req.message.success ||"Something went wrong!");
-      }
-    })
-    .catch((err) => {
-      console.error("Error starting treecount inference:", err);
-    });
+      })
+      .catch((err) => {
+        console.error(`Error starting ${selectedInference} inference:`, err);
+        message.error("Failed to start inference.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const onChange = (checked: boolean) => {
@@ -482,15 +504,17 @@ const MapAttributes: React.FC<Props> = (props) => {
             <div style={{ marginTop: "20px" }}>
               {status === "Complete" ? (
                 <p style={{ color: "green", fontWeight: "bold" }}>
-                  Tree count Inference: Complete
+                  {inferenceType} Inference : Complete
                 </p>
               ) : (
-                <Button
-                  onClick={invokeInference}
-                  loading={loading}
-                >
-                  Tree count Inference
-                </Button>
+                <Dropdown overlay={menu} trigger={["click"]}>
+                  <Button loading={loading}>
+                    <Space>
+                      Select Inference
+                      <DownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
               )}
               {loading && <Progress percent={progress} />}
             </div>
