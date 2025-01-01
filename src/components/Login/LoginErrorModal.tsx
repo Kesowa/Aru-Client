@@ -38,7 +38,6 @@ function LoginErrorModal(props: any) {
         if (result.data.status) {
           //login
           login(
-            result.data.token,
             result.data.data._id,
             result.data.data
           );

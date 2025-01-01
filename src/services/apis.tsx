@@ -10,6 +10,7 @@ const apis = {
   BASE_SERVER_URL: PUBLIC_URL,
 
   LOGIN: "/apis/v1/auth/login",
+  LOGOUT: "/apis/v1/auth/logout",
   GET_USER_DETAILS: "/apis/v1/auth/userdetails",
   FORGOT_PASSWORD: "/apis/v1/auth/forgot-password",
   //tenants
