@@ -178,7 +178,11 @@ function VideoPlayer(props: any) {
     lat: 43.642567,
     long: -79.387054,
   });
-  const [inference, setInference] = useState("");
+  const [inferType, setInferType] = useState("");
+  const [peopleData, setPeopleData] = useState();
+  const [boundingBoxes,setBoundingBoxes] = useState();
+  const [peopleCount,setPeopleCount] = useState()
+  const [scaledBoxes, setScaledBoxes] = useState([]);
 
   const [showHotkeys, setShowHotkeys] = useState(false);
   const [storageModal, setStorageModal] = useState(false);
@@ -377,6 +381,8 @@ function VideoPlayer(props: any) {
         return "Violence";
       case "non-violence":
         return "Non-Violence";
+      case "people-count":
+        return "People-Count";
       default:
         return;
     }
@@ -404,6 +410,7 @@ function VideoPlayer(props: any) {
     const index = aiTaskData.Keys.indexOf(task);
     console.log("AIML graphData", task, aiTaskData);
     if (aiTaskData.Values.length > 0) {
+      setPeopleData(aiTaskData);
       const graphData = aiTaskData.Values.map((value) => {
         return value[index];
       });
@@ -428,7 +435,11 @@ function VideoPlayer(props: any) {
 
   const startInferenceVODViolence = async () => {
     const taskStatusResponse = await http
-      .post(`${apis.INFER_VOD_VIOLENCE.replace(":vodId", props.mission._id)}`)
+      .post(
+        apis.INFER_VOD_VIOLENCE
+          .replace(":vodId", props.mission._id)
+          .replace(":inferType", inferType)
+      )
       .catch((err) => {
         console.log("AIML: Error", err);
       });
@@ -923,6 +934,72 @@ function VideoPlayer(props: any) {
     }
   }, [props.url, isLive]);
 
+  //----------------people count implementation----------
+  useEffect(() => {
+    if (played && !isLive && peopleData?.Values?.length > 0) {
+      console.log("people data: ",peopleData.values);
+      const currentFrame = Math.floor(played * peopleData.Values.length);
+      console.log("people current frame: ",currentFrame);
+      const frameData = peopleData.Values[currentFrame];
+      console.log("people frame: ",frameData);
+      
+      if (frameData) {
+        console.log(frameData);
+        setBoundingBoxes(frameData.coordinates);
+        setPeopleCount(frameData.people_count);
+      }
+    }
+  }, [played, aiGraphData, peopleData]);
+
+  const VIDEO_SIZES = {
+    normal: { width: 712, height: 400 },
+    large: { width: 1920, height: 808 },
+  };
+
+  useEffect(() => {
+    const adjustBoundingBoxes = () => {
+      if (playerRef.current && boundingBoxes) {
+        const videoElement = playerRef.current.getInternalPlayer();
+        const { offsetWidth: containerWidth, offsetHeight: containerHeight } =
+          playerRef.current.wrapper;
+  
+        const mode =
+          containerWidth === VIDEO_SIZES.large.width &&
+          containerHeight === VIDEO_SIZES.large.height
+            ? "large"
+            : "normal";
+  
+        const videoWidth = VIDEO_SIZES[mode].width;
+        const videoHeight = VIDEO_SIZES[mode].height;
+  
+        const scaleX = containerWidth / videoWidth;
+        const scaleY = containerHeight / videoHeight;
+  
+        const heightAdjustmentFactor = 0.85;
+        const newBoxes = boundingBoxes.map(([x1, y1, x2, y2]) => {
+          const scaledX1 = x1 * scaleX;
+          const scaledY1 = y1 * scaleY;
+          const scaledX2 = x2 * scaleX;
+          const scaledY2 = y2 * scaleY * heightAdjustmentFactor;
+          return [
+            Math.max(0, scaledX1),
+            Math.max(0, scaledY1),
+            Math.min(containerWidth, scaledX2),
+            Math.min(containerHeight, scaledY2),
+          ];
+        });
+  
+        setScaledBoxes(newBoxes);
+      }
+    };
+    adjustBoundingBoxes();
+    document.addEventListener("fullscreenchange", adjustBoundingBoxes);
+  
+    return () => {
+      document.removeEventListener("fullscreenchange", adjustBoundingBoxes);
+    };
+  }, [boundingBoxes]);
+  
   //----------fetch telemetry------------------
   useEffect(() => {
     if (played && !isLive) {
@@ -1080,6 +1157,7 @@ function VideoPlayer(props: any) {
               <Item
                 className="bg-transparent"
                 onClick={() => {
+                  setInferType("violence");
                   if (aiTask === "violence") {
                     setAiTask("");
                   } else {
@@ -1109,6 +1187,26 @@ function VideoPlayer(props: any) {
                 Non-Violence
               </Item>
               {aiTask === "non-violence" && (
+                <CheckOutlined style={{ color: "white" }} />
+              )}
+            </div>
+            <div
+              style={{ width: "140px", display: "flex", alignItems: "center" }}
+            >
+              <Item
+                className="bg-transparent"
+                onClick={() => {
+                  setInferType("people-count");
+                  if (aiTask === "people-count") {
+                    setAiTask("");
+                  } else {
+                    setAiTask("people-count");
+                  }
+                }}
+              >
+                People-Count
+              </Item>
+              {aiTask === "people-count" && (
                 <CheckOutlined style={{ color: "white" }} />
               )}
             </div>
@@ -1391,6 +1489,39 @@ function VideoPlayer(props: any) {
           },
         }}
       />
+      {peopleCount !== undefined && scaledBoxes.length > 0 && (
+        <>
+          <div
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              color: "white",
+              background: "rgba(0, 0, 0, 0.5)",
+              padding: "5px",
+              zIndex: 10,
+            }}
+          >
+            People Count: {peopleCount}
+          </div>
+
+          {scaledBoxes.map((box, index) => (
+            <div
+              key={index}
+              style={{
+                position: "absolute",
+                left: `${box[0]}px`,
+                top: `${box[1]}px`,
+                width: `${box[2] - box[0]}px`,
+                height: `${box[3] - box[1]}px`,
+                border: "2px solid red",
+                boxSizing: "border-box",
+                zIndex: 9,
+              }}
+            />
+          ))}
+        </>
+      )}
 
       {/* ---------MAP NAV UI----------------------------------------------------------------- */}
       <>
@@ -2305,9 +2436,12 @@ function VideoPlayer(props: any) {
           Violence Inference: Complete
         </p>
       )}
-      {loading &&
-      <><Text>Inference Progress:</Text><Progress percent={inferenceProgress} /></>
-      }
+      {loading && (
+        <>
+          <Text>Inference Progress:</Text>
+          <Progress percent={inferenceProgress} />
+        </>
+      )}
 
       <canvas ref={canvasRef} />
       <Modal
