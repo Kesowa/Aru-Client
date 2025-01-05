@@ -410,7 +410,9 @@ function VideoPlayer(props: any) {
     const index = aiTaskData.Keys.indexOf(task);
     console.log("AIML graphData", task, aiTaskData);
     if (aiTaskData.Values.length > 0) {
-      setPeopleData(aiTaskData);
+      if(task == "people-count") {
+        setPeopleData(aiTaskData);
+      }
       const graphData = aiTaskData.Values.map((value) => {
         return value[index];
       });
