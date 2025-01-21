@@ -694,6 +694,10 @@ function InfoWindow(props) {
                     </Option>
                   </Select>
                 </Text>
+                <Text>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<img src={SmallAngleIcon} />
+                  &nbsp;&nbsp;{angle.toString().split('.')[0]}°&nbsp;
+                </Text>
               </span>
               <span>
                 {!props.isPublic && renderFeatureOptions()}
