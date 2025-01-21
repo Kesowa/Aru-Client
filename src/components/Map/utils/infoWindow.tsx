@@ -22,8 +22,10 @@ import {
 import apis from "../../../services/apis";
 import "../index.less";
 import Area from "../../../static/area_icon.svg";
+import SmallAngleIcon from "../../../static/small-angle.svg";
 import Perimeter from "../../../static/perimeter_icon.svg";
 import * as turf from "@turf/turf";
+import * as THREE from 'three';
 import moment from "moment";
 import getAddressfromLatLong from "../../../services/reverseGeocoding";
 import { STATIC_URL } from "src/constants";
@@ -45,6 +47,7 @@ function InfoWindow(props) {
   const [perimeter, setPerimeter] = React.useState<any>(
     turf.length(props.feature).toFixed(2)
   );
+  const [angle, setAngle] = useState(0);
   const [areaUnit, setAreaUnit] = useState("sq. m");
   const [lengthUnit, setLenghtUnit] = useState("km");
   const [flag, setFlag] = useState(false);
@@ -520,6 +523,42 @@ function InfoWindow(props) {
     });
     setProperties(filtered);
   }
+
+// Function to calculate angle (supports both 2D and 3D)
+  function calculateAngle(points = props.feature.geometry.coordinates , options = { use3D: false }) {
+    const start =points[0];
+    const end =points[1];
+    if (options.use3D) {
+      // 3D angle calculation using three.js
+      const vectorA = new THREE.Vector3(
+        start[0],
+        start[1],
+        start[2] || 0
+      );
+      const vectorB = new THREE.Vector3(
+        end[0],
+        end[1],
+        end[2] || 0
+      );
+      const angleInRadians = vectorA.angleTo(vectorB);
+      const angleInDegrees = angleInRadians * (180 / Math.PI);
+      console.log("3D Angle between points is:", angleInDegrees, "°");
+      setAngle(angleInDegrees);
+    } else {
+      // 2D Angle calculation using Turf.js bearing
+      const point1 = turf.point(start);
+      const point2 = turf.point(end);
+      const angle = turf.bearing(point1, point2);
+      console.log("2D Angle between points is :", angle, "°");
+      setAngle(angle);
+    }
+  }
+
+  useEffect(()=>{
+       //add condition when more then three points we have then this will run
+     calculateAngle();
+  },[props.features])
+
   useEffect(() => {
     if (props.missionLayer === "VOD" || props.missionLayer === "Alert") {
       if (props.missionLayer === "Alert") {
@@ -692,6 +731,11 @@ function InfoWindow(props) {
                       ft
                     </Option>
                   </Select>
+                  &nbsp;&nbsp;&nbsp;&nbsp;
+                </Text>
+                <Text>
+                  <img src={SmallAngleIcon} />
+                  &nbsp;&nbsp;{angle.toString().split('.')[0]}°&nbsp;degree &nbsp;&nbsp;
                 </Text>
               </span>
               <span>
@@ -703,6 +747,25 @@ function InfoWindow(props) {
           </div>
         </>
       );
+      // case "TwoPointsView":
+      //   console.log("twopointsview...");
+      //   return (
+      //     <>
+      //       <div className="infoWindowContent">
+      //         <div className="sub-info">
+      //           <span className="coordinates">
+      //             <Text>
+      //               <img src={SmallAngleIcon} />
+      //               &nbsp;&nbsp;Angle: {props.angle.toFixed(0)}°&nbsp;&nbsp;
+      //             </Text>
+      //           </span>
+      //           <span>{!props.isPublic && renderFeatureOptions()}</span>
+      //         </div>
+      //         {props.show && saveDrawingButton()}
+      //         {props.show && CancelDrawingButton()}
+      //       </div>
+      //     </>
+      //   );
     default:
       return <p>unknown</p>;
   }

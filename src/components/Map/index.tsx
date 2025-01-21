@@ -82,6 +82,7 @@ import DotIcon from "../../static/DotIcon.png";
 import { SketchPicker } from "react-color";
 import "./index.less";
 import LineIcon from "../../static/line.svg";
+import AngleIcon from "../../static/angle.svg";
 import PolygonIcon from "../../static/polygon.svg";
 import DeckGL from "@deck.gl/react";
 import { FlyToInterpolator } from "deck.gl";
@@ -7164,6 +7165,19 @@ function BaseMap(props) {
                   </div>
                 </Tooltip>
               )}
+              <Tooltip placement="bottom" title="Angle tool">
+                <div
+                  className="line-tool"
+                  style={{
+                    background: toolSelected === "Angle" ? "#35BDD0" : "#ffffff",
+                  }}
+                  onClick={() => startDrawing("DrawLine", "Angle")}
+                >
+                  <div className="line-icon">
+                    <img src={AngleIcon} alt="" />
+                  </div>
+                </div>
+              </Tooltip>
               <Tooltip placement="bottom" title="Line tool">
                 <div
                   className="line-tool"
