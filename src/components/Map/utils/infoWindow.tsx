@@ -47,7 +47,7 @@ function InfoWindow(props) {
   const [perimeter, setPerimeter] = React.useState<any>(
     turf.length(props.feature).toFixed(2)
   );
-  const [angle, setAngle] = useState(0);
+  const [angle, setAngle] = useState("");
   const [areaUnit, setAreaUnit] = useState("sq. m");
   const [lengthUnit, setLenghtUnit] = useState("km");
   const [flag, setFlag] = useState(false);
@@ -555,8 +555,9 @@ function InfoWindow(props) {
   }
 
   useEffect(()=>{
-       //add condition when more then three points we have then this will run
-     calculateAngle();
+    if(props.feature.geometry.coordinates.length > 1){
+      calculateAngle();
+    }
   },[props.features])
 
   useEffect(() => {
@@ -650,7 +651,7 @@ function InfoWindow(props) {
             {renderFeatureAddress()}
             <div className="sub-info">
               <span className="coordinates">
-                <Text>
+                {area!=="0.00" && <Text>
                   <img src={Area} />
                   &nbsp;&nbsp;{area}&nbsp;&nbsp;
                   <Select
@@ -674,6 +675,7 @@ function InfoWindow(props) {
                   </Select>
                   &nbsp;&nbsp;&nbsp;&nbsp;
                 </Text>
+                }
                 <Text>
                   <img src={Perimeter} />
                   &nbsp;&nbsp;{perimeter}&nbsp;&nbsp;
@@ -694,10 +696,11 @@ function InfoWindow(props) {
                     </Option>
                   </Select>
                 </Text>
-                <Text>
-                  &nbsp;&nbsp;&nbsp;&nbsp;<img src={SmallAngleIcon} />
-                  &nbsp;&nbsp;{angle.toString().split('.')[0]}°&nbsp;
+                { angle && <Text>
+                  &nbsp;&nbsp;<img src={SmallAngleIcon} />
+                  &nbsp;{angle.toString().split('.')[0]}°&nbsp;degree &nbsp;&nbsp;
                 </Text>
+                }
               </span>
               <span>
                 {!props.isPublic && renderFeatureOptions()}
