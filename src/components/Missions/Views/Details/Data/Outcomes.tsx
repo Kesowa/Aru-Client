@@ -214,6 +214,7 @@ function Outcomes(props) {
         setTotal(res.data.total);
         setAllOutcomes(res.data.data);
         console.log("Alerts: ", res.data.data);
+        props.setTotalAlerts(res.data.total);
       })
       .catch((err) => {
         console.log(err);
@@ -637,13 +638,10 @@ function Outcomes(props) {
     console.log(tags);
 
     if (tags.GPSLatitude && tags.GPSLongitude) {
-      const address: any = await geocoder([
+      const address = await geocoder([
         tags.GPSLongitude.description,
         tags.GPSLatitude.description,
-      ]).then((res: any) => {
-        return res;
-      });
-      console.log(address);
+      ]);
       return {
         status: true,
         address: address,
@@ -666,7 +664,7 @@ function Outcomes(props) {
       const source = cancelToken.source();
       // const fData = new FormData();
       const res = await extractExif(options.file);
-      console.log(res);
+      console.log("EXTRACT EXIFR: ", res);
 
       // const config:AxiosRequestConfig = {
       //   onUploadProgress: (event) => {

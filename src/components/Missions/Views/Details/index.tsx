@@ -386,6 +386,7 @@ function MissionView() {
             missionDetails={MissionDetails}
             refreshDoc={docRefresh}
             setRefreshDoc={setDocRefresh}
+            setTotalDocs={setTotalDocs}
           />
         ),
       },
@@ -422,7 +423,7 @@ function MissionView() {
         children: (
           <Outcomes
             id={id}
-            count={totalAlerts}
+            setTotalAlerts={setTotalAlerts}
             missionDetails={MissionDetails}
           />
         ),
@@ -443,6 +444,7 @@ function MissionView() {
             missionName={MissionDetails.missionName}
             missionId={MissionDetails.missionId}
             missionDetails={MissionDetails}
+            setTotalImages={setTotalImages}
           />
         ),
       },
@@ -1252,6 +1254,7 @@ function MissionView() {
             "success"
           );
           setDocRefresh(true);
+          setTotalDocs(prev => prev + 1);
         },
         REPORT_GENERATION_FAILED: (data) => {
           console.log("Report generation failed!", data);
