@@ -555,7 +555,7 @@ function InfoWindow(props) {
   }
 
   useEffect(()=>{
-    if(props.feature.geometry.coordinates.length > 1){
+    if(props.feature.geometry.coordinates.length > 1 && props.mode==="LineView"){
       calculateAngle();
     }
   },[props.features])

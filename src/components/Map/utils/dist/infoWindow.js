@@ -26,7 +26,7 @@ function InfoWindow(props) {
     var _c = react_1.useState(false), loader = _c[0], setLoader = _c[1];
     var _d = react_1["default"].useState(turf.area(props.feature).toFixed(2)), area = _d[0], setArea = _d[1];
     var _e = react_1["default"].useState(turf.length(props.feature).toFixed(2)), perimeter = _e[0], setPerimeter = _e[1];
-    var _f = react_1.useState(0), angle = _f[0], setAngle = _f[1];
+    var _f = react_1.useState(""), angle = _f[0], setAngle = _f[1];
     var _g = react_1.useState("sq. m"), areaUnit = _g[0], setAreaUnit = _g[1];
     var _h = react_1.useState("km"), lengthUnit = _h[0], setLenghtUnit = _h[1];
     var _j = react_1.useState(false), flag = _j[0], setFlag = _j[1];
@@ -373,8 +373,9 @@ function InfoWindow(props) {
         }
     }
     react_1.useEffect(function () {
-        //add condition when more then three points we have then this will run
-        calculateAngle();
+        if (props.feature.geometry.coordinates.length > 1 && props.mode === "LineView") {
+            calculateAngle();
+        }
     }, [props.features]);
     react_1.useEffect(function () {
         if (props.missionLayer === "VOD" || props.missionLayer === "Alert") {
@@ -459,7 +460,7 @@ function InfoWindow(props) {
                     renderFeatureAddress(),
                     react_1["default"].createElement("div", { className: "sub-info" },
                         react_1["default"].createElement("span", { className: "coordinates" },
-                            react_1["default"].createElement(Text, null,
+                            area !== "0.00" && react_1["default"].createElement(Text, null,
                                 react_1["default"].createElement("img", { src: area_icon_svg_1["default"] }),
                                 "\u00A0\u00A0",
                                 area,
@@ -478,7 +479,13 @@ function InfoWindow(props) {
                                 react_1["default"].createElement(antd_1.Select, { defaultValue: lengthUnit, size: "small", style: { width: "60px", fontSize: "12px" }, onChange: lengthMeasurementHandeller },
                                     react_1["default"].createElement(Option, { className: "option-value", value: "km" }, "km"),
                                     react_1["default"].createElement(Option, { className: "option-value", value: "m" }, "m"),
-                                    react_1["default"].createElement(Option, { className: "option-value", value: "ft" }, "ft")))),
+                                    react_1["default"].createElement(Option, { className: "option-value", value: "ft" }, "ft"))),
+                            angle && react_1["default"].createElement(Text, null,
+                                "\u00A0\u00A0",
+                                react_1["default"].createElement("img", { src: small_angle_svg_1["default"] }),
+                                "\u00A0",
+                                angle.toString().split('.')[0],
+                                "\u00B0\u00A0degree \u00A0\u00A0")),
                         react_1["default"].createElement("span", null, !props.isPublic && renderFeatureOptions())),
                     props.show && saveDrawingButton(),
                     props.show && CancelDrawingButton())));
