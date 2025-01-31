@@ -435,6 +435,7 @@ function ImageDocs(props) {
         if (res.data.status) {
           setTotalCount(res.data.data.total);
           setImages(res.data.data.documents);
+          props.setTotalImages(res.data.data.total);
         } else {
           message.error(res.data.message);
         }
