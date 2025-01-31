@@ -171,11 +171,11 @@ const MapAttributes: React.FC<Props> = (props) => {
       return;
     }
     setInferenceType(selectedInference);
+
     const apiEndpoint = apis.INFER_LAYER_API.replace(":layerId", layerId).replace(
       ":inferType",
       selectedInference
     );
-
 
     http
       .post(apiEndpoint)

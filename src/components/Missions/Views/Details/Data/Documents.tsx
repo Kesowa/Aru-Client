@@ -699,6 +699,11 @@ function Documents(props) {
             };
           });
           setFileSystem(fileState);
+          props.setTotalDocs(res.data.data.documents.filter((d) => [
+            'root1234',
+            'rawPhotos',
+            'rawVideos'
+          ].includes(d.folderName)).length);
         } else {
           message.error(res.data.message);
         }

@@ -1652,7 +1652,7 @@ function BaseMap(props) {
         if (res.data.status) {
           message.success("Export Successful");
           //console.log(res.data);
-          window.open(`${PUBLIC_URL}${res.data.pathh}`);
+          window.open(`${STATIC_URL}${res.data.pathh}`);
         } else {
           message.error(res.data.message);
         }
@@ -1673,7 +1673,7 @@ function BaseMap(props) {
       .then((res) => {
         if (res.data.status) {
           message.success("Export Successful");
-          window.open(`${PUBLIC_URL}${res.data.pathh}`);
+          window.open(`${STATIC_URL}${res.data.pathh}`);
         } else {
           message.error(res.data.message);
         }
