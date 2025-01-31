@@ -526,6 +526,7 @@ function InfoWindow(props) {
 
 // Function to calculate angle (supports both 2D and 3D)
   function calculateAngle(points = props.feature.geometry.coordinates , options = { use3D: false }) {
+    console.log(points);
     const start =points[0];
     const end =points[1];
     if (options.use3D) {
@@ -754,25 +755,6 @@ function InfoWindow(props) {
           </div>
         </>
       );
-      // case "TwoPointsView":
-      //   console.log("twopointsview...");
-      //   return (
-      //     <>
-      //       <div className="infoWindowContent">
-      //         <div className="sub-info">
-      //           <span className="coordinates">
-      //             <Text>
-      //               <img src={SmallAngleIcon} />
-      //               &nbsp;&nbsp;Angle: {props.angle.toFixed(0)}°&nbsp;&nbsp;
-      //             </Text>
-      //           </span>
-      //           <span>{!props.isPublic && renderFeatureOptions()}</span>
-      //         </div>
-      //         {props.show && saveDrawingButton()}
-      //         {props.show && CancelDrawingButton()}
-      //       </div>
-      //     </>
-      //   );
     default:
       return <p>unknown</p>;
   }

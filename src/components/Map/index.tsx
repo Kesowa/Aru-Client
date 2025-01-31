@@ -77,6 +77,7 @@ import {
 import { TbFlag, TbFlagOff } from "react-icons/tb";
 import MarkerIcon from "../../static/MarkerIcon.png";
 import TankIcon from "../../static/TankIcon.png";
+import location from "../../static/location.svg"
 import ValveIcon from "../../static/ValveIcon.png";
 import DotIcon from "../../static/DotIcon.png";
 import { SketchPicker } from "react-color";
@@ -86,7 +87,7 @@ import AngleIcon from "../../static/angle.svg";
 import PolygonIcon from "../../static/polygon.svg";
 import DeckGL from "@deck.gl/react";
 import { FlyToInterpolator } from "deck.gl";
-import { BitmapLayer, IconLayer, PathLayer } from "@deck.gl/layers";
+import { BitmapLayer, IconLayer, LineLayer, PathLayer, ScatterplotLayer } from "@deck.gl/layers";
 import { SolidPolygonLayer } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
 import { HTMLOverlayItem, HTMLOverlay } from "../shared/HTMLOverlay";
@@ -501,6 +502,100 @@ function BaseMap(props) {
     (typeof window !== "undefined" && window.devicePixelRatio) || 1;
 
   const [selectedKey, setSelectedKey] = useState<any>();
+
+  //draw angle raw implementation.....
+
+  const [drawAngle, setDrawAngle] = useState(false);
+  const [points, setPoints] = useState([]);
+  const [dashedLines, setDashedLines] = useState([]);
+  const [intersectionPoint, setIntersectionPoint] = useState(null);
+  const [angle, setAngle] = useState(null);
+  const [screenPosition, setScreenPosition] = useState(null)
+
+  let offsetDistance = 0.005; // Offset for dashed line intersection
+
+  const handleDrawAngle = (info) => {
+    const [lng, lat] = info.coordinate;
+
+    if (points.length >= 2) {
+      setPoints([]);
+      setDashedLines([]);
+      setIntersectionPoint(null);
+      setAngle(null);
+    }
+    setPoints((prevPoints) => {
+      const newPoints = [...prevPoints, [lng, lat]];
+
+      if (newPoints.length === 2) {
+        // Midpoint Calculation
+        const midLat = (newPoints[0][1] + newPoints[1][1]) / 2;
+        const midLng = (newPoints[0][0] + newPoints[1][0]) / 2;
+
+        // Offset for intersection point
+        const dx = newPoints[1][0] - newPoints[0][0];
+        const dy = newPoints[1][1] - newPoints[0][1];
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const offsetLng = (-dy / length) * offsetDistance;
+        const offsetLat = (dx / length) * offsetDistance;
+
+        const intersection = [midLng + offsetLng, midLat + offsetLat];
+        setIntersectionPoint(intersection);
+        console.log(intersection);
+
+        const angle = turf.bearing(
+          turf.point(newPoints[0]),
+          turf.point(newPoints[1])
+        );
+        setAngle(angle.toString().split(".")[0]);
+
+        const viewport = new WebMercatorViewport(deckRef.current.deck.viewManager._viewports[0]);
+        const [x, y] = viewport.project(intersection);
+        setScreenPosition({ x, y});
+
+        setDashedLines([
+          [newPoints[0], intersection],
+          [newPoints[1], intersection],
+        ]);
+      }
+
+      return newPoints;
+    });
+  };
+
+  const angleLayers = [
+    new IconLayer({
+      id: "marker-layer",
+      data: points.map((coord) => ({ position: coord })),
+      getIcon: () => ({
+        url: location,
+        width: 250,
+        height: 250,
+        anchorY: 250,
+      }),
+      getSize: 20,
+      sizeScale: 2,
+      pickable: true,
+    }),
+
+    new LineLayer({
+      id: "dashed-lines",
+      data: dashedLines.map((line) => ({
+        sourcePosition: line[0],
+        targetPosition: line[1],
+      })),
+      getWidth: 2,
+      getDashArray: [20, 5],
+      dashJustified: true,
+      billboard: true,
+    }),
+
+    new ScatterplotLayer({
+      id: "intersection-point",
+      data: intersectionPoint ? [{ position: intersectionPoint }] : [],
+      getFillColor: [0, 0, 0],
+      getRadius: 5,
+    }),
+  ];
 
   //---------------------Open Stree Maps Layer ----------------------------------------------------
   interface HoverInfo {
@@ -3095,6 +3190,15 @@ function BaseMap(props) {
   const cancelDrawing = () => {
     setIsDrawing(false);
     setFeatureState(myFeatureCollection);
+    
+    //angle tool 
+    setDrawAngle(false);
+    setToolSelected(null);
+    setPoints([]);
+    setDashedLines([]);
+    setIntersectionPoint(null);
+    setAngle(null);
+    setScreenPosition(null);
 
     setMode({
       mode: ViewMode,
@@ -6750,6 +6854,10 @@ function BaseMap(props) {
             layers.push(maskLayer);
           }
 
+          if (angleLayers) {
+            layers.push(angleLayers);
+          }
+
           // Tree Menu Layers
           layers.push(useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers]));
           layers.push(
@@ -6828,8 +6936,10 @@ function BaseMap(props) {
           } else {
             setShowDrawingTools(false);
           }
-        }
-      }}
+          } else if (drawAngle) {
+            handleDrawAngle(info);
+          }
+        }}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         <ElevationBlock hoverInfo={hoverInfo} isElevationEnabled={isElevationEnabled} />
@@ -6973,6 +7083,26 @@ function BaseMap(props) {
                     onClick={removeFlightPath}
                   />
                 </Tooltip>
+              )}
+              {screenPosition && angle && (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: screenPosition.x - 860,
+                    top: screenPosition.y - 40,
+                    background: "rgba(0, 0, 0, 0.85)",
+                    color: "white",
+                    padding: "8px 12px",
+                    borderRadius: "4px",
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    pointerEvents: "none",
+                    whiteSpace: "nowrap",
+                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)",
+                  }}
+                >
+                  Angle: {angle}°
+                </div>
               )}
               {isMaskLayerVisible && (
                 <div
@@ -7169,9 +7299,16 @@ function BaseMap(props) {
                 <div
                   className="line-tool"
                   style={{
-                    background: toolSelected === "Angle" ? "#35BDD0" : "#ffffff",
+                    background:
+                      toolSelected === "Angle" ? "#35BDD0" : "#ffffff",
                   }}
-                  onClick={() => startDrawing("DrawLine", "Angle")}
+                  onClick={() => {
+                    setDrawAngle((prev) => !prev);
+                    setToolSelected((prev) =>
+                      prev === "Angle" ? null : "Angle"
+                    );
+                    setIsDrawing(true);
+                  }}
                 >
                   <div className="line-icon">
                     <img src={AngleIcon} alt="" />
