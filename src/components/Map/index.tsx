@@ -503,8 +503,7 @@ function BaseMap(props) {
 
   const [selectedKey, setSelectedKey] = useState<any>();
 
-  //draw angle raw implementation.....
-
+  //draw angle.....
   const [drawAngle, setDrawAngle] = useState(false);
   const [points, setPoints] = useState([]);
   const [dashedLines, setDashedLines] = useState([]);
@@ -512,52 +511,48 @@ function BaseMap(props) {
   const [angle, setAngle] = useState(null);
   const [screenPosition, setScreenPosition] = useState(null)
 
-  let offsetDistance = 0.005; // Offset for dashed line intersection
+  const calculateAngle = (pointA, pointB, pointC) => {
+    const a = turf.point(pointA);
+    const b = turf.point(pointB);
+    const c = turf.point(pointC);
+  
+    const bearingAB = turf.bearing(a, b);
+    const bearingBC = turf.bearing(b, c);
+  
+    let angle = bearingBC - bearingAB;
+    if (angle < 0) angle += 360; // Normalize to 0-360°
+  
+    return angle.toFixed(2);
+  };
 
   const handleDrawAngle = (info) => {
     const [lng, lat] = info.coordinate;
-
-    if (points.length >= 2) {
+  
+    if (points.length >= 3) {
       setPoints([]);
       setDashedLines([]);
       setIntersectionPoint(null);
       setAngle(null);
     }
+  
     setPoints((prevPoints) => {
       const newPoints = [...prevPoints, [lng, lat]];
-
-      if (newPoints.length === 2) {
-        // Midpoint Calculation
-        const midLat = (newPoints[0][1] + newPoints[1][1]) / 2;
-        const midLng = (newPoints[0][0] + newPoints[1][0]) / 2;
-
-        // Offset for intersection point
-        const dx = newPoints[1][0] - newPoints[0][0];
-        const dy = newPoints[1][1] - newPoints[0][1];
-        const length = Math.sqrt(dx * dx + dy * dy);
-        const offsetLng = (-dy / length) * offsetDistance;
-        const offsetLat = (dx / length) * offsetDistance;
-
-        const intersection = [midLng + offsetLng, midLat + offsetLat];
-        setIntersectionPoint(intersection);
-        console.log(intersection);
-
-        const angle = turf.bearing(
-          turf.point(newPoints[0]),
-          turf.point(newPoints[1])
-        );
-        setAngle(angle.toString().split(".")[0]);
+  
+      if (newPoints.length === 3) {
+        const [pointA, pointB, pointC] = newPoints;
+        const calculatedAngle = calculateAngle(pointA, pointB, pointC);
+        setAngle(calculatedAngle);  
+        setIntersectionPoint(pointB);
 
         const viewport = new WebMercatorViewport(deckRef.current.deck.viewManager._viewports[0]);
-        const [x, y] = viewport.project(intersection);
-        setScreenPosition({ x, y});
-
+        const [x, y] = viewport.project(pointB);
+        setScreenPosition({ x, y });
+  
         setDashedLines([
-          [newPoints[0], intersection],
-          [newPoints[1], intersection],
+          [pointA, pointB],
+          [pointB, pointC],
         ]);
       }
-
       return newPoints;
     });
   };
@@ -587,13 +582,6 @@ function BaseMap(props) {
       getDashArray: [20, 5],
       dashJustified: true,
       billboard: true,
-    }),
-
-    new ScatterplotLayer({
-      id: "intersection-point",
-      data: intersectionPoint ? [{ position: intersectionPoint }] : [],
-      getFillColor: [0, 0, 0],
-      getRadius: 5,
     }),
   ];
 
