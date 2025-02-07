@@ -257,7 +257,7 @@ const apis = {
   THREAD: "/apis/v1/thread",
 
   //AIML
-  BASE_AIML_API: "/apis/v1/aiml/",
+  INFER_LAYER_API: "/apis/v1/aiml/layer/:layerId/:inferType/infer",
   INFER_VOD_VIOLENCE: "apis/v1/aiml/vod/:vodId/:inferType/infer",
   FETCH_AI_TASK: "apis/v1/aiml", //  /:docModel/:docId?infer=
 
