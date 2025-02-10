@@ -515,14 +515,9 @@ function BaseMap(props) {
     const a = turf.point(pointA);
     const b = turf.point(pointB);
     const c = turf.point(pointC);
+    const angle = turf.angle(a, b, c);
   
-    const bearingAB = turf.bearing(a, b);
-    const bearingBC = turf.bearing(b, c);
-  
-    let angle = bearingBC - bearingAB;
-    if (angle < 0) angle += 360; // Normalize to 0-360°
-  
-    return angle.toFixed(2);
+    return angle.toFixed(0);
   };
 
   const handleDrawAngle = (info) => {
