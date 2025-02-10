@@ -60,7 +60,7 @@ class Var {
 class EnvVar extends Var {
   constructor(key: string) {
     super(key);
-    const val = import.meta.env[key] || window["RUNTIME_CONFIG"];
+    const val = import.meta.env[key] || window["RUNTIME_CONFIG"][key];
     if (val === undefined || val.length === 0) throw new EnvError(key, val);
     this.val = val;
   }
