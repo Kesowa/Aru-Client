@@ -4,7 +4,7 @@ on:
   # Trigger the workflow on push or pull request,
   # but only for the main branch
   push:
-    branches: ["master", "dev", "code_refactor"]       
+    branches: ["master", "dev"]       
   # Replace pull_request with pull_request_target if you
   # plan to use this action with forks, see the Limitations section
   pull_request:
@@ -42,4 +42,3 @@ jobs:
           auto_fix: true
           eslint: true
           prettier: true
-          eslint_extensions: js,ts,jsx,tsx          
