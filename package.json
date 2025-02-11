@@ -21,6 +21,7 @@
   "dependencies": {
     "@ant-design/pro-layout": "^7.17.6",
     "@deck.gl-community/editable-layers": "^9.0.0-alpha.1",
+    "@deck.gl-community/layers": "^9.0.3",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.2.0",
