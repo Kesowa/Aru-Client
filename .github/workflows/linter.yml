@@ -36,9 +36,4 @@ jobs:
       # Install your linters here
 
       - name: Run linters
-        uses: wearerequired/lint-action@v2
-        with:
-          # Enable your linters here
-          auto_fix: true
-          eslint: true
-          prettier: true
+        run: npm run lint
