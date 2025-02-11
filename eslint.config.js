@@ -10,7 +10,7 @@ export default [
   js.configs.recommended,
   react.configs.flat["jsx-runtime"],
   {
-    files: ["**/*.ts", "**/*.tsx"],
+    files: ["src/**/*.ts", "src/**/*.tsx"],
     languageOptions: {
       parser: tsparser,
       parserOptions: {
