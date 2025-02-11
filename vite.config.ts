@@ -1,12 +1,12 @@
 import { defineConfig } from "vite";
 import reactRefresh from "@vitejs/plugin-react";
+import eslint from "vite-plugin-eslint";
 import svgrPlugin from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 import wasm from "vite-plugin-wasm";
 import topLevelAwait from "vite-plugin-top-level-await";
 import path from "path";
 import { env } from "process";
-// import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -44,6 +44,10 @@ export default defineConfig({
     wasm(),
     topLevelAwait(),
     reactRefresh(),
+    eslint({
+      failOnWarning: false,
+      failOnError: false,
+    }),
     tsconfigPaths(),
     svgrPlugin({
       svgrOptions: {
@@ -51,6 +55,5 @@ export default defineConfig({
         // ...svgr options (https://react-svgr.com/docs/options/)
       },
     }),
-    // visualizer() as PluginOption,
   ],
 });
