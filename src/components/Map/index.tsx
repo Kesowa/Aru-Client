@@ -510,6 +510,15 @@ function BaseMap(props) {
   const [intersectionPoint, setIntersectionPoint] = useState(null);
   const [angle, setAngle] = useState(null);
   const [screenPosition, setScreenPosition] = useState(null)
+  const [mousePosition, setMousePosition] = useState(null);
+
+  const handleMouseMove1 = (info) => {
+    if (points.length < 3) {
+      setMousePosition(info.coordinate);
+    } else {
+      setMousePosition(null);
+    }
+  };
 
   const calculateAngle = (pointA, pointB, pointC) => {
     const a = turf.point(pointA);
@@ -532,6 +541,11 @@ function BaseMap(props) {
   
     setPoints((prevPoints) => {
       const newPoints = [...prevPoints, [lng, lat]];
+
+      if (newPoints.length > 1) {
+        const newDashedLines = [...dashedLines, [newPoints[newPoints.length - 2], newPoints[newPoints.length - 1]]];
+        setDashedLines(newDashedLines);
+      }
   
       if (newPoints.length === 3) {
         const [pointA, pointB, pointC] = newPoints;
@@ -542,11 +556,8 @@ function BaseMap(props) {
         const viewport = new WebMercatorViewport(deckRef.current.deck.viewManager._viewports[0]);
         const [x, y] = viewport.project(pointB);
         setScreenPosition({ x, y });
-  
-        setDashedLines([
-          [pointA, pointB],
-          [pointB, pointC],
-        ]);
+
+        setMousePosition(null);
       }
       return newPoints;
     });
@@ -568,14 +579,19 @@ function BaseMap(props) {
     }),
 
     new LineLayer({
-      id: "dashed-lines",
-      data: dashedLines.map((line) => ({
-        sourcePosition: line[0],
-        targetPosition: line[1],
-      })),
+      id: "combined-lines",
+      data: [
+        ...dashedLines.map((line) => ({
+          sourcePosition: line[0],
+          targetPosition: line[1],
+          isDashed: true,
+        })),
+        ...(points.length > 0 && mousePosition
+          ? [{ sourcePosition: points[points.length - 1], targetPosition: mousePosition, isDashed: false }]
+          : []),
+      ],
       getWidth: 2,
-      getDashArray: [20, 5],
-      dashJustified: true,
+      getDashArray: (d) => (d.isDashed ? [20, 5] : [0, 0]),
       billboard: true,
     }),
   ];
@@ -6815,6 +6831,7 @@ function BaseMap(props) {
         //   setPolygon(mapCoords);
         // }}
         onHover={(info) => {
+          handleMouseMove1(info);
           if (isMaskLayerVisible) {
             const coords = getPolygon(info.x, info.y, polygonSize);
             const mapCoords = coords.map((coord) =>
