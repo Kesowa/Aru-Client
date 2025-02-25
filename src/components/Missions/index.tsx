@@ -23,7 +23,7 @@ function MissionList() {
   const [usedFilter, setUsedFilter] = useState("");
   const [missionCount, setMissionCount] = useState({});
   const [totalMissions, settotalMissions] = useState(0);
-  const [sortOrder, setSortOrder] = useState("createdAt:descend");
+  const [sortOrder, setSortOrder] = useState("updatedAt:descend");
   const [searchFilters, setSearchFilters] = useState("");
   const { Auth, logout } = useContext(AuthContext);
 
