@@ -1106,7 +1106,7 @@ function BaseMap(props) {
     endDate: string
   ) => {
     const params = new URLSearchParams({ startDate, endDate }).toString();
-    let url = API_URL;
+    let url = "";
     if (isBaseMap) {
       if (type === "alert")
         url = `${apis.GET_ALERT_LOCATION_GEOJSON}?${params}`;
@@ -2023,7 +2023,7 @@ function BaseMap(props) {
     }
     if (MissionLayers.isAlertChecked) {
       const { data } = await http.get(
-        STATIC_URL + MissionLayers.alertGeojsonUrl
+        API_URL + MissionLayers.alertGeojsonUrl
       );
       const { features } = data;
       if (Array.isArray(features) && features.length > 0) {
@@ -2032,7 +2032,7 @@ function BaseMap(props) {
       }
     }
     if (MissionLayers.isVODChecked) {
-      const { data } = await http.get(STATIC_URL + MissionLayers.vodGeojsonUrl);
+      const { data } = await http.get(API_URL + MissionLayers.vodGeojsonUrl);
       const { features } = data;
       if (Array.isArray(features) && features.length > 0) {
         const bounds = turf.bbox(turf.featureCollection(features)) as BBox;

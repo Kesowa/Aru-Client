@@ -10,7 +10,7 @@ import {
   MaskExtension,
 } from "@deck.gl/extensions";
 import { HeatmapLayer } from "@deck.gl/aggregation-layers";
-import { COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
+import { API_URL, COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
 import { Feature, GeoJson, Point } from "src/types/geojson";
 import { ILayer } from "src/types/layer";
 import http from "src/services/httpCall";
@@ -400,7 +400,7 @@ export const MissionLayerToDeckLayer = (missionLayers: IMissionLayers) => {
       new GeoJsonLayer({
         id: "alert",
         data: http
-          .get(STATIC_URL + missionLayers.alertGeojsonUrl)
+          .get(API_URL + missionLayers.alertGeojsonUrl)
           .then((result) => result.data),
         pickable: true,
         pointType: "icon",
@@ -421,7 +421,7 @@ export const MissionLayerToDeckLayer = (missionLayers: IMissionLayers) => {
       new GeoJsonLayer({
         id: "vod",
         data: http
-          .get(STATIC_URL + missionLayers.vodGeojsonUrl)
+          .get(API_URL + missionLayers.vodGeojsonUrl)
           .then((result) => result.data),
         pickable: true,
         pointType: "icon",
