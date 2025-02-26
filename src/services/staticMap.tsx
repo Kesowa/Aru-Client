@@ -1,7 +1,9 @@
+import { GOOGLE_API_KEY } from "src/constants";
+
 export const getImageForCircle = (lat, lng, rad, detail = 8) => {
   const uri = "https://maps.googleapis.com/maps/api/staticmap?";
   let staticMapSrc = "center=" + lat + "," + lng;
-  staticMapSrc += "&key=AIzaSyCYWROYTFQ3XH4bhhLJnmJSV-0k9a-PHY8";
+  staticMapSrc += `&key=${GOOGLE_API_KEY}`;
   staticMapSrc += "&size=500x500";
   staticMapSrc += "&path=color:0xff0000ff:weight:1";
 
@@ -59,7 +61,7 @@ export const getImageForPolygon = (points) => {
   const uri = "https://maps.googleapis.com/maps/api/staticmap?";
   let staticMapSrc =
     "center=" + centerOfPolygon.lat() + "," + centerOfPolygon.lng();
-  staticMapSrc += "&key=AIzaSyCYWROYTFQ3XH4bhhLJnmJSV-0k9a-PHY8";
+  staticMapSrc += `&key=${GOOGLE_API_KEY}`;
   staticMapSrc += "&size=500x500";
   staticMapSrc += "&path=color:0xff0000ff:weight:1";
 

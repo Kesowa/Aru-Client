@@ -56,7 +56,7 @@ import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import * as turf from "@turf/turf";
-import { API_URL, LIVE_URL, STATIC_URL } from "src/constants";
+import { API_URL, GOOGLE_API_KEY, LIVE_URL, STATIC_URL } from "src/constants";
 import { FlightPath } from "src/types/FlightPath";
 import {
   Chart as ChartJS,
@@ -1397,7 +1397,7 @@ function VideoPlayer(props: any) {
                       >
                         <img
                           className="static-map"
-                          src={`https://maps.googleapis.com/maps/api/staticmap?center=${captLat},${captLong}&zoom=16&size=200x130&markers=size:mid|color:red|${captLat},${captLong}&maptype=roadmap&key=AIzaSyCYWROYTFQ3XH4bhhLJnmJSV-0k9a-PHY8`}
+                          src={`https://maps.googleapis.com/maps/api/staticmap?center=${captLat},${captLong}&zoom=16&size=200x130&markers=size:mid|color:red|${captLat},${captLong}&maptype=roadmap&key=${GOOGLE_API_KEY}`}
                         />
                       </a>
                     </div>
