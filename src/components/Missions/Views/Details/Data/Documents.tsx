@@ -267,12 +267,9 @@ function Documents(props) {
           //----------Delete Files---------------------------------------------------
           case ChonkyActions.DeleteFiles.id:
             if (data.state.selectedFilesForAction.length > 1) {
-              let restrictedFolder = 0;
-              data.state.selectedFilesForAction.map((file: any) => {
-                if (file.id === "rawData" || file.parentId === "rawData") {
-                  restrictedFolder = restrictedFolder + 1;
-                }
-              });
+              let restrictedFolder = data.state.selectedFilesForAction.filter((file: any) => 
+                (file.id === "rawData" || file.parentId === "rawData")
+              ).length;
               if (restrictedFolder > 1) {
                 message.warning("Operation Restricted!");
               } else {
@@ -324,7 +321,7 @@ function Documents(props) {
           case ChonkyActions.DownloadFiles.id:
             if (data.state.selectedFilesForAction.length > 1) {
               if (currentFolderId === "root1234") {
-                data.state.selectedFilesForAction.map((data) => {
+                data.state.selectedFilesForAction.forEach((data) => {
                   if (data.id === "rawData") {
                     bulkDownload("rawData");
                   } else {
@@ -334,7 +331,7 @@ function Documents(props) {
               } else if (currentFolderId === "rawData") {
                 bulkDownload("rawData");
               } else {
-                data.state.selectedFilesForAction.map((data) => {
+                data.state.selectedFilesForAction.forEach((data) => {
                   download(data.path);
                 });
               }

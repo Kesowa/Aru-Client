@@ -5,7 +5,6 @@ const castEnum = <T>(val: string) => val as unknown as T;
 
 const checkUrl = (val: string) => {
   if (val.endsWith("/")) {
-    new URL(val);
     return false;
   }
   return true;

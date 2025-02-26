@@ -268,11 +268,9 @@ function Pictomap(props) {
         data.features.forEach(function (value, i) {
           let objecty: any = {};
           let test;
-          Object.keys(value.properties).filter((key: any) => {
-            if (key === props.layerLabel) {
-              test = value.properties[key];
-            }
-          });
+          if (props.layerLabel) {
+            test = value.properties[props.layerLabel];
+          }
           objecty = {
             index: value.properties.sys_id,
             label: test,

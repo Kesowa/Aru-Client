@@ -139,17 +139,14 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
   }, [props.contentHeight]);
 
   useEffect(() => {
-    const obj: any = [];
-    props.tableData.map((i, index) =>
-      obj.push({
-        ...i.properties,
-        featureIndex: (props.page - 1) * props.limit + index,
-        key: index,
-        coordinates: [...i.geometry.coordinates],
-        type: i.geometry.type,
-        index: i.index,
-      })
-    );
+    const obj: any = props.tableData.map((i, index) => ({
+      ...i.properties,
+      featureIndex: (props.page - 1) * props.limit + index,
+      key: index,
+      coordinates: [...i.geometry.coordinates],
+      type: i.geometry.type,
+      index: i.index,
+    }));
     setCount(props.total);
     setData(obj);
   }, [props.tableData]);

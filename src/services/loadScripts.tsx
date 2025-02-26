@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { GOOGLE_API_KEY } from "src/constants";
 
-export const loadScripts = () => {
+export const useScripts = () => {
   const [mapScriptLoaded, setMapScriptLoaded] = useState(false);
   const [paymentScriptLoaded, setPaymentScriptLoaded] = useState(false);
 
