@@ -683,20 +683,6 @@ function VideoPlayer(props: any) {
 
   // Upload alert api
   const saveAlert = async() => {
-    const body = {
-      locationName: captAddress,
-      location: isLive
-        ? location
-        : {
-            lat: captLat ? captLat : null,
-            long: captLong ? captLong : null,
-          },
-      missionId: isLive ? mission._id : mission.missionID._id,
-      flightId: isLive ? mission.flight._id : mission.flightID._id,
-      pcount: 0,
-      type: "Manual",
-      image: "",
-    };
     const form = document.createElement("form");
     form.innerHTML = `<input type="file" id="filename" name="filename" /> 
     <input type="submit" id="submitButton" name="submitButton" />`;
@@ -710,14 +696,25 @@ function VideoPlayer(props: any) {
 
     const uploadToken = await uploadFile(rcFile, DocModel.ALERT_IMAGES, (prog) => console.info("PROGRESS: " + prog));
 
-      const data = {
-        file: uploadToken,
-      };
+    const body = {
+      locationName: captAddress,
+      location: isLive
+        ? location
+        : {
+            lat: captLat ? captLat : null,
+            long: captLong ? captLong : null,
+          },
+      missionId: isLive ? mission._id : mission.missionID._id,
+      flightId: isLive ? mission.flight._id : mission.flightID._id,
+      pcount: 0,
+      type: "Automated",
+      image: uploadToken,
+    };
     // const formDataToUpload = new FormData(form);
     // formDataToUpload.append("image", blob);
     setLoader(true);
     http
-      .post(`${apis.UPLOAD_ALERT_IMAGE}`, data)
+      .post(`${apis.CREATE_ALERT}`, body)
       .then((res) => {
         body.image = res.data.file;
 

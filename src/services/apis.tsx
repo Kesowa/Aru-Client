@@ -98,7 +98,6 @@ const apis = {
 
   //ALERT
   UPLOAD_ALERT: "/apis/v1/alert/manual-upload-alert",
-  UPLOAD_ALERT_IMAGE: "/apis/v1/alert/upload-alert-image",
   FETCH_ALL_ALERTS_BY_MISSION_ID: "/apis/v1/alert/get/",
   CREATE_ALERT: "/apis/v1/alert/create",
   DELETE_ALERT: "/apis/v1/alert/delete-multiple-alerts",
