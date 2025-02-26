@@ -716,8 +716,6 @@ function VideoPlayer(props: any) {
     http
       .post(`${apis.CREATE_ALERT}`, body)
       .then((res) => {
-        body.image = res.data.file;
-
         if (captLat !== undefined && captLong !== undefined) {
           const addressLocation: any = geocoder([
             //Review
@@ -730,11 +728,8 @@ function VideoPlayer(props: any) {
             })
             .catch((err: any) => message.error("Error: ", err));
         }
-
-        return http.post(`${apis.CREATE_ALERT}`, body);
       })
       .then((res) => {
-        console.log(res.data);
         setIsAlertEnabled(false);
         if (isLive) {
           openNotification("bottomRight");

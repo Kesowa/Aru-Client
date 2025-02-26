@@ -1106,7 +1106,7 @@ function BaseMap(props) {
     endDate: string
   ) => {
     const params = new URLSearchParams({ startDate, endDate }).toString();
-    let url = "";
+    let url = API_URL;
     if (isBaseMap) {
       if (type === "alert")
         url = `${apis.GET_ALERT_LOCATION_GEOJSON}?${params}`;
