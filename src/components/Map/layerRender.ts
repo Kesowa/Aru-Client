@@ -404,10 +404,10 @@ export const MissionLayerToDeckLayer = (missionLayers: IMissionLayers) => {
           .then((result) => result.data),
         pickable: true,
         pointType: "icon",
-        iconSizeMinPixels: 6,
-        iconSizeUnits: "meters",
+        iconSizeMinPixels: 4,
+        iconSizeUnits: "pixels",
         iconSizeScale: 10,
-        getIconSize: 2,
+        getIconSize: 4,
         getIcon,
         getIconColor: (d) =>
           d.properties?.color
@@ -425,10 +425,10 @@ export const MissionLayerToDeckLayer = (missionLayers: IMissionLayers) => {
           .then((result) => result.data),
         pickable: true,
         pointType: "icon",
-        iconSizeMinPixels: 6,
-        iconSizeUnits: "meters",
+        iconSizeMinPixels: 4,
+        iconSizeUnits: "pixels",
         iconSizeScale: 10,
-        getIconSize: 2,
+        getIconSize: 4,
         getIcon,
         getIconColor: (d) =>
           d.properties?.color
