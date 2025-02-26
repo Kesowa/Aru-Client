@@ -85,6 +85,7 @@ import "./index.less";
 import LineIcon from "../../static/line.svg";
 import AngleIcon from "../../static/angle.svg";
 import PolygonIcon from "../../static/polygon.svg";
+import VolumeIcon from "../../static/volume.svg";
 import DeckGL from "@deck.gl/react";
 import { FlyToInterpolator } from "deck.gl";
 import { BitmapLayer, IconLayer, LineLayer, PathLayer, ScatterplotLayer } from "@deck.gl/layers";
@@ -131,6 +132,7 @@ import {
   Layer,
   IMissionLayers,
   MissionLayerToDeckLayer,
+  processPolygonData,
 } from "./layerRender";
 import { ILayersToTree } from "./treeRender";
 import { BBox, Feature, mergeBoundingBoxes } from "src/types/geojson";
@@ -205,6 +207,7 @@ function BaseMap(props) {
   const [videoDetails, setVideoDetails] = useState<any>({});
   const [showCarousel, setShowCarousel] = useState(false);
   const [terrainmap, setTerrainMap] = useState(false);
+  const [volumeCalculation,setVolumeCalculation] = useState(false);
   // const [overlayId, setOverlayID] = useState<string>();
   const [isElevationEnabled, setIsElevationEnabled] = useState(false);
   const isElevationEnabledRef = useRef(isElevationEnabled);
@@ -3199,6 +3202,8 @@ function BaseMap(props) {
     setAngle(null);
     setScreenPosition(null);
 
+    setVolumeCalculation(false);
+
     setMode({
       mode: ViewMode,
     });
@@ -5394,6 +5399,10 @@ function BaseMap(props) {
           }
           fLat = fLat / updatedData.features[0].geometry.coordinates[0].length;
           centerPoint = [fLng, fLat];
+
+          if (volumeCalculation) {
+            processPolygonData(updatedData.features[0].geometry.coordinates[0]);
+          }
         } else if (mode.mode === DrawLineStringMode) {
           modee = "LineView";
 
@@ -7295,6 +7304,23 @@ function BaseMap(props) {
                   </div>
                 </Tooltip>
               )}
+              <Tooltip placement="bottom" title="Volume tool">
+                <div
+                  className="polygon-tool"
+                  style={{
+                    background:
+                      toolSelected === "Volume" ? "#35BDD0" : "#ffffff",
+                  }}
+                  onClick={() =>{ 
+                    startDrawing("DrawPolygon", "Volume")
+                    setVolumeCalculation(true);
+                  }}
+                >
+                  <div className="polygon-icon">
+                    <img src={VolumeIcon} alt="" />
+                  </div>
+                </div>
+              </Tooltip>
               <Tooltip placement="bottom" title="Angle tool">
                 <div
                   className="line-tool"

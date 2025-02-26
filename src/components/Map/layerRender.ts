@@ -19,6 +19,9 @@ import { MASK_ID } from ".";
 import { featureType, featureTypes } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
 import { handleHover } from "./utils/elevationTooltip";
+import { extractMeshInsidePolygon } from "./utils/volumeCal";
+import * as THREE from 'three';
+
 
 export type Layer = ILayer & {
   _isChecked?: boolean;
@@ -89,6 +92,28 @@ const svgToDataURL = (svg: string) => {
 //       }
 //     }
 
+let globalMesh = null;
+
+
+export async function processPolygonData(polygon) {
+  try {
+    const threePolygon: THREE.Vector3[] = polygon.map(
+      ([lng, lat]) => new THREE.Vector3(lng, lat, 3) // Assuming Z=3
+    );
+    console.log("all data: ",threePolygon,globalMesh)
+    if (!globalMesh) {
+      throw new Error("Mesh data not found");
+    }
+    const selectedMeshVolume = await extractMeshInsidePolygon(globalMesh, threePolygon);
+    console.log(selectedMeshVolume); //hold volume value 
+    return selectedMeshVolume; //now pass this to index.tsx to show then voulme
+  } catch (error) {
+    console.error("Error processing polygon data:", error);
+    return null;
+  }
+}
+
+
 const getRasterDataUrl = (layer: Layer) => {
   const settings = {
     bidx: layer._metadata?.bidx || null,
@@ -155,6 +180,13 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             loader: Tiles3DLoader,
             _subLayerProps: {
               scenegraph: { _lighting: "flat" },
+            },
+            onTileLoad: (tileHeader) => {              
+              // Extracting mesh geometry (for ESRI MeshPyramids data)
+              if (tileHeader.content.gltf) {
+                console.log("Mesh Data:", tileHeader.content.gltf.meshes[0]);
+                globalMesh = tileHeader.content.gltf.meshes[0];             
+              }
             },
             operation: layer._isMeshSource ? "terrain+draw" : "draw",
           });

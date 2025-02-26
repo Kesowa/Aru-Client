@@ -72,6 +72,7 @@
     "react-router-dom": "^5.2.0",
     "react-sortable-hoc": "^2.0.0",
     "react-static-google-map": "^0.9.0",
+    "rhino3dm": "^8.9.0",
     "screenfull": "^5.1.0",
     "socket.io-client": "^4.5.3",
     "supercluster": "^8.0.1",
@@ -81,7 +82,8 @@
     "three": "^0.172.0",
     "uuid": "^8.3.2",
     "viewport-mercator-project": "^7.0.4",
-    "vtracer-webapp": "file:vtracer-webapp-0.4.0.tgz"
+    "vtracer-webapp": "file:vtracer-webapp-0.4.0.tgz",
+    "ws": "^8.18.1"
   },
   "eslintConfig": {
     "extends": [
