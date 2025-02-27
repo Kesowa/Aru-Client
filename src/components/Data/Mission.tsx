@@ -36,7 +36,7 @@ function DataMission(props) {
   const [usedFilter, setUsedFilter] = useState("Completed");
   const [missionCount, setMissionCount] = useState({});
   const [totalMissions, settotalMissions] = useState(0);
-  const [sortOrder, setSortOrder] = useState("updatedAt:descend");
+  const [sortOrder, setSortOrder] = useState("createdAt:descend");
   const [searchFilters, setSearchFilters] = useState("");
   const [missionTypes, populateMissionTypes] = useState([]);
   const [typesLoader, setTypesLoader] = useState(false);
