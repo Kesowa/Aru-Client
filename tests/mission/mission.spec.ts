@@ -4,7 +4,7 @@ import { CLIENT_URL } from "tests/constants";
 
 test("create mission", async ({ page }) => {
   await page.goto(CLIENT_URL);
-  await expect(page).toHaveURL(/.*dashboard/);
+  await expect(page).toHaveURL(/.{0,30}dashboard/);
   await page.getByRole("link", { name: "diff Create Mission" }).click();
 
   // stage 1: mission type selection

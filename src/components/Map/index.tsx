@@ -1282,7 +1282,7 @@ function BaseMap(props) {
 
   useEffect(() => {
     if (srtVideoPath && showFlightPath) {
-      fetchJSON(STATIC_URL + srtVideoPath.replace(/.\w+$/, ".geojson"))
+      fetchJSON(STATIC_URL + srtVideoPath.replace(/.\w{0,10}$/, ".geojson"))
         .then((data) => {
           const flightTelemetry: any = data.features;
           const pathObject: any = flightTelemetry.pop();
@@ -6822,7 +6822,7 @@ function BaseMap(props) {
               {"© "}
               <a
                 style={LINK_STYLE}
-                href="http://www.openstreetmap.org/copyright"
+                href="https://www.openstreetmap.org/copyright"
                 target="blank"
               >
                 OpenStreetMap contributors

@@ -732,7 +732,7 @@ function PublicMap(props) {
                     {"© "}
                     <a
                       style={LINK_STYLE}
-                      href="http://www.openstreetmap.org/copyright"
+                      href="https://www.openstreetmap.org/copyright"
                       target="blank"
                     >
                       OpenStreetMap contributors

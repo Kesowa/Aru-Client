@@ -46,7 +46,7 @@ export default defineConfig({
   projects: [
     {
       name: "setup",
-      testMatch: /.*\.setup\.ts/,
+      testMatch: /.{0,20}\.setup\.ts/,
       use: {
         ...devices["Desktop Firefox"],
       },

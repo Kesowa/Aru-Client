@@ -273,7 +273,7 @@ class GoogleMap extends Component<mapProps, mapState> {
       const place = this.searchAutoComplete.getPlace();
 
       const regex = new RegExp(
-        /^([-+]?\d+(?:\.\d+)?)(?:N)?[,\.\s]*([-+]?\d+(?:\.\d+)?)(?:E)?$/,
+        /^([-+]?\d{0,20}(?:\.\d{0,20})?)(?:N)?[,\.\s]*([-+]?\d{0,20}(?:\.\d{0,20})?)(?:E)?$/,
         "i"
       );
       if (regex.test(place.name)) {

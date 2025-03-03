@@ -899,7 +899,7 @@ function VideoPlayer(props: any) {
   //-------------fetch flight log from srt geojson--------------------------------
   useEffect(() => {
     if (!isLive) {
-      fetchJSON((props.url as string).replace(/.\w+$/, ".geojson"))
+      fetchJSON((props.url as string).replace(/.\w{0,10}$/, ".geojson"))
         .then((d) => {
           const data = d as FlightPath;
           const lineString = data.features.pop(); // Remove linestring at the very end

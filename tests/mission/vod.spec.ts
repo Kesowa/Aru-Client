@@ -8,7 +8,7 @@ test("vod tests", async ({ page }) => {
 
   // navigating to mission videos page of "Mapping mission sample" mission
   await page.goto(CLIENT_URL);
-  await expect(page).toHaveURL(/.*dashboard/);
+  await expect(page).toHaveURL(/.{0,30}dashboard/);
   await page
     .getByRole("main")
     .getByRole("link", { name: "border-inner Missions" })
