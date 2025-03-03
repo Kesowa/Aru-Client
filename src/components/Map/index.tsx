@@ -6658,6 +6658,30 @@ function BaseMap(props) {
     return <FourOhOne />;
   }
 
+  const memoizedAllLayers = useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers]);
+  const memoizedMissionLayers = useMemo(() => MissionLayerToDeckLayer(MissionLayers), [MissionLayers]);
+  const computeLayers = () => {
+    const layers: any[] = [];
+
+    // OSMState Layers
+    if (osmState) layers.push(osm);
+
+    // Drawing State Layers
+    if (isDrawing) {
+      layers.push(drawPolygonTool);
+    } else {
+      layers.push(maskLayer);
+    }
+
+    // Tree Menu Layers
+    layers.push(memoizedAllLayers);
+    layers.push(memoizedMissionLayers);
+
+    if (digitizer) layers.push(digitizerLayer);
+
+    return layers;
+  }
+
   return (
     <div
       className="map_wrapper"
@@ -6719,32 +6743,7 @@ function BaseMap(props) {
           }
         }}
         controller={true}
-        layers={(() => {
-          const layers: any[] = [];
-
-          // OSMState Layers
-          if (osmState) layers.push(osm);
-
-          // Drawing State Layers
-          if (isDrawing) {
-            layers.push(drawPolygonTool);
-          } else {
-            layers.push(maskLayer);
-          }
-
-          // Tree Menu Layers
-          layers.push(useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers]));
-          layers.push(
-            useMemo(
-              () => MissionLayerToDeckLayer(MissionLayers),
-              [MissionLayers]
-            )
-          );
-
-          if (digitizer) layers.push(digitizerLayer);
-
-          return layers;
-        })()}
+        layers={computeLayers()}
         style={{ height: "100vh", width: "100%" }}
         // onHover={(info) => {
         //   const coords = getPolygon(info.x, info.y, 150);

@@ -670,6 +670,19 @@ function PublicMap(props) {
     setFuse(searchIndexes);
   };
 
+  const memoizedAllLayers = useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers]);
+  const computeLayers = () => {
+    const layers: any[] = [];
+
+    // OSMState Layers
+    if (osmState) layers.push(osm);
+
+    // Tree Menu Layers
+    layers.push(memoizedAllLayers);
+
+    return layers;
+  };
+
   // MAP RENDER
   const renderMap = () => {
     switch (errorState) {
@@ -698,19 +711,7 @@ function PublicMap(props) {
             <DeckGL
               initialViewState={INITIAL_VIEW_STATE}
               controller={true}
-              layers={(() => {
-                const layers: any[] = [];
-
-                // OSMState Layers
-                if (osmState) layers.push(osm);
-
-                // Tree Menu Layers
-                layers.push(
-                  useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers])
-                );
-
-                return layers;
-              })()}
+              layers={computeLayers()}
               style={{ height: "100vh", width: "100%" }}
               onClick={(info, _) => {
                 if (info.layer) {
