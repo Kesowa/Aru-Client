@@ -88,7 +88,7 @@ import PolygonIcon from "../../static/polygon.svg";
 import VolumeIcon from "../../static/volume.svg";
 import DeckGL from "@deck.gl/react";
 import { FlyToInterpolator } from "deck.gl";
-import { BitmapLayer, IconLayer, LineLayer, PathLayer, ScatterplotLayer } from "@deck.gl/layers";
+import { BitmapLayer, IconLayer, LineLayer, PathLayer, ScatterplotLayer,PolygonLayer } from "@deck.gl/layers";
 import { SolidPolygonLayer } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
 import { HTMLOverlayItem, HTMLOverlay } from "../shared/HTMLOverlay";
@@ -132,7 +132,6 @@ import {
   Layer,
   IMissionLayers,
   MissionLayerToDeckLayer,
-  processPolygonData,
 } from "./layerRender";
 import { ILayersToTree } from "./treeRender";
 import { BBox, Feature, mergeBoundingBoxes } from "src/types/geojson";
@@ -154,6 +153,8 @@ import { LoaderContext } from "../shared/Loader";
 import { ThreadContext } from "src/services/threadUtils";
 import ElevationBlock from "./utils/elevationTooltip";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
+import { calculateVolume } from "./utils/volumeCal";
+
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
   [lat - size * 0.5, lng - size * 0.5],
@@ -506,7 +507,42 @@ function BaseMap(props) {
 
   const [selectedKey, setSelectedKey] = useState<any>();
 
-  //draw angle.....
+// //volume calculation..................
+ 
+//  const [co,setCo] = useState(null);
+
+//   const colorScale = (value) => {
+//     const minZ = Math.min(...volumeMesh.flat().map(p => p[2]));
+//     const maxZ = Math.max(...volumeMesh.flat().map(p => p[2]));
+//     const ratio = (value - minZ) / (maxZ - minZ);
+    
+//     return [
+//       Math.floor(255 * ratio),    // Red
+//       Math.floor(255 * (1 - ratio)), // Green
+//       128,                        // Blue
+//       200                         // Alpha
+//     ];
+//   };
+//   const polygonLayer = new PolygonLayer({
+//     id: 'terrain-surface',
+//     data: volumeMesh,
+//     getPolygon: triangle => [
+//       ...triangle, 
+//       triangle[0] // Close the polygon loop
+//     ],
+//     stroked: false,
+//     filled: true,
+//     extruded: false,
+//     getFillColor: triangle => {
+//       // Color by average elevation
+//       const avgZ = triangle.reduce((sum, p) => sum + p[2], 0) / 3;
+//       return colorScale(avgZ); // Implement your color scale
+//     },
+//     pickable: true,
+//     opacity: 0.8
+//   });
+  //.................draw angle.........................
+
   const [drawAngle, setDrawAngle] = useState(false);
   const [points, setPoints] = useState([]);
   const [dashedLines, setDashedLines] = useState([]);
@@ -5401,7 +5437,7 @@ function BaseMap(props) {
           centerPoint = [fLng, fLat];
 
           if (volumeCalculation) {
-            processPolygonData(updatedData.features[0].geometry.coordinates[0]);
+            calculateVolume(updatedData.features[0].geometry.coordinates[0],deckRef);
           }
         } else if (mode.mode === DrawLineStringMode) {
           modee = "LineView";
@@ -6840,13 +6876,14 @@ function BaseMap(props) {
         //   setPolygon(mapCoords);
         // }}
         onHover={(info) => {
-          handleMouseMove1(info);
           if (isMaskLayerVisible) {
             const coords = getPolygon(info.x, info.y, polygonSize);
             const mapCoords = coords.map((coord) =>
               info.viewport?.unproject(coord)
             );
             setPolygon(mapCoords);
+          } else if (drawAngle){
+            handleMouseMove1(info);
           }
         }}
         controller={true}
