@@ -74,10 +74,10 @@ const EditFlightForm: FC<any> = ({
 
   const handleFormSubmit = () => {
     if (
-      flightDetails.locationID && 
-      flightDetails.name && 
-      flightDetails.duration && 
-      flightDetails.time && 
+      flightDetails.locationID &&
+      flightDetails.name &&
+      flightDetails.duration &&
+      flightDetails.time &&
       flightDetails.date
     ) {
       onSubmit();
@@ -87,38 +87,46 @@ const EditFlightForm: FC<any> = ({
   };
 
   return (
-    locations && pilots && (
+    locations &&
+    pilots && (
       <div className="edit-flight-form">
         <div>
           <Title className="panel-title" level={5}>
             <InfoCircleFilled />
-            &nbsp;&nbsp;{ isEditing ? "Edit" : "Create"} Flight
+            &nbsp;&nbsp;{isEditing ? "Edit" : "Create"} Flight
           </Title>
-          {
-            flightDetails._id && (flightDetails._id !== "") &&
+          {flightDetails._id && flightDetails._id !== "" && (
             <Text className="flight-id">ID : {flightDetails._id}</Text>
-          }
+          )}
         </div>
         <Form
           form={form}
           layout="vertical"
           name="create_mission"
           initialValues={
-            isEditing ?
-            {
-              name: flightDetails.name,
-              date: moment(flightDetails.date, "YYYY-MM-DD"),
-              time: moment(flightDetails.time, "HH:mm A"),
-              duration: flightDetails.duration,
-              locationId: flightDetails.locationID ? locations.find(location => location._id === flightDetails.locationID)?.properties.name : "none",
-              pilot: flightDetails.pilotID ? pilots.find(pilot => pilot._id === flightDetails.pilotID)?.name : "no pilot assigned",
-              remember: true,
-            } :
-            {
-              name: flightDetails.name,
-              date: moment(flightDetails.date, "YYYY-MM-DD"),
-              time: moment(flightDetails.time, "HH:mm A"),
-            }
+            isEditing
+              ? {
+                  name: flightDetails.name,
+                  date: moment(flightDetails.date, "YYYY-MM-DD"),
+                  time: moment(flightDetails.time, "HH:mm A"),
+                  duration: flightDetails.duration,
+                  locationId: flightDetails.locationID
+                    ? locations.find(
+                        (location) => location._id === flightDetails.locationID
+                      )?.properties.name
+                    : "none",
+                  pilot: flightDetails.pilotID
+                    ? pilots.find(
+                        (pilot) => pilot._id === flightDetails.pilotID
+                      )?.name
+                    : "no pilot assigned",
+                  remember: true,
+                }
+              : {
+                  name: flightDetails.name,
+                  date: moment(flightDetails.date, "YYYY-MM-DD"),
+                  time: moment(flightDetails.time, "HH:mm A"),
+                }
           }
           size="small"
           requiredMark={false}
@@ -229,7 +237,9 @@ const EditFlightForm: FC<any> = ({
               }}
             >
               {pilots.map((pilot: any) => (
-                <Option value={pilot._id} key={pilot._id}>{pilot.name}</Option>
+                <Option value={pilot._id} key={pilot._id}>
+                  {pilot.name}
+                </Option>
               ))}
             </Select>
           </Form.Item>
@@ -245,10 +255,15 @@ const EditFlightForm: FC<any> = ({
                         <strong>Geofence Selected</strong>
                       </p>
                       <p>
-                        <span>{flightDetails.geoFence.polygon.points.length} Points Selected</span>{" "}
+                        <span>
+                          {flightDetails.geoFence.polygon.points.length} Points
+                          Selected
+                        </span>{" "}
                         <span>
                           {" "}
-                          {`${(flightDetails.geoFence.polygon.area * 0.000247105).toFixed(2)} acres`}
+                          {`${(
+                            flightDetails.geoFence.polygon.area * 0.000247105
+                          ).toFixed(2)} acres`}
                         </span>
                       </p>
                     </div>
@@ -259,9 +274,9 @@ const EditFlightForm: FC<any> = ({
                       </p>
                       <p style={{ marginTop: "-5px" }}>
                         <span style={{ fontWeight: "bold" }}>Area :</span>{" "}
-                        <span>{`${(flightDetails.geoFence.circle.area * 0.000247105).toFixed(
-                          2
-                        )} acres`}</span>
+                        <span>{`${(
+                          flightDetails.geoFence.circle.area * 0.000247105
+                        ).toFixed(2)} acres`}</span>
                       </p>
                     </div>
                   )}

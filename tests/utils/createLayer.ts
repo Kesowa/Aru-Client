@@ -20,9 +20,7 @@ export const createVectorLayer = async (page: Page) => {
   await page.getByRole("button", { name: "Next" }).click();
 
   // fill layer details
-  const layername =
-    "testVectorLayer" +
-    faker.random.alphaNumeric(8); // random name;
+  const layername = "testVectorLayer" + faker.random.alphaNumeric(8); // random name;
   // layer name
   await page.getByPlaceholder("Layer's Name").fill(layername);
   // layer type selection
@@ -82,9 +80,7 @@ export const createRasterLayer = async (page: Page) => {
   await page.getByRole("button", { name: "Next" }).click();
 
   // fill layer details
-  const layername =
-    "testRasterLayer" +
-    faker.random.alphaNumeric(8); // random name;
+  const layername = "testRasterLayer" + faker.random.alphaNumeric(8); // random name;
   // layer name
   await page.getByPlaceholder("Layer's Name").fill(layername);
   // layer type selection

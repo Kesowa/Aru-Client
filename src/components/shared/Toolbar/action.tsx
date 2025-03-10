@@ -118,8 +118,7 @@ const ActionToolbar = (props) => {
             } ${props.type}s`}
       </Text>
       <div className="upload-btn">
-        {
-          props.canToggleFlag &&
+        {props.canToggleFlag && (
           <Tooltip
             title={`${
               !(props.activateSelection && props.checkedList.length > 0)
@@ -140,7 +139,7 @@ const ActionToolbar = (props) => {
               checked={props.flag}
             />
           </Tooltip>
-        }
+        )}
         <Dropdown
           menu={{ items: actionMenu, onClick: handleAction }}
           trigger={["click"]}

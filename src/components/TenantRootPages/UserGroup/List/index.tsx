@@ -211,7 +211,12 @@ function UserGroupListPage(props: any) {
                         dataSource={activeUserGroup.permissions}
                         renderItem={(item: string) => (
                           <List.Item>
-                            <span aria-valuetext={item} style={{textTransform: "capitalize"}}>{item.replaceAll('_', ' ')}</span>
+                            <span
+                              aria-valuetext={item}
+                              style={{ textTransform: "capitalize" }}
+                            >
+                              {item.replaceAll("_", " ")}
+                            </span>
                           </List.Item>
                         )}
                       />

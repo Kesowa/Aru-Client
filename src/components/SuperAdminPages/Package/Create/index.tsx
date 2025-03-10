@@ -29,7 +29,9 @@ function CreatePackage(props: any) {
   const beforeUploadFunction = (file: any) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsPosterUploading(true);
-      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) =>
+        console.info("PROGRESS: " + prog)
+      );
 
       const body = {
         file: uploadToken,
@@ -37,8 +39,7 @@ function CreatePackage(props: any) {
       // const formData = new FormData();
       // formData.append("poster", file);
       http
-        .post(apis.UPLOAD_PACKAGE_POSTER, body, {
-        })
+        .post(apis.UPLOAD_PACKAGE_POSTER, body, {})
         .then((result) => {
           if (result.data.status) {
             setPoster(result.data.file);

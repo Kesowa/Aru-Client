@@ -31,10 +31,7 @@ function Login() {
         console.log(result.data);
         if (result.data.status) {
           //login
-          login(
-            result.data.data._id,
-            result.data.data
-          );
+          login(result.data.data._id, result.data.data);
           history.replace(from);
         } else {
           setErrMessage(result.data.message);

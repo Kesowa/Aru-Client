@@ -36,9 +36,9 @@ function LiveViewBase() {
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
   const tenantId = Auth.userdetails.tenantId._id || Auth.userdetails.tenantId;
-  
+
   const { setLoading } = useContext(LoaderContext);
-  
+
   //socket connectino variable
   const socket: any = useRef();
   const items: TabsProps["items"] = [

@@ -241,7 +241,9 @@ function DataLocation(props) {
                 .delete(`${apis.DELETE_LOCATION}?id=${data.key}`)
                 .then((result) => {
                   if (result.data.status) {
-                    message.success(`Location ${result.data.data.properties.name} deleted`);
+                    message.success(
+                      `Location ${result.data.data.properties.name} deleted`
+                    );
                     getAllLocations();
                   } else {
                     message.error(result.data.message);

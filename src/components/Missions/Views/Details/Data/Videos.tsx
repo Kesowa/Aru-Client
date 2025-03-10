@@ -136,7 +136,11 @@ function Videos(props) {
         icon: <MessageOutlined />,
       },
     ];
-    if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.VOD_UPDATE)) {
+    if (
+      props.missionDetails.currentUserDetails.customPermissions.includes(
+        PERMS.VOD_UPDATE
+      )
+    ) {
       item.push(
         {
           key: "3",
@@ -147,10 +151,14 @@ function Videos(props) {
           key: "4",
           label: "Rename",
           icon: <EditOutlined />,
-        },
+        }
       );
     }
-    if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.VOD_DELETE)) {
+    if (
+      props.missionDetails.currentUserDetails.customPermissions.includes(
+        PERMS.VOD_DELETE
+      )
+    ) {
       item.push({
         key: "5",
         label: "Delete video",
@@ -165,7 +173,9 @@ function Videos(props) {
       case "1":
         break;
       case "2":
-        openThread("vod", selectedVideo?.data._id, 
+        openThread(
+          "vod",
+          selectedVideo?.data._id,
           selectedVideo?.data.bookmarks
             ? {
                 bookmarks: generateTags(),
@@ -231,7 +241,7 @@ function Videos(props) {
   //     .then((res) => {
   //       if (res.data.status) {
   //           setLoading(true);
-  //           message.success("Violence inference started successfully!");    
+  //           message.success("Violence inference started successfully!");
   //       } else {
   //         message.error(res.data.message || "Something went wrong!");
   //       }
@@ -409,17 +419,24 @@ function Videos(props) {
       //   cancelToken: source.token,
       // };
 
-      const uploadToken = await uploadFile(options.file, DocModel.VOD, (prog) => {
-        console.log("PROGRESS: ", prog);
-        setProgress(prog * 100);
-        options.onProgress({ percent: prog * 100 });
-      }, source.token);
-        
+      const uploadToken = await uploadFile(
+        options.file,
+        DocModel.VOD,
+        (prog) => {
+          console.log("PROGRESS: ", prog);
+          setProgress(prog * 100);
+          options.onProgress({ percent: prog * 100 });
+        },
+        source.token
+      );
+
       const body = {
-        file : uploadToken,
-        missionID : props.missionDetails.missionId,
-        flightID : props.missionDetails.flightId,
-        locationID : props.missionDetails.locationId?._id ? props.missionDetails.locationId._id : undefined,
+        file: uploadToken,
+        missionID: props.missionDetails.missionId,
+        flightID: props.missionDetails.flightId,
+        locationID: props.missionDetails.locationId?._id
+          ? props.missionDetails.locationId._id
+          : undefined,
       };
       // const fData = new FormData();
       // fData.append("video", options.file);
@@ -460,7 +477,7 @@ function Videos(props) {
                   ) {
                     setIsModalVisible2(true);
                     window.setTimeout(function () {
-                      AxiosErrorHandler(err, logout); 
+                      AxiosErrorHandler(err, logout);
                     }, 5000);
                   } else if (
                     err.response?.data.message ===
@@ -515,7 +532,7 @@ function Videos(props) {
                   ) {
                     setIsModalVisible2(true);
                     window.setTimeout(function () {
-                      AxiosErrorHandler(err, logout); 
+                      AxiosErrorHandler(err, logout);
                     }, 5000);
                   } else if (
                     err.response?.data.message ===
@@ -1431,10 +1448,7 @@ function Videos(props) {
   //----------------Render Assign Pilot Button---------------------
 
   function renderUploadBtn() {
-    if (
-      userType === "tenant-staff" ||
-      userType === "tenant-client"
-    ) {
+    if (userType === "tenant-staff" || userType === "tenant-client") {
       if (userDetails.customPermissions.includes(PERMS.VOD_CREATE)) {
         return (
           <div className="upload-btn">

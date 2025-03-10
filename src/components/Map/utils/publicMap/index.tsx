@@ -37,13 +37,13 @@ import {
 import "../../index.less";
 import DeckGL from "@deck.gl/react";
 import { FlyToInterpolator } from "deck.gl";
-import { BitmapLayer, } from "@deck.gl/layers";
+import { BitmapLayer } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-import { HTMLOverlayItem, HTMLOverlay } from "src/components/shared/HTMLOverlay";
 import {
-  ViewMode,
-  GeoJsonEditMode,
-} from "@deck.gl-community/editable-layers";
+  HTMLOverlayItem,
+  HTMLOverlay,
+} from "src/components/shared/HTMLOverlay";
+import { ViewMode, GeoJsonEditMode } from "@deck.gl-community/editable-layers";
 import { StaticMap } from "react-map-gl";
 import InfoWindowContent from "../../utils/infoWindow";
 
@@ -312,7 +312,7 @@ function PublicMap(props) {
     layername: any,
     mode: any,
     feature: any,
-    id: any,
+    id: any
   ) {
     setCoordinates(coordinate);
     setFeatureData(feature);
@@ -363,10 +363,7 @@ function PublicMap(props) {
     }
   };
 
-  const fetchLayerBounds = async (
-    type: string,
-    layerpath: string,
-  ) => {
+  const fetchLayerBounds = async (type: string, layerpath: string) => {
     let bounds: BBox;
     if (type === "Vector") {
       const response = await fetch(STATIC_URL + layerpath);
@@ -394,10 +391,7 @@ function PublicMap(props) {
     for (const layer of AllLayers) {
       const _isChecked = checkedKeysValue.includes(layer._id);
       if (_isChecked && !layer._metadata?.bounds) {
-        const bounds = await fetchLayerBounds(
-          layer.type,
-          layer.layerpath,
-        );
+        const bounds = await fetchLayerBounds(layer.type, layer.layerpath);
         layersWithBounds.push({
           ...layer,
           _isChecked,
@@ -553,7 +547,9 @@ function PublicMap(props) {
               ellipsis={true}
               onClick={() => {
                 if (layer._isChecked && layer._metadata?.bounds) {
-                  const { longitude, latitude, zoom } = calculateViewport(layer._metadata.bounds);
+                  const { longitude, latitude, zoom } = calculateViewport(
+                    layer._metadata.bounds
+                  );
                   setViewport({
                     longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
                     latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
@@ -670,7 +666,10 @@ function PublicMap(props) {
     setFuse(searchIndexes);
   };
 
-  const memoizedAllLayers = useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers]);
+  const memoizedAllLayers = useMemo(
+    () => ILayerToDeckLayer(AllLayers),
+    [AllLayers]
+  );
   const computeLayers = () => {
     const layers: any[] = [];
 
@@ -715,17 +714,23 @@ function PublicMap(props) {
               style={{ height: "100vh", width: "100%" }}
               onClick={(info, _) => {
                 if (info.layer) {
-                  const layer = AllLayers.find((layer) => layer.type === 'Vector' && info.layer?.id === layer._id);
+                  const layer = AllLayers.find(
+                    (layer) =>
+                      layer.type === "Vector" && info.layer?.id === layer._id
+                  );
                   if (layer) {
                     InfoWindow(
                       info.coordinate,
                       layer.name,
-                      (featureType[layer.vector] === featureTypes.POINT) ? "PointView" : "PolygonView",
+                      featureType[layer.vector] === featureTypes.POINT
+                        ? "PointView"
+                        : "PolygonView",
                       info.object,
-                      layer._id,
+                      layer._id
                     );
+                  }
                 }
-              }}}
+              }}
             >
               {osmState ? (
                 <>
@@ -747,10 +752,9 @@ function PublicMap(props) {
                 />
               )}
 
-              { showPopup &&
-                (
+              {showPopup && (
                 <HTMLOverlay>
-                 <HTMLOverlayItem coordinates={coordinates}>
+                  <HTMLOverlayItem coordinates={coordinates}>
                     <Popover
                       content={
                         <>
@@ -835,7 +839,7 @@ function PublicMap(props) {
                                 layer._metadata = {
                                   ...layer._metadata,
                                   highlightIndexes: [searchResult.refIndex],
-                                }
+                                };
                               }
                               return layer;
                             })
@@ -868,7 +872,7 @@ function PublicMap(props) {
                           layer._metadata = {
                             ...layer._metadata,
                             highlightIndexes: [],
-                          }
+                          };
                           return layer;
                         })
                       );

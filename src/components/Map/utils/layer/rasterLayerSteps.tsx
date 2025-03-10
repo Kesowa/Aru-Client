@@ -143,7 +143,10 @@ export const UploadRasterData = ({
               </Upload>
 
               {uploading ? (
-                <Progress strokeLinecap="square" percent={Math.floor(progress)} />
+                <Progress
+                  strokeLinecap="square"
+                  percent={Math.floor(progress)}
+                />
               ) : null}
             </Form.Item>
           </Row>
@@ -201,7 +204,10 @@ export const UpdateRasterData = ({
                 </Upload>
 
                 {uploading ? (
-                  <Progress strokeLinecap="square" percent={Math.floor(progress)} />
+                  <Progress
+                    strokeLinecap="square"
+                    percent={Math.floor(progress)}
+                  />
                 ) : null}
               </Form.Item>
             </div>

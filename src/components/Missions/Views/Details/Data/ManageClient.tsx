@@ -33,8 +33,8 @@ function ManageClients(props) {
   const userDetails = Auth.userdetails;
   const userType = userDetails.userType;
 
-  const canManageClient = userDetails.customPermissions.some(
-    perm => [PERMS.CREATE_CLIENT, PERMS.EDIT_CLIENT, PERMS.DELETE_CLIENT].includes(perm)
+  const canManageClient = userDetails.customPermissions.some((perm) =>
+    [PERMS.CREATE_CLIENT, PERMS.EDIT_CLIENT, PERMS.DELETE_CLIENT].includes(perm)
   );
 
   const [client, setMissionClient] = useState<any>([
@@ -185,10 +185,7 @@ function ManageClients(props) {
   //----------------Render manageclient Button---------------------
 
   function renderClientManageBtns(client: any) {
-    if (
-      userType === "tenant-staff" ||
-      userType === "tenant-client"
-    ) {
+    if (userType === "tenant-staff" || userType === "tenant-client") {
       if (canManageClient) {
         return (
           <>
@@ -249,7 +246,7 @@ function ManageClients(props) {
                         marginLeft: "12px",
                       }}
                     >
-                      { canManageClient && renderClientManageBtns(client.id)}
+                      {canManageClient && renderClientManageBtns(client.id)}
                     </div>
                     <div
                       style={{
@@ -278,7 +275,7 @@ function ManageClients(props) {
           ) : (
             <Empty description="no clients assigned to this mission!" />
           )}
-          { canManageClient && renderAddClientBtn() }
+          {canManageClient && renderAddClientBtn()}
         </Card>
       </Row>
       <Modal

@@ -49,15 +49,18 @@ function EditTenant() {
   const beforeUploadFunction = (file: RcFile) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
-      
+
       // Create a preview URL for the image
       const previewUrl = URL.createObjectURL(file);
       setAvatarPreview(previewUrl);
 
-      const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
+      const uploadToken = await uploadFile(
+        file,
+        DocModel.USER_AVATARS,
+        (prog) => console.info("PROGRESS: " + prog)
+      );
       setAvatar(uploadToken);
 
-     
       // const formData = new FormData();
       // formData.append("avatar", file);
       // http
@@ -141,237 +144,258 @@ function EditTenant() {
         message.error(err.message);
         AxiosErrorHandler(err, logout);
       })
-      .finally(()=> {
+      .finally(() => {
         history.push("/dashboard/admin/tenant/list");
       });
   };
 
   return (
-    tenant &&
-    <div className="edit-tenant">
-      <PageHeader
-        onBack={() => window.history.back()}
-        title="Tenant"
-        subTitle="Edit Tenant"
-        extra={[
-          <Link to="/dashboard/admin/package/list" key="1">
-            <Button key="1" type="primary" icon={<UnorderedListOutlined />}>
-              Tenant List
-            </Button>
-          </Link>,
-        ]}
-      />
-      <Form
-        form={form}
-        onFinish={onFinish}
-        layout="vertical"
-        initialValues={{
-          ...tenant,
-          activePackage: tenant.activePackage._id,
-        }}
-      >
-        <div className="basic-info">
-          <Title level={5}>Basic Info:</Title>
-          <Row gutter={16}>
-            <Col span="12">
-              <Form.Item
-                label="Tenant Name"
-                name="name"
-                rules={[
-                  { required: true, message: "Please enter the tenant name!" },
-                ]}
-              >
-                <Input placeholder="Tenant name" />
-              </Form.Item>
-              <Form.Item
-                label="Contact Person"
-                name="contactPerson"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter the contact person name!",
-                  },
-                ]}
-              >
-                <Input placeholder="Contact Person" />
-              </Form.Item>
-            </Col>
-            <Col span="12">
-              <ImgCrop grid={true}>
-                <Upload
-                  name="avatar"
-                  listType="picture-card"
-                  className="avatar-uploader"
-                  showUploadList={false}
-                  beforeUpload={beforeUploadFunction}
-                >
-                  {avatar ? (
-                    <img
-                    src={avatarPreview ? avatarPreview : `${STATIC_URL}${avatar}`}
-                    className="uploaded-avatar"
-                    />
-                  ) : (
-                    <div>
-                      {isAvatarUploading ? (
-                        <LoadingOutlined />
-                      ) : (
-                        <PlusOutlined />
-                      )}
-                      <div className="ant-upload-text">Upload</div>
-                    </div>
-                  )}
-                </Upload>
-              </ImgCrop>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span="12">
-              <Form.Item
-                label="Contact Number"
-                name="phoneNo"
-                rules={[
-                  { required: true, message: "Please enter the phone number!" },
-                ]}
-              >
-                <Input placeholder="Contact Number" style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-            <Col span="12">
-              <Form.Item
-                label="Email Id"
-                name="email"
-                rules={[
-                  { required: true, message: "Please enter the email id!" },
-                  { type: "email", message: "Enter a valid email id" },
-                ]}
-              >
-                <Input placeholder="Email Id" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span="12">
-              <Form.Item label="Registration Number" name="registrationNumber">
-                <Input placeholder="Registration Number" />
-              </Form.Item>
-            </Col>
-            <Col span="12">
-              <Form.Item label="Official Website" name="officialWebsite">
-                <Input placeholder="Official Website" />
-              </Form.Item>
-            </Col>
-          </Row>
-        </div>
-        <div>
-          <Title level={5} style={{ marginTop: "10px" }}>
-            Billing Details:
-          </Title>
-          <Row gutter={16}>
-            <Col span="12">
-              <Form.Item
-                label="GST Number"
-                name="gstNumber"
-                rules={[
-                  { required: true, message: "Please enter the GST number!" },
-                ]}
-              >
-                <Input placeholder="GST Number" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span="12">
-              <Form.Item
-                label="Address Line 1"
-                name="billingAddressLine1"
-                rules={[
-                  { required: true, message: "Please enter the address!" },
-                ]}
-              >
-                <Input placeholder="Address Line 1" />
-              </Form.Item>
-            </Col>
-            <Col span="12">
-              <Form.Item label="Address Line 2" name="billingAddressLine2">
-                <Input placeholder="Address Line 2" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span="6">
-              <Form.Item
-                label="City"
-                name="billingCity"
-                rules={[{ required: true, message: "Please enter the city!" }]}
-              >
-                <Input placeholder="City" />
-              </Form.Item>
-            </Col>
-            <Col span="6">
-              <Form.Item
-                label="District"
-                name="billingDistrict"
-                rules={[
-                  { required: true, message: "Please enter the district!" },
-                ]}
-              >
-                <Input placeholder="District" />
-              </Form.Item>
-            </Col>
-            <Col span="6">
-              <Form.Item
-                label="State"
-                name="billingState"
-                rules={[{ required: true, message: "Please enter the state!" }]}
-              >
-                <Input placeholder="State" />
-              </Form.Item>
-            </Col>
-            <Col span="6">
-              <Form.Item
-                label="Pin"
-                name="billingPin"
-                rules={[
-                  { required: true, message: "Please enter the pin number!" },
-                  { len: 6, message: "Enter a valid pin number!" },
-                ]}
-              >
-                <Input
-                  type="number"
-                  placeholder="Pin"
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-        </div>
-        <div>
-          <Title level={5} style={{ marginTop: "10px" }}>
-            Active Package:
-          </Title>
-          <Row>
-            <Col span={8}>
-              <Form.Item label="Select Package" name="activePackage">
-                <Select>
-                  {packages.map((item) => (
-                    <Option value={item._id}>{item.name}</Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-        </div>
-        <Row justify="end" gutter={16}>
-          <Col>
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Submit
+    tenant && (
+      <div className="edit-tenant">
+        <PageHeader
+          onBack={() => window.history.back()}
+          title="Tenant"
+          subTitle="Edit Tenant"
+          extra={[
+            <Link to="/dashboard/admin/package/list" key="1">
+              <Button key="1" type="primary" icon={<UnorderedListOutlined />}>
+                Tenant List
               </Button>
-            </Form.Item>
-          </Col>
-        </Row>
-      </Form>
-    </div>
+            </Link>,
+          ]}
+        />
+        <Form
+          form={form}
+          onFinish={onFinish}
+          layout="vertical"
+          initialValues={{
+            ...tenant,
+            activePackage: tenant.activePackage._id,
+          }}
+        >
+          <div className="basic-info">
+            <Title level={5}>Basic Info:</Title>
+            <Row gutter={16}>
+              <Col span="12">
+                <Form.Item
+                  label="Tenant Name"
+                  name="name"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter the tenant name!",
+                    },
+                  ]}
+                >
+                  <Input placeholder="Tenant name" />
+                </Form.Item>
+                <Form.Item
+                  label="Contact Person"
+                  name="contactPerson"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter the contact person name!",
+                    },
+                  ]}
+                >
+                  <Input placeholder="Contact Person" />
+                </Form.Item>
+              </Col>
+              <Col span="12">
+                <ImgCrop grid={true}>
+                  <Upload
+                    name="avatar"
+                    listType="picture-card"
+                    className="avatar-uploader"
+                    showUploadList={false}
+                    beforeUpload={beforeUploadFunction}
+                  >
+                    {avatar ? (
+                      <img
+                        src={
+                          avatarPreview
+                            ? avatarPreview
+                            : `${STATIC_URL}${avatar}`
+                        }
+                        className="uploaded-avatar"
+                      />
+                    ) : (
+                      <div>
+                        {isAvatarUploading ? (
+                          <LoadingOutlined />
+                        ) : (
+                          <PlusOutlined />
+                        )}
+                        <div className="ant-upload-text">Upload</div>
+                      </div>
+                    )}
+                  </Upload>
+                </ImgCrop>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span="12">
+                <Form.Item
+                  label="Contact Number"
+                  name="phoneNo"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter the phone number!",
+                    },
+                  ]}
+                >
+                  <Input
+                    placeholder="Contact Number"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span="12">
+                <Form.Item
+                  label="Email Id"
+                  name="email"
+                  rules={[
+                    { required: true, message: "Please enter the email id!" },
+                    { type: "email", message: "Enter a valid email id" },
+                  ]}
+                >
+                  <Input placeholder="Email Id" />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span="12">
+                <Form.Item
+                  label="Registration Number"
+                  name="registrationNumber"
+                >
+                  <Input placeholder="Registration Number" />
+                </Form.Item>
+              </Col>
+              <Col span="12">
+                <Form.Item label="Official Website" name="officialWebsite">
+                  <Input placeholder="Official Website" />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
+          <div>
+            <Title level={5} style={{ marginTop: "10px" }}>
+              Billing Details:
+            </Title>
+            <Row gutter={16}>
+              <Col span="12">
+                <Form.Item
+                  label="GST Number"
+                  name="gstNumber"
+                  rules={[
+                    { required: true, message: "Please enter the GST number!" },
+                  ]}
+                >
+                  <Input placeholder="GST Number" />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span="12">
+                <Form.Item
+                  label="Address Line 1"
+                  name="billingAddressLine1"
+                  rules={[
+                    { required: true, message: "Please enter the address!" },
+                  ]}
+                >
+                  <Input placeholder="Address Line 1" />
+                </Form.Item>
+              </Col>
+              <Col span="12">
+                <Form.Item label="Address Line 2" name="billingAddressLine2">
+                  <Input placeholder="Address Line 2" />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span="6">
+                <Form.Item
+                  label="City"
+                  name="billingCity"
+                  rules={[
+                    { required: true, message: "Please enter the city!" },
+                  ]}
+                >
+                  <Input placeholder="City" />
+                </Form.Item>
+              </Col>
+              <Col span="6">
+                <Form.Item
+                  label="District"
+                  name="billingDistrict"
+                  rules={[
+                    { required: true, message: "Please enter the district!" },
+                  ]}
+                >
+                  <Input placeholder="District" />
+                </Form.Item>
+              </Col>
+              <Col span="6">
+                <Form.Item
+                  label="State"
+                  name="billingState"
+                  rules={[
+                    { required: true, message: "Please enter the state!" },
+                  ]}
+                >
+                  <Input placeholder="State" />
+                </Form.Item>
+              </Col>
+              <Col span="6">
+                <Form.Item
+                  label="Pin"
+                  name="billingPin"
+                  rules={[
+                    { required: true, message: "Please enter the pin number!" },
+                    { len: 6, message: "Enter a valid pin number!" },
+                  ]}
+                >
+                  <Input
+                    type="number"
+                    placeholder="Pin"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
+          <div>
+            <Title level={5} style={{ marginTop: "10px" }}>
+              Active Package:
+            </Title>
+            <Row>
+              <Col span={8}>
+                <Form.Item label="Select Package" name="activePackage">
+                  <Select>
+                    {packages.map((item) => (
+                      <Option value={item._id}>{item.name}</Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
+          <Row justify="end" gutter={16}>
+            <Col>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Submit
+                </Button>
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
+      </div>
+    )
   );
 }
 

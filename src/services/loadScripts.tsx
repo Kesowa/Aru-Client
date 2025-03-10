@@ -25,4 +25,4 @@ export const useScripts = () => {
   }, []);
 
   return { mapScriptLoaded, paymentScriptLoaded };
-}
+};

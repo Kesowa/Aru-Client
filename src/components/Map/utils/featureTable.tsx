@@ -278,7 +278,9 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
         console.log("row:", row);
         return row.index; // changed featureindex to index
       });
-      const features = selectedRows.map(({ type, coordinates }) => ({ geometry: { type, coordinates } }));
+      const features = selectedRows.map(({ type, coordinates }) => ({
+        geometry: { type, coordinates },
+      }));
       console.log(index);
       props.setSelectedIndexes(index);
       props.setSelectedFeatures(features);

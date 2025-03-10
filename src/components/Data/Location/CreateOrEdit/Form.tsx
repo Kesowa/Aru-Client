@@ -17,11 +17,11 @@ type CreateOrEditLocationForm = {
   geolocation: any;
   isEditing: any;
   locationToEdit: any;
-}
+};
 
 const CreateOrEditLocationForm = (props: any) => {
   const [formState, setFormState] = useState<any>({
-    locationName: props.isEditing ? props.locationToEdit.properties.name : ""
+    locationName: props.isEditing ? props.locationToEdit.properties.name : "",
   });
   const [area, setArea] = useState(0);
   const [selectedPoints, setSelectedPoints] = useState(0);
@@ -42,18 +42,23 @@ const CreateOrEditLocationForm = (props: any) => {
 
   const createLocation = () => {
     setLoading(true);
-    const isPolygon = (props.geoData.points.length > 1);
-    const firstPoint = [props.geoData.points[0].lng, props.geoData.points[0].lat];
+    const isPolygon = props.geoData.points.length > 1;
+    const firstPoint = [
+      props.geoData.points[0].lng,
+      props.geoData.points[0].lat,
+    ];
     const data = {
       type: isPolygon ? "Polygon" : "Point",
-      coordinates: isPolygon ? [
-        [
-          ...props.geoData.points.map((point) => {
-            return [point.lng, point.lat];
-          }),
-          firstPoint
-        ]
-      ] : firstPoint,
+      coordinates: isPolygon
+        ? [
+            [
+              ...props.geoData.points.map((point) => {
+                return [point.lng, point.lat];
+              }),
+              firstPoint,
+            ],
+          ]
+        : firstPoint,
       properties: {
         name: formState.locationName,
       },
@@ -85,28 +90,34 @@ const CreateOrEditLocationForm = (props: any) => {
         setLoading(false);
       });
   };
-  
+
   const editLocation = () => {
     setLoading(true);
-    const isPolygon = (props.geoData?.points.length > 1);
-    const firstPoint = [props.geoData?.points[0].lng, props.geoData?.points[0].lat];
+    const isPolygon = props.geoData?.points.length > 1;
+    const firstPoint = [
+      props.geoData?.points[0].lng,
+      props.geoData?.points[0].lat,
+    ];
     const data = {
       id: props.locationToEdit._id,
       geometry: {
-        coordinates: 
-          props.geoData ? (
-            isPolygon ?
-              [[
-                ...props.geoData.points.map((point) => {
-                  return [point.lng, point.lat];
-                }),
-                firstPoint
-              ]]
-              : firstPoint
-          ) : props.locationToEdit.geometry.coordinates,
-        type: props.geoData ? (
-            isPolygon ? "Polygon" : "Point"
-          ) : props.locationToEdit.geometry.type,
+        coordinates: props.geoData
+          ? isPolygon
+            ? [
+                [
+                  ...props.geoData.points.map((point) => {
+                    return [point.lng, point.lat];
+                  }),
+                  firstPoint,
+                ],
+              ]
+            : firstPoint
+          : props.locationToEdit.geometry.coordinates,
+        type: props.geoData
+          ? isPolygon
+            ? "Polygon"
+            : "Point"
+          : props.locationToEdit.geometry.type,
       },
       properties: {
         name: formState.locationName,
@@ -181,105 +192,106 @@ const CreateOrEditLocationForm = (props: any) => {
         />
       </Modal>
       <div style={{ marginTop: "20px" }}>
-          <Form
-            form={form}
-            layout="vertical"
-            name="create_mission"
-            initialValues={{
-              location: props.isEditing ? props.locationToEdit.properties.name : "",
-              remember: true,
-            }}
-            onFinish={handleFormSubmit}
-            requiredMark={false}
-            size="small"
-          >
-            <Form.Item
-              label="Location Name"
-              name="location"
-              rules={[
-                {
-                  required: true,
-                  message: "Please add the location name",
-                },
-              ]}
-            >
+        <Form
+          form={form}
+          layout="vertical"
+          name="create_mission"
+          initialValues={{
+            location: props.isEditing
+              ? props.locationToEdit.properties.name
+              : "",
+            remember: true,
+          }}
+          onFinish={handleFormSubmit}
+          requiredMark={false}
+          size="small"
+        >
+          <Form.Item
+            label="Location Name"
+            name="location"
+            rules={[
               {
-                props.isEditing ?
-                <Input
-                  className="locationBox"
-                  defaultValue={props.locationToEdit.properties.name}
-                  onChange={onNameChange}
-                  placeholder="Location Name"
-                /> :
-                <Input
-                  className="locationBox"
-                  onChange={onNameChange}
-                  placeholder="Location Name"
-                />
-              }
-            </Form.Item>
+                required: true,
+                message: "Please add the location name",
+              },
+            ]}
+          >
+            {props.isEditing ? (
+              <Input
+                className="locationBox"
+                defaultValue={props.locationToEdit.properties.name}
+                onChange={onNameChange}
+                placeholder="Location Name"
+              />
+            ) : (
+              <Input
+                className="locationBox"
+                onChange={onNameChange}
+                placeholder="Location Name"
+              />
+            )}
+          </Form.Item>
 
-            {props.areaSelected && (
-              <div>
-                {
-                  (selectedPoints > 1) &&
-                  <div className="data_selected" style={{ marginTop: "20px" }}>
-                    <img
-                      style={{ height: "20px", marginTop: "-20px" }}
-                      src={s_m}
-                    />
-                    <div className="data_selected_inner">
-                      <div>
-                          <p>
-                            <strong>Geofence Selected</strong>
-                          </p>
-                          <p>
-                            <span>{selectedPoints} Points Selected</span>{" "}
-                            <span>
-                              {" "}
-                              {`${(area * 0.000247105).toFixed(2)} acres`}
-                            </span>
-                          </p>
-                      </div>
+          {props.areaSelected && (
+            <div>
+              {selectedPoints > 1 && (
+                <div className="data_selected" style={{ marginTop: "20px" }}>
+                  <img
+                    style={{ height: "20px", marginTop: "-20px" }}
+                    src={s_m}
+                  />
+                  <div className="data_selected_inner">
+                    <div>
+                      <p>
+                        <strong>Geofence Selected</strong>
+                      </p>
+                      <p>
+                        <span>{selectedPoints} Points Selected</span>{" "}
+                        <span>
+                          {" "}
+                          {`${(area * 0.000247105).toFixed(2)} acres`}
+                        </span>
+                      </p>
                     </div>
                   </div>
-                }
+                </div>
+              )}
 
-                <div className="data_selcted_2" style={{ marginTop: "20px" }}>
-                  <div className="location_details">
-                    <img src={l_a} alt="" style={{ height: "20px" }} />
-                    <div>
-                      <strong>Location Selected</strong>
-                      <p>{props.geolocation}</p>
-                    </div>
+              <div className="data_selcted_2" style={{ marginTop: "20px" }}>
+                <div className="location_details">
+                  <img src={l_a} alt="" style={{ height: "20px" }} />
+                  <div>
+                    <strong>Location Selected</strong>
+                    <p>{props.geolocation}</p>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {props.geoData && (
-              <Form.Item>
-                <div className="mission_creation_buttons">
-                  <Button
-                    type="primary"
-                    style={{ background: "red" }}
-                    onClick={() => {
-                      form.resetFields();
-                      props.setAreaSelected(false);
-                      props.setPolygonData(null);
-                      history.push("/dashboard/data");
-                    }}
-                    size="middle"
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="primary" htmlType="submit" size="middle">
-                    { props.isEditing ? "Submit" : "Add"}
-                  </Button>
-                </div>
-              </Form.Item>
-            )}
-          </Form>
+          {props.geoData && (
+            <Form.Item>
+              <div className="mission_creation_buttons">
+                <Button
+                  type="primary"
+                  style={{ background: "red" }}
+                  onClick={() => {
+                    form.resetFields();
+                    props.setAreaSelected(false);
+                    props.setPolygonData(null);
+                    history.push("/dashboard/data");
+                  }}
+                  size="middle"
+                >
+                  Cancel
+                </Button>
+                <Button type="primary" htmlType="submit" size="middle">
+                  {props.isEditing ? "Submit" : "Add"}
+                </Button>
+              </div>
+            </Form.Item>
+          )}
+        </Form>
       </div>
     </>
   );

@@ -7,14 +7,7 @@ import {
   DeleteOutlined,
   LockOutlined,
 } from "@ant-design/icons";
-import {
-  message,
-  Input,
-  Button,
-  Tag,
-  Table,
-  Popconfirm,
-} from "antd";
+import { message, Input, Button, Tag, Table, Popconfirm } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
@@ -282,7 +275,9 @@ function UserListPage(props: any) {
   useEffect(() => {
     if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
-    } else if (!["tenant-root","tenant-staff"].includes(userDetails.userType)) {
+    } else if (
+      !["tenant-root", "tenant-staff"].includes(userDetails.userType)
+    ) {
       // client shouldn't be able to view
       setErrorState("401");
     } else {
@@ -296,7 +291,7 @@ function UserListPage(props: any) {
 
     case "401":
       return <FourOhOne />;
-    
+
     case "403":
       return <FourOhOne />;
 
@@ -319,15 +314,18 @@ function UserListPage(props: any) {
             subTitle="Here you will find all users under your organization."
             extra={[
               <>
-                {
-                  userDetails.userType === "tenant-root" && 
+                {userDetails.userType === "tenant-root" && (
                   <Link to="/dashboard/tenant/user/create" key="1">
-                    <Button key="1" type="primary" icon={<PlusCircleOutlined />}>
+                    <Button
+                      key="1"
+                      type="primary"
+                      icon={<PlusCircleOutlined />}
+                    >
                       Create User
                     </Button>
                   </Link>
-                }
-              </>
+                )}
+              </>,
             ]}
           ></PageHeader>
           <div className="tenants-user-list padding-after-page-header">
@@ -338,9 +336,12 @@ function UserListPage(props: any) {
               loading={isTableLoading}
               dataSource={tenantUserTableData}
               columns={
-                (userDetails.userType === "tenant-root") ?
-                columns :
-                columns.filter(col => !["email","phoneNo","actions"].includes(col.dataIndex))
+                userDetails.userType === "tenant-root"
+                  ? columns
+                  : columns.filter(
+                      (col) =>
+                        !["email", "phoneNo", "actions"].includes(col.dataIndex)
+                    )
               }
               rowKey="_id"
             />

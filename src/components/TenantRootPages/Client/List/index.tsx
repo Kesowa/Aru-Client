@@ -39,9 +39,9 @@ function ClientListPage(props: any) {
 
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
-  
+
   const { setLoading } = useContext(LoaderContext);
-  
+
   let searchInput: any;
 
   const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
@@ -117,8 +117,9 @@ function ClientListPage(props: any) {
   //--------------render delete button based on user perms---------------------
   function renderDeleteBtn(record: any) {
     if (
-      (userDetails.userType === "tenant-root") ||
-      (userDetails.userType === "tenant-staff" && userDetails.customPermissions.includes(PERMS.DELETE_CLIENT))
+      userDetails.userType === "tenant-root" ||
+      (userDetails.userType === "tenant-staff" &&
+        userDetails.customPermissions.includes(PERMS.DELETE_CLIENT))
     ) {
       return (
         <Popconfirm
@@ -157,8 +158,9 @@ function ClientListPage(props: any) {
   //--------------render edit button based on user perms---------------------
   function renderEditBtn(record: any) {
     if (
-      (userDetails.userType === "tenant-root") ||
-      (userDetails.userType === "tenant-staff" && userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
+      userDetails.userType === "tenant-root" ||
+      (userDetails.userType === "tenant-staff" &&
+        userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
     ) {
       return (
         <Button
@@ -175,8 +177,9 @@ function ClientListPage(props: any) {
   //-------------render create client button-----------------------------------
   function renderCreateClientButton() {
     if (
-      (userDetails.userType === "tenant-root") ||
-      (userDetails.userType === "tenant-staff" && userDetails.customPermissions.includes(PERMS.CREATE_CLIENT))
+      userDetails.userType === "tenant-root" ||
+      (userDetails.userType === "tenant-staff" &&
+        userDetails.customPermissions.includes(PERMS.CREATE_CLIENT))
     ) {
       return (
         <Link to="/dashboard/tenant/client/create" key="1">
@@ -431,9 +434,12 @@ function ClientListPage(props: any) {
               loading={isTableLoading}
               dataSource={tenantUserTableData}
               columns={
-                (userDetails.userType === "tenant-client") ?
-                columns.filter(col => !["email","phoneNo","actions"].includes(col.dataIndex)) :
-                columns
+                userDetails.userType === "tenant-client"
+                  ? columns.filter(
+                      (col) =>
+                        !["email", "phoneNo", "actions"].includes(col.dataIndex)
+                    )
+                  : columns
               }
               rowKey="_id"
               onChange={handleTableChange}

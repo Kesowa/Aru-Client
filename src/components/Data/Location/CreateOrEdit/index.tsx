@@ -11,16 +11,16 @@ import { useParams } from "react-router-dom";
 import { AuthContext } from "src/services/authUtils";
 
 type CreateOrEditLocationProps = {
-  isEditing: boolean
-}
+  isEditing: boolean;
+};
 
 function CreateOrEditLocation(props: CreateOrEditLocationProps) {
   const [areaSelected, setAreaSelected] = useState(false);
   const [drawingToolBtns, setDrawingToolBtns] = useState(false);
   const [geoData, setPolygonData] = useState<{
-    area: number,
-    length: number,
-    points: any,
+    area: number;
+    length: number;
+    points: any;
   } | null>(null);
   const [geolocation, setGeolocation] = useState("");
   const { id } = useParams<any>();
@@ -38,13 +38,13 @@ function CreateOrEditLocation(props: CreateOrEditLocationProps) {
     setPolygonData,
     setGeolocation,
     isEditing: props.isEditing,
-    locationToEdit
+    locationToEdit,
   };
 
   const getLocation = (id: string) => {
     http
       .get(`${apis.GET_LOCATION_BY_ID}`, {
-        params: { id }
+        params: { id },
       })
       .then((result) => {
         if (result.data.data) {
@@ -68,19 +68,18 @@ function CreateOrEditLocation(props: CreateOrEditLocationProps) {
     <>
       <div className="edit-location-header">
         <h1 style={{ fontSize: "1.6rem", marginBottom: "0.2rem" }}>
-          { props.isEditing ? "Edit" : "Create"} Location
+          {props.isEditing ? "Edit" : "Create"} Location
         </h1>
         <p>
-          You can { props.isEditing ? "edit" : "create"} geofence based on a real location for monitoring data
-          influx
+          You can {props.isEditing ? "edit" : "create"} geofence based on a real
+          location for monitoring data influx
         </p>
       </div>
       <div
         className="create-location-container"
         style={{ position: "absolute", left: 0, right: 0 }}
       >
-        {
-          ((!props.isEditing) || (props.isEditing && locationToEdit)) && 
+        {(!props.isEditing || (props.isEditing && locationToEdit)) && (
           <>
             <LocationMap {...mapProps} />
             <div className="form-container">
@@ -93,7 +92,7 @@ function CreateOrEditLocation(props: CreateOrEditLocationProps) {
                 <div>
                   <Title className="panel-title" level={5}>
                     <InfoCircleFilled />
-                    &nbsp;&nbsp;{ props.isEditing ? "Edit" : "Create"} location
+                    &nbsp;&nbsp;{props.isEditing ? "Edit" : "Create"} location
                   </Title>
                 </div>
                 <LocationCreateOrEditForm
@@ -108,7 +107,7 @@ function CreateOrEditLocation(props: CreateOrEditLocationProps) {
               </Card>
             </div>
           </>
-        }
+        )}
       </div>
     </>
   );

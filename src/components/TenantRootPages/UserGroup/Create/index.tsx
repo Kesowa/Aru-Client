@@ -113,7 +113,7 @@ function UserGroupCreatePage(props: any) {
             err.response.data.message === "Package has expired! Please renew!"
           ) {
             setErrorState("403-expiry");
-            window.setTimeout(function() {
+            window.setTimeout(function () {
               AxiosErrorHandler(err, logout);
             }, 5000);
           } else {
@@ -183,15 +183,27 @@ function UserGroupCreatePage(props: any) {
                     <Input type="text" />
                   </Form.Item>
                   <Transfer
-                    dataSource={allPermissions.map(perm => ({ key: perm, title: perm }))}
+                    dataSource={allPermissions.map((perm) => ({
+                      key: perm,
+                      title: perm,
+                    }))}
                     showSearch
-                    filterOption={(inputValue, { title }) => title.toLowerCase().includes(inputValue.toLowerCase())}
+                    filterOption={(inputValue, { title }) =>
+                      title.toLowerCase().includes(inputValue.toLowerCase())
+                    }
                     listStyle={{
                       width: "100%",
                       height: 400,
                     }}
                     onChange={transferchange}
-                    render={(item) => <span aria-valuetext={item.key} style={{ textTransform: "capitalize" }}>{item.title.replaceAll('_', ' ')}</span>}
+                    render={(item) => (
+                      <span
+                        aria-valuetext={item.key}
+                        style={{ textTransform: "capitalize" }}
+                      >
+                        {item.title.replaceAll("_", " ")}
+                      </span>
+                    )}
                     targetKeys={selectedPermissions}
                     oneWay
                   />

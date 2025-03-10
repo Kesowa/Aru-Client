@@ -414,7 +414,9 @@ const Thread = (props) => {
                         type="Edit"
                         action={action}
                         setAction={setAction}
-                        tags={thread.tags?.bookmarks ? thread.tags.bookmarks : {}}
+                        tags={
+                          thread.tags?.bookmarks ? thread.tags.bookmarks : {}
+                        }
                       />
                     }
                   />

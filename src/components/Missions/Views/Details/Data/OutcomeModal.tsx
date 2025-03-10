@@ -8,7 +8,7 @@ import {
   Tooltip,
   Button,
   Avatar,
-  notification
+  notification,
 } from "antd";
 import {
   UserOutlined,
@@ -271,8 +271,7 @@ function OutcomeModal(props) {
               marginTop: "20px",
             }}
           >
-            {
-              props.data.length > 1 ?
+            {props.data.length > 1 ? (
               <>
                 <Button
                   type="primary"
@@ -284,11 +283,12 @@ function OutcomeModal(props) {
                 <Button type="primary" onClick={() => nextIndex()}>
                   Next
                 </Button>
-              </> :
+              </>
+            ) : (
               <Button type="primary" onClick={() => props.closeModal()}>
                 OK
               </Button>
-            }
+            )}
           </div>
         </Modal>
       )}

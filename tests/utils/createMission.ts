@@ -3,8 +3,7 @@ import { expect, type Page } from "@playwright/test";
 
 export const createMission = async (page: Page) => {
   await page.getByRole("link", { name: "diff Create Mission" }).click();
-  const missionName: string =
-    "Test-" + faker.random.alphaNumeric(8); // random mission name
+  const missionName: string = "Test-" + faker.random.alphaNumeric(8); // random mission name
 
   // stage 1: mission type selection
   await page.getByText("Mapping", { exact: true }).click();

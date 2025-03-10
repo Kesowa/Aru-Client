@@ -63,64 +63,61 @@ const App = () => {
       fetchUserDetails();
     }
   }, []);
-  
+
   const { mapScriptLoaded, paymentScriptLoaded } = useScripts();
 
-  return (
-    userDetailsFetched ?
+  return userDetailsFetched ? (
     <React.Fragment>
       <LoaderContext.Provider value={{ loading, setLoading }}>
-      <AuthContext.Provider value={{ Auth, login, logout, setUserDetails }} >
-      <ThreadContext.Provider value={{ thread, openThread, closeThread }} >
-      <Socket />
-      <Loader />
-      {
-        mapScriptLoaded && paymentScriptLoaded &&
-        <BrowserRouter>
-          <Suspense
-            fallback={
-              <div className="example">
-                <Space size="middle">
-                  <Spin size="large" />
-                </Space>
-              </div>
-            }
-          >
-            <Switch>
-              
-                <Route exact path="/">
-                  <Redirect to={{ pathname: "/dashboard" }} />
-                </Route>
-                <Route exact path="/map/:id">
-                  <PublicMap isBaseMap={true} />
-                </Route>
-                <Route exact path="/map/:tenantId/:missionId">
-                  <PublicMap isMissionMap={true} isBaseMap={true} />
-                </Route>
-                <Route exact path="/forgot-password">
-                  <ForgotPassword />
-                </Route>
-                <LoginWrapper exact={true} path="/login">
-                  <Login />
-                </LoginWrapper>
-                <LoginWrapper exact={true} path="/sign-up">
-                  <Register />
-                </LoginWrapper>
-                <PrivateRoute path="/dashboard">
-                  <DashboardWrapper />
-                </PrivateRoute>
-                <Route>
-                  <Redirect to="/" />
-                </Route>
-            </Switch>
-          </Suspense>
-        </BrowserRouter>
-      }
-      </ThreadContext.Provider>
-      </AuthContext.Provider>
+        <AuthContext.Provider value={{ Auth, login, logout, setUserDetails }}>
+          <ThreadContext.Provider value={{ thread, openThread, closeThread }}>
+            <Socket />
+            <Loader />
+            {mapScriptLoaded && paymentScriptLoaded && (
+              <BrowserRouter>
+                <Suspense
+                  fallback={
+                    <div className="example">
+                      <Space size="middle">
+                        <Spin size="large" />
+                      </Space>
+                    </div>
+                  }
+                >
+                  <Switch>
+                    <Route exact path="/">
+                      <Redirect to={{ pathname: "/dashboard" }} />
+                    </Route>
+                    <Route exact path="/map/:id">
+                      <PublicMap isBaseMap={true} />
+                    </Route>
+                    <Route exact path="/map/:tenantId/:missionId">
+                      <PublicMap isMissionMap={true} isBaseMap={true} />
+                    </Route>
+                    <Route exact path="/forgot-password">
+                      <ForgotPassword />
+                    </Route>
+                    <LoginWrapper exact={true} path="/login">
+                      <Login />
+                    </LoginWrapper>
+                    <LoginWrapper exact={true} path="/sign-up">
+                      <Register />
+                    </LoginWrapper>
+                    <PrivateRoute path="/dashboard">
+                      <DashboardWrapper />
+                    </PrivateRoute>
+                    <Route>
+                      <Redirect to="/" />
+                    </Route>
+                  </Switch>
+                </Suspense>
+              </BrowserRouter>
+            )}
+          </ThreadContext.Provider>
+        </AuthContext.Provider>
       </LoaderContext.Provider>
     </React.Fragment>
-    :
+  ) : (
     <EntryLoader />
   );
 };
