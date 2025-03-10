@@ -430,15 +430,9 @@ function DashboardContent() {
 
   //fetch filtered missions based on socket events
   useEffect(() => {
-    if (alertSocketEvent == "refresh-dashboard") {
-      fetchFilterMissions(
-        Auth.userdetails?.tenantId?._id || Auth.userdetails?.tenantId
-      );
-    } else {
-      fetchFilterMissions(
-        Auth.userdetails?.tenantId?._id || Auth.userdetails?.tenantId
-      );
-    }
+    fetchFilterMissions(
+      Auth.userdetails?.tenantId?._id || Auth.userdetails?.tenantId
+    );
   }, [alertSocketEvent]);
 
   // Render dashboard content for tenant root and tenant staff

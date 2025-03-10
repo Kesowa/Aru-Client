@@ -144,7 +144,7 @@ function UserCreatePage(props: any) {
 
   //subimt form
   const onFinish = (data: any) => {
-    const password = Math.random().toString(36).slice(-8);
+    const password = Array.from(crypto.getRandomValues(new Uint8Array(8)), b => (b % 36).toString(36)).join('');
     data = { ...data, password };
     createUserAccount(data);
   };

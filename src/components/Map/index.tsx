@@ -1282,7 +1282,7 @@ function BaseMap(props) {
 
   useEffect(() => {
     if (srtVideoPath && showFlightPath) {
-      fetchJSON(STATIC_URL + srtVideoPath.replace(/.\w+$/, ".geojson"))
+      fetchJSON(STATIC_URL + srtVideoPath.replace(/.\w{0,10}$/, ".geojson"))
         .then((data) => {
           const flightTelemetry: any = data.features;
           const pathObject: any = flightTelemetry.pop();
@@ -3242,34 +3242,18 @@ function BaseMap(props) {
             isVODChecked: false,
           });
           // setAllLayers(result.data.data.layers);
-          if (result.data.message === "No layer exists for mission") {
-            setMissioName(result.data.data.mission);
-            setViewport({
-              latitude: result.data.data.centerPoints.lat,
-              longitude: result.data.data.centerPoints.lng,
-              zoom: 13,
-              pitch: 0,
-              minZoom: 0,
-              maxZoom: 22,
-              bearing: 0,
-              // transitionDuration: 8000,
-              // transitionInterpolator: new FlyToInterpolator(),
-            });
-          } else {
-            setMissioName(result.data.data.mission);
-            // segrigateLayers(result.data.data.layers);
-            setViewport({
-              latitude: result.data.data.centerPoints.lat,
-              longitude: result.data.data.centerPoints.lng,
-              zoom: 13,
-              pitch: 0,
-              minZoom: 0,
-              maxZoom: 22,
-              bearing: 0,
-              // transitionDuration: 8000,
-              // transitionInterpolator: new FlyToInterpolator(),
-            });
-          }
+          setMissioName(result.data.data.mission);
+          setViewport({
+            latitude: result.data.data.centerPoints.lat,
+            longitude: result.data.data.centerPoints.lng,
+            zoom: 13,
+            pitch: 0,
+            minZoom: 0,
+            maxZoom: 22,
+            bearing: 0,
+            // transitionDuration: 8000,
+            // transitionInterpolator: new FlyToInterpolator(),
+          });
         } else {
           message.error(`${result.data.message}`);
         }
@@ -4933,8 +4917,6 @@ function BaseMap(props) {
           ...pane,
           count,
         };
-
-        return pane;
       }
     });
 
@@ -4945,17 +4927,18 @@ function BaseMap(props) {
 
   const add = (name, type, id, path, count) => {
     if (!tabKeys.find((key) => key == id)) {
-      tabKeys.push(id);
-      setTabKeys(tabKeys);
-      panes.push({
-        title: name,
-        type: type == "Raster" ? "raster" : "vector",
-        key: id,
-        id: id,
-        path: path,
-        count: count,
-      });
-      setPanes(panes);
+      setTabKeys(prev => [...prev, id]);
+      setPanes(prev => [
+        ...prev,
+        {
+          title: name,
+          type: type == "Raster" ? "raster" : "vector",
+          key: id,
+          id: id,
+          path: path,
+          count: count,
+        },
+      ]);
       setActiveKey(id);
     } else setActiveKey(id);
 
@@ -6675,6 +6658,30 @@ function BaseMap(props) {
     return <FourOhOne />;
   }
 
+  const memoizedAllLayers = useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers]);
+  const memoizedMissionLayers = useMemo(() => MissionLayerToDeckLayer(MissionLayers), [MissionLayers]);
+  const computeLayers = () => {
+    const layers: any[] = [];
+
+    // OSMState Layers
+    if (osmState) layers.push(osm);
+
+    // Drawing State Layers
+    if (isDrawing) {
+      layers.push(drawPolygonTool);
+    } else {
+      layers.push(maskLayer);
+    }
+
+    // Tree Menu Layers
+    layers.push(memoizedAllLayers);
+    layers.push(memoizedMissionLayers);
+
+    if (digitizer) layers.push(digitizerLayer);
+
+    return layers;
+  }
+
   return (
     <div
       className="map_wrapper"
@@ -6736,32 +6743,7 @@ function BaseMap(props) {
           }
         }}
         controller={true}
-        layers={(() => {
-          const layers: any[] = [];
-
-          // OSMState Layers
-          if (osmState) layers.push(osm);
-
-          // Drawing State Layers
-          if (isDrawing) {
-            layers.push(drawPolygonTool);
-          } else {
-            layers.push(maskLayer);
-          }
-
-          // Tree Menu Layers
-          layers.push(useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers]));
-          layers.push(
-            useMemo(
-              () => MissionLayerToDeckLayer(MissionLayers),
-              [MissionLayers]
-            )
-          );
-
-          if (digitizer) layers.push(digitizerLayer);
-
-          return layers;
-        })()}
+        layers={computeLayers()}
         style={{ height: "100vh", width: "100%" }}
         // onHover={(info) => {
         //   const coords = getPolygon(info.x, info.y, 150);
@@ -6839,7 +6821,7 @@ function BaseMap(props) {
               {"© "}
               <a
                 style={LINK_STYLE}
-                href="http://www.openstreetmap.org/copyright"
+                href="https://www.openstreetmap.org/copyright"
                 target="blank"
               >
                 OpenStreetMap contributors
@@ -7958,17 +7940,9 @@ function BaseMap(props) {
                   const height = window.screen.height;
                   console.log(height);
                   if (height >= 1080) {
-                    if (pr === 1.5) {
-                      setBottomBarHeight("900px");
-                    } else {
-                      setBottomBarHeight("900px"); ///-----------adjust height
-                    }
+                    setBottomBarHeight("900px");
                   } else if (height >= 768) {
-                    if (pr === 1.5) {
-                      setBottomBarHeight("700px");
-                    } else {
-                      setBottomBarHeight("700px"); ///-----------adjust height
-                    }
+                    setBottomBarHeight("700px");
                   } else if (height >= 720) {
                     if (pr === 1.5) {
                       setBottomBarHeight("540px"); ///-----------adjust height
@@ -7987,23 +7961,11 @@ function BaseMap(props) {
                     const pr = window.devicePixelRatio;
                     const height = window.screen.height;
                     if (height >= 1080) {
-                      if (pr === 1.5) {
-                        setBottomBarHeight("480px");
-                      } else {
-                        setBottomBarHeight("480px");
-                      }
+                      setBottomBarHeight("480px");
                     } else if (height >= 768) {
-                      if (pr === 1.5) {
-                        setBottomBarHeight("240px");
-                      } else {
-                        setBottomBarHeight("240px");
-                      }
+                      setBottomBarHeight("240px");
                     } else if (height >= 720) {
-                      if (pr === 1.5) {
-                        setBottomBarHeight("240px");
-                      } else {
-                        setBottomBarHeight("240px");
-                      }
+                      setBottomBarHeight("240px");
                     }
                     setMinimise(false);
                   } else {

@@ -494,7 +494,7 @@ function InfoWindow(props) {
       "isFlagged",
     ];
     const missionVODKeys = ["videos"];
-    Object.keys(object).filter((key: any) => {
+    Object.keys(object).forEach((key: any) => {
       if (type === "Alert") {
         if (key === "isFlagged") {
           setFlag(object[key]);
@@ -507,7 +507,7 @@ function InfoWindow(props) {
           filtered[key] = object[key];
         }
       } else {
-        if (props.isBaseMap == false) {
+        if (!props.isBaseMap) {
           if (!layerLocationCardKeys.includes(key)) {
             filtered[key] = object[key];
           }

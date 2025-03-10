@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
+import { GOOGLE_API_KEY } from "src/constants";
 
-export const loadScripts = () => {
+export const useScripts = () => {
   const [mapScriptLoaded, setMapScriptLoaded] = useState(false);
   const [paymentScriptLoaded, setPaymentScriptLoaded] = useState(false);
 
   useEffect(() => {
     const googleScript = document.createElement("script");
-    googleScript.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCYWROYTFQ3XH4bhhLJnmJSV-0k9a-PHY8&libraries=drawing,geometry,places`;
+    googleScript.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=drawing,geometry,places`;
     window.document.body.appendChild(googleScript);
     googleScript.addEventListener("load", () => {
       console.log("GoogleMap script loaded");

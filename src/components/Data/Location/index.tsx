@@ -18,6 +18,7 @@ import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
+import { GOOGLE_API_KEY } from "src/constants";
 
 interface TabOptions {
   filter: any;
@@ -421,7 +422,7 @@ function DataLocation(props) {
                           : data[0].centerPoint.long
                       }&path=color:0x00B3FF|weight:5|fillcolor:0xcfe1ff${formatGeoFenceForUrl(
                         geofence.length > 0 ? geofence : data[0].geofence
-                      )}&maptype=roadmap&key=AIzaSyCYWROYTFQ3XH4bhhLJnmJSV-0k9a-PHY8`
+                      )}&maptype=roadmap&key=${GOOGLE_API_KEY}`
                     : AloneLogo
                 }
                 style={{

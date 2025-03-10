@@ -2,7 +2,6 @@ const checkEnum = (e) => (val) => Object.values(e).includes(val);
 const castEnum = <T>(val: string) => val as T;
 const checkUrl = (val: string) => {
   if (val.endsWith("/")) {
-    new URL(val);
     return false;
   }
   return true;
@@ -86,6 +85,7 @@ class CastError extends Error {
 }
 
 export const MAPBOX_API_KEY = new EnvVar("VITE_MAPBOX_API_KEY").toString();
+export const GOOGLE_API_KEY = new EnvVar("VITE_GOOGLE_API_KEY").toString();
 export const COG_URL = new EnvVar("VITE_COG_URL").isUrl().toString();
 export const TITILER_STATIC = new EnvVar("VITE_TITILER_STATIC")
   .isUrl()

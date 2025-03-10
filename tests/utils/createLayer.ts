@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { expect, FileChooser, type Page } from "@playwright/test";
 
 export const createVectorLayer = async (page: Page) => {
@@ -21,7 +22,7 @@ export const createVectorLayer = async (page: Page) => {
   // fill layer details
   const layername =
     "testVectorLayer" +
-    Math.round(Math.random() * 1000000 + 1000000).toString(); // random name;
+    faker.random.alphaNumeric(8); // random name;
   // layer name
   await page.getByPlaceholder("Layer's Name").fill(layername);
   // layer type selection
@@ -83,7 +84,7 @@ export const createRasterLayer = async (page: Page) => {
   // fill layer details
   const layername =
     "testRasterLayer" +
-    Math.round(Math.random() * 1000000 + 1000000).toString(); // random name;
+    faker.random.alphaNumeric(8); // random name;
   // layer name
   await page.getByPlaceholder("Layer's Name").fill(layername);
   // layer type selection

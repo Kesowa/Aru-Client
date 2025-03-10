@@ -8,7 +8,7 @@ import LoginWrapper from "./components/shared/Wrappers/LoginWrapper";
 import Socket from "./components/shared/Socket";
 import DashboardWrapper from "./components/shared/Wrappers/DashboardWrapper";
 import { AuthContext, useAuth } from "./services/authUtils";
-import { loadScripts } from "./services/loadScripts";
+import { useScripts } from "./services/loadScripts";
 import { ThreadContext, useThread } from "./services/threadUtils";
 import http from "./services/httpCall";
 import { components } from "./handlers/schema";
@@ -64,7 +64,7 @@ const App = () => {
     }
   }, []);
   
-  const { mapScriptLoaded, paymentScriptLoaded } = loadScripts();
+  const { mapScriptLoaded, paymentScriptLoaded } = useScripts();
 
   return (
     userDetailsFetched ?
