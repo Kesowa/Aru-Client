@@ -4,7 +4,7 @@ import { CLIENT_URL } from "tests/constants";
 
 test("create and delete user", async ({ page }) => {
   await page.goto(CLIENT_URL);
-  await expect(page).toHaveURL(/.*dashboard/);
+  await expect(page).toHaveURL(/.{0,30}dashboard/);
 
   // create user
   const userName = faker.name.fullName();

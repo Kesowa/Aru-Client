@@ -3,7 +3,7 @@ import { CLIENT_URL } from "tests/constants";
 
 export const loginTenantRoot = async (page: Page) => {
   await page.goto(CLIENT_URL);
-  await expect(page).toHaveURL(/.*login/);
+  await expect(page).toHaveURL(/.{0,30}login/);
 
   await page
     .locator('xpath=//input[@placeholder="email id"]')
@@ -15,5 +15,5 @@ export const loginTenantRoot = async (page: Page) => {
 
   await page.locator('xpath=//button[@type="submit"]').click();
 
-  await expect(page).toHaveURL(/.*dashboard/);
+  await expect(page).toHaveURL(/.{0,30}dashboard/);
 };

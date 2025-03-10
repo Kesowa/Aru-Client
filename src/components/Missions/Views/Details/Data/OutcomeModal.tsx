@@ -21,7 +21,7 @@ import moment from "moment";
 import * as htmlToImage from "html-to-image";
 import "./data.less";
 import "./../../Live/index.less";
-import { STATIC_URL } from "src/constants";
+import { GOOGLE_API_KEY, STATIC_URL } from "src/constants";
 
 const { Text, Title } = Typography;
 
@@ -133,7 +133,7 @@ function OutcomeModal(props) {
                       >
                         <img
                           className="static-map"
-                          src={`https://maps.googleapis.com/maps/api/staticmap?center=${dataa.location.lat},${dataa.location.long}&zoom=16&size=200x130&markers=size:mid|color:red|${dataa.location.lat},${dataa.location.long}&maptype=roadmap&key=AIzaSyCYWROYTFQ3XH4bhhLJnmJSV-0k9a-PHY8`}
+                          src={`https://maps.googleapis.com/maps/api/staticmap?center=${dataa.location.lat},${dataa.location.long}&zoom=16&size=200x130&markers=size:mid|color:red|${dataa.location.lat},${dataa.location.long}&maptype=roadmap&key=${GOOGLE_API_KEY}`}
                         />
                       </a>
                     </div>

@@ -196,20 +196,19 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
   }, [selectedID]);
 
   useEffect(() => {
-    const obj: Item[] = [];
     if (data) {
-      setCount(0);
-      Object.keys(data.props).map((key) => {
-        const obj1 = {} as Item;
-        obj1.key = key;
-        obj1.id = count;
-        obj1.value = data.props[key];
-        setCount(count + 1);
-        obj.push(obj1);
-      });
+      const obj: Item[] = Object.keys(data.props).map((key, idx) => ({
+        key,
+        id: idx,
+        value: data.props[key],
+      }));
+      setCount(obj.length);
+      setModelInfo(obj);
+      setTableData(obj);
+    } else {
+      setModelInfo([]);
+      setTableData([]);
     }
-    setModelInfo(obj);
-    setTableData(obj);
   }, [data]);
 
   const filter = (inputValue: string, path: any) => {

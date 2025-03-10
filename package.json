@@ -12,15 +12,16 @@
     "lint": "eslint",
     "format": "prettier",
     "lint:check": "npm run prettier:check && npm run eslint:check",
-    "eslint:check": "eslint . --ext .js,.ts,.jsx,.tsx",
+    "eslint:check": "eslint .",
     "prettier:check": "prettier --list-different \"**/*.js\" \"**/*.ts\" \"**/*.tsx\"",
     "lint:fix": "npm run prettier:fix && npm run eslint:fix",
-    "eslint:fix": "eslint . --fix --ext .js,.ts,.jsx,.tsx",
+    "eslint:fix": "eslint --fix",
     "prettier:fix": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\""
   },
   "dependencies": {
     "@ant-design/pro-layout": "^7.17.6",
     "@deck.gl-community/editable-layers": "^9.0.0-alpha.1",
+    "@deck.gl-community/layers": "^9.0.3",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.2.0",
@@ -39,8 +40,6 @@
     "date-fns": "^2.21.3",
     "deck.gl": "^9.0.20",
     "downloadjs": "^1.4.7",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.2.1",
     "events": "^3.3.0",
     "exifreader": "^4.5.0",
     "fuse.js": "^7.0.0",
@@ -82,27 +81,6 @@
     "viewport-mercator-project": "^7.0.4",
     "vtracer-webapp": "file:vtracer-webapp-0.4.0.tgz"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "plugin:prettier/recommended"
-    ],
-    "rules": {
-      "prefer-const": "warn",
-      "no-var": "warn",
-      "@typescript-eslint/no-unused-vars": "off",
-      "unused-imports/no-unused-imports": "error",
-      "unused-imports/no-unused-vars": [
-        "warn",
-        {
-          "vars": "all",
-          "varsIgnorePattern": "^_",
-          "args": "after-used",
-          "argsIgnorePattern": "^_"
-        }
-      ]
-    }
-  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -116,6 +94,9 @@
     ]
   },
   "devDependencies": {
+    "@eslint/compat": "^1.2.6",
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.20.0",
     "@faker-js/faker": "^7.6.0",
     "@playwright/test": "^1.31.1",
     "@testing-library/jest-dom": "^4.2.4",
@@ -128,11 +109,17 @@
     "@types/react-dom": "^18.3.0",
     "@types/react-highlight-words": "^0.16.1",
     "@types/react-router-dom": "^5.1.5",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.2.4",
     "dotenv": "^16.0.3",
-    "eslint": "^9.6.0",
+    "eslint": "^9.20.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-unused-imports": "^4.0.0",
+    "globals": "^15.14.0",
     "gulp": "^4.0.2",
     "gulp-csso": "^4.0.1",
     "gulp-debug": "^4.0.0",
@@ -140,9 +127,9 @@
     "gulp-postcss": "^9.0.0",
     "less-plugin-npm-import": "^2.1.0",
     "rollup": "^4.18.1",
-    "rollup-plugin-visualizer": "^5.9.0",
     "typescript": "^5.5.2",
     "vite": "^5.3.2",
+    "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-svgr": "^4.2.0",
     "vite-plugin-top-level-await": "^1.4.1",
     "vite-plugin-wasm": "^3.3.0",

@@ -316,7 +316,7 @@ function Weather(props) {
             {weatherData ? (
               <div>
                 <img
-                  src={`http://openweathermap.org/img/wn/${weatherData.icon}@2x.png`}
+                  src={`https://openweathermap.org/img/wn/${weatherData.icon}@2x.png`}
                   alt=""
                   style={{
                     width: "60px",
@@ -403,7 +403,7 @@ function Weather(props) {
         <div style={{ alignSelf: "center" }}>
           {weatherData ? (
             <img
-              src={`http://openweathermap.org/img/wn/${weatherData.icon}@2x.png`}
+              src={`https://openweathermap.org/img/wn/${weatherData.icon}@2x.png`}
               alt=""
               style={{
                 width: "60px",

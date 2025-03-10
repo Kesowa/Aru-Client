@@ -81,21 +81,16 @@ function LayerDocs(props) {
 
   const { logout } = useContext(AuthContext);
 
-  const menuItem1 = () => {
-    const items = [
-      {
-        key: "1",
-        label: "Unassign Group",
-      },
-    ];
-    reviewOptions.map((item) => {
-      items.push({
-        key: `2-${item.index}-${item.label}`,
-        label: item.label,
-      });
-    });
-    return items;
-  };
+  const menuItem1 = [
+    {
+      key: "1",
+      label: "Unassign Group",
+    },
+    ...reviewOptions.map((item) => ({
+      key: `2-${item.index}-${item.label}`,
+      label: item.label,
+    }))
+  ];
   const onClickMenu1 = (e) => {
     if (e.key === "1") {
       unAssignGroup(subHeading.label);
@@ -476,7 +471,7 @@ function LayerDocs(props) {
                               <Dropdown
                                 onOpenChange={() => setSubHeading(subHeading)}
                                 menu={{
-                                  items: menuItem1(),
+                                  items: menuItem1,
                                   onClick: onClickMenu1,
                                 }}
                                 trigger={["click"]}
@@ -644,7 +639,7 @@ function LayerDocs(props) {
                               <Dropdown
                                 onOpenChange={() => setSubHeading(subHeading)}
                                 menu={{
-                                  items: menuItem1(),
+                                  items: menuItem1,
                                   onClick: onClickMenu1,
                                 }}
                                 trigger={["click"]}
@@ -920,11 +915,9 @@ function LayerDocs(props) {
         data?.features.forEach(function (value, i) {
           let objecty: any = {};
           let test;
-          Object.keys(value.properties).filter((key: any) => {
-            if (key === props.layerLabel) {
-              test = value.properties[key];
-            }
-          });
+          if (props.layerLabel) {
+            test = value.properties[props.layerLabel];
+          }
           objecty = {
             index: value.properties.sys_id,
             label: test,
@@ -1509,7 +1502,7 @@ function LayerDocs(props) {
           // console.log(filteredObjectArray);
 
           const attributes: any = [];
-          Object.keys(data.features[0].properties).filter((key: any) => {
+          Object.keys(data.features[0].properties).forEach((key: any) => {
             if (
               key !== "color" &&
               key !== "Id" &&

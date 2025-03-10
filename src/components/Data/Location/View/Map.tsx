@@ -125,7 +125,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
       position: location,
       map: this.googleMap,
       icon: {
-        url: "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|FA8027|FFF",
+        url: "https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|FA8027|FFF",
         scaledSize: new google.maps.Size(48, 48),
       },
     });

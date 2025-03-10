@@ -394,7 +394,7 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload}) => {
         "image/svg+xml"
       );
 
-      const metaInfoNS = "http://www.prognoz.ru";
+      const metaInfoNS = "https://www.prognoz.ru";
       const metaInfoElement = svgDocument.createElementNS(
         metaInfoNS,
         "MetaInfo"
