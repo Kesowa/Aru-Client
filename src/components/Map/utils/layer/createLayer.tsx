@@ -118,20 +118,20 @@ const CreateLayer = (props: any) => {
       // };
 
       const uploadTokenPromises = fileList.map((file) =>
-      uploadFile(file.originFileObj, DocModel.LAYER_FILES, (prog) => {
-        console.info("PROGRESS: " + prog);
-        setProgress(prog * 100);
-      } )
-    );
+        uploadFile(file.originFileObj, DocModel.LAYER_FILES, (prog) => {
+          console.info("PROGRESS: " + prog);
+          setProgress(prog * 100);
+        })
+      );
       const uploadTokens = await Promise.all(uploadTokenPromises);
 
       const body = {
         file: uploadTokens,
-        ...(props.isBaseMap ? {}:{ missionId: props.missionId }),
+        ...(props.isBaseMap ? {} : { missionId: props.missionId }),
         name: layerName,
         color: layerColor,
         vectorType: String(layerType),
-      }
+      };
       setIsUploading(false);
 
       // const fData = new FormData();
@@ -154,7 +154,7 @@ const CreateLayer = (props: any) => {
       //     return;
       //   }
       // });
-      console.log("create layer data :",body);
+      console.log("create layer data :", body);
 
       http
         .post(`${apis.CREATE_LAYER_FROM_IMAGES}`, body)
@@ -249,10 +249,7 @@ const CreateLayer = (props: any) => {
           </Dragger>
           <>
             {isUploading ? (
-              <Progress
-                strokeLinecap="square"
-                percent={progress}
-              />
+              <Progress strokeLinecap="square" percent={progress} />
             ) : null}
           </>
           <Row

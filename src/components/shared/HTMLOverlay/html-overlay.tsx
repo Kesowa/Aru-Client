@@ -1,12 +1,12 @@
-import * as React from 'react';
+import * as React from "react";
 
 const styles = {
   mainContainer: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    overflow: 'hidden',
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    pointerEvents: "none",
+    overflow: "hidden",
   },
 };
 
@@ -78,7 +78,8 @@ export default class HtmlOverlay extends React.Component<Props> {
       .forEach((item, index) => {
         const [x, y] = this.getCoords(item.props.coordinates);
         if (this.inView([x, y])) {
-          const key = item.key === null || item.key === undefined ? index : item.key;
+          const key =
+            item.key === null || item.key === undefined ? index : item.key;
           renderItems.push(React.cloneElement(item, { x, y, key }));
         }
       });

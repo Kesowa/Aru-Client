@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-FROM node:lts AS build
+FROM node:22.14.0-bookworm-slim@sha256:6bba748696297138f802735367bc78fea5cfe3b85019c74d2a930bc6c6b2fac4 AS build
 
 # Set working directory
 WORKDIR /app

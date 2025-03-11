@@ -50,7 +50,7 @@ function LocationCard(props) {
   const [once, setonce] = useState(true);
 
   const { id } = useParams<any>();
-  
+
   const { logout } = useContext(AuthContext);
   const { setLoading } = useContext(LoaderContext);
 
@@ -106,21 +106,21 @@ function LocationCard(props) {
         let centerOfLocation: number[];
         let points: any;
         if (location.data.data.geometry.type === "Point") {
-          points = [{
-            lat: location.data.data.geometry.coordinates[1],
-            lng: location.data.data.geometry.coordinates[0]
-          }];
+          points = [
+            {
+              lat: location.data.data.geometry.coordinates[1],
+              lng: location.data.data.geometry.coordinates[0],
+            },
+          ];
           // map component expects [lat,lng] instead of [lng,lat] in locationCenter
           centerOfLocation = location.data.data.geometry.coordinates.reverse();
         } else {
-          points = location.data.data.geometry.coordinates[0].map(
-            (point) => {
-              return {
-                lat: point[1],
-                lng: point[0],
-              };
-            }
-          );
+          points = location.data.data.geometry.coordinates[0].map((point) => {
+            return {
+              lat: point[1],
+              lng: point[0],
+            };
+          });
           centerOfLocation = findPolygonCenter(points);
         }
         setLocationName(location.data.data.properties.name);

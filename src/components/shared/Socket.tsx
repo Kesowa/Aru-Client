@@ -136,7 +136,7 @@ function Socket() {
 
   return (
     <div>
-      <OutcomeModal 
+      <OutcomeModal
         index={0}
         data={[selectedAlert]}
         visible={!!selectedAlert}

@@ -680,11 +680,16 @@ function Outcomes(props) {
       //   cancelToken: source.token,
       // };
 
-      const uploadToken = await uploadFile(options.file, DocModel.ALERT_IMAGES,(prog) => {
-        console.log("PROGRESS: ", prog);
-        setProgress(prog * 100);
-        options.onProgress({ percent: prog * 100 });
-      },source.token);
+      const uploadToken = await uploadFile(
+        options.file,
+        DocModel.ALERT_IMAGES,
+        (prog) => {
+          console.log("PROGRESS: ", prog);
+          setProgress(prog * 100);
+          options.onProgress({ percent: prog * 100 });
+        },
+        source.token
+      );
 
       const body = {
         file: uploadToken,
@@ -696,149 +701,148 @@ function Outcomes(props) {
         type: "Manual",
         note: "Alert uploaded from browser!",
         onSite: "false",
-        flightId: props.missionDetails.flightId
+        flightId: props.missionDetails.flightId,
       };
 
-      if (res.status) {   
-          console.log(res.status);
-        
-          // fData.append("image", options.file);
-          // fData.append("locationName", res.address);
-          // fData.append("missionId", props.missionDetails.missionId);
-          // fData.append("locationId", props.missionDetails.locationId._id);
-          // fData.append("pcount", "0");
-          // fData.append("type", "Manual");
-          // fData.append("note", "Alert uploaded from browser!");
-          // fData.append("onSite", "false");
-          // fData.append("flightId", props.missionDetails.flightId);
-          http
-            .post(options.action, body)
-            .then((res: any) => {
-              if (res.data.status) {
-                console.log("Upload successful! ", res.data);
-                message.success(
-                  "File " + options.file.name + " uploaded successfully"
-                );
-                options.onSuccess(res.data, options.file);
-                setRefresh(!refresh);
-              } else {
-                message.error("File " + options.file.name + " uploaded error");
-                options.onError({ res });
-              }
-            })
-            .catch((err) => {
-              if (axios.isCancel(err)) {
-                console.log("Upload Cancelled");
-                return;
-              } else if (err?.response?.status === 403) {
-                console.log(err.response);
-                if (
-                  err.response.data.message ===
-                  "Package has expired! Please renew!"
-                ) {
-                  setIsModalVisible2(true);
-                  window.setTimeout(function () {
-                    AxiosErrorHandler(err, logout); 
-                  }, 5000);
-                } else if (
-                  err.response?.data.message ===
-                  "Actual storage exceeded the Limit of Set storage!"
-                )
-                  setStorageModal(true);
-                else {
-                  {
-                    message.error(err.response?.data.message);
-                    console.log(err.response);
-                  }
-                  setIsModalVisible(true);
+      if (res.status) {
+        console.log(res.status);
+
+        // fData.append("image", options.file);
+        // fData.append("locationName", res.address);
+        // fData.append("missionId", props.missionDetails.missionId);
+        // fData.append("locationId", props.missionDetails.locationId._id);
+        // fData.append("pcount", "0");
+        // fData.append("type", "Manual");
+        // fData.append("note", "Alert uploaded from browser!");
+        // fData.append("onSite", "false");
+        // fData.append("flightId", props.missionDetails.flightId);
+        http
+          .post(options.action, body)
+          .then((res: any) => {
+            if (res.data.status) {
+              console.log("Upload successful! ", res.data);
+              message.success(
+                "File " + options.file.name + " uploaded successfully"
+              );
+              options.onSuccess(res.data, options.file);
+              setRefresh(!refresh);
+            } else {
+              message.error("File " + options.file.name + " uploaded error");
+              options.onError({ res });
+            }
+          })
+          .catch((err) => {
+            if (axios.isCancel(err)) {
+              console.log("Upload Cancelled");
+              return;
+            } else if (err?.response?.status === 403) {
+              console.log(err.response);
+              if (
+                err.response.data.message ===
+                "Package has expired! Please renew!"
+              ) {
+                setIsModalVisible2(true);
+                window.setTimeout(function () {
+                  AxiosErrorHandler(err, logout);
+                }, 5000);
+              } else if (
+                err.response?.data.message ===
+                "Actual storage exceeded the Limit of Set storage!"
+              )
+                setStorageModal(true);
+              else {
+                {
+                  message.error(err.response?.data.message);
+                  console.log(err.response);
                 }
-              } else {
-                console.log("Upload Error!", err.message);
-                message.error("Unable to upload file!");
+                setIsModalVisible(true);
               }
-              options.onError({ err });
-            })
-            .finally(() => {
-              setUploading(false);
-            });
-        } else {
-          
-          console.log(res);
-          // fData.append("image", options.file);
-          // fData.append("locationName", res.address);
-          // fData.append("missionId", props.missionDetails.missionId);
-          // fData.append("locationId", props.missionDetails.locationId._id);
-          // fData.append("pcount", "0");
-          // fData.append("type", "Manual");
-          // fData.append("note", "Alert uploaded from browser!");
-          // fData.append("onSite", "false");
-          // fData.append("flightId", props.missionDetails.flightId);
-          
-          // const config = {
-          
-          //   onUploadProgress: (event) => {
-          //     const percent = Math.floor((event.loaded / event.total) * 100);
-          //     setProgress(percent);
-          //     if (percent === 100) {
-          //       setTimeout(() => setProgress(0), 1000);
-          //     }
-          //     options.onProgress({
-          //       percent: (event.loaded / event.total) * 100,
-          //     });
-          //   },
-          //   cancelToken: source.token,
-          // };
-          http
-            .post(options.action, body)
-            .then((res: any) => {
-              if (res.data.status) {
-                console.log("Upload successful! ", res.data);
-                message.success(
-                  "File " + options.file.name + " uploaded successfully"
-                );
-                options.onSuccess(res.data, options.file);
-                setRefresh(!refresh);
-              } else {
-                message.error("File " + options.file.name + " uploaded error");
-                options.onError({ res });
-              }
-            })
-            .catch((err) => {
-              if (axios.isCancel(err)) {
-                console.log("Upload Cancelled");
-                return;
-              } else if (err?.response?.status === 403) {
-                console.log(err.response);
-                if (
-                  err.response.data.message ===
-                  "Package has expired! Please renew!"
-                ) {
-                  setIsModalVisible2(true);
-                  window.setTimeout(function () {
-                    AxiosErrorHandler(err, logout); 
-                  }, 5000);
-                } else if (
-                  err.response?.data.message ===
-                  "Actual storage exceeded the Limit of Set storage!"
-                )
-                  setStorageModal(true);
-                else {
-                  {
-                    message.error(err.response?.data.message);
-                    console.log(err.response);
-                  }
-                  setIsModalVisible(true);
+            } else {
+              console.log("Upload Error!", err.message);
+              message.error("Unable to upload file!");
+            }
+            options.onError({ err });
+          })
+          .finally(() => {
+            setUploading(false);
+          });
+      } else {
+        console.log(res);
+        // fData.append("image", options.file);
+        // fData.append("locationName", res.address);
+        // fData.append("missionId", props.missionDetails.missionId);
+        // fData.append("locationId", props.missionDetails.locationId._id);
+        // fData.append("pcount", "0");
+        // fData.append("type", "Manual");
+        // fData.append("note", "Alert uploaded from browser!");
+        // fData.append("onSite", "false");
+        // fData.append("flightId", props.missionDetails.flightId);
+
+        // const config = {
+
+        //   onUploadProgress: (event) => {
+        //     const percent = Math.floor((event.loaded / event.total) * 100);
+        //     setProgress(percent);
+        //     if (percent === 100) {
+        //       setTimeout(() => setProgress(0), 1000);
+        //     }
+        //     options.onProgress({
+        //       percent: (event.loaded / event.total) * 100,
+        //     });
+        //   },
+        //   cancelToken: source.token,
+        // };
+        http
+          .post(options.action, body)
+          .then((res: any) => {
+            if (res.data.status) {
+              console.log("Upload successful! ", res.data);
+              message.success(
+                "File " + options.file.name + " uploaded successfully"
+              );
+              options.onSuccess(res.data, options.file);
+              setRefresh(!refresh);
+            } else {
+              message.error("File " + options.file.name + " uploaded error");
+              options.onError({ res });
+            }
+          })
+          .catch((err) => {
+            if (axios.isCancel(err)) {
+              console.log("Upload Cancelled");
+              return;
+            } else if (err?.response?.status === 403) {
+              console.log(err.response);
+              if (
+                err.response.data.message ===
+                "Package has expired! Please renew!"
+              ) {
+                setIsModalVisible2(true);
+                window.setTimeout(function () {
+                  AxiosErrorHandler(err, logout);
+                }, 5000);
+              } else if (
+                err.response?.data.message ===
+                "Actual storage exceeded the Limit of Set storage!"
+              )
+                setStorageModal(true);
+              else {
+                {
+                  message.error(err.response?.data.message);
+                  console.log(err.response);
                 }
-              } else {
-                console.log("Upload Error!", err.message);
-                message.error("Unable to upload file!");
+                setIsModalVisible(true);
               }
-              options.onError({ err });
-            })
-            .finally(() => {
-              setUploading(false);
-            });
-        };
+            } else {
+              console.log("Upload Error!", err.message);
+              message.error("Unable to upload file!");
+            }
+            options.onError({ err });
+          })
+          .finally(() => {
+            setUploading(false);
+          });
+      }
       return {
         abort() {
           console.log("Aborting outcome upload");
@@ -851,10 +855,7 @@ function Outcomes(props) {
 
   // Render upload alert button based on user permissions
   function renderUploadButton() {
-    if (
-      userType === "tenant-staff" ||
-      userType === "tenant-client"
-    ) {
+    if (userType === "tenant-staff" || userType === "tenant-client") {
       if (userDetails.customPermissions.includes(PERMS.ALERT_CREATE)) {
         return (
           <Button onClick={() => uploadModal()}>
@@ -953,7 +954,9 @@ function Outcomes(props) {
         flag={flag}
         updateAPI={apis.UPDATE_MULTI_ALERT}
         thumb={getOutcomeThumbnail}
-        canToggleFlag={userDetails.customPermissions.includes(PERMS.ALERT_UPDATE)}
+        canToggleFlag={userDetails.customPermissions.includes(
+          PERMS.ALERT_UPDATE
+        )}
         canDelete={userDetails.customPermissions.includes(PERMS.ALERT_DELETE)}
       />
       {!loading ? (

@@ -89,7 +89,7 @@ function LayerDocs(props) {
     ...reviewOptions.map((item) => ({
       key: `2-${item.index}-${item.label}`,
       label: item.label,
-    }))
+    })),
   ];
   const onClickMenu1 = (e) => {
     if (e.key === "1") {
@@ -845,7 +845,10 @@ function LayerDocs(props) {
 
   //-------------Fetching review files-----------------------------
   useEffect(() => {
-    if ((props.visible || fetchReviewFiles) && (props.canEditLayer || props.canUpdateBaseLayer)) {
+    if (
+      (props.visible || fetchReviewFiles) &&
+      (props.canEditLayer || props.canUpdateBaseLayer)
+    ) {
       //setActivateButtons(true);
       setReviewFilesLoader(true);
       setFetchReviewFiles(false);
@@ -1575,8 +1578,9 @@ function LayerDocs(props) {
         open={props.visible}
         footer={
           <>
-            {
-              (props.isBaseMap ? props.canUploadToBaseLayer : props.canUploadFileToGeojson) &&
+            {(props.isBaseMap
+              ? props.canUploadToBaseLayer
+              : props.canUploadFileToGeojson) && (
               <Button
                 type="dashed"
                 icon={<UploadOutlined />}
@@ -1585,7 +1589,7 @@ function LayerDocs(props) {
               >
                 Upload to features
               </Button>
-            }
+            )}
             {showConfirmBtn && reviewFiles.length > 0 ? (
               <>
                 <Button

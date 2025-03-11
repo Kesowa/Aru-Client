@@ -29,11 +29,16 @@ interface StageTwoProps {
   prevStage: () => void;
   nextStage: () => void;
   flightDetails: any;
-  setFlightDetails: (f:any) => void;
+  setFlightDetails: (f: any) => void;
   isEditing: boolean;
 }
 
-const StageTwo: FC<StageTwoProps> = ({ isEditing, flightDetails, setFlightDetails, nextStage }) => {
+const StageTwo: FC<StageTwoProps> = ({
+  isEditing,
+  flightDetails,
+  setFlightDetails,
+  nextStage,
+}) => {
   const [isoDate, setIsoDate] = useState(new Date().toISOString());
 
   const [areaSelected, setAreaSelected] = useState<boolean>(false);
@@ -42,12 +47,12 @@ const StageTwo: FC<StageTwoProps> = ({ isEditing, flightDetails, setFlightDetail
 
   const addFlight = () => {
     if (
-      (flightDetails.name === "") ||
-      (flightDetails.date === "") ||
-      (flightDetails.time === "") ||
-      (flightDetails.duration === "") ||
+      flightDetails.name === "" ||
+      flightDetails.date === "" ||
+      flightDetails.time === "" ||
+      flightDetails.duration === "" ||
       !flightDetails.locationID ||
-      !flightDetails.pilotID 
+      !flightDetails.pilotID
     ) {
       message.error("Please fill all fields");
     } else if (
@@ -64,43 +69,46 @@ const StageTwo: FC<StageTwoProps> = ({ isEditing, flightDetails, setFlightDetail
 
   return (
     <>
-    <div className="container-full">
-      <GoogleMap 
-        areaSelected={areaSelected}
-        setAreaSelected={setAreaSelected}
-        drawingToolBtns={drawingToolBtns}
-        setDrawingToolBtns={setDrawingToolBtns}
-        isEditing={isEditing}
-        setlocation={setlocation}
-        location={location}
-        geoLocation={flightDetails.geolocation}
-        setGeolocation={(geolocation: string) => setFlightDetails((prev) => ({ ...prev, geolocation }))}
-        centerPoints={flightDetails.centerPoints}
-        setCenterPoints={(centerPoints: { lat:number; lng:number; }) => setFlightDetails((prev) => ({ ...prev, centerPoints }))}
-        geoFence={flightDetails.geoFence}
-        setGeoFence={(geoFence: any) => setFlightDetails((prev) => ({ ...prev, geoFence }))}
-      />
-    </div>
-    <div className="stage_two">
-      <div className="mission_creation_accordian">
-        <div className="accordian-panel">
-          <div className="mission_creation_form">
-            <EditFlightForm
-              flightDetails={flightDetails}
-              setFlightDetails={setFlightDetails}
-              areaSelected={areaSelected}
-              setisoDate={setIsoDate}
-              onSubmit={addFlight}
-              isEditing={isEditing}
-            />
+      <div className="container-full">
+        <GoogleMap
+          areaSelected={areaSelected}
+          setAreaSelected={setAreaSelected}
+          drawingToolBtns={drawingToolBtns}
+          setDrawingToolBtns={setDrawingToolBtns}
+          isEditing={isEditing}
+          setlocation={setlocation}
+          location={location}
+          geoLocation={flightDetails.geolocation}
+          setGeolocation={(geolocation: string) =>
+            setFlightDetails((prev) => ({ ...prev, geolocation }))
+          }
+          centerPoints={flightDetails.centerPoints}
+          setCenterPoints={(centerPoints: { lat: number; lng: number }) =>
+            setFlightDetails((prev) => ({ ...prev, centerPoints }))
+          }
+          geoFence={flightDetails.geoFence}
+          setGeoFence={(geoFence: any) =>
+            setFlightDetails((prev) => ({ ...prev, geoFence }))
+          }
+        />
+      </div>
+      <div className="stage_two">
+        <div className="mission_creation_accordian">
+          <div className="accordian-panel">
+            <div className="mission_creation_form">
+              <EditFlightForm
+                flightDetails={flightDetails}
+                setFlightDetails={setFlightDetails}
+                areaSelected={areaSelected}
+                setisoDate={setIsoDate}
+                onSubmit={addFlight}
+                isEditing={isEditing}
+              />
+            </div>
           </div>
         </div>
+        {location && <Weather isoDate={isoDate} location={location} />}
       </div>
-      {
-        location &&
-        <Weather isoDate={isoDate} location={location} />
-      }
-    </div>
     </>
   );
 };

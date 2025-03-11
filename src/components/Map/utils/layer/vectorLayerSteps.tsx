@@ -150,7 +150,10 @@ export const UploadVectorData = ({
                 </Upload>
 
                 {uploading ? (
-                  <Progress strokeLinecap="square" percent={Math.floor(progress)} />
+                  <Progress
+                    strokeLinecap="square"
+                    percent={Math.floor(progress)}
+                  />
                 ) : null}
               </Form.Item>
             </Row>

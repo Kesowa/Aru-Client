@@ -139,7 +139,6 @@ const apis = {
   DELETE_LOCATION: "/apis/v1/location/delete",
   GET_LOCATION_BY_ID: "/apis/v1/location/get-by-id",
 
-
   //ASSETS
   GET_MANUFACTURERS: "/apis/v1/manufacturer/get",
   GET_MODELS: "/apis/v1/model/get",

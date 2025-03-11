@@ -20,7 +20,9 @@ function BasicInfo(props: any) {
   const beforeUploadFunction = (file: RcFile) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
-      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) =>
+        console.info("PROGRESS: " + prog)
+      );
       setAvatar(uploadToken);
     });
     return false;

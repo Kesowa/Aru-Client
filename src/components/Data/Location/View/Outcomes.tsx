@@ -156,7 +156,7 @@ function Outcomes(outcomeProps) {
 
   return (
     <React.Fragment>
-      <OutcomeModal 
+      <OutcomeModal
         index={0}
         data={[selectedAlert]}
         visible={!!selectedAlert}
@@ -263,9 +263,7 @@ function Outcomes(outcomeProps) {
                   <Col
                     md={4}
                     style={{ padding: "10px" }}
-                    onClick={() =>
-                      setSelectedAlert(dataa)
-                    }
+                    onClick={() => setSelectedAlert(dataa)}
                   >
                     <img
                       style={{ width: "100%", height: "auto" }}
@@ -318,9 +316,7 @@ function Outcomes(outcomeProps) {
                     className="outcome-card"
                     cover={
                       <img
-                        onClick={() =>
-                          setSelectedAlert(outcome)
-                        }
+                        onClick={() => setSelectedAlert(outcome)}
                         src={STATIC_URL + outcome.image}
                       />
                     }

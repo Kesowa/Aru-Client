@@ -243,7 +243,7 @@ function InfoWindow(props) {
         )}
       </div>
     );
-  }
+  };
 
   const renderFeatureOptions = () => {
     return (
@@ -251,9 +251,8 @@ function InfoWindow(props) {
         {!props.show && (
           <div style={{ float: "right", marginTop: "4px" }}>
             <Row>
-              {
-                props.missionLayer === "Alert" ?
-                (<Tooltip placement="right" title={"Open Thread"}>
+              {props.missionLayer === "Alert" ? (
+                <Tooltip placement="right" title={"Open Thread"}>
                   <MessageOutlined
                     style={{
                       color: thread.open ? "#3b86ff" : "#000",
@@ -267,8 +266,9 @@ function InfoWindow(props) {
                       openThread("alert", props.feature.properties._id, {});
                     }}
                   />
-                </Tooltip>) :
-                (<Tooltip placement="bottom" title="Open Media">
+                </Tooltip>
+              ) : (
+                <Tooltip placement="bottom" title="Open Media">
                   <Badge
                     size="small"
                     count={fileCount}
@@ -279,33 +279,36 @@ function InfoWindow(props) {
                       onClick={() => openImages()}
                     />
                   </Badge>
-                </Tooltip>)
-              }
-              {
-                props.missionLayer !== "VOD" &&
+                </Tooltip>
+              )}
+              {props.missionLayer !== "VOD" && (
                 <Tooltip
-                  placement={props.missionLayer === "Alert" ? "right" : "bottom"}
+                  placement={
+                    props.missionLayer === "Alert" ? "right" : "bottom"
+                  }
                   title={props.flag ? "Unflag" : "Flag"}
                 >
                   <BsFlagFill
                     style={{
                       color: props.flag ? "#da1c5c" : "#000",
                       cursor: "pointer",
-                      [(props.missionLayer === "Alert") ? "fontSize" : ""]: "16px",
-                      [(props.missionLayer === "Alert") ? "marginLeft" : ""]: "5px",
+                      [props.missionLayer === "Alert" ? "fontSize" : ""]:
+                        "16px",
+                      [props.missionLayer === "Alert" ? "marginLeft" : ""]:
+                        "5px",
                     }}
                     onClick={() => {
                       toggleFlag();
                     }}
                   />
                 </Tooltip>
-              }
+              )}
             </Row>
           </div>
         )}
       </>
     );
-  }
+  };
 
   const renderAttributeContent = () => {
     return (
@@ -371,7 +374,7 @@ function InfoWindow(props) {
         )}
       </div>
     );
-  }
+  };
 
   const initFlag = () => {
     if (props.missionLayer === "Alert") {
@@ -423,13 +426,18 @@ function InfoWindow(props) {
           message.success(
             `Feature ${!body.flag ? "un-flagged" : "flagged"} successfully!`
           );
-          props.SetAllLayers((prev: Layer[]) => prev.map((layer) => {
-            if (layer._id === props.layerId) {
-              if (body.flag) layer.flaggedFeatures.push(props.featureIdx);
-              else layer.flaggedFeatures = layer.flaggedFeatures.filter(idx => idx !== props.featureIdx);
-            }
-            return layer;
-          }));
+          props.SetAllLayers((prev: Layer[]) =>
+            prev.map((layer) => {
+              if (layer._id === props.layerId) {
+                if (body.flag) layer.flaggedFeatures.push(props.featureIdx);
+                else
+                  layer.flaggedFeatures = layer.flaggedFeatures.filter(
+                    (idx) => idx !== props.featureIdx
+                  );
+              }
+              return layer;
+            })
+          );
           props.setShouldAttributeTableReload(
             !props.shouldAttributeTableReload
           );
@@ -593,9 +601,7 @@ function InfoWindow(props) {
                   {props.coordinates[0]}
                 </Text>
               </span>
-              <span>
-                {!props.isPublic && renderFeatureOptions()}
-              </span>
+              <span>{!props.isPublic && renderFeatureOptions()}</span>
             </div>
             {props.show && saveDrawingButton()}
             {props.show && CancelDrawingButton()}
@@ -656,9 +662,7 @@ function InfoWindow(props) {
                   </Select>
                 </Text>
               </span>
-              <span>
-                {!props.isPublic && renderFeatureOptions()}
-              </span>
+              <span>{!props.isPublic && renderFeatureOptions()}</span>
             </div>
             {props.show && saveDrawingButton()}
             {props.show && CancelDrawingButton()}
@@ -694,9 +698,7 @@ function InfoWindow(props) {
                   </Select>
                 </Text>
               </span>
-              <span>
-                {!props.isPublic && renderFeatureOptions()}
-              </span>
+              <span>{!props.isPublic && renderFeatureOptions()}</span>
             </div>
             {props.show && saveDrawingButton()}
             {props.show && CancelDrawingButton()}

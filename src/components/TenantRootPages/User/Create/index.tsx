@@ -66,7 +66,11 @@ function UserCreatePage(props: any) {
   const beforeUploadFunction = (file: RcFile) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
-      const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
+      const uploadToken = await uploadFile(
+        file,
+        DocModel.USER_AVATARS,
+        (prog) => console.info("PROGRESS: " + prog)
+      );
       // Create a preview URL for the image
       const previewUrl = URL.createObjectURL(file);
       setAvatarPreview(previewUrl);
@@ -93,13 +97,22 @@ function UserCreatePage(props: any) {
         console.info("Fetched user groups!");
         if (result.data.status) {
           console.info("UserGroup status OK!");
-          const data: components["schemas"]["IUserGroupPermissions"][] = result.data.data;
+          const data: components["schemas"]["IUserGroupPermissions"][] =
+            result.data.data;
           setUserGroups(
             data
-              .filter((ele) =>
-                ele.permissions.every(perm => TENANT_STAFF_PERMS.includes(perm)) // only list usergroups assignable to tenant-staff
+              .filter(
+                (ele) =>
+                  ele.permissions.every((perm) =>
+                    TENANT_STAFF_PERMS.includes(perm)
+                  ) // only list usergroups assignable to tenant-staff
               )
-              .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }))
+              .map(({ _id, name, isActive, permissions }) => ({
+                _id,
+                name,
+                isActive,
+                permissions,
+              }))
           );
         } else {
           switch (result.data.message) {
@@ -144,7 +157,10 @@ function UserCreatePage(props: any) {
 
   //subimt form
   const onFinish = (data: any) => {
-    const password = Array.from(crypto.getRandomValues(new Uint8Array(8)), b => (b % 36).toString(36)).join('');
+    const password = Array.from(
+      crypto.getRandomValues(new Uint8Array(8)),
+      (b) => (b % 36).toString(36)
+    ).join("");
     data = { ...data, password };
     createUserAccount(data);
   };
@@ -296,10 +312,7 @@ function UserCreatePage(props: any) {
                       beforeUpload={beforeUploadFunction}
                     >
                       {avatar ? (
-                        <img
-                        src={avatarPreview}
-                        className="uploaded-avatar"
-                        />
+                        <img src={avatarPreview} className="uploaded-avatar" />
                       ) : (
                         <div>
                           {isAvatarUploading ? (

@@ -34,9 +34,11 @@ function EditPackage(props: any) {
   useEffect(() => {}, []);
 
   const beforeUploadFunction = (file: RcFile) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsPosterUploading(true);
-      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) =>
+        console.info("PROGRESS: " + prog)
+      );
 
       const body = {
         file: uploadToken,
@@ -44,8 +46,7 @@ function EditPackage(props: any) {
       // const formData = new FormData();
       // formData.append("poster", file);
       http
-        .post(apis.UPLOAD_PACKAGE_POSTER, body, {
-        })
+        .post(apis.UPLOAD_PACKAGE_POSTER, body, {})
         .then((result) => {
           if (result.data.status) {
             setPoster(result.data.file);
@@ -86,7 +87,7 @@ function EditPackage(props: any) {
   };
 
   useEffect(() => {
-    fetchPackageDetails()
+    fetchPackageDetails();
   }, []);
 
   useEffect(() => {
@@ -130,269 +131,282 @@ function EditPackage(props: any) {
   };
 
   return (
-    pckg &&
-    <div className="package-add-wrapper full-width-height">
-      <PageHeader
-        onBack={() => window.history.back()}
-        className="site-page-header-responsive"
-        title="Package"
-        subTitle="Edit Package"
-        extra={[
-          <Link to="/dashboard/admin/package/list" key="1">
-            <Button key="1" type="primary" icon={<UnorderedListOutlined />}>
-              Package List
-            </Button>
-          </Link>,
-        ]}
-      ></PageHeader>
-      <div className="package-add-form padding-after-page-header">
-        <Form
-          layout="vertical"
-          form={form}
-          onFinish={onFinish}
-          initialValues={{
-            name: pckg.name,
-            bandwidth: pckg.bandwidth,
-            storage: pckg.storage,
-            duration: pckg.duration,
-            userCount: pckg.userCount,
-            alertCount: pckg.alertCount,
-            clientCount: pckg.clientCount,
-            layerCount: pckg.layerCount,
-            locationCount: pckg.locationCount,
-            missionCount: pckg.missionCount,
-            userGroupCount: pckg.userGroupCount,
-            vodCount: pckg.vodCount,
-          }}
-        >
-          <Row gutter={16}>
-            <Col span="12">
-              <Form.Item
-                label="Package Name"
-                name="name"
-                rules={[
-                  { required: true, message: "Please enter the package name!" },
-                ]}
-              >
-                <Input placeholder="Package Name" />
-              </Form.Item>
-              <Form.Item
-                label="Bandwidth"
-                name="bandwidth"
-                rules={[
-                  { required: true, message: "Please enter the bandwidth!" },
-                ]}
-              >
-                <Input placeholder="Bandwidth" />
-              </Form.Item>
-            </Col>
-            <Col span="12">
-              <ImgCrop grid={true} aspect={1.5}>
-                <Upload
-                  name="avatar"
-                  listType="picture-card"
-                  className="poster-uploader"
-                  showUploadList={false}
-                  beforeUpload={beforeUploadFunction}
+    pckg && (
+      <div className="package-add-wrapper full-width-height">
+        <PageHeader
+          onBack={() => window.history.back()}
+          className="site-page-header-responsive"
+          title="Package"
+          subTitle="Edit Package"
+          extra={[
+            <Link to="/dashboard/admin/package/list" key="1">
+              <Button key="1" type="primary" icon={<UnorderedListOutlined />}>
+                Package List
+              </Button>
+            </Link>,
+          ]}
+        ></PageHeader>
+        <div className="package-add-form padding-after-page-header">
+          <Form
+            layout="vertical"
+            form={form}
+            onFinish={onFinish}
+            initialValues={{
+              name: pckg.name,
+              bandwidth: pckg.bandwidth,
+              storage: pckg.storage,
+              duration: pckg.duration,
+              userCount: pckg.userCount,
+              alertCount: pckg.alertCount,
+              clientCount: pckg.clientCount,
+              layerCount: pckg.layerCount,
+              locationCount: pckg.locationCount,
+              missionCount: pckg.missionCount,
+              userGroupCount: pckg.userGroupCount,
+              vodCount: pckg.vodCount,
+            }}
+          >
+            <Row gutter={16}>
+              <Col span="12">
+                <Form.Item
+                  label="Package Name"
+                  name="name"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter the package name!",
+                    },
+                  ]}
                 >
-                  {poster ? (
-                    <img
-                      src={`${STATIC_URL}${poster}`}
-                      className="uploaded-poster"
-                    />
-                  ) : (
-                    <div>
-                      {isPosterUploading ? (
-                        <LoadingOutlined />
-                      ) : (
-                        <PlusOutlined />
-                      )}
-                      <div className="ant-upload-text">Upload</div>
-                    </div>
-                  )}
-                </Upload>
-              </ImgCrop>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span="12">
-              <Form.Item
-                label="Storage(in GB)"
-                name="storage"
-                rules={[
-                  { required: true, message: "Please enter tthe storage!" },
-                ]}
-              >
-                <Input
-                  type="number"
-                  placeholder="Storage"
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-            <Col span="12">
-              <Form.Item
-                label="Duration(in days)"
-                name="duration"
-                rules={[
-                  { required: true, message: "Please enter the duration!" },
-                ]}
-              >
-                <Input
-                  type="number"
-                  placeholder="Duration"
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span="8">
-              <Form.Item
-                label="Alert Count"
-                name="alertCount"
-                rules={[
-                  { required: true, message: "Please enter the alert count!" },
-                ]}
-              >
-                <Input
-                  type="number"
-                  placeholder="Alert Count"
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-            <Col span="8">
-              <Form.Item
-                label="Client Count"
-                name="clientCount"
-                rules={[
-                  { required: true, message: "Please enter the client count!" },
-                ]}
-              >
-                <Input
-                  type="number"
-                  placeholder="Client Count"
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-            <Col span="8">
-              <Form.Item
-                label="Layer Count"
-                name="layerCount"
-                rules={[
-                  { required: true, message: "Please enter the layer count!" },
-                ]}
-              >
-                <Input
-                  type="number"
-                  placeholder="Layer Count"
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span="8">
-              <Form.Item
-                label="Location Count"
-                name="locationCount"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter the location count!",
-                  },
-                ]}
-              >
-                <Input
-                  type="number"
-                  placeholder="Location Count"
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-            <Col span="8">
-              <Form.Item
-                label="Mission Count"
-                name="missionCount"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter the mission count!",
-                  },
-                ]}
-              >
-                <Input
-                  type="number"
-                  placeholder="Mission Count"
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-            <Col span="8">
-              <Form.Item
-                label="User Count"
-                name="userCount"
-                rules={[
-                  { required: true, message: "Please enter the user count!" },
-                ]}
-              >
-                <Input
-                  type="number"
-                  placeholder="User Count"
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span="12">
-              <Form.Item
-                label="User Group Count"
-                name="userGroupCount"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter the user group count!",
-                  },
-                ]}
-              >
-                <Input
-                  type="number"
-                  placeholder="User Group Count"
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-            <Col span="12">
-              <Form.Item
-                label="VOD Count"
-                name="vodCount"
-                rules={[
-                  { required: true, message: "Please enter the VOD count!" },
-                ]}
-              >
-                <Input
-                  type="number"
-                  placeholder="VOD Count"
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row justify="end" gutter={16}>
-            <Col>
-              <Form.Item>
-                <Button type="primary" htmlType="submit">
-                  Submit
-                </Button>
-              </Form.Item>
-            </Col>
-          </Row>
-        </Form>
+                  <Input placeholder="Package Name" />
+                </Form.Item>
+                <Form.Item
+                  label="Bandwidth"
+                  name="bandwidth"
+                  rules={[
+                    { required: true, message: "Please enter the bandwidth!" },
+                  ]}
+                >
+                  <Input placeholder="Bandwidth" />
+                </Form.Item>
+              </Col>
+              <Col span="12">
+                <ImgCrop grid={true} aspect={1.5}>
+                  <Upload
+                    name="avatar"
+                    listType="picture-card"
+                    className="poster-uploader"
+                    showUploadList={false}
+                    beforeUpload={beforeUploadFunction}
+                  >
+                    {poster ? (
+                      <img
+                        src={`${STATIC_URL}${poster}`}
+                        className="uploaded-poster"
+                      />
+                    ) : (
+                      <div>
+                        {isPosterUploading ? (
+                          <LoadingOutlined />
+                        ) : (
+                          <PlusOutlined />
+                        )}
+                        <div className="ant-upload-text">Upload</div>
+                      </div>
+                    )}
+                  </Upload>
+                </ImgCrop>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span="12">
+                <Form.Item
+                  label="Storage(in GB)"
+                  name="storage"
+                  rules={[
+                    { required: true, message: "Please enter tthe storage!" },
+                  ]}
+                >
+                  <Input
+                    type="number"
+                    placeholder="Storage"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span="12">
+                <Form.Item
+                  label="Duration(in days)"
+                  name="duration"
+                  rules={[
+                    { required: true, message: "Please enter the duration!" },
+                  ]}
+                >
+                  <Input
+                    type="number"
+                    placeholder="Duration"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span="8">
+                <Form.Item
+                  label="Alert Count"
+                  name="alertCount"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter the alert count!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="number"
+                    placeholder="Alert Count"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span="8">
+                <Form.Item
+                  label="Client Count"
+                  name="clientCount"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter the client count!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="number"
+                    placeholder="Client Count"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span="8">
+                <Form.Item
+                  label="Layer Count"
+                  name="layerCount"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter the layer count!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="number"
+                    placeholder="Layer Count"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span="8">
+                <Form.Item
+                  label="Location Count"
+                  name="locationCount"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter the location count!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="number"
+                    placeholder="Location Count"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span="8">
+                <Form.Item
+                  label="Mission Count"
+                  name="missionCount"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter the mission count!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="number"
+                    placeholder="Mission Count"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span="8">
+                <Form.Item
+                  label="User Count"
+                  name="userCount"
+                  rules={[
+                    { required: true, message: "Please enter the user count!" },
+                  ]}
+                >
+                  <Input
+                    type="number"
+                    placeholder="User Count"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span="12">
+                <Form.Item
+                  label="User Group Count"
+                  name="userGroupCount"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter the user group count!",
+                    },
+                  ]}
+                >
+                  <Input
+                    type="number"
+                    placeholder="User Group Count"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span="12">
+                <Form.Item
+                  label="VOD Count"
+                  name="vodCount"
+                  rules={[
+                    { required: true, message: "Please enter the VOD count!" },
+                  ]}
+                >
+                  <Input
+                    type="number"
+                    placeholder="VOD Count"
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row justify="end" gutter={16}>
+              <Col>
+                <Form.Item>
+                  <Button type="primary" htmlType="submit">
+                    Submit
+                  </Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </div>
       </div>
-    </div>
+    )
   );
 }
 

@@ -206,12 +206,7 @@ function Outcomes(props: any) {
             <Col md={1}>
               <Checkbox></Checkbox>
             </Col>
-            <Col
-              md={4}
-              onClick={() =>
-                setSelectedAlert(dataa)
-              }
-            >
+            <Col md={4} onClick={() => setSelectedAlert(dataa)}>
               <img
                 style={{ width: "100%", height: "auto" }}
                 src={STATIC_URL + dataa.image}
@@ -275,7 +270,7 @@ function Outcomes(props: any) {
   ];
   return (
     <>
-      <OutcomeModal 
+      <OutcomeModal
         index={0}
         data={[selectedAlert]}
         visible={!!selectedAlert}

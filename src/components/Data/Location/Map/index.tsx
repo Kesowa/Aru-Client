@@ -118,41 +118,45 @@ class LocationMap extends Component<mapProps, mapState> {
         obj.point = {
           lng: this.props.locationToEdit.geometry.coordinates[0],
           lat: this.props.locationToEdit.geometry.coordinates[1],
-        }
+        };
       }
 
       if (this.props.locationToEdit.geometry.type === "Polygon") {
         obj.polygon = {
-          points: this.props.locationToEdit.geometry.coordinates[0].map((point) => {
-            return {
-              lng: point[0],
-              lat: point[1],
-            };
-          }),
+          points: this.props.locationToEdit.geometry.coordinates[0].map(
+            (point) => {
+              return {
+                lng: point[0],
+                lat: point[1],
+              };
+            }
+          ),
           length: this.props.locationToEdit.geometry.coordinates[0].length,
         };
       }
 
-
       const shape = this.createMeasurements(obj);
 
       if (shape) {
-
         this.oldShape = shape;
         this.drawingManager.setDrawingMode(null);
 
         // Polygon data
-        const pathPoints = obj.polygon ? shape
-          .getPath()
-          .getArray()
-          .map((data) => {
-            return {
-              lat: data.lat(),
-              lng: data.lng(),
-            };
-          }) : [];
+        const pathPoints = obj.polygon
+          ? shape
+              .getPath()
+              .getArray()
+              .map((data) => {
+                return {
+                  lat: data.lat(),
+                  lng: data.lng(),
+                };
+              })
+          : [];
 
-        const center = obj.polygon ? this.findPolygonCenter(pathPoints) : [obj.point.lat, obj.point.lng];
+        const center = obj.polygon
+          ? this.findPolygonCenter(pathPoints)
+          : [obj.point.lat, obj.point.lng];
 
         getAddressfromLatLong(center[0], center[1], (err, address) => {
           if (!err) {
@@ -162,13 +166,13 @@ class LocationMap extends Component<mapProps, mapState> {
           }
         });
 
-        const area = obj.polygon ? window.google.maps.geometry.spherical.computeArea(
-          shape.getPath()
-        ) : 0;
+        const area = obj.polygon
+          ? window.google.maps.geometry.spherical.computeArea(shape.getPath())
+          : 0;
 
-        const length = obj.polygon ? window.google.maps.geometry.spherical.computeLength(
-          shape.getPath()
-        ) : 0;
+        const length = obj.polygon
+          ? window.google.maps.geometry.spherical.computeLength(shape.getPath())
+          : 0;
 
         // Set Polygon data to State
         this.props.setPolygonData({
@@ -287,12 +291,8 @@ class LocationMap extends Component<mapProps, mapState> {
   // Function to execute when drawing is complete
   overlayComplete = () => {
     const self: any = this;
-    const {
-      setAreaSelected,
-      areaSelected,
-      setPolygonData,
-      setGeolocation,
-    } = this.props;
+    const { setAreaSelected, areaSelected, setPolygonData, setGeolocation } =
+      this.props;
 
     this.drawingManager.addListener("overlaycomplete", (e) => {
       setAreaSelected(areaSelected ? areaSelected : !areaSelected);
@@ -459,7 +459,7 @@ class LocationMap extends Component<mapProps, mapState> {
       this.setPolygonChangeEvent(obj);
     } else if (geofence.point) {
       obj = new window.google.maps.Marker({
-        position: geofence.point
+        position: geofence.point,
       });
       this.googleMap.setCenter(geofence.point);
     }
@@ -590,19 +590,20 @@ class LocationMap extends Component<mapProps, mapState> {
             />
           </div>
           <div className="control-icons-container">
-            {(this.state.isPolygonActive || this.state.isPointActive) && (this.oldShape) && (
-              <div
-                className="control-clear-button"
-                onClick={this.clearIncompleteDrawing}
-              >
-                <p style={{ whiteSpace: "nowrap" }}>Clear Selection</p>
-              </div>
-            )}
+            {(this.state.isPolygonActive || this.state.isPointActive) &&
+              this.oldShape && (
+                <div
+                  className="control-clear-button"
+                  onClick={this.clearIncompleteDrawing}
+                >
+                  <p style={{ whiteSpace: "nowrap" }}>Clear Selection</p>
+                </div>
+              )}
             <img
               src={MarkerIcon}
               style={{
                 background: this.state.isPointActive ? "#1890ff" : "#fff",
-                marginRight: "5px"
+                marginRight: "5px",
               }}
               className="control-icons"
               onClick={this.setPointDrawing}

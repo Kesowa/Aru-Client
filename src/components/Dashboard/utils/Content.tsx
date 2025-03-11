@@ -148,8 +148,8 @@ function DashboardContent() {
   }
 
   useEffect(() => {
-    if (["tenant-staff","tenant-root"].includes(Auth.userdetails.userType)) {
-      fetchTenantStats()
+    if (["tenant-staff", "tenant-root"].includes(Auth.userdetails.userType)) {
+      fetchTenantStats();
     }
   }, [Auth.userdetails]);
 
@@ -572,4 +572,4 @@ function DashboardContent() {
   }
 }
 
-export default DashboardContent
+export default DashboardContent;

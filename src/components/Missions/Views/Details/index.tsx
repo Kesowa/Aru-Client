@@ -99,7 +99,7 @@ function MissionView() {
   const userDetails = Auth.userdetails;
   const userType = userDetails.userType;
   const tenantId = userDetails.tenantId._id || userDetails.tenantId;
-  
+
   const { setLoading } = useContext(LoaderContext);
 
   //-----------------Notification Function-------------------------//
@@ -264,7 +264,7 @@ function MissionView() {
       }
 
       setMissionDetails(details);
-      
+
       // if user is able to edit mission, get mission types and pilot list and client list from backend
       if (userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
         await fetchPilots();
@@ -333,7 +333,7 @@ function MissionView() {
             ...MissionDetails,
             missionName: body.name,
             instructions: body.description,
-            missionType: missionTypes.find(mT => mT._id === body.type).name,
+            missionType: missionTypes.find((mT) => mT._id === body.type).name,
             deliverables: body.deliverables,
             isPublic: body.isPublic,
           });
@@ -467,7 +467,7 @@ function MissionView() {
     if (MissionDetails.missionType === "Mapping") {
       return items;
     } else {
-      return items.filter((item) => !["1","2","6"].includes(item.key));
+      return items.filter((item) => !["1", "2", "6"].includes(item.key));
     }
   };
 
@@ -766,10 +766,7 @@ function MissionView() {
   function renderMissionDetailsBtn() {
     console.log("User Type:", userType);
     console.log("Custom Permissions:", userDetails.customPermissions);
-    if (
-      userType === "tenant-staff" ||
-      userType === "tenant-client"
-    ) {
+    if (userType === "tenant-staff" || userType === "tenant-client") {
       if (userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
         return (
           <Button
@@ -818,10 +815,7 @@ function MissionView() {
   //----------------Render review Button---------------------
 
   function renderReviewBtn() {
-    if (
-      userType === "tenant-staff" ||
-      userType === "tenant-client"
-    ) {
+    if (userType === "tenant-staff" || userType === "tenant-client") {
       if (userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
         return (
           <Button
@@ -855,10 +849,7 @@ function MissionView() {
   //----------------Render completed Button---------------------
 
   function renderCompleteBtn() {
-    if (
-      userType === "tenant-staff" ||
-      userType === "tenant-client"
-    ) {
+    if (userType === "tenant-staff" || userType === "tenant-client") {
       if (userDetails.customPermissions.includes(PERMS.MISSION_UPDATE)) {
         return (
           <Button
@@ -1152,34 +1143,38 @@ function MissionView() {
   function renderPilotBadge() {
     return (
       <>
-        {
-          (initialPilot.name || (MissionDetails.pilotAssigned !== "no-pilot")) &&
+        {(initialPilot.name || MissionDetails.pilotAssigned !== "no-pilot") && (
           <>
             <Avatar
               key="2"
               size="large"
               icon={<UserOutlined />}
-              src={initialPilot.avatar ? initialPilot.avatar : STATIC_URL + MissionDetails.pilotPhoto}
+              src={
+                initialPilot.avatar
+                  ? initialPilot.avatar
+                  : STATIC_URL + MissionDetails.pilotPhoto
+              }
             />
             <div className="pilot-name">
               <Title level={5} className="designation">
-                {initialPilot.name ? initialPilot.name : MissionDetails.pilotAssigned}
+                {initialPilot.name
+                  ? initialPilot.name
+                  : MissionDetails.pilotAssigned}
               </Title>
               <Text type="secondary">Pilot assigned</Text>
             </div>
           </>
-        }
-        {
-          userDetails.customPermissions.includes(PERMS.MISSION_UPDATE) &&
+        )}
+        {userDetails.customPermissions.includes(PERMS.MISSION_UPDATE) && (
           <div className="pilot-assign-btn">
             {renderAssignPilotBtn(
-              (initialPilot.name || (MissionDetails.pilotAssigned !== "no-pilot")) ?
-              "Re-Assign Pilot" :
-              "Assign Pilot"
+              initialPilot.name || MissionDetails.pilotAssigned !== "no-pilot"
+                ? "Re-Assign Pilot"
+                : "Assign Pilot"
             )}
             {renderPilotAssignModal()}
           </div>
-        }
+        )}
       </>
     );
   }
@@ -1254,7 +1249,7 @@ function MissionView() {
             "success"
           );
           setDocRefresh(true);
-          setTotalDocs(prev => prev + 1);
+          setTotalDocs((prev) => prev + 1);
         },
         REPORT_GENERATION_FAILED: (data) => {
           console.log("Report generation failed!", data);
@@ -1385,9 +1380,16 @@ function MissionView() {
 
               <Row>
                 <Card title="Flights" bordered={false} className="flight-card">
-                  <Dropdown menu={{
-                    items: userDetails.customPermissions.includes(PERMS.FLIGHT_UPDATE) ? items : [items[1]]
-                  }} trigger={["contextMenu"]}>
+                  <Dropdown
+                    menu={{
+                      items: userDetails.customPermissions.includes(
+                        PERMS.FLIGHT_UPDATE
+                      )
+                        ? items
+                        : [items[1]],
+                    }}
+                    trigger={["contextMenu"]}
+                  >
                     <Tooltip
                       placement="bottom"
                       title="Right click to view/edit flight"

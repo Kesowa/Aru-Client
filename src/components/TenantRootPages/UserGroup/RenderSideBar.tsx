@@ -5,7 +5,9 @@ import "./UserGroup.less";
 import { permissionsToSideBar } from "src/static/sideBarOptions";
 
 export default function RenderSideBar(props: any) {
-  const menuItems: MenuProps["items"] = permissionsToSideBar(props.selectedPermissions).map((ele, i) => ({
+  const menuItems: MenuProps["items"] = permissionsToSideBar(
+    props.selectedPermissions
+  ).map((ele, i) => ({
     key: `menu${i}`,
     label: ele.text,
     icon: decideIcon(ele.icon),
