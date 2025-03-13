@@ -352,7 +352,7 @@ const StageThree: FC<StageThreeProps> = ({
                 onChange={(e) => {
                   setMissionName(e.target.value);
                 }}
-                maxLength={100}
+                maxLength={50}
                 value={missionName ? missionName : ""}
                 placeholder="Enter mission name here"
               />
