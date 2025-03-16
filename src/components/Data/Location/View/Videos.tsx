@@ -88,7 +88,7 @@ function Videos(VideoProps) {
   }
   function renderVideos(data: any[]) {
     return data.map((dataa) => (
-      <Col span={5} className="video-thumbnail">
+      <Col span={5} className="video-thumbnail" key={window.crypto.randomUUID()}>
         <Card
           onClick={() =>
             openVideoPlayer(dataa.videoPath, dataa.flightID?.name, dataa)

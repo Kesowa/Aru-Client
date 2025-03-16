@@ -117,7 +117,6 @@ function ManageClients(props) {
   // Add Client Buttons
   function renderAddClientBtn() {
     return (
-      <>
         <div
           style={{ float: "left", cursor: "pointer" }}
           onClick={() => {
@@ -138,7 +137,6 @@ function ManageClients(props) {
             </Text>
           </div>
         </div>
-      </>
     );
   }
 
@@ -218,7 +216,7 @@ function ManageClients(props) {
           {props.missionClient.length > 0 ? (
             props.missionClient.map((client: any) => {
               return (
-                <Row>
+                <Row key={window.crypto.randomUUID()}>
                   <div style={{ float: "left" }}>
                     <Avatar
                       key="2"

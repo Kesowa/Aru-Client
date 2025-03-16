@@ -559,7 +559,6 @@ function Pictomap(props) {
       title: "Processing",
       description: "Now processing images",
       content: (
-        <>
           <Result
             status="success"
             title="Images uploaded successfully!"
@@ -585,7 +584,6 @@ function Pictomap(props) {
               </Row>
             </div>
           </Result>
-        </>
       ),
       stage: 1,
     },
@@ -593,7 +591,6 @@ function Pictomap(props) {
       title: "Review",
       description: "Verify assigned photos",
       content: (
-        <>
           <Spin size="large" spinning={loader}>
             <>
               <Title level={2}>Please review the geolocated images</Title>
@@ -626,7 +623,7 @@ function Pictomap(props) {
                       <Row>
                         {subHeading.data.files.map((item: any) => {
                           return (
-                            <Col span={8} md={8}>
+                            <Col span={8} md={8} key={window.crypto.randomUUID()}>
                               <div>
                                 <Dropdown
                                   onOpenChange={() => setSubHeading(subHeading)}
@@ -660,7 +657,6 @@ function Pictomap(props) {
               </div>
             </>
           </Spin>
-        </>
       ),
       stage: 2,
     },

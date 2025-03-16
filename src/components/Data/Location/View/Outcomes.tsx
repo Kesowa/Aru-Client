@@ -259,6 +259,7 @@ function Outcomes(outcomeProps) {
                   className="listview-outcomes"
                   align="middle"
                   style={{ padding: "10px" }}
+                  key={window.crypto.randomUUID()}
                 >
                   <Col
                     md={4}
@@ -313,7 +314,7 @@ function Outcomes(outcomeProps) {
           ) : (
             <Row>
               {outcomeData.map((outcome) => (
-                <Col span={6} className="video-thumbnail">
+                <Col span={6} className="video-thumbnail" key={window.crypto.randomUUID()}>
                   <Card
                     className="outcome-card"
                     cover={

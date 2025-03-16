@@ -945,6 +945,7 @@ function Outcomes(props) {
                             items: outcomeMenu(outcome),
                             onClick: outcomeMenuOnClick,
                           }}
+                          key={window.crypto.randomUUID()}
                         >
                           <Row
                             className="listview-outcomes"

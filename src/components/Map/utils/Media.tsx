@@ -990,6 +990,7 @@ function Media(props) {
                       textAlign: "center",
                       background: "black",
                     }}
+                    key={window.crypto.randomUUID()}
                   >
                     {!props.videoDetails.link && (
                       <img

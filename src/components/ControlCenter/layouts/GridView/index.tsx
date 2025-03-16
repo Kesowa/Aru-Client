@@ -57,7 +57,7 @@ const SortableList = SortableContainer(
       <Row gutter={[16, 8]} className="section-row">
         {items.map((value, index) => (
           <SortableItem
-            key={`item-${index}`}
+            key={window.crypto.randomUUID()}
             index={index}
             ind={index}
             value={value}

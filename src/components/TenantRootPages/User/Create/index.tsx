@@ -260,8 +260,8 @@ function UserCreatePage(props: any) {
                           .indexOf(input.toLowerCase()) >= 0
                       }
                     >
-                      {userGroups.map((ele: any, i: any) => (
-                        <Select.Option key={i} value={ele._id}>
+                      {userGroups.map((ele: any) => (
+                        <Select.Option key={window.crypto.randomUUID()} value={ele._id}>
                           {ele.name}
                         </Select.Option>
                       ))}

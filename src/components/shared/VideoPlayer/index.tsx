@@ -1502,9 +1502,9 @@ function VideoPlayer(props: any) {
             People Count: {peopleCount}
           </div>
 
-          {scaledBoxes.map((box, index) => (
+          {scaledBoxes.map((box) => (
             <div
-              key={index}
+              key={window.crypto.randomUUID()}
               style={{
                 position: "absolute",
                 left: `${box[0]}px`,

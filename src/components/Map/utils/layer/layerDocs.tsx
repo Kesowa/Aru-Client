@@ -487,7 +487,7 @@ function LayerDocs(props) {
                             <Row>
                               {subHeading.data.files.map((item: any) => {
                                 return (
-                                  <Col span={8} md={8}>
+                                  <Col span={8} md={8} key={window.crypto.randomUUID()}>
                                     <div>
                                       <Dropdown
                                         onOpenChange={() =>
@@ -655,7 +655,7 @@ function LayerDocs(props) {
                             <Row>
                               {subHeading.data.files.map((item: any) => {
                                 return (
-                                  <Col span={8} md={8}>
+                                  <Col span={8} md={8} key={window.crypto.randomUUID()}>
                                     <div>
                                       <Dropdown
                                         onOpenChange={() =>
@@ -1265,6 +1265,7 @@ function LayerDocs(props) {
                         <Dropdown
                           menu={{ items, onClick: genOnClick(item) }}
                           trigger={["contextMenu"]}
+                          key={window.crypto.randomUUID()}
                         >
                           <Image
                             key={`${item._id}`}

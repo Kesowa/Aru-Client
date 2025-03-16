@@ -2649,7 +2649,7 @@ function BaseMap(props) {
                 {AllLayers.filter(
                   (layer) => layer.layerGroupId?._id === layerGroup._id
                 ).map((layer) => {
-                  return <p>{layer.name}</p>;
+                  return <p key={window.crypto.randomUUID()}>{layer.name}</p>;
                 })}
               </>
             </>
@@ -4288,7 +4288,6 @@ function BaseMap(props) {
       }
     });
     return (
-      <>
         <Form
           name="basic"
           onFinish={moveLayers}
@@ -4319,9 +4318,9 @@ function BaseMap(props) {
                   );
                 }
               )} */}
-              {groups.map((group, idx) => {
+              {groups.map((group) => {
                 return (
-                  <Option value={group.id} key={idx}>
+                  <Option value={group.id} key={window.crypto.randomUUID()}>
                     {group.name}
                   </Option>
                 );
@@ -4335,7 +4334,6 @@ function BaseMap(props) {
             </Button>
           </Form.Item>
         </Form>
-      </>
     );
   };
 
@@ -5046,6 +5044,7 @@ function BaseMap(props) {
                         return { ...prev };
                       })
                     }
+                    key={window.crypto.randomUUID()}
                   >
                     {tag}
                   </Tag>
@@ -5070,6 +5069,7 @@ function BaseMap(props) {
                         return { ...prev };
                       })
                     }
+                    key={window.crypto.randomUUID()}
                   >
                     {tag}
                   </Tag>
@@ -5095,6 +5095,7 @@ function BaseMap(props) {
                         return { ...prev };
                       })
                     }
+                    key={window.crypto.randomUUID()}
                   >
                     {tag}
                   </Tag>
@@ -5848,6 +5849,7 @@ function BaseMap(props) {
                 height: "100px",
                 marginBottom: "20px",
               }}
+              key={window.crypto.randomUUID()}
             >
               {!props.isBaseMap ? (
                 <Colorscale

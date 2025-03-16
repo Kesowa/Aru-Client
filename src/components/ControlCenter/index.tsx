@@ -532,6 +532,7 @@ function GridLive(props: any) {
                           addFeed={addFeed}
                           swapFeed={swapFeed}
                           setGroupOrder={setGroupOrder}
+                          key={window.crypto.randomUUID()}
                         />
                       );
                     } else if (group.layout === "twoFeeds") {
@@ -543,6 +544,7 @@ function GridLive(props: any) {
                           addFeed={addFeed}
                           swapFeed={swapFeed}
                           setGroupOrder={setGroupOrder}
+                          key={window.crypto.randomUUID()}
                         />
                       );
                     } else if (group.layout === "threeFeeds") {
@@ -554,6 +556,7 @@ function GridLive(props: any) {
                           addFeed={addFeed}
                           swapFeed={swapFeed}
                           setGroupOrder={setGroupOrder}
+                          key={window.crypto.randomUUID()}
                         />
                       );
                     }

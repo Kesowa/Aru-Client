@@ -660,7 +660,7 @@ function AssetBase(props: any) {
           >
             <Select placeholder="Choose asset owner">
               {users.map((user: any) => (
-                <Select.Option value={user._id}>{user.name}</Select.Option>
+                <Select.Option value={user._id} key={window.crypto.randomUUID()}>{user.name}</Select.Option>
               ))}
             </Select>
           </Form.Item>
@@ -756,7 +756,7 @@ function AssetBase(props: any) {
           >
             <Select placeholder="Choose Asset Class">
               {assetClasses.map((assetClass: any) => (
-                <Select.Option value={assetClass._id}>
+                <Select.Option value={assetClass._id} key={window.crypto.randomUUID()}>
                   {assetClass.typeName}
                 </Select.Option>
               ))}
@@ -774,7 +774,7 @@ function AssetBase(props: any) {
           >
             <Select placeholder="Choose Manufacturer">
               {manufacturers.map((manufacturer: any) => (
-                <Select.Option value={manufacturer._id}>
+                <Select.Option value={manufacturer._id} key={window.crypto.randomUUID()}>
                   {manufacturer.name}
                 </Select.Option>
               ))}

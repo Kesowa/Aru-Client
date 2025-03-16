@@ -347,7 +347,7 @@ const CreateLayer = (props: any) => {
                 </Paragraph>
                 {badImages.map((item: any) => {
                   return (
-                    <Paragraph>
+                    <Paragraph key={window.crypto.randomUUID()}>
                       <CloseCircleOutlined style={{ color: "red" }} /> File{" "}
                       {item} has no geocoordinates. Failed to geolocate!
                     </Paragraph>

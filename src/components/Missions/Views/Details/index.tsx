@@ -1420,7 +1420,7 @@ function MissionView() {
           {/* ++++++++++++++++++++++++++++++++++++++++ E20 SHARE MODAL CODE++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
           <Modal
             title={[
-              <Title level={5}>
+              <Title level={5} key={window.crypto.randomUUID()}>
                 <ShareAltOutlined style={{ fontSize: "24px" }} />
                 &nbsp;&nbsp;&nbsp;Share mission card
               </Title>,
@@ -1456,7 +1456,7 @@ function MissionView() {
           {/* +++++++++++++++++++++++++++++++++++++++++++++++++++ E21 Modal Edit++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
           <Modal
             title={[
-              <Title level={5}>
+              <Title level={5} key={window.crypto.randomUUID()}>
                 <EditOutlined style={{ fontSize: "24px" }} />
                 &nbsp;&nbsp;&nbsp;Edit Mission and flight details
               </Title>,
@@ -1554,7 +1554,7 @@ function MissionView() {
           {/* +++++++++++++++++++++++++++++++++++++++++++++++++++ Report Generation Errors Modal ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
           <Modal
             title={[
-              <Title level={4}>
+              <Title level={4} key={window.crypto.randomUUID()}>
                 <ExceptionOutlined style={{ fontSize: "24px" }} />
                 &nbsp;&nbsp;&nbsp;Report generation failed!
               </Title>,

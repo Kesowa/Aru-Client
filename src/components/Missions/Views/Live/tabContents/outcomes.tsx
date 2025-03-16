@@ -200,7 +200,7 @@ function Outcomes(props: any) {
 
   function renderOutcomes(data: any[]) {
     return data.map((dataa) => (
-      <div>
+      <div key={window.crypto.randomUUID()}>
         <div className="outcome-live-view-thumb">
           <Row align="middle">
             <Col md={1}>

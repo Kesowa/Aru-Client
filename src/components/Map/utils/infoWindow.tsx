@@ -314,8 +314,8 @@ function InfoWindow(props) {
             {imageToShow.length > 0 || props.videoToShow?.length > 0 ? (
               <Row>
                 <Col span={15} className="properties">
-                  {Object.keys(properties).map((key: any, i: any) => (
-                    <Row key={i}>
+                  {Object.keys(properties).map((key: any) => (
+                    <Row key={window.crypto.randomUUID()}>
                       <Col md={10}>
                         <Text className="key" strong>
                           {key}
@@ -350,8 +350,8 @@ function InfoWindow(props) {
               </Row>
             ) : (
               <>
-                {Object.keys(properties).map((key: any, i: any) => (
-                  <Row key={i}>
+                {Object.keys(properties).map((key: any) => (
+                  <Row key={window.crypto.randomUUID()}>
                     <Col md={10}>
                       <Text className="key" strong>
                         {key}

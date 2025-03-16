@@ -300,7 +300,7 @@ function LocationCard(props) {
         title={locationName}
         subTitle={geoLocation}
         extra={[
-          <Row className="location_card_header_sec_two" align="middle">
+          <Row className="location_card_header_sec_two" align="middle" key={window.crypto.randomUUID()}>
             <Col style={{ height: "100%" }}>
               <ClockCircleOutlined style={{ fontSize: "36px" }} />
             </Col>
