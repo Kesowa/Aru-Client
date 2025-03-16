@@ -112,10 +112,6 @@ function InfoWindow(props) {
         setArea((turf.area(props.feature) / 1000000).toFixed(2));
         setAreaUnit("sq. km");
         break;
-      case "sq. m":
-        setArea(turf.area(props.feature).toFixed(2));
-        setAreaUnit("sq. m");
-        break;
       case "acres":
         setArea((turf.area(props.feature) * 0.00025).toFixed(2));
         setAreaUnit("acres");
@@ -132,10 +128,6 @@ function InfoWindow(props) {
 
   function lengthMeasurementHandeller(unit: any) {
     switch (unit) {
-      case "km":
-        setPerimeter(turf.length(props.feature).toFixed(2));
-        setLenghtUnit("km");
-        break;
       case "m":
         setPerimeter((turf.length(props.feature) * 1000).toFixed(2));
         setLenghtUnit("m");
@@ -329,14 +321,9 @@ function InfoWindow(props) {
                 </Col>
                 <Col span={9} className="image-part">
                   <Spin spinning={imageLoader}>
-                    {props.missionLayer === "Alert" ? (
-                      <Image src={STATIC_URL + imageToShow[0]} />
-                    ) : props.missionLayer === "VOD" ? (
-                      <img
-                        src={STATIC_URL + props.videoToShow[0].thumbnail}
-                        style={{ cursor: "pointer" }}
-                      />
-                    ) : (
+                    {props.missionLayer === "Alert" && <Image src={STATIC_URL + imageToShow[0]} />}
+                    {props.missionLayer === "VOD" && <img src={STATIC_URL + props.videoToShow[0].thumbnail} style={{ cursor: "pointer" }} />}
+                    {!["Alert", "VOD"].includes(props.missionLayer) && 
                       <img
                         src={`${STATIC_URL}/images/geojson/1x_${
                           imageToShow[0].filePath.split("/")[3]
@@ -344,7 +331,7 @@ function InfoWindow(props) {
                         onClick={() => openImages()}
                         style={{ cursor: "pointer" }}
                       />
-                    )}
+                    }
                   </Spin>
                 </Col>
               </Row>

@@ -370,6 +370,16 @@ function DataLocation(props) {
       setCenterPoint(selectedRows[0].centerPoint);
     },
   };
+  const actualCenterPoint = `${
+    centerPoint.lat
+      ? centerPoint.lat
+      : data[0].centerPoint.lat
+  },${
+    centerPoint.long
+      ? centerPoint.long
+      : data[0].centerPoint.long
+  }`;
+  const actualGeofence = geofence.length > 0 ? geofence : data[0].geofence;
   return (
     <div>
       {/* +++++++++++++++++++++++++++++++++MISSION LISTING+++++++++++++++++++++++++++++++++++++++++ */}
@@ -389,24 +399,12 @@ function DataLocation(props) {
                 src={
                   geofence.length > 0
                     ? `https://maps.googleapis.com/maps/api/staticmap?center=${
-                        centerPoint.lat
-                          ? centerPoint.lat
-                          : data[0].centerPoint.lat
-                      },${
-                        centerPoint.long
-                          ? centerPoint.long
-                          : data[0].centerPoint.long
-                      }&zoom=15&size=800x400&markers=size:mid|color:red|${
-                        centerPoint.lat
-                          ? centerPoint.lat
-                          : data[0].centerPoint.lat
-                      },${
-                        centerPoint.long
-                          ? centerPoint.long
-                          : data[0].centerPoint.long
-                      }&path=color:0x00B3FF|weight:5|fillcolor:0xcfe1ff${formatGeoFenceForUrl(
-                        geofence.length > 0 ? geofence : data[0].geofence
-                      )}&maptype=roadmap&key=${GOOGLE_API_KEY}`
+                      actualCenterPoint
+                    }&zoom=15&size=800x400&markers=size:mid|color:red|${
+                      actualCenterPoint
+                    }&path=color:0x00B3FF|weight:5|fillcolor:0xcfe1ff${
+                      formatGeoFenceForUrl(actualGeofence)
+                    }&maptype=roadmap&key=${GOOGLE_API_KEY}`
                     : AloneLogo
                 }
                 style={{

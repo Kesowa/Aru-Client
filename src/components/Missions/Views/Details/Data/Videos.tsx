@@ -858,6 +858,7 @@ function Videos(props) {
 
   //---------------Render video thumbnails------------------------------------------------
   function renderVideos(data: any[]) {
+    if (data.length === 0) return <Empty style={{ margin: "auto" }} />;
     return (
       <div>
         {data.length < 1 ? (
@@ -960,17 +961,7 @@ function Videos(props) {
                       <Row>
                         {data.map((dataa, idx) => (
                           <Col
-                            span={
-                              window.devicePixelRatio == 1.5
-                                ? 8
-                                : window.screen.width == 1920
-                                ? 4
-                                : window.screen.width == 1366
-                                ? 8
-                                : window.screen.width == 2560
-                                ? 4
-                                : 8
-                            }
+                            span={[1920, 2560].includes(window.screen.width) ? 4 : 8}
                             key={`${dataa._id}`}
                           >
                             <Dropdown
@@ -1604,11 +1595,7 @@ function Videos(props) {
               </Row>
           )}
         </>
-      ) : VodData.length > 0 ? (
-        renderVideos(VodData)
-      ) : (
-        <Empty style={{ margin: "auto" }} />
-      )}
+      ) : renderVideos(VodData)}
     </>
   );
 }

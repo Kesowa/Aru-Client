@@ -314,7 +314,6 @@ function MissionTable(props: TableProps) {
       dataIndex: "_id",
       ...getColumnSearchProps("_id"),
       render: (text, record) => (
-        <>
           <span
             onClick={() => {
               history.push({
@@ -331,7 +330,6 @@ function MissionTable(props: TableProps) {
           >
             <p className="mission-id">{record._id}</p>
           </span>
-        </>
       ),
     },
     {
@@ -341,7 +339,7 @@ function MissionTable(props: TableProps) {
       sortDirections: ["descend", "ascend"],
       ...getColumnSearchProps("user"),
       render: (user: any) =>
-        user ? (user.name ? user.name : "Auto") : "User Deleted",
+        user ? (user.name || "Auto") : "User Deleted",
     },
     {
       title: "Status",

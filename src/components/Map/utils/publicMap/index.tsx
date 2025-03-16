@@ -516,6 +516,9 @@ function PublicMap(props) {
   };
 
   const getTitleElement = (layer: Layer) => {
+    let nameTextWidth: string;
+    if (layer.type === "Raster") nameTextWidth = layer.layerGroupId ? "139px" : "160px";
+    else nameTextWidth = layer.layerGroupId ? "119px" : "140px";
     return (
       <Dropdown menu={{ items: [] }} trigger={["contextMenu"]}>
         <Tooltip
@@ -541,14 +544,7 @@ function PublicMap(props) {
           >
             <Text
               style={{
-                width:
-                  layer.type === "Raster"
-                    ? layer.layerGroupId
-                      ? "139px"
-                      : "160px"
-                    : layer.layerGroupId
-                    ? "119px"
-                    : "140px",
+                width: nameTextWidth,
               }}
               ellipsis={true}
               onClick={() => {
@@ -728,7 +724,6 @@ function PublicMap(props) {
               }}}
             >
               {osmState ? (
-                <>
                   <div style={COPYRIGHT_LICENSE_STYLE}>
                     {"© "}
                     <a
@@ -739,7 +734,6 @@ function PublicMap(props) {
                       OpenStreetMap contributors
                     </a>
                   </div>
-                </>
               ) : (
                 <StaticMap
                   mapboxApiAccessToken={MAPBOX_API_KEY}
@@ -753,7 +747,6 @@ function PublicMap(props) {
                  <HTMLOverlayItem coordinates={coordinates}>
                     <Popover
                       content={
-                        <>
                           <InfoWindowContent
                             mode={infoWindowMode}
                             coordinates={coordinates}
@@ -766,7 +759,6 @@ function PublicMap(props) {
                             isBaseMap={false}
                             missionLayer={"Vector"}
                           />
-                        </>
                       }
                       title={
                         <>
@@ -918,13 +910,13 @@ function PublicMap(props) {
                             <Text type="primary">
                               Name:{" "}
                               <Text type="secondary">
-                                {mission && mission.name ? mission.name : ""}
+                                {mission?.name || ""}
                               </Text>
                             </Text>
                             <Text type="primary">
                               ID:{" "}
                               <Text type="secondary" copyable>
-                                {mission && mission._id ? mission._id : ""}
+                                {mission?._id || ""}
                               </Text>
                             </Text>
                           </div>

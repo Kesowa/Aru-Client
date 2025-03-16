@@ -94,11 +94,7 @@ function Media(props) {
                   </div>
                 </Col>
               </Row>
-            ) : props.videoToShow.length > 0 ? (
-              <Row gutter={[16, 16]}>{renderVideo()}</Row>
-            ) : (
-              <Row>{renderMedia()}</Row>
-            )}
+            ) : renderMedia()}
           </>
         ),
       },
@@ -666,11 +662,11 @@ function Media(props) {
         <Image.PreviewGroup>
           {props.videoToShow.map((item: any, idx) => {
             return (
-              <>
                 <Dropdown
                   onOpenChange={() => setSelectedVideo({ data: item, idx })}
                   menu={{ items: vodMenu(item), onClick: vodMenuOnClick }}
                   trigger={["contextMenu"]}
+                  key={window.crypto.randomUUID()}
                 >
                   <Col span={8} md={8}>
                     <Badge
@@ -705,7 +701,6 @@ function Media(props) {
                     </Badge>
                   </Col>
                 </Dropdown>
-              </>
             );
           })}
         </Image.PreviewGroup>
@@ -715,12 +710,13 @@ function Media(props) {
 
   //-------------- render media content --------------------
   function renderMedia() {
+    if (props.videoToShow.length > 0) return <Row gutter={[16, 16]}>{renderVideo()}</Row>;
     const media: any[] = extractImages(files);
     media.sort((a, b) => {
       return moment(b.createdAt).diff(moment(a.createdAt));
     });
     return (
-      <>
+      <Row>
         {media.length < 1 ? <Empty style={{ margin: "auto" }} /> : <></>}
         {multiDelete ? (
           <>
@@ -819,7 +815,7 @@ function Media(props) {
             })}
           </Image.PreviewGroup>
         )}
-      </>
+      </Row>
     );
   }
 

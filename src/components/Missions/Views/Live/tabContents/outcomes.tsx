@@ -199,6 +199,24 @@ function Outcomes(props: any) {
   };
 
   function renderOutcomes(data: any[]) {
+    if (outcomeData === undefined) {
+      return (
+        <>
+          <img
+            src={Alone}
+            style={{
+              width: "30%",
+              display: "block",
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+          />
+          <p style={{ textAlign: "center" }}>
+            There are no alerts to display yet
+          </p>
+        </>
+      );
+    }
     return data.map((dataa) => (
       <div key={window.crypto.randomUUID()}>
         <div className="outcome-live-view-thumb">
@@ -343,24 +361,7 @@ function Outcomes(props: any) {
           <div style={{ textAlign: "center", marginTop: "2rem" }}>
             <Spin size="large" />
           </div>
-        ) : outcomeData === undefined ? (
-          <>
-            <img
-              src={Alone}
-              style={{
-                width: "30%",
-                display: "block",
-                marginLeft: "auto",
-                marginRight: "auto",
-              }}
-            />
-            <p style={{ textAlign: "center" }}>
-              There are no alerts to display yet
-            </p>
-          </>
-        ) : (
-          renderOutcomes(displayData)
-        )}
+        ) : renderOutcomes(displayData)}
       </div>
       <br />
       <Pagination current={page} onChange={setPaginationPage} total={total} />

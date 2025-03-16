@@ -369,10 +369,8 @@ function Outcomes(props) {
                 <Row>
                   <Col md={20}>
                     <Text type="secondary">
-                      {outcome.location
-                        ? outcome.location.lat == "0"
-                          ? ""
-                          : `${outcome.location.lat}, ${outcome.location.long}`
+                      {outcome?.location?.lat && outcome?.location?.lat != "0"
+                        ? `${outcome.location.lat}, ${outcome.location.long}`
                         : ""}
                     </Text>
                   </Col>
@@ -920,19 +918,22 @@ function Outcomes(props) {
           {outcomeData?.length !== 0 ? (
             <div>
               {activateSelection ? (
-                listView ? (
-                  <>
-                    {outcomeData?.map((item: any, ind: any) =>
-                      OutcomeCompononent(item, ind)
-                    )}
-                  </>
-                ) : (
-                  <Row>
-                    {outcomeData?.map((item: any, ind: any) =>
-                      OutcomeCompononent(item, ind)
-                    )}
-                  </Row>
-                )
+                <>
+                {
+                  listView ?
+                    <>
+                      {outcomeData?.map((item: any, ind: any) =>
+                        OutcomeCompononent(item, ind)
+                      )}
+                    </>
+                  :
+                    <Row>
+                      {outcomeData?.map((item: any, ind: any) =>
+                        OutcomeCompononent(item, ind)
+                      )}
+                    </Row>
+                }
+                </>
               ) : (
                 <>
                   {listView ? (
@@ -1017,10 +1018,8 @@ function Outcomes(props) {
                                 <Row>
                                   <Col md={20}>
                                     <Text type="secondary">
-                                      {outcome.location
-                                        ? outcome.location.lat == "0"
-                                          ? ""
-                                          : `${outcome.location.lat}, ${outcome.location.long}`
+                                      {outcome?.location?.lat && outcome?.location?.lat != "0"
+                                          ? `${outcome.location.lat}, ${outcome.location.long}`
                                         : ""}
                                     </Text>
                                   </Col>
@@ -1192,11 +1191,7 @@ function Outcomes(props) {
           ) : (
             <Empty />
           )}
-          {outcomeData === undefined ? (
-            <>
-              <Empty style={{ margin: "auto" }} />
-            </>
-          ) : null}
+          {outcomeData === undefined ? <Empty style={{ margin: "auto" }} /> : null}
 
           <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
           <ThermalImaging

@@ -414,7 +414,12 @@ const CreateBaseLayer = (props) => {
         //     }
         //   },
         // };
-        const docModel = layerType === "Vector" ? DocModel.VECTOR : layerType === "Raster" ? DocModel.RASTER : DocModel.LAYER_FILES;
+        
+        let docModel: DocModel;
+        if (layerType === "Vector") docModel = DocModel.VECTOR;
+        else if (layerType === "Raster") docModel = DocModel.RASTER;
+        else docModel = DocModel.LAYER_FILES;
+
         const uploadToken = await uploadFile(fileList[0], docModel, (prog) => {
           console.info("PROGRESS: " + prog);
           setProgress(prog * 100);

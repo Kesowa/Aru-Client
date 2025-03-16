@@ -230,7 +230,6 @@ function DataMission(props) {
       dataIndex: "_id",
       ...getColumnSearchProps("_id"),
       render: (text, record) => (
-        <>
           <span
             onClick={() => {
               history.push(`/dashboard/mission/view/staff-${record._id}`);
@@ -238,7 +237,6 @@ function DataMission(props) {
           >
             <p className="mission-id">{record._id}</p>
           </span>
-        </>
       ),
     },
     {
@@ -248,7 +246,7 @@ function DataMission(props) {
       sortDirections: ["descend", "ascend"],
       ...getColumnSearchProps("user"),
       render: (user: any) =>
-        user ? (user.name ? user.name : "Auto") : "User deleted",
+        user ? (user.name || "Auto") : "User deleted",
     },
     {
       title: "STATUS",

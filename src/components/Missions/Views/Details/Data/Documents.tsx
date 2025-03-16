@@ -230,6 +230,7 @@ function Documents(props) {
   ) => {
     return useCallback(
       (data: ChonkyFileActionData) => {
+        let url:string;
         switch (data.id) {
           case OpenThread.id:
             openThread("document", data.state.selectedFiles[0].id, {});
@@ -247,7 +248,7 @@ function Documents(props) {
                 currentFolderId === "rawPhotos" ||
                 currentFolderId === "rawVideos"
               ) {
-                var url = data.state.selectedFilesForAction[0]?.path;
+                url = data.state.selectedFilesForAction[0]?.path;
                 window.open(url);
               }
             }
@@ -332,14 +333,14 @@ function Documents(props) {
                   if (data.state.selectedFilesForAction[0].id === "rawData") {
                     bulkDownload("rawData");
                   } else {
-                    var url = data.state.selectedFilesForAction[0].path;
+                    url = data.state.selectedFilesForAction[0].path;
                     window.open(url);
                   }
                 } else {
                   bulkDownload(data.state.selectedFilesForAction[0].id);
                 }
               } else {
-                var url = data.state.selectedFilesForAction[0].path;
+                url = data.state.selectedFilesForAction[0].path;
                 window.open(url);
               }
             }
@@ -423,38 +424,6 @@ function Documents(props) {
           props.missionDetails.userType //upload priviledge checks
         ) {
           case "tenant-root": //when user is a tenant root
-            http
-              .post(options.action, body)
-              .then((res: any) => {
-                options.onSuccess(res.data, options.file);
-                message.success(
-                  "File " + options.file.name + " uploaded successfully"
-                );
-              })
-              .catch((err) => {
-                if (axios.isCancel(err)) {
-                  console.log("Upload Cancelled");
-                  return;
-                } else if (err.response?.status === 403) {
-                  if (
-                    err.response?.data.message ===
-                    "Actual storage exceeded the Limit of Set storage!"
-                  ) {
-                    setStorageModal(true);
-                  } else {
-                    message.error(err.response?.data.message);
-                    console.log(err.response);
-                  }
-                } else {
-                  console.log(err);
-                  message.error("Unable to upload file!");
-                  options.onError({ err });
-                }
-                AxiosErrorHandler(err, logout);
-              });
-
-            break;
-
           case "tenant-staff": // when user is tenant staff
             http
               .post(options.action, body)

@@ -186,7 +186,11 @@ function LiveViewBase() {
               height: "100%",
             }}
           >
-            <Col className="video-wrapper" span={theater ? 24 : pip ? 0 : 16}>
+            <Col className="video-wrapper" span={(() => {
+              if (theater) return 24;
+              else if (pip) return 0;
+              else return 16;
+            })()}>
               {streamKey ? (
                 <VideoPlayer
                   url={streamURL}
@@ -212,7 +216,11 @@ function LiveViewBase() {
             </Col>
             <Col
               className="live-map-wrapper"
-              span={theater ? 0 : pip ? 24 : 8}
+              span={(() => {
+                if (theater) return 24;
+                else if (pip) return 0;
+                else return 16;
+              })()}
               onDoubleClick={handlePip}
             >
               {streamKey ? (

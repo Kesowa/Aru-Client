@@ -2537,6 +2537,12 @@ function BaseMap(props) {
           break;
       }
     };
+    let nameTextWidth: string;
+    if (layer.type === "Raster") {
+      nameTextWidth = layer.layerGroupId ? "139px" : "160px";
+    } else {
+      nameTextWidth = layer.layerGroupId ? "119px" : "140px";
+    }
     return (
       <Dropdown
         menu={{ items: treeMenu(layer), onClick: treeMenuOnClick }}
@@ -2564,16 +2570,7 @@ function BaseMap(props) {
             overflowCount={9}
           >
             <Text
-              style={{
-                width:
-                  layer.type === "Raster"
-                    ? layer.layerGroupId
-                      ? "139px"
-                      : "160px"
-                    : layer.layerGroupId
-                      ? "119px"
-                      : "140px",
-              }}
+              style={{ width: nameTextWidth }}
               ellipsis={true}
               onClick={() => {
                 if (layer._isChecked && layer._metadata?.bounds) {
@@ -2971,7 +2968,11 @@ function BaseMap(props) {
       //   },
       // };
 
-      const docModel = layerType === "Vector" ? DocModel.VECTOR : layerType === "Raster" ? DocModel.RASTER : DocModel.LAYER_FILES;
+      let docModel: DocModel;
+      if (layerType === "Vector") docModel = DocModel.VECTOR;
+      else if (layerType === "Raster") docModel = DocModel.RASTER;
+      else docModel = DocModel.LAYER_FILES;
+      
       const uploadToken = await uploadFile(fileList[0], docModel, (prog) => {
         console.info("PROGRESS: " + prog);
         setProgress(prog * 100);
@@ -3097,47 +3098,30 @@ function BaseMap(props) {
         let modee;
         let centerPoint;
 
+        let fLat: any = 0;
+        let fLng: any = 0;
+
         if (mode.mode === DrawPolygonMode) {
           modee = "PolygonView";
 
-          var fLat: any = 0;
-          var fLng: any = 0;
-          for (
-            var i = 0;
-            i < updatedData.features[0].geometry.coordinates[0].length;
-            i++
-          ) {
-            fLng += updatedData.features[0].geometry.coordinates[0][i][0];
+          for (const element of updatedData.features[0].geometry.coordinates[0]) {
+            fLng += element[0];
           }
           fLng = fLng / updatedData.features[0].geometry.coordinates[0].length;
-          for (
-            var i = 0;
-            i < updatedData.features[0].geometry.coordinates[0].length;
-            i++
-          ) {
-            fLat += updatedData.features[0].geometry.coordinates[0][i][1];
+          for (const element of updatedData.features[0].geometry.coordinates[0]) {
+            fLat += element[1];
           }
           fLat = fLat / updatedData.features[0].geometry.coordinates[0].length;
           centerPoint = [fLng, fLat];
         } else if (mode.mode === DrawLineStringMode) {
           modee = "LineView";
 
-          var fLat: any = 0;
-          var fLng: any = 0;
-          for (
-            var i = 0;
-            i < updatedData.features[0].geometry.coordinates.length;
-            i++
-          ) {
-            fLng += updatedData.features[0].geometry.coordinates[i][0];
+          for (const element of updatedData.features[0].geometry.coordinates) {
+            fLng += element[0];
           }
           fLng = fLng / updatedData.features[0].geometry.coordinates.length;
-          for (
-            var i = 0;
-            i < updatedData.features[0].geometry.coordinates.length;
-            i++
-          ) {
-            fLat += updatedData.features[0].geometry.coordinates[i][1];
+          for (const element of updatedData.features[0].geometry.coordinates) {
+            fLat += element[1];
           }
           fLat = fLat / updatedData.features[0].geometry.coordinates.length;
           centerPoint = [fLng, fLat];
@@ -5358,20 +5342,11 @@ function BaseMap(props) {
                         {/* <Form.Item label="Layer Type" name="type"> */}
                         <Cascader
                           style={{ width: "100%" }}
-                          defaultValue={
-                            defaultLayerType
-                              ? defaultLayerType.featureType
-                                ? [
-                                    defaultLayerType.layerType.toUpperCase(),
-                                    defaultLayerType.featureType.toUpperCase(),
-                                    defaultLayerType.layerProp.toUpperCase(),
-                                  ]
-                                : [
-                                    defaultLayerType.layerType.toUpperCase(),
-                                    defaultLayerType.layerProp.toUpperCase(),
-                                  ]
-                              : []
-                          }
+                          defaultValue={[
+                            defaultLayerType?.layerType,
+                            defaultLayerType?.featureType,
+                            defaultLayerType?.layerProp,
+                          ].filter(e => !!e).map(e => e.toUpperCase())}
                           options={getEditLayerTypeOptions(defaultLayerType)}
                           placeholder="Select Layer Type"
                           onChange={(value) => {

@@ -389,17 +389,7 @@ export const ImportLayerSteps = ({
                                       <Select
                                         key={`${fields.key}-${uuid()}`}
                                         style={{ width: "200px" }}
-                                        defaultValue={
-                                          selectedAttr[layers._id]
-                                            ? selectedAttr[layers._id][
-                                                fields.key
-                                              ]
-                                              ? selectedAttr[layers._id][
-                                                  fields.key
-                                                ]
-                                              : null
-                                            : null
-                                        }
+                                        defaultValue={selectedAttr?.[layers._id]?.[fields.key] || null}
                                         onSelect={(e) =>
                                           handleAttributeMapping(
                                             e,
@@ -409,7 +399,7 @@ export const ImportLayerSteps = ({
                                         }
                                         placeholder="Map the attribute selected"
                                       >
-                                        {primeAttributes.map((item, index) => (
+                                        {primeAttributes.map((item) => (
                                           <Option
                                             key={`${uuid()}-${item.key}`}
                                             value={item.attribute}
@@ -762,17 +752,7 @@ export const ImportLayerSteps = ({
                                       <Select
                                         key={`${fields.key}-${uuid()}`}
                                         style={{ width: "200px" }}
-                                        defaultValue={
-                                          selectedAttr[layers._id]
-                                            ? selectedAttr[layers._id][
-                                                fields.key
-                                              ]
-                                              ? selectedAttr[layers._id][
-                                                  fields.key
-                                                ]
-                                              : null
-                                            : null
-                                        }
+                                        defaultValue={selectedAttr?.[layers._id]?.[fields.key] || null}
                                         onSelect={(e) =>
                                           handleAttributeMapping(
                                             e,
@@ -782,7 +762,7 @@ export const ImportLayerSteps = ({
                                         }
                                         placeholder="Map the attribute selected"
                                       >
-                                        {primeAttributes.map((item, index) => (
+                                        {primeAttributes.map((item) => (
                                           <Option
                                             key={`${uuid()}-${item.key}`}
                                             value={item.attribute}

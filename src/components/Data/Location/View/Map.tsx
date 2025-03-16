@@ -79,7 +79,6 @@ class LocationCardMap extends Component<mapProps, mapState> {
 
   googleMapRef: any = React.createRef<HTMLDivElement>();
   googleMap: any = null;
-  socket: any = null;
   outcomes: any = null;
   missionMarker: any = null;
 

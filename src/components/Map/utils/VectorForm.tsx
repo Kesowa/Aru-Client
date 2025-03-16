@@ -113,14 +113,13 @@ function VectorForm(props: IVectorFormProps) {
   };
 
   const getCascaderOptions = (fType: featureTypes) => {
+    let label: string;
+    if (fType === featureTypes.MULTI_POLYGON) label = "Area";
+    else if (fType === featureTypes.MULTI_LINE_STRING) label = "Line";
+    else label = "Marker";
     return {
       value: fType,
-      label:
-        fType === featureTypes.MULTI_POLYGON
-          ? "Area"
-          : fType === featureTypes.MULTI_LINE_STRING
-          ? "Line"
-          : "Marker",
+      label,
       children: Object.keys(featureType)
         .filter((p) => featureType[p] === fType)
         .map((p) => ({ label: p, value: p })),
@@ -504,7 +503,6 @@ function VectorForm(props: IVectorFormProps) {
   };
 
   return (
-    <>
       <Drawer
         title={null}
         width={600}
@@ -634,7 +632,6 @@ function VectorForm(props: IVectorFormProps) {
           </Row>
         </React.Fragment>
       </Drawer>
-    </>
   );
 }
 

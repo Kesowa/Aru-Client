@@ -87,6 +87,7 @@ function Videos(VideoProps) {
     });
   }
   function renderVideos(data: any[]) {
+    if (data.length === 0) return <Empty style={{ margin: "auto" }} />;
     return data.map((dataa) => (
       <Col span={5} className="video-thumbnail" key={window.crypto.randomUUID()}>
         <Card
@@ -117,11 +118,7 @@ function Videos(VideoProps) {
           <div style={{ margin: "auto", marginTop: "5%" }}>
             <Spin size="large" />
           </div>
-        ) : VodData.length > 0 ? (
-          renderVideos(VodData)
-        ) : (
-          <Empty style={{ margin: "auto" }} />
-        )}
+        ) : renderVideos(VodData)}
       </Row>
       <Pagination
         onShowSizeChange={setPageLimit}

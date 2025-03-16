@@ -49,15 +49,12 @@ class GoogleMap extends Component<mapProps, mapState> {
   googleMapRef: any = React.createRef<HTMLDivElement>();
   googleSearchRef: any = React.createRef<HTMLInputElement>();
   geojsonInputRef: any = React.createRef<HTMLInputElement>();
-  tl = null;
-  container: any = null;
   top = 0;
   left = 0;
   googleMap: any = null;
   drawingManager: any = null;
   oldShape: any = null;
   searchAutoComplete: any = null;
-  infoWindow: any = null;
 
   componentDidMount() {
     const loc = { lat: 43.642567, lng: -79.387054 };
@@ -71,7 +68,6 @@ class GoogleMap extends Component<mapProps, mapState> {
     this.drawingManager.setMap(this.googleMap);
     this.setSearchBarEvent();
     this.overlayComplete();
-    this.container = document.getElementById("gmap_container");
     // Pin drop
     this.googleMap.addListener("dblclick", (e) => {
       if (this.oldShape) {
@@ -235,17 +231,17 @@ class GoogleMap extends Component<mapProps, mapState> {
   };
 
   // Set Current location of user
-  setCurrentLocation = () => {
-    let lat, lng;
-    if (window.navigator.geolocation) {
-      window.navigator.geolocation.getCurrentPosition((position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        this.googleMap.panTo({ lat, lng });
-        this.props.setlocation({ lat, lng });
-      });
-    }
-  };
+  // setCurrentLocation = () => {
+  //   let lat, lng;
+  //   if (window.navigator.geolocation) {
+  //     window.navigator.geolocation.getCurrentPosition((position) => {
+  //       const lat = position.coords.latitude;
+  //       const lng = position.coords.longitude;
+  //       this.googleMap.panTo({ lat, lng });
+  //       this.props.setlocation({ lat, lng });
+  //     });
+  //   }
+  // };
 
   // Initialize Drawing Manager
   createDrawingManager = () =>

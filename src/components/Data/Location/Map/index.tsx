@@ -40,8 +40,6 @@ class LocationMap extends Component<mapProps, mapState> {
 
   googleMapRef: any = React.createRef<HTMLDivElement>();
   googleSearchRef: any = React.createRef<HTMLInputElement>();
-  tl = null;
-  container: any = null;
   top = 0;
   left = 0;
   googleMap: any = null;
@@ -62,7 +60,6 @@ class LocationMap extends Component<mapProps, mapState> {
     this.drawingManager.setMap(this.googleMap);
     this.setSearchBarEvent();
     this.overlayComplete();
-    this.container = document.getElementById("gmap_container");
     // Pin drop
     this.googleMap.addListener("dblclick", (e) => {
       if (this.oldShape) {
