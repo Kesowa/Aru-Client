@@ -11,7 +11,7 @@ import { AuthContext, useAuth } from "./services/authUtils";
 import { useScripts } from "./services/loadScripts";
 import { ThreadContext, useThread } from "./services/threadUtils";
 import http from "./services/httpCall";
-import { components } from "./handlers/schema";
+import { Components } from "./handlers/schema";
 import apis from "./services/apis";
 import { AxiosErrorHandler } from "./services/httpErrorHandle";
 import EntryLoader from "./components/shared/Loader/Entry";
@@ -33,7 +33,7 @@ const App = () => {
   const fetchUserDetails = () => {
     setLoading(true);
     http
-      .get<components["schemas"]["UserDetailsAuthResponse"]>(
+      .get<Components["schemas"]["UserDetailsAuthResponse"]>(
         apis.GET_USER_DETAILS
       )
       .then((result) => {

@@ -6,7 +6,6 @@ import { Typography, Form, Input, Button, Alert } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
 import "./index.less";
 import KesowaLogo from "../../static/kiv_logo_new.png";
-import { clientOptions } from "../../static/sideBarOptions";
 import { Link } from "react-router-dom";
 import { INSTANCE, Instance } from "src/constants";
 import ReactDom from "react-dom";

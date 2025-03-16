@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useContext } from "react";
+import React, { useState, useRef, useCallback, useContext, useEffect, useMemo } from "react";
 import {
   Alert,
   Button,
@@ -30,9 +30,7 @@ import {
   MessageOutlined,
 } from "@ant-design/icons";
 import Dragger from "antd/lib/upload/Dragger";
-import { useEffect } from "react";
 import io from "socket.io-client";
-import { useMemo } from "react";
 import download from "downloadjs";
 import { API_URL, STATIC_URL } from "src/constants";
 import Thread from "src/components/shared/Thread";

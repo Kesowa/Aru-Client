@@ -3,14 +3,8 @@ import {
   Row,
   Col,
   Typography,
-  Avatar,
-  Button,
-  Tooltip,
   Divider,
   Checkbox,
-  Modal,
-  Image,
-  notification,
   Spin,
   Input,
   Cascader,
@@ -19,23 +13,18 @@ import {
 } from "antd";
 import {
   UserOutlined,
-  ShareAltOutlined,
-  DownloadOutlined,
-  GoogleOutlined,
   SortAscendingOutlined,
   SortDescendingOutlined,
-  LoadingOutlined,
 } from "@ant-design/icons";
 import { API_URL, STATIC_URL } from "src/constants";
 import "../index.less";
-import * as htmlToImage from "html-to-image";
 import http from "../../../../../services/httpCall";
 import apis from "../../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import Alone from "../../../../../static/Alone-rafiki.svg";
 import moment from "moment";
 import io from "socket.io-client";
-import { components } from "src/handlers/schema";
+import { Components } from "src/handlers/schema";
 import { AuthContext } from "src/services/authUtils";
 import OutcomeModal from "../../Details/Data/OutcomeModal";
 const { Title, Text } = Typography;
@@ -101,7 +90,7 @@ function Outcomes(props: any) {
         setAlertSocketEvent("");
         setLoading(true);
         http
-          .get<components["schemas"]["GetByMissionIDResponse"]>(
+          .get<Components["schemas"]["GetByMissionIDResponse"]>(
             `${apis.GET_ALERT_BY_MISSION_ID_PAGINATION}?sortBy=createdAt:asce&page=${page}&limit=10&id=${missionId}&alertType=`
           )
           .then((res) => {
@@ -120,7 +109,7 @@ function Outcomes(props: any) {
       } else {
         setLoading(true);
         http
-          .get<components["schemas"]["GetByMissionIDResponse"]>(
+          .get<Components["schemas"]["GetByMissionIDResponse"]>(
             `${apis.GET_ALERT_BY_MISSION_ID_PAGINATION}?sortBy=createdAt:asce&page=${page}&limit=10&id=${missionId}&alertType=`
           )
           .then((res) => {

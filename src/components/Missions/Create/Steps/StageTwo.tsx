@@ -1,19 +1,9 @@
-import React, { useState, useEffect, FC } from "react";
-import { Card, message, Typography } from "antd";
-import { InfoCircleFilled } from "@ant-design/icons";
-import { Collapse } from "antd";
-import StageTwoForm from "./StageTwoForm";
-import FlightEditing from "../CreateFlight";
+import { useState, FC } from "react";
+import { message } from "antd";
 import Weather from "../../../shared/Weather";
-import Codes from "../../../../static/weatherCodes";
-import convertDegreeToDirection from "../../../../services/convertDegreeToDirection";
 import "../index.less";
-import axios from "axios";
 import GoogleMap from "../../GoogleMap";
 import EditFlightForm from "../../Flight/Edit/Form";
-
-const { Panel } = Collapse;
-const { Title } = Typography;
 
 interface WeatherData {
   humidity: number;

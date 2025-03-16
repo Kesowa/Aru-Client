@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useContext } from "react";
+import React, { useState, useEffect, useMemo, useContext } from "react";
 import KesowaNewLogo from "../../../../static/kesowa-black.png";
 import * as turf from "@turf/turf";
 import {
@@ -11,7 +11,6 @@ import {
   message,
   Tree,
   Dropdown,
-  Modal,
   Input,
   Select,
   Space,
@@ -22,15 +21,9 @@ import {
 } from "antd";
 import {
   DoubleRightOutlined,
-  FileImageOutlined,
   DoubleLeftOutlined,
-  BranchesOutlined,
-  EnvironmentOutlined,
-  GatewayOutlined,
   SortAscendingOutlined,
   SortDescendingOutlined,
-  ExclamationCircleOutlined,
-  FolderOutlined,
   FlagOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
@@ -41,7 +34,6 @@ import { BitmapLayer, } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
 import { HTMLOverlayItem, HTMLOverlay } from "src/components/shared/HTMLOverlay";
 import {
-  ViewMode,
   GeoJsonEditMode,
 } from "@deck.gl-community/editable-layers";
 import { StaticMap } from "react-map-gl";
@@ -67,7 +59,7 @@ import FourOFour from "src/components/shared/Error/FourOFour";
 import { AxiosResponse } from "axios";
 import { IMission } from "src/types/mission";
 import { ILayer } from "src/types/layer";
-import { BBox, mergeBoundingBoxes, GeoJson } from "src/types/geojson";
+import { BBox, GeoJson } from "src/types/geojson";
 import { Layer, ILayerToDeckLayer } from "../../layerRender";
 import { ILayersToTree } from "../../treeRender";
 import { WebMercatorViewport } from "viewport-mercator-project";
@@ -268,7 +260,7 @@ function PublicMap(props) {
 
   useEffect(() => {
     SetAllLayers((prev) => [
-      ...prev.sort((a, b) => {
+      ...prev.toSorted((a, b) => {
         if (sortType === "createdAt") {
           if (isAscending) return moment(a.createdAt).diff(moment(b.createdAt));
           else return moment(b.createdAt).diff(moment(a.createdAt));

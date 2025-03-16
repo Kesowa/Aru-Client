@@ -16,7 +16,7 @@ test("thermal image tests", async ({ page }) => {
     });
   await page.getByText("Thermal View").click();
 
-  const modalElement = await page.locator("#canvas");
+  const modalElement = page.locator("#canvas");
 
   await modalElement.hover();
   await page.waitForTimeout(2500);

@@ -22,7 +22,7 @@ export async function uploadFile(file: RcFile, model: DocModel, progress?: (frac
     type: file.type,
     model,
   });
-  if (getUrlRes.data.status == false) {
+  if (!getUrlRes.data.status) {
     console.error("ERROR GETTING PRESIGNED URL!!!: ", getUrlRes.data.message);
     return;
   }

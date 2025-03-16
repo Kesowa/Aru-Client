@@ -29,7 +29,7 @@ import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { API_URL } from "src/constants";
 import { featureType, featureTypes, vectorProps } from "src/static/vectorprops";
 import { ILayer } from "src/types/layer";
-import { components } from "src/handlers/schema";
+import { Components } from "src/handlers/schema";
 import { Feature, GeoJson, Properties } from "src/types/geojson";
 import { AuthContext } from "src/services/authUtils";
 
@@ -432,7 +432,7 @@ function VectorForm(props: IVectorFormProps) {
       }
       props.loading(true);
       http
-        .post<components["schemas"]["CreateBaseVectorLayerResponse"]>(
+        .post<Components["schemas"]["CreateBaseVectorLayerResponse"]>(
           props.isBaseMap
             ? `${apis.CREATE_BASE_LAYER_FROM_DRAWING}`
             : `${apis.CREATE_VECTOR_LAYER}`,

@@ -321,6 +321,7 @@ function GridLive(props: any) {
   const setGroupOrder = (groupno, group) => {
     const allGroups = [...feedGroups];
     allGroups[groupno].feeds = [...group];
+    setFeedGroups(allGroups);
   };
 
   const addFeedToPlace = () => {

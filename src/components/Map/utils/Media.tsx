@@ -99,7 +99,7 @@ function Media(props) {
         ),
       },
     ];
-    if (!(props.videoToShow.length > 0)) {
+    if (props.videoToShow.length <= 0) {
       items.push({
         key: "2",
         label: (
@@ -485,7 +485,7 @@ function Media(props) {
       if (refresh) {
         setRefresh(false);
       }
-      if (!(props.videoToShow.length > 0)) {
+      if (props.videoToShow.length <= 0) {
         setLoader(true);
         const newdata: any = [];
         http
@@ -1042,7 +1042,7 @@ function Media(props) {
         open={props.visible}
         footer={
           <>
-            {!(props.videoToShow.length > 0) ? (
+            {props.videoToShow.length <= 0 ? (
               <>
                 {props.isBaseMap ? (
                   <>

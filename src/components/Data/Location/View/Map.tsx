@@ -7,32 +7,15 @@ import {
   Select,
   message,
   Spin,
-  Modal,
-  Row,
-  Col,
-  Image,
-  Typography,
-  Tooltip,
-  Button,
-  notification,
-  Avatar,
 } from "antd";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import "./index.less";
 import "../../../Missions/Views/Live/index.less";
-import {
-  UserOutlined,
-  ShareAltOutlined,
-  DownloadOutlined,
-  GoogleOutlined,
-} from "@ant-design/icons";
-import * as htmlToImage from "html-to-image";
 import { STATIC_URL } from "src/constants";
 import { LoaderContext } from "src/components/shared/Loader";
 import OutcomeModal from "src/components/Missions/Views/Details/Data/OutcomeModal";
 const { Option } = Select;
-const { Text, Title } = Typography;
 
 type mapProps = {
   center: any;

@@ -230,7 +230,9 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload}) => {
             while (
               !(done = this.converter.tick()) &&
               performance.now() - startTick < 25
-            ) {}
+            ) {
+              // wait
+            }
             if (!done) {
               requestAnimationFrame(tick);
             } else {

@@ -5,12 +5,6 @@ import {
   Card,
   Typography,
   Spin,
-  Image,
-  Modal,
-  Tooltip,
-  Button,
-  Avatar,
-  notification,
   Cascader,
   Select,
   Input,
@@ -23,18 +17,13 @@ import {
   UserOutlined,
   AppstoreOutlined,
   BarsOutlined,
-  ShareAltOutlined,
-  DownloadOutlined,
-  GoogleOutlined,
   SortAscendingOutlined,
   SortDescendingOutlined,
-  LoadingOutlined,
 } from "@ant-design/icons";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import moment from "moment";
-import * as htmlToImage from "html-to-image";
 import "./data.less";
 import "../../../Missions/Views/Live/index.less";
 import { STATIC_URL } from "src/constants";

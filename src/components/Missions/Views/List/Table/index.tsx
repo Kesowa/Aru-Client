@@ -1,17 +1,15 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import {
   Tag,
-  Row,
-  Col,
   Typography,
   Tooltip,
   Table,
   Button,
   message,
   Popconfirm,
+  Input,
 } from "antd";
-import { Input } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
@@ -21,7 +19,6 @@ import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import moment from "moment";
 import { useHistory } from "react-router-dom";
 import mp from "../../../../../static/mapping.svg";
-import { DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import "./index.less";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import { Form, Input, Button, Select, message, Result, Modal } from "antd";
+import { Form, Input, Button, message, Result, Modal } from "antd";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
 import http from "../../../../services/httpCall";

@@ -9,7 +9,6 @@ import {
   Typography,
   Modal,
   Button,
-  notification,
   Tag,
   Pagination,
   Empty,
@@ -628,7 +627,7 @@ function Outcomes(props) {
   }
 
   async function extractExif(file: any) {
-    const tags = await ExifReader.load(file);
+    const tags = ExifReader.load(file);
     console.log(tags);
 
     if (tags.GPSLatitude && tags.GPSLongitude) {
