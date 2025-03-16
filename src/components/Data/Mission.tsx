@@ -11,8 +11,8 @@ import {
   Popconfirm,
   Radio,
   Spin,
+  Input,
 } from "antd";
-import { Input } from "antd";
 import { SearchOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -33,12 +33,9 @@ function DataMission(props) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
-  const [usedFilter, setUsedFilter] = useState("Completed");
-  const [missionCount, setMissionCount] = useState({});
-  const [totalMissions, settotalMissions] = useState(0);
   const [sortOrder, setSortOrder] = useState("createdAt:descend");
   const [searchFilters, setSearchFilters] = useState("");
-  const [missionTypes, populateMissionTypes] = useState([]);
+  const [missionTypes, setMissionTypes] = useState([]);
   const [typesLoader, setTypesLoader] = useState(false);
   const [missionType, setMissionType] = useState("");
 
@@ -347,7 +344,7 @@ function DataMission(props) {
         id: tenantId,
         page,
         limit,
-        filter: usedFilter,
+        filter: "Completed", // Only completed missions are displayed on data page
         sort: sortOrder,
         searchFilters,
       };
@@ -369,8 +366,6 @@ function DataMission(props) {
               tm += Number(c.count);
             });
             props.setMissionCount(count["Completed"]);
-            setMissionCount(count);
-            settotalMissions(tm);
           } else {
             message.error(result.data.message);
           }
@@ -389,7 +384,7 @@ function DataMission(props) {
 
   useEffect(() => {
     fetchMissions();
-  }, [page, limit, usedFilter, sortOrder, searchFilters, missionType]);
+  }, [page, limit, sortOrder, searchFilters, missionType]);
 
   //fetch mission types
   useEffect(() => {
@@ -398,7 +393,7 @@ function DataMission(props) {
       .get(`${apis.GET_ALL_MISSION_TYPES}`)
       .then((res) => {
         if (res.data.status) {
-          populateMissionTypes(res.data.data);
+          setMissionTypes(res.data.data);
         } else {
           message.error(res.data.message);
         }

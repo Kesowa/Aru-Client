@@ -80,10 +80,6 @@ function Outcomes(props) {
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
   const [thumbnail, setThumbnail] = useState("");
-  const [progress, setProgress] = useState(0); //this can be used for a different progress component
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isModalVisible2, setIsModalVisible2] = useState(false);
-  const [storageModal, setStorageModal] = useState(false);
   const [activateSelection, setActivateSelection] = useState(false);
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
@@ -666,23 +662,7 @@ function Outcomes(props) {
       const res = await extractExif(options.file);
       console.log("EXTRACT EXIFR: ", res);
 
-      // const config:AxiosRequestConfig = {
-      //   onUploadProgress: (event) => {
-      //     const percent = Math.floor((event.loaded / event.total) * 100);
-      //     setProgress(percent);
-      //     if (percent === 100) {
-      //       setTimeout(() => setProgress(0), 1000);
-      //     }
-      //     options.onProgress({
-      //       percent: (event.loaded / event.total) * 100,
-      //     });
-      //   },
-      //   cancelToken: source.token,
-      // };
-
       const uploadToken = await uploadFile(options.file, DocModel.ALERT_IMAGES,(prog) => {
-        console.log("PROGRESS: ", prog);
-        setProgress(prog * 100);
         options.onProgress({ percent: prog * 100 });
       },source.token);
 
@@ -736,21 +716,12 @@ function Outcomes(props) {
                   err.response.data.message ===
                   "Package has expired! Please renew!"
                 ) {
-                  setIsModalVisible2(true);
                   window.setTimeout(function () {
                     AxiosErrorHandler(err, logout); 
                   }, 5000);
-                } else if (
-                  err.response?.data.message ===
-                  "Actual storage exceeded the Limit of Set storage!"
-                )
-                  setStorageModal(true);
-                else {
-                  {
-                    message.error(err.response?.data.message);
-                    console.log(err.response);
-                  }
-                  setIsModalVisible(true);
+                } else {
+                  message.error(err.response?.data.message);
+                  console.log(err.response);
                 }
               } else {
                 console.log("Upload Error!", err.message);
@@ -773,21 +744,6 @@ function Outcomes(props) {
           // fData.append("note", "Alert uploaded from browser!");
           // fData.append("onSite", "false");
           // fData.append("flightId", props.missionDetails.flightId);
-          
-          // const config = {
-          
-          //   onUploadProgress: (event) => {
-          //     const percent = Math.floor((event.loaded / event.total) * 100);
-          //     setProgress(percent);
-          //     if (percent === 100) {
-          //       setTimeout(() => setProgress(0), 1000);
-          //     }
-          //     options.onProgress({
-          //       percent: (event.loaded / event.total) * 100,
-          //     });
-          //   },
-          //   cancelToken: source.token,
-          // };
           http
             .post(options.action, body)
             .then((res: any) => {
@@ -813,21 +769,12 @@ function Outcomes(props) {
                   err.response.data.message ===
                   "Package has expired! Please renew!"
                 ) {
-                  setIsModalVisible2(true);
                   window.setTimeout(function () {
                     AxiosErrorHandler(err, logout); 
                   }, 5000);
-                } else if (
-                  err.response?.data.message ===
-                  "Actual storage exceeded the Limit of Set storage!"
-                )
-                  setStorageModal(true);
-                else {
-                  {
-                    message.error(err.response?.data.message);
-                    console.log(err.response);
-                  }
-                  setIsModalVisible(true);
+                } else {
+                  message.error(err.response?.data.message);
+                  console.log(err.response);
                 }
               } else {
                 console.log("Upload Error!", err.message);

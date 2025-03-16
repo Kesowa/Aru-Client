@@ -1,8 +1,6 @@
 import { useState, useEffect, useContext } from "react";
-import { Row, Col, Typography, Table, Button, Card, message } from "antd";
-import { Input } from "antd";
+import { Row, Col, Typography, Table, Button, Card, message, Input } from "antd";
 import {
-  AudioOutlined,
   SearchOutlined,
   EditOutlined,
   DeleteOutlined,
@@ -20,20 +18,8 @@ import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 import { GOOGLE_API_KEY } from "src/constants";
 
-interface TabOptions {
-  filter: any;
-}
 function DataLocation(props) {
-  const { Search } = Input;
   const { Title } = Typography;
-  const suffix = (
-    <AudioOutlined
-      style={{
-        fontSize: 16,
-        color: "#1890ff",
-      }}
-    />
-  );
 
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
@@ -360,8 +346,6 @@ function DataLocation(props) {
       createdAt: "17/02/2021",
     },
   ];
-
-  const onSearch = (value) => console.log(value);
 
   function fetchRowDetails(geofence, name) {
     return console.log("");

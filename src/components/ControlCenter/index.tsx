@@ -303,10 +303,6 @@ function GridLive(props: any) {
 
     groups[group] = requiredGroup;
 
-    const activeFeeds = requiredGroup.feeds.filter(
-      (feed) => feed.type === "feed"
-    );
-
     console.log(pool);
 
     setFeedPool(pool);
@@ -456,14 +452,6 @@ function GridLive(props: any) {
     };
     setFeedGroups(allGroups);
     resetChangeFeedModal();
-  };
-
-  const contentStyle: any = {
-    height: "500px",
-    color: "#fff",
-    lineHeight: "160px",
-    textAlign: "center",
-    background: "#364d79",
   };
 
   return (

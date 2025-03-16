@@ -462,7 +462,7 @@ const CreateBaseLayer = (props) => {
             let c = 0;
             setVectorPath(result.data.data.layer.layerpath);
             setCurrentLayerId(result.data.data.layer._id);
-            for (const [key, value] of Object.entries(
+            for (const [key, _] of Object.entries(
               result.data.data.properties
             )) {
               if (key !== "sys_id" && key !== "icon" && key !== "color") {
@@ -1220,32 +1220,6 @@ const CreateBaseLayer = (props) => {
     {
       title: "Attributes",
       dataIndex: "attribute",
-    },
-  ];
-
-  const columns2 = [
-    {
-      title: "Attributes",
-      dataIndex: "attribute",
-    },
-    {
-      title: "Occurence In Layers",
-      dataIndex: "occurs",
-      render: (e) => (
-        <>
-          {e == "Present in all layers" ? (
-            <>
-              <span style={{ color: "green", marginRight: "5px" }}>●</span>
-              {e}
-            </>
-          ) : (
-            <>
-              <span style={{ color: "red", marginRight: "5px" }}>●</span>
-              {e}
-            </>
-          )}
-        </>
-      ),
     },
   ];
 

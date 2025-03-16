@@ -63,11 +63,6 @@ function Map(props) {
           missionId: id,
         },
       })
-      .then((res) => {
-        if (res.data.status) {
-          const url = `${STATIC_URL}/${res.data.link}`;
-        }
-      })
       .catch((err) => {
         console.log(err);
         message.error(err.message);

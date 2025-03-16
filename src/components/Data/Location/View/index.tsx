@@ -47,7 +47,6 @@ function LocationCard(props) {
   const [outComesToRender, setoutComesToRender] = useState([]);
   const [shouldRenderOutcomes, setshouldRenderOutcomes] = useState(true);
   const [isChecked, setIsChecked] = useState(true);
-  const [once, setonce] = useState(true);
 
   const { id } = useParams<any>();
   

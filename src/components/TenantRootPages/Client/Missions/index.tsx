@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Tag,
   Row,
@@ -11,12 +11,11 @@ import {
   Popconfirm,
   Radio,
   Spin,
+  Input,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { Input } from "antd";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import {
-  AudioOutlined,
   SearchOutlined,
   DeleteOutlined,
   EyeOutlined,
@@ -29,7 +28,6 @@ import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import http from "../../../../services/httpCall";
 import apis from "../../../../services/apis";
 import moment from "moment";
-import { useHistory } from "react-router-dom";
 import mp from "../../../../static/mapping.svg";
 import "../../../shared/MissionList.less";
 import { PERMS } from "src/static/permissions";
@@ -46,8 +44,6 @@ function DataMission() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
-  const [missionCount, setMissionCount] = useState({});
-  const [totalMissions, settotalMissions] = useState(0);
   const [sortOrder, setSortOrder] = useState("createdAt:descend");
   const [searchFilters, setSearchFilters] = useState("");
   const [missionTypes, populateMissionTypes] = useState([]);
@@ -67,16 +63,8 @@ function DataMission() {
     setLimit(limit);
   };
 
-  const { Search } = Input;
   const { Title } = Typography;
-  const suffix = (
-    <AudioOutlined
-      style={{
-        fontSize: 16,
-        color: "#1890ff",
-      }}
-    />
-  );
+
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");

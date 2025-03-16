@@ -1,6 +1,5 @@
 import { useState, Suspense, lazy, useContext } from "react";
-import { Layout, Row, Col, Typography, Space, Spin } from "antd";
-import { useHistory } from "react-router-dom";
+import { Layout, Row, Col, Space, Spin } from "antd";
 
 import "./index.less";
 import TermsAndCondition from "./utils/TnC";
@@ -11,9 +10,7 @@ const FallbackComponent = lazy(() => import("./utils/Fallback"));
 
 function Dashboard(props: any) {
   const [sideBarCollapsed, setSideBarCollapsed] = useState(false);
-  const { Paragraph, Text } = Typography;
   const [showProfile, setShowProfile] = useState(false);
-  const history = useHistory();
 
   const { Auth } = useContext(AuthContext);
 

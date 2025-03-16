@@ -228,7 +228,6 @@ function VideoPlayer(props: any) {
   const [captLat, setCaptLat] = useState<any>(0);
   const [captLong, setCaptLong] = useState<any>(0);
   const [captAddress, setCaptAddress] = useState<any>("");
-  const [captTime, setCaptTime] = useState<any>("");
   const [loader, setLoader] = useState(false);
 
   //-----------props states passed to flight log map-----------
@@ -242,10 +241,7 @@ function VideoPlayer(props: any) {
     streamKey,
     mission,
     isLive,
-    alertBtnStatus,
     theatreModeStatus,
-    liveTagStatus,
-    map,
   } = props; //add prop for alert button #2
 
   const resolutionURLs = {
@@ -288,7 +284,7 @@ function VideoPlayer(props: any) {
       socketInstance.on("AI_TASK_PROGRESS", (data) => {
         console.log(data);
         setLoading(true);
-        const { inferId, status, progress } = data;
+        const { inferId, progress } = data;
         setInferenceProgress(progress);
 
         if (progress === 100) {
@@ -722,7 +718,7 @@ function VideoPlayer(props: any) {
         body.image = res.data.file;
 
         if (captLat !== undefined && captLong !== undefined) {
-          const addressLocation: any = geocoder([
+          geocoder([
             //Review
             isLive ? location.long : captLong,
             isLive ? location.lat : captLat,
@@ -961,7 +957,6 @@ function VideoPlayer(props: any) {
   useEffect(() => {
     const adjustBoundingBoxes = () => {
       if (playerRef.current && boundingBoxes) {
-        const videoElement = playerRef.current.getInternalPlayer();
         const { offsetWidth: containerWidth, offsetHeight: containerHeight } =
           playerRef.current.wrapper;
   
@@ -2245,7 +2240,7 @@ function VideoPlayer(props: any) {
                                 ) {
                                   setCaptLat(dPosition.lat);
                                   setCaptLong(dPosition.long);
-                                  const address: any = geocoder([
+                                  geocoder([
                                     dPosition.long,
                                     dPosition.lat,
                                   ]).then((res: any) => setCaptAddress(res));

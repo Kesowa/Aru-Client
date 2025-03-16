@@ -52,8 +52,6 @@ import { ThreadContext } from "src/services/threadUtils";
 
 let plainOptions = new Array<any>();
 function ImageDocs(props) {
-  const [defaultFileList, setDefaultFileList] = useState([]);
-  const [progress, setProgress] = useState(0); //this can be used for a different progress component
   const [refreshState, setRefreshState] = useState(false);
   const socket: any = useRef();
   const [loader, setLoader] = useState(false);
@@ -64,7 +62,6 @@ function ImageDocs(props) {
   const [isAscending, setIsAscending] = useState(false);
   const [sortType, setSortType] = useState("timeStamp");
   const [thermalPayload, setThermalPayload] = useState({});
-  // This is a comment
   const [flag, setFlag] = useState(false);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
@@ -252,19 +249,7 @@ function ImageDocs(props) {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       if (validateFile(options.file)) {
-        // const config:AxiosRequestConfig = {
-        //   onUploadProgress: (event) => {
-        //     const percent = Math.floor((event.loaded / event.total) * 100);
-        //     setProgress(percent);
-        //     if (percent === 100) {
-        //       setTimeout(() => setProgress(0), 1000);
-        //     }
-        //     options.onProgress({ percent: (event.loaded / event.total) * 100 });
-        //   },
-        //   cancelToken: source.token,
-        // };
-
-        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => { setProgress(prog * 100); options.onProgress({ percent: prog * 100 })}, source.token);
+        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => { options.onProgress({ percent: prog * 100 })}, source.token);
 
         const body = {
           file: uploadToken,
@@ -375,7 +360,7 @@ function ImageDocs(props) {
             type="info"
             showIcon
           />
-          <Dragger {...UploadProps} defaultFileList={defaultFileList}>
+          <Dragger {...UploadProps} defaultFileList={[]}>
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>

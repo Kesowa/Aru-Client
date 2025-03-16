@@ -37,20 +37,6 @@ function ManageClients(props) {
     perm => [PERMS.CREATE_CLIENT, PERMS.EDIT_CLIENT, PERMS.DELETE_CLIENT].includes(perm)
   );
 
-  const [client, setMissionClient] = useState<any>([
-    {
-      id: "no-client",
-      name: "",
-      avatar: "",
-    },
-  ]);
-
-  useEffect(() => {
-    if (props.missionClient) {
-      setMissionClient(props.missionClient);
-    }
-  }, [props.missionClient]);
-
   useEffect(() => {
     if (canManageClient) {
       http

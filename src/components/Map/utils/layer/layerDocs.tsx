@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { default as Shimmer } from "react-loading-skeleton";
@@ -55,9 +55,6 @@ const { Option } = Select;
 
 function LayerDocs(props) {
   const [files, populateFiles] = useState<any>([]);
-  const [defaultFileList, setDefaultFileList] = useState([]);
-  const [progress, setProgress] = useState(0);
-  const socket: any = useRef();
   const [loader, setLoader] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -71,7 +68,6 @@ function LayerDocs(props) {
   const [isLayerLabel, setIsLayerLabel] = useState(
     props.layerLabel === "No label selected" ? false : true
   );
-  const [activateButtons, setActivateButtons] = useState(true);
   const [showConfirmBtn, setShowConfirmBtn] = useState(false);
   const [reviewList, setReviewList] = useState<any>([]);
   const [fetchReviewFiles, setFetchReviewFiles] = useState(false);
@@ -846,7 +842,6 @@ function LayerDocs(props) {
   //-------------Fetching review files-----------------------------
   useEffect(() => {
     if ((props.visible || fetchReviewFiles) && (props.canEditLayer || props.canUpdateBaseLayer)) {
-      //setActivateButtons(true);
       setReviewFilesLoader(true);
       setFetchReviewFiles(false);
       http
@@ -910,7 +905,7 @@ function LayerDocs(props) {
           setReviewFilesLoader(false);
           setReviewShow(false);
         });
-      const data = fetchJSON().then((data) => {
+      fetchJSON().then((data) => {
         const filteredArrayy: any = [];
         data?.features.forEach(function (value, i) {
           let objecty: any = {};
@@ -926,8 +921,6 @@ function LayerDocs(props) {
         });
         setReviewOptions(filteredArrayy);
       });
-
-      //console.log(data);
     }
   }, [
     props.layerId,
@@ -1192,7 +1185,6 @@ function LayerDocs(props) {
   //-------------Handle Drawer Close------------------------
   const onClose = () => {
     props.setVisibility(false);
-    setDefaultFileList([]);
     props.set3Dstate("");
     setMadePublic(false);
     setPublicMapRefId("");

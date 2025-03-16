@@ -49,8 +49,7 @@ import { ThreadContext } from "src/services/threadUtils";
 
 function Media(props) {
   const [files, populateFiles] = useState<any>([]);
-  const [defaultFileList, setDefaultFileList] = useState<any>([]);
-  const [progress, setProgress] = useState(0);
+  // const [progress, setProgress] = useState(0); // Not used yet. May be used in future
 
   const [multiDelete, setMultiDelete] = useState(false);
   const [checkedList, setCheckedList] = useState<any>([]);
@@ -423,11 +422,12 @@ function Media(props) {
 
           const config = {
             onUploadProgress: (event) => {
-              const percent = Math.floor((event.loaded / event.total) * 100);
-              setProgress(percent);
-              if (percent === 100) {
-                setTimeout(() => setProgress(0), 1000);
-              }
+              // const percent = Math.floor((event.loaded / event.total) * 100);
+              // progress not used / shown anywhere yet
+              // setProgress(percent);
+              // if (percent === 100) {
+              //   setTimeout(() => setProgress(0), 1000);
+              // }
               options.onProgress({
                 percent: (event.loaded / event.total) * 100,
               });
@@ -1067,7 +1067,7 @@ function Media(props) {
                                 {props.canUpload ? (
                                   <Dragger
                                     {...UploadProps}
-                                    defaultFileList={defaultFileList}
+                                    defaultFileList={[]}
                                   >
                                     <p className="ant-upload-drag-icon">
                                       <InboxOutlined />
@@ -1110,7 +1110,7 @@ function Media(props) {
                             {props.canUpload ? (
                               <Dragger
                                 {...UploadProps}
-                                defaultFileList={defaultFileList}
+                                defaultFileList={[]}
                               >
                                 <p className="ant-upload-drag-icon">
                                   <InboxOutlined />

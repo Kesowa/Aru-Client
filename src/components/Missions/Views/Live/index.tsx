@@ -120,6 +120,8 @@ function LiveViewBase() {
           missionDetails.flight.time.split(" ")[0] +
           "Z"
       );
+    } else {
+      setisoDate(new Date().toISOString());
     }
   }, [missionDetails]);
 
@@ -155,7 +157,7 @@ function LiveViewBase() {
           );
           socket.current.on("STREAM_REMOVED", (streamKey) => {
             const temp = Buffer.from(streamKey, "base64").toString();
-            const [mID, fID, lID] = temp.split("-");
+            const fID = temp.split("-")[1];
 
             if (fID.toString() === missionDetails.flight._id.toString()) {
               message.success("Stream complete!");
@@ -233,7 +235,7 @@ function LiveViewBase() {
           <Col span={8}>
             <Weather
               location={location}
-              isoDate={new Date().toISOString()}
+              isoDate={isoDate}
               type="live"
             />
           </Col>

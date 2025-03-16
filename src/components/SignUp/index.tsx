@@ -32,7 +32,6 @@ const { Title, Text } = Typography;
 function Registration(props: any) {
   const [otpError, setOtpError] = useState(false);
   const [invalidOtp, setInvalidOtp] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState("");
   const [packages, popPackages] = useState<any>([]);
   const [loading, setLoader] = useState(false);
   const [resendLoad, setResendLoad] = useState(false);
@@ -206,7 +205,7 @@ function Registration(props: any) {
         billingPin: data.billingPin,
         avatar: "/",
         password: data.password,
-        package: selectedPackage,
+        package: "",
         captcha: "test",
       };
       http

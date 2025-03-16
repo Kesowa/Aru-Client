@@ -68,8 +68,6 @@ const { Text } = Typography;
 function Videos(props) {
   const [VodData, setVodData] = useState([]);
   const [loader, setLoader] = useState(true);
-  const [defaultFileList, setDefaultFileList] = useState([]);
-  const [progress, setProgress] = useState(0); //this can be used for a different progress component
   const [refresh, setRefresh] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
@@ -397,21 +395,7 @@ function Videos(props) {
       const source = cancelToken.source();
       setUploading(true);
 
-      // const config: AxiosRequestConfig = {
-      //   onUploadProgress: (event) => {
-      //     const percent = Math.floor((event.loaded / event.total) * 100);
-      //     // setProgress(percent);
-      //     if (percent === 100) {
-      //       // setTimeout(() => setProgress(0), 1000);
-      //     }
-      //     // options.onProgress({ percent: (event.loaded / event.total) * 100 });
-      //   },
-      //   cancelToken: source.token,
-      // };
-
       const uploadToken = await uploadFile(options.file, DocModel.VOD, (prog) => {
-        console.log("PROGRESS: ", prog);
-        setProgress(prog * 100);
         options.onProgress({ percent: prog * 100 });
       }, source.token);
         
@@ -795,7 +779,7 @@ function Videos(props) {
             type="info"
             showIcon
           />
-          <Dragger {...UploadProps} defaultFileList={defaultFileList}>
+          <Dragger {...UploadProps} defaultFileList={[]}>
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
@@ -824,9 +808,6 @@ function Videos(props) {
   //-------------------------render delete vod button based on permission--------------
   /* Action Button*/
 
-  const onChange = (list) => {
-    setCheckedList(list);
-  };
   useEffect(() => {
     console.log(checkedList);
   }, [checkedList]);

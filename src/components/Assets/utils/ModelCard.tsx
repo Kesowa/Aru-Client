@@ -476,16 +476,6 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
     setCount(count - 1);
   };
 
-  const handleAdd = () => {
-    const newData: Item = {
-      id: count,
-      key: `Key ${count + 1}`,
-      value: "",
-    };
-    setTableData([...tableData, newData]);
-    setCount(count + 1);
-  };
-
   const mergedColumns = columns.map((col) => {
     if (!col.editable) {
       return col;
@@ -801,7 +791,10 @@ if (data) {
                     },
                   ]}
                 >
-                  <DatePicker />
+                  <DatePicker
+                    showTime
+                    onChange={(value) => setManufacturingDate(value)}
+                  />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>

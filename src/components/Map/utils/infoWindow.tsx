@@ -159,9 +159,6 @@ function InfoWindow(props) {
   }
   useEffect(() => {
     reverseGeocoder(props.coordinates);
-    const featureData = Object.keys(props.feature.properties).filter(
-      (key: any, i: any) => key !== "Id" && key !== "color"
-    );
   }, []);
 
   const saveDrawingButton = () => {

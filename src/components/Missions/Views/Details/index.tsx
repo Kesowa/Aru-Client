@@ -87,7 +87,6 @@ function MissionView() {
   const [missionClient, setMissionClient] = useState<any>([]);
   const [initialPilot, setInitialPilot] = useState<any>({});
   const [missType, setMissType] = useState<any>("");
-  const [typeflag, settypeflag] = useState<any>(0);
   const location = useLocation<any>();
   const [showReportErrors, setShowReportErrors] = useState(false);
   const [reportErrors, setReportErrors] = useState<IPlotReportError | null>(
@@ -283,9 +282,6 @@ function MissionView() {
 
   // ++++++++++++++++++++++++++++++++++++ E2 share Modal states ++++++++++++++++++++++++++++++++++++++++++++
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
 
   const handleOk = () => {
     setIsModalVisible(false);
@@ -350,8 +346,6 @@ function MissionView() {
       .finally(() => {
         setLoading(false);
       });
-
-    settypeflag(1);
   };
 
   const EditCancel = () => {
@@ -650,7 +644,7 @@ function MissionView() {
   // ++++++++++++++++++ E7 Data Card Contents +++++++++++++++++++++++++++++++++++
 
   function renderDataCard(status: any) {
-    const [userType, missionId] = id.split("-");
+    const missionId = id.split("-")[1];
     console.log("LOGIS", missionId);
     switch (status) {
       case "Review":
@@ -1183,18 +1177,6 @@ function MissionView() {
       </>
     );
   }
-
-  // +++++++++++++++ E10 Breadcrumb routes ++++++++++++++++++++++++++++++++
-  const routes = [
-    {
-      path: "missions",
-      breadcrumbName: "Missions",
-    },
-    {
-      path: "missionView",
-      breadcrumbName: MissionDetails.missionName,
-    },
-  ];
 
   const onFinish = (values) => {
     console.log("Success:", values);

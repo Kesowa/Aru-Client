@@ -35,7 +35,6 @@ const { Title, Text } = Typography;
 function Pictomap(props) {
   const socket: any = useRef();
   const [currentStage, setCurrentStage] = useState(0);
-  const [defaultFileList, setDefaultFileList] = useState([]);
   const [progress, setProgress] = useState(0);
   const [fileList, setFileList] = useState<any>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -132,15 +131,15 @@ function Pictomap(props) {
  async function handleUploadFiles() {
     if (fileList.length > 0) {
       setIsUploading(true);
-      // const config:AxiosRequestConfig = {
-      //   onUploadProgress: (event) => {
-      //     const percent = Math.floor((event.loaded / event.total) * 100);
-      //     setProgress(percent);
-      //     if (percent === 100) {
-      //       setTimeout(() => setProgress(0), 1000);
-      //     }
-      //   },
-      // };
+      const config = {
+        onUploadProgress: (event) => {
+          const percent = Math.floor((event.loaded / event.total) * 100);
+          setProgress(percent);
+          if (percent === 100) {
+            setTimeout(() => setProgress(0), 1000);
+          }
+        },
+      };
       const uploadTokenPromises = fileList.map((file) =>
       uploadFile(file.originFileObj, DocModel.LAYER_FILES, (prog) =>
         console.info("PROGRESS: " + prog)
@@ -159,7 +158,7 @@ function Pictomap(props) {
       //   fData.append("file", file.originFileObj);
       // });
       http
-        .patch(`${apis.PIC_TO_MAP}?mode=${matchMode}`, body)
+        .patch(`${apis.PIC_TO_MAP}?mode=${matchMode}`, body, config)
         .then((res: any) => {
           if (res.data.status) {
             console.log(res.data.result);
@@ -263,7 +262,7 @@ function Pictomap(props) {
   //---Set layer features list for combo box---------------------
   useEffect(() => {
     if (currentStage === 2) {
-      const data = fetchJSON().then((data) => {
+      fetchJSON().then((data) => {
         const filterArray: any = [];
         data.features.forEach(function (value, i) {
           let objecty: any = {};

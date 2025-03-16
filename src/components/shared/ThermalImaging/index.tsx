@@ -1,12 +1,9 @@
-import { useState, useEffect, useRef, useContext } from "react";
-import { Button, Modal, message, Input, Form } from "antd";
+import { useState, useEffect, useContext } from "react";
+import { Button, Modal, message, Input, Space, Table } from "antd";
 import ThermalImage from "./thermalImage";
 import "./index.less";
 import { STATIC_URL } from "src/constants";
 import { PlusOutlined } from "@ant-design/icons";
-/* import http from "src/services/httpCall";
-import apis from "src/services/apis"; */
-import { Space, Table } from "antd";
 import apis from "../../../services/apis";
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
@@ -24,13 +21,9 @@ const ThermalImaging = (props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [thermalData, setThermalData] = useState<any>([]);
   const [tableData, setTableData] = useState([]);
-  const tableDataRef = useRef([]); // Initialize with an empty array
-  const [isLoading, setMissionsLoading] = useState(false);
-  const [isFetching, setFetch] = useState(false);
   const [xValues, setXValues] = useState([]);
   const [latestData, setLatestData] = useState(null);
   const [labelInput, setLabelInput] = useState("");
-  const [form] = Form.useForm();
 
   const { logout } = useContext(AuthContext);
 
@@ -72,25 +65,18 @@ const ThermalImaging = (props) => {
   };
 
   const fetchTableData = async ({ id, doc }) => {
-    setMissionsLoading(true);
-
     await http
       .get(apis.GET_THERMALPOINT, { params: { id, doc } })
       .then((res) => {
         // console.log(res.data.data.data);
         const tableDataResponse = res.data.data.data.table;
         console.log("tableDataResponse", tableDataResponse); // Assuming the response data matches your table data format
-        // tableDataRef.current = tableDataResponse;
         setTableData(tableDataResponse);
         console.log(tableData);
       })
       .catch((err) => {
         console.log(err);
         AxiosErrorHandler(err, logout);
-      })
-      .finally(() => {
-        setMissionsLoading(false);
-        setFetch(false);
       });
   };
 
@@ -139,7 +125,7 @@ const ThermalImaging = (props) => {
   }, [xValues, latestData]);
 
   const handleDelete = (record) => {
-    // Filter out the record to be deleted from the tableDataRef
+    // Filter out the record to be deleted from the tableData
     const updatedTableData = tableData.filter(
       (item) => item.x !== record.x || item.y !== record.y
     );

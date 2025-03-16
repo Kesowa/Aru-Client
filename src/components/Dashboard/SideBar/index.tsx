@@ -32,8 +32,7 @@ const { Title } = Typography;
 
 function SideBar(props: any) {
   const [href, setHref] = useState<any>(null);
-  const [r, setR] = useState(true);
-  const { switcher, themes, currentTheme, status } = useThemeSwitcher();
+  const { switcher, themes } = useThemeSwitcher();
   const history = useHistory();
 
   const { Auth, logout } = useContext(AuthContext);
@@ -58,7 +57,7 @@ function SideBar(props: any) {
     } else {
       setHref(l);
     }
-  }, [r]);
+  }, []);
   useEffect(() => {
     if (href !== null) {
       if (href.includes("control-center")) {
