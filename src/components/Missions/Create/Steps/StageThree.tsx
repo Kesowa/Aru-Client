@@ -92,7 +92,7 @@ const StageThree: FC<StageThreeProps> = ({
   jobTypeName,
   prevStage,
   flightDetails,
-  setIsEditing
+  setIsEditing,
 }) => {
   // Form control states
   const [data, setData] = useState<any>([]);
@@ -208,18 +208,20 @@ const StageThree: FC<StageThreeProps> = ({
       description: missionDescription,
       assetID: asset,
       missionType,
-      flights: [{
-        flightDetails: {
-          locationId: flightDetails.locationID || "none",
-          flightName: flightDetails.name,
-          date: flightDetails.date,
-          time: flightDetails.time,
-          duration: flightDetails.duration,
-          geoLocation: flightDetails.geolocation,
-          centerPoints: flightDetails.centerPoints,
+      flights: [
+        {
+          flightDetails: {
+            locationId: flightDetails.locationID || "none",
+            flightName: flightDetails.name,
+            date: flightDetails.date,
+            time: flightDetails.time,
+            duration: flightDetails.duration,
+            geoLocation: flightDetails.geolocation,
+            centerPoints: flightDetails.centerPoints,
+          },
+          geoFence: flightDetails.geoFence,
         },
-        geoFence: flightDetails.geoFence,
-      }],
+      ],
     };
     if (client) {
       data["clientId"] = [client];

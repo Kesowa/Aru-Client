@@ -673,7 +673,7 @@ function Outcomes(props) {
         type: "Manual",
         note: "Alert uploaded from browser!",
         onSite: "false",
-        flightId: props.missionDetails.flightId
+        flightId: props.missionDetails.flightId,
       };
 
       if (res.status) {   
@@ -720,9 +720,6 @@ function Outcomes(props) {
                   message.error(err.response?.data.message);
                   console.log(err.response);
                 }
-              } else {
-                console.log("Upload Error!", err.message);
-                message.error("Unable to upload file!");
               }
               options.onError({ err });
             })
@@ -778,11 +775,11 @@ function Outcomes(props) {
                 message.error("Unable to upload file!");
               }
               options.onError({ err });
-            })
-            .finally(() => {
-              setUploading(false);
-            });
-        };
+          })
+          .finally(() => {
+            setUploading(false);
+          });
+      }
       return {
         abort() {
           console.log("Aborting outcome upload");
@@ -795,10 +792,7 @@ function Outcomes(props) {
 
   // Render upload alert button based on user permissions
   function renderUploadButton() {
-    if (
-      userType === "tenant-staff" ||
-      userType === "tenant-client"
-    ) {
+    if (userType === "tenant-staff" || userType === "tenant-client") {
       if (userDetails.customPermissions.includes(PERMS.ALERT_CREATE)) {
         return (
           <Button onClick={() => uploadModal()}>
@@ -897,7 +891,9 @@ function Outcomes(props) {
         flag={flag}
         updateAPI={apis.UPDATE_MULTI_ALERT}
         thumb={getOutcomeThumbnail}
-        canToggleFlag={userDetails.customPermissions.includes(PERMS.ALERT_UPDATE)}
+        canToggleFlag={userDetails.customPermissions.includes(
+          PERMS.ALERT_UPDATE
+        )}
         canDelete={userDetails.customPermissions.includes(PERMS.ALERT_DELETE)}
       />
       {!loading ? (

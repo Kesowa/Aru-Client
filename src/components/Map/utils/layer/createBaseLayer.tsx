@@ -323,25 +323,28 @@ const CreateBaseLayer = (props) => {
       setUploading(true);
       if (props.isUpdate) {
         if (props.updateType == "Raster") {
+          // const config:AxiosRequestConfig = {
+          //   onUploadProgress: (event) => {
+          //       const percent = Math.floor((event.loaded / event.total) * 100);
+          //       setProgress(percent);
+          //     if (percent === 100) {
+          //         setTimeout(() => setProgress(0), 1000);
+          //       }
+          //     },
+          //   };
+          const uploadToken = await uploadFile(
+            fileList[0],
+            DocModel.RASTER,
+            (prog) => {
+              console.info("PROGRESS: " + prog);
+              setProgress(prog * 100);
+            }
+          );
 
-        // const config:AxiosRequestConfig = {
-        //   onUploadProgress: (event) => {
-        //       const percent = Math.floor((event.loaded / event.total) * 100);
-        //       setProgress(percent);
-        //     if (percent === 100) {
-        //         setTimeout(() => setProgress(0), 1000);
-        //       }
-        //     },
-        //   };
-        const uploadToken = await uploadFile(fileList[0], DocModel.RASTER, (prog) => {
-          console.info("PROGRESS: " + prog);
-          setProgress(prog * 100);
-        });
-
-        const body = {
-          file: uploadToken,
-          layerId: props.BaseLayerId,
-        };
+          const body = {
+            file: uploadToken,
+            layerId: props.BaseLayerId,
+          };
 
           // UPDATE RASTER BY FILE UPLOAD
           // const fmData = new FormData();
@@ -361,7 +364,6 @@ const CreateBaseLayer = (props) => {
             message.error(result.data.message);
           }
         } else {
-
           // const config:AxiosRequestConfig = {
           //   onUploadProgress: (event) => {
           //     const percent = Math.floor((event.loaded / event.total) * 100);
@@ -372,10 +374,14 @@ const CreateBaseLayer = (props) => {
           //   },
           // };
           // UPDATE VECTOR BY FILE UPLOAD
-          const uploadToken = await uploadFile(fileList[0], DocModel.VECTOR, (prog) => {
-            console.info("PROGRESS: " + prog);
-            setProgress(prog * 100);
-          });
+          const uploadToken = await uploadFile(
+            fileList[0],
+            DocModel.VECTOR,
+            (prog) => {
+              console.info("PROGRESS: " + prog);
+              setProgress(prog * 100);
+            }
+          );
 
           const body = {
             file: uploadToken,
@@ -425,19 +431,21 @@ const CreateBaseLayer = (props) => {
           setProgress(prog * 100);
         });
 
-          const body = {
-            file: uploadToken,
-            captureDate: captureDate,
-            name: layerName,
-            type: layerType,
-            icon: icon,
-            ...(layerType === "Vector" ? {
-              color: layerColor,
-              inHeritOriginalColorFromFile: inheritColor.toString(),
-              vector: String(layerProp),
-            } : {}),
-            ...(layerType === "Raster" ? { raster: String(layerProp) } : {}),
-          };
+        const body = {
+          file: uploadToken,
+          captureDate: captureDate,
+          name: layerName,
+          type: layerType,
+          icon: icon,
+          ...(layerType === "Vector"
+            ? {
+                color: layerColor,
+                inHeritOriginalColorFromFile: inheritColor.toString(),
+                vector: String(layerProp),
+              }
+            : {}),
+          ...(layerType === "Raster" ? { raster: String(layerProp) } : {}),
+        };
         // const fmData = new FormData();
         // fmData.append("file", fileList[0]);
         // fmData.append("captureDate", captureDate);

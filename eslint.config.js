@@ -28,7 +28,7 @@ export default [
     },
     plugins: {
       "@typescript-eslint": tseslint,
-      "react": react,
+      react: react,
       "react-hooks": reactHooks,
       "jsx-a11y": jsxA11y,
     },
@@ -39,7 +39,10 @@ export default [
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
       "jsx-a11y/anchor-is-valid": "warn",
-      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_" },
+      ],
       "@typescript-eslint/explicit-module-boundary-types": "off",
     },
     settings: {
@@ -47,6 +50,16 @@ export default [
         version: "detect",
       },
     },
-    ignores: ["node_modules", "build", "assets", "dist", "jest.config.jest", "mongo-init.js", "openAPI", "tmp", ".github"]
+    ignores: [
+      "node_modules",
+      "build",
+      "assets",
+      "dist",
+      "jest.config.jest",
+      "mongo-init.js",
+      "openAPI",
+      "tmp",
+      ".github",
+    ],
   },
 ];

@@ -10,7 +10,6 @@ import { STATIC_URL } from "src/constants";
 import type { RcFile } from "antd/lib/upload";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 
-
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
@@ -32,14 +31,16 @@ function TenantInfo(props: any) {
   }, [props.tenantData]);
 
   const beforeUploadFunction = (file: RcFile) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
       const previewUrl = URL.createObjectURL(file);
-      setAvatarPreview(previewUrl); 
+      setAvatarPreview(previewUrl);
 
-      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+      const uploadToken = await uploadFile(file, DocModel.DOCUMENTS, (prog) =>
+        console.info("PROGRESS: " + prog)
+      );
       setAvatar(uploadToken);
-      
+
       // const formData = new FormData();
       // formData.append("avatar", file);
       // http
@@ -72,7 +73,7 @@ function TenantInfo(props: any) {
     const body = {
       ...data,
     };
-    if (avatar && avatar !== props.tenantData.avatar || "") {
+    if ((avatar && avatar !== props.tenantData.avatar) || "") {
       body["avatar"] = avatar;
     }
     console.log(body);
@@ -155,8 +156,10 @@ function TenantInfo(props: any) {
               >
                 {avatar ? (
                   <img
-                  src={avatarPreview ? avatarPreview : `${STATIC_URL}${avatar}`}
-                  className="uploaded-avatar"
+                    src={
+                      avatarPreview ? avatarPreview : `${STATIC_URL}${avatar}`
+                    }
+                    className="uploaded-avatar"
                   />
                 ) : (
                   <div>

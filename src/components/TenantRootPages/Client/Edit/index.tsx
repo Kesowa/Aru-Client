@@ -65,9 +65,9 @@ function ClientEditPage() {
 
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
-  
+
   const { setLoading } = useContext(LoaderContext);
-  
+
   //avatar upload
   const beforeUploadFunction = (file: RcFile) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
@@ -77,7 +77,11 @@ function ClientEditPage() {
       const previewUrl = URL.createObjectURL(file);
       setAvatarPreview(previewUrl);
 
-      const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
+      const uploadToken = await uploadFile(
+        file,
+        DocModel.USER_AVATARS,
+        (prog) => console.info("PROGRESS: " + prog)
+      );
       setAvatar(uploadToken);
 
       // const body = {
@@ -121,10 +125,18 @@ function ClientEditPage() {
         if (result.data.status) {
           const data: Components["schemas"]["IUserGroupPermissions"][] = result.data.data;
           const groups = data
-            .filter((ele) =>
-              ele.permissions.every(perm => TENANT_CLIENT_PERMS.includes(perm)) // only list usergroups assignable to tenant-client
+            .filter(
+              (ele) =>
+                ele.permissions.every((perm) =>
+                  TENANT_CLIENT_PERMS.includes(perm)
+                ) // only list usergroups assignable to tenant-client
             )
-            .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }));
+            .map(({ _id, name, isActive, permissions }) => ({
+              _id,
+              name,
+              isActive,
+              permissions,
+            }));
 
           const sug = groups.find((g) => g._id === client.userGroupId);
           setSelectedusergroup(sug);
@@ -180,8 +192,9 @@ function ClientEditPage() {
     if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
     } else if (
-      (userDetails.userType === "tenant-client") ||
-      (userDetails.userType === "tenant-staff" && !userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
+      userDetails.userType === "tenant-client" ||
+      (userDetails.userType === "tenant-staff" &&
+        !userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
     ) {
       // clients can't edit other clients
       // staff can edit clients only if have permission
@@ -210,7 +223,7 @@ function ClientEditPage() {
       id: client._id,
       ...data,
     };
-    if (avatar && avatar !== client.avatar || "") {
+    if ((avatar && avatar !== client.avatar) || "") {
       body["avatar"] = avatar;
     }
     console.log(body);
@@ -339,7 +352,11 @@ function ClientEditPage() {
                         >
                           {avatar ? (
                             <img
-                              src={avatarPreview ? avatarPreview : `${STATIC_URL}${avatar}`}
+                              src={
+                                avatarPreview
+                                  ? avatarPreview
+                                  : `${STATIC_URL}${avatar}`
+                              }
                               className="uploaded-avatar"
                             />
                           ) : (

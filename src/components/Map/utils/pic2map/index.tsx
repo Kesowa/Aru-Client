@@ -128,7 +128,7 @@ function Pictomap(props) {
     });
   };
 
- async function handleUploadFiles() {
+  async function handleUploadFiles() {
     if (fileList.length > 0) {
       setIsUploading(true);
       const config = {
@@ -141,17 +141,17 @@ function Pictomap(props) {
         },
       };
       const uploadTokenPromises = fileList.map((file) =>
-      uploadFile(file.originFileObj, DocModel.LAYER_FILES, (prog) =>
-        console.info("PROGRESS: " + prog)
-      )
-    );
+        uploadFile(file.originFileObj, DocModel.LAYER_FILES, (prog) =>
+          console.info("PROGRESS: " + prog)
+        )
+      );
       const uploadTokens = await Promise.all(uploadTokenPromises);
 
       const body = {
         file: uploadTokens,
         Id: props.layerId,
-      }
-      
+      };
+
       // const fData = new FormData();
       // fData.append("Id", props.layerId);
       // fileList.forEach((file) => {

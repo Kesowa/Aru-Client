@@ -162,12 +162,14 @@ function Media(props) {
         toggleFlag(data);
         break;
       case "3":
-        openThread("vod", data._id, 
+        openThread(
+          "vod",
+          data._id,
           data.bookmarks
-          ? {
-              bookmarks: generateTags(data.bookmarks),
-            }
-          : {}
+            ? {
+                bookmarks: generateTags(data.bookmarks),
+              }
+            : {}
         );
         props.setThumbnail(vodThumbnail(data, idx));
         break;
@@ -390,13 +392,17 @@ function Media(props) {
         options.onError("File not Supported!");
       } else {
         if (validateFile(options.file)) {
-          const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => console.info("PROGRESS: " + prog));
+          const uploadToken = await uploadFile(
+            options.file,
+            DocModel.DOCUMENTS,
+            (prog) => console.info("PROGRESS: " + prog)
+          );
 
           const body = {
             file: uploadToken,
             layerId: props.layerId,
-            sys_Id:  props.feature.properties.sys_id,
-            centerPoints: { 
+            sys_Id: props.feature.properties.sys_id,
+            centerPoints: {
               lat: props.coordinates[1],
               lng: props.coordinates[0],
             },

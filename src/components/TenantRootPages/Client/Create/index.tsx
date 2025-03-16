@@ -54,15 +54,19 @@ function ClientCreatePage(props: any) {
 
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
-  
+
   const { setLoading } = useContext(LoaderContext);
 
   const beforeUploadFunction = (file: any) => {
-    beforeUpload(file, ["image/jpeg", "image/png"], 2, async() => {
+    beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {
       setIsAvatarUploading(true);
       const previewUrl = URL.createObjectURL(file);
       setAvatarPreview(previewUrl);
-      const uploadToken = await uploadFile(file, DocModel.USER_AVATARS, (prog) => console.info("PROGRESS: " + prog));
+      const uploadToken = await uploadFile(
+        file,
+        DocModel.USER_AVATARS,
+        (prog) => console.info("PROGRESS: " + prog)
+      );
       setAvatar(uploadToken);
       setIsAvatarUploading(false);
     });
@@ -85,10 +89,18 @@ function ClientCreatePage(props: any) {
           const data: Components["schemas"]["IUserGroupPermissions"][] = result.data.data;
           setUserGroups(
             data
-              .filter((ele) =>
-                ele.permissions.every(perm => TENANT_CLIENT_PERMS.includes(perm)) // only list usergroups assignable to tenant-client
+              .filter(
+                (ele) =>
+                  ele.permissions.every((perm) =>
+                    TENANT_CLIENT_PERMS.includes(perm)
+                  ) // only list usergroups assignable to tenant-client
               )
-              .map(({ _id, name, isActive, permissions }) => ({ _id, name, isActive, permissions }))
+              .map(({ _id, name, isActive, permissions }) => ({
+                _id,
+                name,
+                isActive,
+                permissions,
+              }))
           );
         } else if (result.data.message === "You do not have permission to use this API.") {
           setErrorState("unauthorized");
@@ -119,8 +131,9 @@ function ClientCreatePage(props: any) {
     if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
     } else if (
-      (userDetails.userType === "tenant-client") ||
-      (userDetails.userType === "tenant-staff" && !userDetails.customPermissions.includes(PERMS.CREATE_CLIENT))
+      userDetails.userType === "tenant-client" ||
+      (userDetails.userType === "tenant-staff" &&
+        !userDetails.customPermissions.includes(PERMS.CREATE_CLIENT))
     ) {
       // clients can't create other clients
       // staff can create clients only if have permission
@@ -133,7 +146,10 @@ function ClientCreatePage(props: any) {
 
   //subimt form
   const onFinish = (data: any) => {
-    const password = Array.from(crypto.getRandomValues(new Uint8Array(8)), b => (b % 36).toString(36)).join('');;
+    const password = Array.from(
+      crypto.getRandomValues(new Uint8Array(8)),
+      (b) => (b % 36).toString(36)
+    ).join("");
     data = { ...data, password };
     createUserAccount(data);
   };
@@ -151,7 +167,7 @@ function ClientCreatePage(props: any) {
     http
       .post(apis.CREATE_CLIENT, body)
       .then((result) => {
-        console.log("result data:",result.data);
+        console.log("result data:", result.data);
         if (result.data.status) {
           form.resetFields();
           setAvatar("");
@@ -168,7 +184,7 @@ function ClientCreatePage(props: any) {
           ) {
             setErrorState("403-expiry");
             window.setTimeout(function () {
-              AxiosErrorHandler(err, logout); 
+              AxiosErrorHandler(err, logout);
             }, 5000);
           } else {
             setErrorState("403");
@@ -292,10 +308,7 @@ function ClientCreatePage(props: any) {
                       beforeUpload={beforeUploadFunction}
                     >
                       {avatar ? (
-                        <img
-                          src={avatarPreview}
-                          className="uploaded-avatar"
-                        />
+                        <img src={avatarPreview} className="uploaded-avatar" />
                       ) : (
                         <div>
                           {isAvatarUploading ? (

@@ -183,7 +183,9 @@ function DataMission() {
 
   function renderDeleteBtn(record: any) {
     if (userDetails.userType === "tenant-staff") {
-      if (userDetails.userDetails.customPermissions.includes(PERMS.MISSION_DELETE)) {
+      if (
+        userDetails.userDetails.customPermissions.includes(PERMS.MISSION_DELETE)
+      ) {
         return (
           <Popconfirm
             title="Are you sure to delete the mission？"

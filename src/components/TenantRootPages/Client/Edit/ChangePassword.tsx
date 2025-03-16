@@ -26,7 +26,7 @@ function ChangeClientPassword() {
 
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
-  
+
   const { setLoading } = useContext(LoaderContext);
 
   const fetchClientDetails = () => {
@@ -53,7 +53,7 @@ function ChangeClientPassword() {
   useEffect(() => {
     fetchClientDetails();
   }, []);
-  
+
   //subimt form
   const onFinish = (data: any) => {
     EditUserAccount(data);
@@ -61,7 +61,10 @@ function ChangeClientPassword() {
 
   //auto generate password
   const autoGeneratePassword = () => {
-    const password = Array.from(crypto.getRandomValues(new Uint8Array(8)), b => (b % 36).toString(36)).join('');
+    const password = Array.from(
+      crypto.getRandomValues(new Uint8Array(8)),
+      (b) => (b % 36).toString(36)
+    ).join("");
     form.setFieldsValue({
       password: password,
       ConfirmPassword: password,
@@ -99,8 +102,9 @@ function ChangeClientPassword() {
     if (!Auth.isLoggedIn) {
       setErrorState("unauthorized");
     } else if (
-      (userDetails.userType === "tenant-client") ||
-      (userDetails.userType === "tenant-staff" && !userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
+      userDetails.userType === "tenant-client" ||
+      (userDetails.userType === "tenant-staff" &&
+        !userDetails.customPermissions.includes(PERMS.EDIT_CLIENT))
     ) {
       // clients can't edit other clients' password
       // staff can edit clients' password only if have permission

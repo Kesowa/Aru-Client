@@ -63,7 +63,9 @@ const CreateMissionBase = lazy(() => import("../../Missions/Create"));
 const EditFlight = lazy(() => import("../../Missions/Flight/Edit"));
 const ViewFlight = lazy(() => import("../../Missions/Flight/View"));
 const AssetBase = lazy(() => import("../../Assets"));
-const CreateOrEditLocation = lazy(() => import("../../Data/Location/CreateOrEdit"));
+const CreateOrEditLocation = lazy(
+  () => import("../../Data/Location/CreateOrEdit")
+);
 const DashboardContent = lazy(() => import("./Content"));
 const AssetView = lazy(() => import("../../Assets/View"));
 const LocationCard = lazy(() => import("../../Data/Location/View"));

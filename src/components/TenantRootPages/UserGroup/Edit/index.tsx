@@ -24,7 +24,7 @@ function UserGroupEditPage() {
   const [errorState, setErrorState] = useState("");
   const [groupName, setGroupName] = useState("");
   const history = useHistory();
-  const { id } = useParams<{id: string}>();
+  const { id } = useParams<{ id: string }>();
   const { logout } = useContext(AuthContext);
   const { setLoading } = useContext(LoaderContext);
 
@@ -109,9 +109,7 @@ function UserGroupEditPage() {
   }, [allPermissions]);
 
   const transferchange = (targetKeys: any) => {
-    const arr = allPermissions.filter((ele) =>
-      targetKeys.includes(ele)
-    );
+    const arr = allPermissions.filter((ele) => targetKeys.includes(ele));
     setSelectedPermissions(arr);
   };
 
@@ -202,15 +200,27 @@ function UserGroupEditPage() {
                     )}
                   </Form.Item>
                   <Transfer
-                    dataSource={allPermissions.map(perm => ({key: perm, title: perm}))}
+                    dataSource={allPermissions.map((perm) => ({
+                      key: perm,
+                      title: perm,
+                    }))}
                     showSearch
-                    filterOption={(inputValue, { title }) => title.toLowerCase().includes(inputValue.toLowerCase())}
+                    filterOption={(inputValue, { title }) =>
+                      title.toLowerCase().includes(inputValue.toLowerCase())
+                    }
                     listStyle={{
                       width: "100%",
                       height: 400,
                     }}
                     onChange={transferchange}
-                    render={(item) => <span aria-valuetext={item.key} style={{textTransform: "capitalize"}}>{item.title.replaceAll('_', ' ')}</span>}
+                    render={(item) => (
+                      <span
+                        aria-valuetext={item.key}
+                        style={{ textTransform: "capitalize" }}
+                      >
+                        {item.title.replaceAll("_", " ")}
+                      </span>
+                    )}
                     targetKeys={selectedPermissions}
                     oneWay
                   />

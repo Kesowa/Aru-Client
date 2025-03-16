@@ -100,7 +100,7 @@ class GoogleMap extends Component<mapProps, mapState> {
         this.drawingManager.setOptions({
           drawingControl: false,
         });
-  
+
         const center: any = {};
         if (this.props.geoFence.circle) {
           center.lat = shape.getCenter().lat();
@@ -117,12 +117,12 @@ class GoogleMap extends Component<mapProps, mapState> {
             });
           [center.lat, center.lng] = this.findPolygonCenter(pathPoints);
         }
-  
+
         getAddressfromLatLong(center.lat, center.lng, (err, address) => {
           if (!err) {
             if (
-              (this.props.centerPoints.lat !== center.lat) ||
-              (this.props.centerPoints.lng !== center.lng)
+              this.props.centerPoints.lat !== center.lat ||
+              this.props.centerPoints.lng !== center.lng
             ) {
               this.props.setCenterPoints(center);
             }
@@ -133,10 +133,10 @@ class GoogleMap extends Component<mapProps, mapState> {
             message.error("Location could not be fetched");
           }
         });
-  
+
         this.setState({
-          isCircleActive: !!(this.props.geoFence.circle),
-          isPolygonActive: !!(this.props.geoFence.polygon),
+          isCircleActive: !!this.props.geoFence.circle,
+          isPolygonActive: !!this.props.geoFence.polygon,
           isGeoJSONActive: false,
           showDrawingButtons: false,
         });
@@ -179,10 +179,7 @@ class GoogleMap extends Component<mapProps, mapState> {
   }
 
   componentDidUpdate() {
-    if (
-      this.props.geoFence == null &&
-      !this.props.areaSelected
-    ) {
+    if (this.props.geoFence == null && !this.props.areaSelected) {
       this.clearDrawing();
       this.drawingManager.setOptions({
         drawingControl: false,
@@ -394,8 +391,8 @@ class GoogleMap extends Component<mapProps, mapState> {
         getAddressfromLatLong(center[0], center[1], (err, address) => {
           if (!err) {
             setCenterPoints({
-              lat: center[0], 
-              lng: center[1]
+              lat: center[0],
+              lng: center[1],
             });
             setGeolocation(address);
           } else {
@@ -429,8 +426,7 @@ class GoogleMap extends Component<mapProps, mapState> {
   };
 
   setCircleEditEvent = (circle: any) => {
-    const { setGeoFence, setGeolocation, setCenterPoints } =
-      this.props;
+    const { setGeoFence, setGeolocation, setCenterPoints } = this.props;
     window.google.maps.event.addListener(
       circle,
       "radius_changed",
@@ -488,8 +484,7 @@ class GoogleMap extends Component<mapProps, mapState> {
   };
 
   setPolygonChangeEvent = (polygon) => {
-    const { setGeolocation, setCenterPoints, setGeoFence } =
-      this.props;
+    const { setGeolocation, setCenterPoints, setGeoFence } = this.props;
     const self = this;
     window.google.maps.event.addListener(
       polygon.getPath(),
@@ -509,7 +504,7 @@ class GoogleMap extends Component<mapProps, mapState> {
 
         setCenterPoints({
           lat: center[0],
-          lng: center[1]
+          lng: center[1],
         });
 
         getAddressfromLatLong(center[0], center[1], (err, address) => {
@@ -551,8 +546,8 @@ class GoogleMap extends Component<mapProps, mapState> {
 
         const center = self.findPolygonCenter(pathPoints);
         setCenterPoints({
-          lat: center[0], 
-          lng: center[1]
+          lat: center[0],
+          lng: center[1],
         });
 
         getAddressfromLatLong(center[0], center[1], (err, address) => {

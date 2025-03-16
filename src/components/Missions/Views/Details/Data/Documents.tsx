@@ -72,10 +72,7 @@ function Documents(props) {
   setChonkyDefaults({ iconComponent: CustomChonkyIcon });
   //----------------Set Perms----------------------------
   useEffect(() => {
-    if (
-      userType === "tenant-staff" ||
-      userType === "tenant-client"
-    ) {
+    if (userType === "tenant-staff" || userType === "tenant-client") {
       let upload: any = [];
       let deleteDoc: any = [];
       const perms: any = [
@@ -168,14 +165,14 @@ function Documents(props) {
     return useMemo(() => {
       const currentFolder = fileMap[currentFolderId];
       const files = currentFolder.childrenIds
-        ? currentFolder.childrenIds.map(
-            (fileId: string) => fileMap[fileId] ?? null
-          ).sort((a, b) => {
-            if (!a.modDate || !b.modDate) return 0;
-            if (a.modDate > b.modDate) return -1;
-            if (a.modDate < b.modDate) return 1;
-            return 0;
-          })
+        ? currentFolder.childrenIds
+            .map((fileId: string) => fileMap[fileId] ?? null)
+            .sort((a, b) => {
+              if (!a.modDate || !b.modDate) return 0;
+              if (a.modDate > b.modDate) return -1;
+              if (a.modDate < b.modDate) return 1;
+              return 0;
+            })
         : [];
       return files;
     }, [currentFolderId, filesSystem]);
@@ -254,8 +251,9 @@ function Documents(props) {
           //----------Delete Files---------------------------------------------------
           case ChonkyActions.DeleteFiles.id:
             if (data.state.selectedFilesForAction.length > 1) {
-              let restrictedFolder = data.state.selectedFilesForAction.filter((file: any) => 
-                (file.id === "rawData" || file.parentId === "rawData")
+              let restrictedFolder = data.state.selectedFilesForAction.filter(
+                (file: any) =>
+                  file.id === "rawData" || file.parentId === "rawData"
               ).length;
               if (restrictedFolder > 1) {
                 message.warning("Operation Restricted!");
@@ -639,11 +637,11 @@ function Documents(props) {
             };
           });
           setFileSystem(fileState);
-          props.setTotalDocs(res.data.data.documents.filter((d) => [
-            'root1234',
-            'rawPhotos',
-            'rawVideos'
-          ].includes(d.folderName)).length);
+          props.setTotalDocs(
+            res.data.data.documents.filter((d) =>
+              ["root1234", "rawPhotos", "rawVideos"].includes(d.folderName)
+            ).length
+          );
         } else {
           message.error(res.data.message);
         }

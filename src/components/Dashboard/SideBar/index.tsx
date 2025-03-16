@@ -129,7 +129,9 @@ function SideBar(props: any) {
                     <Popconfirm
                       placement="rightTop"
                       title="Are you sure you want to logout?"
-                      onConfirm={() => { logout() }}
+                      onConfirm={() => {
+                        logout();
+                      }}
                       okText="Yes"
                       cancelText="No"
                     >

@@ -120,7 +120,7 @@ function MissionList() {
 
   function fetchMissions() {
     if (usedFilter.length === 0) return;
-    const userType= Auth.userdetails.userType;
+    const userType = Auth.userdetails.userType;
     const tenantId = Auth.userdetails.tenantId._id || Auth.userdetails.tenantId;
     setIsTableLoading(true);
     if (userType === "tenant-root" || userType === "tenant-staff") {

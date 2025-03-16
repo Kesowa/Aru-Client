@@ -108,40 +108,45 @@ const EditFlight: FC<any> = (props) => {
   }, []);
 
   return (
-    flightDetails &&
-    <React.Fragment>
-      <div
-        className="edit-mission-container"
-        style={{ position: "relative" }}
-      >
-        <GoogleMap 
-          areaSelected={areaSelected}
-          setAreaSelected={setAreaSelected}
-          drawingToolBtns={drawingToolBtns}
-          setDrawingToolBtns={setDrawingToolBtns}
-          isEditing={true}
-          setlocation={setlocation}
-          location={location}
-          geoLocation={flightDetails.geolocation}
-          setGeolocation={(geolocation: string) => setFlightDetails((prev) => ({ ...prev, geolocation }))}
-          centerPoints={flightDetails.centerPoints}
-          setCenterPoints={(centerPoints: { lat:number; lng:number; }) => setFlightDetails((prev) => ({ ...prev, centerPoints }))}
-          geoFence={flightDetails.geoFence}
-          setGeoFence={(geoFence: any) => setFlightDetails((prev) => ({ ...prev, geoFence }))}
-        />
-        <EditFlightForm
-          flightDetails={flightDetails}
-          setFlightDetails={setFlightDetails}
-          areaSelected={areaSelected}
-          setisoDate={setIsoDate}
-          onSubmit={editFlight}
-          isEditing={true}
-        />
-      </div>{" "}
-      {location && (
-        <Weather isoDate={isoDate} location={location} />
-      )}
-    </React.Fragment>
+    flightDetails && (
+      <React.Fragment>
+        <div
+          className="edit-mission-container"
+          style={{ position: "relative" }}
+        >
+          <GoogleMap
+            areaSelected={areaSelected}
+            setAreaSelected={setAreaSelected}
+            drawingToolBtns={drawingToolBtns}
+            setDrawingToolBtns={setDrawingToolBtns}
+            isEditing={true}
+            setlocation={setlocation}
+            location={location}
+            geoLocation={flightDetails.geolocation}
+            setGeolocation={(geolocation: string) =>
+              setFlightDetails((prev) => ({ ...prev, geolocation }))
+            }
+            centerPoints={flightDetails.centerPoints}
+            setCenterPoints={(centerPoints: { lat: number; lng: number }) =>
+              setFlightDetails((prev) => ({ ...prev, centerPoints }))
+            }
+            geoFence={flightDetails.geoFence}
+            setGeoFence={(geoFence: any) =>
+              setFlightDetails((prev) => ({ ...prev, geoFence }))
+            }
+          />
+          <EditFlightForm
+            flightDetails={flightDetails}
+            setFlightDetails={setFlightDetails}
+            areaSelected={areaSelected}
+            setisoDate={setIsoDate}
+            onSubmit={editFlight}
+            isEditing={true}
+          />
+        </div>{" "}
+        {location && <Weather isoDate={isoDate} location={location} />}
+      </React.Fragment>
+    )
   );
 };
 

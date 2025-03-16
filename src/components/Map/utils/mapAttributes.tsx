@@ -1,8 +1,19 @@
 // MapAttributes.tsx
 
-import React, { useState, useEffect, useContext, useRef} from "react";
-import { DownOutlined } from '@ant-design/icons';
-import { Typography, Spin, Select, Switch, Space, Button, Progress,message,Dropdown, Menu} from "antd";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { DownOutlined } from "@ant-design/icons";
+import {
+  Typography,
+  Spin,
+  Select,
+  Switch,
+  Space,
+  Button,
+  Progress,
+  message,
+  Dropdown,
+  Menu,
+} from "antd";
 import ReactJson from "@uiw/react-json-view";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
@@ -39,7 +50,7 @@ interface Props {
   refreshLayer: boolean;
   setViewport: (viewport: any) => void;
   setSelectedIndexes: (indexes: number[]) => void;
-  setSelectedFeatures: (features: Feature<any,any>[]) => void;
+  setSelectedFeatures: (features: Feature<any, any>[]) => void;
   defaultKeys: any;
   selectedIndexes: number[];
   setColorMap: (color: string) => void;
@@ -100,15 +111,15 @@ const MapAttributes: React.FC<Props> = (props) => {
 
   const { logout } = useContext(AuthContext);
 
-  //AIML inference api implementation 
+  //AIML inference api implementation
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [status, setStatus] = useState("Idle");
-  const socket = useRef(null); 
+  const socket = useRef(null);
   const [inferenceType, setInferenceType] = useState(null);
 
   const layerId = props.id;
-  const tenantId = props.AllLayers[0].tenantId
+  const tenantId = props.AllLayers[0].tenantId;
 
   useEffect(() => {
     let socketInstance = null;
@@ -124,12 +135,12 @@ const MapAttributes: React.FC<Props> = (props) => {
 
       socket.current = socketInstance;
 
-      socketInstance.on("AI_TASK", (data)=>{
-        console.log("AI_TASK:",data);
-        if (data.status === "completed"){
-          props.refreshVectorLayers(!props.refreshLayer)
+      socketInstance.on("AI_TASK", (data) => {
+        console.log("AI_TASK:", data);
+        if (data.status === "completed") {
+          props.refreshVectorLayers(!props.refreshLayer);
         }
-      })
+      });
 
       socketInstance.on("AI_TASK_PROGRESS", (data) => {
         console.log(data);
@@ -154,9 +165,7 @@ const MapAttributes: React.FC<Props> = (props) => {
   }, [tenantId]);
 
   const menu = (
-    <Menu
-      onClick={({ key }) => invokeInference(key)} 
-    >
+    <Menu onClick={({ key }) => invokeInference(key)}>
       <Menu.Item key="deepforest">Tree Count</Menu.Item>
       <Menu.Item key="rooftopsegmentation">Rooftop Segmentation </Menu.Item>
       {/* Add more inference types as needed */}
@@ -171,10 +180,10 @@ const MapAttributes: React.FC<Props> = (props) => {
     }
     setInferenceType(selectedInference);
 
-    const apiEndpoint = apis.INFER_LAYER_API.replace(":layerId", layerId).replace(
-      ":inferType",
-      selectedInference
-    );
+    const apiEndpoint = apis.INFER_LAYER_API.replace(
+      ":layerId",
+      layerId
+    ).replace(":inferType", selectedInference);
 
     http
       .post(apiEndpoint)
@@ -186,7 +195,9 @@ const MapAttributes: React.FC<Props> = (props) => {
             setStatus("Complete");
             message.info("Inference task is already complete!");
           } else {
-            message.success(`${selectedInference} inference has started successfully!`);
+            message.success(
+              `${selectedInference} inference has started successfully!`
+            );
           }
         } else {
           message.error(res.data.message || "Something went wrong!");

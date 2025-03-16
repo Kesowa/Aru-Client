@@ -98,14 +98,22 @@ function ImageDocs(props) {
         icon: <MessageOutlined />,
       },
     ];
-    if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.UPDATE_DOCUMENT)) {
+    if (
+      props.missionDetails.currentUserDetails.customPermissions.includes(
+        PERMS.UPDATE_DOCUMENT
+      )
+    ) {
       item.push({
         key: "4",
         label: !data.isFlagged ? "Flag" : "Unflag",
         icon: <FlagOutlined />,
       });
     }
-    if (props.missionDetails.currentUserDetails.customPermissions.includes(PERMS.DELETE_DOCUMENT)) {
+    if (
+      props.missionDetails.currentUserDetails.customPermissions.includes(
+        PERMS.DELETE_DOCUMENT
+      )
+    ) {
       item.push({
         key: "5",
         label: "Delete Image",
@@ -252,9 +260,9 @@ function ImageDocs(props) {
 
         const body = {
           file: uploadToken,
-          missionId :props.missionDetails.missionId,
+          missionId: props.missionDetails.missionId,
           folderName: "photos",
-          type:options.file.type,
+          type: options.file.type,
         };
 
         // const fData = new FormData();
@@ -269,7 +277,7 @@ function ImageDocs(props) {
           case "tenant-root":
           case "tenant-staff": // when user is tenant staff
             http
-              .post(options.action, body) 
+              .post(options.action, body)
               .then((res: any) => {
                 options.onSuccess(res.data, options.file);
                 message.success(
@@ -584,10 +592,7 @@ function ImageDocs(props) {
   //----------render upload button----------------------
 
   function renderUploadBtn() {
-    if (
-      userType === "tenant-staff" ||
-      userType === "tenant-client"
-    ) {
+    if (userType === "tenant-staff" || userType === "tenant-client") {
       if (userDetails.customPermissions.includes(PERMS.UPLOAD_DOCUMENT)) {
         return (
           <div className="upload-btn">
@@ -681,8 +686,12 @@ function ImageDocs(props) {
         uploadBtn={renderUploadBtn}
         updateAPI={apis.UPDATE_MULTI_DOC}
         delete={deleteFile}
-        canToggleFlag={userDetails.customPermissions.includes(PERMS.UPDATE_DOCUMENT)}
-        canDelete={userDetails.customPermissions.includes(PERMS.DELETE_DOCUMENT)}
+        canToggleFlag={userDetails.customPermissions.includes(
+          PERMS.UPDATE_DOCUMENT
+        )}
+        canDelete={userDetails.customPermissions.includes(
+          PERMS.DELETE_DOCUMENT
+        )}
       />
       {loader ? (
         <div

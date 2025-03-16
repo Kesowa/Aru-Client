@@ -19,9 +19,9 @@ const AuthInit: IAuth = {
 
 export const AuthContext = createContext({
   Auth: AuthInit,
-  login: (userid: string, userdetails: any) => { },
-  logout: (isError?: boolean) => { },
-  setUserDetails: (userDteails: any) => { },
+  login: (userid: string, userdetails: any) => {},
+  logout: (isError?: boolean) => {},
+  setUserDetails: (userDteails: any) => {},
 });
 
 export const useAuth = (init: IAuth = AuthInit) => {
@@ -32,14 +32,15 @@ export const useAuth = (init: IAuth = AuthInit) => {
     SetAuth({
       isLoggedIn: true,
       userid,
-      userdetails: userdetails ? {
-        ...userdetails,
-        sideBar: getSideBar(userdetails),
-      }
+      userdetails: userdetails
+        ? {
+            ...userdetails,
+            sideBar: getSideBar(userdetails),
+          }
         : null,
       isError: false,
     });
-  }
+  };
 
   const logout = (isError: boolean = false) => {
     console.log("Logout Called", isError);
@@ -48,22 +49,23 @@ export const useAuth = (init: IAuth = AuthInit) => {
         isLoggedIn: false,
         userid: null,
         userdetails: null,
-        isError
+        isError,
       });
     });
-  }
+  };
 
   const setUserDetails = (user: any) => {
     console.log("SetUserDetails Called");
     SetAuth({
       ...Auth,
-      userdetails: user ? {
-        ...user,
-        sideBar: getSideBar(user),
-      }
+      userdetails: user
+        ? {
+            ...user,
+            sideBar: getSideBar(user),
+          }
         : null,
     });
-  }
+  };
 
   return { Auth, login, logout, setUserDetails };
-}
+};

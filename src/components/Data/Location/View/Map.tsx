@@ -160,7 +160,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
         if (result.data.status) {
           this.setState({
             ...this.state,
-            selectedAlert: result.data.data[0], 
+            selectedAlert: result.data.data[0],
           });
         } else {
           message.error(result.data.message);
@@ -211,7 +211,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
     });
   };
 
-  createGoogleMapMarker = (point: { lat: number, lng: number }) => {
+  createGoogleMapMarker = (point: { lat: number; lng: number }) => {
     const obj = new window.google.maps.Marker({
       position: point,
       map: this.googleMap,
@@ -327,7 +327,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
   render() {
     return (
       <React.Fragment>
-        <OutcomeModal 
+        <OutcomeModal
           index={0}
           data={[this.state.selectedAlert]}
           visible={!!this.state.selectedAlert}

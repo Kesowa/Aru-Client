@@ -104,7 +104,9 @@ export const ENV = new EnvVar("VITE_ENV").isEnum(Mode).toEnum<Mode>();
 export const SITE_KEY = new EnvVar("VITE_SITE_KEY").toString();
 export const SECRET_KEY = new EnvVar("VITE_SECRET_KEY").toString();
 export const VERSION = new EnvVar("VITE_VERSION").toString();
-export const OPENWEATHER_API_KEY = new EnvVar("VITE_OPENWEATHER_API_KEY").toString();
+export const OPENWEATHER_API_KEY = new EnvVar(
+  "VITE_OPENWEATHER_API_KEY"
+).toString();
 
 export enum Instance {
   ARU = "aru",

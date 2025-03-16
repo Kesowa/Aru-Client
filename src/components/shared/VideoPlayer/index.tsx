@@ -180,8 +180,8 @@ function VideoPlayer(props: any) {
   });
   const [inferType, setInferType] = useState("");
   const [peopleData, setPeopleData] = useState();
-  const [boundingBoxes,setBoundingBoxes] = useState();
-  const [peopleCount,setPeopleCount] = useState()
+  const [boundingBoxes, setBoundingBoxes] = useState();
+  const [peopleCount, setPeopleCount] = useState();
   const [scaledBoxes, setScaledBoxes] = useState([]);
 
   const [showHotkeys, setShowHotkeys] = useState(false);
@@ -264,7 +264,7 @@ function VideoPlayer(props: any) {
 
   const tenantId = props.mission.tenantId;
   const [loading, setLoading] = useState(false);
-  const [status ,setStatus] = useState("Idle");
+  const [status, setStatus] = useState("Idle");
   const [inferenceProgress, setInferenceProgress] = useState(0);
 
   useEffect(() => {
@@ -308,7 +308,6 @@ function VideoPlayer(props: any) {
       }
     };
   }, [tenantId]);
-
 
   useEffect(() => {
     setIsFlagged(props.mission?.isFlagged);
@@ -406,7 +405,7 @@ function VideoPlayer(props: any) {
     const index = aiTaskData.Keys.indexOf(task);
     console.log("AIML graphData", task, aiTaskData);
     if (aiTaskData.Values.length > 0) {
-      if(task == "people-count") {
+      if (task == "people-count") {
         setPeopleData(aiTaskData);
       }
       const graphData = aiTaskData.Values.map((value) => {
@@ -434,9 +433,10 @@ function VideoPlayer(props: any) {
   const startInferenceVODViolence = async () => {
     const taskStatusResponse = await http
       .post(
-        apis.INFER_VOD_VIOLENCE
-          .replace(":vodId", props.mission._id)
-          .replace(":inferType", inferType)
+        apis.INFER_VOD_VIOLENCE.replace(":vodId", props.mission._id).replace(
+          ":inferType",
+          inferType
+        )
       )
       .catch((err) => {
         console.log("AIML: Error", err);
@@ -678,21 +678,7 @@ function VideoPlayer(props: any) {
   };
 
   // Upload alert api
-  const saveAlert = async() => {
-    const body = {
-      locationName: captAddress,
-      location: isLive
-        ? location
-        : {
-            lat: captLat ? captLat : null,
-            long: captLong ? captLong : null,
-          },
-      missionId: isLive ? mission._id : mission.missionID._id,
-      flightId: isLive ? mission.flight._id : mission.flightID._id,
-      pcount: 0,
-      type: "Manual",
-      image: "",
-    };
+  const saveAlert = async () => {
     const form = document.createElement("form");
     form.innerHTML = `<input type="file" id="filename" name="filename" /> 
     <input type="submit" id="submitButton" name="submitButton" />`;
@@ -704,19 +690,32 @@ function VideoPlayer(props: any) {
     const blob = b64toBlob(realData, contentType);
     const rcFile = new File([blob], "image.png", { type: contentType });
 
-    const uploadToken = await uploadFile(rcFile, DocModel.ALERT_IMAGES, (prog) => console.info("PROGRESS: " + prog));
+    const uploadToken = await uploadFile(
+      rcFile,
+      DocModel.ALERT_IMAGES,
+      (prog) => console.info("PROGRESS: " + prog)
+    );
 
-      const data = {
-        file: uploadToken,
-      };
+    const body = {
+      locationName: captAddress,
+      location: isLive
+        ? location
+        : {
+            lat: captLat ? captLat : null,
+            long: captLong ? captLong : null,
+          },
+      missionId: isLive ? mission._id : mission.missionID._id,
+      flightId: isLive ? mission.flight._id : mission.flightID._id,
+      pcount: 0,
+      type: "Automated",
+      image: uploadToken,
+    };
     // const formDataToUpload = new FormData(form);
     // formDataToUpload.append("image", blob);
     setLoader(true);
     http
-      .post(`${apis.UPLOAD_ALERT_IMAGE}`, data)
+      .post(`${apis.CREATE_ALERT}`, body)
       .then((res) => {
-        body.image = res.data.file;
-
         if (captLat !== undefined && captLong !== undefined) {
           geocoder([
             //Review
@@ -729,11 +728,8 @@ function VideoPlayer(props: any) {
             })
             .catch((err: any) => message.error("Error: ", err));
         }
-
-        return http.post(`${apis.CREATE_ALERT}`, body);
       })
       .then((res) => {
-        console.log(res.data);
         setIsAlertEnabled(false);
         if (isLive) {
           openNotification("bottomRight");
@@ -935,12 +931,12 @@ function VideoPlayer(props: any) {
   //----------------people count implementation----------
   useEffect(() => {
     if (played && !isLive && peopleData?.Values?.length > 0) {
-      console.log("people data: ",peopleData.values);
+      console.log("people data: ", peopleData.values);
       const currentFrame = Math.floor(played * peopleData.Values.length);
-      console.log("people current frame: ",currentFrame);
+      console.log("people current frame: ", currentFrame);
       const frameData = peopleData.Values[currentFrame];
-      console.log("people frame: ",frameData);
-      
+      console.log("people frame: ", frameData);
+
       if (frameData) {
         console.log(frameData);
         setBoundingBoxes(frameData.coordinates);
@@ -959,19 +955,19 @@ function VideoPlayer(props: any) {
       if (playerRef.current && boundingBoxes) {
         const { offsetWidth: containerWidth, offsetHeight: containerHeight } =
           playerRef.current.wrapper;
-  
+
         const mode =
           containerWidth === VIDEO_SIZES.large.width &&
           containerHeight === VIDEO_SIZES.large.height
             ? "large"
             : "normal";
-  
+
         const videoWidth = VIDEO_SIZES[mode].width;
         const videoHeight = VIDEO_SIZES[mode].height;
-  
+
         const scaleX = containerWidth / videoWidth;
         const scaleY = containerHeight / videoHeight;
-  
+
         const heightAdjustmentFactor = 0.85;
         const newBoxes = boundingBoxes.map(([x1, y1, x2, y2]) => {
           const scaledX1 = x1 * scaleX;
@@ -985,18 +981,18 @@ function VideoPlayer(props: any) {
             Math.min(containerHeight, scaledY2),
           ];
         });
-  
+
         setScaledBoxes(newBoxes);
       }
     };
     adjustBoundingBoxes();
     document.addEventListener("fullscreenchange", adjustBoundingBoxes);
-  
+
     return () => {
       document.removeEventListener("fullscreenchange", adjustBoundingBoxes);
     };
   }, [boundingBoxes]);
-  
+
   //----------fetch telemetry------------------
   useEffect(() => {
     if (played && !isLive) {

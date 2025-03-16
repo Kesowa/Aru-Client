@@ -31,7 +31,7 @@ const ViewFlight: FC<any> = () => {
       const mission = result.data.data;
       setFlightDetails(mission.flight);
       const geoFence: any = {};
-  
+
       if (mission.flight.geoFence.polygon) {
         geoFence.shape = "Polygon";
         geoFence.points = [...mission.flight.geoFence.polygon.points];

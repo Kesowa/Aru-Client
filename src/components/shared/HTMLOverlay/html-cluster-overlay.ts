@@ -1,6 +1,6 @@
-import { point } from '@turf/helpers';
-import Supercluster from 'supercluster';
-import HtmlOverlay from './html-overlay';
+import { point } from "@turf/helpers";
+import Supercluster from "supercluster";
+import HtmlOverlay from "./html-overlay";
 
 type OptionalObject = Record<string, any> | null | undefined;
 
@@ -18,7 +18,9 @@ export default class HtmlClusterOverlay<ObjType> extends HtmlOverlay {
     if (newObjects !== this._lastObjects) {
       this._superCluster = new Supercluster(this.getClusterOptions());
       this._superCluster.load(
-        newObjects.map((object) => point(this.getObjectCoordinates(object), { object }))
+        newObjects.map((object) =>
+          point(this.getObjectCoordinates(object), { object })
+        )
       );
       this._lastObjects = newObjects;
       // console.log('new Supercluster() run');
@@ -32,7 +34,12 @@ export default class HtmlClusterOverlay<ObjType> extends HtmlOverlay {
     return clusters.map(
       ({
         geometry: { coordinates },
-        properties: { cluster, point_count: pointCount, cluster_id: clusterId, object },
+        properties: {
+          cluster,
+          point_count: pointCount,
+          cluster_id: clusterId,
+          object,
+        },
       }) =>
         cluster
           ? this.renderCluster(coordinates, clusterId, pointCount)

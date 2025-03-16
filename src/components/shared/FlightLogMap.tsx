@@ -60,9 +60,9 @@ function FlightLogMap(props) {
   //-----creating drone path-----
   useEffect(() => {
     if (props.flight) {
-      const filterArray: any = props.flight.filter(
-        (i: any) => i[0] !== null && i[1] !== null
-      ).map((i: any) => [i[0],i[1]]); // keeping the third element, altiude, causes layer to disappear on zooming in
+      const filterArray: any = props.flight
+        .filter((i: any) => i[0] !== null && i[1] !== null)
+        .map((i: any) => [i[0], i[1]]); // keeping the third element, altiude, causes layer to disappear on zooming in
       setDronePath([
         {
           path: filterArray,

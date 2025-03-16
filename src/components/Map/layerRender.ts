@@ -10,7 +10,7 @@ import {
   MaskExtension,
 } from "@deck.gl/extensions";
 import { HeatmapLayer } from "@deck.gl/aggregation-layers";
-import { COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
+import { API_URL, COG_URL, STATIC_URL, TITILER_STATIC } from "src/constants";
 import { Feature, GeoJson, Point } from "src/types/geojson";
 import { ILayer } from "src/types/layer";
 import http from "src/services/httpCall";
@@ -32,7 +32,7 @@ export type Layer = ILayer & {
     resamplingMethod?: string;
     overlayId?: string;
     highlightIndexes?: number[];
-    layerOpacity?:number;
+    layerOpacity?: number;
   };
   _isMeshSource?: boolean;
 };
@@ -156,12 +156,12 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
     .map((layer) => {
       let maskProps: Record<string, any> = layer._isMasked
         ? {
-          // enable masking
-          extensions: [new MaskExtension()],
-          maskId: MASK_ID,
-          // bring masked layers above others
-          zIndex: 9999,
-        }
+            // enable masking
+            extensions: [new MaskExtension()],
+            maskId: MASK_ID,
+            // bring masked layers above others
+            zIndex: 9999,
+          }
         : {};
 
       const opacity = layer._metadata?.layerOpacity ?? 1;
@@ -201,7 +201,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               offset: -10000,
             },
             minZoom: 13,
-            opacity:opacity,
+            opacity: opacity,
             maxZoom: 19,
             elevationData: getRasterDataUrl(layer),
             tileSize: 256,
@@ -212,14 +212,14 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
           });
         }
         return new TileLayer({
-          id: maskProps.extensions ? layer._id +".ext" : layer._id,
+          id: maskProps.extensions ? layer._id + ".ext" : layer._id,
           data: getRasterDataUrl(layer),
           minZoom: 0,
           maxZoom: 24,
           tileSize: 256,
           pickable: true,
-          onHover:(event) =>{
-           handleHover({ ...event, layer })
+          onHover: (event) => {
+            handleHover({ ...event, layer });
           },
           extent: layer._metadata?.bounds,
           renderSubLayers: (props) => {
@@ -230,7 +230,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               data: null,
               image: props.data,
               bounds: [west, south, east, north],
-              opacity:opacity,
+              opacity: opacity,
               ...maskProps,
             });
           },
@@ -241,10 +241,10 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
       } else if (layer.type === "Vector") {
         if (featureType[layer.vector] === featureTypes.POINT)
           return new GeoJsonLayer({
-            id: maskProps.extensions ? layer._id +".ext" : layer._id,
+            id: maskProps.extensions ? layer._id + ".ext" : layer._id,
             data: STATIC_URL + layer.layerpath,
             pickable: true,
-            opacity:opacity,
+            opacity: opacity,
             pointType: "icon",
             iconSizeMinPixels: 4,
             iconSizeUnits: "pixels",
@@ -272,7 +272,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
           });
         else if (featureType[layer.vector] === featureTypes.WIND_DIRECTION)
           return new IconLayer({
-            id: maskProps.extensions ? layer._id +".ext" : layer._id,
+            id: maskProps.extensions ? layer._id + ".ext" : layer._id,
             data: fetch(STATIC_URL + layer.layerpath)
               .then((response) => response.json())
               .then((data: GeoJson<Feature<Point, { windSpeed: number }>>) => {
@@ -323,25 +323,25 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
           return new GeoJsonLayer({
             id: maskProps.extensions ? layer._id + ".ext" : layer._id,
             data: fetch(STATIC_URL + layer.layerpath)
-            .then((response) => response.json())
-            .then((data) => {
-              if (layer._metadata?.highlightIndexes) {
-                for (const idx of layer._metadata?.highlightIndexes) {
-                  if (idx) {
-                    const oldColor = data.features[idx].properties?.color;
-                    if (oldColor)
-                      data.features[idx].properties.color = invertColor(oldColor);
-                    else
-                      data.features[idx].properties.color = "808080"; // light grey
-                    // if property has no color, it would get assigned black ("000000") as default
-                    // so to highlight property, light grey used
+              .then((response) => response.json())
+              .then((data) => {
+                if (layer._metadata?.highlightIndexes) {
+                  for (const idx of layer._metadata?.highlightIndexes) {
+                    if (idx) {
+                      const oldColor = data.features[idx].properties?.color;
+                      if (oldColor)
+                        data.features[idx].properties.color =
+                          invertColor(oldColor);
+                      else data.features[idx].properties.color = "808080"; // light grey
+                      // if property has no color, it would get assigned black ("000000") as default
+                      // so to highlight property, light grey used
+                    }
                   }
                 }
-              }
-              return data.features;
-            }),
+                return data.features;
+              }),
             pickable: true,
-            opacity:opacity,
+            opacity: opacity,
             stroked: [
               featureTypes.MULTI_POLYGON,
               featureTypes.POLYGON,
@@ -375,14 +375,14 @@ export const MissionLayerToDeckLayer = (missionLayers: IMissionLayers) => {
       new GeoJsonLayer({
         id: "alert",
         data: http
-          .get(STATIC_URL + missionLayers.alertGeojsonUrl)
+          .get(API_URL + missionLayers.alertGeojsonUrl)
           .then((result) => result.data),
         pickable: true,
         pointType: "icon",
-        iconSizeMinPixels: 6,
-        iconSizeUnits: "meters",
+        iconSizeMinPixels: 4,
+        iconSizeUnits: "pixels",
         iconSizeScale: 10,
-        getIconSize: 2,
+        getIconSize: 4,
         getIcon,
         getIconColor: (d) =>
           d.properties?.color
@@ -396,14 +396,14 @@ export const MissionLayerToDeckLayer = (missionLayers: IMissionLayers) => {
       new GeoJsonLayer({
         id: "vod",
         data: http
-          .get(STATIC_URL + missionLayers.vodGeojsonUrl)
+          .get(API_URL + missionLayers.vodGeojsonUrl)
           .then((result) => result.data),
         pickable: true,
         pointType: "icon",
-        iconSizeMinPixels: 6,
-        iconSizeUnits: "meters",
+        iconSizeMinPixels: 4,
+        iconSizeUnits: "pixels",
         iconSizeScale: 10,
-        getIconSize: 2,
+        getIconSize: 4,
         getIcon,
         getIconColor: (d) =>
           d.properties?.color

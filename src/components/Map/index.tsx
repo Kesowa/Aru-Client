@@ -45,7 +45,7 @@ import {
   notification,
   MenuProps,
   Space,
-  Popover
+  Popover,
 } from "antd";
 import {
   UploadOutlined,
@@ -363,21 +363,49 @@ function BaseMap(props) {
   //----------UseEffectBlock to assign permissions--------------
   useEffect(() => {
     setPerms({
-      canCreateLayer: Auth.userdetails.customPermissions.includes(PERMS.UPLOAD_LAYER),
-      canDeleteLayer: Auth.userdetails.customPermissions.includes(PERMS.DELETE_LAYER),
-      canEditLayer: Auth.userdetails.customPermissions.includes(PERMS.EDIT_LAYER),
+      canCreateLayer: Auth.userdetails.customPermissions.includes(
+        PERMS.UPLOAD_LAYER
+      ),
+      canDeleteLayer: Auth.userdetails.customPermissions.includes(
+        PERMS.DELETE_LAYER
+      ),
+      canEditLayer: Auth.userdetails.customPermissions.includes(
+        PERMS.EDIT_LAYER
+      ),
       canDownloadLayer: true,
-      canEditGeojson: Auth.userdetails.customPermissions.includes(PERMS.EDIT_FEATURE),
-      canDeleteFeature: Auth.userdetails.customPermissions.includes(PERMS.DELETE_FEATURE),
-      canAddFeature: Auth.userdetails.customPermissions.includes(PERMS.ADD_FEATURE),
-      canUploadFileToGeojson: Auth.userdetails.customPermissions.includes(PERMS.FEATURE_FILE_UPLOAD),
-      canDeleteFileFromGeojson: Auth.userdetails.customPermissions.includes(PERMS.FEATURE_FILE_DELETE),
-      canSetCoverPhoto: Auth.userdetails.customPermissions.includes(PERMS.SET_COVER_PHOTO),
-      canCreateBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_CREATE_BASE_LAYER),
-      canUpdateBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_UPDATE_BASE_LAYER),
-      canDeleteBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_DELETE_BASE_LAYER),
-      canEditBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_EDIT_BASE_LAYER),
-      canUploadToBaseLayer: Auth.userdetails.customPermissions.includes(PERMS.CAN_UPLOAD_TO_BASE_LAYER),
+      canEditGeojson: Auth.userdetails.customPermissions.includes(
+        PERMS.EDIT_FEATURE
+      ),
+      canDeleteFeature: Auth.userdetails.customPermissions.includes(
+        PERMS.DELETE_FEATURE
+      ),
+      canAddFeature: Auth.userdetails.customPermissions.includes(
+        PERMS.ADD_FEATURE
+      ),
+      canUploadFileToGeojson: Auth.userdetails.customPermissions.includes(
+        PERMS.FEATURE_FILE_UPLOAD
+      ),
+      canDeleteFileFromGeojson: Auth.userdetails.customPermissions.includes(
+        PERMS.FEATURE_FILE_DELETE
+      ),
+      canSetCoverPhoto: Auth.userdetails.customPermissions.includes(
+        PERMS.SET_COVER_PHOTO
+      ),
+      canCreateBaseLayer: Auth.userdetails.customPermissions.includes(
+        PERMS.CAN_CREATE_BASE_LAYER
+      ),
+      canUpdateBaseLayer: Auth.userdetails.customPermissions.includes(
+        PERMS.CAN_UPDATE_BASE_LAYER
+      ),
+      canDeleteBaseLayer: Auth.userdetails.customPermissions.includes(
+        PERMS.CAN_DELETE_BASE_LAYER
+      ),
+      canEditBaseLayer: Auth.userdetails.customPermissions.includes(
+        PERMS.CAN_EDIT_BASE_LAYER
+      ),
+      canUploadToBaseLayer: Auth.userdetails.customPermissions.includes(
+        PERMS.CAN_UPLOAD_TO_BASE_LAYER
+      ),
     });
   }, []);
 
@@ -409,9 +437,9 @@ function BaseMap(props) {
       if (navigator.geolocation) {
         navigator.permissions
           .query({ name: "geolocation" })
-          .then(function(result: any) {
+          .then(function (result: any) {
             if (result.state === "granted") {
-              navigator.geolocation.getCurrentPosition(function(pos: any) {
+              navigator.geolocation.getCurrentPosition(function (pos: any) {
                 const crd = pos.coords;
                 // console.log("Your current position is:");
                 // console.log(`Latitude : ${crd.latitude}`);
@@ -431,7 +459,7 @@ function BaseMap(props) {
               });
             } else if (result.state === "prompt") {
               navigator.geolocation.getCurrentPosition(
-                function(pos: any) {
+                function (pos: any) {
                   const crd = pos.coords;
                   // console.log("Your current position is:");
                   // console.log(`Latitude : ${crd.latitude}`);
@@ -449,7 +477,7 @@ function BaseMap(props) {
                     transitionInterpolator: new FlyToInterpolator(),
                   });
                 },
-                function(err) {
+                function (err) {
                   console.log(`Location fetch error: \n ${err}`);
                 },
                 {
@@ -463,7 +491,7 @@ function BaseMap(props) {
                 "Please allow location access from your browser for best experience of ARU!"
               );
             }
-            result.onChange = function() {
+            result.onChange = function () {
               console.log(result.state);
             };
           });
@@ -510,8 +538,8 @@ function BaseMap(props) {
 
   const handleFileUpload = (file) => {
     setIsModalVisible(true);
-    if(file){
-       setFileList([file]);
+    if (file) {
+      setFileList([file]);
     }
   };
 
@@ -542,11 +570,11 @@ function BaseMap(props) {
 
   useEffect(() => {
     const handleValueChange = (newValue: HoverInfo) => {
-        setHoverInfo(newValue);
-    }
-    valueChangeEmitter.on('valueChanged', handleValueChange);
+      setHoverInfo(newValue);
+    };
+    valueChangeEmitter.on("valueChanged", handleValueChange);
     return () => {
-      valueChangeEmitter.off('valueChanged', handleValueChange);
+      valueChangeEmitter.off("valueChanged", handleValueChange);
     };
   }, []);
 
@@ -970,7 +998,9 @@ function BaseMap(props) {
   const [selectedLayerPopupLabel, setSelectedLayerPopupLabel] = useState("");
   const [activeID, setActiveID] = useState("");
   const [selectedIndexes, setSelectedIndexes] = useState<React.Key[]>([]);
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature<any,any>[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<Feature<any, any>[]>(
+    []
+  );
   const [showSelectedIndexes, setshowSelectedIndexes] = useState([]);
   const [defaultKeys, setDefaultKeys] = useState<React.Key[]>([]);
   const [videoToShow, setVideoToShow] = useState<any>([]);
@@ -1197,7 +1227,7 @@ function BaseMap(props) {
 
   function fetchJSON(file: any) {
     return fetch(file)
-      .then(function(res) {
+      .then(function (res) {
         return res.json();
       })
       .catch((err) => console.log(err));
@@ -1298,7 +1328,7 @@ function BaseMap(props) {
           layer._metadata = {
             ...layer._metadata,
             highlightIndexes: selectedIndexes as number[],
-          }
+          };
         }
         return layer;
       })
@@ -1698,7 +1728,7 @@ function BaseMap(props) {
         return layer;
       })
     );
-  }, [terrainmap, colorMap,layerOpacity]);
+  }, [terrainmap, colorMap, layerOpacity]);
 
   useEffect(() => {
     SetAllLayers((prev) =>
@@ -1878,14 +1908,19 @@ function BaseMap(props) {
       ] as BBox;
     } else if (raster == "CESIUM_3D") {
       const res = await fetch(STATIC_URL + metadata);
-      const tileset = await res.json() as Tileset;
+      const tileset = (await res.json()) as Tileset;
       const bounds_rad = [
         tileset.properties.Longitude.minimum,
         tileset.properties.Latitude.minimum,
         tileset.properties.Longitude.maximum,
-        tileset.properties.Latitude.maximum
+        tileset.properties.Latitude.maximum,
       ];
-      return bounds_rad.map(coord => coord * 180 / Math.PI) as [number, number, number, number];
+      return bounds_rad.map((coord) => (coord * 180) / Math.PI) as [
+        number,
+        number,
+        number,
+        number
+      ];
     }
     // Implementation for Cesium_3D pending
     return [0, 0, 0, 0];
@@ -2314,7 +2349,7 @@ function BaseMap(props) {
     );
   };
 
-  const handleMeshSourceOption = (id:string) => {
+  const handleMeshSourceOption = (id: string) => {
     SetAllLayers((prev) =>
       prev.map((layer) => {
         if (layer.type == "Raster" && layer.raster == "CESIUM_3D") {
@@ -2331,8 +2366,8 @@ function BaseMap(props) {
 
   const refreshVectorLayer = () => {
     filterLayers();
-    message.success("Checkout the vector section for Inference Layer");  
-  }
+    message.success("Checkout the vector section for Inference Layer");
+  };
 
   const toggleElevation = () => {
     setIsElevationEnabled((prevValue) => !prevValue);
@@ -2515,7 +2550,9 @@ function BaseMap(props) {
               ellipsis={true}
               onClick={() => {
                 if (layer._isChecked && layer._metadata?.bounds) {
-                  const { longitude, latitude, zoom } = calculateViewport(layer._metadata.bounds);
+                  const { longitude, latitude, zoom } = calculateViewport(
+                    layer._metadata.bounds
+                  );
                   setViewport({
                     longitude /* : (bounds[0][0] + bounds[1][0]) / 2 */,
                     latitude /* : (bounds[0][1] + bounds[1][1]) / 2 */,
@@ -2807,8 +2844,8 @@ function BaseMap(props) {
 
   const add = (name, type, id, path, count) => {
     if (!tabKeys.find((key) => key == id)) {
-      setTabKeys(prev => [...prev, id]);
-      setPanes(prev => [
+      setTabKeys((prev) => [...prev, id]);
+      setPanes((prev) => [
         ...prev,
         {
           title: name,
@@ -2921,7 +2958,7 @@ function BaseMap(props) {
 
       const body = {
         file: uploadToken,
-        missionId : id,
+        missionId: id,
         captureDate: captureDate,
         name: layerName,
         type: layerType,
@@ -2947,12 +2984,8 @@ function BaseMap(props) {
 
       // fmData.append("icon", icon2);
 
-      const result = await http.post(
-        `${apis.CREATE_LAYER}/${layerType}`,
-        body
-      );
+      const result = await http.post(`${apis.CREATE_LAYER}/${layerType}`, body);
       console.log("vector layer is uploaded", result);
-
 
       if (result.data.status) {
         console.log("metadata for me:", result.data.data);
@@ -4278,12 +4311,21 @@ function BaseMap(props) {
     setCursorPosition({ x: e.clientX, y: e.clientY });
   };
 
-  if (props.isBaseMap && !["tenant-root","tenant-staff"].includes(Auth.userdetails.userType)) {
+  if (
+    props.isBaseMap &&
+    !["tenant-root", "tenant-staff"].includes(Auth.userdetails.userType)
+  ) {
     return <FourOhOne />;
   }
 
-  const memoizedAllLayers = useMemo(() => ILayerToDeckLayer(AllLayers), [AllLayers]);
-  const memoizedMissionLayers = useMemo(() => MissionLayerToDeckLayer(MissionLayers), [MissionLayers]);
+  const memoizedAllLayers = useMemo(
+    () => ILayerToDeckLayer(AllLayers),
+    [AllLayers]
+  );
+  const memoizedMissionLayers = useMemo(
+    () => MissionLayerToDeckLayer(MissionLayers),
+    [MissionLayers]
+  );
   const computeLayers = () => {
     const layers: any[] = [];
 
@@ -4304,7 +4346,7 @@ function BaseMap(props) {
     if (digitizer) layers.push(digitizerLayer);
 
     return layers;
-  }
+  };
 
   return (
     <div
@@ -4327,7 +4369,7 @@ function BaseMap(props) {
           status="500"
           title="Oops! You have reached your limit of creating layers!"
           subTitle="Please contact your admin."
-        //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
+          //extra={<Button type="primary" onClick={() => window.history.back()}>Back</Button>}
         />
       </Modal>
       <Modal
@@ -4392,7 +4434,7 @@ function BaseMap(props) {
             }
           );
         }}
-        onDrag={() => { }}
+        onDrag={() => {}}
         onClick={(info, event) => {
           if (event.rightButton) {
             const layerIndex = AllLayers.findIndex(
@@ -4412,13 +4454,17 @@ function BaseMap(props) {
               drawingMenuRef.current.click();
             }
           } else if (info.layer) {
-            const layer = AllLayers.find((layer) => layer.type === 'Vector' && info.layer?.id === layer._id);
+            const layer = AllLayers.find(
+              (layer) => layer.type === "Vector" && info.layer?.id === layer._id
+            );
             if (layer) {
               InfoWindow(
                 info.index,
                 info.coordinate,
                 layer.name,
-                (featureType[layer.vector] === featureTypes.POINT) ? "PointView" : "PolygonView",
+                featureType[layer.vector] === featureTypes.POINT
+                  ? "PointView"
+                  : "PolygonView",
                 info.object,
                 false,
                 layer._id,
@@ -4428,11 +4474,13 @@ function BaseMap(props) {
               setSelectedLayerLabel(layer.layerLabel ? layer.layerLabel : "No label selected");
               setSelectedLayerPopupLabel(layer.layerPopupLabel ? layer.layerPopupLabel : "No label selected");
           }
-        }
-      }}
+        }}}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
-        <ElevationBlock hoverInfo={hoverInfo} isElevationEnabled={isElevationEnabled} />
+        <ElevationBlock
+          hoverInfo={hoverInfo}
+          isElevationEnabled={isElevationEnabled}
+        />
 
         {osmState ? (
           <>
@@ -4455,42 +4503,41 @@ function BaseMap(props) {
           />
         )}
 
-        {
-           showPopup && (
+        {showPopup && (
           <HTMLOverlay>
             <HTMLOverlayItem coordinates={coordinates}>
               <Popover
                 content={
-                    <InfoWindowContent
-                      mode={infoWindowMode}
-                      coordinates={coordinates}
-                      token={MAPBOX_API_KEY}
-                      feature={featureData}
-                      sysId={sysId}
-                      featureIdx={featureIdx}
-                      setformDrawerVisible={setformDrawerVisible}
-                      drawerVisibility={viewMedia}
-                      setImagesDrawer={setViewMedia}
-                      videoToShow={videoToShow}
-                      setVideoToShow={setVideoToShow}
-                      show={saveButtonShow}
-                      setShowForm={setShowForm}
-                      cancelDrawing={cancelDrawing}
-                      togglePopup={togglePopup}
-                      layerId={featureLayer}
-                      missionLayer={missionLayer}
-                      setMissionLayer={setMissionLayer}
-                      AllLayers={AllLayers}
-                      SetAllLayers={SetAllLayers}
-                      setShouldAttributeTableReload={
-                        setShouldAttributeTableReload
-                      }
-                      shouldAttributeTableReload={shouldAttributeTableReload}
-                      canDraw={perms.canCreateLayer}
-                      isBaseMap={props.isBaseMaps}
-                      isPublic={false}
-                      setThumbnail={setThumbnail}
-                    />
+                  <InfoWindowContent
+                    mode={infoWindowMode}
+                    coordinates={coordinates}
+                    token={MAPBOX_API_KEY}
+                    feature={featureData}
+                    sysId={sysId}
+                    featureIdx={featureIdx}
+                    setformDrawerVisible={setformDrawerVisible}
+                    drawerVisibility={viewMedia}
+                    setImagesDrawer={setViewMedia}
+                    videoToShow={videoToShow}
+                    setVideoToShow={setVideoToShow}
+                    show={saveButtonShow}
+                    setShowForm={setShowForm}
+                    cancelDrawing={cancelDrawing}
+                    togglePopup={togglePopup}
+                    layerId={featureLayer}
+                    missionLayer={missionLayer}
+                    setMissionLayer={setMissionLayer}
+                    AllLayers={AllLayers}
+                    SetAllLayers={SetAllLayers}
+                    setShouldAttributeTableReload={
+                      setShouldAttributeTableReload
+                    }
+                    shouldAttributeTableReload={shouldAttributeTableReload}
+                    canDraw={perms.canCreateLayer}
+                    isBaseMap={props.isBaseMaps}
+                    isPublic={false}
+                    setThumbnail={setThumbnail}
+                  />
                 }
                 title={
                   <>
@@ -4649,17 +4696,12 @@ function BaseMap(props) {
                   </div>
                 </Tooltip>
               )}
-              <Tooltip
-                title="digitize image to map"
-                placement="bottom"
-              >
-                 <div
+              <Tooltip title="digitize image to map" placement="bottom">
+                <div
                   className="time-filter-tool"
                   onClick={() => setDigitizer((digitizer) => !digitizer)}
                 >
-                  <Text strong>
-                      Digitizer
-                  </Text>
+                  <Text strong>Digitizer</Text>
                 </div>
               </Tooltip>
               <Tooltip title="Time" placement="bottom">
@@ -4915,7 +4957,7 @@ function BaseMap(props) {
                 menu={{ items: filterMenu }}
                 //overlay={filterMenu}
                 disabled={chipsLoading}
-              //overlayStyle={{}}
+                //overlayStyle={{}}
               >
                 <Button style={{ float: "right" }} type="link">
                   Filter <DownOutlined />
@@ -5039,10 +5081,11 @@ function BaseMap(props) {
                   <Card
                     key="1"
                     onClick={() => setSelectedKey(1)}
-                    className={`create-mission-extended-card ${selectedKey == 1
-                      ? "create-mission-extended-card-selected"
-                      : ""
-                      }`}
+                    className={`create-mission-extended-card ${
+                      selectedKey == 1
+                        ? "create-mission-extended-card-selected"
+                        : ""
+                    }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -5064,10 +5107,11 @@ function BaseMap(props) {
                   <Card
                     key="2"
                     onClick={() => setSelectedKey(2)}
-                    className={`create-mission-extended-card ${selectedKey == 2
-                      ? "create-mission-extended-card-selected"
-                      : ""
-                      }`}
+                    className={`create-mission-extended-card ${
+                      selectedKey == 2
+                        ? "create-mission-extended-card-selected"
+                        : ""
+                    }`}
                     // loading={isLoading}
                     hoverable
                   >
@@ -5186,7 +5230,10 @@ function BaseMap(props) {
                         </Upload>
 
                         {uploading ? (
-                          <Progress strokeLinecap="square" percent={Math.floor(progress)} />
+                          <Progress
+                            strokeLinecap="square"
+                            percent={Math.floor(progress)}
+                          />
                         ) : null}
                       </Form.Item>
                     </Row>
@@ -5713,7 +5760,7 @@ function BaseMap(props) {
         <Modal
           title="Edit Group"
           open={visibleEditModal}
-          onOk={() => { }}
+          onOk={() => {}}
           onCancel={() => {
             setVisibleEditModal(false);
           }}
