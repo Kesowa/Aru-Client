@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import Loader, { LoaderContext, useLoader } from "./components/shared/Loader";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import { message, Space, Spin } from "antd";
@@ -66,11 +66,15 @@ const App = () => {
 
   const { mapScriptLoaded, paymentScriptLoaded } = useScripts();
 
+  const memoizedLoaderContextValue = useMemo(() => ({ loading, setLoading }), [loading, setLoading]);
+  const memoizedAuthContextValue = useMemo(() => ({ Auth, login, logout, setUserDetails }), [Auth, login, logout, setUserDetails]);
+  const memoizedThreadContextValue = useMemo(() => ({ thread, openThread, closeThread }), [thread, openThread, closeThread]);
+
   return userDetailsFetched ? (
     <React.Fragment>
-      <LoaderContext.Provider value={{ loading, setLoading }}>
-        <AuthContext.Provider value={{ Auth, login, logout, setUserDetails }}>
-          <ThreadContext.Provider value={{ thread, openThread, closeThread }}>
+      <LoaderContext.Provider value={memoizedLoaderContextValue}>
+        <AuthContext.Provider value={memoizedAuthContextValue}>
+          <ThreadContext.Provider value={memoizedThreadContextValue}>
             <Socket />
             <Loader />
             {mapScriptLoaded && paymentScriptLoaded && (

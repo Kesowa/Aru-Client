@@ -778,8 +778,8 @@ function Pictomap(props) {
     if (isUploading) {
       window.addEventListener("beforeunload", (ev) => {
         ev.preventDefault();
-        return (ev.returnValue =
-          "Are you sure you want to close? Data uploading proccess will be terminated!");
+        ev.returnValue = "Are you sure you want to close? Data uploading proccess will be terminated!";
+        return ev.returnValue;
       });
     }
   }, [isUploading]);
