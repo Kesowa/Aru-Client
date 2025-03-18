@@ -1,9 +1,9 @@
 import { useState } from "react";
 
-import { Link } from "react-router-dom";
-import { Button, Tabs, Badge } from "antd";
+// import { Link } from "react-router-dom";
+import { Tabs, Badge } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { PlusCircleOutlined } from "@ant-design/icons";
+// import { PlusCircleOutlined } from "@ant-design/icons";
 import DataMission from "./Mission";
 import DataLocation from "./Location";
 
@@ -18,13 +18,13 @@ function DataList() {
         title="My Data"
         className="site-page-header-responsive"
         subTitle="Here you will find all the data captured from your missions!"
-        extra={[
-          <Link to="/dashboard/data/locations/create" key="1">
-            <Button key="1" type="primary" icon={<PlusCircleOutlined />}>
-              Create location
-            </Button>
-          </Link>,
-        ]}
+        // extra={[
+        //   <Link to="/dashboard/data/locations/create" key="1">     //remove create location buttom 
+        //     <Button key="1" type="primary" icon={<PlusCircleOutlined />}>
+        //       Create location
+        //     </Button>
+        //   </Link>,
+        // ]}
       />
 
       <Tabs
