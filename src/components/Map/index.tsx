@@ -2450,8 +2450,8 @@ function BaseMap(props) {
             .get(`${apis.DOWNLOAD_KML}?id=${layer._id}`)
             .then((res: any) => {
               if (res.data.status) {
-                //download(API_URL + res.data.link);
-                window.open(PUBLIC_URL + res.data.link);
+                download(STATIC_URL + res.data.link);
+                // window.open(PUBLIC_URL + res.data.link);
               } else {
                 console.log(res.data.message);
               }
