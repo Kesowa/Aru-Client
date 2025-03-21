@@ -1140,6 +1140,8 @@ function VideoPlayer(props: any) {
             <Item onClick={() => setPlaybackSpeed(2)}>2x</Item>
             <Item onClick={() => setPlaybackSpeed(1.5)}>1.5x</Item>
             <Item onClick={() => setPlaybackSpeed(1)}>1x</Item>
+            <Item onClick={() => setPlaybackSpeed(0.75)}>0.75x</Item>
+            <Item onClick={() => setPlaybackSpeed(0.5)}>0.5x</Item>
           </SubMenu>
           <SubMenu
             title={
