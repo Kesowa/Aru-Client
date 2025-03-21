@@ -25,7 +25,7 @@ import {
   getImageForCircle,
   getImageForPolygon,
 } from "../../../../../services/staticMap";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import { API_URL, STATIC_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";

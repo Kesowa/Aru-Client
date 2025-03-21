@@ -24,7 +24,7 @@ import { Layer } from "../layerRender";
 import { rasterProps } from "src/static/rasterprops";
 import { AuthContext } from "src/services/authUtils";
 import { Feature } from "src/types/geojson";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 
 const { Text } = Typography;
 const { Option } = Select;

@@ -34,7 +34,7 @@ import apis from "../../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import Alone from "../../../../../static/Alone-rafiki.svg";
 import moment from "moment";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import { components } from "src/handlers/schema";
 import { AuthContext } from "src/services/authUtils";
 import OutcomeModal from "../../Details/Data/OutcomeModal";

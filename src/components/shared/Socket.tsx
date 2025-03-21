@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import {
   Button,
   notification,

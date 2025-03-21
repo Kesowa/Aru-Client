@@ -3,7 +3,7 @@ import { useParams, useHistory } from "react-router-dom";
 import { Tabs, Row, Col, message, Typography } from "antd";
 import type { TabsProps } from "antd";
 import "./index.less";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import About from "./tabContents/about";
 import Outcomes from "./tabContents/outcomes";
 import VideoPlayer from "../../../shared/VideoPlayer";

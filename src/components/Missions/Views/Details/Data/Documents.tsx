@@ -31,7 +31,7 @@ import {
 } from "@ant-design/icons";
 import Dragger from "antd/lib/upload/Dragger";
 import { useEffect } from "react";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import { useMemo } from "react";
 import download from "downloadjs";
 import { API_URL, STATIC_URL } from "src/constants";

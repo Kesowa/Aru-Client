@@ -10,11 +10,13 @@ export default function connect(uri: string) {
 
   const socket = io(cookedURI, {
     withCredentials: true,
+    // transports: ["websocket"],
   });
 
   socket.on("connect", () => {
-    console.log(`${uri} connected`);
+    console.log(`${URL.parse(cookedURI)?.pathname} connected`);
   });
 
+  console.log(`${cookedURI} connected`);
   return socket;
 };
