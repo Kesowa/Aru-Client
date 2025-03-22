@@ -31,7 +31,6 @@ import {
   UploadOutlined,
   UserOutlined,
   VideoCameraOutlined,
-  AimOutlined,
   DownloadOutlined,
   MessageOutlined,
   CloseOutlined,
@@ -167,6 +166,20 @@ function Videos(props) {
     }
     return item;
   };
+
+  const handleEscKeyPress = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      setShowCarousel(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleEscKeyPress);
+    return () => {
+      document.removeEventListener("keydown", handleEscKeyPress);
+    };
+  }, []);
+
   const vodMenuOnClick: MenuProps["onClick"] = (e) => {
     console.log(e);
     switch (e.key) {
