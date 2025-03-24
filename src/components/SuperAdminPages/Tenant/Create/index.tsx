@@ -18,7 +18,7 @@ import { Link, useHistory } from "react-router-dom";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function CreateTenant(props: any) {
+function CreateTenant() {
   const [formState, setFormState] = useState(0);
   const [tenantData, setTenantData] = useState({});
   const history = useHistory();

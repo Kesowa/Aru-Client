@@ -43,10 +43,10 @@ export const getImageForCircle = (lat, lng, rad, detail = 8) => {
 export const getImageForPolygon = (points) => {
   const bounds = new window.google.maps.LatLngBounds();
 
-  const polygonCoords: google.maps.LatLng[] = [];
+  const polygonCoords = [];
 
   for (const x of points) {
-    const llbound = new google.maps.LatLng(x.lat, x.lng);
+    const llbound = new window.google.maps.LatLng(x.lat, x.lng);
     polygonCoords.push(llbound);
   }
   for (const element of polygonCoords) {

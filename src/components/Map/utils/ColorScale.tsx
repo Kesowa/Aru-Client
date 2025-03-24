@@ -1,4 +1,5 @@
 import "./scale.less";
+import React from "react";
 
 interface ShowColorscaleProps {
   settings: { minp: number; maxp: number };

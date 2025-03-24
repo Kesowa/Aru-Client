@@ -9,20 +9,9 @@ import {
   TreeSelect,
   DatePicker,
   Progress,
-  Card,
-  Typography,
-  Select,
-  Collapse,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { options } from "../propUtils";
-import React from "react";
-const { Dragger } = Upload;
-const { Item } = Form;
-const { Meta } = Card;
-const { Option } = Select;
-const { Text, Title } = Typography;
-const { Panel } = Collapse;
 export const UploadRasterData = ({
   form,
   setLayerName,
@@ -36,7 +25,6 @@ export const UploadRasterData = ({
   progress,
 }) => {
   return (
-    <>
       <Form
         name="upload2"
         layout="vertical"
@@ -152,7 +140,6 @@ export const UploadRasterData = ({
           </Row>
         </Col>
       </Form>
-    </>
   );
 };
 
@@ -163,7 +150,6 @@ export const UpdateRasterData = ({
   progress,
 }) => {
   return (
-    <>
       <Form
         name="upload2"
         layout="vertical"
@@ -214,6 +200,5 @@ export const UpdateRasterData = ({
           </Row>
         </Col>
       </Form>
-    </>
   );
 };

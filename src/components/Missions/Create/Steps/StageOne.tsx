@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import { FC } from "react";
 import { Button, Row, Col, Card, Avatar } from "antd";
 import { VideoCameraOutlined } from "@ant-design/icons";
 import "../index.less";

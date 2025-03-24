@@ -84,7 +84,7 @@ function MavlinkTest() {
           style={{ height: "500px", width: "500px" }}
           ref={vref}
           src=""
-        ></video>
+        ><track kind="captions"></track></video>
       </div>
     </div>
   );

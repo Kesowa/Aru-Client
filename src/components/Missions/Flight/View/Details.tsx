@@ -71,6 +71,7 @@ const FlightDetails: FC<any> = (props) => {
                     <img
                       style={{ height: "20px", marginTop: "-20px" }}
                       src={s_m}
+                      alt=""
                     />
                     <div className="area_details_inner">
                       {areaType === "Polygon" ? (

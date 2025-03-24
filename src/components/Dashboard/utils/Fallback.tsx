@@ -77,7 +77,7 @@ const Payment = lazy(() => import("../../shared/Payment"));
 
 const FallbackComponent = (props: any) => {
   const { Paragraph, Text } = Typography;
-  function fallBackComponent({ error, resetErrorBoundary }) {
+  function fallBackComponent({ error }) {
     return (
       <div>
         <Result

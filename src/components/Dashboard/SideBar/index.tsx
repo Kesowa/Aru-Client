@@ -141,12 +141,11 @@ function SideBar(props: any) {
                 </Col>
               </Row>
             </div>
-            <div
-              className="user-info"
-              onClick={() => props.showProfileDrawer(true)}
-              style={{ cursor: "pointer" }}
-            >
-              <Row>
+            <div className="user-info">
+              <Row
+                onClick={() => props.showProfileDrawer(true)}
+                style={{ cursor: "pointer" }}
+              >
                 <Col span={8}>
                   <Avatar
                     className="user-avatar"
@@ -263,7 +262,7 @@ function SideBar(props: any) {
             </div>
           </Col>
           <Col span={8}>
-            <img src={qrCode} style={{ width: "100%" }} />
+            <img src={qrCode} alt="qrcode" style={{ width: "100%" }} />
           </Col>
         </Row>
       </Modal>
@@ -271,7 +270,7 @@ function SideBar(props: any) {
   };
 
   // Final menu items
-  const menu: MenuProps["items"] = () => {
+  const menu: () => MenuProps["items"] = () => {
     const items: MenuProps["items"] = [];
     Auth.userdetails.sideBar.map((ele: any, i: number) => {
       if (ele.type === "sub_menu") {
@@ -281,7 +280,7 @@ function SideBar(props: any) {
           label: ele.text,
         };
         const children: MenuProps["items"] = [];
-        ele.sub_menu.map((subEle: any, j: number) => {
+        ele.sub_menu.map((subEle: any) => {
           children.push({
             key: subEle.link,
             label: (
@@ -310,11 +309,12 @@ function SideBar(props: any) {
       items.push({
         key: "connect_to_app_sidebar",
         label: (
-          <div onClick={() => setVisible(true)}>
+          <div>
             {decideIcon("MobileOutlined")}
             <span>Connect to App</span>
           </div>
         ),
+        onClick: () => setVisible(true),
       });
     }
     return items;

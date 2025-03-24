@@ -15,6 +15,7 @@ import {
   Checkbox,
   Badge,
   Pagination,
+  MenuProps,
 } from "antd";
 import "./data.less";
 import "./checkbox.less";
@@ -80,7 +81,7 @@ function ImageDocs(props) {
 
   const { thread, openThread } = useContext(ThreadContext);
 
-  const imgMenu: MenuProps["items"] = (data) => {
+  const imgMenu: (data: any) => MenuProps["items"] = (data) => {
     const item = [
       {
         key: "1",
@@ -265,10 +266,6 @@ function ImageDocs(props) {
           type: options.file.type,
         };
 
-        // const fData = new FormData();
-        // fData.append("file", options.file);
-        // fData.append("missionId", props.missionDetails.missionId);
-        // fData.append("folderName", "photos");
         console.log("File type: ", options.file.type);
 
         switch (

@@ -8,7 +8,7 @@ function FourOhOne() {
       <div className="error-wrapper">
         <Row>
           <Col span={16} className="picture-div">
-            <img src={FourOhOnePic} className="picture" />
+            <img src={FourOhOnePic} className="picture" alt="" />
           </Col>
           <Col span={8} className="message-div">
             <Title>ERROR 401</Title>

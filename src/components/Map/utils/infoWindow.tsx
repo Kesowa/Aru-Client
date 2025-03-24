@@ -46,14 +46,14 @@ function InfoWindow(props) {
     turf.length(props.feature).toFixed(2)
   );
   const [areaUnit, setAreaUnit] = useState("sq. m");
-  const [lengthUnit, setLenghtUnit] = useState("km");
+  const [lengthUnit, setLengthUnit] = useState("km");
   const [flag, setFlag] = useState(false);
 
   const { logout } = useContext(AuthContext);
   const { thread, openThread } = useContext(ThreadContext);
 
   const [fileCount, setFileCount] = useState(0);
-  const [imageToShow, setImageToshow] = useState<any>([]);
+  const [imageToShow, setImageToShow] = useState<any>([]);
   const [imageLoader, setImageLoader] = useState(false);
   function openImages() {
     props.setImagesDrawer(true);
@@ -130,23 +130,23 @@ function InfoWindow(props) {
     switch (unit) {
       case "m":
         setPerimeter((turf.length(props.feature) * 1000).toFixed(2));
-        setLenghtUnit("m");
+        setLengthUnit("m");
         break;
       case "cm":
         setPerimeter((turf.length(props.feature) * 100000).toFixed(2));
-        setLenghtUnit("cm");
+        setLengthUnit("cm");
         break;
       case "ft":
         setPerimeter((turf.length(props.feature) * 3280.84).toFixed(2));
-        setLenghtUnit("ft");
+        setLengthUnit("ft");
         break;
       case "inch":
         setPerimeter((turf.length(props.feature) * 39370.1).toFixed(2));
-        setLenghtUnit("inch");
+        setLengthUnit("inch");
         break;
       default:
         setPerimeter(turf.length(props.feature).toFixed(2));
-        setLenghtUnit("km");
+        setLengthUnit("km");
     }
   }
   useEffect(() => {
@@ -156,7 +156,6 @@ function InfoWindow(props) {
   const saveDrawingButton = () => {
     if (props.canDraw) {
       return (
-        <React.Fragment>
           <Row
             style={{
               width: "100%",
@@ -177,7 +176,6 @@ function InfoWindow(props) {
               Save
             </Button>
           </Row>
-        </React.Fragment>
       );
     } else return <></>;
   };
@@ -322,17 +320,20 @@ function InfoWindow(props) {
                     </Row>
                   ))}
                 </Col>
-                <Col span={9} className="image-part">
+                <Col span={9} 
+                  className="image-part"
+                  onClick={() => openImages()}
+                  style={{ cursor: "pointer" }}
+                >
                   <Spin spinning={imageLoader}>
                     {props.missionLayer === "Alert" && <Image src={STATIC_URL + imageToShow[0]} />}
-                    {props.missionLayer === "VOD" && <img src={STATIC_URL + props.videoToShow[0].thumbnail} style={{ cursor: "pointer" }} />}
+                    {props.missionLayer === "VOD" && <img src={STATIC_URL + props.videoToShow[0].thumbnail} alt="" style={{ cursor: "pointer" }} />}
                     {!["Alert", "VOD"].includes(props.missionLayer) && 
                       <img
                         src={`${STATIC_URL}/images/geojson/1x_${
                           imageToShow[0].filePath.split("/")[3]
                         }`}
-                        onClick={() => openImages()}
-                        style={{ cursor: "pointer" }}
+                        alt=""
                       />
                     }
                   </Spin>
@@ -516,7 +517,7 @@ function InfoWindow(props) {
     if (props.missionLayer === "VOD" || props.missionLayer === "Alert") {
       if (props.missionLayer === "Alert") {
         console.log("Alert", props.feature.properties.isFlagged);
-        setImageToshow([props.feature.properties.Image]);
+        setImageToShow([props.feature.properties.Image]);
         setFileCount(1);
       } else {
         props.setVideoToShow(props.feature.properties.videos);
@@ -553,7 +554,7 @@ function InfoWindow(props) {
               toshow.sort((a, b) => {
                 return moment(b.createdAt).diff(moment(a.createdAt));
               });
-              setImageToshow(toshow);
+              setImageToShow(toshow);
               setFileCount(res.data.data.length);
             } else {
               console.log(res.data.message);
@@ -574,7 +575,6 @@ function InfoWindow(props) {
   switch (props.mode) {
     case "PointView":
       return (
-        <>
           <div className="infoWindowContent">
             {renderAttributeContent()}
             {renderFeatureAddress()}
@@ -590,19 +590,17 @@ function InfoWindow(props) {
             {props.show && saveDrawingButton()}
             {props.show && CancelDrawingButton()}
           </div>
-        </>
       );
 
     case "PolygonView":
       return (
-        <>
           <div className="infoWindowContent">
             {renderAttributeContent()}
             {renderFeatureAddress()}
             <div className="sub-info">
               <span className="coordinates">
                 <Text>
-                  <img src={Area} />
+                  <img src={Area} alt="" />
                   &nbsp;&nbsp;{area}&nbsp;&nbsp;
                   <Select
                     defaultValue={areaUnit}
@@ -626,7 +624,7 @@ function InfoWindow(props) {
                   &nbsp;&nbsp;&nbsp;&nbsp;
                 </Text>
                 <Text>
-                  <img src={Perimeter} />
+                  <img src={Perimeter} alt="" />
                   &nbsp;&nbsp;{perimeter}&nbsp;&nbsp;
                   <Select
                     defaultValue={lengthUnit}
@@ -651,18 +649,16 @@ function InfoWindow(props) {
             {props.show && saveDrawingButton()}
             {props.show && CancelDrawingButton()}
           </div>
-        </>
       );
     case "LineView":
       return (
-        <>
           <div className="infoWindowContent">
             {renderAttributeContent()}
             {renderFeatureAddress()}
             <div className="sub-info">
               <span className="coordinates">
                 <Text>
-                  <img src={Perimeter} />
+                  <img src={Perimeter} alt="" />
                   &nbsp;&nbsp;{perimeter}&nbsp;&nbsp;
                   <Select
                     defaultValue={lengthUnit}
@@ -687,7 +683,6 @@ function InfoWindow(props) {
             {props.show && saveDrawingButton()}
             {props.show && CancelDrawingButton()}
           </div>
-        </>
       );
     default:
       return <p>unknown</p>;

@@ -141,10 +141,9 @@ function ModelList() {
       sortDirections: ["ascend", "descend"],
       ...getColumnSearchProps("name"),
       width: "15%",
-      render: (modelName: any, record) => {
+      render: (modelName: any) => {
         return (
-          <>
-            <span onClick={() => {}}>
+            <span>
               <Title level={5}>
                 <ShakeOutlined
                   style={{ marginRight: "1rem", color: "#a5a4bf" }}
@@ -152,7 +151,6 @@ function ModelList() {
                 {modelName}
               </Title>
             </span>
-          </>
         );
       },
     },
@@ -181,10 +179,8 @@ function ModelList() {
       dataIndex: "website",
       width: "15%",
       ...getColumnSearchProps("website"),
-      render: (text, record) => (
-        <>
-          <span onClick={() => {}}>{record.website}</span>
-        </>
+      render: (_, record) => (
+          <span>{record.website}</span>
       ),
     },
 
@@ -211,7 +207,7 @@ function ModelList() {
   ];
 
   const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
+    onChange: (_, selectedRows) => {
       const newSelectedModelID = selectedRows[0]?._id;
       setSelectedModelID(newSelectedModelID);
     },
@@ -233,7 +229,11 @@ function ModelList() {
         </Col>
         <Col span={8}>
           <div>
-            <ModelCard id={selectedModelID} showDate={true} key={selectedModelID}/>
+            <ModelCard 
+              id={selectedModelID} 
+              // showDate={true} // currently not used anywhere in the component
+              key={selectedModelID}
+            />
           </div>
         </Col>
       </Row>

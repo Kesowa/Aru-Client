@@ -73,8 +73,6 @@ function Documents(props) {
   //----------------Set Perms----------------------------
   useEffect(() => {
     if (userType === "tenant-staff" || userType === "tenant-client") {
-      let upload: any = [];
-      let deleteDoc: any = [];
       const perms: any = [
         ChonkyActions.EnableListView,
         ChonkyActions.EnableGridView,
@@ -118,7 +116,7 @@ function Documents(props) {
   }, []);
 
   //-----------Defining File System Structure in State------------------
-  const [filesSystem, setFileSystem] = useState({
+  const [fileSystem, setFileSystem] = useState({
     rootFolderId: "root1234",
     fileMap: {
       root1234: {
@@ -156,8 +154,8 @@ function Documents(props) {
   });
 
   //--------------Defining Roor folde and FileMap -------------------------------
-  const rootFolderId = filesSystem.rootFolderId;
-  const fileMap = filesSystem.fileMap as unknown as {
+  const rootFolderId = fileSystem.rootFolderId;
+  const fileMap = fileSystem.fileMap as unknown as {
     [fileId: string]: FileData & { childrenIds: string[] };
   };
   //----------------------Fetch Files list from fileSystem state ----------------
@@ -175,7 +173,7 @@ function Documents(props) {
             })
         : [];
       return files;
-    }, [currentFolderId, filesSystem]);
+    }, [currentFolderId, fileSystem]);
   };
 
   //----------- setting Folder chain management -------------------------
@@ -231,7 +229,7 @@ function Documents(props) {
             openThread("document", data.state.selectedFiles[0].id, {});
             break;
           //-----Changing DIR state--------------------------------------------------
-          case ChonkyActions.OpenFiles.id:
+          case ChonkyActions.OpenFiles.id: {
             const { targetFile, files } = data.payload;
             const fileToOpen = targetFile ?? files[0];
             if (fileToOpen && FileHelper.isDirectory(fileToOpen)) {
@@ -248,6 +246,7 @@ function Documents(props) {
               }
             }
             break;
+          }
           //----------Delete Files---------------------------------------------------
           case ChonkyActions.DeleteFiles.id:
             if (data.state.selectedFilesForAction.length > 1) {
@@ -398,23 +397,6 @@ function Documents(props) {
           missionId: props.missionDetails.missionId,
           folderName: currentFolderId,
         };
-
-        // const fData = new FormData();
-        // fData.append("file", options.file);
-        // fData.append("missionId", props.missionDetails.missionId);
-        // fData.append("folderName", currentFolderId);
-        // if (
-        //   options.file.name.substring(
-        //     options.file.name.lastIndexOf(".") + 1
-        //   ) === "las" ||
-        //   options.file.name.substring(
-        //     options.file.name.lastIndexOf(".") + 1
-        //   ) === "LAS"
-        // ) {
-        //   fData.append("type", "pointCloud");  //conditionally need to add the type in the body object that will going to pass to the http request
-        // } else {
-        //   fData.append("type", options.file.type);
-        // }
 
         switch (
           props.missionDetails.userType //upload priviledge checks
@@ -718,17 +700,17 @@ function Documents(props) {
           `${API_URL}/stream/mission-specific?missionID=${props.missionDetails.missionId}`
         );
 
-        socket.current.on("DOCUMENT_CREATED", (data) => {
+        socket.current.on("DOCUMENT_CREATED", () => {
           setRefreshState(true);
           fetchDocuments();
         });
 
-        socket.current.on("DOCUMENT_DELETED", (data) => {
+        socket.current.on("DOCUMENT_DELETED", () => {
           setRefreshState(true);
           fetchDocuments();
         });
 
-        socket.current.on("DOCUMENT_ZIP_START", (data) => {
+        socket.current.on("DOCUMENT_ZIP_START", () => {
           message.success("Preparing your download...");
         });
 

@@ -161,16 +161,16 @@ function DataMission(props) {
     {
       title: "MISSION",
       dataIndex: "name",
-      sorter: (a: any, b: any) => null,
+      sorter: () => null,
       sortDirections: ["ascend", "descend"],
       ...getColumnSearchProps("name"),
       render: (name: any, record) => {
         return (
-          <>
-            <span
+            <Button
               onClick={() => {
                 history.push(`/dashboard/mission/view/staff-${record._id}`);
               }}
+              type="text"
             >
               <Tooltip placement="bottom" title={name}>
                 <Title level={5} className="tableMissionName">
@@ -208,15 +208,14 @@ function DataMission(props) {
                   {name}
                 </Title>
               </Tooltip>
-            </span>
-          </>
+            </Button>
         );
       },
     },
     {
       title: "ORDER DATE",
       dataIndex: "createdAt",
-      sorter: (a: any, b: any) => null,
+      sorter: () => null,
       sortDirections: ["descend", "ascend"],
       ...getColumnSearchProps("createdAt"),
       render: (createdAt: string) => (
@@ -230,19 +229,20 @@ function DataMission(props) {
       dataIndex: "_id",
       ...getColumnSearchProps("_id"),
       render: (text, record) => (
-          <span
+          <Button
+            type="text"
             onClick={() => {
               history.push(`/dashboard/mission/view/staff-${record._id}`);
             }}
           >
             <p className="mission-id">{record._id}</p>
-          </span>
+          </Button>
       ),
     },
     {
       title: "Created By",
       dataIndex: "user",
-      sorter: (a: any, b: any) => null,
+      sorter: () => null,
       sortDirections: ["descend", "ascend"],
       ...getColumnSearchProps("user"),
       render: (user: any) =>
@@ -358,10 +358,8 @@ function DataMission(props) {
             setCompletedMissions(result.data.data);
             setTotal(result.data.total);
             const count = {};
-            let tm = 0;
             result.data.missionCount.forEach((c) => {
               count[c._id] = c.count;
-              tm += Number(c.count);
             });
             props.setMissionCount(count["Completed"]);
           } else {

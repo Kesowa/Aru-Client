@@ -57,7 +57,7 @@ const CreateLayer = (props: any) => {
     }
   }, [props.status, current]);
 
-  const handleChangeFiles = ({ fileList, file }) => {
+  const handleChangeFiles = ({ fileList }) => {
     setFileList([...fileList]);
   };
 
@@ -85,16 +85,16 @@ const CreateLayer = (props: any) => {
     },
   };
   //---------------------File validator----------------
-  function validateFile(file: any) {
-    switch (file.type) {
-      case "image/png":
-        return true;
-      case "image/jpeg":
-        return true;
-      default:
-        return false;
-    }
-  }
+  // function validateFile(file: any) {
+  //   switch (file.type) {
+  //     case "image/png":
+  //       return true;
+  //     case "image/jpeg":
+  //       return true;
+  //     default:
+  //       return false;
+  //   }
+  // }
 
   async function handleUploadFiles() {
     if (fileList.length > 0) {
@@ -293,7 +293,6 @@ const CreateLayer = (props: any) => {
       title: "Processing",
       description: "Now Processing Images and Layer Information",
       content: (
-        <>
           <Result
             status="success"
             title="Images uploaded successfully!"
@@ -317,7 +316,6 @@ const CreateLayer = (props: any) => {
               </Row>
             </div>
           </Result>
-        </>
       ),
     },
     {

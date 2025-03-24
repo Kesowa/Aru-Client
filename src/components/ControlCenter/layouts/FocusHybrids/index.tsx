@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col } from "antd";
+import { Row, Col, Button } from "antd";
 import "./threeStreamsView.less";
 import VideoBox from "../../utils/VideoBox";
 import EmptyFeed from "../../utils/emptyFeed";
@@ -70,7 +70,9 @@ function TwoStreamWithMap(props) {
                 {feed.id === feeds[0].id ? (
                   <Col span={8} key={window.crypto.randomUUID()} className="small-section">
                     {feed.type === "feed" ? (
-                      <span
+                      // REVISIT STYLING
+                      <Button
+                        type="text"
                         onClick={() => {
                           viewInLarge(feed);
                         }}
@@ -85,7 +87,7 @@ function TwoStreamWithMap(props) {
                           streamKey={feed.streamKey}
                           value={feed}
                         />
-                      </span>
+                      </Button>
                     ) : (
                       <EmptyFeed
                         addFeed={props.addFeed}
@@ -97,7 +99,9 @@ function TwoStreamWithMap(props) {
                 ) : (
                   <Col span={8} key={window.crypto.randomUUID()} className="small-section">
                     {feed.type === "feed" ? (
-                      <span
+                      // REVISIT STYLING
+                      <Button
+                        type="text"
                         onClick={() => {
                           viewInLarge(feed);
                         }}
@@ -110,7 +114,7 @@ function TwoStreamWithMap(props) {
                           swapFeed={props.swapFeed}
                           value={feed}
                         />
-                      </span>
+                      </Button>
                     ) : (
                       <EmptyFeed
                         addFeed={props.addFeed}

@@ -23,8 +23,8 @@ import Highlighter from "react-highlight-words";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
-function ClientListPage(props: any) {
-  const [isTableLoading, setIstableLoading] = useState(false);
+function ClientListPage() {
+  const [isTableLoading, setIsTableLoading] = useState(false);
   const [tenantUserTableData, setTenantUserTableData] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -196,7 +196,7 @@ function ClientListPage(props: any) {
       dataIndex: "name",
       key: "name",
       ...getColumnSearchProps("name"),
-      sorter: (a: any, b: any) => null,
+      sorter: () => null,
       sortDirections: ["ascend", "descend"],
     },
     {
@@ -216,9 +216,9 @@ function ClientListPage(props: any) {
       dataIndex: "count",
       key: "missions",
       render: (count) => {
-        return count && count.length ? count[0].count : 0;
+        return count?.length ? count[0].count : 0;
       },
-      sorter: (a: any, b: any) => null,
+      sorter: () => null,
       sortDirections: ["ascend", "descend"],
     },
     {
@@ -229,7 +229,7 @@ function ClientListPage(props: any) {
       render: (country) => {
         return country;
       },
-      sorter: (a: any, b: any) => null,
+      sorter: () => null,
       sortDirections: ["ascend", "descend"],
     },
     {
@@ -240,7 +240,7 @@ function ClientListPage(props: any) {
       render: (city) => {
         return city;
       },
-      sorter: (a: any, b: any) => null,
+      sorter: () => null,
       sortDirections: ["ascend", "descend"],
     },
     {
@@ -249,7 +249,7 @@ function ClientListPage(props: any) {
       key: "createdAt",
       ...getColumnSearchProps("createdAt"),
       render: (createdAt: string) => moment(createdAt).format("DD-MM-YYYY"),
-      sorter: (a: any, b: any) => null,
+      sorter: () => null,
       sortDirections: ["ascend", "descend"],
     },
 
@@ -259,7 +259,7 @@ function ClientListPage(props: any) {
       key: "createdBy",
       ...getColumnSearchProps("createdBy"),
       render: (createdBy: any) => (createdBy ? createdBy.name : "Auto"),
-      sorter: (a: any, b: any) => null,
+      sorter: () => null,
       sortDirections: ["ascend", "descend"],
     },
 
@@ -269,7 +269,7 @@ function ClientListPage(props: any) {
       key: "expiryDatee",
       ...getColumnSearchProps("expiryDate"),
       render: (expiryDatee) => moment(expiryDatee).format("DD-MM-YYYY"),
-      sorter: (a: any, b: any) => null,
+      sorter: () => null,
       sortDirections: ["ascend", "descend"],
     },
     {
@@ -309,7 +309,7 @@ function ClientListPage(props: any) {
   ];
 
   const fetchAllUsers = () => {
-    setIstableLoading(true);
+    setIsTableLoading(true);
     const params = {};
     if (searchFilters) {
       Object.entries(searchFilters).forEach((f: any) => {
@@ -353,7 +353,7 @@ function ClientListPage(props: any) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        setIstableLoading(false);
+        setIsTableLoading(false);
       });
   };
 

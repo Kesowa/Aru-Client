@@ -10,7 +10,7 @@ import { useContext } from "react";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function CreatePermission(props: any) {
+function CreatePermission() {
   const { logout } = useContext(AuthContext);
   const { setLoading } = useContext(LoaderContext);
   const [form] = Form.useForm();

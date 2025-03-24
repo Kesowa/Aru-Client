@@ -8,7 +8,7 @@ function Unauthorized() {
       <div className="error-wrapper">
         <Row>
           <Col span={16} className="picture-div">
-            <img src={unAuthorizedPic} className="picture" />
+            <img src={unAuthorizedPic} className="picture" alt="" />
           </Col>
           <Col span={8} className="message-div">
             <Title>Sorry! You dont have access to this feature.</Title>

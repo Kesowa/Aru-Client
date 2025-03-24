@@ -49,30 +49,31 @@ import Paragraph from "antd/lib/typography/Paragraph";
 import { PUBLIC_URL, STATIC_URL } from "../../../../constants";
 import { featureType, featureTypes } from "src/static/vectorprops";
 import { AuthContext } from "src/services/authUtils";
+import { Components } from "src/handlers/schema";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 function LayerDocs(props) {
-  const [files, populateFiles] = useState<any>([]);
+  const [files, setFiles] = useState<any>([]);
   const [loader, setLoader] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [attributess, setAttributes] = useState([]);
-  const [attributesLoading, setAttLoading] = useState(false);
+  const [attributes, setAttributes] = useState([]);
+  const [attributesLoading, setAttributesLoading] = useState(false);
   const [selectLoader, setSelectLoader] = useState(false);
   const [reviewShow, setReviewShow] = useState(false);
-  const [reviewFiles, populateReviewFiles] = useState([]);
+  const [reviewFiles, setReviewFiles] = useState([]);
   const [reviewFilesLoader, setReviewFilesLoader] = useState(true);
   const [reviewOptions, setReviewOptions] = useState([]);
   const [isLayerLabel, setIsLayerLabel] = useState(
-    props.layerLabel === "No label selected" ? false : true
+    props.layerLabel !== "No label selected"
   );
   const [showConfirmBtn, setShowConfirmBtn] = useState(false);
   const [reviewList, setReviewList] = useState<any>([]);
   const [fetchReviewFiles, setFetchReviewFiles] = useState(false);
   const [confirmingFiles, setConfirmingFiles] = useState(false);
-  const [documents, fillDocuments] = useState<any>([]);
+  const [documents, setDocuments] = useState<any>([]);
   const [subHeading, setSubHeading] = useState("");
 
   const { logout } = useContext(AuthContext);
@@ -736,7 +737,6 @@ function LayerDocs(props) {
       if (refresh) {
         setRefresh(false);
         setLoader(true);
-        const newdata: any = [];
         http
           .get(`${apis.FETCH_FEATURE_FILES}`, {
             params: {
@@ -751,7 +751,7 @@ function LayerDocs(props) {
               const images: any = extractImages(res.data.data);
               const documents: any = extractDocuments(res.data.data);
               if (documents.length > 0) {
-                fillDocuments(documents);
+                setDocuments(documents);
               }
               images.map((data: any) => {
                 if (LastFeature.includes(data.sys_Id) === false) {
@@ -772,10 +772,9 @@ function LayerDocs(props) {
                   LastFeature.push(data.sys_Id);
                 }
               });
-              populateFiles(finalArray);
+              setFiles(finalArray);
             } else {
               if (res.data.message !== "Oops no data to show") {
-                //console.log(res.data);
                 message.error(res.data.message);
               }
             }
@@ -787,7 +786,6 @@ function LayerDocs(props) {
           .finally(() => setLoader(false));
       } else {
         setLoader(true);
-        const newdata: any = [];
         http
           .get(`${apis.FETCH_FEATURE_FILES}`, {
             params: {
@@ -801,7 +799,7 @@ function LayerDocs(props) {
               const images: any = extractImages(res.data.data);
               const documents: any = extractDocuments(res.data.data);
               if (documents.length > 0) {
-                fillDocuments(documents);
+                setDocuments(documents);
               }
               images.map((data: any) => {
                 if (LastFeature.includes(data.sys_Id) === false) {
@@ -822,10 +820,9 @@ function LayerDocs(props) {
                   LastFeature.push(data.sys_Id);
                 }
               });
-              populateFiles(finalArray);
+              setFiles(finalArray);
             } else {
               if (res.data.message !== "Oops no data to show") {
-                //console.log(res.data);
                 message.error(res.data.message);
               }
             }
@@ -887,9 +884,9 @@ function LayerDocs(props) {
             ); //filtering the array to get rid of the unassigned object
             if (UnassignedImages.length > 0) {
               filtered2Array.unshift(UnassignedImages[0]);
-              populateReviewFiles(filtered2Array);
+              setReviewFiles(filtered2Array);
             } else {
-              populateReviewFiles(finalArray);
+              setReviewFiles(finalArray);
             }
           } else {
             if (res.data.message !== "Could not fetch layer files!") {
@@ -897,7 +894,7 @@ function LayerDocs(props) {
             } else {
               //console.log(res.data);
               const emptyArray: any = [];
-              populateReviewFiles(emptyArray);
+              setReviewFiles(emptyArray);
             }
           }
         })
@@ -911,7 +908,7 @@ function LayerDocs(props) {
         });
       fetchJSON().then((data) => {
         const filteredArrayy: any = [];
-        data?.features.forEach(function (value, i) {
+        data?.features.forEach(function (value) {
           let objecty: any = {};
           let test;
           if (props.layerLabel) {
@@ -979,7 +976,7 @@ function LayerDocs(props) {
         newIndexFiles.map((i: any) => {
           filteredArray.push(i);
         });
-        populateReviewFiles(filteredArray);
+        setReviewFiles(filteredArray);
       } else {
         const newFiles: any = [
           {
@@ -999,7 +996,7 @@ function LayerDocs(props) {
         newFiles.map((i: any) => {
           filteredArray.push(i);
         });
-        populateReviewFiles(filteredArray);
+        setReviewFiles(filteredArray);
       }
     }
   }
@@ -1024,7 +1021,7 @@ function LayerDocs(props) {
               loading={selectLoader}
               virtual={false}
             >
-              {attributess.map((item: any) => {
+              {attributes.map((item: any) => {
                 return (
                   <Option key={`1-${item}`} value={item}>
                     {item}
@@ -1043,7 +1040,7 @@ function LayerDocs(props) {
               onChange={handlePopupAttrChange}
               virtual={false}
             >
-              {attributess.map((item: any) => {
+              {attributes.map((item: any) => {
                 return (
                   <Option key={`1-${item}`} value={item}>
                     {item}
@@ -1095,11 +1092,11 @@ function LayerDocs(props) {
         const filtered2Array: any = filtered.filter((i) => i.label !== null); //filtering the array to get rid of the unassigned object
         if (UnassignedImages.length > 0) {
           filtered2Array.unshift(UnassignedImages[0]);
-          populateReviewFiles(filtered2Array);
+          setReviewFiles(filtered2Array);
         } else {
-          populateReviewFiles(filtered);
+          setReviewFiles(filtered);
         }
-        //populateReviewFiles(filtered);
+        //setReviewFiles(filtered);
       } else {
         const object: any = {
           label: newLabel,
@@ -1119,11 +1116,11 @@ function LayerDocs(props) {
         const filtered2Array: any = filtered.filter((i) => i.label !== null); //filtering the array to get rid of the unassigned object
         if (UnassignedImages.length > 0) {
           filtered2Array.unshift(UnassignedImages[0]);
-          populateReviewFiles(filtered2Array);
+          setReviewFiles(filtered2Array);
         } else {
-          populateReviewFiles(filtered);
+          setReviewFiles(filtered);
         }
-        //populateReviewFiles(filtered);
+        //setReviewFiles(filtered);
       }
     }
   }
@@ -1322,15 +1319,17 @@ function LayerDocs(props) {
           renderItem={(item) => (
             <List.Item
               actions={[
-                <a
+                <Button
+                  type="link"
                   key={`1.${item._id}`}
                   onClick={() => window.open(`${PUBLIC_URL}${item.filePath}`)}
                 >
                   <DownloadOutlined /> Download
-                </a>,
+                </Button>,
                 <>
                   {props.canDelete ? (
-                    <a
+                    <Button
+                      type="link"
                       key={`2.${item._id}`}
                       onClick={() => {
                         Modal.confirm({
@@ -1347,7 +1346,7 @@ function LayerDocs(props) {
                       }}
                     >
                       <DeleteOutlined /> Delete
-                    </a>
+                    </Button>
                   ) : (
                     <></>
                   )}
@@ -1434,7 +1433,7 @@ function LayerDocs(props) {
   }
 
   // make layer public
-  const [publicLoading, setPublicLoader] = useState(false);
+  const [publicLoading, setPublicLoading] = useState(false);
   const [madePublic, setMadePublic] = useState(false);
   const [publicMapRefId, setPublicMapRefId] = useState("");
 
@@ -1442,9 +1441,9 @@ function LayerDocs(props) {
     const payload: any = {
       layerId: props.layerId,
     };
-    setPublicLoader(true);
+    setPublicLoading(true);
     http
-      .patch<components["schemas"]["PublishBaseLayerResponse"]>(
+      .patch<Components["schemas"]["PublishBaseLayerResponse"]>(
         `${apis.MAKE_LAYER_PUBLIC}`,
         payload
       )
@@ -1460,7 +1459,7 @@ function LayerDocs(props) {
         console.log(err);
         AxiosErrorHandler(err, logout);
       })
-      .finally(() => setPublicLoader(false));
+      .finally(() => setPublicLoading(false));
   }
 
   //---Get properties keys ---
@@ -1478,7 +1477,7 @@ function LayerDocs(props) {
 
   useEffect(() => {
     if (props.visible) {
-      setAttLoading(true);
+      setAttributesLoading(true);
       fetchJSON()
         .then((data) => {
           // let filteredObjectArray:any = [];
@@ -1514,15 +1513,15 @@ function LayerDocs(props) {
           //console.log(attributes);
           setAttributes(attributes);
         })
-        .catch((err) => {
+        .catch(() => {
           console.log("could not fetch geojson");
         })
-        .finally(() => setAttLoading(false));
+        .finally(() => setAttributesLoading(false));
     }
   }, [props.visible]);
 
   //------handling render of confirm button based on tabclick----------
-  const onClickForTab = (key: any, value: any) => {
+  const onClickForTab = (key: any) => {
     if (key == 4) {
       setReviewShow(true);
       setShowConfirmBtn(true);
@@ -1546,7 +1545,7 @@ function LayerDocs(props) {
       };
       filteredArray.push(x);
     });
-    populateReviewFiles(filteredArray);
+    setReviewFiles(filteredArray);
   }
 
   return (
@@ -1585,7 +1584,6 @@ function LayerDocs(props) {
               </Button>
             )}
             {showConfirmBtn && reviewFiles.length > 0 ? (
-              <>
                 <Button
                   type="primary"
                   style={{ float: "left" }}
@@ -1595,7 +1593,6 @@ function LayerDocs(props) {
                 >
                   Confirm images
                 </Button>
-              </>
             ) : (
               <></>
             )}

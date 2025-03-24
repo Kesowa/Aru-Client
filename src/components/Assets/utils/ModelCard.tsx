@@ -80,10 +80,6 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
 const EditableCell: React.FC<EditableCellProps> = ({
   editing,
   dataIndex,
-  title,
-  inputType,
-  record,
-  index,
   children,
   ...restProps
 }) => {
@@ -111,7 +107,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
 interface ModelCardProps {
   id: any;
-  showDate: boolean;
+  // showDate: boolean;
 }
 
 const ModelCard: React.FC<ModelCardProps> = (props) => {
@@ -332,7 +328,7 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
     }
   };
 
-  const onFinish = async (values: any) => {
+  const onFinish = async () => {
     form.resetFields();
     const modelProps: { [key: string]: any } = {};
     for (const element of tableData) {
@@ -433,17 +429,16 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
         const editable = isEditing(record);
         return editable ? (
           <span>
-            <a
-              href="javascript:;"
+            <Button type="link"
               onClick={() => save(record.key)}
               style={{ marginRight: 8 }}
             >
               <SaveOutlined style={{ color: "green" }} />
-            </a>
+            </Button>
             <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-              <a>
+              <Button type="link">
                 <CloseOutlined style={{ color: "red" }} />
-              </a>
+              </Button>
             </Popconfirm>
           </span>
         ) : (
@@ -458,9 +453,9 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
               title="Sure to delete?"
               onConfirm={() => handleDelete(record.key)}
             >
-              <a>
+              <Button type="link">
                 <DeleteOutlined style={{ color: "red" }} />
-              </a>
+              </Button>
             </Popconfirm>
           </>
         );
@@ -746,11 +741,11 @@ if (data) {
                 >
                   <Select
                     showSearch
-                    filterOption={(input, option) =>
-                      option?.children
-                        .toLowerCase()
-                        .indexOf(input.toLowerCase()) >= 0
-                    }
+                    // filterOption={(input, option) =>
+                    //   option?.children
+                    //     .toLowerCase()
+                    //     .indexOf(input.toLowerCase()) >= 0
+                    // }
                   >
                     {users.map((user: any) => (
                       <Option key={user._id} value={user._id}>

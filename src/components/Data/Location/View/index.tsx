@@ -32,7 +32,7 @@ import { LoaderContext } from "src/components/shared/Loader";
 const { Panel } = Collapse;
 const { Text, Title } = Typography;
 
-function LocationCard(props) {
+function LocationCard() {
   const [missions, setMissions] = useState<any>();
   const [selectedMission, setSelectedMission] = useState<any>({});
   const [isMissionsLoading, setisMissionsLoading] = useState(true);
@@ -154,15 +154,14 @@ function LocationCard(props) {
   const findPolygonCenter = (points) => {
     const bounds = new window.google.maps.LatLngBounds();
 
-    const polygonCoords: google.maps.LatLng[] = [];
+    const polygonCoords: unknown[] = [];
 
     for (const x of points) {
       const llbound = new window.google.maps.LatLng(x.lat, x.lng);
       polygonCoords.push(llbound);
     }
-    let i;
-    for (i = 0; i < polygonCoords.length; i++) {
-      bounds.extend(polygonCoords[i]);
+    for (const polygonCoord of polygonCoords) {
+      bounds.extend(polygonCoord);
     }
 
     const centerOfPolygon = bounds.getCenter();
@@ -369,15 +368,15 @@ function LocationCard(props) {
                                 : ""
                             }`}
                             key={mis.missionID}
-                            onClick={() => {
-                              setSelectedMission(mis);
-                              getMissionDetails(mis.missionID);
-                              setIsChecked(false);
-                            }}
                           >
                             <Row
                               className="mission-tab-card"
                               style={{ padding: "15px 10px" }}
+                              onClick={() => {
+                                setSelectedMission(mis);
+                                getMissionDetails(mis.missionID);
+                                setIsChecked(false);
+                              }}
                             >
                               <Col span={4}>
                                 {selectedMission.missionID === mis.missionID ? (
@@ -498,6 +497,7 @@ function LocationCard(props) {
               ) : (
                 <img
                   src={AloneLogo}
+                  alt=""
                   style={{ width: "80%", margin: "0 auto" }}
                 />
               )}

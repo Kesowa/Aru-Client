@@ -39,7 +39,7 @@ interface TableProps {
   setFilters: any;
 }
 
-function MissionTable(props: TableProps) {
+function MissionTable(props: Readonly<TableProps>) {
   const history = useHistory();
   const { Title } = Typography;
 
@@ -112,7 +112,7 @@ function MissionTable(props: TableProps) {
     filterIcon: (filtered: any) => (
       <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
     ),
-    onFilter: (value: any, record: any) => true,
+    onFilter: () => true,
     onFilterDropdownOpenChange: (visible: any) => {
       if (visible) {
         setTimeout(() => searchInput.select());
@@ -222,8 +222,8 @@ function MissionTable(props: TableProps) {
           ...record.missionType,
         };
         return (
-          <>
-            <span
+            <Button
+              type="text"
               onClick={() => {
                 history.push({
                   pathname: `/dashboard/mission/view/staff-${record._id}`,
@@ -276,8 +276,7 @@ function MissionTable(props: TableProps) {
                   {name}
                 </Title>
               </Tooltip>
-            </span>
-          </>
+            </Button>
         );
       },
     },
@@ -297,7 +296,7 @@ function MissionTable(props: TableProps) {
     {
       title: "Flight Date",
       dataIndex: "flight",
-      sorter: (a: any, b: any) => true,
+      sorter: () => true,
       sortDirections: ["descend", "ascend"],
       ...getColumnSearchProps("flight"),
       render: (flight: any) => (
@@ -311,7 +310,8 @@ function MissionTable(props: TableProps) {
       dataIndex: "_id",
       ...getColumnSearchProps("_id"),
       render: (text, record) => (
-          <span
+          <Button
+            type="text"
             onClick={() => {
               history.push({
                 pathname: `/dashboard/mission/view/staff-${record._id}`,
@@ -326,7 +326,7 @@ function MissionTable(props: TableProps) {
             }}
           >
             <p className="mission-id">{record._id}</p>
-          </span>
+          </Button>
       ),
     },
     {

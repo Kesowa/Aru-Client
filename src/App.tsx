@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import Loader, { LoaderContext, useLoader } from "./components/shared/Loader";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import { message, Space, Spin } from "antd";
@@ -71,7 +71,6 @@ const App = () => {
   const memoizedThreadContextValue = useMemo(() => ({ thread, openThread, closeThread }), [thread, openThread, closeThread]);
 
   return userDetailsFetched ? (
-    <React.Fragment>
       <LoaderContext.Provider value={memoizedLoaderContextValue}>
         <AuthContext.Provider value={memoizedAuthContextValue}>
           <ThreadContext.Provider value={memoizedThreadContextValue}>
@@ -120,7 +119,6 @@ const App = () => {
           </ThreadContext.Provider>
         </AuthContext.Provider>
       </LoaderContext.Provider>
-    </React.Fragment>
   ) : (
     <EntryLoader />
   );

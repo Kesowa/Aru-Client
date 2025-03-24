@@ -71,10 +71,6 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
 const EditableCell: React.FC<EditableCellProps> = ({
   editing,
   dataIndex,
-  title,
-  inputType,
-  record,
-  index,
   children,
   ...restProps
 }) => {
@@ -314,17 +310,16 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
         const editable = isEditing(record);
         return editable ? (
           <span>
-            <a
-              href="javascript:;"
+            <Button type="link"
               onClick={() => save(record.key)}
               style={{ marginRight: 8 }}
             >
               <SaveOutlined style={{ color: "green" }} />
-            </a>
+            </Button>
             <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-              <a>
+              <Button type="link">
                 <CloseOutlined style={{ color: "red" }} />
-              </a>
+              </Button>
             </Popconfirm>
           </span>
         ) : (
@@ -339,9 +334,9 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
               title="Sure to delete?"
               onConfirm={() => handleDelete(record.key)}
             >
-              <a>
+              <Button type="link">
                 <DeleteOutlined style={{ color: "red" }} />
-              </a>
+              </Button>
             </Popconfirm>
           </>
         );

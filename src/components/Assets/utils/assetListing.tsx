@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import {
   Typography,
@@ -48,7 +48,7 @@ interface TableProps {
   refreshAssets: boolean;
 }
 
-function AssetListing({ filter, refreshAssets }: TableProps) {
+function AssetListing({ filter, refreshAssets }: Readonly<TableProps>) {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [isTableLoading, setIsTableLoading] = useState(true);
@@ -230,8 +230,7 @@ function AssetListing({ filter, refreshAssets }: TableProps) {
       ...getColumnSearchProps("name"),
       render: (assetName: string) => {
         return (
-          <>
-            <span onClick={() => {}}>
+            <span>
               <Title level={5}>
                 <ShakeOutlined
                   style={{ marginRight: "1rem", color: "#a5a4bf" }}
@@ -239,7 +238,6 @@ function AssetListing({ filter, refreshAssets }: TableProps) {
                 {assetName}
               </Title>
             </span>
-          </>
         );
       },
     },
@@ -276,9 +274,7 @@ function AssetListing({ filter, refreshAssets }: TableProps) {
       dataIndex: "_id",
       ...getColumnSearchProps("_id"),
       render: (text: string, record: Asset) => (
-        <>
-          <span onClick={() => {}}>{record._id}</span>
-        </>
+          <span>{record._id}</span>
       ),
     },
     {
@@ -309,7 +305,6 @@ function AssetListing({ filter, refreshAssets }: TableProps) {
       title: "ACTIONS",
       dataIndex: "actions",
       render: (text: string, record: Asset) => (
-        <>
           <Dropdown.Button
             onClick={() => {
               history.push(`/dashboard/asset/view/${record._id}`);
@@ -319,7 +314,6 @@ function AssetListing({ filter, refreshAssets }: TableProps) {
           >
             <EyeOutlined />
           </Dropdown.Button>
-        </>
       ),
     },
   ];

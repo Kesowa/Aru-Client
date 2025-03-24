@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, MouseEvent as ME } from "react";
+import { useState, useEffect, useRef, MouseEvent as ME } from "react";
 import { STATIC_URL } from "src/constants";
 
 const ThermalImage = (props: {

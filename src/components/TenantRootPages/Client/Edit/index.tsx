@@ -50,7 +50,7 @@ function ClientEditPage() {
       permissions: string[];
     }[]
   >([]);
-  const [selectedUserGroup, setSelectedusergroup] = useState<{
+  const [selectedUserGroup, setSelectedUserGroup] = useState<{
     name: string;
     _id: string;
     isActive: boolean;
@@ -82,30 +82,7 @@ function ClientEditPage() {
         DocModel.USER_AVATARS,
         (prog) => console.info("PROGRESS: " + prog)
       );
-      setAvatar(uploadToken);
-
-      // const body = {
-      //   file: uploadToken,
-      // };
-      // const formData = new FormData();
-      // formData.append("avatar", file);
-      // http
-      //   .post(apis.UPLOAD_USER_PROFILE_PICTURE, body, {
-      //   })
-      //   .then((result) => {
-      //     if (result.data.status) {
-      //       setAvatar(result.data.file);
-      //     } else {
-      //       message.error(result.data.message);
-      //     }
-      //   })
-      //   .catch((err) => {
-      //     console.log(err);
-      //     AxiosErrorHandler(err, props.logout);
-      //   })
-      //   .finally(() => {
-      //     setIsAvatarUploading(false);
-      //   });
+      setAvatar(String(uploadToken));
     });
     return false;
   };
@@ -113,7 +90,7 @@ function ClientEditPage() {
   //change user group
   const onUserGroupChange = (value: any) => {
     const ug = userGroups.find((ele: any) => ele._id === value);
-    setSelectedusergroup(ug);
+    setSelectedUserGroup(ug);
   };
 
   //fetch user group
@@ -139,7 +116,7 @@ function ClientEditPage() {
             }));
 
           const sug = groups.find((g) => g._id === client.userGroupId);
-          setSelectedusergroup(sug);
+          setSelectedUserGroup(sug);
           setUserGroups(groups);
         } else if (result.data.message === "You do not have permission to use this API.") {
           setErrorState("unauthorized");
@@ -310,12 +287,10 @@ function ClientEditPage() {
                           placeholder="Select a user group"
                           defaultValue={selectedUserGroup.name}
                           filterOption={(input, option) =>
-                            option!.children
-                              .toLowerCase()
-                              .indexOf(input.toLowerCase()) >= 0
+                            option!.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0
                           }
                         >
-                          {userGroups.map((ele: any, i: any) => (
+                          {userGroups.map((ele: any) => (
                             <Select.Option key={ele._id} value={ele._id}>
                               {ele.name}
                             </Select.Option>
@@ -353,11 +328,10 @@ function ClientEditPage() {
                           {avatar ? (
                             <img
                               src={
-                                avatarPreview
-                                  ? avatarPreview
-                                  : `${STATIC_URL}${avatar}`
+                                avatarPreview ?? `${STATIC_URL}${avatar}`
                               }
                               className="uploaded-avatar"
+                              alt=""
                             />
                           ) : (
                             <div>

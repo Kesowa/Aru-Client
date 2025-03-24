@@ -152,12 +152,12 @@ const EditFlightForm: FC<any> = ({
               onChange={(date: Moment | null) => {
                 setFlightDetails((prev) => ({
                   ...prev,
-                  date: date?.format("YYYY-MM-DD") || "",
+                  date: date?.format("YYYY-MM-DD") ?? "",
                 }));
                 setisoDate(
                   date?.format("YYYY-MM-DD") +
                     "T" +
-                    (flightDetails.time.split(" ")[0] || "") +
+                    (flightDetails.time.split(" ")[0] ?? "") +
                     "Z"
                 );
               }}
@@ -170,12 +170,12 @@ const EditFlightForm: FC<any> = ({
               onChange={(value) => {
                 setFlightDetails((prev) => ({
                   ...prev,
-                  time: value?.format("HH:mm:ss A") || "",
+                  time: value?.format("HH:mm:ss A") ?? "",
                 }));
                 setisoDate(
                   flightDetails.date +
                     "T" +
-                    (value?.format("HH:mm:ss A").split(" ")[0] || "") +
+                    (value?.format("HH:mm:ss A").split(" ")[0] ?? "") +
                     "Z"
                 );
               }}
@@ -247,7 +247,7 @@ const EditFlightForm: FC<any> = ({
           {areaSelected && (
             <div>
               <div className="data_selected">
-                <img style={{ height: "20px", marginTop: "-20px" }} src={s_m} />
+                <img style={{ height: "20px", marginTop: "-20px" }} src={s_m} alt="" />
                 <div className="data_selected_inner">
                   {flightDetails.geoFence.polygon ? (
                     <div>

@@ -130,8 +130,8 @@ function ClientMission() {
       ...getColumnSearchProps("name"),
       render: (name: any, record) => {
         return (
-          <>
-            <span
+            <Button
+              type="text"
               onClick={() => {
                 history.push(`/dashboard/mission/view/client-${record._id}`);
               }}
@@ -172,8 +172,7 @@ function ClientMission() {
                   {name}
                 </Title>
               </Tooltip>
-            </span>
-          </>
+            </Button>
         );
       },
     },
@@ -195,15 +194,14 @@ function ClientMission() {
       dataIndex: "_id",
       ...getColumnSearchProps("_id"),
       render: (text, record) => (
-        <>
-          <span
+          <Button
+            type="text"
             onClick={() => {
               history.push(`/dashboard/mission/view/client-${record._id}`);
             }}
           >
             <p className="mission-id">{record._id}</p>
-          </span>
-        </>
+          </Button>
       ),
     },
     {
@@ -253,7 +251,6 @@ function ClientMission() {
       dataIndex: "actions",
       className: "mission-actions",
       render: (text, record) => (
-        <>
           <Button
             onClick={() => {
               history.push(`/dashboard/mission/view/client-${record._id}`);
@@ -261,7 +258,6 @@ function ClientMission() {
           >
             <EyeOutlined />
           </Button>
-        </>
       ),
     },
   ];

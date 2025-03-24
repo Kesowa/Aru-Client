@@ -11,7 +11,7 @@ import "../shared/login-bg.less";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "../shared/Loader";
 
-function ForgotPassword(props: any) {
+function ForgotPassword() {
   const [messageType, setmessageType] = useState<any>("");
   const [msg, setMsg] = useState("");
 

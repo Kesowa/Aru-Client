@@ -95,7 +95,7 @@ function Videos(VideoProps) {
             openVideoPlayer(dataa.videoPath, dataa.flightID?.name, dataa)
           }
           className="video-card"
-          cover={<img src={STATIC_URL + dataa.thumbnail} />}
+          cover={<img src={STATIC_URL + dataa.thumbnail} alt="" />}
         >
           <Row style={{ marginTop: "-12px" }}>
             <Col span={18}>

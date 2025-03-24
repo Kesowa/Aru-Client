@@ -1,6 +1,6 @@
 import { Form, Input } from "antd";
 
-function PhoneNumberChanger(props: any) {
+function PhoneNumberChanger() {
   const [form] = Form.useForm();
 
   const onFinish = (data: any) => {

@@ -1,5 +1,4 @@
 import "./index.less";
-import React from "react";
 import { createRoot } from "react-dom/client";
 import * as serviceWorker from "./serviceWorker";
 import { ENV, Mode } from "./constants";

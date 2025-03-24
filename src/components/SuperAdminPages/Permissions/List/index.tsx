@@ -9,8 +9,8 @@ import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { Link } from "react-router-dom";
 import { AuthContext } from "src/services/authUtils";
 
-function ListAllPermissions(props: any) {
-  const [isTableLoading, setIstableLoading] = useState(false);
+function ListAllPermissions() {
+  const [isTableLoading, setIsTableLoading] = useState(false);
   const [permissiontableData, setPermissiontableData] = useState([]);
 
   const { logout } = useContext(AuthContext);
@@ -24,7 +24,7 @@ function ListAllPermissions(props: any) {
   ];
 
   const fetchAllPermissionList = () => {
-    setIstableLoading(true);
+    setIsTableLoading(true);
     http
       .get(apis.FETCH_ALL_PERMISSIONS)
       .then((result) => {
@@ -40,7 +40,7 @@ function ListAllPermissions(props: any) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        setIstableLoading(false);
+        setIsTableLoading(false);
       });
   };
 

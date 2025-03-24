@@ -9,7 +9,7 @@ const getAddressfromLatLong = (lat, lng, callback) => {
     },
     (results, status) => {
       if (status === "OK") {
-        if (results[0]) {
+        if (results?.[0]) {
           callback(null, results[0].formatted_address);
         } else {
           callback(new Error("not found"));
