@@ -675,7 +675,7 @@ function VideoPlayer(props: any) {
 
       setLocation(position);
       setIsAlertEnabled(true);
-      if (isFullScreen) toggleFullScreen();
+      if (isFullScreen) saveAlert();
       setPlayingBeforeCapture(playing);
       setPlaying(false);
     }
