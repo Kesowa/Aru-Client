@@ -119,7 +119,7 @@ function Videos(props) {
           <span>
             <a
               href={
-                STATIC_URL + data.videoPath.toString().replace(".m3u8", ".flv")
+                STATIC_URL + data.originalFile
               }
               download
             >
