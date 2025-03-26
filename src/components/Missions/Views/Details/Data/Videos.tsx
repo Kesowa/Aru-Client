@@ -584,6 +584,16 @@ function Videos(props) {
     },
   };
 
+  const cancelUpload = async () => {
+    try {
+      await axios.post("/api/cancel-upload"); // Replace with process cancelation api
+      message.success("Upload has been canceled successfully");
+    } catch (error) {
+      console.error("Failed to cancel upload:", error);
+      message.error("Failed to cancel upload");
+    }
+  };
+
   useEffect(() => {
     let socketInstance = null;
 
@@ -813,9 +823,9 @@ function Videos(props) {
   };
 
   //-------- Upload Modal ------------------------
-
+  
   function uploadModal() {
-    Modal.info({
+    Modal.confirm({
       title: "Upload video files!",
       content: (
         <div className="upload-modal-video">
@@ -841,8 +851,9 @@ function Videos(props) {
       centered: true,
       width: 640,
       okText: "Close",
+      cancelText: "Cancel",
       onOk() {},
-      onCancel() {},
+      onCancel: cancelUpload, 
     });
   }
   useEffect(() => {
