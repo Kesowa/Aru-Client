@@ -188,9 +188,11 @@ function MissionTable(props: TableProps) {
               deleteMission(record.name, record._id);
             }}
           >
+            <Tooltip title="Delete">
               <Button style={{ marginLeft: "8px" }} danger>
                 <DeleteOutlined className="missionViewDelBtn" />
               </Button>
+            </Tooltip>
           </Popconfirm>
         );
       }
@@ -204,9 +206,11 @@ function MissionTable(props: TableProps) {
             deleteMission(record.name, record._id);
           }}
         >
+          <Tooltip title="Delete">
             <Button style={{ marginLeft: "8px" }} danger>
               <DeleteOutlined className="missionViewDelBtn" />
             </Button>
+          </Tooltip>
         </Popconfirm>
       );
     }
