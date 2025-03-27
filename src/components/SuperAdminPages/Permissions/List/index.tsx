@@ -2,7 +2,6 @@ import { useState, useEffect, useContext } from "react";
 import { message, Button, Table } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { PlusCircleOutlined } from "@ant-design/icons";
-import "../Permission.less";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
