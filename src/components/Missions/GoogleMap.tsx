@@ -60,11 +60,11 @@ class GoogleMap extends Component<mapProps, mapState> {
   infoWindow: any = null;
 
   componentDidMount() {
-    const loc = { lat: 43.642567, lng: -79.387054 };
+    const loc = { lat: 22.599412, lng: 88.423617 };
     this.googleMap = this.createGoogleMap(loc);
     this.props.setlocation(loc);
 
-    // this.setCurrentLocation();
+    this.setCurrentLocation();
 
     this.drawingManager = this.createDrawingManager();
     this.searchAutoComplete = this.createSearchBar();
@@ -231,7 +231,7 @@ class GoogleMap extends Component<mapProps, mapState> {
     });
   };
 
-  // Set Current location of user
+  // Set Current location of user   (not that much accurate need some modification)
   setCurrentLocation = () => {
     let lat, lng;
     if (window.navigator.geolocation) {
