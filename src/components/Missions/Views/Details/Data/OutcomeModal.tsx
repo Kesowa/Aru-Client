@@ -220,7 +220,7 @@ function OutcomeModal(props) {
                         <Text strong>{dataa.locationName}</Text>
                       </Row>
                       <Row style={{ marginTop: 8 }}>
-                        <Text type="secondary">Coordinates</Text>
+                        <Text type="secondary">Map Coordinates</Text>
                       </Row>
                       <Row>
                         <Text keyboard copyable>
