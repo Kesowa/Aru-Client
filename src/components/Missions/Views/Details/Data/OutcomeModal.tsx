@@ -125,6 +125,13 @@ function OutcomeModal(props) {
                         </Text>
                       )}
                     </Row>
+                    <Row>
+                      <Text className="p-coord">
+                        {moment(dataa.createdAt).format(
+                          "MMMM Do YYYY, h:mm:ss a"
+                        )}
+                      </Text>
+                    </Row>
                   </div>
                   {!locationNull && (
                     <div className="static-map-div">
