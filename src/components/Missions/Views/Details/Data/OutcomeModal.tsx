@@ -16,6 +16,8 @@ import {
   DownloadOutlined,
   GoogleOutlined,
   LoadingOutlined,
+  MailOutlined,
+  WhatsAppOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
 import * as htmlToImage from "html-to-image";
@@ -142,18 +144,63 @@ function OutcomeModal(props) {
               </Col>
               <Col span={7}>
                 <Row style={{ marginLeft: "8px" }}>
-                  <Title level={5}>
+                  <Title level={5} style={{ fontSize: "19px" }}>
                     <ShareAltOutlined style={{ fontSize: "24px" }} />
                     &nbsp;&nbsp;&nbsp;Share
                   </Title>
                 </Row>
                 <Row>
-                  &nbsp;&nbsp;&nbsp;&nbsp;
                   {/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++TO BE MADE++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
+                  &nbsp;
+                  {/* Share by Email */}
+                  <Tooltip placement="bottom" title="Share by Email">
+                    <Button
+                      type="default"
+                      onClick={async () => {
+                        const subject = encodeURIComponent(
+                          "Check out this location!"
+                        );
+                        const body = encodeURIComponent(
+                          `Here is the location:\n\nhttps://www.google.com/maps/?q=${
+                            dataa.location.lat
+                          },${dataa.location.long}\n\nDownload Image: ${
+                            STATIC_URL + dataa.image
+                          }`
+                        );
+                        window.location.href = `mailto:?subject=${subject}&body=${body}`;
+                      }}
+                      shape="round"
+                      icon={<MailOutlined />}
+                      size="large"
+                    />
+                  </Tooltip>
                   &nbsp;&nbsp;
+                  {/* Share by WhatsApp */}
+                  <Tooltip placement="bottom" title="Share by WhatsApp">
+                    <Button
+                      type="default"
+                      onClick={async () => {
+                        const message = encodeURIComponent(
+                          `Check out this location:\n\nhttps://www.google.com/maps/?q=${
+                            dataa.location.lat
+                          },${dataa.location.long}\n\nDownload Image: ${
+                            STATIC_URL + dataa.image
+                          }`
+                        );
+                        window.open(
+                          `https://web.whatsapp.com/send?text=${message}`,
+                          "_blank"
+                        );
+                      }}
+                      shape="round"
+                      icon={<WhatsAppOutlined />}
+                      size="large"
+                    />
+                  </Tooltip>
+                  &nbsp;
                   <Tooltip placement="bottom" title="download image">
                     <Button
-                      type="primary"
+                      type="default"
                       onClick={() => {
                         setDownloadLoading(true);
                         htmlToImage
@@ -177,7 +224,7 @@ function OutcomeModal(props) {
                       size="large"
                     />
                   </Tooltip>
-                  &nbsp;&nbsp;
+                  &nbsp;
                   {!locationNull && (
                     <Tooltip placement="bottom" title="Google map link">
                       <Button
