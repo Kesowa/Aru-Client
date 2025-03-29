@@ -124,9 +124,8 @@ function OutcomeModal(props) {
                           {dataa.location.long.toFixed(6)}
                         </Text>
                       )}
-                    </Row>
-                    <Row>
-                      <Text className="p-coord">
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                       <Text className="p-coord">
                         {moment(dataa.createdAt).format(
                           "MMMM Do YYYY, h:mm:ss a"
                         )}
