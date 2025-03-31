@@ -178,7 +178,7 @@ function Map(props) {
             <div className="text-container">
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <Title level={4} className="title-text">
-                  Map files
+                  Map layers
                 </Title>
                 {files2.length > 0 ? (
                   <Button
