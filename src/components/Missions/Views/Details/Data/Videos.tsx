@@ -950,9 +950,7 @@ function Videos(props) {
                             <a
                               href={
                                 STATIC_URL +
-                                videoDetails.link
-                                  .toString()
-                                  .replace(".m3u8", ".flv")
+                                videoDetails.missionDetails.originalFile
                               }
                               download
                             >
@@ -1249,9 +1247,7 @@ function Videos(props) {
                         <a
                           href={
                             STATIC_URL +
-                            videoDetails.link
-                              .toString()
-                              .replace(".m3u8", ".flv")
+                            videoDetails.missionDetails.originalFile
                           }
                           download
                         >
