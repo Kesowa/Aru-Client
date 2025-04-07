@@ -1130,9 +1130,11 @@ function Videos(props) {
                               trigger={["contextMenu"]}
                             >
                               <div
-                                style={{
-                                  padding: "2px",
-                                }}
+                               style={{ padding: "2px", cursor: "pointer" }}
+                               onMouseDown={() => handleLongPressStart(dataa)}
+                               onMouseUp={handleLongPressEnd}
+                               onTouchStart={() => handleLongPressStart(dataa)}
+                               onTouchEnd={handleLongPressEnd}
                               >
                                 <Badge
                                   style={{
@@ -1170,6 +1172,22 @@ function Videos(props) {
                                   >
                                     <Card
                                       key={`1-${dataa._id}`}
+                                      onClick={() => {
+                                        if (longPressOccurred) {
+                                          setLongPressOccurred(false);
+                                          return;
+                                        }
+                                        if (activateSelection) {
+                                          if (checkedList.includes(dataa._id)) {
+                                            const filtered = checkedList.filter((i: any) => i !== dataa._id);
+                                            setCheckedList(filtered);
+                                          } else {
+                                            setCheckedList([...checkedList, dataa._id]);
+                                          }
+                                        } else {
+                                          updateSelectedVOD(dataa, idx);
+                                        }
+                                      }}
                                       className="outcome-cardd"
                                       cover={
                                         <>
@@ -1329,7 +1347,15 @@ function Videos(props) {
                     <Row
                       className="listview-outcomes"
                       align="middle"
+                      onMouseDown={() => handleLongPressStart(dataa)}
+                      onMouseUp={handleLongPressEnd}
+                      onTouchStart={() => handleLongPressStart(dataa)}
+                      onTouchEnd={handleLongPressEnd}
                       onClick={() => {
+                        if (longPressOccurred) {
+                          setLongPressOccurred(false);
+                          return;
+                        }
                         if (activateSelection) {
                           if (checkedList.includes(dataa._id)) {
                             const filtered: any = checkedList.filter(
@@ -1494,6 +1520,33 @@ function Videos(props) {
   };
   const handleCancel2 = () => {
     setIsModalVisible2(false);
+  };
+
+  //media selection
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [longPressOccurred, setLongPressOccurred] = useState(false);
+
+  const handleLongPressStart = (video: any) => {
+    const timer = setTimeout(() => {
+      setActivateSelection(true);
+      setCheckedList(prev => {
+        if (prev.includes(video._id)) {
+          return prev.filter((id: string) => id !== video._id);
+        }
+        return [...prev, video._id];
+      });
+      setLongPressOccurred(true);
+    }, 500);
+    setLongPressTimer(timer);
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    } else {
+      setTimeout(() => setLongPressOccurred(false), 100);
+    }
   };
 
   return (
