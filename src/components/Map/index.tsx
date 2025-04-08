@@ -3983,7 +3983,12 @@ function BaseMap(props) {
             .then((res: any) => {
               if (res.data.status) {
                 //download(API_URL + res.data.link);
-                window.open(PUBLIC_URL + res.data.link);
+                // window.open(PUBLIC_URL + res.data.link);
+                notification.success({
+                  message: "Layer downloaded successfully.",
+                  description:
+                    "Check out in document section.",
+                });
               } else {
                 console.log(res.data.message);
               }
