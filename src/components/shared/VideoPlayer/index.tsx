@@ -1489,12 +1489,41 @@ function VideoPlayer(props: any) {
           },
         }}
       />
+      <Tooltip
+        title={props.mission?.videoName || "Mission Name"}
+        placement="right"
+        overlayStyle={{
+          zIndex: 10000,
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            color: "white",
+            background: "rgba(0, 0, 0, 0.7)",
+            padding: "5px 10px",
+            borderRadius: "4px",
+            zIndex: 1000,
+            fontSize: "14px",
+            fontWeight: "bold",
+            maxWidth: "70%",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            cursor: "default",
+          }}
+        >
+          {props.mission?.videoName || "Mission Name"}
+        </div>
+      </Tooltip>
       {peopleCount !== undefined && scaledBoxes.length > 0 && (
         <>
           <div
             style={{
               position: "absolute",
-              top: "10px",
+              top: "37px",
               right: "10px",
               color: "white",
               background: "rgba(0, 0, 0, 0.5)",
@@ -2439,7 +2468,7 @@ function VideoPlayer(props: any) {
       {loading && (
         <>
           <Text>Inference Progress:</Text>
-          <Progress percent={inferenceProgress} />
+          <Progress strokeLinecap="square" percent={inferenceProgress} />
         </>
       )}
 
