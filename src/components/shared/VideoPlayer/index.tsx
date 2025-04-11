@@ -694,7 +694,7 @@ function VideoPlayer(props: any) {
       missionId: isLive ? mission._id : mission.missionID._id,
       flightId: isLive ? mission.flight._id : mission.flightID._id,
       pcount: 0,
-      type: "Manual",
+      type: "Automated",
       image: "",
     };
     const form = document.createElement("form");
@@ -710,14 +710,12 @@ function VideoPlayer(props: any) {
 
     const uploadToken = await uploadFile(rcFile, DocModel.ALERT_IMAGES, (prog) => console.info("PROGRESS: " + prog));
 
-      const data = {
-        file: uploadToken,
-      };
+    body.image = uploadToken;
     // const formDataToUpload = new FormData(form);
     // formDataToUpload.append("image", blob);
     setLoader(true);
     http
-      .post(`${apis.UPLOAD_ALERT_IMAGE}`, data)
+      .post(`${apis.CREATE_ALERT}`, body)
       .then((res) => {
         body.image = res.data.file;
 
