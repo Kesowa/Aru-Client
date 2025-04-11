@@ -6,6 +6,7 @@
   "scripts": {
     "start": "vite",
     "build": "NODE_OPTIONS=--max-old-space-size=4096 vite build",
+    "test": "playwright test",
     "serve": "vite preview",
     "lock": "npm i --package-lock-only",
     "proxy": "localhost:3000",
