@@ -31,6 +31,8 @@ import {
 } from "src/constants";
 import { getSideBar } from "src/static/sideBarOptions";
 import { AuthContext } from "src/services/authUtils";
+import { getUserExpirationInfo, ExpiryInfo } from "src/services/expiryUpdate";
+
 
 const { Title, Text } = Typography;
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -46,6 +48,7 @@ function DashboardContent() {
   const [storage, setStorage] = useState<any>({});
   const socket: any = useRef();
   const [statsRefresh, setStatsRefresh] = useState(true);
+  const [expiryInfo, setExpiryInfo] = useState<ExpiryInfo | null>(null);
 
   const { Auth, logout } = useContext(AuthContext);
 
@@ -69,6 +72,16 @@ function DashboardContent() {
       setqrCode(url);
     });
   };
+
+  useEffect(() => {
+    const fetchExpiry = async () => {
+      const info = await getUserExpirationInfo(Auth.userdetails);
+      setExpiryInfo(info);
+    };
+  
+    fetchExpiry();
+  }, [Auth.userdetails]);
+  
 
   const connectToAppModal = () => {
     return (
@@ -482,10 +495,27 @@ function DashboardContent() {
           </Col>
         </Row>
 
-        <Row>
-          <Title className="welcome-title">
-            Welcome back {Auth.userdetails.name}!
-          </Title>
+        <Row align="middle" gutter={8} wrap={false}>
+          <Col>
+            <Title level={3} className="welcome-title" style={{ margin: 0 }}>
+              Welcome back {Auth.userdetails.name}!
+            </Title>
+          </Col>
+          {expiryInfo?.isExpiringSoon && (
+            <Col>
+              <span style={{ color: "#fa8c16", fontWeight: 1000 }}>
+                {expiryInfo.message}
+                (Your account is expiring in {expiryInfo.daysLeft} days.{" "}
+                <a
+                  href={`mailto:info@kesowa.com?subject=Renewal Request&body=Hi Team,%0D%0A%0D%0AMy account is expiring in ${expiryInfo.daysLeft} days. Please assist with the renewal process.`}
+                  style={{ color: "#fa541c", textDecoration: "underline" }}
+                >
+                  Click here for renewal
+                </a>
+                )
+              </span>
+            </Col>
+          )}
         </Row>
 
         <Row>
@@ -543,10 +573,26 @@ function DashboardContent() {
     //++++++++++++++++++++++++++++++++++++++++++++++++++RenderDashboardContent++++++++++++++++++++++++
     return (
       <div className="dashboard-wrapper">
-        <Row>
-          <Title className="welcome-title">
-            Welcome back {Auth.userdetails.name}!
-          </Title>
+        <Row align="middle" gutter={8} wrap={false}>
+          <Col>
+            <Title level={3} className="welcome-title" style={{ margin: 0 }}>
+              Welcome back {Auth.userdetails.name}!
+            </Title>
+          </Col>
+          {expiryInfo?.isExpiringSoon && (
+            <Col>
+              <span style={{ color: "#fa8c16", fontWeight: 1000 }}>
+                (Your account is expiring in {expiryInfo.daysLeft} days.{" "}
+                <a
+                  href={`mailto:info@kesowa.com?subject=Renewal Request& body=Hi Team,%0D%0A%0D%0AMy account is expiring in ${expiryInfo.daysLeft} days. Please assist with the renewal process.`}
+                  style={{ color: "#fa541c", textDecoration: "underline" }}
+                >
+                  Click here for renewal
+                </a>
+                )
+              </span>
+            </Col>
+          )}
         </Row>
         <Title className="shortcuts-title" level={4}>
           <ImportOutlined /> Shortcuts
