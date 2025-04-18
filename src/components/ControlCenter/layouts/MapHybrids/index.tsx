@@ -51,7 +51,7 @@ const SortableList = SortableContainer(
       <Row style={{ height: "100%", alignContent: "space-between" }}>
         {items.map((value, index) => (
           <SortableItem
-            key={`item-${index}`}
+            key={window.crypto.randomUUID()}
             index={index}
             ind={index}
             group={group}

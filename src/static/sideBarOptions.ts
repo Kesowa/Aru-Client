@@ -1,4 +1,4 @@
-import { components } from "src/handlers/schema";
+import { Components } from "src/handlers/schema";
 import { PERMS } from "./permissions";
 
 //++++++++++++++++++++++++++++++++ super admin ++++++++++++++++++++++++++++++++++++++
@@ -231,7 +231,7 @@ export const permissionGuardedOptions = [
 ];
 
 export const permissionsToSideBar = (
-  permissions: components["schemas"]["IPermission"][]
+  permissions: Components["schemas"]["IPermission"][]
 ) => {
   const permissionNames = permissions.map((p) => p);
   return permissionGuardedOptions
@@ -247,7 +247,7 @@ export const permissionsToSideBar = (
 export const getSideBar = ({
   userType,
   customPermissions,
-}: components["schemas"]["IUserCustomPermission"]) => {
+}: Components["schemas"]["IUserCustomPermission"]) => {
   switch (userType) {
     case "tenant-root":
       return tenantRootOptions;

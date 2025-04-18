@@ -35,7 +35,7 @@ import MarkerIcon from "../../../../static/MarkerIcon.png";
 import TankIcon from "../../../../static/TankIcon.png";
 import ValveIcon from "../../../../static/ValveIcon.png";
 import DotIcon from "../../../../static/DotIcon.png";
-import { components } from "src/handlers/schema";
+import { Components } from "src/handlers/schema";
 import { featureType, vectorProps } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
 import { DocModel, uploadFile } from "src/services/fileUpload";
@@ -420,12 +420,12 @@ const CreateBaseLayer = (props) => {
         //     }
         //   },
         // };
-        const docModel =
-          layerType === "Vector"
-            ? DocModel.VECTOR
-            : layerType === "Raster"
-            ? DocModel.RASTER
-            : DocModel.LAYER_FILES;
+        
+        let docModel: DocModel;
+        if (layerType === "Vector") docModel = DocModel.VECTOR;
+        else if (layerType === "Raster") docModel = DocModel.RASTER;
+        else docModel = DocModel.LAYER_FILES;
+
         const uploadToken = await uploadFile(fileList[0], docModel, (prog) => {
           console.info("PROGRESS: " + prog);
           setProgress(prog * 100);
@@ -475,7 +475,7 @@ const CreateBaseLayer = (props) => {
             let c = 0;
             setVectorPath(result.data.data.layer.layerpath);
             setCurrentLayerId(result.data.data.layer._id);
-            for (const [key, value] of Object.entries(
+            for (const [key, _] of Object.entries(
               result.data.data.properties
             )) {
               if (key !== "sys_id" && key !== "icon" && key !== "color") {
@@ -550,8 +550,8 @@ const CreateBaseLayer = (props) => {
       }
       http
         .patch<
-          components["schemas"]["GetMetaDataBaseLayerResponse"],
-          components["schemas"]["GetMetaDataUpdateResponse"]
+          Components["schemas"]["GetMetaDataBaseLayerResponse"],
+          Components["schemas"]["GetMetaDataUpdateResponse"]
         >(
           !props.isUpdate
             ? `${apis.GET_METADATA}`
@@ -560,7 +560,7 @@ const CreateBaseLayer = (props) => {
         )
         .then((res) => {
           console.log("--------------------", res);
-          if (res.data.success == false) message.error(res.data.message);
+          if (!res.data.success) message.error(res.data.message);
           else {
             if (!props.isUpdate) {
               const attrset: unknown = [];
@@ -1233,32 +1233,6 @@ const CreateBaseLayer = (props) => {
     {
       title: "Attributes",
       dataIndex: "attribute",
-    },
-  ];
-
-  const columns2 = [
-    {
-      title: "Attributes",
-      dataIndex: "attribute",
-    },
-    {
-      title: "Occurence In Layers",
-      dataIndex: "occurs",
-      render: (e) => (
-        <>
-          {e == "Present in all layers" ? (
-            <>
-              <span style={{ color: "green", marginRight: "5px" }}>●</span>
-              {e}
-            </>
-          ) : (
-            <>
-              <span style={{ color: "red", marginRight: "5px" }}>●</span>
-              {e}
-            </>
-          )}
-        </>
-      ),
     },
   ];
 

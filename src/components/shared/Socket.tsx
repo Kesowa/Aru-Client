@@ -1,32 +1,13 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import {
-  Button,
   notification,
-  Modal,
-  Row,
-  Col,
-  Image,
-  Typography,
-  Avatar,
-  Tooltip,
 } from "antd";
-import {
-  ShareAltOutlined,
-  DownloadOutlined,
-  GoogleOutlined,
-  UserOutlined,
-  LoadingOutlined,
-} from "@ant-design/icons";
-import * as htmlToImage from "html-to-image";
-import moment from "moment";
-import { API_URL, STATIC_URL } from "src/constants";
+import { API_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
 
 import "../Missions/Views/Live/index.less";
 import OutcomeModal from "../Missions/Views/Details/Data/OutcomeModal";
-
-const { Text, Title } = Typography;
 
 function Socket() {
   const socket: any = useRef();

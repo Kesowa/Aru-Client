@@ -14,6 +14,11 @@ function Profile(props: any) {
       setLoader(false);
     }
   }, [props.userDetails]);
+  
+  let userType = "Default User";
+  if (props.userDetails.userdetails.userType === "tenant-root") userType = "Root Admin";
+  else if (props.userDetails.userdetails.userType === "super-admin") userType = "Super Admin";
+
   return (
     <Drawer
       title="My Profile"
@@ -54,13 +59,7 @@ function Profile(props: any) {
             <Text>{props.userDetails.userdetails.email}</Text>
           </div>
           <div className="user-type">
-            <Text type="secondary">
-              {props.userDetails.userdetails.userType == "tenant-root"
-                ? "Root Admin"
-                : props.userDetails.userdetails.userType == "super-admin"
-                ? "Super Admin"
-                : "Default User"}
-            </Text>
+            <Text type="secondary">{userType}</Text>
           </div>
         </div>
       </Skeleton>

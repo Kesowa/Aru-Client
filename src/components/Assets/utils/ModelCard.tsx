@@ -21,14 +21,12 @@ import {
   CloseOutlined,
   EditOutlined,
   DeleteOutlined,
-  PlusOutlined,
 } from "@ant-design/icons";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import AloneLogo from "../../../static/Alone-rafiki.svg";
 import moment from "moment";
-import { FormInstance } from "antd/lib/form";
 import { AuthContext } from "src/services/authUtils";
 
 const { Text } = Typography;
@@ -337,8 +335,8 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
   const onFinish = async (values: any) => {
     form.resetFields();
     const modelProps: { [key: string]: any } = {};
-    for (let i = 0; i < tableData.length; ++i) {
-      modelProps[tableData[i].key] = tableData[i].value;
+    for (const element of tableData) {
+      modelProps[element.key] = element.value;
     }
 
     http
@@ -382,8 +380,8 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
     form.resetFields();
 
     const assetInfo: { [key: string]: any } = {};
-    for (let i = 0; i < tableData.length; ++i) {
-      assetInfo[tableData[i].key] = tableData[i].value;
+    for (const element of tableData) {
+      assetInfo[element.key] = element.value;
     }
 
     const asset = {
@@ -474,16 +472,6 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
     const newData = tableData.filter((item) => item.key !== key);
     setTableData(newData);
     setCount(count - 1);
-  };
-
-  const handleAdd = () => {
-    const newData: Item = {
-      id: count,
-      key: `Key ${count + 1}`,
-      value: "",
-    };
-    setTableData([...tableData, newData]);
-    setCount(count + 1);
   };
 
   const mergedColumns = columns.map((col) => {
@@ -801,7 +789,10 @@ if (data) {
                     },
                   ]}
                 >
-                  <DatePicker />
+                  <DatePicker
+                    showTime
+                    onChange={(value) => setManufacturingDate(value)}
+                  />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>

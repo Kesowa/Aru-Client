@@ -47,7 +47,6 @@ function LocationCard(props) {
   const [outComesToRender, setoutComesToRender] = useState([]);
   const [shouldRenderOutcomes, setshouldRenderOutcomes] = useState(true);
   const [isChecked, setIsChecked] = useState(true);
-  const [once, setonce] = useState(true);
 
   const { id } = useParams<any>();
 
@@ -301,7 +300,7 @@ function LocationCard(props) {
         title={locationName}
         subTitle={geoLocation}
         extra={[
-          <Row className="location_card_header_sec_two" align="middle">
+          <Row className="location_card_header_sec_two" align="middle" key={window.crypto.randomUUID()}>
             <Col style={{ height: "100%" }}>
               <ClockCircleOutlined style={{ fontSize: "36px" }} />
             </Col>

@@ -208,7 +208,7 @@ export const ImportLayerSteps = ({
                 </Row>
                 {uiElement.map((id: unknown) => {
                   return (
-                    <Row style={{ marginTop: "12px" }}>
+                    <Row style={{ marginTop: "12px" }} key={window.crypto.randomUUID()}>
                       <Col span={12}>
                         <h4>
                           <span style={{ color: "red" }}>*</span> Choose mission
@@ -353,11 +353,11 @@ export const ImportLayerSteps = ({
             {metadata.map((missions: unknown) => {
               return (
                 <>
-                  {missions.layers.map((layers: unknown, i) => {
+                  {missions.layers.map((layers: unknown) => {
                     return (
                       <Panel
                         header={`${layers.name} (${missions.missionName})`}
-                        key={i}
+                        key={window.crypto.randomUUID()}
                       >
                         <div style={{ padding: "20px" }} key={uuid()}>
                           <Row>
@@ -389,17 +389,7 @@ export const ImportLayerSteps = ({
                                       <Select
                                         key={`${fields.key}-${uuid()}`}
                                         style={{ width: "200px" }}
-                                        defaultValue={
-                                          selectedAttr[layers._id]
-                                            ? selectedAttr[layers._id][
-                                                fields.key
-                                              ]
-                                              ? selectedAttr[layers._id][
-                                                  fields.key
-                                                ]
-                                              : null
-                                            : null
-                                        }
+                                        defaultValue={selectedAttr?.[layers._id]?.[fields.key] || null}
                                         onSelect={(e) =>
                                           handleAttributeMapping(
                                             e,
@@ -409,7 +399,7 @@ export const ImportLayerSteps = ({
                                         }
                                         placeholder="Map the attribute selected"
                                       >
-                                        {primeAttributes.map((item, index) => (
+                                        {primeAttributes.map((item) => (
                                           <Option
                                             key={`${uuid()}-${item.key}`}
                                             value={item.attribute}
@@ -439,7 +429,6 @@ export const ImportLayerSteps = ({
     {
       title: "Layer Details",
       content: (
-        <>
           <Form
             layout="vertical"
             style={{ height: "390px", marginTop: "10px" }}
@@ -491,7 +480,6 @@ export const ImportLayerSteps = ({
               </Col>
             </Row>
           </Form>
-        </>
       ),
     },
   ];
@@ -608,7 +596,7 @@ export const ImportLayerSteps = ({
                 </Row>
                 {uiElement.map((id: unknown) => {
                   return (
-                    <Row style={{ marginTop: "12px" }}>
+                    <Row style={{ marginTop: "12px" }} key={window.crypto.randomUUID()}>
                       <Col span={12}>
                         <h4>
                           <span style={{ color: "red" }}>*</span> Choose mission
@@ -728,11 +716,11 @@ export const ImportLayerSteps = ({
             {metadata.map((missions: unknown) => {
               return (
                 <>
-                  {missions.layers.map((layers: unknown, i) => {
+                  {missions.layers.map((layers: unknown) => {
                     return (
                       <Panel
                         header={`${layers.name} (${missions.missionName})`}
-                        key={i}
+                        key={window.crypto.randomUUID()}
                       >
                         <div style={{ padding: "20px" }} key={uuid()}>
                           <Row>
@@ -764,17 +752,7 @@ export const ImportLayerSteps = ({
                                       <Select
                                         key={`${fields.key}-${uuid()}`}
                                         style={{ width: "200px" }}
-                                        defaultValue={
-                                          selectedAttr[layers._id]
-                                            ? selectedAttr[layers._id][
-                                                fields.key
-                                              ]
-                                              ? selectedAttr[layers._id][
-                                                  fields.key
-                                                ]
-                                              : null
-                                            : null
-                                        }
+                                        defaultValue={selectedAttr?.[layers._id]?.[fields.key] || null}
                                         onSelect={(e) =>
                                           handleAttributeMapping(
                                             e,
@@ -784,7 +762,7 @@ export const ImportLayerSteps = ({
                                         }
                                         placeholder="Map the attribute selected"
                                       >
-                                        {primeAttributes.map((item, index) => (
+                                        {primeAttributes.map((item) => (
                                           <Option
                                             key={`${uuid()}-${item.key}`}
                                             value={item.attribute}

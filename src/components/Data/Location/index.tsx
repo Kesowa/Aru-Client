@@ -1,8 +1,6 @@
 import { useState, useEffect, useContext } from "react";
-import { Row, Col, Typography, Table, Button, Card, message } from "antd";
-import { Input } from "antd";
+import { Row, Col, Typography, Table, Button, Card, message, Input } from "antd";
 import {
-  AudioOutlined,
   SearchOutlined,
   EditOutlined,
   DeleteOutlined,
@@ -20,20 +18,8 @@ import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 import { GOOGLE_API_KEY } from "src/constants";
 
-interface TabOptions {
-  filter: any;
-}
 function DataLocation(props) {
-  const { Search } = Input;
   const { Title } = Typography;
-  const suffix = (
-    <AudioOutlined
-      style={{
-        fontSize: 16,
-        color: "#1890ff",
-      }}
-    />
-  );
 
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
@@ -363,8 +349,6 @@ function DataLocation(props) {
     },
   ];
 
-  const onSearch = (value) => console.log(value);
-
   function fetchRowDetails(geofence, name) {
     return console.log("");
   }
@@ -388,6 +372,16 @@ function DataLocation(props) {
       setCenterPoint(selectedRows[0].centerPoint);
     },
   };
+  const actualCenterPoint = `${
+    centerPoint.lat
+      ? centerPoint.lat
+      : data[0].centerPoint.lat
+  },${
+    centerPoint.long
+      ? centerPoint.long
+      : data[0].centerPoint.long
+  }`;
+  const actualGeofence = geofence.length > 0 ? geofence : data[0].geofence;
   return (
     <div>
       {/* +++++++++++++++++++++++++++++++++MISSION LISTING+++++++++++++++++++++++++++++++++++++++++ */}
@@ -407,24 +401,12 @@ function DataLocation(props) {
                 src={
                   geofence.length > 0
                     ? `https://maps.googleapis.com/maps/api/staticmap?center=${
-                        centerPoint.lat
-                          ? centerPoint.lat
-                          : data[0].centerPoint.lat
-                      },${
-                        centerPoint.long
-                          ? centerPoint.long
-                          : data[0].centerPoint.long
-                      }&zoom=15&size=800x400&markers=size:mid|color:red|${
-                        centerPoint.lat
-                          ? centerPoint.lat
-                          : data[0].centerPoint.lat
-                      },${
-                        centerPoint.long
-                          ? centerPoint.long
-                          : data[0].centerPoint.long
-                      }&path=color:0x00B3FF|weight:5|fillcolor:0xcfe1ff${formatGeoFenceForUrl(
-                        geofence.length > 0 ? geofence : data[0].geofence
-                      )}&maptype=roadmap&key=${GOOGLE_API_KEY}`
+                      actualCenterPoint
+                    }&zoom=15&size=800x400&markers=size:mid|color:red|${
+                      actualCenterPoint
+                    }&path=color:0x00B3FF|weight:5|fillcolor:0xcfe1ff${
+                      formatGeoFenceForUrl(actualGeofence)
+                    }&maptype=roadmap&key=${GOOGLE_API_KEY}`
                     : AloneLogo
                 }
                 style={{

@@ -1,5 +1,5 @@
-import { useContext, useState } from "react";
-import { Form, Input, Upload, Row, Col, message, Button } from "antd";
+import { useState } from "react";
+import { Form, Input, Upload, Row, Col, Button } from "antd";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
 import { beforeUpload } from "../../../../services/imageupload";
@@ -7,15 +7,12 @@ import { STATIC_URL } from "src/constants";
 import { RcFile } from "antd/lib/upload";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 
-import { AuthContext } from "src/services/authUtils";
-
 function BasicInfo(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState(
     props.tenantData.avatar ? props.tenantData.avatar : ""
   );
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
-  const { logout } = useContext(AuthContext);
 
   const beforeUploadFunction = (file: RcFile) => {
     beforeUpload(file, ["image/jpeg", "image/png"], 2, async () => {

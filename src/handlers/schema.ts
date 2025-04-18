@@ -7,14 +7,14 @@ import { PERMS } from "src/static/permissions";
 import { rasterProps } from "src/static/rasterprops";
 import { vectorProps } from "src/static/vectorprops";
 
-export interface paths {
+export interface Paths {
   "/alert/upload-alert-image": {
     /** This should be a multipart form-data */
-    post: operations["UploadAlertImage"];
+    post: Operations["UploadAlertImage"];
   };
   "/alert/create": {
     /** Create alert for uploaded image */
-    post: operations["CreateAlert"];
+    post: Operations["CreateAlert"];
   };
   "/alert/manual-upload-alert": {
     /**
@@ -22,97 +22,97 @@ export interface paths {
      *
      * Use multipart/form-data instead of json
      */
-    post: operations["ManualUploadAlert"];
+    post: Operations["ManualUploadAlert"];
   };
   "/alert/get-alerts-by-flight-or-location-ID": {
     /** Provide one of either parameters */
-    get: operations["GetByFlightOrLocationID"];
+    get: Operations["GetByFlightOrLocationID"];
   };
   "/alert/get-alert-by-ID": {
-    get: operations["GetByID"];
+    get: Operations["GetByID"];
   };
   "/alert/get-alert-by-location-ID": {
-    get: operations["GetByLocationID"];
+    get: Operations["GetByLocationID"];
   };
   "/alert/get-alert-by-location-ID-and-time": {
     /** Provide one of either parameters */
-    get: operations["GetByLocationAndTime"];
+    get: Operations["GetByLocationAndTime"];
   };
   "/get-number-of-alerts-By-location-ID": {
     /** Provide one of either parameters */
-    get: operations["GetNumberByLocationID"];
+    get: Operations["GetNumberByLocationID"];
   };
   "/alert/get-alerts-By-mission-ID": {
     /** Provide one of either parameters */
-    get: operations["GetByMissionID"];
+    get: Operations["GetByMissionID"];
   };
   "/get-alerts-By-location-id-pagination": {
     /** Provide one of either parameters */
-    get: operations["GetByLocationIdPaginate"];
+    get: Operations["GetByLocationIdPaginate"];
   };
   "/get-alerts-by-mission-mapref": {
     /** Provide one of either parameters */
-    get: operations["GetMyMissionMapref"];
+    get: Operations["GetMyMissionMapref"];
   };
   "/alert/get-alerts-by-tenantid": {
     /** Get alerts owned by the tenant of the user account */
-    get: operations["GetByTenantID"];
+    get: Operations["GetByTenantID"];
   };
   "/get-alerts-by-tenantid-advanced-result": {
     /** Get alerts owned by the tenant of the user account */
-    get: operations["GetByTenantIdAdvanced"];
+    get: Operations["GetByTenantIdAdvanced"];
   };
   "/alert/delete-multiple-alerts": {
     /** Provide one of either parameters */
-    delete: operations["DeleteMultipleAlert"];
+    delete: Operations["DeleteMultipleAlert"];
   };
   "/asset/create": {
     /** Create asset */
-    post: operations["CreateAsset"];
+    post: Operations["CreateAsset"];
   };
   "/asset/get": {
     /** Get asset */
-    get: operations["GetAsset"];
+    get: Operations["GetAsset"];
   };
   "/asset/get-all-asset": {
     /** Get all assets */
-    get: operations["GetAllAssets"];
+    get: Operations["GetAllAssets"];
   };
   "/asset/update": {
     /** Update asset properties */
-    patch: operations["UpdateAsset"];
+    patch: Operations["UpdateAsset"];
   };
   "/asset/delete": {
     /** Delete asset */
-    delete: operations["DeleteAsset"];
+    delete: Operations["DeleteAsset"];
   };
   "/asset/toggle-asset-status": {
     /** Toggle live status */
-    patch: operations["ToggleStatusAsset"];
+    patch: Operations["ToggleStatusAsset"];
   };
   "/assetClass/create": {
     /** Create asset class */
-    post: operations["CreateAssetClass"];
+    post: Operations["CreateAssetClass"];
   };
   "/assetClass/get": {
     /** Get all asset classes */
-    get: operations["GetAssetClass"];
+    get: Operations["GetAssetClass"];
   };
   "/assetClass/update": {
     /** Update asset class */
-    patch: operations["UpdateAssetClass"];
+    patch: Operations["UpdateAssetClass"];
   };
   "/assetClass/get-asset-class-by-id": {
     /** Get asset class by ID */
-    get: operations["GetByIdAssetClass"];
+    get: Operations["GetByIdAssetClass"];
   };
   "/auth/login": {
     /** Login user, receive session token */
-    post: operations["LoginAuth"];
+    post: Operations["LoginAuth"];
   };
   "/auth/userdetails": {
     /** Get user details */
-    get: operations["UserDetailsAuth"];
+    get: Operations["UserDetailsAuth"];
   };
   "/auth/reset-password/{token}": {
     /**
@@ -120,106 +120,106 @@ export interface paths {
      *
      * Renders reset password page
      */
-    get: operations["GetResetPasswordAuth"];
+    get: Operations["GetResetPasswordAuth"];
     /** Set new password */
-    post: operations["PostResetPasswordAuth"];
+    post: Operations["PostResetPasswordAuth"];
   };
   "/auth/forgot-password": {
     /** Mail password reset token */
-    post: operations["ForgotPasswordAuth"];
+    post: Operations["ForgotPasswordAuth"];
   };
   "/baselayer/get-meta-data": {
     /** Get base layer */
-    patch: operations["GetMetaDataBaseLayer"];
+    patch: Operations["GetMetaDataBaseLayer"];
   };
   "/baselayer/create/Vector": {
     /** Must be multipart/form-data */
-    post: operations["CreateBaseLayer"];
+    post: Operations["CreateBaseLayer"];
   };
   "/baselayer/get-meta-data-for-update": {
     /** Get base layer */
-    patch: operations["GetMetaDataUpdate"];
+    patch: Operations["GetMetaDataUpdate"];
   };
   "/baselayer/set-prime-attr": {
     /** Get base layer */
-    put: operations["SetPrimeAttr"];
+    put: Operations["SetPrimeAttr"];
   };
   "/baselayer/create-by-layers": {
     /** Get base layer */
-    post: operations["CreateByLayers"];
+    post: Operations["CreateByLayers"];
   };
   "/baselayer/filter-base-layer": {
     /** Get base layer */
-    post: operations["FilterBaseLayer"];
+    post: Operations["FilterBaseLayer"];
   };
   "/baselayer/update-by-layers": {
     /** Get base layer */
-    patch: operations["UpdateByLayers"];
+    patch: Operations["UpdateByLayers"];
   };
   "/fetch/{type}": {
     /** Get base layer */
-    get: operations["FetchBaseLayer"];
+    get: Operations["FetchBaseLayer"];
   };
   "/baselayer/upload-to-update-base-layer": {
     /** This must be multipart/form-data */
-    post: operations["UploadToUpdateBaseLayer"];
+    post: Operations["UploadToUpdateBaseLayer"];
   };
   "/baselayer/update-base-layer-by-uploaded-layer": {
     /** Get base layer */
-    patch: operations["UpdateByUploadedLayer"];
+    patch: Operations["UpdateByUploadedLayer"];
   };
   "/baselayer/create-base-raster-import-mission": {
     /** Get base layer */
-    post: operations["CreateRasterImportMission"];
+    post: Operations["CreateRasterImportMission"];
   };
   "/baselayer/delete-baseLayer-id": {
     /** Get base layer */
-    delete: operations["DeleteBaseByID"];
+    delete: Operations["DeleteBaseByID"];
   };
   "/baselayer/create-base-raster-upload/Raster": {
     /** Body is multipart/form-data */
-    post: operations["CreateBaseRasterUpload"];
+    post: Operations["CreateBaseRasterUpload"];
   };
   "/baselayer/updateRasterLayerUpload/Raster": {
     /** Must be multipart/form-data */
-    patch: operations["UpdateRasterLayerUpload"];
+    patch: Operations["UpdateRasterLayerUpload"];
   };
   "/baselayer/updateRasterLayerImport": {
     /** Get base layer */
-    patch: operations["UpdateRasterLayerImport"];
+    patch: Operations["UpdateRasterLayerImport"];
   };
   "/baselayer/updateisBase": {
     /** Please don't use this endpoint at all */
-    patch: operations["UpdateIsBaseLayer"];
+    patch: Operations["UpdateIsBaseLayer"];
   };
   "/baselayer/create-base-vector-layer": {
     /** Get base layer */
-    post: operations["CreateBaseVectorLayer"];
+    post: Operations["CreateBaseVectorLayer"];
   };
   "/baselayer/publishBaseLayer": {
     /** Get base layer */
-    patch: operations["PublishBaseLayer"];
+    patch: Operations["PublishBaseLayer"];
   };
   "/baselayer/getallpublicbaselayers": {
     /** Get base layer */
-    get: operations["GetAllPublicBaseLayers"];
+    get: Operations["GetAllPublicBaseLayers"];
   };
   "/baselayer/updateisPublic": {
     /** Get base layer */
-    patch: operations["UpdateIsPublicBaseLayer"];
+    patch: Operations["UpdateIsPublicBaseLayer"];
   };
   "/baselayer/searchPublicLayer": {
     /** Get base layer */
-    get: operations["SearchPublicLayer"];
+    get: Operations["SearchPublicLayer"];
   };
 }
 
-export interface components {
+export interface Components {
   schemas: {
     /** @description Blob-like file data */
     File: string;
     UploadRequest: {
-      image: components["schemas"]["File"];
+      image: Components["schemas"]["File"];
     };
     /** @description Path to a file, relative to the static server URL */
     FilePath: string;
@@ -228,7 +228,7 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "file uploaded successfully";
-      file: components["schemas"]["FilePath"];
+      file: Components["schemas"]["FilePath"];
     };
     /** @description Map of field name to errors */
     ErrorMap: {
@@ -244,7 +244,7 @@ export interface components {
       status: false;
       /** @enum {string} */
       message: "request validation failed";
-      data: components["schemas"]["ErrorMap"];
+      data: Components["schemas"]["ErrorMap"];
     };
     /**
      * @description Tenant storage exhausted
@@ -271,10 +271,10 @@ export interface components {
     /** @description A MongoDB ID */
     MongoId: string;
     CreateAlertRequest: {
-      missionId: components["schemas"]["MongoId"];
-      flightId: components["schemas"]["MongoId"];
+      missionId: Components["schemas"]["MongoId"];
+      flightId: Components["schemas"]["MongoId"];
       locationName: string;
-      locationId?: components["schemas"]["MongoId"];
+      locationId?: Components["schemas"]["MongoId"];
       location?: {
         /** Format: float */
         lat: number;
@@ -283,13 +283,13 @@ export interface components {
       };
       note?: string;
       onSite?: boolean;
-      image: components["schemas"]["FilePath"];
+      image: Components["schemas"]["FilePath"];
       /** Format: int32 */
       pcount: number;
       type: string;
     };
     IAlert: {
-      _id: components["schemas"]["MongoId"];
+      _id: Components["schemas"]["MongoId"];
       location: {
         /** Format: float */
         lat?: number;
@@ -304,30 +304,30 @@ export interface components {
       /** Format: int32 */
       pcount: number;
       type?: string;
-      image: components["schemas"]["FilePath"];
-      locationId?: components["schemas"]["MongoId"];
+      image: Components["schemas"]["FilePath"];
+      locationId?: Components["schemas"]["MongoId"];
       /** Format: date-time */
       createdAt: string;
       /** Format: date-time */
       updatedAt: string;
-      missionId: components["schemas"]["MongoId"];
-      createdBy: components["schemas"]["MongoId"];
-      flightId: components["schemas"]["MongoId"];
-      tenantId: components["schemas"]["MongoId"];
+      missionId: Components["schemas"]["MongoId"];
+      createdBy: Components["schemas"]["MongoId"];
+      flightId: Components["schemas"]["MongoId"];
+      tenantId: Components["schemas"]["MongoId"];
     };
     CreateAlertResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "New alert created";
-      data: components["schemas"]["IAlert"];
+      data: Components["schemas"]["IAlert"];
     };
     ManualRequest: {
-      image: components["schemas"]["File"];
-      missionId: components["schemas"]["MongoId"];
-      flightId: components["schemas"]["MongoId"];
+      image: Components["schemas"]["File"];
+      missionId: Components["schemas"]["MongoId"];
+      flightId: Components["schemas"]["MongoId"];
       locationName: string;
-      locationId?: components["schemas"]["MongoId"];
+      locationId?: Components["schemas"]["MongoId"];
       note?: string;
       onSite?: boolean;
       /** Format: int32 */
@@ -339,14 +339,14 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "New alert created";
-      data: components["schemas"]["IAlert"];
+      data: Components["schemas"]["IAlert"];
     };
     GetFlightLocationResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "Alerts fetched successfully";
-      data: components["schemas"]["IAlert"][];
+      data: Components["schemas"]["IAlert"][];
     };
     GetFlightLocationNotFound: {
       /** @enum {boolean} */
@@ -359,7 +359,7 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "Alert fetched successfully";
-      data: components["schemas"]["IAlert"][];
+      data: Components["schemas"]["IAlert"][];
     };
     GetByIdNotFound: {
       /** @enum {boolean} */
@@ -372,7 +372,7 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "Alert fetched successfully";
-      data: components["schemas"]["IAlert"][];
+      data: Components["schemas"]["IAlert"][];
     };
     GetByLocationIDNotFound: {
       /** @enum {boolean} */
@@ -391,7 +391,7 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "Total Alerts for ${req.query.locationID} is ${data.length}";
-      data: components["schemas"]["IAlert"][];
+      data: Components["schemas"]["IAlert"][];
     };
     GetByLocationAndTimeNotFound: {
       /** @enum {boolean} */
@@ -417,7 +417,7 @@ export interface components {
       message: "Alert fetched successfully";
       /** Format: int32 */
       data: number;
-      location: components["schemas"]["Location"][];
+      location: Components["schemas"]["Location"][];
     };
     GetNumberByLocationIDNotFound: {
       /** @enum {boolean} */
@@ -426,7 +426,7 @@ export interface components {
       message: "Wrong input";
     };
     IMission: {
-      _id: components["schemas"]["MongoId"];
+      _id: Components["schemas"]["MongoId"];
       deliverables?: string[];
       status?: string;
       pilotAssigned?: string;
@@ -436,15 +436,15 @@ export interface components {
       createdAt: string;
       /** Format: date-time */
       updatedAt: string;
-      user: components["schemas"]["MongoId"];
-      assetID?: components["schemas"]["MongoId"];
-      tenantId?: components["schemas"]["MongoId"];
-      clientId?: components["schemas"]["MongoId"][];
-      missionType: components["schemas"]["MongoId"];
-      invites?: components["schemas"]["MongoId"][];
+      user: Components["schemas"]["MongoId"];
+      assetID?: Components["schemas"]["MongoId"];
+      tenantId?: Components["schemas"]["MongoId"];
+      clientId?: Components["schemas"]["MongoId"][];
+      missionType: Components["schemas"]["MongoId"];
+      invites?: Components["schemas"]["MongoId"][];
     };
     IUser: {
-      _id: components["schemas"]["MongoId"];
+      _id: Components["schemas"]["MongoId"];
       name: string;
       phoneNo: string;
       email: string;
@@ -467,14 +467,14 @@ export interface components {
       createdAt: string;
       /** Format: date-time */
       updatedAt: string;
-      tenantId: components["schemas"]["MongoId"];
-      userGroupId: components["schemas"]["MongoId"];
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
-      customPermissions: components["schemas"]["IPermission"][];
+      tenantId: Components["schemas"]["MongoId"];
+      userGroupId: Components["schemas"]["MongoId"];
+      createdBy: Components["schemas"]["MongoId"];
+      updatedBy: Components["schemas"]["MongoId"];
+      customPermissions: Components["schemas"]["IPermission"][];
     };
     IFlight: {
-      _id: components["schemas"]["MongoId"];
+      _id: Components["schemas"]["MongoId"];
       name: string;
       description: string;
       date: string;
@@ -529,18 +529,18 @@ export interface components {
       createdAt: string;
       /** Format: date-time */
       updatedAt: string;
-      assetID?: components["schemas"]["MongoId"];
-      client: components["schemas"]["MongoId"];
-      tenant: components["schemas"]["MongoId"];
-      locationID: components["schemas"]["MongoId"];
-      pilotID: components["schemas"]["MongoId"];
-      mission: components["schemas"]["MongoId"];
+      assetID?: Components["schemas"]["MongoId"];
+      client: Components["schemas"]["MongoId"];
+      tenant: Components["schemas"]["MongoId"];
+      locationID: Components["schemas"]["MongoId"];
+      pilotID: Components["schemas"]["MongoId"];
+      mission: Components["schemas"]["MongoId"];
     };
     IAlertMissionCreatedFlight: {
-      missionId: components["schemas"]["IMission"];
-      createdBy: components["schemas"]["IUser"];
-      flightId: components["schemas"]["IFlight"];
-      _id: components["schemas"]["MongoId"];
+      missionId: Components["schemas"]["IMission"];
+      createdBy: Components["schemas"]["IUser"];
+      flightId: Components["schemas"]["IFlight"];
+      _id: Components["schemas"]["MongoId"];
       location: {
         /** Format: float */
         lat?: number;
@@ -555,8 +555,8 @@ export interface components {
       /** Format: int32 */
       pcount: number;
       type?: string;
-      image: components["schemas"]["FilePath"];
-      locationId?: components["schemas"]["MongoId"];
+      image: Components["schemas"]["FilePath"];
+      locationId?: Components["schemas"]["MongoId"];
       /** Format: date-time */
       createdAt: string;
       /** Format: date-time */
@@ -568,7 +568,7 @@ export interface components {
       /** @enum {string} */
       message: "Alert fetched successfully";
       /** @description Has the missionId, FlightId, and createdBy fields populated with mission, flight, and user models */
-      data: components["schemas"]["IAlertMissionCreatedFlight"][];
+      data: Components["schemas"]["IAlertMissionCreatedFlight"][];
       /** Format: int32 */
       total: number;
     };
@@ -586,7 +586,7 @@ export interface components {
       /** Format: int32 */
       total: number;
       /** @description Has the missionId, FlightId, and createdBy fields populated with mission, flight, and user models */
-      data: components["schemas"]["IAlertMissionCreatedFlight"][];
+      data: Components["schemas"]["IAlertMissionCreatedFlight"][];
     };
     GetByLocationIdPaginateNotFound: {
       /** @enum {boolean} */
@@ -600,7 +600,7 @@ export interface components {
       /** @enum {string} */
       message: " mission data fetched successfully!";
       /** @description missionId is expanded to Mission model */
-      data: components["schemas"]["IAlert"][];
+      data: Components["schemas"]["IAlert"][];
     };
     GetMyMissionMaprefNotFound: {
       /** @enum {boolean} */
@@ -613,7 +613,7 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "Total Alerts are ${data.length}";
-      data: components["schemas"]["IAlert"][];
+      data: Components["schemas"]["IAlert"][];
       /** Format: int32 */
       count: number;
     };
@@ -628,7 +628,7 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "Total Alerts are ${data.length}";
-      data: components["schemas"]["IAlert"][];
+      data: Components["schemas"]["IAlert"][];
       /** Format: int32 */
       count: number;
     };
@@ -640,7 +640,7 @@ export interface components {
     };
     DeleteMultipleAlertRequest: {
       /** @description Alert IDs to be deleted */
-      id: components["schemas"]["MongoId"][];
+      id: Components["schemas"]["MongoId"][];
     };
     DeleteMultipleAlertResponse: {
       /** @enum {boolean} */
@@ -661,19 +661,19 @@ export interface components {
     };
     CreateAssetRequest: {
       assetName: string;
-      userID: components["schemas"]["MongoId"];
-      assetInfo: components["schemas"]["AssetInfo"][];
-      userid: components["schemas"]["MongoId"];
-      model: components["schemas"]["MongoId"];
-      assetOwner: components["schemas"]["MongoId"];
+      userID: Components["schemas"]["MongoId"];
+      assetInfo: Components["schemas"]["AssetInfo"][];
+      userid: Components["schemas"]["MongoId"];
+      model: Components["schemas"]["MongoId"];
+      assetOwner: Components["schemas"]["MongoId"];
       /** Format: date */
       manufactureDate: string;
-      manufactureID: components["schemas"]["MongoId"];
+      manufactureID: Components["schemas"]["MongoId"];
     };
     IAsset: {
-      _id: components["schemas"]["MongoId"];
+      _id: Components["schemas"]["MongoId"];
       assetName: string;
-      assetInfo: components["schemas"]["AssetInfo"][];
+      assetInfo: Components["schemas"]["AssetInfo"][];
       isActive: boolean;
       /** Format: date */
       manufactureDate: string;
@@ -681,19 +681,19 @@ export interface components {
       createdAt: string;
       /** Format: date-time */
       updatedAt: string;
-      userID: components["schemas"]["MongoId"];
-      tenantID: components["schemas"]["MongoId"];
-      manufactureID: components["schemas"]["MongoId"];
-      createdBy: components["schemas"]["MongoId"];
-      modelID: components["schemas"]["MongoId"];
-      assetOwner: components["schemas"]["MongoId"];
+      userID: Components["schemas"]["MongoId"];
+      tenantID: Components["schemas"]["MongoId"];
+      manufactureID: Components["schemas"]["MongoId"];
+      createdBy: Components["schemas"]["MongoId"];
+      modelID: Components["schemas"]["MongoId"];
+      assetOwner: Components["schemas"]["MongoId"];
     };
     CreateAssetResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "Successfully saved the asset";
-      data: components["schemas"]["IAsset"];
+      data: Components["schemas"]["IAsset"];
     };
     GetAssetResponse: {
       /** @enum {boolean} */
@@ -701,7 +701,7 @@ export interface components {
       /** @enum {string} */
       message: "Asset fetched";
       data: {
-        gotDoc: components["schemas"]["IAsset"];
+        gotDoc: Components["schemas"]["IAsset"];
       };
     };
     GetAssetNotFound: {
@@ -717,7 +717,7 @@ export interface components {
       message: "All assets fetched";
       data: {
         /** @description Fields userID, tenantID, createdBy, assetOwner, and manufactureID are expanded */
-        gotDoc: components["schemas"]["IAsset"][];
+        gotDoc: Components["schemas"]["IAsset"][];
       };
     };
     GetAllAssetsNotFound: {
@@ -727,17 +727,17 @@ export interface components {
       message: "Asset doesnt exist";
     };
     UpdateAssetRequest: {
-      userID: components["schemas"]["MongoId"];
-      tenantID: components["schemas"]["MongoId"];
-      assetID: components["schemas"]["MongoId"];
-      assetInfo: components["schemas"]["AssetInfo"][];
+      userID: Components["schemas"]["MongoId"];
+      tenantID: Components["schemas"]["MongoId"];
+      assetID: Components["schemas"]["MongoId"];
+      assetInfo: Components["schemas"]["AssetInfo"][];
     };
     UpdateAssetResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "Successfully updated Asset";
-      data: components["schemas"]["IAsset"];
+      data: Components["schemas"]["IAsset"];
     };
     UpdateAssetError: {
       /** @enum {boolean} */
@@ -746,14 +746,14 @@ export interface components {
       message: "Asset could not be updated";
     };
     DeleteAssetRequest: {
-      assetID: components["schemas"]["MongoId"];
+      assetID: Components["schemas"]["MongoId"];
     };
     DeleteAssetResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "Asset deleted";
-      data: components["schemas"]["IAsset"];
+      data: Components["schemas"]["IAsset"];
     };
     DeleteAssetNotFound: {
       /** @enum {boolean} */
@@ -769,7 +769,7 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "Sucessfully toggled the asset to ${toggledAsset.isActive}";
-      data: components["schemas"]["IAsset"];
+      data: Components["schemas"]["IAsset"];
     };
     ToggleStatusAssetNotFound: {
       /** @enum {boolean} */
@@ -783,28 +783,28 @@ export interface components {
       createdAt?: string;
     };
     IAssetClass: {
-      _id: components["schemas"]["MongoId"];
+      _id: Components["schemas"]["MongoId"];
       typeName: string;
       /** Format: date-time */
       createdAt: string;
-      createdBy: components["schemas"]["MongoId"];
+      createdBy: Components["schemas"]["MongoId"];
     };
     CreateAssetClassResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "Sucessfully created asset class";
-      data: components["schemas"]["IAssetClass"];
+      data: Components["schemas"]["IAssetClass"];
     };
     GetAssetClassResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "Sucessfully fetched Asset classes";
-      data: components["schemas"]["IAssetClass"][];
+      data: Components["schemas"]["IAssetClass"][];
     };
     UpdateAssetClassRequest: {
-      id: components["schemas"]["MongoId"];
+      id: Components["schemas"]["MongoId"];
       typeName: string;
     };
     UpdateAssetClassResponse: {
@@ -812,7 +812,7 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "Sucessfully updated the assetClass";
-      data: components["schemas"]["IAssetClass"];
+      data: Components["schemas"]["IAssetClass"];
     };
     UpdateAssetClassNotFound: {
       /** @enum {boolean} */
@@ -825,7 +825,7 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "Asset fetched sucessfully.";
-      data: components["schemas"]["IAsset"];
+      data: Components["schemas"]["IAsset"];
     };
     GetByIdAssetClassNotFound: {
       /** @enum {boolean} */
@@ -839,11 +839,11 @@ export interface components {
     };
     IPermission: PERMS;
     IUserGroupPermissions: {
-      permissions: components["schemas"]["IPermission"][];
-      tenantId: components["schemas"]["MongoId"];
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
-      _id: components["schemas"]["MongoId"];
+      permissions: Components["schemas"]["IPermission"][];
+      tenantId: Components["schemas"]["MongoId"];
+      createdBy: Components["schemas"]["MongoId"];
+      updatedBy: Components["schemas"]["MongoId"];
+      _id: Components["schemas"]["MongoId"];
       name: string;
       isActive: boolean;
       /** Format: date-time */
@@ -852,12 +852,12 @@ export interface components {
       updatedAt: string;
     };
     IUserCustomPermission: {
-      tenantId: components["schemas"]["MongoId"];
-      userGroupId: components["schemas"]["MongoId"];
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
-      customPermissions: components["schemas"]["IPermission"][];
-      _id: components["schemas"]["MongoId"];
+      tenantId: Components["schemas"]["MongoId"];
+      userGroupId: Components["schemas"]["MongoId"];
+      createdBy: Components["schemas"]["MongoId"];
+      updatedBy: Components["schemas"]["MongoId"];
+      customPermissions: Components["schemas"]["IPermission"][];
+      _id: Components["schemas"]["MongoId"];
       name: string;
       phoneNo: string;
       email: string;
@@ -886,8 +886,8 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "login sucessfully";
-      data: components["schemas"]["IUserCustomPermission"];
-      token: components["schemas"]["MongoId"];
+      data: Components["schemas"]["IUserCustomPermission"];
+      token: Components["schemas"]["MongoId"];
     };
     LoginAuthNotFound: {
       /** @enum {boolean} */
@@ -910,14 +910,14 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "user details fetched";
-      data: components["schemas"]["IUserCustomPermission"];
+      data: Components["schemas"]["IUserCustomPermission"];
     };
     GetResetPasswordAuthResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "";
-      token: components["schemas"]["MongoId"];
+      token: Components["schemas"]["MongoId"];
     };
     ForgotPasswordAuthRequest: {
       email: string;
@@ -935,7 +935,7 @@ export interface components {
       message: "Email is not registered";
     };
     GetMetaDataBaseLayerRequest: {
-      layers: components["schemas"]["MongoId"][];
+      layers: Components["schemas"]["MongoId"][];
     };
     GetMetaDataBaseLayerResponse: {
       /** @enum {boolean} */
@@ -943,10 +943,10 @@ export interface components {
       /** @enum {string} */
       message: "got the right stuff";
       data: {
-        missionId: components["schemas"]["MongoId"];
+        missionId: Components["schemas"]["MongoId"];
         missionName: string;
         layers: {
-          _id: components["schemas"]["MongoId"];
+          _id: Components["schemas"]["MongoId"];
           name: string;
           fields: string[];
         }[];
@@ -966,23 +966,23 @@ export interface components {
      */
     Color: string;
     CreateBaseLayerRequest: {
-      file: components["schemas"]["File"];
+      file: Components["schemas"]["File"];
       name: string;
       /** @enum {string} */
       type: "Vector";
       /** Format: date */
       captureDate: string;
-      color: components["schemas"]["Color"];
+      color: Components["schemas"]["Color"];
       icon?: string;
       /** @enum {string} */
       inHeritOriginalColorFromFile: "true" | "false";
     };
     ILayer: {
-      _id: components["schemas"]["MongoId"];
+      _id: Components["schemas"]["MongoId"];
       type: string;
       /** Format: date */
       captureDate: string;
-      color: components["schemas"]["Color"];
+      color: Components["schemas"]["Color"];
       layerpath: string;
       name: string;
       layerdataArr: { [key: string]: unknown }[];
@@ -993,7 +993,7 @@ export interface components {
       maxp: number;
       /** Format: float */
       featureCount: number;
-      layers?: components["schemas"]["MongoId"][];
+      layers?: Components["schemas"]["MongoId"][];
       layerLabel?: string;
       isPublic: boolean;
       isBase: boolean;
@@ -1005,11 +1005,11 @@ export interface components {
       updatedAt: string;
       raster: rasterProps;
       vector: vectorProps;
-      missionId: components["schemas"]["MongoId"];
-      tenantId: components["schemas"]["MongoId"];
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
-      layerGroupId: components["schemas"]["MongoId"];
+      missionId: Components["schemas"]["MongoId"];
+      tenantId: Components["schemas"]["MongoId"];
+      createdBy: Components["schemas"]["MongoId"];
+      updatedBy: Components["schemas"]["MongoId"];
+      layerGroupId: Components["schemas"]["MongoId"];
     };
     Properties: {
       /** Format: float */
@@ -1033,9 +1033,9 @@ export interface components {
       /** @enum {string} */
       message: "New Layer Created";
       data: {
-        layer: components["schemas"]["ILayer"];
-        properties: components["schemas"]["Properties"] & {
-          Nth: components["schemas"]["Properties"];
+        layer: Components["schemas"]["ILayer"];
+        properties: Components["schemas"]["Properties"] & {
+          Nth: Components["schemas"]["Properties"];
         };
       };
     };
@@ -1049,8 +1049,8 @@ export interface components {
         | "Failed! GEOJSON does not have color";
     };
     GetMetaDataUpdateRequest: {
-      layers: components["schemas"]["MongoId"][];
-      baseLayer: components["schemas"]["MongoId"];
+      layers: Components["schemas"]["MongoId"][];
+      baseLayer: Components["schemas"]["MongoId"];
     };
     /** @enum {string} */
     Attrs:
@@ -1071,12 +1071,12 @@ export interface components {
       /** @enum {string} */
       message: "got the data";
       data: {
-        pattr: components["schemas"]["Attrs"][];
+        pattr: Components["schemas"]["Attrs"][];
         layerAttr: {
-          missionId: components["schemas"]["MongoId"];
+          missionId: Components["schemas"]["MongoId"];
           missionName: string;
           layers: {
-            _id: components["schemas"]["MongoId"];
+            _id: Components["schemas"]["MongoId"];
             name: string;
             fields: string[];
           }[];
@@ -1093,24 +1093,24 @@ export interface components {
         | "Vector type of base layer is different than selected layers";
     };
     SetPrimeAttrRequest: {
-      path: components["schemas"]["FilePath"];
-      pattr: components["schemas"]["Attrs"][];
-      id: components["schemas"]["MongoId"];
+      path: Components["schemas"]["FilePath"];
+      pattr: Components["schemas"]["Attrs"][];
+      id: Components["schemas"]["MongoId"];
     };
     IVector: vectorProps;
     ILayerVector: {
       raster: rasterProps;
       vector: vectorProps;
-      missionId: components["schemas"]["MongoId"];
-      tenantId: components["schemas"]["MongoId"];
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
-      layerGroupId: components["schemas"]["MongoId"];
-      _id: components["schemas"]["MongoId"];
+      missionId: Components["schemas"]["MongoId"];
+      tenantId: Components["schemas"]["MongoId"];
+      createdBy: Components["schemas"]["MongoId"];
+      updatedBy: Components["schemas"]["MongoId"];
+      layerGroupId: Components["schemas"]["MongoId"];
+      _id: Components["schemas"]["MongoId"];
       type: string;
       /** Format: date */
       captureDate: string;
-      color: components["schemas"]["Color"];
+      color: Components["schemas"]["Color"];
       layerpath: string;
       name: string;
       layerdataArr: { [key: string]: unknown }[];
@@ -1121,7 +1121,7 @@ export interface components {
       maxp: number;
       /** Format: float */
       featureCount: number;
-      layers?: components["schemas"]["MongoId"][];
+      layers?: Components["schemas"]["MongoId"][];
       layerLabel?: string;
       isPublic: boolean;
       isBase: boolean;
@@ -1137,7 +1137,7 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "Prime attributes added successfully";
-      data: components["schemas"]["ILayerVector"];
+      data: Components["schemas"]["ILayerVector"];
     };
     SetPrimeAttrNotFound: {
       /** @enum {boolean} */
@@ -1147,25 +1147,25 @@ export interface components {
     };
     CreateByLayersRequest: {
       name: string;
-      pattr: components["schemas"]["Attrs"][];
-      layers: components["schemas"]["MongoId"][];
-      vectorTypeId: components["schemas"]["MongoId"];
-      color: components["schemas"]["Color"];
+      pattr: Components["schemas"]["Attrs"][];
+      layers: Components["schemas"]["MongoId"][];
+      vectorTypeId: Components["schemas"]["MongoId"];
+      color: Components["schemas"]["Color"];
     };
     CreateByLayersResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "Sucessfully created base layer";
-      data: components["schemas"]["ILayer"];
+      data: Components["schemas"]["ILayer"];
     };
     /** @enum {string} */
     SortOrder: "desc" | "asc";
     FilterBaseLayerRequest: {
-      createdAt?: components["schemas"]["SortOrder"];
-      name?: components["schemas"]["SortOrder"];
-      captureDate?: components["schemas"]["SortOrder"];
-      time: components["schemas"]["Time"];
+      createdAt?: Components["schemas"]["SortOrder"];
+      name?: Components["schemas"]["SortOrder"];
+      captureDate?: Components["schemas"]["SortOrder"];
+      time: Components["schemas"]["Time"];
       rasterProps?: string[];
       vectorProps?: string[];
       vectorPropsType?: string[];
@@ -1174,16 +1174,16 @@ export interface components {
     ILayerRasterVector: {
       raster: rasterProps;
       vector: vectorProps;
-      missionId: components["schemas"]["MongoId"];
-      tenantId: components["schemas"]["MongoId"];
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
-      layerGroupId: components["schemas"]["MongoId"];
-      _id: components["schemas"]["MongoId"];
+      missionId: Components["schemas"]["MongoId"];
+      tenantId: Components["schemas"]["MongoId"];
+      createdBy: Components["schemas"]["MongoId"];
+      updatedBy: Components["schemas"]["MongoId"];
+      layerGroupId: Components["schemas"]["MongoId"];
+      _id: Components["schemas"]["MongoId"];
       type: string;
       /** Format: date */
       captureDate: string;
-      color: components["schemas"]["Color"];
+      color: Components["schemas"]["Color"];
       layerpath: string;
       name: string;
       layerdataArr: { [key: string]: unknown }[];
@@ -1194,7 +1194,7 @@ export interface components {
       maxp: number;
       /** Format: float */
       featureCount: number;
-      layers?: components["schemas"]["MongoId"][];
+      layers?: Components["schemas"]["MongoId"][];
       layerLabel?: string;
       isPublic: boolean;
       isBase: boolean;
@@ -1210,7 +1210,7 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "Sucessfully get Vector or Raster data ";
-      data: components["schemas"]["ILayerRasterVector"];
+      data: Components["schemas"]["ILayerRasterVector"];
     };
     FilterBaseLayerNotFound: {
       /** @enum {boolean} */
@@ -1219,15 +1219,15 @@ export interface components {
       message: "Data doesn't exist!";
     };
     UpdateByLayersRequest: {
-      layers: components["schemas"]["MongoId"][];
-      baseLayer: components["schemas"]["MongoId"];
+      layers: Components["schemas"]["MongoId"][];
+      baseLayer: Components["schemas"]["MongoId"];
     };
     UpdateByLayersResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "Layer updated successfully";
-      data: components["schemas"]["ILayerVector"];
+      data: Components["schemas"]["ILayerVector"];
     };
     UpdateByLayersNotFound: {
       /** @enum {boolean} */
@@ -1241,7 +1241,7 @@ export interface components {
       /** @enum {string} */
       message: "Asset fetched";
       /** @description Fields vector and raster populated */
-      data: components["schemas"]["ILayerRasterVector"][];
+      data: Components["schemas"]["ILayerRasterVector"][];
     };
     FetchBaseLayerNotFound: {
       /** @enum {boolean} */
@@ -1250,17 +1250,17 @@ export interface components {
       message: "Please provide a valid size";
     };
     UploadToUpdateBaseLayerRequest: {
-      file: components["schemas"]["File"];
-      baseLayer: components["schemas"]["MongoId"];
+      file: Components["schemas"]["File"];
+      baseLayer: Components["schemas"]["MongoId"];
     };
     UploadToUpdateBaseLayerResponse: {
       /** @enum {boolean} */
       status: true;
       data: {
-        primeAttributes: components["schemas"]["Attrs"];
-        layerAttributes: components["schemas"]["Attrs"];
-        filePath: components["schemas"]["FilePath"];
-        baseLayer: components["schemas"]["MongoId"];
+        primeAttributes: Components["schemas"]["Attrs"];
+        layerAttributes: Components["schemas"]["Attrs"];
+        filePath: Components["schemas"]["FilePath"];
+        baseLayer: Components["schemas"]["MongoId"];
       };
     };
     UploadToUpdateBaseLayerNotFound: {
@@ -1270,10 +1270,10 @@ export interface components {
       message: "file path not exist! ";
     };
     UpdateByUploadedLayerRequest: {
-      filePath: components["schemas"]["FilePath"];
-      baseLayer: components["schemas"]["MongoId"];
+      filePath: Components["schemas"]["FilePath"];
+      baseLayer: Components["schemas"]["MongoId"];
       attrMapping: {
-        Attr: components["schemas"]["Attrs"];
+        Attr: Components["schemas"]["Attrs"];
       };
     };
     UpdateByUploadedLayerResponse: {
@@ -1281,7 +1281,7 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "Layer has been updated successfully";
-      data: components["schemas"]["ILayerRasterVector"];
+      data: Components["schemas"]["ILayerRasterVector"];
     };
     UpdateByUploadedLayerNotFound: {
       /** @enum {boolean} */
@@ -1291,7 +1291,7 @@ export interface components {
     };
     CreateRasterImportMissionRequest: {
       name: string;
-      layers: components["schemas"]["MongoId"][];
+      layers: Components["schemas"]["MongoId"][];
       /** Format: date */
       captureDate: string;
     };
@@ -1302,7 +1302,7 @@ export interface components {
       message:
         | "New Base Layer Created Successfully"
         | "Incompatible layer types";
-      data: components["schemas"]["ILayer"];
+      data: Components["schemas"]["ILayer"];
     };
     CreateRasterImportMissionNotFound: {
       /** @enum {boolean} */
@@ -1311,7 +1311,7 @@ export interface components {
       message: "Asset doesnt exist";
     };
     DeleteBaseByIDRequest: {
-      layers: components["schemas"]["MongoId"][];
+      layers: Components["schemas"]["MongoId"][];
     };
     DeleteBaseByIDResponse: {
       /** @enum {boolean} */
@@ -1326,7 +1326,7 @@ export interface components {
       message: "Base could not be deleted";
     };
     CreateBaseRasterUploadRequest: {
-      file: components["schemas"]["File"];
+      file: Components["schemas"]["File"];
       name: string;
       type: string;
       raster: rasterProps;
@@ -1338,7 +1338,7 @@ export interface components {
       status: true;
       /** @enum {string} */
       message: "New Base Layer Created Successfully";
-      data: components["schemas"]["ILayer"];
+      data: Components["schemas"]["ILayer"];
     };
     CreateBaseRasterUploadFailed: {
       /** @enum {boolean} */
@@ -1347,15 +1347,15 @@ export interface components {
       message: "Failed to create base layer";
     };
     UpdateRasterLayerUploadRequest: {
-      file: components["schemas"]["File"];
-      layerId: components["schemas"]["MongoId"];
+      file: Components["schemas"]["File"];
+      layerId: Components["schemas"]["MongoId"];
     };
     UpdateRasterLayerUploadResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "Raster layer updated sucessfully";
-      data: components["schemas"]["ILayer"];
+      data: Components["schemas"]["ILayer"];
     };
     UpdateRasterLayerUploadNotFound: {
       /** @enum {boolean} */
@@ -1364,15 +1364,15 @@ export interface components {
       message: "Layer not found";
     };
     UpdateRasterLayerImportRequest: {
-      layerId: components["schemas"]["MongoId"];
-      layers: components["schemas"]["MongoId"][];
+      layerId: Components["schemas"]["MongoId"];
+      layers: Components["schemas"]["MongoId"][];
     };
     UpdateRasterLayerImportResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "Raster layer updated sucessfully";
-      data: components["schemas"]["ILayer"];
+      data: Components["schemas"]["ILayer"];
     };
     UpdateRasterLayerImportNotFound: {
       /** @enum {boolean} */
@@ -1381,7 +1381,7 @@ export interface components {
       message: "Layer not found";
     };
     UpdateIsBaseLayerRequest: {
-      assetID: components["schemas"]["MongoId"];
+      assetID: Components["schemas"]["MongoId"];
     };
     UpdateIsBaseLayerResponse: {
       /** @enum {boolean} */
@@ -1403,10 +1403,10 @@ export interface components {
     Feature: {
       /** @enum {string} */
       type: "Feature";
-      properties: components["schemas"]["Properties"] & {
-        Nth: components["schemas"]["Properties"];
+      properties: Components["schemas"]["Properties"] & {
+        Nth: Components["schemas"]["Properties"];
       };
-      geometry: components["schemas"]["Point"];
+      geometry: Components["schemas"]["Point"];
     };
     GeoJson: {
       type: string;
@@ -1417,27 +1417,27 @@ export interface components {
           name: string;
         };
       };
-      features: components["schemas"]["Feature"][];
+      features: Components["schemas"]["Feature"][];
       /** Format: float */
       errno: number;
     };
     CreateBaseVectorLayerRequest: {
       name: string;
-      vectorId: components["schemas"]["MongoId"];
-      geoJSON: components["schemas"]["GeoJson"];
+      vectorId: Components["schemas"]["MongoId"];
+      geoJSON: Components["schemas"]["GeoJson"];
     };
     CreateBaseVectorLayerResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "Sucessfully created base vector layer";
-      data: components["schemas"]["ILayer"];
+      data: Components["schemas"]["ILayer"];
     };
     PublishBaseLayerRequest: {
-      layerId: components["schemas"]["MongoId"][];
+      layerId: Components["schemas"]["MongoId"][];
     };
     ITenant: {
-      _id: components["schemas"]["MongoId"];
+      _id: Components["schemas"]["MongoId"];
       name: string;
       phoneNo: string;
       email: string;
@@ -1489,24 +1489,24 @@ export interface components {
       createdAt: string;
       /** Format: date-time */
       updatedAt: string;
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
-      activePackage: components["schemas"]["MongoId"];
-      upcomingPackages: components["schemas"]["MongoId"][];
+      createdBy: Components["schemas"]["MongoId"];
+      updatedBy: Components["schemas"]["MongoId"];
+      activePackage: Components["schemas"]["MongoId"];
+      upcomingPackages: Components["schemas"]["MongoId"][];
     };
     ILayerTenantVector: {
       raster: rasterProps;
       vector: vectorProps;
-      missionId: components["schemas"]["MongoId"];
-      tenantId: components["schemas"]["ITenant"];
-      createdBy: components["schemas"]["MongoId"];
-      updatedBy: components["schemas"]["MongoId"];
-      layerGroupId: components["schemas"]["MongoId"];
-      _id: components["schemas"]["MongoId"];
+      missionId: Components["schemas"]["MongoId"];
+      tenantId: Components["schemas"]["ITenant"];
+      createdBy: Components["schemas"]["MongoId"];
+      updatedBy: Components["schemas"]["MongoId"];
+      layerGroupId: Components["schemas"]["MongoId"];
+      _id: Components["schemas"]["MongoId"];
       type: string;
       /** Format: date */
       captureDate: string;
-      color: components["schemas"]["Color"];
+      color: Components["schemas"]["Color"];
       layerpath: string;
       name: string;
       layerdataArr: { [key: string]: unknown }[];
@@ -1517,7 +1517,7 @@ export interface components {
       maxp: number;
       /** Format: float */
       featureCount: number;
-      layers?: components["schemas"]["MongoId"][];
+      layers?: Components["schemas"]["MongoId"][];
       layerLabel?: string;
       isPublic: boolean;
       isBase: boolean;
@@ -1534,7 +1534,7 @@ export interface components {
       /** @enum {string} */
       message: "Layer: ${req.body.layerId} has been made public";
       publicMapRed: string;
-      data: components["schemas"]["ILayerTenantVector"];
+      data: Components["schemas"]["ILayerTenantVector"];
     };
     PublishBaseLayerNotFound: {
       /** @enum {boolean} */
@@ -1548,7 +1548,7 @@ export interface components {
       /** @enum {string} */
       message: "Fetched all public base layers";
       /** @description Fields tenantId, vector are populated */
-      data: components["schemas"]["ILayerTenantVector"][];
+      data: Components["schemas"]["ILayerTenantVector"][];
     };
     GetAllPublicBaseLayersNotFound: {
       /** @enum {boolean} */
@@ -1576,18 +1576,18 @@ export interface components {
       index: number;
       /** @enum {string} */
       type: "Feature";
-      properties: components["schemas"]["Properties"] & {
-        Nth: components["schemas"]["Properties"];
+      properties: Components["schemas"]["Properties"] & {
+        Nth: Components["schemas"]["Properties"];
       };
-      geometry: components["schemas"]["Point"];
+      geometry: Components["schemas"]["Point"];
     };
     SearchPublicLayerResponse: {
       /** @enum {boolean} */
       status: true;
       /** @enum {string} */
       message: "Match found";
-      data: components["schemas"]["SearchDataResponse"][];
-      layerId: components["schemas"]["MongoId"];
+      data: Components["schemas"]["SearchDataResponse"][];
+      layerId: Components["schemas"]["MongoId"];
     };
     SearchPublicLayerNotFound: {
       /** @enum {boolean} */
@@ -1601,7 +1601,7 @@ export interface components {
   };
 }
 
-export interface operations {
+export interface Operations {
   /** This should be a multipart form-data */
   UploadAlertImage: {
     parameters: Record<string, never>;
@@ -1609,31 +1609,31 @@ export interface operations {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["UploadResponse"];
+          "application/json": Components["schemas"]["UploadResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 403 response */
       403: {
         content: {
-          "application/json": components["schemas"]["SizeExceeded"];
+          "application/json": Components["schemas"]["SizeExceeded"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UploadRequest"];
+        "application/json": Components["schemas"]["UploadRequest"];
       };
     };
   };
@@ -1644,25 +1644,25 @@ export interface operations {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["CreateAlertResponse"];
+          "application/json": Components["schemas"]["CreateAlertResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateAlertRequest"];
+        "application/json": Components["schemas"]["CreateAlertRequest"];
       };
     };
   };
@@ -1677,31 +1677,31 @@ export interface operations {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["ManualResponse"];
+          "application/json": Components["schemas"]["ManualResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 403 response */
       403: {
         content: {
-          "application/json": components["schemas"]["SizeExceeded"];
+          "application/json": Components["schemas"]["SizeExceeded"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["ManualRequest"];
+        "application/json": Components["schemas"]["ManualRequest"];
       };
     };
   };
@@ -1709,33 +1709,33 @@ export interface operations {
   GetByFlightOrLocationID: {
     parameters: {
       query: {
-        flightID?: components["schemas"]["MongoId"];
-        locationID?: components["schemas"]["MongoId"];
+        flightID?: Components["schemas"]["MongoId"];
+        locationID?: Components["schemas"]["MongoId"];
       };
     };
     responses: {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetFlightLocationResponse"];
+          "application/json": Components["schemas"]["GetFlightLocationResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetFlightLocationNotFound"];
+          "application/json": Components["schemas"]["GetFlightLocationNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -1743,32 +1743,32 @@ export interface operations {
   GetByID: {
     parameters: {
       query: {
-        id: components["schemas"]["MongoId"];
+        id: Components["schemas"]["MongoId"];
       };
     };
     responses: {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetByIDResponse"];
+          "application/json": Components["schemas"]["GetByIDResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetByIdNotFound"];
+          "application/json": Components["schemas"]["GetByIdNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -1776,32 +1776,32 @@ export interface operations {
   GetByLocationID: {
     parameters: {
       query: {
-        id: components["schemas"]["MongoId"];
+        id: Components["schemas"]["MongoId"];
       };
     };
     responses: {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetByLocationIDResponse"];
+          "application/json": Components["schemas"]["GetByLocationIDResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetByLocationIDNotFound"];
+          "application/json": Components["schemas"]["GetByLocationIDNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -1810,39 +1810,39 @@ export interface operations {
   GetByLocationAndTime: {
     parameters: {
       query: {
-        locationID: components["schemas"]["MongoId"];
-        time: components["schemas"]["Time"];
+        locationID: Components["schemas"]["MongoId"];
+        time: Components["schemas"]["Time"];
       };
     };
     responses: {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetByLocationAndTimeResponse"];
+          "application/json": Components["schemas"]["GetByLocationAndTimeResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetByLocationAndTimeNotFound"];
+          "application/json": Components["schemas"]["GetByLocationAndTimeNotFound"];
         };
       };
       /** 500 response */
       500: {
         content: {
-          "application/json": components["schemas"]["GetByLocationAndTimeInvalid"];
+          "application/json": Components["schemas"]["GetByLocationAndTimeInvalid"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -1851,32 +1851,32 @@ export interface operations {
   GetNumberByLocationID: {
     parameters: {
       query: {
-        locationID: components["schemas"]["MongoId"];
+        locationID: Components["schemas"]["MongoId"];
       };
     };
     responses: {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetNumberByLocationIDResponse"];
+          "application/json": Components["schemas"]["GetNumberByLocationIDResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetNumberByLocationIDNotFound"];
+          "application/json": Components["schemas"]["GetNumberByLocationIDNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -1896,32 +1896,32 @@ export interface operations {
          */
         sortBy: string;
         alertType?: string;
-        id: components["schemas"]["MongoId"];
+        id: Components["schemas"]["MongoId"];
       };
     };
     responses: {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetByMissionIDResponse"];
+          "application/json": Components["schemas"]["GetByMissionIDResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetByMissionIDNotFound"];
+          "application/json": Components["schemas"]["GetByMissionIDNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -1933,7 +1933,7 @@ export interface operations {
         page: number;
         limit: number;
         /** Location ID */
-        id: components["schemas"]["MongoId"];
+        id: Components["schemas"]["MongoId"];
         /** Sort using field name in desc or asc order */
         sortBy: string;
       };
@@ -1942,25 +1942,25 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetByLocationIdPaginateResponse"];
+          "application/json": Components["schemas"]["GetByLocationIdPaginateResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetByLocationIdPaginateNotFound"];
+          "application/json": Components["schemas"]["GetByLocationIdPaginateNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -1969,32 +1969,32 @@ export interface operations {
   GetMyMissionMapref: {
     parameters: {
       query: {
-        id: components["schemas"]["MongoId"];
+        id: Components["schemas"]["MongoId"];
       };
     };
     responses: {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetMyMissionMaprefResponse"];
+          "application/json": Components["schemas"]["GetMyMissionMaprefResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetMyMissionMaprefNotFound"];
+          "application/json": Components["schemas"]["GetMyMissionMaprefNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -2003,32 +2003,32 @@ export interface operations {
   GetByTenantID: {
     parameters: {
       query: {
-        time?: components["schemas"]["Time"];
+        time?: Components["schemas"]["Time"];
       };
     };
     responses: {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetByTenantIDResponse"];
+          "application/json": Components["schemas"]["GetByTenantIDResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetByTenantIDNotFound"];
+          "application/json": Components["schemas"]["GetByTenantIDNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -2037,7 +2037,7 @@ export interface operations {
   GetByTenantIdAdvanced: {
     parameters: {
       query: {
-        time?: components["schemas"]["Time"];
+        time?: Components["schemas"]["Time"];
         /** Example: 2022-10-30 2022-11-21 */
         timeRange?: string;
         user?: string;
@@ -2049,25 +2049,25 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetByTenantIdAdvancedResponse"];
+          "application/json": Components["schemas"]["GetByTenantIdAdvancedResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetByTenantIdAdvancedNotFound"];
+          "application/json": Components["schemas"]["GetByTenantIdAdvancedNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -2079,31 +2079,31 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["DeleteMultipleAlertResponse"];
+          "application/json": Components["schemas"]["DeleteMultipleAlertResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["DeleteMultipleAlertNotFound"];
+          "application/json": Components["schemas"]["DeleteMultipleAlertNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["DeleteMultipleAlertRequest"];
+        "application/json": Components["schemas"]["DeleteMultipleAlertRequest"];
       };
     };
   };
@@ -2114,25 +2114,25 @@ export interface operations {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["CreateAssetResponse"];
+          "application/json": Components["schemas"]["CreateAssetResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateAssetRequest"];
+        "application/json": Components["schemas"]["CreateAssetRequest"];
       };
     };
   };
@@ -2140,32 +2140,32 @@ export interface operations {
   GetAsset: {
     parameters: {
       query: {
-        assetID: components["schemas"]["MongoId"];
+        assetID: Components["schemas"]["MongoId"];
       };
     };
     responses: {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetAssetResponse"];
+          "application/json": Components["schemas"]["GetAssetResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetAssetNotFound"];
+          "application/json": Components["schemas"]["GetAssetNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -2177,25 +2177,25 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetAllAssetsResponse"];
+          "application/json": Components["schemas"]["GetAllAssetsResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetAllAssetsNotFound"];
+          "application/json": Components["schemas"]["GetAllAssetsNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -2207,31 +2207,31 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["UpdateAssetResponse"];
+          "application/json": Components["schemas"]["UpdateAssetResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 500 response */
       500: {
         content: {
-          "application/json": components["schemas"]["UpdateAssetError"];
+          "application/json": Components["schemas"]["UpdateAssetError"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateAssetRequest"];
+        "application/json": Components["schemas"]["UpdateAssetRequest"];
       };
     };
   };
@@ -2242,31 +2242,31 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["DeleteAssetResponse"];
+          "application/json": Components["schemas"]["DeleteAssetResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["DeleteAssetNotFound"];
+          "application/json": Components["schemas"]["DeleteAssetNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["DeleteAssetRequest"];
+        "application/json": Components["schemas"]["DeleteAssetRequest"];
       };
     };
   };
@@ -2277,31 +2277,31 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["ToggleStatusAssetResponse"];
+          "application/json": Components["schemas"]["ToggleStatusAssetResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["ToggleStatusAssetNotFound"];
+          "application/json": Components["schemas"]["ToggleStatusAssetNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["ToggleStatusAssetRequest"];
+        "application/json": Components["schemas"]["ToggleStatusAssetRequest"];
       };
     };
   };
@@ -2312,25 +2312,25 @@ export interface operations {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["CreateAssetClassResponse"];
+          "application/json": Components["schemas"]["CreateAssetClassResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateAssetClassRequest"];
+        "application/json": Components["schemas"]["CreateAssetClassRequest"];
       };
     };
   };
@@ -2341,19 +2341,19 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetAssetClassResponse"];
+          "application/json": Components["schemas"]["GetAssetClassResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -2365,31 +2365,31 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["UpdateAssetClassResponse"];
+          "application/json": Components["schemas"]["UpdateAssetClassResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["UpdateAssetClassNotFound"];
+          "application/json": Components["schemas"]["UpdateAssetClassNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateAssetClassRequest"];
+        "application/json": Components["schemas"]["UpdateAssetClassRequest"];
       };
     };
   };
@@ -2397,32 +2397,32 @@ export interface operations {
   GetByIdAssetClass: {
     parameters: {
       query: {
-        _id: components["schemas"]["MongoId"];
+        _id: Components["schemas"]["MongoId"];
       };
     };
     responses: {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetByIdAssetClassResponse"];
+          "application/json": Components["schemas"]["GetByIdAssetClassResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetByIdAssetClassNotFound"];
+          "application/json": Components["schemas"]["GetByIdAssetClassNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -2434,37 +2434,37 @@ export interface operations {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["LoginAuthResponse"];
+          "application/json": Components["schemas"]["LoginAuthResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 401 response */
       401: {
         content: {
-          "application/json": components["schemas"]["LoginAuthUnauthorized"];
+          "application/json": Components["schemas"]["LoginAuthUnauthorized"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["LoginAuthNotFound"];
+          "application/json": Components["schemas"]["LoginAuthNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LoginAuthRequest"];
+        "application/json": Components["schemas"]["LoginAuthRequest"];
       };
     };
   };
@@ -2475,19 +2475,19 @@ export interface operations {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["UserDetailsAuthResponse"];
+          "application/json": Components["schemas"]["UserDetailsAuthResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -2500,26 +2500,26 @@ export interface operations {
   GetResetPasswordAuth: {
     parameters: {
       path: {
-        token: components["schemas"]["MongoId"];
+        token: Components["schemas"]["MongoId"];
       };
     };
     responses: {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["GetResetPasswordAuthResponse"];
+          "application/json": Components["schemas"]["GetResetPasswordAuthResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -2528,21 +2528,21 @@ export interface operations {
   PostResetPasswordAuth: {
     parameters: {
       path: {
-        token: components["schemas"]["MongoId"];
+        token: Components["schemas"]["MongoId"];
       };
     };
     responses: {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["GetResetPasswordAuthResponse"];
+          "application/json": Components["schemas"]["GetResetPasswordAuthResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
           "application/json": {
-            token: components["schemas"]["MongoId"];
+            token: Components["schemas"]["MongoId"];
             /** @enum {string} */
             message: "Password doesn't match";
           };
@@ -2552,7 +2552,7 @@ export interface operations {
       401: {
         content: {
           "application/json": {
-            token: components["schemas"]["MongoId"];
+            token: Components["schemas"]["MongoId"];
             /** @enum {string} */
             message: "Invalid Token";
           };
@@ -2561,7 +2561,7 @@ export interface operations {
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -2581,19 +2581,19 @@ export interface operations {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["ForgotPasswordAuthResponse"];
+          "application/json": Components["schemas"]["ForgotPasswordAuthResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["ForgotPasswordAuthNotFound"];
+          "application/json": Components["schemas"]["ForgotPasswordAuthNotFound"];
         };
       };
       /** 500 response */
@@ -2610,13 +2610,13 @@ export interface operations {
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["ForgotPasswordAuthRequest"];
+        "application/json": Components["schemas"]["ForgotPasswordAuthRequest"];
       };
     };
   };
@@ -2627,13 +2627,13 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetMetaDataBaseLayerResponse"];
+          "application/json": Components["schemas"]["GetMetaDataBaseLayerResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 403 response */
@@ -2652,19 +2652,19 @@ export interface operations {
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetMetaDataBaseLayerNotFound"];
+          "application/json": Components["schemas"]["GetMetaDataBaseLayerNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["GetMetaDataBaseLayerRequest"];
+        "application/json": Components["schemas"]["GetMetaDataBaseLayerRequest"];
       };
     };
   };
@@ -2675,37 +2675,37 @@ export interface operations {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["CreateBaseLayerResponse"];
+          "application/json": Components["schemas"]["CreateBaseLayerResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 403 response */
       403: {
         content: {
-          "application/json": components["schemas"]["SizeExceeded"];
+          "application/json": Components["schemas"]["SizeExceeded"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["CreateBaseLayerNotFound"];
+          "application/json": Components["schemas"]["CreateBaseLayerNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateBaseLayerRequest"];
+        "application/json": Components["schemas"]["CreateBaseLayerRequest"];
       };
     };
   };
@@ -2716,31 +2716,31 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetMetaDataUpdateResponse"];
+          "application/json": Components["schemas"]["GetMetaDataUpdateResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetMetaDataUpdateNotFound"];
+          "application/json": Components["schemas"]["GetMetaDataUpdateNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["GetMetaDataUpdateRequest"];
+        "application/json": Components["schemas"]["GetMetaDataUpdateRequest"];
       };
     };
   };
@@ -2751,31 +2751,31 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["SetPrimeAttrResponse"];
+          "application/json": Components["schemas"]["SetPrimeAttrResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["SetPrimeAttrNotFound"];
+          "application/json": Components["schemas"]["SetPrimeAttrNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetPrimeAttrRequest"];
+        "application/json": Components["schemas"]["SetPrimeAttrRequest"];
       };
     };
   };
@@ -2786,19 +2786,19 @@ export interface operations {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["CreateByLayersResponse"];
+          "application/json": Components["schemas"]["CreateByLayersResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 403 response */
       403: {
         content: {
-          "application/json": components["schemas"]["SizeExceeded"];
+          "application/json": Components["schemas"]["SizeExceeded"];
         };
       };
       /** 500 response */
@@ -2815,13 +2815,13 @@ export interface operations {
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateByLayersRequest"];
+        "application/json": Components["schemas"]["CreateByLayersRequest"];
       };
     };
   };
@@ -2832,19 +2832,19 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["FilterBaseLayerResponse"];
+          "application/json": Components["schemas"]["FilterBaseLayerResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["FilterBaseLayerNotFound"];
+          "application/json": Components["schemas"]["FilterBaseLayerNotFound"];
         };
       };
       /** 500 response */
@@ -2861,13 +2861,13 @@ export interface operations {
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["FilterBaseLayerRequest"];
+        "application/json": Components["schemas"]["FilterBaseLayerRequest"];
       };
     };
   };
@@ -2878,13 +2878,13 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["UpdateByLayersResponse"];
+          "application/json": Components["schemas"]["UpdateByLayersResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 403 response */
@@ -2901,19 +2901,19 @@ export interface operations {
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["UpdateByLayersNotFound"];
+          "application/json": Components["schemas"]["UpdateByLayersNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateByLayersRequest"];
+        "application/json": Components["schemas"]["UpdateByLayersRequest"];
       };
     };
   };
@@ -2928,25 +2928,25 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["FetchBaseLayerResponse"];
+          "application/json": Components["schemas"]["FetchBaseLayerResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["FetchBaseLayerNotFound"];
+          "application/json": Components["schemas"]["FetchBaseLayerNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -2958,13 +2958,13 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["UploadToUpdateBaseLayerResponse"];
+          "application/json": Components["schemas"]["UploadToUpdateBaseLayerResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 403 response */
@@ -2981,19 +2981,19 @@ export interface operations {
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["UploadToUpdateBaseLayerNotFound"];
+          "application/json": Components["schemas"]["UploadToUpdateBaseLayerNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UploadToUpdateBaseLayerRequest"];
+        "application/json": Components["schemas"]["UploadToUpdateBaseLayerRequest"];
       };
     };
   };
@@ -3004,31 +3004,31 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["UpdateByUploadedLayerResponse"];
+          "application/json": Components["schemas"]["UpdateByUploadedLayerResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["UpdateByUploadedLayerNotFound"];
+          "application/json": Components["schemas"]["UpdateByUploadedLayerNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateByUploadedLayerRequest"];
+        "application/json": Components["schemas"]["UpdateByUploadedLayerRequest"];
       };
     };
   };
@@ -3039,31 +3039,31 @@ export interface operations {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["CreateRasterImportMissionResponse"];
+          "application/json": Components["schemas"]["CreateRasterImportMissionResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["CreateRasterImportMissionNotFound"];
+          "application/json": Components["schemas"]["CreateRasterImportMissionNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateRasterImportMissionRequest"];
+        "application/json": Components["schemas"]["CreateRasterImportMissionRequest"];
       };
     };
   };
@@ -3074,31 +3074,31 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["DeleteBaseByIDResponse"];
+          "application/json": Components["schemas"]["DeleteBaseByIDResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["DeleteBaseByIDNotFound"];
+          "application/json": Components["schemas"]["DeleteBaseByIDNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["DeleteBaseByIDRequest"];
+        "application/json": Components["schemas"]["DeleteBaseByIDRequest"];
       };
     };
   };
@@ -3109,31 +3109,31 @@ export interface operations {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["CreateBaseRasterUploadResponse"];
+          "application/json": Components["schemas"]["CreateBaseRasterUploadResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 500 response */
       500: {
         content: {
-          "application/json": components["schemas"]["CreateBaseRasterUploadFailed"];
+          "application/json": Components["schemas"]["CreateBaseRasterUploadFailed"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateBaseRasterUploadRequest"];
+        "application/json": Components["schemas"]["CreateBaseRasterUploadRequest"];
       };
     };
   };
@@ -3144,19 +3144,19 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["UpdateRasterLayerUploadResponse"];
+          "application/json": Components["schemas"]["UpdateRasterLayerUploadResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["UpdateRasterLayerUploadNotFound"];
+          "application/json": Components["schemas"]["UpdateRasterLayerUploadNotFound"];
         };
       };
       /** default response */
@@ -3173,7 +3173,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateRasterLayerUploadRequest"];
+        "application/json": Components["schemas"]["UpdateRasterLayerUploadRequest"];
       };
     };
   };
@@ -3184,13 +3184,13 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["UpdateRasterLayerImportResponse"];
+          "application/json": Components["schemas"]["UpdateRasterLayerImportResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 403 response */
@@ -3207,7 +3207,7 @@ export interface operations {
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["UpdateRasterLayerImportNotFound"];
+          "application/json": Components["schemas"]["UpdateRasterLayerImportNotFound"];
         };
       };
       /** default response */
@@ -3224,7 +3224,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateRasterLayerImportRequest"];
+        "application/json": Components["schemas"]["UpdateRasterLayerImportRequest"];
       };
     };
   };
@@ -3235,31 +3235,31 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["UpdateIsBaseLayerResponse"];
+          "application/json": Components["schemas"]["UpdateIsBaseLayerResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["UpdateIsBaseLayerNotFound"];
+          "application/json": Components["schemas"]["UpdateIsBaseLayerNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateIsBaseLayerRequest"];
+        "application/json": Components["schemas"]["UpdateIsBaseLayerRequest"];
       };
     };
   };
@@ -3270,19 +3270,19 @@ export interface operations {
       /** 201 response */
       201: {
         content: {
-          "application/json": components["schemas"]["CreateBaseVectorLayerResponse"];
+          "application/json": Components["schemas"]["CreateBaseVectorLayerResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 403 response */
       403: {
         content: {
-          "application/json": components["schemas"]["SizeExceeded"];
+          "application/json": Components["schemas"]["SizeExceeded"];
         };
       };
       /** 500 response */
@@ -3301,13 +3301,13 @@ export interface operations {
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateBaseVectorLayerRequest"];
+        "application/json": Components["schemas"]["CreateBaseVectorLayerRequest"];
       };
     };
   };
@@ -3318,19 +3318,19 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["PublishBaseLayerResponse"];
+          "application/json": Components["schemas"]["PublishBaseLayerResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["PublishBaseLayerNotFound"];
+          "application/json": Components["schemas"]["PublishBaseLayerNotFound"];
         };
       };
       /** 500 response */
@@ -3347,13 +3347,13 @@ export interface operations {
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["PublishBaseLayerRequest"];
+        "application/json": Components["schemas"]["PublishBaseLayerRequest"];
       };
     };
   };
@@ -3368,25 +3368,25 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["GetAllPublicBaseLayersResponse"];
+          "application/json": Components["schemas"]["GetAllPublicBaseLayersResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["GetAllPublicBaseLayersNotFound"];
+          "application/json": Components["schemas"]["GetAllPublicBaseLayersNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
@@ -3398,31 +3398,31 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["UpdateIsPublicBaseLayerResponse"];
+          "application/json": Components["schemas"]["UpdateIsPublicBaseLayerResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["UpdateIsPublicBaseLayerNotFound"];
+          "application/json": Components["schemas"]["UpdateIsPublicBaseLayerNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateIsPublicBaseLayerRequest"];
+        "application/json": Components["schemas"]["UpdateIsPublicBaseLayerRequest"];
       };
     };
   };
@@ -3439,25 +3439,25 @@ export interface operations {
       /** 200 response */
       200: {
         content: {
-          "application/json": components["schemas"]["SearchPublicLayerResponse"];
+          "application/json": Components["schemas"]["SearchPublicLayerResponse"];
         };
       };
       /** 400 response */
       400: {
         content: {
-          "application/json": components["schemas"]["BadRequest"];
+          "application/json": Components["schemas"]["BadRequest"];
         };
       };
       /** 404 response */
       404: {
         content: {
-          "application/json": components["schemas"]["SearchPublicLayerNotFound"];
+          "application/json": Components["schemas"]["SearchPublicLayerNotFound"];
         };
       };
       /** default response */
       default: {
         content: {
-          "application/json": components["schemas"]["ApiError"];
+          "application/json": Components["schemas"]["ApiError"];
         };
       };
     };

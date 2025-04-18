@@ -111,7 +111,7 @@ export type ILayer = {
   flaggedFeatures: number[];
   isFlagged: boolean;
   isThreadExist: boolean;
-  commentCount: Number;
+  commentCount: number;
   createdAt: ISODate; // index
   updatedAt: ISODate;
   metadata: { [key: string]: any };

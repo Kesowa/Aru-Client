@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useContext } from "react";
+import React, { useState, useEffect, useMemo, useContext } from "react";
 import KesowaNewLogo from "../../../../static/kesowa-black.png";
 import * as turf from "@turf/turf";
 import {
@@ -11,7 +11,6 @@ import {
   message,
   Tree,
   Dropdown,
-  Modal,
   Input,
   Select,
   Space,
@@ -22,15 +21,9 @@ import {
 } from "antd";
 import {
   DoubleRightOutlined,
-  FileImageOutlined,
   DoubleLeftOutlined,
-  BranchesOutlined,
-  EnvironmentOutlined,
-  GatewayOutlined,
   SortAscendingOutlined,
   SortDescendingOutlined,
-  ExclamationCircleOutlined,
-  FolderOutlined,
   FlagOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
@@ -40,10 +33,8 @@ import { FlyToInterpolator } from "deck.gl";
 import { BitmapLayer } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
 import {
-  HTMLOverlayItem,
-  HTMLOverlay,
-} from "src/components/shared/HTMLOverlay";
-import { ViewMode, GeoJsonEditMode } from "@deck.gl-community/editable-layers";
+  GeoJsonEditMode,
+} from "@deck.gl-community/editable-layers";
 import { StaticMap } from "react-map-gl";
 import InfoWindowContent from "../../utils/infoWindow";
 
@@ -67,7 +58,7 @@ import FourOFour from "src/components/shared/Error/FourOFour";
 import { AxiosResponse } from "axios";
 import { IMission } from "src/types/mission";
 import { ILayer } from "src/types/layer";
-import { BBox, mergeBoundingBoxes, GeoJson } from "src/types/geojson";
+import { BBox, GeoJson } from "src/types/geojson";
 import { Layer, ILayerToDeckLayer } from "../../layerRender";
 import { ILayersToTree } from "../../treeRender";
 import { WebMercatorViewport } from "viewport-mercator-project";
@@ -268,7 +259,7 @@ function PublicMap(props) {
 
   useEffect(() => {
     SetAllLayers((prev) => [
-      ...prev.sort((a, b) => {
+      ...prev.toSorted((a, b) => {
         if (sortType === "createdAt") {
           if (isAscending) return moment(a.createdAt).diff(moment(b.createdAt));
           else return moment(b.createdAt).diff(moment(a.createdAt));
@@ -510,6 +501,9 @@ function PublicMap(props) {
   };
 
   const getTitleElement = (layer: Layer) => {
+    let nameTextWidth: string;
+    if (layer.type === "Raster") nameTextWidth = layer.layerGroupId ? "139px" : "160px";
+    else nameTextWidth = layer.layerGroupId ? "119px" : "140px";
     return (
       <Dropdown menu={{ items: [] }} trigger={["contextMenu"]}>
         <Tooltip
@@ -535,14 +529,7 @@ function PublicMap(props) {
           >
             <Text
               style={{
-                width:
-                  layer.type === "Raster"
-                    ? layer.layerGroupId
-                      ? "139px"
-                      : "160px"
-                    : layer.layerGroupId
-                    ? "119px"
-                    : "140px",
+                width: nameTextWidth,
               }}
               ellipsis={true}
               onClick={() => {
@@ -733,7 +720,6 @@ function PublicMap(props) {
               }}
             >
               {osmState ? (
-                <>
                   <div style={COPYRIGHT_LICENSE_STYLE}>
                     {"© "}
                     <a
@@ -744,7 +730,6 @@ function PublicMap(props) {
                       OpenStreetMap contributors
                     </a>
                   </div>
-                </>
               ) : (
                 <StaticMap
                   mapboxApiAccessToken={MAPBOX_API_KEY}
@@ -757,7 +742,6 @@ function PublicMap(props) {
                   <HTMLOverlayItem coordinates={coordinates}>
                     <Popover
                       content={
-                        <>
                           <InfoWindowContent
                             mode={infoWindowMode}
                             coordinates={coordinates}
@@ -770,7 +754,6 @@ function PublicMap(props) {
                             isBaseMap={false}
                             missionLayer={"Vector"}
                           />
-                        </>
                       }
                       title={
                         <>
@@ -922,13 +905,13 @@ function PublicMap(props) {
                             <Text type="primary">
                               Name:{" "}
                               <Text type="secondary">
-                                {mission && mission.name ? mission.name : ""}
+                                {mission?.name || ""}
                               </Text>
                             </Text>
                             <Text type="primary">
                               ID:{" "}
                               <Text type="secondary" copyable>
-                                {mission && mission._id ? mission._id : ""}
+                                {mission?._id || ""}
                               </Text>
                             </Text>
                           </div>

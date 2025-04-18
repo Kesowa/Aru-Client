@@ -13,7 +13,6 @@ function DroneMap(props: any) {
   });
   const [course, setCourse] = useState<any>(0);
   const [dronePath, setDronePath] = useState<any>([]);
-  const [pathArray, setPathArray] = useState<any>([]);
 
   let socket: any;
 
@@ -28,24 +27,12 @@ function DroneMap(props: any) {
           long: data.location.long,
         });
         setCourse(data.compass * -1);
-        const currPath = pathArray;
-        if (currPath.length == 0) {
-          currPath.push([
-            parseFloat(data.location.long.toFixed(6)),
-            parseFloat(data.location.lat.toFixed(6)),
-          ]);
-        } else if (
-          currPath.at(-1)[0] !== parseFloat(data.location.long.toFixed(6)) &&
-          currPath.at(-1)[1] !== parseFloat(data.location.lat.toFixed(6))
-        ) {
-          currPath.push([
-            parseFloat(data.location.long.toFixed(6)),
-            parseFloat(data.location.lat.toFixed(6)),
-          ]);
-        }
         setDronePath([
           {
-            path: currPath,
+            path: [
+              parseFloat(data.location.long.toFixed(6)),
+              parseFloat(data.location.lat.toFixed(6)),
+            ],
             name: "Drone's Flight Path",
             color: [255, 0, 0],
           },

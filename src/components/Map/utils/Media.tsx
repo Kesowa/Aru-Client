@@ -49,8 +49,7 @@ import { ThreadContext } from "src/services/threadUtils";
 
 function Media(props) {
   const [files, populateFiles] = useState<any>([]);
-  const [defaultFileList, setDefaultFileList] = useState<any>([]);
-  const [progress, setProgress] = useState(0);
+  // const [progress, setProgress] = useState(0); // Not used yet. May be used in future
 
   const [multiDelete, setMultiDelete] = useState(false);
   const [checkedList, setCheckedList] = useState<any>([]);
@@ -95,16 +94,12 @@ function Media(props) {
                   </div>
                 </Col>
               </Row>
-            ) : props.videoToShow.length > 0 ? (
-              <Row gutter={[16, 16]}>{renderVideo()}</Row>
-            ) : (
-              <Row>{renderMedia()}</Row>
-            )}
+            ) : renderMedia()}
           </>
         ),
       },
     ];
-    if (!(props.videoToShow.length > 0)) {
+    if (props.videoToShow.length <= 0) {
       items.push({
         key: "2",
         label: (
@@ -429,11 +424,12 @@ function Media(props) {
 
           const config = {
             onUploadProgress: (event) => {
-              const percent = Math.floor((event.loaded / event.total) * 100);
-              setProgress(percent);
-              if (percent === 100) {
-                setTimeout(() => setProgress(0), 1000);
-              }
+              // const percent = Math.floor((event.loaded / event.total) * 100);
+              // progress not used / shown anywhere yet
+              // setProgress(percent);
+              // if (percent === 100) {
+              //   setTimeout(() => setProgress(0), 1000);
+              // }
               options.onProgress({
                 percent: (event.loaded / event.total) * 100,
               });
@@ -495,7 +491,7 @@ function Media(props) {
       if (refresh) {
         setRefresh(false);
       }
-      if (!(props.videoToShow.length > 0)) {
+      if (props.videoToShow.length <= 0) {
         setLoader(true);
         const newdata: any = [];
         http
@@ -672,11 +668,11 @@ function Media(props) {
         <Image.PreviewGroup>
           {props.videoToShow.map((item: any, idx) => {
             return (
-              <>
                 <Dropdown
                   onOpenChange={() => setSelectedVideo({ data: item, idx })}
                   menu={{ items: vodMenu(item), onClick: vodMenuOnClick }}
                   trigger={["contextMenu"]}
+                  key={window.crypto.randomUUID()}
                 >
                   <Col span={8} md={8}>
                     <Badge
@@ -711,7 +707,6 @@ function Media(props) {
                     </Badge>
                   </Col>
                 </Dropdown>
-              </>
             );
           })}
         </Image.PreviewGroup>
@@ -721,12 +716,13 @@ function Media(props) {
 
   //-------------- render media content --------------------
   function renderMedia() {
+    if (props.videoToShow.length > 0) return <Row gutter={[16, 16]}>{renderVideo()}</Row>;
     const media: any[] = extractImages(files);
     media.sort((a, b) => {
       return moment(b.createdAt).diff(moment(a.createdAt));
     });
     return (
-      <>
+      <Row>
         {media.length < 1 ? <Empty style={{ margin: "auto" }} /> : <></>}
         {multiDelete ? (
           <>
@@ -825,7 +821,7 @@ function Media(props) {
             })}
           </Image.PreviewGroup>
         )}
-      </>
+      </Row>
     );
   }
 
@@ -996,6 +992,7 @@ function Media(props) {
                       textAlign: "center",
                       background: "black",
                     }}
+                    key={window.crypto.randomUUID()}
                   >
                     {!props.videoDetails.link && (
                       <img
@@ -1051,7 +1048,7 @@ function Media(props) {
         open={props.visible}
         footer={
           <>
-            {!(props.videoToShow.length > 0) ? (
+            {props.videoToShow.length <= 0 ? (
               <>
                 {props.isBaseMap ? (
                   <>
@@ -1073,7 +1070,7 @@ function Media(props) {
                                 {props.canUpload ? (
                                   <Dragger
                                     {...UploadProps}
-                                    defaultFileList={defaultFileList}
+                                    defaultFileList={[]}
                                   >
                                     <p className="ant-upload-drag-icon">
                                       <InboxOutlined />
@@ -1116,7 +1113,7 @@ function Media(props) {
                             {props.canUpload ? (
                               <Dragger
                                 {...UploadProps}
-                                defaultFileList={defaultFileList}
+                                defaultFileList={[]}
                               >
                                 <p className="ant-upload-drag-icon">
                                   <InboxOutlined />

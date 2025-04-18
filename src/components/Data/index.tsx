@@ -8,7 +8,6 @@ import DataMission from "./Mission";
 import DataLocation from "./Location";
 
 function DataList() {
-  const [displayedDataType, setDisplayedDataType] = useState("1");
   const [missionCount, setMissionCount] = useState(0);
 
   return (
@@ -29,7 +28,6 @@ function DataList() {
 
       <Tabs
         defaultActiveKey="1"
-        onChange={(key) => setDisplayedDataType(key)}
         items={[
           {
             key: "1",

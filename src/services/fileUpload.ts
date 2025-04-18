@@ -30,7 +30,7 @@ export async function uploadFile(
     type: file.type,
     model,
   });
-  if (getUrlRes.data.status == false) {
+  if (!getUrlRes.data.status) {
     console.error("ERROR GETTING PRESIGNED URL!!!: ", getUrlRes.data.message);
     return;
   }
