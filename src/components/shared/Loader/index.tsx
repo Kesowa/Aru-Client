@@ -7,7 +7,7 @@ export const LoaderContext = createContext({
 });
 
 export const useLoader = (init: number) => {
-  const [loaderCounter, setLoaderCounter] = useState(init);
+  const [loaderCounter, setLoaderCounter] = useState(0);
   const setLoading = (l: boolean) => {
     if (l) setLoaderCounter((prev) => prev + 1);
     else setLoaderCounter((prev) => Math.max(0, prev - 1));

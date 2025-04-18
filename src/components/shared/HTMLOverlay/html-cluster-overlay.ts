@@ -19,10 +19,11 @@ export default class HtmlClusterOverlay<ObjType> extends HtmlOverlay {
       this._superCluster = new Supercluster(this.getClusterOptions());
       this._superCluster.load(
         newObjects.map((object) =>
-          point(this.getObjectCoordinates(), { object })
+          point(this.getObjectCoordinates(object), { object })
         )
       );
       this._lastObjects = newObjects;
+      // console.log('new Supercluster() run');
     }
 
     const clusters = this._superCluster.getClusters(
@@ -32,13 +33,17 @@ export default class HtmlClusterOverlay<ObjType> extends HtmlOverlay {
 
     return clusters.map(
       ({
+        geometry: { coordinates },
         properties: {
           cluster,
+          point_count: pointCount,
+          cluster_id: clusterId,
+          object,
         },
       }) =>
         cluster
-          ? this.renderCluster()
-          : this.renderObject()
+          ? this.renderCluster(coordinates, clusterId, pointCount)
+          : this.renderObject(coordinates, object)
     );
   }
 
@@ -56,7 +61,7 @@ export default class HtmlClusterOverlay<ObjType> extends HtmlOverlay {
   }
 
   // override to provide coordinates for each object of getAllObjects()
-  getObjectCoordinates(): [number, number] {
+  getObjectCoordinates(obj: ObjType): [number, number] {
     return [0, 0];
   }
 
@@ -68,13 +73,17 @@ export default class HtmlClusterOverlay<ObjType> extends HtmlOverlay {
   }
 
   // override to return an HtmlOverlayItem
-  renderObject(): OptionalObject {
+  renderObject(coordinates: number[], obj: ObjType): OptionalObject {
     return null;
   }
 
   // override to return an HtmlOverlayItem
   // use getClusterObjects() to get cluster contents
-  renderCluster(): OptionalObject {
+  renderCluster(
+    coordinates: number[],
+    clusterId: number,
+    pointCount: number
+  ): OptionalObject {
     return null;
   }
 }

@@ -18,7 +18,7 @@ import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 import { GOOGLE_API_KEY } from "src/constants";
 
-function DataLocation() {
+function DataLocation(props) {
   const { Title } = Typography;
 
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -150,14 +150,15 @@ function DataLocation() {
   const findPolygonCenter = (points) => {
     const bounds = new window.google.maps.LatLngBounds();
 
-    const polygonCoords: unknown[] = [];
+    const polygonCoords: google.maps.LatLng[] = [];
 
     for (const x of points) {
       const llbound = new window.google.maps.LatLng(x.lat, x.long);
       polygonCoords.push(llbound);
     }
-    for (const polygonCoord of polygonCoords) {
-      bounds.extend(polygonCoord);
+    let i;
+    for (i = 0; i < polygonCoords.length; i++) {
+      bounds.extend(polygonCoords[i]);
     }
 
     const centerOfPolygon = bounds.getCenter();
@@ -175,6 +176,7 @@ function DataLocation() {
       ...getColumnSearchProps("name"),
       render: (lName: any) => {
         return (
+          <>
             <Title level={5}>
               <FontAwesomeIcon
                 icon={faMapMarkedAlt}
@@ -182,6 +184,7 @@ function DataLocation() {
               />
               {lName}
             </Title>
+          </>
         );
       },
     },
@@ -346,6 +349,10 @@ function DataLocation() {
     },
   ];
 
+  function fetchRowDetails(geofence, name) {
+    return console.log("");
+  }
+
   function formatGeoFenceForUrl(geofence) {
     if (geofence.length > 0) {
       let formattedGeoFence = "";
@@ -360,6 +367,7 @@ function DataLocation() {
   // rowSelection object indicates the need for row selection
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
+      fetchRowDetails(selectedRows[0].geofence, selectedRows[0].name);
       setGeofence(selectedRows[0].geofence);
       setCenterPoint(selectedRows[0].centerPoint);
     },
@@ -401,7 +409,6 @@ function DataLocation() {
                     }&maptype=roadmap&key=${GOOGLE_API_KEY}`
                     : AloneLogo
                 }
-                alt=""
                 style={{
                   width: geofence.length > 0 ? "100%" : "60%",
                   display: "block",

@@ -1,13 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import connectSocket from "../../services/socketConnect";
 import DeckGL, { FlyToInterpolator } from "deck.gl";
 import { IconLayer, PathLayer } from "@deck.gl/layers";
 import { StaticMap } from "react-map-gl";
 import { MAPBOX_API_KEY } from "src/constants";
 import NavIcon from "../../static/nav_icon.png";
-import { Socket } from "socket.io-client";
 function DroneMap(props: any) {
-  const [viewport, setViewport] = useState<any>(undefined);
+  const [INITIAL_VIEW_STATE, setViewport] = useState<any>(undefined);
   const [dPosition, setDPosition] = useState<any>({
     lat: undefined,
     long: undefined,
@@ -15,14 +14,14 @@ function DroneMap(props: any) {
   const [course, setCourse] = useState<any>(0);
   const [dronePath, setDronePath] = useState<any>([]);
 
-  let socket = useRef<Socket | null>(null);
+  let socket: any;
 
   //---listening for drone telemetry from socket------------
   useEffect(() => {
-    socket.current = connectSocket(props.streamKey);
+    socket = connectSocket(props.streamKey);
 
-    if (socket.current !== null) {
-      socket.current.on("TELEMETRY", (data) => {
+    if (socket !== null) {
+      socket.on("TELEMETRY", (data) => {
         setDPosition({
           lat: data.location.lat,
           long: data.location.long,
@@ -41,7 +40,7 @@ function DroneMap(props: any) {
       });
     }
 
-    return () => {socket.current?.close()};
+    return () => socket.close();
   }, [props.streamKey]);
 
   //---------------Initializing and controlling viewport--------------------
@@ -90,14 +89,14 @@ function DroneMap(props: any) {
       capRounded: true,
       jointRounded: true,
       getPath: (d) => d.path,
-      getColor: () => [0, 195, 255],
-      getWidth: () => 3,
+      getColor: (d) => [0, 195, 255],
+      getWidth: (d) => 3,
     }),
     new IconLayer({
       id: "icon-layer",
       data: markerData,
       pickable: true,
-      getIcon: () => ({
+      getIcon: (d) => ({
         url: `${NavIcon}`,
         width: 100,
         height: 129,
@@ -108,19 +107,20 @@ function DroneMap(props: any) {
       getPosition: (d) => {
         return d.coordinates;
       },
-      getSize: () => 4,
-      getAngle: () => course,
+      getSize: (d) => 4,
+      getAngle: (d) => course,
     }),
   ];
 
   return (
+    <>
       <div style={{ height: "100%", width: "100%" }}>
-        {viewport !== undefined && (
+        {INITIAL_VIEW_STATE !== undefined && (
           <DeckGL
-            initialViewState={viewport}
+            initialViewState={INITIAL_VIEW_STATE}
             controller={true}
             layers={layers}
-            getTooltip={({ object }) => object?.name}
+            getTooltip={({ object }) => object && object.name}
           >
             <StaticMap
               mapboxApiAccessToken={MAPBOX_API_KEY}
@@ -129,6 +129,7 @@ function DroneMap(props: any) {
           </DeckGL>
         )}
       </div>
+    </>
   );
 }
 

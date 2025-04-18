@@ -39,7 +39,7 @@ class Video extends React.Component {
         onMouseLeave={() => {
           this.player.pause();
         }}
-      ><track kind="captions"></track></video>
+      ></video>
     );
   }
 }

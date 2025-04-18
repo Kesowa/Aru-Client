@@ -8,7 +8,7 @@ function InternalServerError() {
       <div className="error-wrapper">
         <Row>
           <Col span={16} className="picture-div">
-            <img src={FiveHundred} className="picture" alt="" />
+            <img src={FiveHundred} className="picture" />
           </Col>
           <Col span={8} className="message-div">
             <Title>ERROR 505: Internal Server Error</Title>

@@ -20,8 +20,8 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function ListAllPackages() {
-  const [isTableLoading, setIsTableLoading] = useState(false);
+function ListAllPackages(props: any) {
+  const [isTableLoading, setIstableLoading] = useState(false);
   const [packagetableData, setPackagetableData] = useState([]);
   const [errorState, setErrorState] = useState("");
   const history = useHistory();
@@ -149,7 +149,7 @@ function ListAllPackages() {
   ];
 
   const fetchAllPackageList = () => {
-    setIsTableLoading(true);
+    setIstableLoading(true);
     http
       .get(apis.FETCH_ALL_PACKAGES)
       .then((result) => {
@@ -177,7 +177,7 @@ function ListAllPackages() {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        setIsTableLoading(false);
+        setIstableLoading(false);
       });
   };
 

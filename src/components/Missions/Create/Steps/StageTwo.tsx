@@ -5,6 +5,16 @@ import "../index.less";
 import GoogleMap from "../../GoogleMap";
 import EditFlightForm from "../../Flight/Edit/Form";
 
+interface WeatherData {
+  humidity: number;
+  temperature: number;
+  visibility: number;
+  weatherCode: string;
+  windDirection: string;
+  windGust: number;
+  windSpeed: number;
+}
+
 interface StageTwoProps {
   prevStage: () => void;
   nextStage: () => void;

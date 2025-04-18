@@ -23,9 +23,9 @@ import { AuthContext } from "src/services/authUtils";
 const { Text, Title } = Typography;
 
 function ManageClients(props) {
-  const [isClientModalVisible, setIsClientModalVisible] = useState(false);
+  const [isClientModalVidible, setIsClientModalVisible] = useState(false);
   const [addClient, setAddClient] = useState(false);
-  const [clientList, setClientList] = useState([]);
+  const [clientList, populateClientList] = useState([]);
   const [currClientId, setCurrClientId] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -43,7 +43,7 @@ function ManageClients(props) {
         .get(`${apis.GET_CLIENT_LIST}?page=1&limit=100`)
         .then((res) => {
           if (res.data.status) {
-            setClientList(res.data.data);
+            populateClientList(res.data.data);
           }
         })
         .catch((err) => {
@@ -117,9 +117,8 @@ function ManageClients(props) {
   // Add Client Buttons
   function renderAddClientBtn() {
     return (
-        <Button
-          type="text"
-          style={{ float: "left", cursor: "pointer", padding: "0" }}
+        <div
+          style={{ float: "left", cursor: "pointer" }}
           onClick={() => {
             setIsClientModalVisible(true);
             setAddClient(false);
@@ -137,7 +136,7 @@ function ManageClients(props) {
               Add Client
             </Text>
           </div>
-        </Button>
+        </div>
     );
   }
 
@@ -266,7 +265,7 @@ function ManageClients(props) {
       <Modal
         title="My Clients"
         destroyOnClose={true}
-        open={isClientModalVisible}
+        open={isClientModalVidible}
         onOk={() => setIsClientModalVisible(false)}
         onCancel={() => setIsClientModalVisible(false)}
         footer={

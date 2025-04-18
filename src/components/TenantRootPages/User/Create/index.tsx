@@ -35,9 +35,8 @@ import { Components } from "src/handlers/schema";
 import { TENANT_STAFF_PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
-import { STATIC_URL } from "src/constants";
 
-function UserCreatePage() {
+function UserCreatePage(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
@@ -50,7 +49,7 @@ function UserCreatePage() {
       permissions: string[];
     }[]
   >([]);
-  const [selectedUserGroup, setSelectedUserGroup] = useState<{
+  const [selectedUserGroup, setSelectedusergroup] = useState<{
     name: string;
     _id: string;
     isActive: boolean;
@@ -74,7 +73,7 @@ function UserCreatePage() {
       const previewUrl = URL.createObjectURL(file);
       setAvatarPreview(previewUrl);
 
-      setAvatar(String(uploadToken));
+      setAvatar(uploadToken);
       setIsAvatarUploading(false);
     });
     return false;
@@ -83,7 +82,7 @@ function UserCreatePage() {
   //change user group
   const onUserGroupChange = (value: any) => {
     const ug = userGroups.find((ele: any) => ele._id === value);
-    setSelectedUserGroup(ug);
+    setSelectedusergroup(ug);
   };
 
   //fetch user group
@@ -265,7 +264,9 @@ function UserCreatePage() {
                       showSearch
                       placeholder="Select a user group"
                       filterOption={(input, option) =>
-                        option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        option.children
+                          .toLowerCase()
+                          .indexOf(input.toLowerCase()) >= 0
                       }
                     >
                       {userGroups.map((ele: any) => (
@@ -304,7 +305,7 @@ function UserCreatePage() {
                       beforeUpload={beforeUploadFunction}
                     >
                       {avatar ? (
-                        <img src={avatarPreview ?? `${STATIC_URL}${avatar}`} className="uploaded-avatar" alt="" />
+                        <img src={avatarPreview} className="uploaded-avatar" />
                       ) : (
                         <div>
                           {isAvatarUploading ? (

@@ -11,7 +11,7 @@ import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { AuthContext } from "src/services/authUtils";
 import moment from "moment";
 
-const CreateMissionBase: FC<any> = () => {
+const CreateMissionBase: FC<any> = (props) => {
   const [currentStage, setCurrentStage] = useState<number>(0);
   const [formData, setFormData] = useState<any>({
     jobType: "",

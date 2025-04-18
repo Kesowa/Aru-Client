@@ -32,8 +32,8 @@ const { Title, Text } = Typography;
 function Registration(props: any) {
   const [otpError, setOtpError] = useState(false);
   const [invalidOtp, setInvalidOtp] = useState(false);
-  const [packages, setPackages] = useState<any>([]);
-  const [loading, setLoading] = useState(false);
+  const [packages, popPackages] = useState<any>([]);
+  const [loading, setLoader] = useState(false);
   const [resendLoad, setResendLoad] = useState(false);
   const [stage, setStage] = useState(props.stage ? props.stage : 0);
   const [form] = Form.useForm();
@@ -41,9 +41,9 @@ function Registration(props: any) {
   const Ref: any = useRef(null);
   const [timer, setTimer] = useState("00:00");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [ppassword, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordIsValid, setPasswordIsValid] = useState(false);
+  const [passwordIsValid, setPasswordValidity] = useState(false);
   const history = useHistory();
 
   const { logout } = useContext(AuthContext);
@@ -130,7 +130,7 @@ function Registration(props: any) {
   }
 
   function confirmOTP() {
-    setLoading(true);
+    setLoader(true);
     setOtpError(false);
     setInvalidOtp(false);
     console.log("email", email);
@@ -162,16 +162,16 @@ function Registration(props: any) {
         console.error(err);
         AxiosErrorHandler(err, logout);
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoader(false));
   }
 
   useEffect(() => {
-    setLoading(true);
+    setLoader(true);
     http
       .get(`${apis.FETCH_ACTIVE_PUBLIC_PACKAGE}`)
       .then((res: any) => {
         if (res.data.status) {
-          setPackages(res.data.data);
+          popPackages(res.data.data);
         } else {
           message.warning(`Oops! ${res.data.message}`);
         }
@@ -180,7 +180,7 @@ function Registration(props: any) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        setLoading(false);
+        setLoader(false);
       });
   }, []);
 
@@ -188,7 +188,7 @@ function Registration(props: any) {
 
   const onFinish = async (data: any) => {
     if (passwordIsValid) {
-      setLoading(true);
+      setLoader(true);
       setEmail(data.email);
       const payload: any = {
         name: data.name,
@@ -225,7 +225,7 @@ function Registration(props: any) {
           AxiosErrorHandler(err, logout);
         })
         .finally(() => {
-          setLoading(false);
+          setLoader(false);
         });
     } else {
       message.warning("Please set your password correctly!");
@@ -453,11 +453,11 @@ function Registration(props: any) {
                   iconSize={10}
                   validColor="#36a556"
                   invalidColor="#ff6565"
-                  value={password}
+                  value={ppassword}
                   valueAgain={confirmPassword}
                   onChange={(isValid) => {
                     console.log(isValid);
-                    setPasswordIsValid(isValid);
+                    setPasswordValidity(isValid);
                   }}
                 />
               </Col>

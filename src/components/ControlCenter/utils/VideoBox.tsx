@@ -60,8 +60,7 @@ const VideoBox = (props: any) => {
             {props.value.flight[0].geoLocation}
           </Title>
 
-          <Button
-            type="text"
+          <div
             onClick={() => {
               history.push(`/dashboard/data/live/${props.value.missionID}`);
             }}
@@ -69,7 +68,7 @@ const VideoBox = (props: any) => {
             <Text className="flight_id" strong>
               FlightID: {props.value.flightID}
             </Text>
-          </Button>
+          </div>
           <div className="pilot">
             <Avatar
               size={40}

@@ -37,7 +37,7 @@ function OutcomeModal(props) {
 
   useEffect(() => {
     setdataa(props.data ? props.data[currIndex] : "");
-    if (props.data?.[currIndex]?.location) {
+    if (props.data && props.data[currIndex]?.location) {
       if (props.data[currIndex]?.location?.lat !== 0) {
         setLocationNull(false);
       } else setLocationNull(true);
@@ -134,7 +134,6 @@ function OutcomeModal(props) {
                         <img
                           className="static-map"
                           src={`https://maps.googleapis.com/maps/api/staticmap?center=${dataa.location.lat},${dataa.location.long}&zoom=16&size=200x130&markers=size:mid|color:red|${dataa.location.lat},${dataa.location.long}&maptype=roadmap&key=${GOOGLE_API_KEY}`}
-                          alt=""
                         />
                       </a>
                     </div>

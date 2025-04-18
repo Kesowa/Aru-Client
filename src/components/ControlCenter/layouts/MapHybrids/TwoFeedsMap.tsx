@@ -43,13 +43,13 @@ class TwoFeedsMap extends Component<mapProps, mapState> {
 
       this.socket_1.on("TELEMETRY", (data) => {
         console.log("drone ", data);
-        this.setState(prev => ({
-          ...prev,
+        this.setState({
+          ...this.state,
           position_1: {
             lat: data.location.lat,
             lng: data.location.long,
           },
-        }));
+        });
       });
     }
 
@@ -60,18 +60,18 @@ class TwoFeedsMap extends Component<mapProps, mapState> {
 
       this.socket_2.on("TELEMETRY", (data) => {
         console.log("drone ", data);
-        this.setState(prev => ({
-          ...prev,
+        this.setState({
+          ...this.state,
           position_2: {
             lat: data.location.lat,
             lng: data.location.long,
           },
-        }));
+        });
       });
     }
 
     if (this.googleMap) {
-      this.googleMap.addListener("click", () => {
+      this.googleMap.addListener("click", (e) => {
         console.log("clicked");
       });
     }
@@ -165,6 +165,7 @@ class TwoFeedsMap extends Component<mapProps, mapState> {
 
   render() {
     return (
+      <React.Fragment>
         <div id="gmap_container">
           <div
             id="google-map"
@@ -175,6 +176,7 @@ class TwoFeedsMap extends Component<mapProps, mapState> {
             }}
           />
         </div>
+      </React.Fragment>
     );
   }
 }

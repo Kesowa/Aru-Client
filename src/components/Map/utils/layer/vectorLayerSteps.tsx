@@ -11,17 +11,22 @@ import {
   DatePicker,
   Progress,
   Switch,
+  Card,
   Typography,
   Table,
   Select,
+  Collapse,
   Divider,
 } from "antd";
 import { UploadOutlined, InboxOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
 import { options } from "../propUtils";
 const { Dragger } = Upload;
+const { Item } = Form;
+const { Meta } = Card;
 const { Option } = Select;
 const { Text, Title } = Typography;
+const { Panel } = Collapse;
 export const UploadVectorData = ({
   form,
   setLayerName,
@@ -39,6 +44,7 @@ export const UploadVectorData = ({
   onChangeInherit,
 }) => {
   return (
+    <>
       <Form
         name="upload2"
         layout="vertical"
@@ -179,11 +185,13 @@ export const UploadVectorData = ({
           </Col>
         </Row>
       </Form>
+    </>
   );
 };
 
 export const AttrSelection = ({ rowSelection, columns, tableData }) => {
   return (
+    <>
       <div
         style={{
           height: "500px",
@@ -218,11 +226,13 @@ export const AttrSelection = ({ rowSelection, columns, tableData }) => {
           pagination={false}
         />
       </div>
+    </>
   );
 };
 
 export const LayerCreated = () => {
   return (
+    <>
       <div
         style={{
           marginTop: "100px",
@@ -234,11 +244,13 @@ export const LayerCreated = () => {
           subTitle="You can now view the layer in the map."
         />
       </div>
+    </>
   );
 };
 
 export const UpdateVectorData = ({ uploadProps, uploading, progress }) => {
   return (
+    <>
       <Row>
         <div
           style={{
@@ -260,6 +272,7 @@ export const UpdateVectorData = ({ uploadProps, uploading, progress }) => {
           ) : null}
         </div>
       </Row>
+    </>
   );
 };
 
@@ -358,6 +371,7 @@ export const AttrMapping = ({
 
 export const LayerUpdated = () => {
   return (
+    <>
       <div
         style={{
           marginTop: "100px",
@@ -369,5 +383,6 @@ export const LayerUpdated = () => {
           subTitle="You can now view the layer in the map."
         />
       </div>
+    </>
   );
 };

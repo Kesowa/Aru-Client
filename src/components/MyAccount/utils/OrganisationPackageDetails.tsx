@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Progress,
   Row,
@@ -74,7 +74,7 @@ function OrganisationPackageDetails(props: any) {
                       packageInfo.duration
                     : 0
                 }
-                format={() => (
+                format={(percent) => (
                   <p style={{ fontSize: "15px" }}>
                     {!loader
                       ? `Expires on : ${moment(
@@ -93,7 +93,7 @@ function OrganisationPackageDetails(props: any) {
                 status="exception"
                 type="circle"
                 percent={100}
-                format={() => (
+                format={(percent) => (
                   <Typography.Title level={3}>
                     No active package
                   </Typography.Title>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import {
   Typography,
@@ -48,7 +48,7 @@ interface TableProps {
   refreshAssets: boolean;
 }
 
-function AssetListing({ filter, refreshAssets }: Readonly<TableProps>) {
+function AssetListing({ filter, refreshAssets }: TableProps) {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [isTableLoading, setIsTableLoading] = useState(true);
@@ -230,7 +230,8 @@ function AssetListing({ filter, refreshAssets }: Readonly<TableProps>) {
       ...getColumnSearchProps("name"),
       render: (assetName: string) => {
         return (
-            <span>
+          <>
+            <span onClick={() => {}}>
               <Title level={5}>
                 <ShakeOutlined
                   style={{ marginRight: "1rem", color: "#a5a4bf" }}
@@ -238,6 +239,7 @@ function AssetListing({ filter, refreshAssets }: Readonly<TableProps>) {
                 {assetName}
               </Title>
             </span>
+          </>
         );
       },
     },
@@ -274,7 +276,9 @@ function AssetListing({ filter, refreshAssets }: Readonly<TableProps>) {
       dataIndex: "_id",
       ...getColumnSearchProps("_id"),
       render: (text: string, record: Asset) => (
-          <span>{record._id}</span>
+        <>
+          <span onClick={() => {}}>{record._id}</span>
+        </>
       ),
     },
     {
@@ -305,6 +309,7 @@ function AssetListing({ filter, refreshAssets }: Readonly<TableProps>) {
       title: "ACTIONS",
       dataIndex: "actions",
       render: (text: string, record: Asset) => (
+        <>
           <Dropdown.Button
             onClick={() => {
               history.push(`/dashboard/asset/view/${record._id}`);
@@ -314,6 +319,7 @@ function AssetListing({ filter, refreshAssets }: Readonly<TableProps>) {
           >
             <EyeOutlined />
           </Dropdown.Button>
+        </>
       ),
     },
   ];

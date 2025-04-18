@@ -1,3 +1,4 @@
+import React from "react";
 import { Menu, Card, MenuProps } from "antd";
 import decideIcon from "../../../services/decideIcon";
 import "./UserGroup.less";

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useContext } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import ReactPlayer from "react-player";
 import "./index.less";
 import "./hud.less";
@@ -70,7 +70,7 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { io, Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 import { AuthContext } from "src/services/authUtils";
 ChartJS.register(
   CategoryScale,
@@ -83,7 +83,7 @@ ChartJS.register(
   Legend
 );
 ChartJS.defaults.elements.point.pointStyle = false;
-const { Text } = Typography;
+const { Text, Link } = Typography;
 const { SubMenu, Item } = Menu;
 
 const antIcon = <LoadingOutlined style={{ fontSize: 64 }} spin />;
@@ -165,7 +165,7 @@ function VideoPlayer(props: any) {
   const [bookmark, setBookmark] = useState({});
   const [controlVisibleCounter, setControlVisibleCounter] = useState(0);
   const [bottomHudHeight, setBottomHudHeight] = useState(70);
-  const [bottomMapHeight, setBottomMapHeight] = useState(95);
+  const [bottomMapHeight, setBottomHeight] = useState(95);
   const [isAlertEnabled, setIsAlertEnabled] = useState(false);
   const [alertImage, setAlertImage] = useState("");
   const [volume, setVolume] = useState(0.5);
@@ -214,10 +214,10 @@ function VideoPlayer(props: any) {
   const [vSpeedDeg, setVSpeedDeg] = useState(-150);
   const [hSpeedDeg, setHSpeedDeg] = useState(-150);
   const [batter, setBatter] = useState(0);
-  const [batteryLevel, setBatteryLevel] = useState(0);
+  const [batterLevel, setBatteryLevel] = useState(0);
   //---misc tele-------------------------------
-  const [ISO, setISO] = useState(0);
-  const [EV, setEV] = useState(0);
+  const [ISO, setIso] = useState(0);
+  const [EV, setEv] = useState(0);
   const [shutter, setShutter] = useState(0);
   const [fStop, setFStop] = useState(0);
 
@@ -259,7 +259,7 @@ function VideoPlayer(props: any) {
     : "00:00";
   const elapsedTime = format(currentTime);
 
-  let socket = useRef<Socket | null>(null);
+  let socket;
   const aiSocket: any = useRef();
 
   const tenantId = props.mission.tenantId;
@@ -268,7 +268,7 @@ function VideoPlayer(props: any) {
   const [inferenceProgress, setInferenceProgress] = useState(0);
 
   useEffect(() => {
-    let socketInstance: Socket | null = null;
+    let socketInstance = null;
 
     if (tenantId) {
       if (aiSocket.current) {
@@ -315,10 +315,10 @@ function VideoPlayer(props: any) {
       setBookmark(props.mission.bookmarks);
   }, [props.mission, props.mission?.bookmarks]);
   useEffect(() => {
-    socket.current = connectSocket(streamKey);
+    socket = connectSocket(streamKey);
 
-    if (socket.current !== null) {
-      socket.current.on("TELEMETRY", (data) => {
+    if (socket !== null) {
+      socket.on("TELEMETRY", (data) => {
         setHeight(data.altitude);
         setVelocity(data.velocity);
         setPosition({
@@ -335,7 +335,7 @@ function VideoPlayer(props: any) {
       });
     }
 
-    return () => {socket.current?.close()};
+    return () => socket.close();
   }, [streamKey]);
 
   const handlePlayPause = () => {
@@ -431,52 +431,50 @@ function VideoPlayer(props: any) {
   };
 
   const startInferenceVODViolence = async () => {
-    try {
-      const taskStatusResponse = await http
-        .post(
-          apis.INFER_VOD_VIOLENCE.replace(":vodId", props.mission._id).replace(
-            ":inferType",
-            inferType
-          )
-        );
-      if (taskStatusResponse.status) {
-        console.log("AIML: Task status -", taskStatusResponse.data.message);
-        const message = taskStatusResponse.data.message;
-        if (message.includes("started")) {
-          setAiTaskStatus("started");
-        } else if (message.includes("restarted")) {
-          setAiTaskStatus("restarted");
-        }
-        if (message === "task completed") {
-          setIsAiTaskCompleted(true);
-        }
-      } else {
-        console.log("AIML: Error");
+    const taskStatusResponse = await http
+      .post(
+        apis.INFER_VOD_VIOLENCE.replace(":vodId", props.mission._id).replace(
+          ":inferType",
+          inferType
+        )
+      )
+      .catch((err) => {
+        console.log("AIML: Error", err);
+      });
+    if (taskStatusResponse.status) {
+      console.log("AIML: Task status -", taskStatusResponse.data.message);
+      const message = taskStatusResponse.data.message;
+      if (message.includes("started")) {
+        setAiTaskStatus("started");
+      } else if (message.includes("restarted")) {
+        setAiTaskStatus("restarted");
       }
-    } catch (err) {
-      console.log("AIML: Error", err);
+      if (message === "task completed") {
+        setIsAiTaskCompleted(true);
+      }
+    } else {
+      console.log("AIML: Error");
     }
   };
   const fetchAITasks = async () => {
-    try {
-      const tasks = await http
-        .get(`${apis.FETCH_AI_TASK}/vod/${props.mission._id}`);
-      console.log("AIML tasks.data", tasks.data);
-      if (tasks.data?.status) {
-        const vodTask = tasks.data.data.filter(
-          (task) => task.doc === props.mission._id
-        );
-        if (vodTask.length !== 0 || vodTask[0].data !== "null") {
-          fetchJSON(STATIC_URL + "/" + vodTask[0].data).then((d) => {
-            console.log("AIML data", d);
-            setAiTaskData(d);
-          });
-        }
-  
-        console.log("AIML", vodTask[0].data);
+    const tasks = await http
+      .get(`${apis.FETCH_AI_TASK}/vod/${props.mission._id}`)
+      .catch((err) => {
+        console.log("AIML", err);
+      });
+    console.log("AIML tasks.data", tasks.data);
+    if (tasks.data?.status) {
+      const vodTask = tasks.data.data.filter(
+        (task) => task.doc === props.mission._id
+      );
+      if (vodTask.length !== 0 || vodTask[0].data !== "null") {
+        fetchJSON(STATIC_URL + "/" + vodTask[0].data).then((d) => {
+          console.log("AIML data", d);
+          setAiTaskData(d);
+        });
       }
-    } catch (err) {
-      console.log("AIML", err);
+
+      console.log("AIML", vodTask[0].data);
     }
   };
   const socketFetchTaskStatus = (tenantID: any) => {
@@ -556,7 +554,8 @@ function VideoPlayer(props: any) {
   const toggleFullScreen = () => {
     if (
       screenfull.isEnabled &&
-      playerContainerRef?.current
+      playerContainerRef &&
+      playerContainerRef.current
     ) {
       screenfull.toggle(playerContainerRef.current);
     }
@@ -590,17 +589,20 @@ function VideoPlayer(props: any) {
     }
     if (
       controlVisibleCounter > 0 &&
-      playerControlsRef?.current &&
+      playerControlsRef &&
+      playerControlsRef.current &&
       !isAlertEnabled
     ) {
       playerControlsRef.current.style.opacity = "0";
       setControlVisibleCounter(0);
       setBottomHudHeight(18);
-      setBottomMapHeight(45);
+      setBottomHeight(45);
     }
 
     if (
-      playerControlsRef?.current?.style.opacity === "1"
+      playerControlsRef &&
+      playerControlsRef.current &&
+      playerControlsRef.current.style.opacity === "1"
     ) {
       setControlVisibleCounter(controlVisibleCounter + 1);
     }
@@ -613,7 +615,7 @@ function VideoPlayer(props: any) {
 
   const handleSeekMouseUp = (newValue) => {
     setSeeking(false);
-    if (playerRef?.current) {
+    if (playerRef && playerRef.current) {
       playerRef.current.seekTo(newValue / 100);
     }
   };
@@ -626,11 +628,11 @@ function VideoPlayer(props: any) {
     }
   }, [props.seek]);
   const handleMouseMove = () => {
-    if (playerControlsRef?.current) {
+    if (playerControlsRef && playerControlsRef.current) {
       playerControlsRef.current.style.opacity = "1";
       setControlVisibleCounter(0);
       setBottomHudHeight(70);
-      setBottomMapHeight(95);
+      setBottomHeight(95);
     }
   };
 
@@ -646,7 +648,7 @@ function VideoPlayer(props: any) {
 
   // handle snapshot button
   const handleSnapShot = () => {
-    if (!isAlertEnabled && canvasRef?.current) {
+    if (!isAlertEnabled && canvasRef && canvasRef.current) {
       const canvas = canvasRef.current;
 
       canvas.width = 1280;
@@ -655,7 +657,7 @@ function VideoPlayer(props: any) {
       const ctx = canvas.getContext("2d");
       let video;
 
-      if (playerRef?.current) {
+      if (playerRef && playerRef.current) {
         video = playerRef.current.getInternalPlayer();
       }
 
@@ -699,8 +701,8 @@ function VideoPlayer(props: any) {
       location: isLive
         ? location
         : {
-            lat: captLat ?? null,
-            long: captLong ?? null,
+            lat: captLat ? captLat : null,
+            long: captLong ? captLong : null,
           },
       missionId: isLive ? mission._id : mission.missionID._id,
       flightId: isLive ? mission.flight._id : mission.flightID._id,
@@ -708,10 +710,12 @@ function VideoPlayer(props: any) {
       type: "Automated",
       image: uploadToken,
     };
+    // const formDataToUpload = new FormData(form);
+    // formDataToUpload.append("image", blob);
     setLoader(true);
     http
       .post(`${apis.CREATE_ALERT}`, body)
-      .then(() => {
+      .then((res) => {
         if (captLat !== undefined && captLong !== undefined) {
           geocoder([
             //Review
@@ -725,7 +729,7 @@ function VideoPlayer(props: any) {
             .catch((err: any) => message.error("Error: ", err));
         }
       })
-      .then(() => {
+      .then((res) => {
         setIsAlertEnabled(false);
         if (isLive) {
           openNotification("bottomRight");
@@ -927,10 +931,10 @@ function VideoPlayer(props: any) {
   //----------------people count implementation----------
   useEffect(() => {
     if (played && !isLive && peopleData?.Values?.length > 0) {
-      console.log("people data: ", peopleData?.Values);
-      const currentFrame = Math.floor(played * peopleData?.Values.length);
+      console.log("people data: ", peopleData.values);
+      const currentFrame = Math.floor(played * peopleData.Values.length);
       console.log("people current frame: ", currentFrame);
-      const frameData = peopleData?.Values[currentFrame];
+      const frameData = peopleData.Values[currentFrame];
       console.log("people frame: ", frameData);
 
       if (frameData) {
@@ -1006,8 +1010,8 @@ function VideoPlayer(props: any) {
       }
       setDistance(flightTeleSrt[x]?.properties.DISTANCE);
       setH_speed(flightTeleSrt[x]?.properties.SPEED_TWOD);
-      setISO(flightTeleSrt[x]?.properties.ISO);
-      setEV(flightTeleSrt[x]?.properties.EV);
+      setIso(flightTeleSrt[x]?.properties.ISO);
+      setEv(flightTeleSrt[x]?.properties.EV);
       setShutter(flightTeleSrt[x]?.properties.SHUTTER);
       setFStop(flightTeleSrt[x]?.properties.FNUM);
       setHSpeedDeg(
@@ -1385,7 +1389,6 @@ function VideoPlayer(props: any) {
                         <img
                           className="static-map"
                           src={`https://maps.googleapis.com/maps/api/staticmap?center=${captLat},${captLong}&zoom=16&size=200x130&markers=size:mid|color:red|${captLat},${captLong}&maptype=roadmap&key=${GOOGLE_API_KEY}`}
-                          alt=""
                         />
                       </a>
                     </div>
@@ -1573,13 +1576,13 @@ function VideoPlayer(props: any) {
                           >
                             <stop
                               offset="0"
-                              stopColor="#3b86ff"
-                              stopOpacity="1"
+                              stop-color="#3b86ff"
+                              stop-opacity="1"
                             ></stop>
                             <stop
                               offset="1"
-                              stopColor="#00d4ff"
-                              stopOpacity="1"
+                              stop-color="#00d4ff"
+                              stop-opacity="1"
                             ></stop>
                           </linearGradient>
                           <rect
@@ -1591,7 +1594,7 @@ function VideoPlayer(props: any) {
                             width="40"
                             height="28"
                             style={{
-                              width: `${batteryLevel}px`,
+                              width: `${batterLevel}px`,
                             }}
                           ></rect>
                         </svg>
@@ -1929,19 +1932,19 @@ function VideoPlayer(props: any) {
               </Row>
               <Row className="hot-keys-table">
                 <Text>ISO</Text>
-                <Text>{ISO ?? "--"}</Text>
+                <Text>{ISO ? ISO : "--"}</Text>
               </Row>
               <Row className="hot-keys-table">
                 <Text>Exposure</Text>
-                <Text>{EV ?? "--"}</Text>
+                <Text>{EV ? EV : "--"}</Text>
               </Row>
               <Row className="hot-keys-table">
                 <Text>Shutter speed</Text>
-                <Text>{shutter ?? "--"}</Text>
+                <Text>{shutter ? shutter : "--"}</Text>
               </Row>
               <Row className="hot-keys-table">
                 <Text>Fstop</Text>
-                <Text>{fStop ?? "--"}</Text>
+                <Text>{fStop ? fStop : "--"}</Text>
               </Row>
             </div>
           )}
@@ -2296,7 +2299,9 @@ function VideoPlayer(props: any) {
               className="map-section"
               style={{ bottom: `${bottomHudHeight + 20}px` }}
             >
+              <>
                 {showPosition ? (
+                  <>
                     <div id="position" className="position">
                       <svg className="Rectangle_1920">
                         <rect
@@ -2316,9 +2321,11 @@ function VideoPlayer(props: any) {
                         </span>
                       </div>
                     </div>
+                  </>
                 ) : (
                   <></>
                 )}
+              </>
             </div>
           ) : (
             <></>

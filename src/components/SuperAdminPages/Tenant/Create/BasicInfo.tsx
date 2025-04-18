@@ -26,7 +26,7 @@ function BasicInfo(props: any) {
   };
 
   const onFinish = (data: any) => {
-    const image = avatar ?? undefined;
+    const image = avatar ? avatar : undefined;
     props.goToNextFromBasic({ ...data, avatar: image });
   };
 
@@ -75,7 +75,6 @@ function BasicInfo(props: any) {
                   <img
                     src={`${STATIC_URL}${avatar}`}
                     className="uploaded-avatar"
-                    alt=""
                   />
                 ) : (
                   <div>

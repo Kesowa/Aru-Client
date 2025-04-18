@@ -81,6 +81,7 @@ export default function BasicInfo(props: any) {
       ],
     };
     return (
+      <>
         <div style={{ width: "400px" }}>
           {props.tenantDetails.isActivated ? (
             <>
@@ -103,6 +104,7 @@ export default function BasicInfo(props: any) {
             </div>
           )}
         </div>
+      </>
     );
   };
   return (

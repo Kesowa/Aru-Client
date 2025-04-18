@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ReactDom from "react-dom";
 import {
   Comment,
@@ -186,7 +186,7 @@ const Thread = (props) => {
     const foundObject = allMentions.find(
       (obj) => obj[key] && str.includes(obj[key])
     );
-    return foundObject ?? false;
+    return foundObject || false;
   };
   const CommentWithFormattedMentions = ({ text }) => {
     const words = text.replace("\n", " \n").split(" ");
@@ -195,8 +195,7 @@ const Thread = (props) => {
       // Apply formatting to specific words based on conditions
       if (mention) {
         return (
-          <Button
-            type="link"
+          <a
             className="mention-link"
             onClick={() => {
               setOpenVOD({ status: true, seek: mention.id });
@@ -213,7 +212,7 @@ const Thread = (props) => {
             >
               {word}
             </span>{" "}
-          </Button>
+          </a>
         );
       } else {
         return `${word} `;
@@ -285,7 +284,7 @@ const Thread = (props) => {
   const editHandleChange = (e) => {
     setEditCommentValue(e.target.value);
   };
-  const addHandleSubmit = async () => {
+  const addHandleSubmit = async (e) => {
     try {
       if (!addCommentValue) {
         message.error("Empty content cannot be submitted!");
@@ -314,7 +313,7 @@ const Thread = (props) => {
       setActionIdx("");
     }
   };
-  const editHandleSubmit = async () => {
+  const editHandleSubmit = async (e) => {
     try {
       if (!editCommentValue) {
         message.error("Empty content cannot be updated!");
@@ -351,6 +350,7 @@ const Thread = (props) => {
   return ReactDom.createPortal(
     <div id="thread">
       {thread.docType === "vod" && props.data && openVOD.status && (
+        <>
           <div
             style={{
               height: "400px", //video player
@@ -372,6 +372,7 @@ const Thread = (props) => {
               seek={openVOD.seek}
             />
           </div>
+        </>
       )}
       <Drawer
         title="Thread"
@@ -426,7 +427,7 @@ const Thread = (props) => {
                       userDetails.name === comment.authorName &&
                       getActions(comment, idx)
                     }
-                    author={<Button type="link">{comment.authorName}</Button>}
+                    author={<a>{comment.authorName}</a>}
                     datetime={
                       <span style={{ display: "flex" }}>
                         {moment(comment.updatedAt).format("DD/MM/YYYY")}
@@ -470,6 +471,7 @@ const Thread = (props) => {
             />
           }
           content={
+            <>
               <Editor
                 onChange={addHandleChange}
                 onSubmit={addHandleSubmit}
@@ -477,9 +479,8 @@ const Thread = (props) => {
                 value={addCommentValue}
                 tags={thread.tags?.bookmarks ? thread.tags.bookmarks : {}}
                 type="Add"
-                action={action}
-                setAction={setAction}
               />
+            </>
           }
         />
       </Drawer>

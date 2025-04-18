@@ -38,8 +38,7 @@ const GridVideoBox = (props: any) => {
         }}
       />
 
-      <Button
-        type="text"
+      <div
         className={mapClasses}
         onClick={() => {
           if (!showMap) {
@@ -49,7 +48,7 @@ const GridVideoBox = (props: any) => {
       >
         {/* *********************************************** Rendering the map with feed ********************************************* */}
         <GridMap streamKey={props.streamKey} />
-      </Button>
+      </div>
 
       <div className="buttons">
         <div className="action-buttons">
@@ -87,8 +86,7 @@ const GridVideoBox = (props: any) => {
             {props.value.flight[0]?.geoLocation}
           </Title>
 
-          <Button
-            type="text"
+          <div
             onClick={() => {
               history.push(`/dashboard/data/live/${props.value.missionID}`);
             }}
@@ -96,7 +94,7 @@ const GridVideoBox = (props: any) => {
             <Text className="flight_id" strong>
               FlightID: {props.value.flightID}
             </Text>
-          </Button>
+          </div>
           <div className="pilot">
             <Avatar
               size={40}

@@ -16,7 +16,6 @@ import {
   message,
   Dropdown,
   Badge,
-  MenuProps,
 } from "antd";
 import {
   ExclamationOutlined,
@@ -73,8 +72,8 @@ function Outcomes(props) {
   const [showOutcomeModal, setShowOutcomeModal] = useState(false);
   const [modalIndex, setModalIndex] = useState(0);
   const [refresh, setRefresh] = useState(true);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadModall, setUploadModall] = useState(false);
+  const [isUploading, setUploading] = useState(false);
+  const [uploadModall, setUploadModal] = useState(false);
   const [defaultFileList, setDefaultFileList] = useState([]);
   const [flag, setFlag] = useState(false);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
@@ -91,7 +90,7 @@ function Outcomes(props) {
 
   const { thread, openThread } = useContext(ThreadContext);
 
-  const outcomeMenu: (data: any) => MenuProps["items"] = (data) => {
+  const outcomeMenu: MenuProps["items"] = (data) => {
     const item = [
       {
         key: "1",
@@ -311,7 +310,6 @@ function Outcomes(props) {
             e.target.onerror = null;
             e.target.src = "/icons/fallback.png";
           }}
-          alt=""
         />
       </Badge>
     );
@@ -356,7 +354,6 @@ function Outcomes(props) {
                   e.target.onerror = null;
                   e.target.src = "/icons/fallback.png";
                 }}
-                alt=""
               />
             </Col>
             <Col md={19}>
@@ -472,7 +469,6 @@ function Outcomes(props) {
                           e.target.onerror = null;
                           e.target.src = "/icons/fallback.png";
                         }}
-                        alt=""
                       />
                     }
                   >
@@ -591,7 +587,7 @@ function Outcomes(props) {
     message.loading("Deleting outcome...");
     http
       .delete(`${apis.DELETE_ALERT}`, { data: { id } })
-      .then(() => {
+      .then((res: any) => {
         message.success("Outcome deleted succesfully!");
         setRefresh(!refresh);
       })
@@ -604,7 +600,7 @@ function Outcomes(props) {
     message.loading("Deleting outcome...");
     http
       .delete(`${apis.DELETE_ALERT}`, { data: { id } })
-      .then(() => {
+      .then((res: any) => {
         message.success("Outcome deleted succesfully!");
         setRefresh(!refresh);
       })
@@ -627,7 +623,7 @@ function Outcomes(props) {
     document.body.removeChild(link);
   }
   function uploadModal() {
-    setUploadModall(true);
+    setUploadModal(true);
   }
 
   async function extractExif(file: any) {
@@ -656,9 +652,10 @@ function Outcomes(props) {
     action: `${API_URL}${apis.UPLOAD_ALERT}`,
     customRequest: async (options: any) => {
       console.log("Request body:");
-      setIsUploading(true);
+      setUploading(true);
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
+      // const fData = new FormData();
       const res = await extractExif(options.file);
       console.log("EXTRACT EXIFR: ", res);
 
@@ -681,6 +678,16 @@ function Outcomes(props) {
 
       if (res.status) {   
           console.log(res.status);
+        
+          // fData.append("image", options.file);
+          // fData.append("locationName", res.address);
+          // fData.append("missionId", props.missionDetails.missionId);
+          // fData.append("locationId", props.missionDetails.locationId._id);
+          // fData.append("pcount", "0");
+          // fData.append("type", "Manual");
+          // fData.append("note", "Alert uploaded from browser!");
+          // fData.append("onSite", "false");
+          // fData.append("flightId", props.missionDetails.flightId);
           http
             .post(options.action, body)
             .then((res: any) => {
@@ -717,10 +724,20 @@ function Outcomes(props) {
               options.onError({ err });
             })
             .finally(() => {
-              setIsUploading(false);
+              setUploading(false);
             });
         } else {
+          
           console.log(res);
+          // fData.append("image", options.file);
+          // fData.append("locationName", res.address);
+          // fData.append("missionId", props.missionDetails.missionId);
+          // fData.append("locationId", props.missionDetails.locationId._id);
+          // fData.append("pcount", "0");
+          // fData.append("type", "Manual");
+          // fData.append("note", "Alert uploaded from browser!");
+          // fData.append("onSite", "false");
+          // fData.append("flightId", props.missionDetails.flightId);
           http
             .post(options.action, body)
             .then((res: any) => {
@@ -760,14 +777,14 @@ function Outcomes(props) {
               options.onError({ err });
           })
           .finally(() => {
-            setIsUploading(false);
+            setUploading(false);
           });
       }
       return {
         abort() {
           console.log("Aborting outcome upload");
           source.cancel("User cancelled upload");
-          setIsUploading(false);
+          setUploading(false);
         },
       };
     },
@@ -801,7 +818,7 @@ function Outcomes(props) {
           if (isUploading) {
             message.warning("Cannot exit during an ongoing process!");
           } else {
-            setUploadModall(false);
+            setUploadModal(false);
             setDefaultFileList([]);
           }
         }}
@@ -809,7 +826,7 @@ function Outcomes(props) {
           if (isUploading) {
             message.warning("Cannot exit during an ongoing process!");
           } else {
-            setUploadModall(false);
+            setUploadModal(false);
             setDefaultFileList([]);
           }
         }}
@@ -821,7 +838,7 @@ function Outcomes(props) {
               if (isUploading) {
                 message.warning("Cannot exit during an ongoing process!");
               } else {
-                setUploadModall(false);
+                setUploadModal(false);
               }
             }}
           >
@@ -979,7 +996,6 @@ function Outcomes(props) {
                                       e.target.onerror = null;
                                       e.target.src = "/icons/fallback.png";
                                     }}
-                                    alt=""
                                   />
                                 </Badge>
                               </Badge>
@@ -1095,10 +1111,6 @@ function Outcomes(props) {
                                   >
                                     <Card
                                       className="outcome-cardd"
-                                      onClick={() => {
-                                        setShowOutcomeModal(true);
-                                        setModalIndex(ind);
-                                      }}
                                       cover={
                                         <img
                                           style={{
@@ -1107,13 +1119,16 @@ function Outcomes(props) {
                                             objectPosition: "0 0",
                                           }}
                                           className="card-img-size"
+                                          onClick={() => {
+                                            setShowOutcomeModal(true);
+                                            setModalIndex(ind);
+                                          }}
                                           src={STATIC_URL + outcome.thumb}
                                           onError={(e: any) => {
                                             e.target.onerror = null;
                                             e.target.src =
                                               "/icons/fallback.png";
                                           }}
-                                          alt=""
                                         />
                                       }
                                     >

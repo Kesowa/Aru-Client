@@ -32,7 +32,7 @@ import { LoaderContext } from "src/components/shared/Loader";
 const { Panel } = Collapse;
 const { Text, Title } = Typography;
 
-function LocationCard() {
+function LocationCard(props) {
   const [missions, setMissions] = useState<any>();
   const [selectedMission, setSelectedMission] = useState<any>({});
   const [isMissionsLoading, setisMissionsLoading] = useState(true);
@@ -154,14 +154,15 @@ function LocationCard() {
   const findPolygonCenter = (points) => {
     const bounds = new window.google.maps.LatLngBounds();
 
-    const polygonCoords: unknown[] = [];
+    const polygonCoords: google.maps.LatLng[] = [];
 
     for (const x of points) {
       const llbound = new window.google.maps.LatLng(x.lat, x.lng);
       polygonCoords.push(llbound);
     }
-    for (const polygonCoord of polygonCoords) {
-      bounds.extend(polygonCoord);
+    let i;
+    for (i = 0; i < polygonCoords.length; i++) {
+      bounds.extend(polygonCoords[i]);
     }
 
     const centerOfPolygon = bounds.getCenter();
@@ -368,15 +369,15 @@ function LocationCard() {
                                 : ""
                             }`}
                             key={mis.missionID}
+                            onClick={() => {
+                              setSelectedMission(mis);
+                              getMissionDetails(mis.missionID);
+                              setIsChecked(false);
+                            }}
                           >
                             <Row
                               className="mission-tab-card"
                               style={{ padding: "15px 10px" }}
-                              onClick={() => {
-                                setSelectedMission(mis);
-                                getMissionDetails(mis.missionID);
-                                setIsChecked(false);
-                              }}
                             >
                               <Col span={4}>
                                 {selectedMission.missionID === mis.missionID ? (
@@ -497,7 +498,6 @@ function LocationCard() {
               ) : (
                 <img
                   src={AloneLogo}
-                  alt=""
                   style={{ width: "80%", margin: "0 auto" }}
                 />
               )}

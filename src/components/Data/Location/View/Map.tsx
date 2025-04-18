@@ -44,7 +44,7 @@ type mapState = {
 };
 
 class LocationCardMap extends Component<mapProps, mapState> {
-  static readonly contextType = LoaderContext;
+  static contextType = LoaderContext;
   declare context: React.ContextType<typeof LoaderContext>;
 
   constructor(props) {
@@ -75,7 +75,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
     }
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     if (this.props.isChecked && this.missionMarker) {
       this.missionMarker.setMap(null);
     }
@@ -90,7 +90,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
     }
 
     if (this.props.shouldRenderOutcomes) {
-      this.drawMarkers();
+      this.drawMarkers(this.props.outcomes);
     }
 
     if (!this.props.shouldRenderOutcomes) {
@@ -108,12 +108,12 @@ class LocationCardMap extends Component<mapProps, mapState> {
       map: this.googleMap,
       icon: {
         url: "https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|FA8027|FFF",
-        scaledSize: new window.google.maps.Size(48, 48),
+        scaledSize: new google.maps.Size(48, 48),
       },
     });
   };
 
-  drawMarkers = () => {
+  drawMarkers = (newOutcomes) => {
     if (this.outcomes) this.outcomes.clearMarkers();
     if (this.props.shouldRenderOutcomes) {
       const newDrawnMarkers: any = [];
@@ -126,7 +126,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
           title: ele.name,
           icon: {
             url: `${STATIC_URL}${ele.alertImage}`,
-            scaledSize: new window.google.maps.Size(80, 50),
+            scaledSize: new google.maps.Size(80, 50),
           },
         });
         obj.id = ele.id;
@@ -158,10 +158,10 @@ class LocationCardMap extends Component<mapProps, mapState> {
       })
       .then((result) => {
         if (result.data.status) {
-          this.setState((prev) => ({
-            ...prev,
+          this.setState({
+            ...this.state,
             selectedAlert: result.data.data[0],
-          }));
+          });
         } else {
           message.error(result.data.message);
         }
@@ -177,7 +177,7 @@ class LocationCardMap extends Component<mapProps, mapState> {
   };
 
   setMarkerEvent = (marker) => {
-    window.google.maps.event.addListener(marker, "click", () => {
+    google.maps.event.addListener(marker, "click", () => {
       this.setState({
         alertLoading: true,
       });
@@ -332,10 +332,10 @@ class LocationCardMap extends Component<mapProps, mapState> {
           data={[this.state.selectedAlert]}
           visible={!!this.state.selectedAlert}
           closeModal={() => {
-            this.setState((prev) => ({
-              ...prev,
+            this.setState({
+              ...this.state,
               selectedAlert: null,
-            }));
+            });
           }}
         />
         <div

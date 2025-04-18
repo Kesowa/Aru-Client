@@ -13,7 +13,7 @@ import { LoaderContext } from "src/components/shared/Loader";
 
 const { Title, Text } = Typography;
 
-function AssetView() {
+function AssetView(props) {
   const [data, setData] = useState<any>(null);
   const { id } = useParams<any>();
   const history = useHistory();
@@ -124,7 +124,7 @@ function AssetView() {
                     Created By
                   </Text>
                   <Text style={{ fontSize: "16px", display: "block" }}>
-                    {data.createdBy ? data.createdBy.name : ""}
+                    {data.createdBy && data.createdBy.name}
                   </Text>
                 </Col>
                 <Col span={12} style={{ margin: "10px 0" }}>
@@ -157,12 +157,7 @@ function AssetView() {
             </Col>
             <Col span={8}>
               <Title level={4}>Model</Title>
-              {data.modelID && 
-                <ModelCard 
-                  id={data.modelID} 
-                  // showDate={false} // currently not used anywhere in the component
-                />
-              }
+              {data.modelID && <ModelCard id={data.modelID} showDate={false} />}
             </Col>
             <Col span={8}>
               <Title level={4}>Manufacturer</Title>

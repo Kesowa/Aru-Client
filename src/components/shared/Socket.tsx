@@ -44,7 +44,7 @@ function Socket() {
             }`
           );
           // New mission added
-          socket.current.on("MISSION_ADDED", ({ mission }) => {
+          socket.current.on("MISSION_ADDED", ({ mission, flight }) => {
             openNotification(
               "New Mission Added!",
               `Mission with name "${mission.name}" has been added.`,
@@ -91,7 +91,7 @@ function Socket() {
           });
 
           // pilot assign
-          socket.current.on("MISSION_DELETED", ({ name }) => {
+          socket.current.on("MISSION_DELETED", ({ id, name }) => {
             openNotification(
               "Mission Deleted",
               `Mission: ${name} is deleted!`,

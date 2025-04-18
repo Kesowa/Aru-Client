@@ -8,7 +8,6 @@ import {
   Space,
   Switch,
   MenuProps,
-  Button,
 } from "antd";
 import { ExclamationCircleOutlined, DownOutlined } from "@ant-design/icons";
 import { TbFlag, TbFlagOff } from "react-icons/tb";
@@ -23,19 +22,19 @@ const ActionToolbar = (props) => {
     {
       key: "1",
       label: "Clear Selection",
-      disabled: (props.checkedList.length === 0),
+      disabled: props.checkedList.length > 0 ? false : true,
     },
     {
       key: "2",
       label: "Select all files",
-      disabled: (props.data.length === 0),
+      disabled: props.data.length > 0 ? false : true,
     },
   ];
   if (props.canDelete) {
     actionMenu.push({
       key: "3",
       label: "Delete files",
-      disabled: (props.checkedList.length === 0),
+      disabled: props.checkedList.length > 0 ? false : true,
     });
   }
   const handleAction = (e) => {
@@ -141,12 +140,12 @@ const ActionToolbar = (props) => {
           menu={{ items: actionMenu, onClick: handleAction }}
           trigger={["click"]}
         >
-          <Button onClick={(e) => e.preventDefault()} style={{ margin: "0 30px" }} type="link">
+          <a onClick={(e) => e.preventDefault()} style={{ margin: "0 30px" }}>
             <Space>
               Actions
               <DownOutlined />
             </Space>
-          </Button>
+          </a>
         </Dropdown>
         {props.uploadBtn()}
       </div>

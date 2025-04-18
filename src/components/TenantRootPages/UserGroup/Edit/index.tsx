@@ -114,9 +114,9 @@ function UserGroupEditPage() {
   };
 
   //subimt form
-  const onFinish = () => {
+  const onFinish = (data: any) => {
     if (selectedPermissions.length > 0) {
-      editUserGroup();
+      editUserGroup(data);
     } else {
       message.error(
         "You must select at least one permission to create the user group"
@@ -124,7 +124,7 @@ function UserGroupEditPage() {
     }
   };
 
-  const editUserGroup = () => {
+  const editUserGroup = (data: any) => {
     setLoading(true);
     const body = {
       id: id,

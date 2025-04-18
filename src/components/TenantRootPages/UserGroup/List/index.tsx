@@ -29,8 +29,8 @@ import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function UserGroupListPage() {
-  const [isTableLoading, setIsTableLoading] = useState(false);
+function UserGroupListPage(props: any) {
+  const [isTableLoading, setIstableLoading] = useState(false);
   const [userGroupTableData, setUserGroupTableData] = useState([]);
   const [activeUserGroup, setActiveUserGroup]: [any, any] = useState();
   const [errorState, setErrorState] = useState("");
@@ -105,7 +105,7 @@ function UserGroupListPage() {
   ];
 
   const fetchAllUserGroupList = () => {
-    setIsTableLoading(true);
+    setIstableLoading(true);
     http
       .get(apis.FETCH_TENANT_USER_GROUP)
       .then((result) => {
@@ -142,7 +142,7 @@ function UserGroupListPage() {
         }
       })
       .finally(() => {
-        setIsTableLoading(false);
+        setIstableLoading(false);
       });
   };
 

@@ -41,6 +41,10 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
 const EditableCell: React.FC<EditableCellProps> = ({
   editing,
   dataIndex,
+  title,
+  inputType,
+  record,
+  index,
   children,
   ...restProps
 }) => {
@@ -653,14 +657,14 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
           editable: true,
           ...getColumnSearchProps(key),
           render: (name, record) => (
-            <Button
-              type="text"
+            <span
+              style={{ cursor: "pointer" }}
               onClick={() => {
                 setRecord(record);
               }}
             >
               {name}
-            </Button>
+            </span>
           ),
         });
       }
@@ -766,7 +770,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
           },
         }}
         scroll={{ x: "max-content", y: contentHeight * 0.75 }}
-        onRow={() => {
+        onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {
               if (editingKey !== "") {

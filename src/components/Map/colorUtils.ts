@@ -1,5 +1,5 @@
 function padZero(str: string, l?: number) {
-  const len = l ?? 2;
+  const len = l || 2;
   const zeros = new Array(len).join("0");
   return (zeros + str).slice(-len);
 }
@@ -29,7 +29,7 @@ export function hexToRGB(hex: string, opacity?: number) {
 }
 
 export function invertColor(hex: string) {
-  if (hex.startsWith("#")) {
+  if (hex.indexOf("#") === 0) {
     hex = hex.slice(1);
   }
   // convert 3-digit hex to 6-digits.

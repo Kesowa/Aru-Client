@@ -9,7 +9,7 @@ import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-type CreateOrEditLocationFormProps = {
+type CreateOrEditLocationForm = {
   areaSelected: any;
   setAreaSelected: any;
   geoData: any;
@@ -19,7 +19,7 @@ type CreateOrEditLocationFormProps = {
   locationToEdit: any;
 };
 
-const CreateOrEditLocationForm = (props: CreateOrEditLocationFormProps) => {
+const CreateOrEditLocationForm = (props: any) => {
   const [formState, setFormState] = useState<any>({
     locationName: props.isEditing ? props.locationToEdit.properties.name : "",
   });
@@ -145,7 +145,7 @@ const CreateOrEditLocationForm = (props: CreateOrEditLocationFormProps) => {
     });
   };
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = (values) => {
     if (formState.locationName) {
       form.resetFields();
       props.setAreaSelected(false);
@@ -235,7 +235,6 @@ const CreateOrEditLocationForm = (props: CreateOrEditLocationFormProps) => {
                   <img
                     style={{ height: "20px", marginTop: "-20px" }}
                     src={s_m}
-                    alt=""
                   />
                   <div className="data_selected_inner">
                     <div>

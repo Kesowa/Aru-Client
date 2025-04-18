@@ -39,7 +39,7 @@ interface TableProps {
   setFilters: any;
 }
 
-function MissionTable(props: Readonly<TableProps>) {
+function MissionTable(props: TableProps) {
   const history = useHistory();
   const { Title } = Typography;
 
@@ -112,7 +112,7 @@ function MissionTable(props: Readonly<TableProps>) {
     filterIcon: (filtered: any) => (
       <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
     ),
-    onFilter: () => true,
+    onFilter: (value: any, record: any) => true,
     onFilterDropdownOpenChange: (visible: any) => {
       if (visible) {
         setTimeout(() => searchInput.select());
@@ -222,8 +222,8 @@ function MissionTable(props: Readonly<TableProps>) {
           ...record.missionType,
         };
         return (
-            <Button
-              type="text"
+          <>
+            <span
               onClick={() => {
                 history.push({
                   pathname: `/dashboard/mission/view/staff-${record._id}`,
@@ -276,7 +276,8 @@ function MissionTable(props: Readonly<TableProps>) {
                   {name}
                 </Title>
               </Tooltip>
-            </Button>
+            </span>
+          </>
         );
       },
     },
@@ -296,7 +297,7 @@ function MissionTable(props: Readonly<TableProps>) {
     {
       title: "Flight Date",
       dataIndex: "flight",
-      sorter: () => true,
+      sorter: (a: any, b: any) => true,
       sortDirections: ["descend", "ascend"],
       ...getColumnSearchProps("flight"),
       render: (flight: any) => (
@@ -310,8 +311,7 @@ function MissionTable(props: Readonly<TableProps>) {
       dataIndex: "_id",
       ...getColumnSearchProps("_id"),
       render: (text, record) => (
-          <Button
-            type="text"
+          <span
             onClick={() => {
               history.push({
                 pathname: `/dashboard/mission/view/staff-${record._id}`,
@@ -326,7 +326,7 @@ function MissionTable(props: Readonly<TableProps>) {
             }}
           >
             <p className="mission-id">{record._id}</p>
-          </Button>
+          </span>
       ),
     },
     {

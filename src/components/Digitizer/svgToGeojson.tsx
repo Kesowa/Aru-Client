@@ -112,15 +112,15 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
   //     };
   //   }
   //   }, []);
-  //
+
   //   const handleMouseOver = (e) => {
-  //
+
   //     svgElement.setAttribute("fill", "#ff0");
   //     svgElement.setAttribute("stroke", "#f00");
   //   };
-  //
+
   //   const handleMouseOut = (e) => {
-  //
+
   //     svgElement.removeAttribute("fill");
   //     svgElement.removeAttribute("stroke");
   //   };
@@ -202,10 +202,10 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
     setFileName(modifiedName);
     const reader = new FileReader();
     reader.onload = (e) => {
-      const source = e.target?.result;
+      const source = e.target.result;
       const newImg = new Image();
       newImg.onload = handleImageLoad;
-      newImg.src = String(source);
+      newImg.src = source;
       setImg(newImg); // Update state with the new image
       setSvgImage(true);
       setCanvasImageOpacity(1);
@@ -222,14 +222,10 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
               JSON.stringify(converterParams)
             );
       this.converter.init();
-      this.stopped = false;
     }
 
-    converter: ColorImageConverter | BinaryImageConverter;
-    stopped: boolean;
-
     run() {
-      return new Promise<void>((resolve) => {
+      return new Promise((resolve, reject) => {
         const tick = () => {
           if (!this.stopped) {
             let done = false;
@@ -259,46 +255,46 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
 
   // const downloadGeojson = (a, b) => {
   //   // const svgRect = svg.getBoundingClientRect();
-  //
+
   //   // // Extract width and height from the rect object
   //   // const svgWidth = svgRect.width;
   //   // const svgHeight = svgRect.height;
-  //
+
   //   // console.log("SVG width:", svgWidth);
   //   // console.log("SVG height:", svgHeight);
-  //
+
   //   const svgDem = svg.viewBox.animVal;
-  //
+
   //   const svgContent = svg.outerHTML;
   //   const blob = new Blob([svgContent], { type: "image/svg+xml" });
-  //
+
   //   const reader = new FileReader();
   //   reader.onload = async function (event) {
   //     const svgText = event.target.result;
-  //
+
   //     console.log(svgText);
-  //
+
   //     const parser = new DOMParser();
   //     const svgDocument = parser.parseFromString(svgText, "image/svg+xml");
-  //
+
   //     const metaInfoNS = "http://www.prognoz.ru";
   //     const metaInfoElement = svgDocument.createElementNS(
   //       metaInfoNS,
   //       "MetaInfo"
   //     );
-  //
+
   //     const geoElement = svgDocument.createElement("Geo");
-  //
+
   //     // const geoItems = [
   //     //   { X: "0", Y: "0", Latitude: "37.375593", Longitude: "-121.977795" },
   //     //   { X: "665", Y: "632", Latitude: "37.369930", Longitude: "-121.959404" }
   //     // ];
-  //
+
   //     const geoItems = [
   //       { X: "0", Y: "0", Latitude: a[1], Longitude: a[0] }, //use all the coordinates get in the imagepin function with Dimension of svg at X and Y properly {dont chnage order of lat,lng}
   //       { X: svgDem.height, Y: svgDem.width, Latitude: b[1], Longitude: b[0] },
   //     ];
-  //
+
   //     for (const item of geoItems) {
   //       const geoItemElement = svgDocument.createElement("GeoItem");
   //       geoItemElement.setAttribute("X", item.X);
@@ -307,15 +303,15 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
   //       geoItemElement.setAttribute("Longitude", item.Longitude);
   //       geoElement.appendChild(geoItemElement);
   //     }
-  //
+
   //     metaInfoElement.appendChild(geoElement);
-  //
+
   //     svgDocument.documentElement.appendChild(metaInfoElement);
-  //
+
   //     const modifiedSvgText = new XMLSerializer().serializeToString(
   //       svgDocument
   //     );
-  //
+
   //     await new Promise((resolve, reject) => {
   //       geoFromSVGXML(
   //         modifiedSvgText,
@@ -350,17 +346,19 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
 
     const reader = new FileReader();
     reader.onload = async function (event) {
-      const svgText = event.target?.result;
+      const svgText = event.target.result;
 
       // Parse SVG to JSON using svgson
-      const svgJson = await parse(String(svgText));
+      const svgJson = await parse(svgText);
 
       // Apply transformations to path coordinates
       svgJson.children.forEach((child) => {
         if (child.name === "path") {
           const transform = child.attributes.transform;
           if (transform) {
-            const translateMatch = /translate\(([-\d.]+),\s*([-.\d]+)\)/.exec(transform);
+            const translateMatch = transform.match(
+              /translate\(([-\d.]+),\s*([-.\d]+)\)/
+            );
             if (translateMatch) {
               const translateX = parseFloat(translateMatch[1]);
               const translateY = parseFloat(translateMatch[2]);
@@ -413,7 +411,7 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
         svgDocument
       );
 
-      await new Promise<void>((resolve) => {
+      await new Promise((resolve, reject) => {
         geoFromSVGXML(
           modifiedSvgText,
           (layers) => {
@@ -423,7 +421,7 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
               (feature, index) => {
                 const path = paths[index];
                 const pathStyle = path.getAttribute("style");
-                const fillMatch = pathStyle?.match(/fill:\s*([^;]+)/);
+                const fillMatch = pathStyle.match(/fill:\s*([^;]+)/);
                 const fillColor = fillMatch ? fillMatch[1] : null;
 
                 // Add color property to the properties of each feature
@@ -497,6 +495,7 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
     setFlattenedBounds(flattenedBounds);
 
     downloadGeojson(lngLatNW, lngLatSE);
+    setDigitizer(false);
   };
 
   useEffect(() => {

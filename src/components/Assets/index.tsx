@@ -34,6 +34,8 @@ import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import "./index.less";
 import { AuthContext } from "src/services/authUtils";
 
+const { Text, Title } = Typography;
+const { Option } = Select;
 const { TextArea } = Input;
 const { TabPane } = Tabs;
 
@@ -103,6 +105,10 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
 const EditableCell: React.FC<EditableCellProps> = ({
   editing,
   dataIndex,
+  title,
+  inputType,
+  record,
+  index,
   children,
   ...restProps
 }) => {
@@ -128,7 +134,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   );
 };
 
-function AssetBase() {
+function AssetBase(props: any) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [isModalVisible3, setIsModalVisible3] = useState(false);
@@ -473,16 +479,17 @@ function AssetBase() {
         const editable = isEditing(record);
         return editable ? (
           <span>
-            <Button type="link"
+            <a
+              href="javascript:;"
               onClick={() => save(record.key)}
               style={{ marginRight: 8 }}
             >
               <SaveOutlined style={{ color: "green" }} />
-            </Button>
+            </a>
             <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-              <Button type="link">
+              <a>
                 <CloseOutlined style={{ color: "red" }} />
-              </Button>
+              </a>
             </Popconfirm>
           </span>
         ) : (
@@ -497,9 +504,9 @@ function AssetBase() {
               title="Sure to delete?"
               onConfirm={() => handleDelete(record.key)}
             >
-              <Button type="link">
+              <a>
                 <DeleteOutlined style={{ color: "red" }} />
-              </Button>
+              </a>
             </Popconfirm>
           </>
         );
@@ -513,7 +520,7 @@ function AssetBase() {
     setCount(count - 1);
   };
 
-  const handleAdd = () => {
+  const handleAdd = (e) => {
     const newData: Item = {
       id: count,
       key: `Key ${count + 1}`,

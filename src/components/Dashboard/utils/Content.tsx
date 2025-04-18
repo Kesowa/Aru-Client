@@ -32,7 +32,7 @@ import {
 import { getSideBar } from "src/static/sideBarOptions";
 import { AuthContext } from "src/services/authUtils";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function DashboardContent() {
@@ -116,7 +116,7 @@ function DashboardContent() {
             </div>
           </Col>
           <Col span={8}>
-            <img src={qrCode} alt="qrcode" style={{ width: "100%" }} />
+            <img src={qrCode} style={{ width: "100%" }} />
           </Col>
         </Row>
       </Modal>
@@ -205,11 +205,13 @@ function DashboardContent() {
     return (
       <div style={{ padding: "12px" }}>
         {videos == 0 && alerts == 0 && layers == 0 && documents == 0 ? (
+          <>
             <Result
               status="info"
               title="No data!"
               subTitle="Please populate some data in order to storage statistics chart"
             />
+          </>
         ) : (
           <div
             style={{
@@ -228,7 +230,8 @@ function DashboardContent() {
   const dashboardShortcuts = () => {
     if (Auth.userdetails.userType === "tenant-staff") {
       return getSideBar(Auth.userdetails).map((item) => (
-          <Col md={12} key={window.crypto.randomUUID()}>
+        <>
+          <Col md={12}>
             <Link to={item.link} key="1">
               <Card className="shortcut-card" bordered={true}>
                 <div className="card-icon">{DecideIcon(item.icon)}</div>
@@ -238,9 +241,11 @@ function DashboardContent() {
               </Card>
             </Link>
           </Col>
+        </>
       ));
     } else if (Auth.userdetails.userType === "tenant-client") {
       return (
+        <>
           <Col md={6}>
             <Link to={`/dashboard/client/missions`} key="1">
               <Card className="shortcut-card" bordered={true}>
@@ -253,6 +258,7 @@ function DashboardContent() {
               </Card>
             </Link>
           </Col>
+        </>
       );
     } else {
       return (
@@ -333,14 +339,14 @@ function DashboardContent() {
             `${API_URL}/stream/notification?tenantID=${Auth.userdetails.tenantId._id}`
           );
           //new mission listener
-          socket.current.on("MISSION_ADDED", () => {
+          socket.current.on("MISSION_ADDED", ({ mission, flight }) => {
             setAlertSocketEvent("refresh-dashboard");
           });
           //status change listener
-          socket.current.on("MISSION_COMPLETED", () => {
+          socket.current.on("MISSION_COMPLETED", ({ missionID }) => {
             setAlertSocketEvent("refresh-dashboard");
           });
-          socket.current.on("MISSION_LIVE", () => {
+          socket.current.on("MISSION_LIVE", ({ missionID }) => {
             setAlertSocketEvent("refresh-dashboard");
           });
         }
@@ -351,14 +357,14 @@ function DashboardContent() {
             `${API_URL}/stream/notification?tenantID=${Auth.userdetails.tenantId}`
           );
           //new mission listener
-          socket.current.on("MISSION_ADDED", () => {
+          socket.current.on("MISSION_ADDED", ({ mission, flight }) => {
             setAlertSocketEvent("refresh-dashboard");
           });
           //status change listener
-          socket.current.on("MISSION_COMPLETED", () => {
+          socket.current.on("MISSION_COMPLETED", ({ missionID }) => {
             setAlertSocketEvent("refresh-dashboard");
           });
-          socket.current.on("MISSION_LIVE", () => {
+          socket.current.on("MISSION_LIVE", ({ missionID }) => {
             setAlertSocketEvent("refresh-dashboard");
           });
         }

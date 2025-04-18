@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import s_m from "../../../../Icons/start_measurement.svg";
 import "../../../Missions/Create/index.less";
-import { Button, message } from "antd";
+import { message } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import GeoFence from "../../../../static/GeoFence.svg";
@@ -221,6 +221,7 @@ class LocationMap extends Component<mapProps, mapState> {
 
   // Set Current location of user
   setCurrentLocation = () => {
+    let lat, lng;
     if (window.navigator.geolocation) {
       console.log(
         window.navigator.geolocation.getCurrentPosition((position) => {
@@ -268,14 +269,15 @@ class LocationMap extends Component<mapProps, mapState> {
   findPolygonCenter = (points) => {
     const bounds = new window.google.maps.LatLngBounds();
 
-    const polygonCoords: unknown[] = [];
+    const polygonCoords: google.maps.LatLng[] = [];
 
     for (const x of points) {
       const llbound = new window.google.maps.LatLng(x.lat, x.lng);
       polygonCoords.push(llbound);
     }
-    for (const polygonCoord of polygonCoords) {
-      bounds.extend(polygonCoord);
+    let i;
+    for (i = 0; i < polygonCoords.length; i++) {
+      bounds.extend(polygonCoords[i]);
     }
 
     const centerOfPolygon = bounds.getCenter();
@@ -290,7 +292,7 @@ class LocationMap extends Component<mapProps, mapState> {
       this.props;
 
     this.drawingManager.addListener("overlaycomplete", (e) => {
-      setAreaSelected(!!areaSelected);
+      setAreaSelected(areaSelected ? areaSelected : !areaSelected);
       const shape = e.overlay;
       this.oldShape = shape;
 
@@ -355,7 +357,7 @@ class LocationMap extends Component<mapProps, mapState> {
     window.google.maps.event.addListener(
       polygon.getPath(),
       "set_at",
-      function () {
+      function (this: any) {
         const pathPoints = polygon
           .getPath()
           .getArray()
@@ -395,7 +397,7 @@ class LocationMap extends Component<mapProps, mapState> {
     window.google.maps.event.addListener(
       polygon.getPath(),
       "insert_at",
-      function () {
+      function (this: any) {
         const pathPoints = polygon
           .getPath()
           .getArray()
@@ -513,6 +515,7 @@ class LocationMap extends Component<mapProps, mapState> {
 
   render() {
     return (
+      <React.Fragment>
         <div id="data_gmap_container">
           <div
             id="google-map"
@@ -586,43 +589,33 @@ class LocationMap extends Component<mapProps, mapState> {
           <div className="control-icons-container">
             {(this.state.isPolygonActive || this.state.isPointActive) &&
               this.oldShape && (
-                <Button
-                  type="text"
+                <div
                   className="control-clear-button"
                   onClick={this.clearIncompleteDrawing}
                 >
                   <p style={{ whiteSpace: "nowrap" }}>Clear Selection</p>
-                </Button>
+                </div>
               )}
-            <Button
-              type="text"
+            <img
+              src={MarkerIcon}
+              style={{
+                background: this.state.isPointActive ? "#1890ff" : "#fff",
+                marginRight: "5px",
+              }}
+              className="control-icons"
               onClick={this.setPointDrawing}
-            >
-              <img
-                src={MarkerIcon}
-                alt=""
-                style={{
-                  background: this.state.isPointActive ? "#1890ff" : "#fff",
-                  marginRight: "5px",
-                }}
-                className="control-icons"
-              />
-            </Button>
-            <Button
-              type="text"
+            />
+            <img
+              src={GeoFence}
+              style={{
+                background: this.state.isPolygonActive ? "#1890ff" : "#fff",
+              }}
+              className="control-icons"
               onClick={this.setPolygonDrawing}
-            >
-              <img
-                src={GeoFence}
-                alt=""
-                style={{
-                  background: this.state.isPolygonActive ? "#1890ff" : "#fff",
-                }}
-                className="control-icons"
-              />
-            </Button>
+            />
           </div>
         </div>
+      </React.Fragment>
     );
   }
 }

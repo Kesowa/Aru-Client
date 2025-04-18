@@ -49,7 +49,7 @@ function UserEditPage() {
       permissions: string[];
     }[]
   >([]);
-  const [selectedUserGroup, setSelectedUserGroup] = useState<{
+  const [selectedUserGroup, setSelectedusergroup] = useState<{
     name: string;
     _id: string;
     isActive: boolean;
@@ -81,7 +81,7 @@ function UserEditPage() {
         DocModel.USER_AVATARS,
         (prog) => console.info("PROGRESS: " + prog)
       );
-      setAvatar(String(uploadToken));
+      setAvatar(uploadToken);
 
       // const formData = new FormData();
       // formData.append("avatar", file);
@@ -111,7 +111,7 @@ function UserEditPage() {
   //change user group
   const onUserGroupChange = (value: any) => {
     const ug = userGroups.find((ele: any) => ele._id === value);
-    setSelectedUserGroup(ug);
+    setSelectedusergroup(ug);
   };
 
   //fetch user group
@@ -144,7 +144,7 @@ function UserEditPage() {
           console.log("user", user);
           console.log("sug", sug);
 
-          setSelectedUserGroup(sug);
+          setSelectedusergroup(sug);
           setUserGroups(groups);
         } else if (result.data.message === "You do not have permission to use this API.") {
           setErrorState("unauthorized");
@@ -305,7 +305,7 @@ function UserEditPage() {
                       userType: "tenant-client",
                       userGroupId:
                         user.userType === "tenant-staff"
-                          ? selectedUserGroup?._id
+                          ? selectedUserGroup._id
                           : null,
                     }}
                     className="user-form"
@@ -324,12 +324,14 @@ function UserEditPage() {
                                   onChange={onUserGroupChange}
                                   showSearch
                                   placeholder="Select a user group"
-                                  defaultValue={selectedUserGroup?.name}
+                                  defaultValue={selectedUserGroup.name}
                                   filterOption={(input, option) =>
-                                    option!.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                    option!.children
+                                      .toLowerCase()
+                                      .indexOf(input.toLowerCase()) >= 0
                                   }
                                 >
-                                  {userGroups.map((ele: any) => (
+                                  {userGroups.map((ele: any, i: any) => (
                                     <Select.Option
                                       key={ele._id}
                                       value={ele._id}
@@ -378,10 +380,11 @@ function UserEditPage() {
                             {avatar ? (
                               <img
                                 src={
-                                  avatarPreview ?? `${STATIC_URL}${avatar}`
+                                  avatarPreview
+                                    ? avatarPreview
+                                    : `${STATIC_URL}${avatar}`
                                 }
                                 className="uploaded-avatar"
-                                alt=""
                               />
                             ) : (
                               <div>
