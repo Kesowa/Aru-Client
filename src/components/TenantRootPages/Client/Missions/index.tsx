@@ -33,6 +33,10 @@ import "../../../shared/MissionList.less";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 
+interface TabOptions {
+  filter: any;
+  deleteMission: any;
+}
 function DataMission() {
   const history = useHistory();
   const [completedMissions, setCompletedMissions] = useState([]);
@@ -42,7 +46,7 @@ function DataMission() {
   const [total, setTotal] = useState(0);
   const [sortOrder, setSortOrder] = useState("createdAt:descend");
   const [searchFilters, setSearchFilters] = useState("");
-  const [missionTypes, setMissionTypes] = useState([]);
+  const [missionTypes, populateMissionTypes] = useState([]);
   const [typesLoader, setTypesLoader] = useState(false);
   const [missionType, setMissionType] = useState("");
 
@@ -224,8 +228,8 @@ function DataMission() {
       ...getColumnSearchProps("name"),
       render: (name: any, record) => {
         return (
-            <Button
-              type="text"
+          <>
+            <span
               onClick={() => {
                 history.push(`/dashboard/mission/view/staff-${record._id}`);
               }}
@@ -266,7 +270,8 @@ function DataMission() {
                   {name}
                 </Title>
               </Tooltip>
-            </Button>
+            </span>
+          </>
         );
       },
     },
@@ -295,14 +300,15 @@ function DataMission() {
       dataIndex: "_id",
       ...getColumnSearchProps("_id"),
       render: (text, record) => (
-          <Button
-            type="text"
+        <>
+          <span
             onClick={() => {
               history.push(`/dashboard/mission/view/staff-${record._id}`);
             }}
           >
             <p className="mission-id">{record._id}</p>
-          </Button>
+          </span>
+        </>
       ),
     },
     {
@@ -420,7 +426,7 @@ function DataMission() {
       .then((res) => {
         if (res.data.status) {
           console.log("MIssion types", res.data.data);
-          setMissionTypes(res.data.data);
+          populateMissionTypes(res.data.data);
         } else {
           message.error(res.data.message);
         }

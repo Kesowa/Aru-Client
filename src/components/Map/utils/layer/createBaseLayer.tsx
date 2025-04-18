@@ -16,11 +16,15 @@ import {
   Button,
   message,
   Result,
+  Upload,
   Row,
   Col,
   Form,
   Avatar,
   Card,
+  Typography,
+  Select,
+  Collapse,
 } from "antd";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
@@ -36,7 +40,12 @@ import { featureType, vectorProps } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 import { AuthContext } from "src/services/authUtils";
+const { Dragger } = Upload;
+const { Item } = Form;
 const { Meta } = Card;
+const { Option } = Select;
+const { Text, Title } = Typography;
+const { Panel } = Collapse;
 
 const CreateBaseLayer = (props) => {
   const [selectedKey, setSelectedKey] = useState<unknown>();
@@ -73,11 +82,11 @@ const CreateBaseLayer = (props) => {
   const [showAddMissions, setShowAddMissions] = useState(false);
   const [layerType1, setLayerType1] = useState("");
   const [currentLayerId, setCurrentLayerId] = useState("");
-  const [fetchList, setFetchList] = useState(false);
+  const [fetchList, setFetch] = useState(false);
   const [form] = Form.useForm();
   const [page, setPage] = useState(1);
   const [uiElement, setUIElement] = useState<unknown>([]);
-  const [allowApiCall, setAllowApiCall] = useState(true);
+  const [allowApiCall, setApiCall] = useState(true);
   const [storageModal, setStorageModal] = useState(false);
   const [selectedAttr, setSelectedAttr] = useState({});
   const [activeTab, setActiveTab] = useState<unknown>([]);
@@ -89,22 +98,22 @@ const CreateBaseLayer = (props) => {
     {
       value: "MarkerIcon",
       title: "Marker Icon",
-      icon: <img src={MarkerIcon} alt="" style={{ width: "10px" }} />,
+      icon: <img src={MarkerIcon} style={{ width: "10px" }} />,
     },
     {
       value: "TankIcon",
       title: "Tank Icon",
-      icon: <img src={TankIcon} alt="" style={{ width: "10px" }} />,
+      icon: <img src={TankIcon} style={{ width: "10px" }} />,
     },
     {
       value: "ValveIcon",
       title: "Valve Icon",
-      icon: <img src={ValveIcon} alt="" style={{ width: "10px" }} />,
+      icon: <img src={ValveIcon} style={{ width: "10px" }} />,
     },
     {
       value: "DotIcon",
       title: "Dot Icon",
-      icon: <img src={DotIcon} alt="" style={{ width: "10px" }} />,
+      icon: <img src={DotIcon} style={{ width: "10px" }} />,
     },
   ];
   useEffect(
@@ -132,19 +141,19 @@ const CreateBaseLayer = (props) => {
 
       if (layertype.size == 2) {
         message.warning("Cannot merge a raster and vector!");
-        setAllowApiCall(false);
+        setApiCall(false);
       }
 
       if (layertype1.size > 1) {
         message.warning(
           "Cannot merge vector layers of different geometric types! "
         );
-        setAllowApiCall(false);
+        setApiCall(false);
       }
 
       if (layertype2.size > 1) {
         message.warning("Cannot merge raster layers of different type!");
-        setAllowApiCall(false);
+        setApiCall(false);
       }
 
       if (layertype.has("Raster")) setLayerType1("Raster");
@@ -165,14 +174,14 @@ const CreateBaseLayer = (props) => {
     ) {
       target.scrollTo(0, target.scrollHeight);
       setPage(page + 1);
-      setFetchList(true);
+      setFetch(true);
     }
   };
 
   const handleSearch = (e) => {
     setMissionOptions([]);
     setMissionSearchValue(e);
-    setFetchList(true);
+    setFetch(true);
   };
 
   // -------Populate mission list----------------
@@ -203,7 +212,7 @@ const CreateBaseLayer = (props) => {
             })
             .finally(() => {
               setMissionsLoading(false);
-              setFetchList(false);
+              setFetch(false);
             });
         } else {
           setMissionsLoading(true);
@@ -226,7 +235,7 @@ const CreateBaseLayer = (props) => {
             })
             .finally(() => {
               setMissionsLoading(false);
-              setFetchList(false);
+              setFetch(false);
             });
         }
       }
@@ -780,7 +789,7 @@ const CreateBaseLayer = (props) => {
     }
     http
       .patch(`${apis.UPDATE_BASE_RASTER_IMPORT}`, payload)
-      .then((res) => {
+      .then((res: unknown) => {
         if (res.data.status) {
           console.log("update by import", res.data.data);
           props.updateLayer(res.data.data, null, null);
@@ -883,7 +892,7 @@ const CreateBaseLayer = (props) => {
   const uploadProps = {
     name: "file",
     multiple: false,
-    onRemove: () => {
+    onRemove: (file) => {
       setFileList([]);
     },
     beforeUpload: (file) => {
@@ -939,6 +948,7 @@ const CreateBaseLayer = (props) => {
             );
           case 1:
             return (
+              <>
                 <Button
                   onClick={() => {
                     setIsModalVisible1(false);
@@ -952,6 +962,7 @@ const CreateBaseLayer = (props) => {
                 >
                   Close
                 </Button>
+              </>
             );
 
           default:
@@ -1004,6 +1015,7 @@ const CreateBaseLayer = (props) => {
             );
           case 2:
             return (
+              <>
                 <Button
                   onClick={() => {
                     setIsModalVisible1(false);
@@ -1017,6 +1029,7 @@ const CreateBaseLayer = (props) => {
                 >
                   Close
                 </Button>
+              </>
             );
 
           default:
@@ -1080,7 +1093,9 @@ const CreateBaseLayer = (props) => {
                       onClick={() => {
                         let totalLayers = 0;
                         metadata.map((mission: unknown) => {
-                          totalLayers += mission.layers.length;
+                          mission.layers.map((layers: unknown) => {
+                            ++totalLayers;
+                          });
                         });
                         console.log("total layers", totalLayers);
                         if (responseArray.length == totalLayers) {
@@ -1152,7 +1167,9 @@ const CreateBaseLayer = (props) => {
                   onClick={() => {
                     let totalLayers = 0;
                     metadata.map((mission: unknown) => {
-                      totalLayers += mission.layers.length;
+                      mission.layers.map((layers: unknown) => {
+                        ++totalLayers;
+                      });
                     });
                     console.log("total layers", totalLayers);
                     if (responseArray.length == totalLayers) {
@@ -1366,7 +1383,7 @@ const CreateBaseLayer = (props) => {
     };
     http
       .patch(`${apis.UPDATE_BASE_VECTOR_AFTER_UPLOAD}`, payload)
-      .then((res) => {
+      .then((res: unknown) => {
         if (res.data.success) {
           console.log(res.data);
           props.updateLayer(res.data.data, null, null);
@@ -1392,7 +1409,8 @@ const CreateBaseLayer = (props) => {
 
   function handleAttributeMapping2(
     e: unknown,
-    fields: unknown
+    fields: unknown,
+    layers: unknown
   ) {
     const temp = {
       ...selectedAttr,
@@ -1735,12 +1753,12 @@ const CreateBaseLayer = (props) => {
           setPage={setPage}
           setMissionOptions={setMissionOptions}
           setMissionSearchValue={setMissionSearchValue}
-          setFetch={setFetchList}
+          setFetch={setFetch}
           missionOptions={missionOptions}
           layersLoading={layersLoading}
           selectedLayers={selectedLayers}
           setSelectedLayers={setSelectedLayers}
-          setApiCall={setAllowApiCall}
+          setApiCall={setApiCall}
           form={form}
         />
       </Modal>

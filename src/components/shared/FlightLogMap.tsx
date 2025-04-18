@@ -10,7 +10,7 @@ function FlightLogMap(props) {
   const [marker, setMarker] = useState<number[]>([]);
   const [bearing, setBearing] = useState(0);
   const [dronePath, setDronePath] = useState<any>([]);
-  const [viewport, setViewport] = useState<any>(undefined);
+  const [INITIAL_VIEW_STATE, setViewport] = useState<any>(undefined);
 
   function getBearing(
     startLat: any,
@@ -123,15 +123,15 @@ function FlightLogMap(props) {
       capRounded: true,
       jointRounded: true,
       getPath: (d) => d.path,
-      getColor: () => [0, 195, 255],
-      getWidth: () => 3,
+      getColor: (d) => [0, 195, 255],
+      getWidth: (d) => 3,
     }),
 
     new IconLayer({
       id: "icon-layer",
       data: markerData,
       pickable: true,
-      getIcon: () => ({
+      getIcon: (d) => ({
         url: `${NavIcon}`,
         width: 100,
         height: 129,
@@ -142,19 +142,19 @@ function FlightLogMap(props) {
       getPosition: (d) => {
         return d.coordinates;
       },
-      getSize: () => 4,
-      getAngle: () => bearing,
+      getSize: (d) => 4,
+      getAngle: (d) => bearing,
     }),
   ];
 
   return (
     <div style={{ height: "100%", width: "100%" }}>
-      {viewport !== undefined && (
+      {INITIAL_VIEW_STATE !== undefined && (
         <DeckGL
-          initialViewState={viewport}
+          initialViewState={INITIAL_VIEW_STATE}
           controller={true}
           layers={layers}
-          getTooltip={({ object }) => object?.name}
+          getTooltip={({ object }) => object && object.name}
         >
           <StaticMap
             mapboxApiAccessToken={MAPBOX_API_KEY}

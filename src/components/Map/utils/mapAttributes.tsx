@@ -60,8 +60,8 @@ interface Props {
   AllLayers: Layer[];
   canEditGeojson: boolean;
   canDeleteFeature: boolean;
-  updateFeatureCountInLayers: (count: number, id: string) => void;
-  setshowSelectedIndexes: (values: number[]) => void;
+  updateFeatureCountInLayers: (id: string, count: number) => void;
+  setshowSelectedIndexes: (show: boolean) => void;
   setShouldAttributeTableReload: (reload: boolean) => void;
   invertColor: any;
   handleMeshSourceOption: (id: string) => void;
@@ -115,14 +115,14 @@ const MapAttributes: React.FC<Props> = (props) => {
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [status, setStatus] = useState("Idle");
-  const socket = useRef<unknown>(null);
+  const socket = useRef(null);
   const [inferenceType, setInferenceType] = useState(null);
 
   const layerId = props.id;
   const tenantId = props.AllLayers[0].tenantId;
 
   useEffect(() => {
-    let socketInstance: unknown = null;
+    let socketInstance = null;
 
     if (tenantId) {
       if (socket.current) {
@@ -148,7 +148,7 @@ const MapAttributes: React.FC<Props> = (props) => {
         setProgress(progress);
 
         if (progress === 100) {
-          setProgress(0);
+          setProgress(null);
           setLoading(false);
           setStatus("Complete");
         }
@@ -191,7 +191,7 @@ const MapAttributes: React.FC<Props> = (props) => {
         if (res.data.status) {
           if (res.data.message === "Task is already completed") {
             setLoading(false);
-            setProgress(0);
+            setProgress(null);
             setStatus("Complete");
             message.info("Inference task is already complete!");
           } else {
@@ -485,6 +485,7 @@ const MapAttributes: React.FC<Props> = (props) => {
               >
                 <ReactJson
                   value={state.rasterMetaData || {}}
+                  name={false}
                   collapsed={true}
                   displayDataTypes={false}
                 />
@@ -565,15 +566,15 @@ const MapAttributes: React.FC<Props> = (props) => {
           contentHeight={state.contentHeight}
           tableData={state.tableData}
           allLayers={props.AllLayers}
-          flaggedFilter={!!props.flaggedFilter}
-          unflaggedFilter={!!props.unflaggedFilter}
+          flaggedFilter={props.flaggedFilter}
+          unflaggedFilter={props.unflaggedFilter}
           setPage={(page) => setState((prev) => ({ ...prev, page }))}
           page={state.page}
           setLimit={(limit) => setState((prev) => ({ ...prev, limit }))}
           limit={state.limit}
           setPaginationPage={setPaginationPage}
           setPageLimit={setPageLimit}
-          total={Number(state.total)}
+          total={state.total}
           setTotal={(total) => setState((prev) => ({ ...prev, total }))}
           setViewport={props.setViewport}
           setSelectedIndexes={props.setSelectedIndexes}

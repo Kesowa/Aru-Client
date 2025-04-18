@@ -454,7 +454,7 @@ function Weather(props) {
   //   windGust: number;
   //   windSpeed: number;
   // }
-  //
+
   // const fetchWeatherData = (isoDate: string) => {
   //   let endTime = JSON.stringify(
   //     parseInt(isoDate.split("T")[1].split(":")[0]) + 1
@@ -488,7 +488,7 @@ function Weather(props) {
   //       console.log(err.message);
   //     });
   // };
-  //
+
   // useEffect(() => {
   //   if (props.location) {
   //     fetchWeatherData(props.isoDate);

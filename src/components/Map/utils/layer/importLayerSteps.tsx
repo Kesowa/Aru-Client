@@ -206,7 +206,7 @@ export const ImportLayerSteps = ({
                     </Select>
                   </Col>
                 </Row>
-                {uiElement.map(() => {
+                {uiElement.map((id: unknown) => {
                   return (
                     <Row style={{ marginTop: "12px" }} key={window.crypto.randomUUID()}>
                       <Col span={12}>
@@ -594,7 +594,7 @@ export const ImportLayerSteps = ({
                     </Select>
                   </Col>
                 </Row>
-                {uiElement.map(() => {
+                {uiElement.map((id: unknown) => {
                   return (
                     <Row style={{ marginTop: "12px" }} key={window.crypto.randomUUID()}>
                       <Col span={12}>

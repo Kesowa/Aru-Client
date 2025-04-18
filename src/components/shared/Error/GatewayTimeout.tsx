@@ -1,3 +1,4 @@
+import React from "react";
 import { Row, Col, Typography } from "antd";
 import "./index.less";
 import FiveZeroFour from "../../../static/504.svg";
@@ -8,7 +9,7 @@ function GatewayTimeout() {
       <div className="error-wrapper">
         <Row>
           <Col span={16} className="picture-div">
-            <img src={FiveZeroFour} className="picture" alt="" />
+            <img src={FiveZeroFour} className="picture" />
           </Col>
           <Col span={8} className="message-div">
             <Title>ERROR 504: Gateway timed out!</Title>

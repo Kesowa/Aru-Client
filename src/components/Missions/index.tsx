@@ -27,7 +27,7 @@ function MissionList() {
   const [searchFilters, setSearchFilters] = useState("");
   const { Auth, logout } = useContext(AuthContext);
 
-  const renderMissionTable = () => {
+  const renderMissionTable = (filter: unknown) => {
     return (
       <MissionTable
         setMissionTableData={setMissionTableData}
@@ -55,7 +55,7 @@ function MissionList() {
           <Badge style={{ backgroundColor: "#43425d" }} count={totalMissions} />
         </span>
       ),
-      children: renderMissionTable(),
+      children: renderMissionTable("all"),
     },
     {
       key: "2",
@@ -68,7 +68,7 @@ function MissionList() {
           ></Badge>
         </span>
       ),
-      children: renderMissionTable(),
+      children: renderMissionTable("Upcoming"),
     },
     {
       key: "3",
@@ -81,7 +81,7 @@ function MissionList() {
           ></Badge>
         </span>
       ),
-      children: renderMissionTable(),
+      children: renderMissionTable("Live"),
     },
     {
       key: "4",
@@ -94,7 +94,7 @@ function MissionList() {
           ></Badge>
         </span>
       ),
-      children: renderMissionTable(),
+      children: renderMissionTable("Review"),
     },
     {
       key: "5",
@@ -107,7 +107,7 @@ function MissionList() {
           />
         </span>
       ),
-      children: renderMissionTable(),
+      children: renderMissionTable("Completed"),
     },
   ];
   const filters = {

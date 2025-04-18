@@ -1,6 +1,6 @@
 import { Result } from "antd";
 
-function Expiry() {
+function Expiry(props) {
   return (
     <>
       <Result

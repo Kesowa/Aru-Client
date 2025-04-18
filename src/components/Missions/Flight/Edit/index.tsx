@@ -12,7 +12,7 @@ import { AxiosErrorHandler } from "src/services/httpErrorHandle";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-const EditFlight: FC<any> = () => {
+const EditFlight: FC<any> = (props) => {
   const { id: missionId } = useParams<{ id: string }>();
   const [flightDetails, setFlightDetails] = useState<any>(null);
 

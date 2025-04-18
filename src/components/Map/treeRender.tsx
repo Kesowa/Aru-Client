@@ -9,15 +9,14 @@ import {
 } from "@ant-design/icons";
 import moment from "moment";
 import { featureType, featureTypes } from "src/static/vectorprops";
-import React from "react";
 
 const { Text } = Typography;
 
 export const ILayersToTree = (
   layers: GLayer[],
-  getTitleElement: (layer: GLayer) => React.JSX.Element,
-  getGroupTitleElement: (layerGroup: GLayer["layerGroupId"]) => React.JSX.Element,
-  renderRangePicker: () => React.JSX.Element,
+  getTitleElement: (layer: GLayer) => JSX.Element,
+  getGroupTitleElement: (layerGroup: GLayer["layerGroupId"]) => JSX.Element,
+  renderRangePicker: () => JSX.Element,
   sortType: string,
   isAscending: boolean
 ): TreeData => {
@@ -105,7 +104,7 @@ type LayerGroup = GLayer["layerGroupId"] & {
   groupType: 1 | 2;
 };
 type Child = Layer | LayerGroup;
-type MissionChild = {
+type MissionChild = MissionLayer & {
   icon: Object;
   key: string;
   title: Object;
@@ -147,8 +146,8 @@ function vectorIcon(type: featureTypes, color: string) {
 
 function groupLayers(
   layers: GLayer[],
-  getTitleElement: (layer: GLayer) => React.JSX.Element,
-  getGroupTitleElement: (layerGroup: GLayer["layerGroupId"]) => React.JSX.Element
+  getTitleElement: (layer: GLayer) => JSX.Element,
+  getGroupTitleElement: (layerGroup: GLayer["layerGroupId"]) => JSX.Element
 ) {
   const groupedLayers: Child[] = [];
   layers.forEach((layer) => {
@@ -191,7 +190,7 @@ function groupLayers(
   return groupedLayers;
 }
 
-function missionLayersMenu(renderRangePicker: () => React.JSX.Element) {
+function missionLayersMenu(renderRangePicker: () => JSX.Element) {
   return [
     {
       title: renderRangePicker(),
@@ -227,7 +226,7 @@ function missionLayersMenu(renderRangePicker: () => React.JSX.Element) {
   ];
 }
 
-function AirPollutionIcon({ color }: Readonly<{ color: string }>) {
+function AirPollutionIcon({ color }: { color: string }) {
   return (
     <svg
       fill={color}
@@ -238,7 +237,7 @@ function AirPollutionIcon({ color }: Readonly<{ color: string }>) {
       width="68"
       height="68"
       viewBox="64 64 896 896"
-      enableBackground="new 0 0 256 256"
+      enable-background="new 0 0 256 256"
       xmlSpace="preserve"
       style={{ padding: "0.5px" }}
     >
@@ -265,7 +264,7 @@ function AirPollutionIcon({ color }: Readonly<{ color: string }>) {
   );
 }
 
-function WindDirectionIcon({ color }: Readonly<{ color: string }>) {
+function WindDirectionIcon({ color }: { color: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

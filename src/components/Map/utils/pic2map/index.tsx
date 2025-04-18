@@ -40,7 +40,7 @@ function Pictomap(props) {
   const [isUploading, setIsUploading] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
   const [loader, setLoader] = useState(false);
-  const [layerFiles, setLayerFiles] = useState<any>([]);
+  const [layerFiles, populateLayerFiles] = useState<any>([]);
   const [layerFeatures, setLayerFeatures] = useState<any>([]);
   const [reviewList, setReviewList] = useState<any>([]);
   const [reviewPending, setReviewPending] = useState(false);
@@ -101,12 +101,24 @@ function Pictomap(props) {
     }
   };
 
+  //---------------------File validator----------------
+  function validateFile(file: any) {
+    switch (file.type) {
+      case "image/png":
+        return true;
+      case "image/jpeg":
+        return true;
+      default:
+        return false;
+    }
+  }
+
   const handleBeforeUpload = (file) => {
     setFileList([...fileList, file]);
     return false;
   };
 
-  const handleChangeFiles = ({ fileList }) => {
+  const handleChangeFiles = ({ fileList, file }) => {
     setFileList([...fileList]);
   };
 
@@ -222,11 +234,11 @@ function Pictomap(props) {
         const filtered2Array: any = finalArray.filter((i) => i.label !== null); //filtering the array to get rid of the unassigned object
         if (UnassignedImages.length > 0) {
           filtered2Array.unshift(UnassignedImages[0]);
-          setLayerFiles(filtered2Array);
+          populateLayerFiles(filtered2Array);
           setCurrentStage(2);
           props.setData([]);
         } else {
-          setLayerFiles(finalArray);
+          populateLayerFiles(finalArray);
           setCurrentStage(2);
           props.setData([]);
         }
@@ -252,7 +264,7 @@ function Pictomap(props) {
     if (currentStage === 2) {
       fetchJSON().then((data) => {
         const filterArray: any = [];
-        data.features.forEach(function (value) {
+        data.features.forEach(function (value, i) {
           let objecty: any = {};
           let test;
           if (props.layerLabel) {
@@ -312,53 +324,53 @@ function Pictomap(props) {
       };
       filteredArray.push(x);
     });
-    setLayerFiles(filteredArray);
+    populateLayerFiles(filteredArray);
   }
 
   // ------UnAssign a single image------------------
-  // function unAssignFile(id: any) {
-  //   const files: any = layerFiles;
-  //   console.log(files);
-  //   let fileToUnAssign: any = [];
-  //   let uExists = false;
-  //   // pick the file to unassign
-  //   files.map((file: any) => {
-  //     const y: any = file.data.files.filter((i) => i._id == id);
-  //     if (y.length > 0) {
-  //       fileToUnAssign = y;
-  //     }
-  //   });
-  //   console.log(fileToUnAssign, id);
-  //   // remove the file to unassign from file list
-  //   const filteredFile: any = files;
-  //   filteredFile.map((file: any) => {
-  //     file.data.files = file.data.files.filter((i) => i._id !== id);
-  //     // check whether unsassign group already exists of not
-  //     if (file.label === null) {
-  //       uExists = true;
-  //     }
-  //   });
-  //
-  //   filteredFile.filter((i) => i.data.files.length === 0);
-  //
-  //   if (uExists) {
-  //     filteredFile.map((file: any) => {
-  //       if (file.label === null) {
-  //         file.data.files.push(fileToUnAssign[0]);
-  //       }
-  //     });
-  //   } else {
-  //     const x: any = {
-  //       label: null,
-  //       data: {
-  //         fIndex: null,
-  //         files: fileToUnAssign,
-  //       },
-  //     };
-  //     filteredFile.push(x);
-  //   }
-  //   console.log(filteredFile);
-  // }
+  function unAssignFile(id: any) {
+    const files: any = layerFiles;
+    console.log(files);
+    let fileToUnAssign: any = [];
+    let uExists = false;
+    // pick the file to unassign
+    files.map((file: any) => {
+      const y: any = file.data.files.filter((i) => i._id == id);
+      if (y.length > 0) {
+        fileToUnAssign = y;
+      }
+    });
+    console.log(fileToUnAssign, id);
+    // remove the file to unassign from file list
+    const filteredFile: any = files;
+    filteredFile.map((file: any) => {
+      file.data.files = file.data.files.filter((i) => i._id !== id);
+      // check whether unsassign group already exists of not
+      if (file.label === null) {
+        uExists = true;
+      }
+    });
+
+    filteredFile.filter((i) => i.data.files.length === 0);
+
+    if (uExists) {
+      filteredFile.map((file: any) => {
+        if (file.label === null) {
+          file.data.files.push(fileToUnAssign[0]);
+        }
+      });
+    } else {
+      const x: any = {
+        label: null,
+        data: {
+          fIndex: null,
+          files: fileToUnAssign,
+        },
+      };
+      filteredFile.push(x);
+    }
+    console.log(filteredFile);
+  }
 
   //-------update review list-----------------------
   function updateReviewList(value, currentIndex) {
@@ -383,7 +395,7 @@ function Pictomap(props) {
         newIndexFiles.map((i: any) => {
           filteredArray.push(i);
         });
-        setLayerFiles(filteredArray);
+        populateLayerFiles(filteredArray);
       } else {
         const newFiles: any = [
           {
@@ -403,7 +415,7 @@ function Pictomap(props) {
         newFiles.map((i: any) => {
           filteredArray.push(i);
         });
-        setLayerFiles(filteredArray);
+        populateLayerFiles(filteredArray);
       }
     }
   }
@@ -442,9 +454,9 @@ function Pictomap(props) {
         const filtered2Array: any = filtered.filter((i) => i.label !== null); //filtering the array to get rid of the unassigned object
         if (UnassignedImages.length > 0) {
           filtered2Array.unshift(UnassignedImages[0]);
-          setLayerFiles(filtered2Array);
+          populateLayerFiles(filtered2Array);
         } else {
-          setLayerFiles(filtered);
+          populateLayerFiles(filtered);
         }
       } else {
         const object: any = {
@@ -464,11 +476,11 @@ function Pictomap(props) {
         const filtered2Array: any = filtered.filter((i) => i.label !== null); //filtering the array to get rid of the unassigned object
         if (UnassignedImages.length > 0) {
           filtered2Array.unshift(UnassignedImages[0]);
-          setLayerFiles(filtered2Array);
+          populateLayerFiles(filtered2Array);
         } else {
-          setLayerFiles(filtered);
+          populateLayerFiles(filtered);
         }
-        setLayerFiles(filtered);
+        populateLayerFiles(filtered);
       }
     }
   }
@@ -729,6 +741,7 @@ function Pictomap(props) {
         return <></>;
       case 2:
         return (
+          <>
             <Button
               type="primary"
               onClick={() => {
@@ -739,9 +752,11 @@ function Pictomap(props) {
             >
               Confirm and proceed
             </Button>
+          </>
         );
       case 3:
         return (
+          <>
             <Button
               type="primary"
               onClick={() => {
@@ -753,6 +768,7 @@ function Pictomap(props) {
             >
               Close
             </Button>
+          </>
         );
     }
   }

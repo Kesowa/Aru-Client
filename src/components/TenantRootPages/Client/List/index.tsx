@@ -23,8 +23,8 @@ import Highlighter from "react-highlight-words";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
-function ClientListPage() {
-  const [isTableLoading, setIsTableLoading] = useState(false);
+function ClientListPage(props: any) {
+  const [isTableLoading, setIstableLoading] = useState(false);
   const [tenantUserTableData, setTenantUserTableData] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -196,7 +196,7 @@ function ClientListPage() {
       dataIndex: "name",
       key: "name",
       ...getColumnSearchProps("name"),
-      sorter: () => null,
+      sorter: (a: any, b: any) => null,
       sortDirections: ["ascend", "descend"],
     },
     {
@@ -216,9 +216,9 @@ function ClientListPage() {
       dataIndex: "count",
       key: "missions",
       render: (count) => {
-        return count?.length ? count[0].count : 0;
+        return count && count.length ? count[0].count : 0;
       },
-      sorter: () => null,
+      sorter: (a: any, b: any) => null,
       sortDirections: ["ascend", "descend"],
     },
     {
@@ -229,7 +229,7 @@ function ClientListPage() {
       render: (country) => {
         return country;
       },
-      sorter: () => null,
+      sorter: (a: any, b: any) => null,
       sortDirections: ["ascend", "descend"],
     },
     {
@@ -240,7 +240,7 @@ function ClientListPage() {
       render: (city) => {
         return city;
       },
-      sorter: () => null,
+      sorter: (a: any, b: any) => null,
       sortDirections: ["ascend", "descend"],
     },
     {
@@ -249,7 +249,7 @@ function ClientListPage() {
       key: "createdAt",
       ...getColumnSearchProps("createdAt"),
       render: (createdAt: string) => moment(createdAt).format("DD-MM-YYYY"),
-      sorter: () => null,
+      sorter: (a: any, b: any) => null,
       sortDirections: ["ascend", "descend"],
     },
 
@@ -259,7 +259,7 @@ function ClientListPage() {
       key: "createdBy",
       ...getColumnSearchProps("createdBy"),
       render: (createdBy: any) => (createdBy ? createdBy.name : "Auto"),
-      sorter: () => null,
+      sorter: (a: any, b: any) => null,
       sortDirections: ["ascend", "descend"],
     },
 
@@ -269,7 +269,7 @@ function ClientListPage() {
       key: "expiryDatee",
       ...getColumnSearchProps("expiryDate"),
       render: (expiryDatee) => moment(expiryDatee).format("DD-MM-YYYY"),
-      sorter: () => null,
+      sorter: (a: any, b: any) => null,
       sortDirections: ["ascend", "descend"],
     },
     {
@@ -309,7 +309,7 @@ function ClientListPage() {
   ];
 
   const fetchAllUsers = () => {
-    setIsTableLoading(true);
+    setIstableLoading(true);
     const params = {};
     if (searchFilters) {
       Object.entries(searchFilters).forEach((f: any) => {
@@ -353,7 +353,7 @@ function ClientListPage() {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        setIsTableLoading(false);
+        setIstableLoading(false);
       });
   };
 

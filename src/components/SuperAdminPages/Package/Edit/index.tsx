@@ -19,7 +19,7 @@ import { DocModel, uploadFile } from "src/services/fileUpload";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function EditPackage() {
+function EditPackage(props: any) {
   const [form] = Form.useForm();
   const [poster, setPoster] = useState("");
   const [isPosterUploading, setIsPosterUploading] = useState(false);
@@ -43,6 +43,8 @@ function EditPackage() {
       const body = {
         file: uploadToken,
       };
+      // const formData = new FormData();
+      // formData.append("poster", file);
       http
         .post(apis.UPLOAD_PACKAGE_POSTER, body, {})
         .then((result) => {
@@ -201,7 +203,6 @@ function EditPackage() {
                       <img
                         src={`${STATIC_URL}${poster}`}
                         className="uploaded-poster"
-                        alt=""
                       />
                     ) : (
                       <div>

@@ -16,7 +16,7 @@ import RootUser from "./RootUser";
 import Stats from "./Stats";
 import { AuthContext } from "src/services/authUtils";
 
-function TenantDetails() {
+function TenantDetails(props: any) {
   const [tenantDetails, setTenantDetails] = useState(undefined);
   const [loadingTenantDetails, setLoadingTenantDetails] = useState(true);
   const { logout } = useContext(AuthContext);

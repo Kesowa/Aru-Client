@@ -1,4 +1,4 @@
-import { useEffect, useState, FC, useContext } from "react";
+import React, { useEffect, useState, FC, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import {
   Button,
@@ -33,9 +33,55 @@ import { LoaderContext } from "src/components/shared/Loader";
 const { TextArea } = Input;
 const { Option } = Select;
 
+interface FlightData {
+  flightName: string;
+  date: string;
+  time: string;
+  duration: string;
+}
+
+interface GeoFenceCircle {
+  center: {
+    lat: number;
+    lng: number;
+  };
+  radius: number;
+  area: number;
+}
+
+interface GeoFencePolygon {
+  points: Array<any>;
+  area: number;
+}
+
+interface Flight {
+  geoFence: {
+    circle?: GeoFenceCircle;
+    polygon?: GeoFencePolygon;
+  };
+  flightDetails: FlightData;
+}
+
+interface Asset {
+  _id: string;
+  assetName: string;
+}
+
+interface Client {
+  _id: string;
+  name: string;
+}
+
 interface StageThreeProps {
   jobTypeName: string; // Replace with the appropriate type for jobTypeName
   missionType: string; // Replace with the appropriate type for missionType
+  missionCreationData: {
+    flights: Flight[];
+    weather?: {
+      temperature: number;
+      description: string;
+    };
+  };
   prevStage: Function;
   flightDetails: any;
   setIsEditing: any;
@@ -113,6 +159,7 @@ const StageThree: FC<StageThreeProps> = ({
     http
       .get(`${apis.GET_ALL_ASSETS}`)
       .then((result) => {
+        //console.log(result.data.data.gotDoc);
         setAssets(result.data.data.gotDoc);
       })
       .catch((err) => {
@@ -229,6 +276,13 @@ const StageThree: FC<StageThreeProps> = ({
       dataIndex: "weather",
       render: () => {
         return <></>;
+        // no weather field in missionCreationData anyways
+        // return (
+        //   <>
+        //     {missionCreationData.weather?.temperature} <sup>o</sup> C, &nbsp;
+        //     {missionCreationData.weather?.description}
+        //   </>
+        // );
       },
     },
     {
@@ -289,6 +343,7 @@ const StageThree: FC<StageThreeProps> = ({
           subTitle="Please contact admin@kesowa.com to renew our services!"
         />
       </Modal>
+      <React.Fragment>
         <Row className="stage_three_main">
           <Col sm={24} md={12}>
             <div className="mission_name_input">
@@ -298,7 +353,7 @@ const StageThree: FC<StageThreeProps> = ({
                   setMissionName(e.target.value);
                 }}
                 maxLength={100}
-                value={missionName ?? ""}
+                value={missionName ? missionName : ""}
                 placeholder="Enter mission name here"
               />
             </div>
@@ -457,6 +512,7 @@ const StageThree: FC<StageThreeProps> = ({
         </div>
 
         <Row justify="center" className="step_buttons"></Row>
+      </React.Fragment>
     </div>
   );
 };

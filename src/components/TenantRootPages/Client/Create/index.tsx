@@ -36,7 +36,7 @@ import { PERMS, TENANT_CLIENT_PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function ClientCreatePage() {
+function ClientCreatePage(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [avatarPreview, setAvatarPreview] = useState("");
@@ -49,7 +49,7 @@ function ClientCreatePage() {
       permissions: string[];
     }[]
   >([]);
-  const [selectedUserGroup, setSelectedUserGroup]: [any, any] = useState();
+  const [selectedUserGroup, setSelectedusergroup]: [any, any] = useState();
   const [errorState, setErrorState] = useState("");
 
   const { Auth, logout } = useContext(AuthContext);
@@ -67,7 +67,7 @@ function ClientCreatePage() {
         DocModel.USER_AVATARS,
         (prog) => console.info("PROGRESS: " + prog)
       );
-      setAvatar(String(uploadToken));
+      setAvatar(uploadToken);
       setIsAvatarUploading(false);
     });
     return false;
@@ -76,7 +76,7 @@ function ClientCreatePage() {
   //change user group
   const onUserGroupChange = (value: any) => {
     const ug = userGroups.find((ele: any) => ele._id === value);
-    setSelectedUserGroup(ug);
+    setSelectedusergroup(ug);
   };
 
   //fetch user group
@@ -267,7 +267,9 @@ function ClientCreatePage() {
                       showSearch
                       placeholder="Select a user group"
                       filterOption={(input, option) =>
-                        option!.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        option!.children
+                          .toLowerCase()
+                          .indexOf(input.toLowerCase()) >= 0
                       }
                     >
                       {userGroups.map((ele: any) => (
@@ -306,7 +308,7 @@ function ClientCreatePage() {
                       beforeUpload={beforeUploadFunction}
                     >
                       {avatar ? (
-                        <img src={avatarPreview} className="uploaded-avatar" alt="" />
+                        <img src={avatarPreview} className="uploaded-avatar" />
                       ) : (
                         <div>
                           {isAvatarUploading ? (

@@ -14,10 +14,10 @@ type CreateOrEditLocationProps = {
   isEditing: boolean;
 };
 
-function CreateOrEditLocation(props: Readonly<CreateOrEditLocationProps>) {
+function CreateOrEditLocation(props: CreateOrEditLocationProps) {
   const [areaSelected, setAreaSelected] = useState(false);
   const [drawingToolBtns, setDrawingToolBtns] = useState(false);
-  const [polygonData, setPolygonData] = useState<{
+  const [geoData, setPolygonData] = useState<{
     area: number;
     length: number;
     points: any;
@@ -34,7 +34,7 @@ function CreateOrEditLocation(props: Readonly<CreateOrEditLocationProps>) {
     setAreaSelected,
     drawingToolBtns,
     setDrawingToolBtns,
-    polygonData,
+    geoData,
     setPolygonData,
     setGeolocation,
     isEditing: props.isEditing,
@@ -98,7 +98,7 @@ function CreateOrEditLocation(props: Readonly<CreateOrEditLocationProps>) {
                 <LocationCreateOrEditForm
                   areaSelected={areaSelected}
                   setAreaSelected={setAreaSelected}
-                  geoData={polygonData}
+                  geoData={geoData}
                   setPolygonData={setPolygonData}
                   geolocation={geolocation}
                   isEditing={props.isEditing}

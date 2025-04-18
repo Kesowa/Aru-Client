@@ -9,7 +9,7 @@ interface IProps {
   path?: string;
 }
 
-function PrivateRoute({ children, ...rest }: Readonly<IProps>) {
+function PrivateRoute({ children, ...rest }: IProps) {
   const { Auth } = useContext(AuthContext);
   return (
     <Route

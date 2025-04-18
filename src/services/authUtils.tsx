@@ -21,7 +21,7 @@ export const AuthContext = createContext({
   Auth: AuthInit,
   login: (userid: string, userdetails: any) => {},
   logout: (isError?: boolean) => {},
-  setUserDetails: (userDetails: any) => {},
+  setUserDetails: (userDteails: any) => {},
 });
 
 export const useAuth = (init: IAuth = AuthInit) => {

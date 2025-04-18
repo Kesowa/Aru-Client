@@ -187,7 +187,7 @@ function ChangeClientPassword() {
                                 return Promise.resolve();
                               }
                               return Promise.reject(
-                                new Error("The two passwords that you entered do not match!")
+                                "The two passwords that you entered do not match!"
                               );
                             },
                           }),

@@ -80,7 +80,7 @@ interface Item {
   value: string;
 }
 
-function VectorForm(props: Readonly<IVectorFormProps>) {
+function VectorForm(props: IVectorFormProps) {
   const [data, setData] = useState<
     { id: string; key: string; value: string }[]
   >([]);
@@ -212,7 +212,7 @@ function VectorForm(props: Readonly<IVectorFormProps>) {
     setColor(color.hex);
   };
 
-  const handleChange = (color) => {
+  const handleChange = (color, event) => {
     setColor(color.hex);
   };
 
@@ -238,7 +238,7 @@ function VectorForm(props: Readonly<IVectorFormProps>) {
 
     setCount(newData.length + 1);
 
-    setDescription(properties.description ?? "");
+    setDescription(properties.description || "");
     setData(newData);
   };
 
@@ -331,18 +331,17 @@ function VectorForm(props: Readonly<IVectorFormProps>) {
         const editable = isEditing(record);
         return editable ? (
           <span>
-            <Button
-              type="text"
+            <a
               href="javascript:;"
               onClick={() => save(record.key)}
               style={{ marginRight: 8 }}
             >
               <SaveOutlined style={{ color: "green" }} />
-            </Button>
+            </a>
             <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-              <Button type="text">
+              <a>
                 <CloseOutlined style={{ color: "red" }} />
-              </Button>
+              </a>
             </Popconfirm>
           </span>
         ) : (
@@ -357,9 +356,9 @@ function VectorForm(props: Readonly<IVectorFormProps>) {
               title="Sure to delete?"
               onConfirm={() => handleDelete(record.key)}
             >
-              <Button type="text">
+              <a>
                 <DeleteOutlined style={{ color: "red" }} />
-              </Button>
+              </a>
             </Popconfirm>
           </>
         );

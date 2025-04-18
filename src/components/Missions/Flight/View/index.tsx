@@ -132,7 +132,7 @@ const ViewFlight: FC<any> = () => {
   const findPolygonCenter = (points: { lat: number; lng: number }[]) => {
     const bounds = new window.google.maps.LatLngBounds();
 
-    const polygonCoords = [];
+    const polygonCoords: google.maps.LatLng[] = [];
 
     for (const x of points) {
       const llbound = new window.google.maps.LatLng(x.lat, x.lng);
@@ -151,7 +151,7 @@ const ViewFlight: FC<any> = () => {
   const createMeasurements = (geofence: any) => {
     let obj;
     switch (geofence.shape) {
-      case "Polygon": {
+      case "Polygon":
         const geoPoints = geofence.points.map((point: any) => {
           return {
             lat: point.lat,
@@ -166,7 +166,6 @@ const ViewFlight: FC<any> = () => {
         const center = findPolygonCenter(geoPoints);
         googleMap.current.setCenter({ lat: center[0], lng: center[1] });
         break;
-      }
       case "Circle":
         obj = new window.google.maps.Circle({
           center: geofence.center,

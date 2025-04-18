@@ -46,7 +46,7 @@ import moment from "moment";
 import VideoPlayer from "../../../../shared/VideoPlayer";
 import Dragger from "antd/lib/upload/Dragger";
 import { API_URL, STATIC_URL } from "src/constants";
-import { io, Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import Thread from "../../../../shared/Thread";
@@ -83,7 +83,7 @@ function Videos(props) {
   const [limit, setLimit] = useState(4);
   const [totalCount, setTotalCount] = useState(0);
   const [threadDetails, setThreadDetails] = useState({});
-  const [isUploading, setIsUploading] = useState(false);
+  const [isUploading, setUploading] = useState(false);
   const socket: any = useRef();
   const [activateSelection, setActivateSelection] = useState(false);
   const [isAscending, setIsAscending] = useState(false);
@@ -108,7 +108,7 @@ function Videos(props) {
     });
   };
 
-  const vodMenu: (data:any) => MenuProps["items"] = (data) => {
+  const vodMenu: MenuProps["items"] = (data) => {
     const item = [
       {
         key: "1",
@@ -219,6 +219,7 @@ function Videos(props) {
               } successfully!`
             );
           } else if ("bookmarks" in body.update) {
+            //setRefresh(true);
             message.success(
               `Bookmark ${action === "add" ? "added" : "removed"} successfully!`
             );
@@ -398,7 +399,7 @@ function Videos(props) {
     customRequest: async (options: any) => {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
-      setIsUploading(true);
+      setUploading(true);
 
       const uploadToken = await uploadFile(options.file, DocModel.VOD, (prog) => {
         options.onProgress({ percent: prog * 100 });
@@ -412,11 +413,18 @@ function Videos(props) {
           ? props.missionDetails.locationId._id
           : undefined,
       };
+      // const fData = new FormData();
+      // fData.append("video", options.file);
+      // fData.append("missionID", props.missionDetails.missionId);
+      // fData.append("flightID", props.missionDetails.flightId);
+      // if (props.missionDetails.locationId?._id) {
+      //   fData.append("locationID", props.missionDetails.locationId?._id);
+      // }
 
       switch (
         props.missionDetails.userType //upload priviledge checks
       ) {
-        case "tenant-root": { //when user is a tenant root
+        case "tenant-root": //when user is a tenant root
           console.log(options.file.name.split(".")[1]);
           const parts = options.file.name.split(".");
           const isValidExtension = checkExtension(parts[parts.length - 1]);
@@ -462,7 +470,7 @@ function Videos(props) {
                 }
                 options.onError({ err });
               })
-              .finally(() => setIsUploading(false));
+              .finally(() => setUploading(false));
           } else {
             options.onError({});
             message.error(
@@ -470,8 +478,8 @@ function Videos(props) {
             );
           }
           break;
-        }
-        case "tenant-staff": {// when user is tenant staff
+
+        case "tenant-staff": // when user is tenant staff
           const parts2 = options.file.name.split(".");
           const isValidExtension2 = checkExtension(parts2[parts2.length - 1]);
           if (isValidExtension2) {
@@ -515,7 +523,7 @@ function Videos(props) {
                 }
                 options.onError({ err });
               })
-              .finally(() => setIsUploading(false));
+              .finally(() => setUploading(false));
           } else {
             options.onError({});
             message.error(
@@ -523,7 +531,6 @@ function Videos(props) {
             );
           }
           break;
-        }
         default:
           message.warning("You are not permitted to perform this action!");
       }
@@ -531,14 +538,14 @@ function Videos(props) {
         abort() {
           console.log("Aborting video upload");
           source.cancel("User cancelled upload");
-          setIsUploading(false);
+          setUploading(false);
         },
       };
     },
   };
 
   useEffect(() => {
-    let socketInstance: Socket | null = null;
+    let socketInstance = null;
 
     if (props?.missionDetails?.missionId) {
       if (socket.current) {
@@ -560,7 +567,7 @@ function Videos(props) {
         setRefresh(true);
       });
 
-      socketInstance.on("VOD_REMOVED", () => {
+      socketInstance.on("VOD_REMOVED", (data) => {
         setRefresh(true);
       });
     }
@@ -752,7 +759,7 @@ function Videos(props) {
             },
           }
         )
-        .then(() => {
+        .then((res) => {
           message.success("Video deleted succesfully!");
           props.setCount(props.totalVOD - (Array.isArray(id) ? id.length : 1));
           setRefresh(true);
@@ -900,7 +907,7 @@ function Videos(props) {
                             </a>
                           )}
                         </div>
-                        <div className="main">
+                        <div className="main" tabIndex={1}>
                           <Carousel
                             beforeChange={(oldIndex, newIndex) => {
                               updateSelectedVOD(data[newIndex], newIndex);
@@ -912,17 +919,13 @@ function Videos(props) {
                           >
                             {data.map((i, idx) => {
                               return (
-                                <Button
-                                  type="text"
+                                <div
                                   style={{
                                     height: "500px",
                                     textAlign: "center",
                                     background: "black",
                                   }}
                                   key={window.crypto.randomUUID()}
-                                  onClick={() => {
-                                    updateSelectedVOD(i, idx);
-                                  }}
                                 >
                                   {!videoDetails.link && (
                                     <img
@@ -932,10 +935,12 @@ function Videos(props) {
                                         margin: "auto",
                                       }}
                                       src={STATIC_URL + i.thumbnail}
-                                      alt=""
+                                      onClick={() => {
+                                        updateSelectedVOD(i, idx);
+                                      }}
                                     />
                                   )}
-                                </Button>
+                                </div>
                               );
                             })}
                           </Carousel>
@@ -990,9 +995,6 @@ function Videos(props) {
                                 <Card
                                   key={`1-${dataa._id}`}
                                   className="video-card"
-                                  onClick={() => {
-                                    updateSelectedVOD(dataa, idx);
-                                  }}
                                   cover={
                                     <img
                                       style={{
@@ -1002,10 +1004,12 @@ function Videos(props) {
                                       }}
                                       src={STATIC_URL + dataa.thumbnail}
                                       className="card-img-size"
+                                      onClick={() => {
+                                        updateSelectedVOD(dataa, idx);
+                                      }}
                                       onError={(e: any) =>
                                         (e.target.src = `/icons/fallback.png`)
                                       }
-                                      alt=""
                                     />
                                   }
                                 >
@@ -1105,9 +1109,6 @@ function Videos(props) {
                                     <Card
                                       key={`1-${dataa._id}`}
                                       className="outcome-cardd"
-                                      onClick={() => {
-                                        updateSelectedVOD(dataa, idx);
-                                      }}
                                       cover={
                                           <img
                                             style={{
@@ -1116,10 +1117,12 @@ function Videos(props) {
                                               objectPosition: "0 0",
                                             }}
                                             src={STATIC_URL + dataa.thumbnail}
+                                            onClick={() => {
+                                              updateSelectedVOD(dataa, idx);
+                                            }}
                                             onError={(e: any) =>
                                               (e.target.src = `/icons/fallback.png`)
                                             }
-                                            alt=""
                                           />
                                       }
                                     >
@@ -1190,7 +1193,7 @@ function Videos(props) {
                         </a>
                       )}
                     </div>
-                    <div className="main">
+                    <div className="main" tabIndex={1}>
                       <Carousel
                         beforeChange={(oldIndex, newIndex) => {
                           updateSelectedVOD(data[newIndex], newIndex);
@@ -1201,17 +1204,13 @@ function Videos(props) {
                         prevArrow={<LeftOutlined />}
                       >
                         {data.map((i, idx) => (
-                          <Button
-                            type="text"
+                          <div
                             style={{
                               height: "500px",
                               textAlign: "center",
                               background: "black",
                             }}
                             key={window.crypto.randomUUID()}
-                            onClick={() => {
-                              updateSelectedVOD(i, idx);
-                            }}
                           >
                             {!videoDetails.link && (
                               <img
@@ -1221,10 +1220,12 @@ function Videos(props) {
                                   margin: "auto",
                                 }}
                                 src={STATIC_URL + i.thumbnail}
-                                alt=""
+                                onClick={() => {
+                                  updateSelectedVOD(i, idx);
+                                }}
                               />
                             )}
-                          </Button>
+                          </div>
                         ))}
                       </Carousel>
                       {videoDetails.link && (
@@ -1288,15 +1289,7 @@ function Videos(props) {
                           : {}
                       }
                     >
-                      <Col 
-                        md={8} 
-                        style={{ padding: "10px" }}
-                        onClick={() => {
-                          if (!activateSelection) {
-                            updateSelectedVOD(dataa, idx);
-                          }
-                        }}
-                      >
+                      <Col md={8} style={{ padding: "10px" }}>
                         <Badge
                           style={{
                             backgroundColor: "#f5222d",
@@ -1336,10 +1329,14 @@ function Videos(props) {
                               width={310}
                               height={175}
                               src={STATIC_URL + dataa.thumbnail}
+                              onClick={() => {
+                                if (!activateSelection) {
+                                  updateSelectedVOD(dataa, idx);
+                                }
+                              }}
                               onError={(e: any) =>
                                 (e.target.src = `/icons/fallback.png`)
                               }
-                              alt=""
                             />
                           </Badge>
                         </Badge>

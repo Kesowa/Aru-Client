@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import "react-loading-skeleton/dist/skeleton.css";
-import { Tabs, Button, message, TabsProps } from "antd";
+import { Tabs, Button, message } from "antd";
 
 import { DownloadOutlined } from "@ant-design/icons";
 import "./data.less";
@@ -9,6 +9,12 @@ import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 
 import { AuthContext } from "src/services/authUtils";
+const boxStyle: React.CSSProperties = {
+  width: "100%",
+  height: 120,
+  borderRadius: 6,
+  border: "1px solid #40a9ff",
+};
 
 function ReportGenration(props) {
   const [activeKey, setactiveKey] = useState("1");
@@ -51,6 +57,7 @@ function ReportGenration(props) {
     };
 
     return (
+      <>
         <div className="center__button">
           <Button
             type="primary"
@@ -61,6 +68,7 @@ function ReportGenration(props) {
             Generate {reportType} Report
           </Button>
         </div>
+      </>
     );
   }
 
@@ -81,11 +89,13 @@ function ReportGenration(props) {
   };
 
   return (
+    <>
       <Tabs
         defaultActiveKey={activeKey}
         onChange={callback}
         items={returnTabPaneItem()}
       />
+    </>
   );
 }
 

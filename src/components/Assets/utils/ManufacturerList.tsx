@@ -15,7 +15,7 @@ const ManufacturerList = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [isTableLoading, setIsTableLoading] = useState(true);
-  const [selectedManufacturerID, setSelectedManufacturerID] = useState("");
+  const [selectedManufacturerID, setSelectedManufacturerID] = useState();
 
   const [manufacturers, setManufacturers] = useState<any[]>([]);
 
@@ -95,11 +95,11 @@ const ManufacturerList = () => {
     ),
     onFilter: (value, record) =>
       record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    // onFilterDropdownOpenChange: (visible) => {
-    //   if (visible) {
-    //     setTimeout(() => searchInput.select());
-    //   }
-    // },
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.select());
+      }
+    },
     render: (text) =>
       searchedColumn === dataIndex ? (
         <Highlighter
@@ -146,8 +146,9 @@ const ManufacturerList = () => {
       sorter: (a, b) => a.name.length - b.name.length,
       sortDirections: ["ascend", "descend"],
       ...getColumnSearchProps("name"),
-      render: (name) => (
-          <span>
+      render: (name, record) => (
+        <>
+          <span onClick={() => {}}>
             <Title level={5}>
               <ShakeOutlined
                 style={{ marginRight: "1rem", color: "#a5a4bf" }}
@@ -155,22 +156,27 @@ const ManufacturerList = () => {
               {name}
             </Title>
           </span>
+        </>
       ),
     },
     {
       title: "NATIONALITY",
       dataIndex: "nationality",
       ...getColumnSearchProps("nationality"),
-      render: (_, record) => (
-          <span>{record.nationality}</span>
+      render: (text, record) => (
+        <>
+          <span onClick={() => {}}>{record.nationality}</span>
+        </>
       ),
     },
     {
       title: "WEBSITE",
       dataIndex: "website",
       ...getColumnSearchProps("website"),
-      render: (_, record) => (
-          <span>{record.website}</span>
+      render: (text, record) => (
+        <>
+          <span onClick={() => {}}>{record.website}</span>
+        </>
       ),
     },
     {

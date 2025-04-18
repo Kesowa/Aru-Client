@@ -36,7 +36,7 @@ function Map(props) {
   const history = useHistory();
   const { logout } = useContext(AuthContext);
   const { setLoading } = useContext(LoaderContext);
-  const [files, setFiles] = useState([]);
+  const [files2, setFiles] = useState([]);
   const [loader, setLoader] = useState(false);
   const [mapImage, setmapImage] = useState("");
   const socket: any = useRef();
@@ -80,7 +80,7 @@ function Map(props) {
           `${API_URL}/stream/mission-specific?missionID=${props.id}`
         );
         console.log("PROP DATA", props.id);
-        socket.current.on("LAYER_ZIP_START", () => {
+        socket.current.on("LAYER_ZIP_START", (data) => {
           message.success(
             "Preparing your data for download, this may take some time!"
           );
@@ -145,14 +145,12 @@ function Map(props) {
             <Row>
               <div className="text-container">
                 {mapImage && (
-                  <Button
-                    type="text"
+                  <div
                     className="map-button"
                     onClick={() => history.push("/dashboard/map/" + props.id)}
                     style={{
                       background: `url(${mapImage})`,
                       backgroundSize: "contain",
-                      padding: "0"
                     }}
                   >
                     <div className="overlay-content">
@@ -165,7 +163,7 @@ function Map(props) {
                         </Row>
                       </div>
                     </div>
-                  </Button>
+                  </div>
                 )}
               </div>
             </Row>
@@ -176,7 +174,7 @@ function Map(props) {
                 <Title level={4} className="title-text">
                   Map files
                 </Title>
-                {files.length > 0 ? (
+                {files2.length > 0 ? (
                   <Button
                     onClick={() => {
                       downloadAllLayers(props.id);
@@ -194,19 +192,18 @@ function Map(props) {
                     height: "300px",
                     overflow: "auto",
                   }}
-                  dataSource={files}
+                  dataSource={files2}
                   renderItem={(item: any) => (
                     <List.Item
                       actions={[
-                        <Button
-                          type="link"
+                        <a
                           key={`1.${item._id}`}
                           onClick={() =>
                             download(`${STATIC_URL}${item.layerpath}`)
                           }
                         >
                           <DownloadOutlined /> Download
-                        </Button>,
+                        </a>,
                       ]}
                     >
                       <List.Item.Meta

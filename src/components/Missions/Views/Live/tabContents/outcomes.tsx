@@ -199,7 +199,6 @@ function Outcomes(props: any) {
               marginLeft: "auto",
               marginRight: "auto",
             }}
-            alt=""
           />
           <p style={{ textAlign: "center" }}>
             There are no alerts to display yet
@@ -218,7 +217,6 @@ function Outcomes(props: any) {
               <img
                 style={{ width: "100%", height: "auto" }}
                 src={STATIC_URL + dataa.image}
-                alt=""
               />
             </Col>
             <Col md={19}>

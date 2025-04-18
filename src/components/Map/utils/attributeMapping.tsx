@@ -38,7 +38,7 @@ interface AttributeMappingProps {
   setResponseArray: (responseArray: ResponseObject[]) => void;
 }
 
-function AttributeMapping(props: Readonly<AttributeMappingProps>) {
+function AttributeMapping(props: AttributeMappingProps) {
   function handleAttributeMapping(
     attribute: string,
     fields: Attribute,

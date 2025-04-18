@@ -23,8 +23,8 @@ import Highlighter from "react-highlight-words";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function UserListPage() {
-  const [isTableLoading, setIsTableLoading] = useState(false);
+function UserListPage(props: any) {
+  const [isTableLoading, setIstableLoading] = useState(false);
   const [tenantUserTableData, setTenantUserTableData] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -232,7 +232,7 @@ function UserListPage() {
   ];
 
   const fetchAllUsers = () => {
-    setIsTableLoading(true);
+    setIstableLoading(true);
     http
       .get(apis.FETCH_ALL_USERS_OF_TENANT)
       .then((result) => {
@@ -263,7 +263,7 @@ function UserListPage() {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        setIsTableLoading(false);
+        setIstableLoading(false);
       });
   };
 

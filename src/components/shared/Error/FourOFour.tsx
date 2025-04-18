@@ -8,7 +8,7 @@ function FourOFour(props) {
       <div className="error-wrapper">
         <Row>
           <Col span={16} className="picture-div">
-            <img src={Four0FourPic} className="picture" alt="" />
+            <img src={Four0FourPic} className="picture" />
           </Col>
           <Col span={8} className="message-div">
             <Title>ERROR 404</Title>

@@ -59,7 +59,7 @@ import io from "socket.io-client";
 import ImageDoc from "./Data/ImageDocs";
 import ManageClients from "./Data/ManageClient";
 import { API_URL, PUBLIC_URL, STATIC_URL } from "src/constants";
-import ReportGenration from "./Data/report_genration";
+import Report_genration from "./Data/report_genration";
 import { IPlotReportError } from "src/types/report";
 import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
@@ -433,7 +433,7 @@ function MissionView() {
         key: "6",
         label: <span>Report Generation </span>,
         children: (
-          <ReportGenration
+          <Report_genration
             missionId={MissionDetails.missionId}
             missionDetails={MissionDetails}
             setShowReportErrors={setShowReportErrors}
@@ -452,11 +452,13 @@ function MissionView() {
 
   const DataTabs = ({ id }) => {
     return (
+      <>
         <Tabs
           defaultActiveKey={activeKey}
           onChange={callback}
           items={returnTabPaneItem(id)}
         />
+      </>
     );
   };
 
@@ -646,7 +648,6 @@ function MissionView() {
                     <img
                       src={EmptyGraphics}
                       style={{ width: "100%", height: "100%", opacity: "80%" }}
-                      alt=""
                     />
                   </div>
                 </Row>
@@ -903,6 +904,42 @@ function MissionView() {
   }
 
   //--------------Render Generate Report Button-----------
+  function generateReport() {
+    setLoading(true);
+    http
+      .post(`${apis.CREATE_REPORT}`, {
+        missionId: MissionDetails.missionId,
+      })
+      .then((result) => {
+        console.log(result.data.message);
+        if (result.data.status) {
+          message.success(result.data.message);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        message.error(err.message);
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+  function renderGenerateReportButton() {
+    if (["Completed", "Review"].includes(MissionDetails.missionStatus)) {
+      return (
+        <Button
+          type="primary"
+          style={{ marginLeft: "10px" }}
+          onClick={generateReport}
+        >
+          Generate Report
+        </Button>
+      );
+    } else return <></>;
+  }
 
   function headerButtons(status: any) {
     switch (status) {
@@ -940,7 +977,7 @@ function MissionView() {
   };
   console.log("HORRAY", id);
   /*--------------------Mission Type--------------------*/
-  const menu: () => MenuProps["items"] = () => {
+  const menu: MenuProps["items"] = () => {
     const items: MenuProps["items"] = missionTypes.map(
       (mType: any, index: any) => {
         return {
@@ -1066,7 +1103,9 @@ function MissionView() {
               ))}
             </>
           ) : (
+            <>
               <Empty description={<span>No pilot users found!</span>} />
+            </>
           )}
         </div>
       </Modal>
@@ -1219,9 +1258,9 @@ function MissionView() {
           >
             <Descriptions size="small" column={3}>
               <Descriptions.Item label={"Mission ID"}>
-                <Button type="link">
+                <a>
                   <Paragraph copyable>{MissionDetails.missionId}</Paragraph>
-                </Button>
+                </a>
               </Descriptions.Item>
               <Descriptions.Item label="Mission Type">
                 {MissionDetails.missionType}
@@ -1256,9 +1295,11 @@ function MissionView() {
                   className="mission-details"
                   bordered={false}
                   extra={[
-                      <div className="pilot-profile-badge" key={window.crypto.randomUUID()}>
+                    <>
+                      <div className="pilot-profile-badge">
                         {renderPilotBadge()}
-                      </div>,
+                      </div>
+                    </>,
                   ]}
                 >
                   <Text type="secondary">Instructions</Text>
@@ -1271,11 +1312,11 @@ function MissionView() {
                     <>
                       <Text type="secondary" style={{ marginTop: "8px" }}>
                         Public Map URL:{" "}
-                        <Button type="text">
+                        <a>
                           <Paragraph
                             copyable
                           >{`${PUBLIC_URL}/map/${MissionDetails.missionTenantId}/${MissionDetails.missionId}`}</Paragraph>
-                        </Button>
+                        </a>
                       </Text>
                       <p></p>
                     </>

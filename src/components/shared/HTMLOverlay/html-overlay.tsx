@@ -34,7 +34,7 @@ export default class HtmlOverlay extends React.Component<Props> {
   }
 
   getCoords(coordinates: number[]): [number, number] {
-    const pos = this.props.viewport?.project(coordinates);
+    const pos = this.props.viewport.project(coordinates);
     if (!pos) return [-1, -1];
     return pos;
   }
@@ -71,7 +71,7 @@ export default class HtmlOverlay extends React.Component<Props> {
         const [x, y] = this.getCoords(item.props.coordinates);
         if (this.inView([x, y])) {
           const key =
-            item.key ? item.key : index;
+            item.key === null || item.key === undefined ? index : item.key;
           renderItems.push(React.cloneElement(item, { x, y, key }));
         }
       });

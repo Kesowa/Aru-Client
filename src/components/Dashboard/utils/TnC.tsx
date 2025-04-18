@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
@@ -19,7 +19,7 @@ const TermsAndCondition = () => {
     setLoading(true);
     http
       .patch(`${apis.TERMS_CONDITIONS_CHECK}`)
-      .then(() => {
+      .then((res: any) => {
         setTermsModal(false);
       })
       .catch((err: any) => {

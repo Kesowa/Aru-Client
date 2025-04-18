@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Button, message, Tooltip } from "antd";
+import { message, Tooltip } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import GeoFence from "../../static/GeoFence.svg";
@@ -60,6 +60,8 @@ class GoogleMap extends Component<mapProps, mapState> {
     this.googleMap = this.createGoogleMap(loc);
     this.props.setlocation(loc);
 
+    // this.setCurrentLocation();
+
     this.drawingManager = this.createDrawingManager();
     this.searchAutoComplete = this.createSearchBar();
     this.drawingManager.setMap(this.googleMap);
@@ -86,7 +88,7 @@ class GoogleMap extends Component<mapProps, mapState> {
       this.props.setDrawingToolBtns(false);
     });
 
-    this.googleMap.addListener("click", () => {
+    this.googleMap.addListener("click", (e) => {
       this.props.setDrawingToolBtns(false);
     });
 
@@ -150,7 +152,7 @@ class GoogleMap extends Component<mapProps, mapState> {
     });
 
     //----------Rendering InfoWindow for all GeoJSON files loaded on map----------------------
-    const infoWin = new window.google.maps.InfoWindow();
+    const infoWin = new google.maps.InfoWindow();
     const gmap = this.googleMap;
     gmap.data.addListener("click", function (event) {
       const heightLimit = event.feature.h.Elev_Allow
@@ -307,7 +309,7 @@ class GoogleMap extends Component<mapProps, mapState> {
   findPolygonCenter = (points) => {
     const bounds = new window.google.maps.LatLngBounds();
 
-    const polygonCoords = [];
+    const polygonCoords: google.maps.LatLng[] = [];
 
     for (const x of points) {
       const llbound = new window.google.maps.LatLng(x.lat, x.lng);
@@ -335,7 +337,7 @@ class GoogleMap extends Component<mapProps, mapState> {
     } = this.props;
 
     this.drawingManager.addListener("overlaycomplete", (e) => {
-      setAreaSelected(!!areaSelected);
+      setAreaSelected(areaSelected ? areaSelected : !areaSelected);
       const shape = e.overlay;
       this.oldShape = shape;
 
@@ -428,7 +430,7 @@ class GoogleMap extends Component<mapProps, mapState> {
     window.google.maps.event.addListener(
       circle,
       "radius_changed",
-      function () {
+      function (this: any) {
         // Circle data
         const center: any = {};
         center.lat = circle.getCenter().lat();
@@ -454,7 +456,7 @@ class GoogleMap extends Component<mapProps, mapState> {
     window.google.maps.event.addListener(
       circle,
       "center_changed",
-      function () {
+      function (this: any) {
         // Circle data
         const center: any = {};
         center.lat = circle.getCenter().lat();
@@ -487,7 +489,7 @@ class GoogleMap extends Component<mapProps, mapState> {
     window.google.maps.event.addListener(
       polygon.getPath(),
       "set_at",
-      function () {
+      function (this: any) {
         const pathPoints = polygon
           .getPath()
           .getArray()
@@ -531,7 +533,7 @@ class GoogleMap extends Component<mapProps, mapState> {
     window.google.maps.event.addListener(
       polygon.getPath(),
       "insert_at",
-      function () {
+      function (this: any) {
         const pathPoints = polygon
           .getPath()
           .getArray()
@@ -640,17 +642,17 @@ class GoogleMap extends Component<mapProps, mapState> {
   //     setCenterPoints,
   //     setGeoFence,
   //   } = this.props;
-  // 
+
   //   this.clearDrawing();
   //   this.props.setAreaSelected(false);
   //   this.props.setDrawingToolBtns(false);
-  //
+
   //   // Clear previous
   //   const parentMap = this.googleMap;
   //   parentMap.data.forEach((feature) => {
   //     if (feature.getId() === "UploadedGeoJSON") parentMap.data.remove(feature);
   //   });
-  //
+
   //   // Flight Area can't be point
   //   const featToAdd = geojsonData.features.filter((feature) =>
   //     ["MultiPolygon", "Polygon"].includes(feature.geometry.type)
@@ -696,20 +698,20 @@ class GoogleMap extends Component<mapProps, mapState> {
   //     coords.forEach((coord) => {
   //       shapePath.push(new window.google.maps.LatLng(coord.lat, coord.lng));
   //     });
-  //
+
   //     const area = window.google.maps.geometry.spherical.computeArea(shapePath);
-  //
+
   //     const length =
   //       window.google.maps.geometry.spherical.computeLength(shapePath);
-  //
+
   //     // Set Polygon data to State
   //     setGeoFence({
   //       polygon: { area, length, points: coords },
   //       circle: null,
   //     });
-  //
+
   //     setAreaSelected(true);
-  //
+
   //     this.setState({
   //       isCircleActive: false,
   //       isPolygonActive: false,
@@ -769,6 +771,7 @@ class GoogleMap extends Component<mapProps, mapState> {
 
   render() {
     return (
+      <React.Fragment>
         <div id="gmap_container">
           <div
             id="google-map"
@@ -826,8 +829,7 @@ class GoogleMap extends Component<mapProps, mapState> {
             {(this.state.isCircleActive ||
               this.state.isPolygonActive ||
               this.state.isGeoJSONActive) && (
-              <Button
-                type="text"
+              <div
                 className="control-clear-button"
                 onClick={() => {
                   this.clearDrawing();
@@ -840,7 +842,7 @@ class GoogleMap extends Component<mapProps, mapState> {
                 }}
               >
                 <p>Clear Selection</p>
-              </Button>
+              </div>
             )}
             <Tooltip
               title={
@@ -851,8 +853,12 @@ class GoogleMap extends Component<mapProps, mapState> {
               }
               color={"volcano"}
             >
-              <Button 
-                type="text"
+              <img
+                src={RadiusTool}
+                style={{
+                  background: this.state.isCircleActive ? "#1890ff" : "#fff",
+                }}
+                className="control-icons"
                 onClick={() => {
                   if (!this.state.isCircleActive) {
                     if (this.oldShape) {
@@ -862,16 +868,7 @@ class GoogleMap extends Component<mapProps, mapState> {
                     this.setCircleDrawing();
                   }
                 }}
-              >
-                <img
-                  src={RadiusTool}
-                  style={{
-                    background: this.state.isCircleActive ? "#1890ff" : "#fff",
-                  }}
-                  className="control-icons"
-                  alt=""
-                />
-              </Button>
+              />
             </Tooltip>
             <Tooltip
               title={
@@ -882,8 +879,12 @@ class GoogleMap extends Component<mapProps, mapState> {
               }
               color={"volcano"}
             >
-              <Button
-                type="text"
+              <img
+                src={GeoFence}
+                style={{
+                  background: this.state.isPolygonActive ? "#1890ff" : "#fff",
+                }}
+                className="control-icons"
                 onClick={() => {
                   if (!this.state.isPolygonActive) {
                     if (this.oldShape) {
@@ -893,16 +894,7 @@ class GoogleMap extends Component<mapProps, mapState> {
                     this.setPolygonDrawing();
                   }
                 }}
-              >
-                <img
-                  src={GeoFence}
-                  style={{
-                    background: this.state.isPolygonActive ? "#1890ff" : "#fff",
-                  }}
-                  className="control-icons"
-                  alt=""
-                />
-              </Button>
+              />
             </Tooltip>
             <Tooltip
               title={
@@ -933,10 +925,10 @@ class GoogleMap extends Component<mapProps, mapState> {
                 ref={this.geojsonInputRef}
                 onChange={(e) => {
                   const reader = new FileReader();
-                  // const parent = this;
-                  reader.onload = function () {
-                    // const geojsonFile = JSON.parse(reader.result!.toString());
-                    // parent.setGeojsonUploaded(geojsonFile);
+                  const parent = this;
+                  reader.onload = function (e) {
+                    const geojsonFile = JSON.parse(reader.result!.toString());
+                    parent.setGeojsonUploaded(geojsonFile);
                   };
                   if (e.target.files?.length !== 0) {
                     reader.readAsText(e.target.files![0]);
@@ -947,6 +939,7 @@ class GoogleMap extends Component<mapProps, mapState> {
             </Tooltip>
           </div>
         </div>
+      </React.Fragment>
     );
   }
 }

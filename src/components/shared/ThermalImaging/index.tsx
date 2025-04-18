@@ -8,7 +8,6 @@ import apis from "../../../services/apis";
 import http from "../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { AuthContext } from "src/services/authUtils";
-import { ColumnsType } from "antd/lib/table";
 
 interface DataType {
   // index: number;
@@ -69,6 +68,7 @@ const ThermalImaging = (props) => {
     await http
       .get(apis.GET_THERMALPOINT, { params: { id, doc } })
       .then((res) => {
+        // console.log(res.data.data.data);
         const tableDataResponse = res.data.data.data.table;
         console.log("tableDataResponse", tableDataResponse); // Assuming the response data matches your table data format
         setTableData(tableDataResponse);
@@ -158,7 +158,7 @@ const ThermalImaging = (props) => {
       title: "Pixel Color",
       dataIndex: "color",
       key: "color",
-      render: (text) => (
+      render: (text, record) => (
         <div>
           <div
             style={{ backgroundColor: text, width: "1rem", height: "1rem" }}
@@ -195,13 +195,14 @@ const ThermalImaging = (props) => {
       key: "action",
       render: (_, record) => (
         <Space size="middle">
-          <Button type="link" onClick={() => handleDelete(record)}>Delete</Button>
+          <a onClick={() => handleDelete(record)}>Delete</a>
         </Space>
       ),
     },
   ];
 
   return (
+    <>
       <Modal
         className="thermalViewModal"
         centered
@@ -242,6 +243,7 @@ const ThermalImaging = (props) => {
           </div>
         )}
       </Modal>
+    </>
   );
 };
 

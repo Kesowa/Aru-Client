@@ -91,11 +91,11 @@ const svgToDataURL = (svg: string) => {
 
 const getRasterDataUrl = (layer: Layer) => {
   const settings = {
-    bidx: layer._metadata?.bidx ?? null,
-    bandExp: layer._metadata?.bandExp ?? null,
-    colorMap: layer._metadata?.colorMap ?? null,
-    resamplingMethod: layer._metadata?.resamplingMethod ?? null,
-    overlayId: layer._metadata?.overlayId ?? null,
+    bidx: layer._metadata?.bidx || null,
+    bandExp: layer._metadata?.bandExp || null,
+    colorMap: layer._metadata?.colorMap || null,
+    resamplingMethod: layer._metadata?.resamplingMethod || null,
+    overlayId: layer._metadata?.overlayId || null,
   };
   switch (layer.raster) {
     case rasterProps.NDVI:
@@ -287,7 +287,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               })
               .then((data) => data.features),
             getPosition: (d: any) => d.geometry.coordinates,
-            getIcon: (d: any) => {
+            getIcon: (d: any, { index }: { index: any }) => {
               const windSpeed = d.properties.windSpeed;
               const maxWindSpeed = d.properties.maxWindSpeed;
 
@@ -326,7 +326,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               .then((response) => response.json())
               .then((data) => {
                 if (layer._metadata?.highlightIndexes) {
-                  for (const idx of layer._metadata?.highlightIndexes ?? []) {
+                  for (const idx of layer._metadata?.highlightIndexes) {
                     if (idx) {
                       const oldColor = data.features[idx].properties?.color;
                       if (oldColor)

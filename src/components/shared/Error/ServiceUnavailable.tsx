@@ -8,7 +8,7 @@ function ServiceUnvailable() {
       <div className="error-wrapper">
         <Row>
           <Col span={16} className="picture-div">
-            <img src={FiveZeroThree} className="picture" alt="" />
+            <img src={FiveZeroThree} className="picture" />
           </Col>
           <Col span={8} className="message-div">
             <Title>ERROR 503: Service Unavailable</Title>
