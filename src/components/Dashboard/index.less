@@ -34,6 +34,25 @@
 // @box-shadow-base: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08),
 //   0 9px 28px 8px rgba(0, 0, 0, 0.05); // major shadow for layers
 
+.map-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 123, 255, 0.2); /* more faded */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.map-button:hover .map-overlay {
+  background-color: rgba(0, 123, 255, 0.5); /* full color on hover */
+}
+
+
 .dashboard-container {
   .dashboard-header-wrapper {
     position: fixed;

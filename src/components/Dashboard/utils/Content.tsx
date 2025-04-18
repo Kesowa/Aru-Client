@@ -13,6 +13,8 @@ import {
   Skeleton,
 } from "antd";
 import { Link } from "react-router-dom";
+import goToMap from "../../../assets/go-to-map.svg";
+import mapImg from "../../../assets/mapimg.jpg";
 import "./../index.less";
 import { ImportOutlined } from "@ant-design/icons";
 import http from "../../../services/httpCall";
@@ -49,6 +51,7 @@ function DashboardContent() {
   const socket: any = useRef();
   const [statsRefresh, setStatsRefresh] = useState(true);
   const [expiryInfo, setExpiryInfo] = useState<ExpiryInfo | null>(null);
+  const [totalMissionsOfTenant, setTotalMissionsOfTenant] = useState(null);
 
   const { Auth, logout } = useContext(AuthContext);
 
@@ -407,6 +410,7 @@ function DashboardContent() {
         .then((result) => {
           console.log(result.data.missionCount);
           if (result.data.missionCount.length > 0) {
+            let totalCount = 0;
             result.data.missionCount.map((i: any) => {
               switch (i._id) {
                 case "Upcoming":
@@ -421,6 +425,13 @@ function DashboardContent() {
                 default:
               }
             });
+
+          //get the mission count 
+          totalCount = result.data.missionCount.reduce(
+            (acc: number, item: any) => acc + item.count,
+            0
+          );
+          setTotalMissionsOfTenant(totalCount);
           } else {
             setLiveMissions(0);
             setUpcomingMissions(0);
@@ -504,7 +515,6 @@ function DashboardContent() {
           {expiryInfo?.isExpiringSoon && (
             <Col>
               <span style={{ color: "#fa8c16", fontWeight: 1000 }}>
-                {expiryInfo.message}
                 (Your account is expiring in {expiryInfo.daysLeft} days.{" "}
                 <a
                   href={`mailto:info@kesowa.com?subject=Renewal Request&body=Hi Team,%0D%0A%0D%0AMy account is expiring in ${expiryInfo.daysLeft} days. Please assist with the renewal process.`}
@@ -561,6 +571,66 @@ function DashboardContent() {
                 <>{renderStorageStats()}</>
               )}
             </>
+            <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+              <Col span={24}>
+                <Title
+                  className="shortcuts-title"
+                  level={4}
+                  style={{ marginLeft: "8px", marginTop: "10px" }}
+                >
+                  <ImportOutlined /> Quick view Mission Location{" "}
+                  <span style={{ fontSize: "0.8em", fontWeight: "normal" }}>
+                    (Project Locations : {totalMissionsOfTenant})
+                  </span>
+                </Title>
+                <Link
+                  to={{
+                    pathname: "/dashboard/data",
+                    state: { openLocationTab: true },
+                  }}
+                >
+                  <div
+                    className="map-button"
+                    style={{
+                      position: "relative",
+                      marginLeft: "10px",
+                      height: "240px",
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <img
+                      src={mapImg}
+                      alt="Map preview"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
+                    <div className="map-overlay">
+                      <img
+                        src={goToMap}
+                        alt="Go to Map"
+                        style={{ width: "100px", height: "100px" }}
+                      />
+                      <span
+                        style={{
+                          marginTop: "8px",
+                          color: "#fff",
+                          fontWeight: "bold",
+                          fontSize: "27px",
+                        }}
+                      >
+                        Map
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </Col>
+            </Row>
           </Col>
         </Row>
 
