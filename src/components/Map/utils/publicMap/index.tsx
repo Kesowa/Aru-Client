@@ -32,9 +32,6 @@ import DeckGL from "@deck.gl/react";
 import { FlyToInterpolator } from "deck.gl";
 import { BitmapLayer } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
-import {
-  GeoJsonEditMode,
-} from "@deck.gl-community/editable-layers";
 import { StaticMap } from "react-map-gl";
 import InfoWindowContent from "../../utils/infoWindow";
 
@@ -66,10 +63,7 @@ import Fuse from "fuse.js";
 import { featureType, featureTypes } from "src/static/vectorprops";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
-
-interface Config {
-  mode: typeof GeoJsonEditMode;
-}
+import { HTMLOverlay, HTMLOverlayItem } from "src/components/shared/HTMLOverlay";
 
 const { Title, Text } = Typography;
 
@@ -91,7 +85,7 @@ function PublicMap(props) {
   const { setLoading } = useContext(LoaderContext);
 
   // Viewport settings
-  const [INITIAL_VIEW_STATE, setViewport] = useState<any>({
+  const [viewport, setViewport] = useState<any>({
     longitude: DEFAULT_LOCATION.lng,
     latitude: DEFAULT_LOCATION.lat,
     zoom: 13,
@@ -218,7 +212,7 @@ function PublicMap(props) {
     }),
   ];
 
-  const [showPopup, togglePopup] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const [fuse, setFuse] = useState<
     {
       layerId: string;
@@ -232,7 +226,7 @@ function PublicMap(props) {
   const [mapMode, setMapMode] = useState("mapbox://styles/mapbox/streets-v8");
 
   const [tenantName, setTenantName] = useState("");
-  const [mission, setMission] = useState<IMission>("");
+  const [mission, setMission] = useState<IMission>();
 
   const [layerName, setLayerName] = useState("");
   const [infoWindowMode, setInfoWindowMode] = useState("");
@@ -258,7 +252,7 @@ function PublicMap(props) {
   }, []);
 
   useEffect(() => {
-    SetAllLayers((prev) => [
+    setAllLayers((prev) => [
       ...prev.toSorted((a, b) => {
         if (sortType === "createdAt") {
           if (isAscending) return moment(a.createdAt).diff(moment(b.createdAt));
@@ -277,7 +271,6 @@ function PublicMap(props) {
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
   const [featureLayer, setFeatureLayer] = useState("");
 
-  // const [activeID, setActiveID] = useState("");
   const onExpand = (expandedKeysValue: React.Key[]) => {
     // if not set autoExpandParent to false, if children expanded, parent can not collapse.
     // or, you can remove all expanded children keys.
@@ -285,7 +278,7 @@ function PublicMap(props) {
     setAutoExpandParent(false);
   };
 
-  const [AllLayers, SetAllLayers] = useState<Layer[]>([]);
+  const [AllLayers, setAllLayers] = useState<Layer[]>([]);
   const [dateRange, setDateRange] = useState([
     moment(
       moment().subtract(7, "d").format("YYYY-MM-DD") + " " + "00:00",
@@ -310,11 +303,11 @@ function PublicMap(props) {
     setLayerName(layername);
     setInfoWindowMode(mode);
     setFeatureLayer(id);
-    togglePopup(true);
+    setShowPopup(true);
   }
 
   function handleClose(status: boolean) {
-    togglePopup(status);
+    setShowPopup(status);
   }
 
   //-------------on layer check-------------------------------
@@ -376,7 +369,7 @@ function PublicMap(props) {
     }
     return bounds;
   };
-  const onCheck = async (checkedKeysValue: any[], e) => {
+  const onCheck = async (checkedKeysValue: any[]) => {
     const layersWithBounds: Layer[] = [];
 
     for (const layer of AllLayers) {
@@ -399,10 +392,10 @@ function PublicMap(props) {
       }
     }
 
-    SetAllLayers(layersWithBounds);
+    setAllLayers(layersWithBounds);
   };
 
-  const onSelect = (selectedKeysValue: React.Key[], info: any) => {
+  const onSelect = (selectedKeysValue: React.Key[]) => {
     setSelectedKeys(selectedKeysValue);
   };
 
@@ -426,6 +419,7 @@ function PublicMap(props) {
         message: string;
         mission: IMission;
         data: ILayer[];
+        centerPoints: { lat: number; lng: number };
       }>;
       if (props.isMissionMap) {
         result = await http.get(
@@ -440,7 +434,7 @@ function PublicMap(props) {
         });
       }
       if (result.data.status) {
-        SetAllLayers(
+        setAllLayers(
           result.data.data.map((layer) => ({
             ...layer,
             _isChecked: layer.name == selectedLayer,
@@ -613,10 +607,10 @@ function PublicMap(props) {
   function handleMapMode(value) {
     if (value === "osm") {
       setViewport({
-        longitude: INITIAL_VIEW_STATE.longitude,
-        latitude: INITIAL_VIEW_STATE.latitude,
-        zoom: INITIAL_VIEW_STATE.zoom,
-        pitch: INITIAL_VIEW_STATE.pitch,
+        longitude: viewport.longitude,
+        latitude: viewport.latitude,
+        zoom: viewport.zoom,
+        pitch: viewport.pitch,
         minZoom: 0,
         maxZoom: 19,
       });
@@ -695,11 +689,11 @@ function PublicMap(props) {
               </div>
             )}
             <DeckGL
-              initialViewState={INITIAL_VIEW_STATE}
+              initialViewState={viewport}
               controller={true}
               layers={computeLayers()}
               style={{ height: "100vh", width: "100%" }}
-              onClick={(info, _) => {
+              onClick={(info) => {
                 if (info.layer) {
                   const layer = AllLayers.find(
                     (layer) =>
@@ -760,20 +754,21 @@ function PublicMap(props) {
                           <Title level={5} style={{ float: "left" }}>
                             {layerName}
                           </Title>
-                          <a
+                          <Button
+                            type="link"
                             style={{
                               float: "right",
                             }}
                             onClick={() => handleClose(false)}
                           >
                             X
-                          </a>
+                          </Button>
                         </>
                       }
                       trigger="click"
                       open={showPopup}
                       style={{ position: "relative" }}
-                      onVisibleChange={() => handleClose(false)}
+                      onOpenChange={() => handleClose(false)}
                     />
                   </HTMLOverlayItem>
                 </HTMLOverlay>
@@ -815,7 +810,7 @@ function PublicMap(props) {
                           f.searchIndex.search(searchValue)[0];
                         if (searchResult) {
                           // check the layer sothat feature is visible on map
-                          SetAllLayers((prev) =>
+                          setAllLayers((prev) =>
                             prev.map((layer) => {
                               if (layer._id === f.layerId) {
                                 layer._isChecked = true;
@@ -850,7 +845,7 @@ function PublicMap(props) {
                       }
                       // this section is reached both when search failed AND when search cleared
                       if (searchValue !== "") message.warn("No match found!");
-                      SetAllLayers((prev) =>
+                      setAllLayers((prev) =>
                         prev.map((layer) => {
                           layer._metadata = {
                             ...layer._metadata,
@@ -864,13 +859,14 @@ function PublicMap(props) {
                 </Col>
               </Row>
             </div>
-            <div
+            <Button
+              type="text"
               className="collapser-button"
               onClick={() => sideBarHandeller()}
               style={{ right: sideBarState === false ? "10px" : "354px" }}
             >
               <span className="icon">{sideBarIcon}</span>
-            </div>
+            </Button>
             {sideBarState && (
               <div className="map-sidebar">
                 <div className="header-content">
@@ -881,7 +877,7 @@ function PublicMap(props) {
                           Map
                         </Title>
                         <Text type="secondary">
-                          {tenantName ? tenantName : ""}
+                          {tenantName ?? ""}
                         </Text>
                         {props.isMissionMap && (
                           <div
@@ -905,13 +901,13 @@ function PublicMap(props) {
                             <Text type="primary">
                               Name:{" "}
                               <Text type="secondary">
-                                {mission?.name || ""}
+                                {mission?.name ?? ""}
                               </Text>
                             </Text>
                             <Text type="primary">
                               ID:{" "}
                               <Text type="secondary" copyable>
-                                {mission?._id || ""}
+                                {mission?._id ?? ""}
                               </Text>
                             </Text>
                           </div>

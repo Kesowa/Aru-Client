@@ -8,7 +8,7 @@ interface IProps {
   path?: string;
 }
 
-function LoginWrapper({ children, ...rest }: IProps) {
+function LoginWrapper({ children, ...rest }: Readonly<IProps>) {
   const { Auth } = useContext(AuthContext);
   return (
     <Route

@@ -3,7 +3,6 @@ import { mentions, mentionsInput } from "./styles";
 
 const Mentions = (props) => {
   return (
-    <>
       <MentionsInput
         value={props.value}
         onChange={props.handleChange}
@@ -16,7 +15,6 @@ const Mentions = (props) => {
           displayTransform={(id, display) => `@${display}`}
         />
       </MentionsInput>
-    </>
   );
 };
 

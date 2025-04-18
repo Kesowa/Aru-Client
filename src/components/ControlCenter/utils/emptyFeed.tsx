@@ -1,8 +1,10 @@
+import { Button } from "antd";
 import "./videoBox.less";
 
 function EmptyFeed(props) {
   return (
-    <div
+    <Button
+      type="text"
       className="empty_feed"
       onMouseDown={() => {
         props.addFeed(props.group, props.index);
@@ -11,7 +13,7 @@ function EmptyFeed(props) {
       <div className="inner">
         <span>+</span>
       </div>
-    </div>
+    </Button>
   );
 }
 

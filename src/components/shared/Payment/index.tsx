@@ -2,7 +2,7 @@ import { message } from "antd";
 import apis from "../../../services/apis";
 import http from "../../../services/httpCall";
 
-const Payment = (props: any) => {
+const Payment = () => {
   const pay = async () => {
     const response = await http.post(`${apis.GENERATE_ORDER}`, {
       package: "608e7a7ee11f711a34fb0474",
@@ -46,9 +46,7 @@ const Payment = (props: any) => {
   };
 
   return (
-    <>
       <button onClick={() => pay()}>Pay</button>
-    </>
   );
 };
 

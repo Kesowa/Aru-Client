@@ -60,26 +60,6 @@ function EditTenant() {
         (prog) => console.info("PROGRESS: " + prog)
       );
       setAvatar(uploadToken);
-
-      // const formData = new FormData();
-      // formData.append("avatar", file);
-      // http
-      //   .post(apis.UPLOAD_TENANT_AVATAR, body, {
-      //   })
-      //   .then((result) => {
-      //     if (result.data.status) {
-      //       setAvatar(result.data.file);
-      //     } else {
-      //       message.error(result.data.message);
-      //     }
-      //   })
-      //   .catch((err) => {
-      //     console.log(err);
-      //     AxiosErrorHandler(err, props.logout);
-      //   })
-      //   .finally(() => {
-      //     setIsAvatarUploading(false);
-      //   });
     });
     return false;
   };
@@ -214,11 +194,10 @@ function EditTenant() {
                     {avatar ? (
                       <img
                         src={
-                          avatarPreview
-                            ? avatarPreview
-                            : `${STATIC_URL}${avatar}`
+                          avatarPreview ?? `${STATIC_URL}${avatar}`
                         }
                         className="uploaded-avatar"
+                        alt=""
                       />
                     ) : (
                       <div>

@@ -48,21 +48,19 @@ function Organisation() {
         }
       })
       .catch((err) => {
-        //console.log(err.code.toString());
-
-        // switch(err.status.toString()) {
-        //     case "401":
-        //         setErrorState("401");
-        //         break;
-        //     case "503":
-        //         setErrorState("503");
-        //         break;
-        //     case "504":
-        //         setErrorState("504");
-        //         break;
-        //     default:
-        //         setErrorState("500");
-        // }
+        switch(err.status.toString()) {
+            case "401":
+                setErrorState("401");
+                break;
+            case "503":
+                setErrorState("503");
+                break;
+            case "504":
+                setErrorState("504");
+                break;
+            default:
+                setErrorState("500");
+        }
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {

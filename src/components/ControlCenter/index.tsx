@@ -3,13 +3,10 @@ import {
   Button,
   Row,
   Col,
-  Typography,
   Tooltip,
-  Select,
   Dropdown,
   Carousel,
   Modal,
-  Card,
   Layout,
   message,
   Avatar,
@@ -34,15 +31,7 @@ import moment from "moment";
 import Video from "./utils/thumbnailVideo";
 import { STATIC_URL } from "src/constants";
 
-const { Content, Footer, Header, Sider } = Layout;
-const { Meta } = Card;
-const { Title } = Typography;
-const { Option } = Select;
-
-const themes = {
-  dark: `/dark-theme.css`,
-  light: `/light-theme.css`,
-};
+const { Content, Header, Sider } = Layout;
 
 function GridLive(props: any) {
   const [allFeeds, setallFeeds] = useState<any>([]);
@@ -66,15 +55,16 @@ function GridLive(props: any) {
       {
         key: "1",
         label: (
-          <a target="_blank" rel="noopener noreferrer">
+          // REVISIT STYLING
+          <Button type="link">
             {"   "}
             Change layout
-          </a>
+          </Button>
         ),
         icon: <LayoutOutlined />,
       },
     ],
-    onClick: (e) => setisLayoutModalVisible(true),
+    onClick: () => setisLayoutModalVisible(true),
   };
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++ change current page layout +++++++++++++++++++++++++++++++++++++++++++++++++
@@ -179,10 +169,6 @@ function GridLive(props: any) {
     setFeedGroups(allGroups);
     setisLayoutModalVisible(false);
   };
-
-  function handleChange(value) {
-    console.log(`selected ${value}`);
-  }
 
   const chunk = function (arr, size) {
     const result: any[] = [];
@@ -471,8 +457,6 @@ function GridLive(props: any) {
           </div>
           <div
             className="sider-center-div"
-            onClick={addNewPage}
-            style={{ cursor: "pointer" }}
           >
             <Tooltip title="Add new page">
               <Button
@@ -627,7 +611,8 @@ function GridLive(props: any) {
               </Col>
             </Row>
             <Divider />
-            <div
+            <Button
+              type="text"
               onClick={() => {
                 changeLayout("twoFeeds");
               }}
@@ -639,9 +624,10 @@ function GridLive(props: any) {
                 className="layout-icon"
               />
               <h3>2 Feeds + Map</h3>
-            </div>
+            </Button>
             <Divider />
-            <div
+            <Button
+              type="text"
               onClick={() => {
                 changeLayout("threeFeeds");
               }}
@@ -653,7 +639,7 @@ function GridLive(props: any) {
                 className="layout-icon"
               />
               <h3>Three Feeds</h3>
-            </div>
+            </Button>
           </Modal>
 
           {/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Modal to add feed ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
@@ -757,10 +743,8 @@ function GridLive(props: any) {
                       cursor: "pointer",
                     }}
                     className={`feed-to-add ${
-                      replaceWith &&
-                      replaceWith.feed &&
-                      replaceWith.feed._id &&
-                      replaceWith.feed._id === feed.feed._id
+                      replaceWith?.feed?._id &&
+                      replaceWith?.feed?._id === feed.feed._id
                         ? "feed-to-add-selected"
                         : ""
                     }`}

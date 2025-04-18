@@ -18,8 +18,8 @@ import Highlighter from "react-highlight-words";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function ListAllTanents(props: any) {
-  const [isTableLoading, setIstableLoading] = useState(false);
+function ListAllTanents() {
+  const [isTableLoading, setIsTableLoading] = useState(false);
   const [tenantTableData, setTenantTableData] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -210,7 +210,7 @@ function ListAllTanents(props: any) {
   ];
 
   const fetchAllTenants = () => {
-    setIstableLoading(true);
+    setIsTableLoading(true);
     http
       .get(apis.FETCH_ALL_TENANTS)
       .then((result) => {
@@ -226,7 +226,7 @@ function ListAllTanents(props: any) {
         AxiosErrorHandler(err, logout);
       })
       .finally(() => {
-        setIstableLoading(false);
+        setIsTableLoading(false);
       });
   };
 

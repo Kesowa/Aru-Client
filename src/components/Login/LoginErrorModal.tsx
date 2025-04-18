@@ -13,17 +13,7 @@ import "../shared/login-bg.less";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "../shared/Loader";
 
-const OVERLAY_STYLES = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: "#18447A",
-  opacity: 0.9,
-  zIndex: 1000,
-};
-function LoginErrorModal(props: any) {
+function LoginErrorModal() {
   const [errMessage, setErrMessage] = useState("");
   const { login, logout } = useContext(AuthContext);
   const { setLoading } = useContext(LoaderContext);
@@ -49,7 +39,6 @@ function LoginErrorModal(props: any) {
   };
 
   return ReactDom.createPortal(
-    <>
       <div className="login-container login-page login-bg">
         <div className="login-section-wrapper">
           {errMessage && (
@@ -120,8 +109,7 @@ function LoginErrorModal(props: any) {
             <Link to="/forgot-password">Forgot Password</Link>
           </div>
         </div>
-      </div>
-    </>,
+      </div>,
     document.getElementById("portal-root") as Element
   );
 }

@@ -258,6 +258,7 @@ function Outcomes(outcomeProps) {
                     <img
                       style={{ width: "100%", height: "auto" }}
                       src={STATIC_URL + dataa.image}
+                      alt=""
                     />
                   </Col>
                   <Col md={19}>
@@ -304,10 +305,11 @@ function Outcomes(outcomeProps) {
                 <Col span={6} className="video-thumbnail" key={window.crypto.randomUUID()}>
                   <Card
                     className="outcome-card"
+                    onClick={() => setSelectedAlert(outcome)}
                     cover={
                       <img
-                        onClick={() => setSelectedAlert(outcome)}
                         src={STATIC_URL + outcome.image}
+                        alt=""
                       />
                     }
                   >

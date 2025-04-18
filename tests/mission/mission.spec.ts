@@ -68,5 +68,4 @@ test("create mission", async ({ page }) => {
     `Mission DeletedMission: ${missionName} is deleted!`
   );
   expect(missionDeleteAlert).toBeDefined();
-  // expect(await page.getByText(missionName, { exact: true }).count()).toBe(0);
 });

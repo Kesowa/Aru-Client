@@ -83,7 +83,7 @@ function ThreeStreamViewDetails(props) {
             <Col span={15}>
               {" "}
               <h4 className={"field-value"}>
-                {missionData && missionData.name}
+                {missionData ? missionData.name : ""}
               </h4>
             </Col>
           </Row>
@@ -95,7 +95,7 @@ function ThreeStreamViewDetails(props) {
             <Col span={15}>
               {" "}
               <h4 className={"field-value"}>
-                {missionData && missionData._id}
+                {missionData ? missionData._id : ""}
               </h4>
             </Col>
           </Row>
@@ -112,10 +112,10 @@ function ThreeStreamViewDetails(props) {
             <Col span={19}>
               {" "}
               <h4 className={"pilot-name"}>
-                {missionData && missionData.flight.pilotID.name}
+                {missionData ? missionData.flight.pilotID.name : ""}
               </h4>
               <h4 className={"pilot-phone"}>
-                {missionData && missionData.flight.pilotID.phoneNo}
+                {missionData ? missionData.flight.pilotID.phoneNo : ""}
               </h4>
             </Col>
           </Row>
@@ -139,7 +139,7 @@ function ThreeStreamViewDetails(props) {
                 <h5 className="small-text small-text-first">Uptime</h5>
                 <h2 className="large-text">{uptime}</h2>
 
-                {uptime[0] !== "0" || uptime[1] !== "0" ? (
+                {!uptime.startsWith("0") || uptime[1] !== "0" ? (
                   <h5
                     className="small-text small-text-second"
                     style={{ fontSize: "9px" }}

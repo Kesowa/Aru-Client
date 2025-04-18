@@ -135,7 +135,7 @@ function LiveViewBase() {
 
   useEffect(() => {
     if (missionDetails) {
-      const location = { lat: "", lng: "" };
+      const location = { lat: 0, lng: 0 };
       if (missionDetails.flight.geoFence.circle) {
         location.lat = missionDetails.flight.geoFence.circle.center.lat;
         location.lng = missionDetails.flight.geoFence.circle.center.lng;
@@ -207,7 +207,7 @@ function LiveViewBase() {
                 />
               ) : (
                 <div className="no-feed">
-                  <img className="no-feed-svg" src={streamEnd} />
+                  <img className="no-feed-svg" src={streamEnd} alt="" />
                   <div className="no-feed-text">
                     <Title level={4}>Stream is offline!</Title>
                   </div>
@@ -227,7 +227,7 @@ function LiveViewBase() {
                 <DroneMap streamKey={streamKey} geoFence={geoFence.geoFence} />
               ) : (
                 <div className="no-map">
-                  <img className="no-map-svg" src={NoMap} />
+                  <img className="no-map-svg" src={NoMap} alt="" />
                   <div className="no-map-text">
                     <Title level={4}>Drone is currently offline!</Title>
                   </div>

@@ -20,6 +20,7 @@ import {
   Badge,
   Space,
   MenuProps,
+  Button,
 } from "antd";
 import {
   InboxOutlined,
@@ -48,7 +49,7 @@ import { AuthContext } from "src/services/authUtils";
 import { ThreadContext } from "src/services/threadUtils";
 
 function Media(props) {
-  const [files, populateFiles] = useState<any>([]);
+  const [files, setFiles] = useState<any>([]);
   // const [progress, setProgress] = useState(0); // Not used yet. May be used in future
 
   const [multiDelete, setMultiDelete] = useState(false);
@@ -58,7 +59,7 @@ function Media(props) {
   const [coverPhoto, setCoverPhoto] = useState<any>([]);
   const [coverLoaded, setCoverLoaded] = useState(false);
   const [storageModal, setStorageModal] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState("");
+  const [selectedVideo, setSelectedVideo] = useState<{ data: any; idx: any; }>();
   const [selectedMedia, setSelectedMedia] = useState("");
 
   const { logout } = useContext(AuthContext);
@@ -117,7 +118,7 @@ function Media(props) {
     }
     return items;
   };
-  const vodMenu: MenuProps["items"] = (data) => {
+  const vodMenu: (data: any) => MenuProps["items"] = (data) => {
     const items = [
       {
         key: "1",
@@ -178,7 +179,7 @@ function Media(props) {
         break;
     }
   };
-  const mediaMenu: MenuProps["items"] = () => {
+  const mediaMenu: () => MenuProps["items"] = () => {
     const items = [
       {
         key: "1",
@@ -266,27 +267,27 @@ function Media(props) {
     {
       key: 1,
       label: "Clear Selection",
-      disabled: checkedList.length > 0 ? false : true,
+      disabled: (checkedList.length === 0),
     },
     {
       key: 2,
       label: "Select all files",
-      disabled: files.length > 0 ? false : true,
+      disabled: (files.length === 0),
     },
     {
       key: 3,
       label: "Delete files",
-      disabled: checkedList.length > 0 ? false : true,
+      disabled: (checkedList.length === 0),
     },
   ];
 
   const handleAction: MenuProps["onClick"] = (e) => {
-    if (e.key == 0) {
+    if (e.key == "0") {
       setMultiDelete(!multiDelete);
       setCheckedList([]);
-    } else if (e.key == 1) {
+    } else if (e.key == "1") {
       setCheckedList([]);
-    } else if (e.key == 2) {
+    } else if (e.key == "2") {
       if (!multiDelete) {
         setMultiDelete(true);
         setCheckedList(
@@ -301,7 +302,7 @@ function Media(props) {
           })
         );
       }
-    } else if (e.key == 3) {
+    } else if (e.key == "3") {
       Modal.confirm({
         title: `Delete multiple images?`,
         icon: <ExclamationCircleOutlined />,
@@ -446,7 +447,7 @@ function Media(props) {
                   "File " + options.file.name + " uploaded successfully"
                 );
                 uploadedFile.push(res.data.data);
-                populateFiles(uploadedFile);
+                setFiles(uploadedFile);
               } else {
                 message.error("Unable to upload file!");
                 console.log(
@@ -506,7 +507,7 @@ function Media(props) {
               res.data.data.map((item: any) => {
                 newdata.push(item);
               });
-              populateFiles(newdata);
+              setFiles(newdata);
             } else {
               message.error(res.data.message);
             }
@@ -542,7 +543,7 @@ function Media(props) {
           const filteredArray = files.filter(function (obj) {
             return obj._id !== res.data.data._id;
           });
-          populateFiles(filteredArray);
+          setFiles(filteredArray);
         } else {
           message.error(res.data.message);
         }
@@ -569,7 +570,7 @@ function Media(props) {
           const filteredArray = files.filter(function (obj) {
             return !ids.include(obj._id);
           });
-          populateFiles(filteredArray);
+          setFiles(filteredArray);
           setCheckedList([]);
         } else {
           message.error(res.data.message);
@@ -842,15 +843,17 @@ function Media(props) {
           renderItem={(item) => (
             <List.Item
               actions={[
-                <a
+                <Button
+                  type="link"
                   key={`1.${item._id}`}
                   onClick={() => window.open(`${PUBLIC_URL}${item.filePath}`)}
                 >
                   <DownloadOutlined /> Download
-                </a>,
+                </Button>,
                 <>
                   {props.canDelete ? (
-                    <a
+                    <Button
+                      type="link"
                       key={`2.${item._id}`}
                       onClick={() => {
                         Modal.confirm({
@@ -867,7 +870,7 @@ function Media(props) {
                       }}
                     >
                       <DeleteOutlined /> Delete
-                    </a>
+                    </Button>
                   ) : (
                     <></>
                   )}
@@ -974,7 +977,7 @@ function Media(props) {
               </a>
             )}
           </div>
-          <div className="main" tabIndex={1}>
+          <div className="main">
             <Carousel
               beforeChange={(oldIndex, newIndex) => {
                 props.updateVOD(props.videoToShow[newIndex], newIndex);
@@ -986,13 +989,17 @@ function Media(props) {
             >
               {props.videoToShow.map((i, idx) => {
                 return (
-                  <div
+                  <Button
+                    type="text"
                     style={{
                       height: "500px",
                       textAlign: "center",
                       background: "black",
                     }}
                     key={window.crypto.randomUUID()}
+                    onClick={() => {
+                      props.updateVOD(i, idx);
+                    }}
                   >
                     {!props.videoDetails.link && (
                       <img
@@ -1002,15 +1009,13 @@ function Media(props) {
                           margin: "auto",
                         }}
                         src={STATIC_URL + i.thumbnail}
-                        onClick={() => {
-                          props.updateVOD(i, idx);
-                        }}
                         onError={(e: any) =>
                           (e.target.src = `/icons/fallback.png`)
                         }
+                        alt=""
                       />
                     )}
-                  </div>
+                  </Button>
                 );
               })}
             </Carousel>
@@ -1055,14 +1060,12 @@ function Media(props) {
                     {props.canUploadToBaseLayer ? (
                       <div>
                         {props.layerLabel === "No label selected" ? (
-                          <>
                             <Alert
                               message="Please select a layer label first!"
                               description="You can select a layer label for this layer by right clicking on the layer > more > Layer settings"
                               type="info"
                               showIcon
                             />
-                          </>
                         ) : (
                           <>
                             {props.visible && (
@@ -1098,14 +1101,12 @@ function Media(props) {
                 ) : (
                   <div>
                     {props.layerLabel === "No label selected" ? (
-                      <>
                         <Alert
                           message="Please select a layer label first!"
                           description="You can select a layer label for this layer by right clicking on the layer > more > Layer settings"
                           type="info"
                           showIcon
                         />
-                      </>
                     ) : (
                       <>
                         {props.visible && (
@@ -1182,6 +1183,7 @@ function Media(props) {
                       onError={(e: any) =>
                         (e.target.src = `/icons/fallback.png`)
                       }
+                      alt=""
                     />
                   )}
                 </div>
@@ -1201,12 +1203,12 @@ function Media(props) {
                       menu={{ items: actionMenu, onClick: handleAction }}
                       trigger={["click"]}
                     >
-                      <a onClick={(e) => e.preventDefault()}>
+                      <Button type="text" onClick={(e) => e.preventDefault()}>
                         <Space>
                           Actions
                           <DownOutlined />
                         </Space>
-                      </a>
+                      </Button>
                     </Dropdown>
                   ),
                 }}

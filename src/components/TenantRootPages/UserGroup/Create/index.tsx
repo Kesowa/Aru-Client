@@ -19,10 +19,9 @@ import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function UserGroupCreatePage(props: any) {
+function UserGroupCreatePage() {
   const [form] = Form.useForm();
   const [allPermissions, setAllPermissions] = useState<PERMS[]>([]);
-  // const [selectedPermissionsIds, setSelectedPermissionsIds] = useState([]);
   const [selectedPermissions, setSelectedPermissions] = useState<PERMS[]>([]);
   const [errorState, setErrorState] = useState("");
 
@@ -70,7 +69,6 @@ function UserGroupCreatePage(props: any) {
     const arr = allPermissions.filter((ele: string) =>
       targetKeys.includes(ele)
     );
-    // setSelectedPermissionsIds(targetKeys);
     setSelectedPermissions(arr);
   };
 

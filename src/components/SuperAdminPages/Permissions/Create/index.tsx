@@ -1,7 +1,6 @@
 import { Form, Input, Row, Col, message, Button } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import { UnorderedListOutlined } from "@ant-design/icons";
-import "../Permission.less";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
@@ -10,7 +9,7 @@ import { useContext } from "react";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
-function CreatePermission(props: any) {
+function CreatePermission() {
   const { logout } = useContext(AuthContext);
   const { setLoading } = useContext(LoaderContext);
   const [form] = Form.useForm();

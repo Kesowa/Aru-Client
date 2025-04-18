@@ -39,18 +39,18 @@ class GridMap extends Component<mapProps, mapState> {
 
     this.socket.on("TELEMETRY", (data) => {
       console.log("drone ", data);
-      this.setState({
-        ...this.state,
+      this.setState(prev => ({
+        ...prev,
         position: {
           lat: data.location.lat,
           lng: data.location.long,
         },
         orientation: data.compass,
-      });
+      }));
     });
 
     if (this.googleMap) {
-      this.googleMap.addListener("click", (e) => {
+      this.googleMap.addListener("click", () => {
         console.log("clicked");
       });
     }
@@ -69,14 +69,14 @@ class GridMap extends Component<mapProps, mapState> {
           lng: this.state.position.lng,
         });
         this.marker.setIcon({
-          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
           fillColor: "#ff6565",
           fillOpacity: 1,
           strokeWeight: 4,
           strokeColor: "#CC5555",
           rotation: this.state.orientation,
           scale: 10,
-          anchor: new google.maps.Point(0, 2.6),
+          anchor: new window.google.maps.Point(0, 2.6),
         });
       } else {
         this.marker = this.createMarker(
@@ -120,14 +120,14 @@ class GridMap extends Component<mapProps, mapState> {
     }
 
     const icon = {
-      path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+      path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
       fillColor: "#ff6565",
       fillOpacity: 1,
       strokeWeight: 4,
       strokeColor: "#CC5555",
       rotation: compass,
       scale: 10,
-      anchor: new google.maps.Point(0, 2.6),
+      anchor: new window.google.maps.Point(0, 2.6),
     };
 
     return new window.google.maps.Marker({
@@ -139,7 +139,6 @@ class GridMap extends Component<mapProps, mapState> {
 
   render() {
     return (
-      <React.Fragment>
         <div
           id="gmap_container"
           style={{ borderRadius: "8px", boxShadow: "0px 2px 10px #00000028" }}
@@ -153,7 +152,6 @@ class GridMap extends Component<mapProps, mapState> {
             }}
           />
         </div>
-      </React.Fragment>
     );
   }
 }
