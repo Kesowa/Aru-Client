@@ -14,7 +14,7 @@ import {
 } from "antd";
 import { Link } from "react-router-dom";
 import goToMap from "../../../assets/go-to-map.svg";
-import mapImg from "../../../assets/mapimg.jpg";
+import mapImg from "../../../assets/world.svg";
 import "./../index.less";
 import { ImportOutlined } from "@ant-design/icons";
 import http from "../../../services/httpCall";
