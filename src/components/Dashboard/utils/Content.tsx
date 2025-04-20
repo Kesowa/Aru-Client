@@ -219,7 +219,7 @@ function DashboardContent() {
       ],
     };
     return (
-      <div style={{ padding: "12px" }}>
+      <div style={{ padding: "10px" }}>
         {videos == 0 && alerts == 0 && layers == 0 && documents == 0 ? (
           <>
             <Result
@@ -231,7 +231,7 @@ function DashboardContent() {
         ) : (
           <div
             style={{
-              width: "500px",
+              width: "380px",
               height: "auto",
               margin: "auto",
             }}
@@ -571,12 +571,12 @@ function DashboardContent() {
                 <>{renderStorageStats()}</>
               )}
             </>
-            <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+            <Row gutter={[16, 16]} style={{ marginTop: 3 }}>
               <Col span={24}>
                 <Title
                   className="shortcuts-title"
                   level={4}
-                  style={{ marginLeft: "8px", marginTop: "10px" }}
+                  style={{ marginLeft: "8px", marginTop: "2px" }}
                 >
                   <ImportOutlined /> Quick view Mission Location{" "}
                   <span style={{ fontSize: "0.8em", fontWeight: "normal" }}>
@@ -594,7 +594,7 @@ function DashboardContent() {
                     style={{
                       position: "relative",
                       marginLeft: "10px",
-                      height: "240px",
+                      height: "150px",
                       borderRadius: "8px",
                       overflow: "hidden",
                       cursor: "pointer",
@@ -614,14 +614,14 @@ function DashboardContent() {
                       <img
                         src={goToMap}
                         alt="Go to Map"
-                        style={{ width: "100px", height: "100px" }}
+                        style={{ width: "90px", height: "90px" }}
                       />
                       <span
                         style={{
                           marginTop: "8px",
                           color: "#fff",
                           fontWeight: "bold",
-                          fontSize: "27px",
+                          fontSize: "25px",
                         }}
                       >
                         Map
