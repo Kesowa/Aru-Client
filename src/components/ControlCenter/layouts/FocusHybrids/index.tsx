@@ -66,9 +66,9 @@ function TwoStreamWithMap(props) {
           </Row>
           <Row gutter={[16, 16]} className="small-section-row">
             {feeds.map((feed, index) => (
-              <React.Fragment>
+              <React.Fragment key={window.crypto.randomUUID()}>
                 {feed.id === feeds[0].id ? (
-                  <Col span={8} key={index} className="small-section">
+                  <Col span={8} key={window.crypto.randomUUID()} className="small-section">
                     {feed.type === "feed" ? (
                       <span
                         onClick={() => {
@@ -95,7 +95,7 @@ function TwoStreamWithMap(props) {
                     )}
                   </Col>
                 ) : (
-                  <Col span={8} key={index} className="small-section">
+                  <Col span={8} key={window.crypto.randomUUID()} className="small-section">
                     {feed.type === "feed" ? (
                       <span
                         onClick={() => {

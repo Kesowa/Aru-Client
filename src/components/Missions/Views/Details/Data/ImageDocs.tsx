@@ -1,4 +1,4 @@
-import { useState, useRef, useContext } from "react";
+import { useState, useRef, useContext, useEffect } from "react";
 import {
   Alert,
   message,
@@ -15,13 +15,14 @@ import {
   Checkbox,
   Badge,
   Pagination,
+  MenuProps,
 } from "antd";
 import "./data.less";
 import "./checkbox.less";
 
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
-import axios, { AxiosRequestConfig } from "axios";
+import axios from "axios";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import {
   InboxOutlined,
@@ -35,8 +36,7 @@ import {
   MessageOutlined,
 } from "@ant-design/icons";
 import Dragger from "antd/lib/upload/Dragger";
-import { useEffect } from "react";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import moment from "moment";
 import { API_URL, STATIC_URL } from "src/constants";
 import ActionToolbar from "src/components/shared/Toolbar/action";
@@ -52,8 +52,6 @@ import { ThreadContext } from "src/services/threadUtils";
 
 let plainOptions = new Array<any>();
 function ImageDocs(props) {
-  const [defaultFileList, setDefaultFileList] = useState([]);
-  const [progress, setProgress] = useState(0); //this can be used for a different progress component
   const [refreshState, setRefreshState] = useState(false);
   const socket: any = useRef();
   const [loader, setLoader] = useState(false);
@@ -64,7 +62,6 @@ function ImageDocs(props) {
   const [isAscending, setIsAscending] = useState(false);
   const [sortType, setSortType] = useState("timeStamp");
   const [thermalPayload, setThermalPayload] = useState({});
-  // This is a comment
   const [flag, setFlag] = useState(false);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
@@ -83,6 +80,33 @@ function ImageDocs(props) {
   const userType = userDetails.userType;
 
   const { thread, openThread } = useContext(ThreadContext);
+  
+  //media selection functionality
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [longPressOccurred, setLongPressOccurred] = useState(false);
+
+  const handleLongPressStart = (item: any) => {
+    const timer = setTimeout(() => {
+      setActivateSelection(true);
+      setCheckedList(prev => {
+        if (prev.includes(item._id)) {
+          return prev.filter((id: string) => id !== item._id);
+        }
+        return [...prev, item._id];
+      });
+      setLongPressOccurred(true);
+    }, 500);
+    setLongPressTimer(timer);
+  };
+  
+  const handleLongPressEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    } else {
+      setTimeout(() => setLongPressOccurred(false), 100);
+    }
+  };
 
   const imgMenu: MenuProps["items"] = (data) => {
     const item = [
@@ -260,27 +284,7 @@ function ImageDocs(props) {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       if (validateFile(options.file)) {
-        // const config:AxiosRequestConfig = {
-        //   onUploadProgress: (event) => {
-        //     const percent = Math.floor((event.loaded / event.total) * 100);
-        //     setProgress(percent);
-        //     if (percent === 100) {
-        //       setTimeout(() => setProgress(0), 1000);
-        //     }
-        //     options.onProgress({ percent: (event.loaded / event.total) * 100 });
-        //   },
-        //   cancelToken: source.token,
-        // };
-
-        const uploadToken = await uploadFile(
-          options.file,
-          DocModel.DOCUMENTS,
-          (prog) => {
-            setProgress(prog * 100);
-            options.onProgress({ percent: prog * 100 });
-          },
-          source.token
-        );
+        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => { options.onProgress({ percent: prog * 100 })}, source.token);
 
         const body = {
           file: uploadToken,
@@ -298,39 +302,7 @@ function ImageDocs(props) {
         switch (
           props.missionDetails.userType //upload priviledge checks
         ) {
-          case "tenant-root": //when user is a tenant root
-            http
-              .post(options.action, body)
-              .then((res: any) => {
-                options.onSuccess(res.data, options.file);
-                message.success(
-                  "File " + options.file.name + " uploaded successfully"
-                );
-              })
-              .catch((err) => {
-                if (axios.isCancel(err)) {
-                  console.log("Upload Cancelled");
-                  return;
-                } else if (err.response?.status === 403) {
-                  if (
-                    err.response?.data.message ===
-                    "Actual storage exceeded the Limit of Set storage!"
-                  ) {
-                    setStorageModal(true);
-                  } else {
-                    message.error(err.response?.data.message);
-                    console.log(err.response);
-                  }
-                } else {
-                  console.log(err);
-                  message.error("Unable to upload file!");
-                  options.onError({ err });
-                }
-                AxiosErrorHandler(err, logout);
-              });
-
-            break;
-
+          case "tenant-root":
           case "tenant-staff": // when user is tenant staff
             http
               .post(options.action, body)
@@ -391,7 +363,7 @@ function ImageDocs(props) {
             type="info"
             showIcon
           />
-          <Dragger {...UploadProps} defaultFileList={defaultFileList}>
+          <Dragger {...UploadProps} defaultFileList={[]}>
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
@@ -519,6 +491,24 @@ function ImageDocs(props) {
             <Image
               key={`${item._id}`}
               style={imgStyle}
+              onMouseDown={() => handleLongPressStart(item)}
+              onMouseUp={handleLongPressEnd}
+              onTouchStart={() => handleLongPressStart(item)}
+              onTouchEnd={handleLongPressEnd}
+              onClick={() => {
+                if (longPressOccurred) {
+                  setLongPressOccurred(false);
+                  return;
+                }
+                if (activateSelection) {                
+                  if (checkedList.includes(item._id)) {
+                    const filtered = checkedList.filter((i: any) => i !== item._id);
+                    setCheckedList(filtered);
+                  } else {
+                    setCheckedList([...checkedList, item._id]);
+                  }
+                } else { /* empty */ }
+              }}
               src={STATIC_URL + "/documents/1x_" + item.filePath.split("/")[2]}
               preview={
                 !preview
@@ -781,15 +771,32 @@ function ImageDocs(props) {
                       />
                     </Col>
                   ) : (
-                    <>
                       <Image.PreviewGroup>
                         {images.map((item: any) => {
                           return (
-                            <>
                               <Row
                                 className="listview-outcomes"
                                 align="middle"
                                 style={{ padding: "10px" }}
+                                onMouseDown={() => handleLongPressStart(item)}
+                                onMouseUp={handleLongPressEnd}
+                                onTouchStart={() => handleLongPressStart(item)}
+                                onTouchEnd={handleLongPressEnd}
+                                onClick={() => {
+                                  if (longPressOccurred) {
+                                    setLongPressOccurred(false);
+                                    return;
+                                  }
+                                  if (activateSelection) {
+                                    if (checkedList.includes(item._id)) {
+                                      const filtered = checkedList.filter((i: any) => i !== item._id);
+                                      setCheckedList(filtered);
+                                    } else {
+                                      setCheckedList([...checkedList, item._id]);
+                                    }
+                                  } else { /* empty */ }
+                                }}
+                                key={item._id}
                               >
                                 <Col md={8} style={{ padding: "10px" }}>
                                   <Dropdown
@@ -847,11 +854,9 @@ function ImageDocs(props) {
                                   </div>
                                 </Col>
                               </Row>
-                            </>
                           );
                         })}
                       </Image.PreviewGroup>
-                    </>
                   )}
                 </>
               ) : (
@@ -879,6 +884,7 @@ function ImageDocs(props) {
                                 0
                               )
                             }
+                            key={window.crypto.randomUUID()}
                           >
                             <Image
                               alt={`${item._id}`}
@@ -921,11 +927,9 @@ function ImageDocs(props) {
                       })}
                     </Row>
                   ) : (
-                    <>
                       <Image.PreviewGroup>
                         {images.map((item: any) => {
                           return (
-                            <>
                               <Dropdown
                                 onOpenChange={() => setSelectedImg(item)}
                                 menu={{
@@ -933,6 +937,7 @@ function ImageDocs(props) {
                                   onClick: imgMenuOnClick,
                                 }}
                                 trigger={["contextMenu"]}
+                                key={window.crypto.randomUUID()}
                               >
                                 {ImageComponent(item, true, {
                                   padding: "8px",
@@ -940,11 +945,9 @@ function ImageDocs(props) {
                                   height: "150px",
                                 })}
                               </Dropdown>
-                            </>
                           );
                         })}
                       </Image.PreviewGroup>
-                    </>
                   )}
                 </>
               )}

@@ -8,9 +8,9 @@ import {
   Table,
   Button,
   message,
+  Input,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
-import { Input } from "antd";
 import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -33,7 +33,6 @@ function ClientMission() {
   const [total, setTotal] = useState(0);
   const [sortOrder, setSortOrder] = useState("createdAt:descend");
   const [searchFilters, setSearchFilters] = useState("");
-  const [missionType, setMissionType] = useState("");
 
   const { Auth, logout } = useContext(AuthContext);
 
@@ -304,7 +303,7 @@ function ClientMission() {
 
   useEffect(() => {
     fetchMissions();
-  }, [page, limit, sortOrder, searchFilters, missionType]);
+  }, [page, limit, sortOrder, searchFilters]);
 
   const handleTableChange = (pagination, filter, sorter) => {
     let filterString = "";

@@ -14,7 +14,6 @@ import {
   Table,
   Divider,
   List,
-  Typography,
   Popconfirm,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
@@ -121,12 +120,8 @@ function UserGroupListPage(props: any) {
           });
           console.log(data);
           setUserGroupTableData(data);
-        } else {
-          switch (result.data.message) {
-            case "You do not have permission to use this API.":
-              setErrorState("unauthorized");
-              break;
-          }
+        } else if (result.data.message === "You do not have permission to use this API.") {
+          setErrorState("unauthorized");
         }
       })
       .catch((err) => {

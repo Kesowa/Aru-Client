@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import PasswordChecklist from "react-password-checklist";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
@@ -32,7 +32,6 @@ const { Title, Text } = Typography;
 function Registration(props: any) {
   const [otpError, setOtpError] = useState(false);
   const [invalidOtp, setInvalidOtp] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState("");
   const [packages, popPackages] = useState<any>([]);
   const [loading, setLoader] = useState(false);
   const [resendLoad, setResendLoad] = useState(false);
@@ -206,7 +205,7 @@ function Registration(props: any) {
         billingPin: data.billingPin,
         avatar: "/",
         password: data.password,
-        package: selectedPackage,
+        package: "",
         captcha: "test",
       };
       http
@@ -355,7 +354,6 @@ function Registration(props: any) {
 
   const renderStage1RegisterDetails = () => {
     return (
-      <>
         <div className="signup-form">
           <Form
             name="signup"
@@ -553,13 +551,11 @@ function Registration(props: any) {
             </Row>
           </Form>
         </div>
-      </>
     );
   };
 
   const renderStage2VerifyEmail = () => {
     return (
-      <>
         <div className="otp-wrapper">
           <Row>
             <Title level={3} className="otp-title">
@@ -680,13 +676,11 @@ function Registration(props: any) {
             )}
           </Row>
         </div>
-      </>
     );
   };
 
   const renderStage3ChoosePlan = () => {
     return (
-      <>
         <div className="plan-div">
           <Row gutter={8}>
             {loading ? (
@@ -695,7 +689,7 @@ function Registration(props: any) {
               <>
                 {packages.map((p: any) => {
                   return (
-                    <Col md={8} style={{ margin: "auto" }}>
+                    <Col md={8} style={{ margin: "auto" }} key={window.crypto.randomUUID()}>
                       <Card hoverable title={`${p.name}`} className="plan-card">
                         <Meta description="Start flying, mapping, and ARU will help you visualise!" />
                         <Row>
@@ -754,13 +748,11 @@ function Registration(props: any) {
             Back to Login
           </Button>
         </div>
-      </>
     );
   };
 
   const renderStage4AccountCreated = () => {
     return (
-      <>
         <div className="result-div">
           <Result
             status="success"
@@ -773,7 +765,6 @@ function Registration(props: any) {
             ]}
           />
         </div>
-      </>
     );
   };
 

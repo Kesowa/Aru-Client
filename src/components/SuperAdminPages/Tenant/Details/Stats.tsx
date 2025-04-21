@@ -32,7 +32,7 @@ export default function Stats(props: any) {
       <div style={{ padding: "24px", fontSize: "16px" }}>
         {Object.keys(data).map((key) => {
           return (
-            <Row style={{ marginBottom: "5px" }}>
+            <Row style={{ marginBottom: "5px" }} key={window.crypto.randomUUID()}>
               <Col span={5}>{key} :</Col>
               <Col span={19}>{data[key]}</Col>
             </Row>

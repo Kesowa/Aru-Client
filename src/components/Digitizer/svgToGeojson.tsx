@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { BinaryImageConverter, ColorImageConverter } from "vtracer-webapp";
 import { geoFromSVGXML } from "svg2geojson";
 import { Upload, Button } from "antd";
@@ -13,32 +13,29 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
   const [ctx, setCtx] = useState(null);
   const [svg, setSvg] = useState(null);
   const [img, setImg] = useState(new Image());
-  const [outputCanvas, setOutputCanvas] = useState(null);
-  const [outputCtx, setOutputCtx] = useState(null);
-  const [mode1, setMode1] = useState("polygon");
-  const [clusteringMode, setClusteringMode] = useState("color");
-  const [clusteringHierarchical, setClusteringHierarchical] =
-    useState("stacked");
   const [runner, setRunner] = useState(null);
   const [globalCorner, setGlobalCorner] = useState(60);
   const [globalLength, setGlobalLength] = useState(4);
-  const [iterations, setIterations] = useState(10);
   const [globalSplice, setGlobalSplice] = useState(45);
   const [globalFilterSpeckle, setGlobalFilterSpeckle] = useState(4);
   const [globalColorPrecision, setGlobalColorPrecision] = useState(6);
   const [globalLayerDifference, setGlobalLayerDifference] = useState(16);
   const [globalPathPrecision, setGlobalPathPrecision] = useState(8);
-  const [conversionInProgress, setConversionInProgress] = useState(false);
   const [svgImage, setSvgImage] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const [dragStartY, setDragStartY] = useState(0);
   const [canvasOffsetX, setCanvasOffsetX] = useState(0);
   const [canvasOffsetY, setCanvasOffsetY] = useState(0);
-  const [canvasRotation, setCanvasRotation] = useState(0);
+  // const [canvasRotation, setCanvasRotation] = useState(0);
   const [canvasImageOpacity, setCanvasImageOpacity] = useState(1);
   const [flattenedBounds, setFlattenedBounds] = useState([]);
   const [fileName, setFileName] = useState(null);
+
+  const mode = "polygon";
+  const clustering_mode = "color";
+  const max_iterations = 10;
+  const clusteringHierarchical = "stacked";
 
   useEffect(() => {
     if (canvas) {
@@ -49,10 +46,6 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
       canvas.addEventListener("mousemove", handleMouseMoves);
       canvas.addEventListener("mouseup", handleMouseUp);
     }
-    if (outputCanvas) {
-      const outputContext = outputCanvas.getContext("2d");
-      setOutputCtx(outputContext);
-    }
 
     return () => {
       if (canvas) {
@@ -61,7 +54,7 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
         canvas.removeEventListener("mouseup", handleMouseUp);
       }
     };
-  }, [canvas, outputCanvas]);
+  }, [canvas]);
 
   const handleMouseDown = (event) => {
     setIsDragging(true);
@@ -84,10 +77,6 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
     setIsDragging(false);
   };
 
-  // const handleRotationChange = (event) => {
-  //   setCanvasRotation(parseInt(event.target.value));
-  // };
-
   const handleCanvasImageOpacityChange = (event) => {
     const newValue = parseFloat(event.target.value);
     const snappedValue = Math.round(newValue * 10) / 10;
@@ -102,12 +91,8 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
     }
   }, [
     img,
-    mode1,
-    clusteringMode,
-    clusteringHierarchical,
     globalCorner,
     globalLength,
-    iterations,
     globalSplice,
     globalFilterSpeckle,
     globalColorPrecision,
@@ -180,12 +165,12 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
     const converterParams = {
       canvas_id: canvas.id,
       svg_id: svg.id,
-      mode: mode1,
-      clustering_mode: clusteringMode,
+      mode,
+      clustering_mode,
       hierarchical: clusteringHierarchical,
       corner_threshold: deg2rad(globalCorner),
       length_threshold: globalLength,
-      max_iterations: iterations,
+      max_iterations,
       splice_threshold: deg2rad(globalSplice),
       filter_speckle: globalFilterSpeckle * globalFilterSpeckle,
       color_precision: 8 - globalColorPrecision,
@@ -195,17 +180,15 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
     if (runner) {
       runner.stop();
     }
-    setConversionInProgress(true);
     const converterRunner = new ConverterRunner(converterParams);
     setRunner(converterRunner);
     converterRunner
       .run()
       .then(() => {
-        setConversionInProgress(false);
+        console.log("Conversion completed successfully");
       })
       .catch((error) => {
         console.error("Error during conversion:", error);
-        setConversionInProgress(false);
       });
   };
 
@@ -233,7 +216,7 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
   const ConverterRunner = class {
     constructor(converterParams) {
       this.converter =
-        clusteringMode === "color"
+        clustering_mode === "color"
           ? ColorImageConverter.new_with_string(JSON.stringify(converterParams))
           : BinaryImageConverter.new_with_string(
               JSON.stringify(converterParams)
@@ -250,7 +233,9 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
             while (
               !(done = this.converter.tick()) &&
               performance.now() - startTick < 25
-            ) {}
+            ) {
+              // wait
+            }
             if (!done) {
               requestAnimationFrame(tick);
             } else {
@@ -536,7 +521,7 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
             position: "absolute",
             left: 0,
             top: 0,
-            transform: `rotate(${canvasRotation}deg)`,
+            // transform: `rotate(${canvasRotation}deg)`,
             border: "1px dashed black",
             opacity: canvasImageOpacity,
           }}
@@ -554,7 +539,7 @@ const SvgToGeojson = ({ deckRef, onValueChange, fileUpload }) => {
             min="0"
             max="360"
             value={canvasRotation}
-            onChange={handleRotationChange}
+            onChange={(event) => setCanvasRotation(parseInt(event.target.value))}
           /> */}
           <input
             title="Opacity Of Image"

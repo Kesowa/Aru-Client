@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from "react";
-import { useHistory, useParams } from "react-router-dom";
-import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
-import { PlusCircleOutlined } from "@ant-design/icons";
+import { useHistory, useParams, Link } from "react-router-dom";
+import { PlusOutlined, LoadingOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import {
   List,
   Typography,
@@ -22,7 +21,6 @@ import apis from "../../../../services/apis";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
 import { beforeUpload } from "../../../../services/imageupload";
 import ImgCrop from "antd-img-crop";
-import { Link } from "react-router-dom";
 import "../Client.less";
 import Unauthorized from "../../../shared/Error/Unauthorized";
 import FourOhOne from "../../../shared/Error/FourOhOne";
@@ -34,7 +32,7 @@ import { STATIC_URL } from "src/constants";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 import { RcFile } from "antd/lib/upload";
 
-import { components } from "src/handlers/schema";
+import { Components } from "src/handlers/schema";
 import { PERMS, TENANT_CLIENT_PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
@@ -125,8 +123,7 @@ function ClientEditPage() {
       .get(apis.FETCH_TENANT_USER_GROUP)
       .then((result) => {
         if (result.data.status) {
-          const data: components["schemas"]["IUserGroupPermissions"][] =
-            result.data.data;
+          const data: Components["schemas"]["IUserGroupPermissions"][] = result.data.data;
           const groups = data
             .filter(
               (ele) =>
@@ -144,12 +141,8 @@ function ClientEditPage() {
           const sug = groups.find((g) => g._id === client.userGroupId);
           setSelectedusergroup(sug);
           setUserGroups(groups);
-        } else {
-          switch (result.data.message) {
-            case "You do not have permission to use this API.":
-              setErrorState("unauthorized");
-              break;
-          }
+        } else if (result.data.message === "You do not have permission to use this API.") {
+          setErrorState("unauthorized");
         }
       })
       .catch((err) => {

@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
-import { PlusCircleOutlined } from "@ant-design/icons";
+import { PlusOutlined, LoadingOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import {
   List,
   Typography,
@@ -30,11 +29,10 @@ import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
 import CountExceeded from "../../restrictions/restrictions";
 import Expired from "../../restrictions/expiry";
-import { STATIC_URL } from "src/constants";
 import type { RcFile } from "antd/lib/upload";
 import { DocModel, uploadFile } from "src/services/fileUpload";
-import { components } from "src/handlers/schema";
-import { PERMS, TENANT_STAFF_PERMS } from "src/static/permissions";
+import { Components } from "src/handlers/schema";
+import { TENANT_STAFF_PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 
@@ -97,8 +95,7 @@ function UserCreatePage(props: any) {
         console.info("Fetched user groups!");
         if (result.data.status) {
           console.info("UserGroup status OK!");
-          const data: components["schemas"]["IUserGroupPermissions"][] =
-            result.data.data;
+          const data: Components["schemas"]["IUserGroupPermissions"][] = result.data.data;
           setUserGroups(
             data
               .filter(
@@ -114,12 +111,8 @@ function UserCreatePage(props: any) {
                 permissions,
               }))
           );
-        } else {
-          switch (result.data.message) {
-            case "You do not have permission to use this API.":
-              setErrorState("unauthorized");
-              break;
-          }
+        } else if (result.data.message === "You do not have permission to use this API.") {
+          setErrorState("unauthorized");
         }
       })
       .catch((err) => {
@@ -276,8 +269,8 @@ function UserCreatePage(props: any) {
                           .indexOf(input.toLowerCase()) >= 0
                       }
                     >
-                      {userGroups.map((ele: any, i: any) => (
-                        <Select.Option key={i} value={ele._id}>
+                      {userGroups.map((ele: any) => (
+                        <Select.Option key={window.crypto.randomUUID()} value={ele._id}>
                           {ele.name}
                         </Select.Option>
                       ))}

@@ -9,7 +9,7 @@ export interface ILayerTypeDetails {
 
 function getPropOptions(propNames: string[]) {
   return propNames
-    .sort()
+    .toSorted((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
     .map((propName) => ({ title: propName, value: propName }));
 }
 

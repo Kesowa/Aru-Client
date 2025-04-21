@@ -36,7 +36,7 @@ function About(props) {
 
   function MissionDeliverables(items: any[]) {
     if (items) {
-      return items.map((item) => <Tag color="green">{item}</Tag>);
+      return items.map((item) => <Tag color="green" key={window.crypto.randomUUID()}>{item}</Tag>);
     }
   }
 

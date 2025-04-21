@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { FlyToInterpolator } from "deck.gl";
 import {
-  Typography,
   Table,
   Button,
   Form,
@@ -49,7 +48,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   ...restProps
 }) => {
-  const initialValue = record ? record[dataIndex] : undefined;
   const inputNode = <Input size="small" />;
 
   return (
@@ -64,8 +62,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
     </td>
   );
 };
-
-const { Text } = Typography;
 
 interface FeatureTableProps {
   contentHeight?: string;
@@ -83,7 +79,6 @@ interface FeatureTableProps {
   allLayers: any;
   updateFeatureCountInLayers: (count: number, id: string) => void;
   setshowSelectedIndexes: (values: number[]) => void;
-  setKey: (key: string) => void;
   setSelectedIndexes: (values: number[]) => void;
   setSelectedFeatures: (features: any[]) => void;
   setViewport: (viewport: any) => void;
@@ -105,14 +100,12 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
   const [contentHeight, setContentHeight] = useState(160);
   const [search, setSearch] = useState(false);
   const [selectedRowsArray, setSelectedRowsArray] = useState<React.Key[]>([]);
-  const [isFiltering, setIsFiltering] = useState(false);
   const page = props.page;
   const setPage = props.setPage;
   const limit = props.limit;
   const setLimit = props.setLimit;
   const [form] = Form.useForm();
   const [form1] = Form.useForm();
-  let searchInput: any;
 
   const { logout } = useContext(AuthContext);
 
@@ -155,15 +148,6 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
     if (data) formTable();
   }, [data, editingKey]);
 
-  const setPaginationPage = (page) => {
-    setPage(page);
-  };
-
-  const setPageLimit = (currPage, limit) => {
-    setPage(currPage);
-    setLimit(limit);
-  };
-
   //-------------------------------Filter Layer By Range----------------------------------------
   const onFinish = async (values: any, key: any) => {
     console.log(values, key);
@@ -198,7 +182,6 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
             console.log(obj);
             props.updateFeatureCountInLayers(res.data.count, props.id);
             props.setshowSelectedIndexes([values.lower, values.upper]);
-            props.setKey(key);
             setTableData(obj);
           }
         } else {
@@ -318,9 +301,6 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
       <>
         <div style={{ padding: 8 }}>
           <Input
-            ref={(node) => {
-              searchInput = node;
-            }}
             placeholder={`Search ${dataIndex}`}
             value={selectedKeys[0]}
             onChange={(e) =>
@@ -399,11 +379,9 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
     filterIcon: (filtered) => (
       <>
         <SearchOutlined
-          onClick={() => setIsFiltering(false)}
           style={{ color: filtered ? "#1890ff" : undefined }}
         />
         <FilterOutlined
-          onClick={() => setIsFiltering(true)}
           style={{ marginLeft: "5px", color: filtered ? "#1890ff" : undefined }}
         />
       </>
@@ -429,7 +407,6 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
 
   const handleReset = (clearFilters) => {
     props.setshowSelectedIndexes([]);
-    props.setKey("");
     form1.resetFields();
     props.updateFeatureCountInLayers(count, props.id);
     clearFilters();
@@ -789,7 +766,6 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
             setPage(page);
             setLimit(pageSize);
             props.setshowSelectedIndexes([]);
-            props.setKey("");
             form1.resetFields();
           },
         }}

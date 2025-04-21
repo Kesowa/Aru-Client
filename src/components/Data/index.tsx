@@ -1,15 +1,19 @@
 import { useState } from "react";
 
-import { Link } from "react-router-dom";
-import { Button, Tabs, Badge } from "antd";
+// import { Link } from "react-router-dom";
+import { Tabs, Badge } from "antd";
+import { useLocation } from "react-router-dom";
 import { PageHeader } from "@ant-design/pro-layout";
-import { PlusCircleOutlined } from "@ant-design/icons";
+// import { PlusCircleOutlined } from "@ant-design/icons";
 import DataMission from "./Mission";
 import DataLocation from "./Location";
 
 function DataList() {
-  const [displayedDataType, setDisplayedDataType] = useState("1");
   const [missionCount, setMissionCount] = useState(0);
+  const location = useLocation();
+  const openLocationTab = location.state?.openLocationTab;
+  const [displayedDataType, setDisplayedDataType] = useState(openLocationTab ? "2" : "1");
+
 
   return (
     <div style={{ padding: "24px" }}>
@@ -18,17 +22,17 @@ function DataList() {
         title="My Data"
         className="site-page-header-responsive"
         subTitle="Here you will find all the data captured from your missions!"
-        extra={[
-          <Link to="/dashboard/data/locations/create" key="1">
-            <Button key="1" type="primary" icon={<PlusCircleOutlined />}>
-              Create location
-            </Button>
-          </Link>,
-        ]}
+        // extra={[
+        //   <Link to="/dashboard/data/locations/create" key="1">     //remove create location buttom 
+        //     <Button key="1" type="primary" icon={<PlusCircleOutlined />}>
+        //       Create location
+        //     </Button>
+        //   </Link>,
+        // ]}
       />
 
       <Tabs
-        defaultActiveKey="1"
+        defaultActiveKey={displayedDataType}
         onChange={(key) => setDisplayedDataType(key)}
         items={[
           {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { message, Button, Table, Tag, Popconfirm } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import {
@@ -12,7 +12,6 @@ import "../Package.less";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { Link } from "react-router-dom";
 import Unauthorized from "../../../shared/Error/Unauthorized";
 import FourOhOne from "../../../shared/Error/FourOhOne";
 import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
@@ -156,12 +155,8 @@ function ListAllPackages(props: any) {
       .then((result) => {
         if (result.data.status) {
           setPackagetableData(result.data.data);
-        } else {
-          switch (result.data.message) {
-            case "You do not have permission to use this API.":
-              setErrorState("unauthorized");
-              break;
-          }
+        } else if(result.data.message === "You do not have permission to use this API.") {
+          setErrorState("unauthorized");
         }
       })
       .catch((err) => {

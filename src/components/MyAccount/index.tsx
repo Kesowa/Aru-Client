@@ -43,12 +43,8 @@ function Organisation() {
         if (result.data.status) {
           console.log(result.data.data);
           setTenantData(result.data.data);
-        } else {
-          switch (result.data.message) {
-            case "You do not have permission to use this API.":
-              setErrorState("unauthorized");
-              break;
-          }
+        } else if (result.data.message === "You do not have permission to use this API.") {
+          setErrorState("unauthorized");
         }
       })
       .catch((err) => {

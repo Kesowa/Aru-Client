@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import {
   PlusCircleOutlined,
   SearchOutlined,
@@ -18,7 +18,6 @@ import FourOhOne from "../../../shared/Error/FourOhOne";
 import GatewayTimeout from "../../../shared/Error/GatewayTimeout";
 import InternalServerError from "../../../shared/Error/InternalServerError";
 import ServiceUnavailable from "../../../shared/Error/ServiceUnavailable";
-import { Link } from "react-router-dom";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import { AuthContext } from "src/services/authUtils";
@@ -239,12 +238,8 @@ function UserListPage(props: any) {
       .then((result) => {
         if (result.data.status) {
           setTenantUserTableData(result.data.data);
-        } else {
-          switch (result.data.message) {
-            case "You do not have permission to use this API.":
-              setErrorState("unauthorized");
-              break;
-          }
+        } else if (result.data.message === "You do not have permission to use this API.") {
+          setErrorState("unauthorized");
         }
       })
       .catch((err) => {

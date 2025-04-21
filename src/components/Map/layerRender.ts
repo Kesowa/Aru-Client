@@ -120,6 +120,35 @@ const getRasterDataUrl = (layer: Layer) => {
   }
 };
 
+
+const getIcon = (d) => {
+  const iconSelector = (iconType) => {
+    let icon = "";
+    switch (iconType) {
+      case "MarkerIcon":
+        icon = MarkerIcon;
+        break;
+      case "TankIcon":
+        icon = TankIcon;
+        break;
+      case "DotIcon":
+        icon = DotIcon;
+        break;
+      case "ValveIcon":
+        icon = ValveIcon;
+        break;
+    }
+    return icon;
+  };
+  return {
+    url: iconSelector(d.properties.icon),
+    width: 100,
+    height: 129,
+    anchorY: 125,
+    mask: true,
+  };
+};
+
 export const ILayerToDeckLayer = (layers: Layer[]) => {
   const meshOverlayActive = layers.some((layer) => layer._isMeshSource);
   return layers
@@ -221,33 +250,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             iconSizeUnits: "pixels",
             iconSizeScale: 10,
             getIconSize: 4,
-            getIcon: (d) => {
-              const iconSelector = (iconType) => {
-                let icon = "";
-                switch (iconType) {
-                  case "MarkerIcon":
-                    icon = MarkerIcon;
-                    break;
-                  case "TankIcon":
-                    icon = TankIcon;
-                    break;
-                  case "DotIcon":
-                    icon = DotIcon;
-                    break;
-                  case "ValveIcon":
-                    icon = ValveIcon;
-                    break;
-                }
-                return icon;
-              };
-              return {
-                url: iconSelector(d.properties.icon),
-                width: 100,
-                height: 129,
-                anchorY: 125,
-                mask: true,
-              };
-            },
+            getIcon,
             getIconColor: (d) =>
               d.properties?.color
                 ? hexToRGB(d.properties?.color as string)
@@ -366,34 +369,6 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
 
 export const MissionLayerToDeckLayer = (missionLayers: IMissionLayers) => {
   const deckLayers: GeoJsonLayer[] = [];
-
-  const getIcon = (d) => {
-    const iconSelector = (iconType) => {
-      let icon = "";
-      switch (iconType) {
-        case "MarkerIcon":
-          icon = MarkerIcon;
-          break;
-        case "TankIcon":
-          icon = TankIcon;
-          break;
-        case "DotIcon":
-          icon = DotIcon;
-          break;
-        case "ValveIcon":
-          icon = ValveIcon;
-          break;
-      }
-      return icon;
-    };
-    return {
-      url: iconSelector(d.properties.icon),
-      width: 100,
-      height: 129,
-      anchorY: 125,
-      mask: true,
-    };
-  };
 
   if (missionLayers.isAlertChecked) {
     deckLayers.push(

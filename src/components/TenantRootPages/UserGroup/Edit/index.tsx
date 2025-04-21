@@ -35,12 +35,8 @@ function UserGroupEditPage() {
       .then((result) => {
         if (result.data.status) {
           setAllPermissions(result.data.data);
-        } else {
-          switch (result.data.message) {
-            case "You do not have permission to use this API.":
-              setErrorState("unauthorized");
-              break;
-          }
+        } else if (result.data.message === "You do not have permission to use this API.") {
+          setErrorState("unauthorized");
         }
       })
       .catch((err) => {
@@ -76,12 +72,8 @@ function UserGroupEditPage() {
             data[0].permissions.includes(ele)
           );
           setSelectedPermissions(permissions);
-        } else {
-          switch (result.data.message) {
-            case "You do not have permission to use this API.":
-              setErrorState("unauthorized");
-              break;
-          }
+        } else if (result.data.message === "You do not have permission to use this API.") {
+          setErrorState("unauthorized");
         }
       })
       .catch((err) => {

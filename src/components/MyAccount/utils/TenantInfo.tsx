@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Form, Input, Upload, Row, Col, message, Button, Divider } from "antd";
 import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
@@ -17,7 +17,6 @@ function TenantInfo(props: any) {
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState("");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [path, setPath] = useState("");
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
 

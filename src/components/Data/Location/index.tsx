@@ -1,8 +1,15 @@
+import React, { useState, useEffect } from "react";
+import DeckGL from "@deck.gl/react";
+import { IconLayer } from "@deck.gl/layers";
+import { StaticMap } from "react-map-gl";
+import apis from "src/services/apis";
+import http from "src/services/httpCall";
+import { MAPBOX_API_KEY } from "src/constants";
+
+const MAPBOX_TOKEN = MAPBOX_API_KEY;
 import { useState, useEffect, useContext } from "react";
-import { Row, Col, Typography, Table, Button, Card, message } from "antd";
-import { Input } from "antd";
+import { Row, Col, Typography, Table, Button, Card, message, Input } from "antd";
 import {
-  AudioOutlined,
   SearchOutlined,
   EditOutlined,
   DeleteOutlined,
@@ -20,431 +27,227 @@ import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
 import { GOOGLE_API_KEY } from "src/constants";
 
-interface TabOptions {
-  filter: any;
-}
-function DataLocation(props) {
-  const { Search } = Input;
-  const { Title } = Typography;
-  const suffix = (
-    <AudioOutlined
-      style={{
-        fontSize: 16,
-        color: "#1890ff",
-      }}
-    />
-  );
+const initialViewState = {
+  longitude: 88.4512,
+  latitude: 22.5735,
+  zoom: 12,
+  pitch: 0,
+  bearing: 0,
+};
 
-  // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  const [searchText, setSearchText] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [geofence, setGeofence] = useState([]);
-  const [centerPoint, setCenterPoint] = useState({ lat: "", long: "" });
-  const [locationData, setLocationData] = useState([]);
-  const [isTableLoading, setIsTableLoading] = useState(true);
+// Mapbox default marker icon
+const ICON_MAPPING = {
+  marker: { x: 0, y: 0, width: 128, height: 128, mask: true },
+};
 
-  const { logout } = useContext(AuthContext);
-  const { setLoading } = useContext(LoaderContext);
+// more to add acording to aru mission status
+const getColor = (status) => {
+  switch (status) {
+    case "Completed":
+      return [0, 255, 0]; // Green
+    case "Pending":
+      return [255, 165, 0]; // Orange
+    case "Cancelled":
+      return [255, 0, 0]; // Red
+    default:
+      return [100, 100, 100]; // Gray
+  }
+};
 
-  const getAllLocations = () => {
-    http
-      .get(`${apis.GET_ALL_LOCATIONS}`)
-      .then((result) => {
-        if (result.data.data) {
-          const data: any = [];
-          for (const location of result.data.data) {
-            const obj: any = new Object();
-            obj.name = location.properties.name;
-            if (location.geometry.type == "Point") {
-              obj.geofence = [
-                {
-                  lat: location.geometry.coordinates.lat,
-                  long: location.geometry.coordinates.lng,
-                },
-              ];
-            } else {
-              obj.geofence = location.geometry.coordinates[0].map((coord) => {
-                return { lat: coord[1], long: coord[0] };
-              });
-            }
-            /* */
-            obj.missionCount = location.missionCount;
-            obj.outcomeCount = location.outcomeCount;
-            obj.centerPoint = findPolygonCenter(obj.geofence);
-            obj.key = location._id;
-            data.push(obj);
-          }
-
-          setLocationData(data);
-        }
-      })
-      .catch((err) => {
-        message.error("Locations could not be fetched");
-        AxiosErrorHandler(err, logout);
-      })
-      .finally(() => {
-        setIsTableLoading(false);
-      });
-  };
+const MapDisplay = () => {
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [viewState, setViewState] = useState(initialViewState);
+  const [locations, setLocations] = useState([]);
 
   useEffect(() => {
-    getAllLocations();
+    const fetchAllMissions = async () => {
+      try {
+        const params = {
+          filter: "all",
+          sort: "createdAt:descend",
+          page: 1,
+          limit: 999999, //to get all mission
+        };
+
+        const response = await http.get(apis.GET_ALL_MISSIONS_FOR_TENANT, {
+          params,
+        });
+        console.log("get details:  ", response.data.data);
+        if (response.data.data) {
+          const formattedData = response.data.data.map((mission: any) => ({
+            id: mission._id,
+            address: mission.flight?.geoLocation,
+            coordinates: mission.flight?.geoFence?.circle?.center
+              ? [
+                  parseFloat(
+                    mission.flight.geoFence.circle.center.lng.toFixed(4)
+                  ),
+                  parseFloat(
+                    mission.flight.geoFence.circle.center.lat.toFixed(4)
+                  ),
+                ]
+              : null,
+            status: mission.status,
+          }));
+
+          console.log("Formatted Data:", formattedData);
+          setLocations(formattedData);
+          console.log(locations);
+        }
+      } catch (error) {
+        console.error("Error fetching all missions:", error);
+      }
+    };
+
+    fetchAllMissions();
   }, []);
 
-  let searchInput: any;
-  const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-  };
-  const handleReset = (clearFilters: any) => {
-    clearFilters();
-    setSearchText("");
-  };
-  const getColumnSearchProps = (dataIndex: any) => ({
-    filterDropdown: ({
-      setSelectedKeys,
-      selectedKeys,
-      confirm,
-      clearFilters,
-    }: any) => (
-      <div style={{ padding: 8 }}>
-        <Input
-          ref={(node) => {
-            searchInput = node;
-          }}
-          placeholder={`Search ${dataIndex}`}
-          value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{ width: 188, marginBottom: 8, display: "block" }}
-        />
-        <Button
-          type="primary"
-          onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          size="small"
-          style={{ width: 90, marginRight: 8 }}
-        >
-          Search
-        </Button>
-        <Button
-          onClick={() => handleReset(clearFilters)}
-          size="small"
-          style={{ width: 90 }}
-        >
-          Reset
-        </Button>
-      </div>
-    ),
-    filterIcon: (filtered: any) => (
-      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-    ),
-    onFilter: (value: any, record: any) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownOpenChange: (visible: any) => {
-      if (visible) {
-        setTimeout(() => searchInput.select());
-      }
-    },
-    render: (text: any) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text.toString()}
-        />
-      ) : (
-        text
-      ),
-  });
-
-  const findPolygonCenter = (points) => {
-    const bounds = new window.google.maps.LatLngBounds();
-
-    const polygonCoords: google.maps.LatLng[] = [];
-
-    for (const x of points) {
-      const llbound = new window.google.maps.LatLng(x.lat, x.long);
-      polygonCoords.push(llbound);
-    }
-    let i;
-    for (i = 0; i < polygonCoords.length; i++) {
-      bounds.extend(polygonCoords[i]);
-    }
-
-    const centerOfPolygon = bounds.getCenter();
-
-    return { lat: centerOfPolygon.lat(), long: centerOfPolygon.lng() };
+  const handleLocationClick = (location) => {
+    setSelectedLocation(location);
+    setViewState({
+      ...viewState,
+      longitude: location.coordinates[0],
+      latitude: location.coordinates[1],
+      zoom: 14,
+    });
   };
 
-  // ++++++++++++++++++++++++++++++++++++++++++Defining Columns++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  const columns: any[] = [
-    {
-      title: "LOCATION",
-      dataIndex: "name",
-      sorter: (a: any, b: any) => a.name.localeCompare(b.name),
-      sortDirections: ["descend", "ascend"],
-      ...getColumnSearchProps("name"),
-      render: (lName: any) => {
-        return (
-          <>
-            <Title level={5}>
-              <FontAwesomeIcon
-                icon={faMapMarkedAlt}
-                style={{ marginRight: "1rem", color: "#a5a4bf" }}
-              />
-              {lName}
-            </Title>
-          </>
-        );
-      },
-    },
-    {
-      title: "MISSIONS",
-      dataIndex: "missionCount",
-      sorter: (a: any, b: any) => a.missionCount - b.missionCount,
-      sortDirections: ["descend", "ascend"],
-      ...getColumnSearchProps("missionCount"),
-    },
-    {
-      title: "OUTCOMES",
-      dataIndex: "outcomeCount",
-      sorter: (a: any, b: any) => a.outcomeCount - b.outcomeCount,
-      sortDirections: ["descend", "ascend"],
-      ...getColumnSearchProps("outcomeCount"),
-    },
-    {
-      title: "Actions",
-      dataIndex: "",
-      key: "x",
-      render: (data) => (
-        <>
-          <Link to={`data/location/${data.key}`}>
-            <Button>
-              <EyeOutlined />
-            </Button>
-          </Link>
-          <Link to={`data/location/edit/${data.key}`}>
-            <Button>
-              <EditOutlined />
-            </Button>
-          </Link>
-          <Button
-            style={{ marginLeft: "8px" }}
-            danger
-            onClick={() => {
-              setLoading(true);
-              http
-                .delete(`${apis.DELETE_LOCATION}?id=${data.key}`)
-                .then((result) => {
-                  if (result.data.status) {
-                    message.success(
-                      `Location ${result.data.data.properties.name} deleted`
-                    );
-                    getAllLocations();
-                  } else {
-                    message.error(result.data.message);
-                  }
-                })
-                .catch((err) => {
-                  message.error(err.message);
-                  AxiosErrorHandler(err, logout);
-                })
-                .finally(() => {
-                  setLoading(false);
-                });
-            }}
-          >
-            <DeleteOutlined />
-          </Button>
-        </>
-      ),
-    },
-  ];
-  // ++++++++++++++++++++++++++++++++++++SAMPLE DATA, fetch only completed missions here++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // const locations = [
+  //   {
+  //     id: 1,
+  //     coordinates: [88.4512, 22.5735],
+  //     address: 'JF66+P46, Action Area II, Newtown, New Town, West Bengal 700157, India',
+  //     status: 'completed'
+  //   },
+  //   {
+  //     id: 2,
+  //     coordinates: [88.4528, 22.5751],
+  //     address: 'JF67+P32, Action Area II, Newtown, New Town, West Bengal 700135, India',
+  //     status: 'pending'
+  //   },
+  // ];
 
-  const data = [
-    {
-      key: 1,
-      name: "Newtown BC Block",
-      missionCount: 8,
-      outcomeCount: 15,
-      centerPoint: {
-        lat: 22.57257,
-        long: 88.43461,
-      },
-      geofence: [
-        {
-          lat: 22.57653,
-          long: 88.42912,
-        },
-        {
-          lat: 22.57268,
-          long: 88.43813,
-        },
-        {
-          lat: 22.56721,
-          long: 88.43594,
-        },
-        {
-          lat: 22.57098,
-          long: 88.42607,
-        },
-        {
-          lat: 22.57653,
-          long: 88.42912,
-        },
-      ],
-      createdBy: "root",
-      createdAt: "17/02/2021",
-    },
-    {
-      key: 2,
-      name: "Salt Lake AG Block",
-      missionCount: 3,
-      outcomeCount: 12,
-      centerPoint: {
-        lat: 22.51121,
-        long: 87.37773,
-      },
-      geofence: [
-        {
-          lat: 22.51135,
-          long: 87.37769,
-        },
-        {
-          lat: 22.51118,
-          long: 87.37817,
-        },
-        {
-          lat: 22.51109,
-          long: 87.37734,
-        },
-        {
-          lat: 22.51135,
-          long: 87.37769,
-        },
-      ],
-      createdBy: "root",
-      createdAt: "17/02/2021",
-    },
-    {
-      key: 3,
-      name: "Sector 5, Salt lake",
-      missionCount: 4,
-      outcomeCount: 13,
-      centerPoint: {
-        lat: 22.51121,
-        long: 87.37773,
-      },
-      geofence: [
-        {
-          lat: 22.51135,
-          long: 87.37769,
-        },
-        {
-          lat: 22.51118,
-          long: 87.37817,
-        },
-        {
-          lat: 22.51109,
-          long: 87.37734,
-        },
-        {
-          lat: 22.51135,
-          long: 87.37769,
-        },
-      ],
-      createdBy: "root",
-      createdAt: "17/02/2021",
-    },
+  const layers = [
+    new IconLayer({
+      id: "icon-layer",
+      data: locations,
+      pickable: true,
+      iconAtlas:
+        "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png",
+      iconMapping: ICON_MAPPING,
+      getIcon: (d) => "marker",
+      sizeScale: 15,
+      getPosition: (d) => d.coordinates,
+      getSize: (d) => 5,
+      getColor: (d) => getColor(d.status),
+      onClick: ({ object }) => handleLocationClick(object),
+      onHover: ({ object }) => setSelectedLocation(object),
+    }),
   ];
 
-  const onSearch = (value) => console.log(value);
-
-  function fetchRowDetails(geofence, name) {
-    return console.log("");
-  }
-
-  function formatGeoFenceForUrl(geofence) {
-    if (geofence.length > 0) {
-      let formattedGeoFence = "";
-      geofence.forEach((point) => {
-        formattedGeoFence += "|" + point.lat + "," + point.long;
-      });
-      return formattedGeoFence;
-    }
-    return "";
-  }
-
-  // rowSelection object indicates the need for row selection
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      fetchRowDetails(selectedRows[0].geofence, selectedRows[0].name);
-      setGeofence(selectedRows[0].geofence);
-      setCenterPoint(selectedRows[0].centerPoint);
-    },
-  };
   return (
-    <div>
-      {/* +++++++++++++++++++++++++++++++++MISSION LISTING+++++++++++++++++++++++++++++++++++++++++ */}
-      <Row style={{ marginTop: "1rem" }}>
-        <Col span={16}>
-          <Table
-            columns={columns}
-            rowSelection={{ type: "radio", ...rowSelection }}
-            dataSource={locationData}
-            loading={isTableLoading}
+    <div style={{ display: "flex", height: "83vh" }}>
+      <div style={{ flex: 1, position: "relative" }}>
+        <DeckGL
+          viewState={viewState}
+          onViewStateChange={(v) => setViewState(v.viewState)}
+          controller={true}
+          layers={layers}
+        >
+          <StaticMap
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+            mapStyle="mapbox://styles/mapbox/streets-v11"
           />
-        </Col>
-        <Col span={8}>
-          <div>
-            <Card bordered={true} style={{ width: "100%" }}>
-              <img
-                src={
-                  geofence.length > 0
-                    ? `https://maps.googleapis.com/maps/api/staticmap?center=${
-                        centerPoint.lat
-                          ? centerPoint.lat
-                          : data[0].centerPoint.lat
-                      },${
-                        centerPoint.long
-                          ? centerPoint.long
-                          : data[0].centerPoint.long
-                      }&zoom=15&size=800x400&markers=size:mid|color:red|${
-                        centerPoint.lat
-                          ? centerPoint.lat
-                          : data[0].centerPoint.lat
-                      },${
-                        centerPoint.long
-                          ? centerPoint.long
-                          : data[0].centerPoint.long
-                      }&path=color:0x00B3FF|weight:5|fillcolor:0xcfe1ff${formatGeoFenceForUrl(
-                        geofence.length > 0 ? geofence : data[0].geofence
-                      )}&maptype=roadmap&key=${GOOGLE_API_KEY}`
-                    : AloneLogo
-                }
+          {selectedLocation && (
+            <div
+              style={{
+                position: "absolute",
+                top: 10,
+                left: 10,
+                backgroundColor: "white",
+                padding: "15px",
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                zIndex: 999,
+              }}
+            >
+              <h3 style={{ margin: "0 0 10px 0", font: "bold" }}>
+                Mission Details
+              </h3>
+              <p>
+                <strong>Coordinates:</strong>
+                <br />
+                {selectedLocation.coordinates[1].toFixed(4)},{" "}
+                {selectedLocation.coordinates[0].toFixed(4)}
+              </p>
+              <p>
+                <strong>Address:</strong>
+                <br />
+                {selectedLocation.address}
+              </p>
+              <div
                 style={{
-                  width: geofence.length > 0 ? "100%" : "60%",
-                  display: "block",
-                  marginLeft: "auto",
-                  marginRight: "auto",
+                  position: "absolute",
+                  top: "5px",
+                  right: "5px",
+                  cursor: "pointer",
+                  padding: "2px 5px",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  color: "#666",
                 }}
-              />
-              {geofence.length > 0 ? null : (
-                <p style={{ textAlign: "center" }}>
-                  Please Select a location to view
-                </p>
-              )}
-            </Card>
+                onClick={() => setSelectedLocation(null)}
+              >
+                X
+              </div>
+            </div>
+          )}
+        </DeckGL>
+      </div>
+
+      {/* Locations Sidebar */}
+      <div
+        style={{
+          width: "400px",
+          padding: "20px",
+          overflowY: "auto",
+          boxShadow: "-2px 0 5px rgba(0,0,0,0.1)",
+        }}
+      >
+        <h2 style={{ marginBottom: "15px" }}>Mission Locations</h2>
+        {locations.map((location) => (
+          <div
+            key={location.id}
+            style={{
+              padding: "12px",
+              margin: "8px 0",
+              cursor: "pointer",
+              borderRadius: "4px",
+              backgroundColor:
+                selectedLocation?.id === location.id ? "#e6f7ff" : "white",
+              border: `2px solid ${getColor(location.status)
+                .slice(0, 3)
+                .join(",")}`,
+              transition: "all 0.2s",
+            }}
+            onClick={() => handleLocationClick(location)}
+          >
+            <div
+              style={{
+                width: "12px",
+                height: "12px",
+                backgroundColor: `rgb(${getColor(location.status).join(",")})`,
+                borderRadius: "50%",
+                display: "inline-block",
+                marginRight: "8px",
+              }}
+            />
+            {location.address}
           </div>
-        </Col>
-      </Row>
+        ))}
+      </div>
     </div>
   );
-}
+};
 
-export default DataLocation;
+export default MapDisplay;

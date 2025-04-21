@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef } from "react";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import { Button } from "antd";
 import { API_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";

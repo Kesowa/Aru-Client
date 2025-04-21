@@ -15,9 +15,7 @@ export const getImageForCircle = (lat, lng, rad, detail = 8) => {
   const _lng = (lng * pi) / 180;
   const d = rad / 1000 / r;
 
-  let i = 0;
-
-  for (i = 0; i <= 360; i += detail) {
+  for (let i = 0; i <= 360; i += detail) {
     const brng = (i * pi) / 180;
 
     let pLat = Math.asin(
@@ -51,9 +49,8 @@ export const getImageForPolygon = (points) => {
     const llbound = new google.maps.LatLng(x.lat, x.lng);
     polygonCoords.push(llbound);
   }
-  let i;
-  for (i = 0; i < polygonCoords.length; i++) {
-    bounds.extend(polygonCoords[i]);
+  for (const element of polygonCoords) {
+    bounds.extend(element);
   }
 
   const centerOfPolygon = bounds.getCenter();

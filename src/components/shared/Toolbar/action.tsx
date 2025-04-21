@@ -29,6 +29,11 @@ const ActionToolbar = (props) => {
       label: "Select all files",
       disabled: props.data.length > 0 ? false : true,
     },
+    {
+      key: "4",
+      label: "Select files",
+      disabled: props.data.length > 0 ? false : true,
+    },
   ];
   if (props.canDelete) {
     actionMenu.push({
@@ -58,7 +63,10 @@ const ActionToolbar = (props) => {
           })
         );
       }
-    } else if (e.key == 3) {
+    } else if (e.key == 4){
+      props.setActivateSelection(!props.activateSelection);
+
+    }else if (e.key == 3) {
       Modal.confirm({
         title: `Delete ${props.type} ?`,
         icon: <ExclamationCircleOutlined />,
@@ -108,25 +116,21 @@ const ActionToolbar = (props) => {
         console.error(err.message);
       });
   };
+  let flagTooltipText = "Toggle Flag";
+  if (props.activateSelection && props.checkedList.length > 0) flagTooltipText = `${!props.flag ? "Flag" : "Un-flag"} ${props.type}`;
   return (
     <div className="toolbar">
       <Text type="secondary">
         {props.activateSelection
           ? `${props.checkedList.length} Selected`
           : `Total ${
-              props.totalCount ? props.totalCount : props.data?.length
+              props.totalCount || props.data?.length
             } ${props.type}s`}
       </Text>
       <div className="upload-btn">
         {props.canToggleFlag && (
           <Tooltip
-            title={`${
-              !(props.activateSelection && props.checkedList.length > 0)
-                ? "Toggle Flag"
-                : !props.flag
-                ? `Flag ${props.type}`
-                : `Un-flag ${props.type}`
-            }`}
+            title={flagTooltipText}
             placement="bottom"
           >
             <Switch

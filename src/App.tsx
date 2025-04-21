@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import Loader, { LoaderContext, useLoader } from "./components/shared/Loader";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import { message, Space, Spin } from "antd";
@@ -11,7 +11,7 @@ import { AuthContext, useAuth } from "./services/authUtils";
 import { useScripts } from "./services/loadScripts";
 import { ThreadContext, useThread } from "./services/threadUtils";
 import http from "./services/httpCall";
-import { components } from "./handlers/schema";
+import { Components } from "./handlers/schema";
 import apis from "./services/apis";
 import { AxiosErrorHandler } from "./services/httpErrorHandle";
 import EntryLoader from "./components/shared/Loader/Entry";
@@ -33,7 +33,7 @@ const App = () => {
   const fetchUserDetails = () => {
     setLoading(true);
     http
-      .get<components["schemas"]["UserDetailsAuthResponse"]>(
+      .get<Components["schemas"]["UserDetailsAuthResponse"]>(
         apis.GET_USER_DETAILS
       )
       .then((result) => {
@@ -66,11 +66,15 @@ const App = () => {
 
   const { mapScriptLoaded, paymentScriptLoaded } = useScripts();
 
+  const memoizedLoaderContextValue = useMemo(() => ({ loading, setLoading }), [loading, setLoading]);
+  const memoizedAuthContextValue = useMemo(() => ({ Auth, login, logout, setUserDetails }), [Auth, login, logout, setUserDetails]);
+  const memoizedThreadContextValue = useMemo(() => ({ thread, openThread, closeThread }), [thread, openThread, closeThread]);
+
   return userDetailsFetched ? (
     <React.Fragment>
-      <LoaderContext.Provider value={{ loading, setLoading }}>
-        <AuthContext.Provider value={{ Auth, login, logout, setUserDetails }}>
-          <ThreadContext.Provider value={{ thread, openThread, closeThread }}>
+      <LoaderContext.Provider value={memoizedLoaderContextValue}>
+        <AuthContext.Provider value={memoizedAuthContextValue}>
+          <ThreadContext.Provider value={memoizedThreadContextValue}>
             <Socket />
             <Loader />
             {mapScriptLoaded && paymentScriptLoaded && (

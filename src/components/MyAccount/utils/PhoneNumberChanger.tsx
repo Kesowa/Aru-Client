@@ -1,9 +1,7 @@
-import { useState } from "react";
 import { Form, Input } from "antd";
 
 function PhoneNumberChanger(props: any) {
   const [form] = Form.useForm();
-  const [isDisabled, setIsDisabled] = useState(true);
 
   const onFinish = (data: any) => {
     console.log(data);
@@ -28,7 +26,7 @@ function PhoneNumberChanger(props: any) {
           <Input
             placeholder="Contact Number"
             style={{ width: "100%" }}
-            disabled={isDisabled}
+            disabled={true}
           />
         </Form.Item>
       </Form>

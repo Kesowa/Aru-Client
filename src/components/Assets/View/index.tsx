@@ -143,7 +143,7 @@ function AssetView(props) {
                 Object.keys(data.assetInfo[0]).map((key) => {
                   if (key !== "_id") {
                     return (
-                      <Row style={{ marginTop: "5px" }}>
+                      <Row style={{ marginTop: "5px" }} key={window.crypto.randomUUID()}>
                         <Col span={12}>
                           <Text>{key}</Text>
                         </Col>

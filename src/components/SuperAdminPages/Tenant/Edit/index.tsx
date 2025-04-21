@@ -377,7 +377,7 @@ function EditTenant() {
                 <Form.Item label="Select Package" name="activePackage">
                   <Select>
                     {packages.map((item) => (
-                      <Option value={item._id}>{item.name}</Option>
+                      <Option value={item._id} key={window.crypto.randomUUID()}>{item.name}</Option>
                     ))}
                   </Select>
                 </Form.Item>
