@@ -12,11 +12,13 @@ test("create and delete usergroup", async ({ page }) => {
   await page.getByRole("button", { name: "Create User Group" }).click();
   await page.getByLabel("Group Name").fill(userGroupName);
   await page
-    .getByRole("listitem", { name: "mission_create" })
+    .getByRole("listitem")
+    .filter({ hasText: "mission create" })
     .getByLabel("")
     .check();
   await page
-    .getByRole("listitem", { name: "mission_delete" })
+    .getByRole("listitem")
+    .filter({ hasText: "mission delete" })
     .getByLabel("")
     .check();
   await page.getByRole("button", { name: "right" }).click();

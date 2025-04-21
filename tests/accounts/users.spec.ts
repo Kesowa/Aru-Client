@@ -20,7 +20,7 @@ test("create and delete user", async ({ page }) => {
   await page.getByPlaceholder("User's name").click();
   await page.getByPlaceholder("User's name").fill(userName);
   await page.getByLabel("User Group").click();
-  await page.getByText("pilot/analyst").click();
+  await page.getByText("pilot", { exact: true }).click();
   await page.getByPlaceholder("Phone Number").click();
   await page.getByPlaceholder("Phone Number").fill(userPhone);
   await page.getByPlaceholder("Email Id").click();
