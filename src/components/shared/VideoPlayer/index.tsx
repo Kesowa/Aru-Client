@@ -228,7 +228,6 @@ function VideoPlayer(props: any) {
   const [captLat, setCaptLat] = useState<any>(0);
   const [captLong, setCaptLong] = useState<any>(0);
   const [captAddress, setCaptAddress] = useState<any>("");
-  const [captTime, setCaptTime] = useState<any>("");
   const [loader, setLoader] = useState(false);
 
   //-----------props states passed to flight log map-----------
@@ -242,10 +241,7 @@ function VideoPlayer(props: any) {
     streamKey,
     mission,
     isLive,
-    alertBtnStatus,
     theatreModeStatus,
-    liveTagStatus,
-    map,
   } = props; //add prop for alert button #2
 
   const resolutionURLs = {
@@ -288,7 +284,7 @@ function VideoPlayer(props: any) {
       socketInstance.on("AI_TASK_PROGRESS", (data) => {
         console.log(data);
         setLoading(true);
-        const { inferId, status, progress } = data;
+        const { inferId, progress } = data;
         setInferenceProgress(progress);
 
         if (progress === 100) {
@@ -721,7 +717,7 @@ function VideoPlayer(props: any) {
       .post(`${apis.CREATE_ALERT}`, body)
       .then((res) => {
         if (captLat !== undefined && captLong !== undefined) {
-          const addressLocation: any = geocoder([
+          geocoder([
             //Review
             isLive ? location.long : captLong,
             isLive ? location.lat : captLat,
@@ -957,7 +953,6 @@ function VideoPlayer(props: any) {
   useEffect(() => {
     const adjustBoundingBoxes = () => {
       if (playerRef.current && boundingBoxes) {
-        const videoElement = playerRef.current.getInternalPlayer();
         const { offsetWidth: containerWidth, offsetHeight: containerHeight } =
           playerRef.current.wrapper;
 
@@ -1503,9 +1498,9 @@ function VideoPlayer(props: any) {
             People Count: {peopleCount}
           </div>
 
-          {scaledBoxes.map((box, index) => (
+          {scaledBoxes.map((box) => (
             <div
-              key={index}
+              key={window.crypto.randomUUID()}
               style={{
                 position: "absolute",
                 left: `${box[0]}px`,
@@ -1522,13 +1517,10 @@ function VideoPlayer(props: any) {
       )}
 
       {/* ---------MAP NAV UI----------------------------------------------------------------- */}
-      <>
         {props.showHUD && showHUDcontrols ? (
           <>
             <div className="hud-top">
-              <>
                 {showAltitude ? (
-                  <>
                     <div id="Altitude" className="Altitude">
                       <svg className="Rectangle_1918">
                         <rect
@@ -1554,16 +1546,12 @@ function VideoPlayer(props: any) {
                         ></path>
                       </svg>
                     </div>
-                  </>
                 ) : (
                   <></>
                 )}
-              </>
             </div>
             <div className="batter-div">
-              <>
                 {showBatter && isLive ? (
-                  <>
                     <div id="battery" className="battery">
                       <svg className="Rectangle_1916_dn">
                         <rect
@@ -1629,19 +1617,15 @@ function VideoPlayer(props: any) {
                         </svg>
                       </div>
                     </div>
-                  </>
                 ) : (
                   <></>
                 )}
-              </>
             </div>
             <div
               className="hud-bottom"
               style={{ bottom: `${bottomHudHeight}px` }}
             >
-              <>
                 {showCourse ? (
-                  <>
                     <div id="Course" className="Course">
                       <svg className="Rectangle_1916_d">
                         <rect
@@ -1691,15 +1675,11 @@ function VideoPlayer(props: any) {
                         </div>
                       </div>
                     </div>
-                  </>
                 ) : (
                   <></>
                 )}
-              </>
 
-              <>
                 {showVSpeed ? (
-                  <>
                     <div id="v_speed" className="v_speed">
                       <svg className="Rectangle_1916">
                         <rect
@@ -1715,12 +1695,9 @@ function VideoPlayer(props: any) {
                       <div id="n_1_KMH">
                         <span>
                           {isLive
-                            ? velocity
-                              ? velocity.toFixed()
-                              : "--"
-                            : v_speed
-                            ? v_speed.toFixed()
-                            : "--"}{" "}
+                            ? (velocity?.toFixed() || "--")
+                            : (v_speed?.toFixed() || "--")
+                          }{" "}
                           KM/H
                         </span>
                       </div>
@@ -1744,7 +1721,7 @@ function VideoPlayer(props: any) {
                           className="V_needle"
                           style={{
                             transform: `rotate(${
-                              vSpeedDeg ? vSpeedDeg : -150
+                              vSpeedDeg || -150
                             }deg)`,
                           }}
                         >
@@ -1769,14 +1746,11 @@ function VideoPlayer(props: any) {
                         </div>
                       </div>
                     </div>
-                  </>
                 ) : (
                   <></>
                 )}
-              </>
-              <>
+
                 {showHSpeed && !isLive ? (
-                  <>
                     <div id="h_speed" className="h_speed">
                       <svg className="Rectangle_1916">
                         <rect
@@ -1812,7 +1786,7 @@ function VideoPlayer(props: any) {
                           className="H_needle"
                           style={{
                             transform: `rotate(${
-                              hSpeedDeg ? hSpeedDeg : -150
+                              hSpeedDeg || -150
                             }deg)`,
                           }}
                         >
@@ -1837,14 +1811,11 @@ function VideoPlayer(props: any) {
                         </div>
                       </div>
                     </div>
-                  </>
                 ) : (
                   <></>
                 )}
-              </>
-              <>
+
                 {showDistance && !isLive ? (
-                  <>
                     <div id="Distance" className="Distance">
                       <svg className="Rectangle_1916_c">
                         <rect
@@ -1864,17 +1835,14 @@ function VideoPlayer(props: any) {
                         <span>DISTANCE COVERED</span>
                       </div>
                     </div>
-                  </>
                 ) : (
                   <></>
                 )}
-              </>
             </div>
           </>
         ) : (
           <></>
         )}
-      </>
 
       {pip && !isLive ? (
         <div
@@ -2241,7 +2209,7 @@ function VideoPlayer(props: any) {
                                 ) {
                                   setCaptLat(dPosition.lat);
                                   setCaptLong(dPosition.long);
-                                  const address: any = geocoder([
+                                  geocoder([
                                     dPosition.long,
                                     dPosition.lat,
                                   ]).then((res: any) => setCaptAddress(res));
@@ -2263,11 +2231,9 @@ function VideoPlayer(props: any) {
                                   // The same VideoPlayer component is used to play videos in three different files
                                   // LiveViewBase, Mission/DataViews/Videos and LocationCard/Videos
                                   // But the structure of data sent in props is different for different components
-                                  props.mission?.flight?.geoLocation
-                                    ? props.mission.flight.geoLocation // for LiveViewBase component
-                                    : props.flightID?.geoLocation
-                                    ? props.flightID.geoLocation // for Mission/DataViews/Videos component
-                                    : "" // not matched with any structure, keep blank
+                                  props.mission?.flight?.geoLocation // for LiveViewBase component
+                                  || props.flightID?.geoLocation // for Mission/DataViews/Videos component
+                                  || "" // not matched with any structure, keep blank
                                   // NOTE: LocationCard/Videos is currently not sending any geoLocation address anywhere in props
                                 );
                                 setIsModalVisible(true);

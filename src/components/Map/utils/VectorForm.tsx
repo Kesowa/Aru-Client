@@ -29,7 +29,7 @@ import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import { API_URL } from "src/constants";
 import { featureType, featureTypes, vectorProps } from "src/static/vectorprops";
 import { ILayer } from "src/types/layer";
-import { components } from "src/handlers/schema";
+import { Components } from "src/handlers/schema";
 import { Feature, GeoJson, Properties } from "src/types/geojson";
 import { AuthContext } from "src/services/authUtils";
 
@@ -113,14 +113,13 @@ function VectorForm(props: IVectorFormProps) {
   };
 
   const getCascaderOptions = (fType: featureTypes) => {
+    let label: string;
+    if (fType === featureTypes.MULTI_POLYGON) label = "Area";
+    else if (fType === featureTypes.MULTI_LINE_STRING) label = "Line";
+    else label = "Marker";
     return {
       value: fType,
-      label:
-        fType === featureTypes.MULTI_POLYGON
-          ? "Area"
-          : fType === featureTypes.MULTI_LINE_STRING
-          ? "Line"
-          : "Marker",
+      label,
       children: Object.keys(featureType)
         .filter((p) => featureType[p] === fType)
         .map((p) => ({ label: p, value: p })),
@@ -433,7 +432,7 @@ function VectorForm(props: IVectorFormProps) {
       }
       props.loading(true);
       http
-        .post<components["schemas"]["CreateBaseVectorLayerResponse"]>(
+        .post<Components["schemas"]["CreateBaseVectorLayerResponse"]>(
           props.isBaseMap
             ? `${apis.CREATE_BASE_LAYER_FROM_DRAWING}`
             : `${apis.CREATE_VECTOR_LAYER}`,
@@ -504,7 +503,6 @@ function VectorForm(props: IVectorFormProps) {
   };
 
   return (
-    <>
       <Drawer
         title={null}
         width={600}
@@ -634,7 +632,6 @@ function VectorForm(props: IVectorFormProps) {
           </Row>
         </React.Fragment>
       </Drawer>
-    </>
   );
 }
 

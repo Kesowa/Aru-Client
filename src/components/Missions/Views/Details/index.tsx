@@ -87,7 +87,6 @@ function MissionView() {
   const [missionClient, setMissionClient] = useState<any>([]);
   const [initialPilot, setInitialPilot] = useState<any>({});
   const [missType, setMissType] = useState<any>("");
-  const [typeflag, settypeflag] = useState<any>(0);
   const location = useLocation<any>();
   const [showReportErrors, setShowReportErrors] = useState(false);
   const [reportErrors, setReportErrors] = useState<IPlotReportError | null>(
@@ -190,42 +189,32 @@ function MissionView() {
         }
       }
       console.log("STAFF ERROR", result);
+      let missionSize: string;
+      if (mission.size < 1) missionSize = (mission.size * 1000).toFixed(1) + " KB";
+      else if (mission.size >= 1 && mission.size <= 999) missionSize = mission.size.toFixed(1) + " MB";
+      else missionSize = (mission.size / 1000).toFixed(1) + " GB";
       const details = {
         missionName: mission.name,
         missionId: mission._id,
         missionStatus: mission.status,
-        location: mission.flight
-          ? mission.flight.geoLocation
-            ? mission.flight.geoLocation
-            : "none"
-          : "none",
+        location: mission.flight?.geoLocation || "none",
         instructions: mission.description,
         orderDate: moment(mission.createdAt)
           .format("MMMM Do YYYY, h:mm:ss a")
           .toString(),
         flightDate: mission.flight ? mission.flight.date : "none",
         createdBy: mission.user ? mission.user.name : "User deleted",
-        createdByPhoto: mission.user
-          ? mission.user.avatar
-            ? mission.user.avatar
-            : "no-image"
-          : "no-image",
+        createdByPhoto: mission.user?.avatar || "no=image",
         deliverables: mission.deliverables,
         missionGeofence: mission.flight.geoFence,
-        pilotAssigned:
-          mission.flight && mission.flight.pilotID
-            ? mission.flight.pilotID.name
-            : "no-pilot",
-        pilotPhoto:
-          mission.flight && mission.flight.pilotID
-            ? mission.flight.pilotID.avatar
-            : "",
+        pilotAssigned: mission.flight?.pilotID?.name || "no-pilot",
+        pilotPhoto: mission.flight?.pilotID?.avatar || "",
         flightId: mission.flight ? mission.flight._id : "",
         flightName: mission.flight ? mission.flight.name : "",
         fDate: mission.flight ? mission.flight.date : "",
         fDuration: mission.flight ? mission.flight.duration : "",
         locationId: mission.flight ? mission.flight.locationID : null,
-        missionTenantId: tenantId ? tenantId : "",
+        missionTenantId: tenantId || "",
         userType: userDetails ? userDetails.userType : "",
         currentUser: userDetails ? userDetails.name : "",
         currentUserDetails: userDetails,
@@ -233,12 +222,7 @@ function MissionView() {
         missionType: mission.missionType ? mission.missionType.name : "",
         isPublic: mission.isPublic,
         clients: [],
-        size:
-          mission.size < 1
-            ? (mission.size * 1000).toFixed(1) + " KB"
-            : mission.size >= 1 && mission.size <= 999
-            ? mission.size.toFixed(1) + " MB"
-            : (mission.size / 1000).toFixed(1) + " GB",
+        size: missionSize,
       };
 
       console.log("MIissss", details);
@@ -283,9 +267,6 @@ function MissionView() {
 
   // ++++++++++++++++++++++++++++++++++++ E2 share Modal states ++++++++++++++++++++++++++++++++++++++++++++
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
 
   const handleOk = () => {
     setIsModalVisible(false);
@@ -350,8 +331,6 @@ function MissionView() {
       .finally(() => {
         setLoading(false);
       });
-
-    settypeflag(1);
   };
 
   const EditCancel = () => {
@@ -650,7 +629,7 @@ function MissionView() {
   // ++++++++++++++++++ E7 Data Card Contents +++++++++++++++++++++++++++++++++++
 
   function renderDataCard(status: any) {
-    const [userType, missionId] = id.split("-");
+    const missionId = id.split("-")[1];
     console.log("LOGIS", missionId);
     switch (status) {
       case "Review":
@@ -965,13 +944,6 @@ function MissionView() {
   function headerButtons(status: any) {
     switch (status) {
       case "Upcoming":
-        return (
-          <>
-            {renderMissionDetailsBtn()}
-            {renderReviewBtn()}
-          </>
-        );
-
       case "Live":
         return (
           <>
@@ -1178,18 +1150,6 @@ function MissionView() {
       </>
     );
   }
-
-  // +++++++++++++++ E10 Breadcrumb routes ++++++++++++++++++++++++++++++++
-  const routes = [
-    {
-      path: "missions",
-      breadcrumbName: "Missions",
-    },
-    {
-      path: "missionView",
-      breadcrumbName: MissionDetails.missionName,
-    },
-  ];
 
   const onFinish = (values) => {
     console.log("Success:", values);
@@ -1440,7 +1400,7 @@ function MissionView() {
           {/* ++++++++++++++++++++++++++++++++++++++++ E20 SHARE MODAL CODE++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
           <Modal
             title={[
-              <Title level={5}>
+              <Title level={5} key={window.crypto.randomUUID()}>
                 <ShareAltOutlined style={{ fontSize: "24px" }} />
                 &nbsp;&nbsp;&nbsp;Share mission card
               </Title>,
@@ -1476,7 +1436,7 @@ function MissionView() {
           {/* +++++++++++++++++++++++++++++++++++++++++++++++++++ E21 Modal Edit++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
           <Modal
             title={[
-              <Title level={5}>
+              <Title level={5} key={window.crypto.randomUUID()}>
                 <EditOutlined style={{ fontSize: "24px" }} />
                 &nbsp;&nbsp;&nbsp;Edit Mission and flight details
               </Title>,
@@ -1574,7 +1534,7 @@ function MissionView() {
           {/* +++++++++++++++++++++++++++++++++++++++++++++++++++ Report Generation Errors Modal ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */}
           <Modal
             title={[
-              <Title level={4}>
+              <Title level={4} key={window.crypto.randomUUID()}>
                 <ExceptionOutlined style={{ fontSize: "24px" }} />
                 &nbsp;&nbsp;&nbsp;Report generation failed!
               </Title>,

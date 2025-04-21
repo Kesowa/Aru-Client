@@ -50,23 +50,15 @@ export default class HtmlOverlay extends React.Component<Props> {
     );
   }
 
-  scaleWithZoom(n: number) {
-    const { zoom } = this.props.viewport;
-    return n / Math.pow(2, 20 - zoom);
-  }
+  // scaleWithZoom(n: number) {
+  //   const { zoom } = this.props.viewport;
+  //   return n / Math.pow(2, 20 - zoom);
+  // }
 
-  breakpointWithZoom(threshold: number, a: any, b: any): any {
-    const { zoom } = this.props.viewport;
-    return zoom > threshold ? a : b;
-  }
-
-  getViewport() {
-    return this.props.viewport;
-  }
-
-  getZoom() {
-    return this.props.viewport.zoom;
-  }
+  // breakpointWithZoom(threshold: number, a: any, b: any): any {
+  //   const { zoom } = this.props.viewport;
+  //   return zoom > threshold ? a : b;
+  // }
 
   render() {
     const { zIndex = 1 } = this.props;

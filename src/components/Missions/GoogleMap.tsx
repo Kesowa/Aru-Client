@@ -1,10 +1,9 @@
 import React, { Component } from "react";
-import { message } from "antd";
+import { message, Tooltip } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import GeoFence from "../../static/GeoFence.svg";
 import RadiusTool from "../../static/RadiusTool.svg";
-import { Tooltip } from "antd";
 
 import { UploadOutlined } from "@ant-design/icons";
 
@@ -49,15 +48,12 @@ class GoogleMap extends Component<mapProps, mapState> {
   googleMapRef: any = React.createRef<HTMLDivElement>();
   googleSearchRef: any = React.createRef<HTMLInputElement>();
   geojsonInputRef: any = React.createRef<HTMLInputElement>();
-  tl = null;
-  container: any = null;
   top = 0;
   left = 0;
   googleMap: any = null;
   drawingManager: any = null;
   oldShape: any = null;
   searchAutoComplete: any = null;
-  infoWindow: any = null;
 
   componentDidMount() {
     const loc = { lat: 43.642567, lng: -79.387054 };
@@ -71,7 +67,6 @@ class GoogleMap extends Component<mapProps, mapState> {
     this.drawingManager.setMap(this.googleMap);
     this.setSearchBarEvent();
     this.overlayComplete();
-    this.container = document.getElementById("gmap_container");
     // Pin drop
     this.googleMap.addListener("dblclick", (e) => {
       if (this.oldShape) {
@@ -232,17 +227,17 @@ class GoogleMap extends Component<mapProps, mapState> {
   };
 
   // Set Current location of user
-  setCurrentLocation = () => {
-    let lat, lng;
-    if (window.navigator.geolocation) {
-      window.navigator.geolocation.getCurrentPosition((position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        this.googleMap.panTo({ lat, lng });
-        this.props.setlocation({ lat, lng });
-      });
-    }
-  };
+  // setCurrentLocation = () => {
+  //   let lat, lng;
+  //   if (window.navigator.geolocation) {
+  //     window.navigator.geolocation.getCurrentPosition((position) => {
+  //       const lat = position.coords.latitude;
+  //       const lng = position.coords.longitude;
+  //       this.googleMap.panTo({ lat, lng });
+  //       this.props.setlocation({ lat, lng });
+  //     });
+  //   }
+  // };
 
   // Initialize Drawing Manager
   createDrawingManager = () =>
@@ -640,87 +635,90 @@ class GoogleMap extends Component<mapProps, mapState> {
     });
   };
 
-  setGeojsonUploaded = (geojsonData) => {
-    const { setAreaSelected, setGeolocation, setCenterPoints, setGeoFence } =
-      this.props;
+  // setGeojsonUploaded = (geojsonData) => {
+  //   const {
+  //     setAreaSelected,
+  //     setGeolocation,
+  //     setCenterPoints,
+  //     setGeoFence,
+  //   } = this.props;
 
-    this.clearDrawing();
-    this.props.setAreaSelected(false);
-    this.props.setDrawingToolBtns(false);
+  //   this.clearDrawing();
+  //   this.props.setAreaSelected(false);
+  //   this.props.setDrawingToolBtns(false);
 
-    // Clear previous
-    const parentMap = this.googleMap;
-    parentMap.data.forEach((feature) => {
-      if (feature.getId() === "UploadedGeoJSON") parentMap.data.remove(feature);
-    });
+  //   // Clear previous
+  //   const parentMap = this.googleMap;
+  //   parentMap.data.forEach((feature) => {
+  //     if (feature.getId() === "UploadedGeoJSON") parentMap.data.remove(feature);
+  //   });
 
-    // Flight Area can't be point
-    const featToAdd = geojsonData.features.filter((feature) =>
-      ["MultiPolygon", "Polygon"].includes(feature.geometry.type)
-    );
-    if (featToAdd.length === 0) {
-      message.error("Invalid GeoJSON File");
-      this.geojsonInputRef.current.value = null;
-      return;
-    } else {
-      geojsonData.features = [{ ...featToAdd[0], id: "UploadedGeoJSON" }]; // Should have single feature
-      const newFeatures = this.googleMap.data.addGeoJson(geojsonData);
-      console.log("Id of new feature: " + newFeatures[0].getId());
-      const coords: any = [];
-      const newGeometry = newFeatures[0].getGeometry();
-      console.log("Geometry Type: " + newGeometry.getType());
-      if (newGeometry.getType() === "MultiPolygon") {
-        const polygonsContained = newGeometry.getArray();
-        polygonsContained[0].forEachLatLng((latlng) => {
-          coords.push({ lat: latlng.lat(), lng: latlng.lng() });
-        });
-      }
-      if (newGeometry.getType() === "Polygon") {
-        newGeometry.forEachLatLng((latlng) => {
-          coords.push({ lat: latlng.lat(), lng: latlng.lng() });
-        });
-      }
-      const center = this.findPolygonCenter(coords);
-      this.googleMap.panTo({
-        lat: center[0],
-        lng: center[1],
-      });
-      getAddressfromLatLong(center[0], center[1], (err, address) => {
-        if (!err) {
-          setCenterPoints({
-            lat: center[0],
-            lng: center[1],
-          });
-          setGeolocation(address);
-        } else {
-          message.error("Location could not be fetched");
-        }
-      });
-      const shapePath = new window.google.maps.MVCArray<google.maps.LatLng>();
-      coords.forEach((coord) => {
-        shapePath.push(new window.google.maps.LatLng(coord.lat, coord.lng));
-      });
+  //   // Flight Area can't be point
+  //   const featToAdd = geojsonData.features.filter((feature) =>
+  //     ["MultiPolygon", "Polygon"].includes(feature.geometry.type)
+  //   );
+  //   if (featToAdd.length === 0) {
+  //     message.error("Invalid GeoJSON File");
+  //     this.geojsonInputRef.current.value = null;
+  //   } else {
+  //     geojsonData.features = [{ ...featToAdd[0], id: "UploadedGeoJSON" }]; // Should have single feature
+  //     const newFeatures = this.googleMap.data.addGeoJson(geojsonData);
+  //     console.log("Id of new feature: " + newFeatures[0].getId());
+  //     const coords: any = [];
+  //     const newGeometry = newFeatures[0].getGeometry();
+  //     console.log("Geometry Type: " + newGeometry.getType());
+  //     if (newGeometry.getType() === "MultiPolygon") {
+  //       const polygonsContained = newGeometry.getArray();
+  //       polygonsContained[0].forEachLatLng((latlng) => {
+  //         coords.push({ lat: latlng.lat(), lng: latlng.lng() });
+  //       });
+  //     }
+  //     if (newGeometry.getType() === "Polygon") {
+  //       newGeometry.forEachLatLng((latlng) => {
+  //         coords.push({ lat: latlng.lat(), lng: latlng.lng() });
+  //       });
+  //     }
+  //     const center = this.findPolygonCenter(coords);
+  //     this.googleMap.panTo({
+  //       lat: center[0],
+  //       lng: center[1],
+  //     });
+  //     getAddressfromLatLong(center[0], center[1], (err, address) => {
+  //       if (!err) {
+  //         setCenterPoints({
+  //           lat: center[0], 
+  //           lng: center[1]
+  //         });
+  //         setGeolocation(address);
+  //       } else {
+  //         message.error("Location could not be fetched");
+  //       }
+  //     });
+  //     const shapePath = new window.google.maps.MVCArray<google.maps.LatLng>();
+  //     coords.forEach((coord) => {
+  //       shapePath.push(new window.google.maps.LatLng(coord.lat, coord.lng));
+  //     });
 
-      const area = window.google.maps.geometry.spherical.computeArea(shapePath);
+  //     const area = window.google.maps.geometry.spherical.computeArea(shapePath);
 
-      const length =
-        window.google.maps.geometry.spherical.computeLength(shapePath);
+  //     const length =
+  //       window.google.maps.geometry.spherical.computeLength(shapePath);
 
-      // Set Polygon data to State
-      setGeoFence({
-        polygon: { area, length, points: coords },
-        circle: null,
-      });
+  //     // Set Polygon data to State
+  //     setGeoFence({
+  //       polygon: { area, length, points: coords },
+  //       circle: null,
+  //     });
 
-      setAreaSelected(true);
+  //     setAreaSelected(true);
 
-      this.setState({
-        isCircleActive: false,
-        isPolygonActive: false,
-        isGeoJSONActive: true,
-      });
-    }
-  };
+  //     this.setState({
+  //       isCircleActive: false,
+  //       isPolygonActive: false,
+  //       isGeoJSONActive: true,
+  //     });
+  //   }
+  // };
 
   clearDrawing = () => {
     if (this.oldShape) {

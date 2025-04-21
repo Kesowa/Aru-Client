@@ -39,7 +39,7 @@ const FlightDetails: FC<any> = (props) => {
           >
             <Panel
               header={[
-                <div>
+                <div key={window.crypto.randomUUID()}>
                   <Title className="panel-title" level={5}>
                     <InfoCircleFilled />
                     &nbsp;&nbsp;Flight Details

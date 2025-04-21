@@ -1,7 +1,6 @@
 import { Col, Collapse, Divider, Row, Select, Typography } from "antd";
-import { memo } from "react";
+import React, { memo } from "react";
 import { v4 as uuid } from "uuid";
-import React from "react";
 const { Panel } = Collapse;
 const { Text, Title } = Typography;
 const { Option } = Select;

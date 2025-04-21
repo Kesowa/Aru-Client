@@ -308,9 +308,9 @@ function AssetBase(props: any) {
     }
 
     const assetInfo = {};
-    for (let i = 0; i < data.length; ++i) {
-      const key = data[i].key;
-      const value = data[i].value;
+    for (const element of data) {
+      const key = element.key;
+      const value = element.value;
       assetInfo[key] = value;
       if (key === "FCID" && !value || key === "serialNo" && !value || key === "UIN" && !value) {
         message.error("AssetInfo is required");
@@ -352,8 +352,8 @@ function AssetBase(props: any) {
   const onFinish2 = async (values: any) => {
     form.resetFields();
     const props2 = {};
-    for (let i = 0; i < data.length; ++i) {
-      props2[data[i].key] = data[i].value;
+    for (const element of data) {
+      props2[element.key] = element.value;
     }
     const dimensions = {};
     dimensions["length"] = values.length;
@@ -660,7 +660,7 @@ function AssetBase(props: any) {
           >
             <Select placeholder="Choose asset owner">
               {users.map((user: any) => (
-                <Select.Option value={user._id}>{user.name}</Select.Option>
+                <Select.Option value={user._id} key={window.crypto.randomUUID()}>{user.name}</Select.Option>
               ))}
             </Select>
           </Form.Item>
@@ -756,7 +756,7 @@ function AssetBase(props: any) {
           >
             <Select placeholder="Choose Asset Class">
               {assetClasses.map((assetClass: any) => (
-                <Select.Option value={assetClass._id}>
+                <Select.Option value={assetClass._id} key={window.crypto.randomUUID()}>
                   {assetClass.typeName}
                 </Select.Option>
               ))}
@@ -774,7 +774,7 @@ function AssetBase(props: any) {
           >
             <Select placeholder="Choose Manufacturer">
               {manufacturers.map((manufacturer: any) => (
-                <Select.Option value={manufacturer._id}>
+                <Select.Option value={manufacturer._id} key={window.crypto.randomUUID()}>
                   {manufacturer.name}
                 </Select.Option>
               ))}

@@ -19,7 +19,6 @@ import {
   Skeleton,
   Badge,
   Pagination,
-  Progress,
   MenuProps,
   notification,
 } from "antd";
@@ -31,7 +30,6 @@ import {
   UploadOutlined,
   UserOutlined,
   VideoCameraOutlined,
-  AimOutlined,
   DownloadOutlined,
   MessageOutlined,
   CloseOutlined,
@@ -68,8 +66,6 @@ const { Text } = Typography;
 function Videos(props) {
   const [VodData, setVodData] = useState([]);
   const [loader, setLoader] = useState(true);
-  const [defaultFileList, setDefaultFileList] = useState([]);
-  const [progress, setProgress] = useState(0); //this can be used for a different progress component
   const [refresh, setRefresh] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
@@ -262,7 +258,6 @@ function Videos(props) {
   };
   const ImageComponent = (item: any) => {
     return (
-      <>
         <Col
           xs={24}
           sm={24}
@@ -346,7 +341,6 @@ function Videos(props) {
             </Card>
           </Badge>
         </Col>
-      </>
     );
   };
 
@@ -407,29 +401,10 @@ function Videos(props) {
       const source = cancelToken.source();
       setUploading(true);
 
-      // const config: AxiosRequestConfig = {
-      //   onUploadProgress: (event) => {
-      //     const percent = Math.floor((event.loaded / event.total) * 100);
-      //     // setProgress(percent);
-      //     if (percent === 100) {
-      //       // setTimeout(() => setProgress(0), 1000);
-      //     }
-      //     // options.onProgress({ percent: (event.loaded / event.total) * 100 });
-      //   },
-      //   cancelToken: source.token,
-      // };
-
-      const uploadToken = await uploadFile(
-        options.file,
-        DocModel.VOD,
-        (prog) => {
-          console.log("PROGRESS: ", prog);
-          setProgress(prog * 100);
-          options.onProgress({ percent: prog * 100 });
-        },
-        source.token
-      );
-
+      const uploadToken = await uploadFile(options.file, DocModel.VOD, (prog) => {
+        options.onProgress({ percent: prog * 100 });
+      }, source.token);
+        
       const body = {
         file: uploadToken,
         missionID: props.missionDetails.missionId,
@@ -485,10 +460,8 @@ function Videos(props) {
                   )
                     setStorageModal(true);
                   else {
-                    {
-                      message.error(err.response?.data.message);
-                      console.log(err.response);
-                    }
+                    message.error(err.response?.data.message);
+                    console.log(err.response);
                     setIsModalVisible(true);
                   }
                 } else {
@@ -812,7 +785,7 @@ function Videos(props) {
             type="info"
             showIcon
           />
-          <Dragger {...UploadProps} defaultFileList={defaultFileList}>
+          <Dragger {...UploadProps} defaultFileList={[]}>
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
@@ -841,9 +814,6 @@ function Videos(props) {
   //-------------------------render delete vod button based on permission--------------
   /* Action Button*/
 
-  const onChange = (list) => {
-    setCheckedList(list);
-  };
   useEffect(() => {
     console.log(checkedList);
   }, [checkedList]);
@@ -900,6 +870,7 @@ function Videos(props) {
 
   //---------------Render video thumbnails------------------------------------------------
   function renderVideos(data: any[]) {
+    if (data.length === 0) return <Empty style={{ margin: "auto" }} />;
     return (
       <div>
         {data.length < 1 ? (
@@ -954,6 +925,7 @@ function Videos(props) {
                                     textAlign: "center",
                                     background: "black",
                                   }}
+                                  key={window.crypto.randomUUID()}
                                 >
                                   {!videoDetails.link && (
                                     <img
@@ -973,7 +945,6 @@ function Videos(props) {
                             })}
                           </Carousel>
                           {videoDetails.link && (
-                            <>
                               <div
                                 style={{
                                   height: "400px", //video player
@@ -994,7 +965,6 @@ function Videos(props) {
                                   updateVOD={updateVODAttr}
                                 />
                               </div>
-                            </>
                           )}
                         </div>
                       </div>
@@ -1003,17 +973,7 @@ function Videos(props) {
                       <Row>
                         {data.map((dataa, idx) => (
                           <Col
-                            span={
-                              window.devicePixelRatio == 1.5
-                                ? 8
-                                : window.screen.width == 1920
-                                ? 4
-                                : window.screen.width == 1366
-                                ? 8
-                                : window.screen.width == 2560
-                                ? 4
-                                : 8
-                            }
+                            span={[1920, 2560].includes(window.screen.width) ? 4 : 8}
                             key={`${dataa._id}`}
                           >
                             <Dropdown
@@ -1150,7 +1110,6 @@ function Videos(props) {
                                       key={`1-${dataa._id}`}
                                       className="outcome-cardd"
                                       cover={
-                                        <>
                                           <img
                                             style={{
                                               aspectRatio: "16/9",
@@ -1165,7 +1124,6 @@ function Videos(props) {
                                               (e.target.src = `/icons/fallback.png`)
                                             }
                                           />
-                                        </>
                                       }
                                     >
                                       <Row style={{ marginTop: "-12px" }}>
@@ -1252,6 +1210,7 @@ function Videos(props) {
                               textAlign: "center",
                               background: "black",
                             }}
+                            key={window.crypto.randomUUID()}
                           >
                             {!videoDetails.link && (
                               <img
@@ -1270,7 +1229,6 @@ function Videos(props) {
                         ))}
                       </Carousel>
                       {videoDetails.link && (
-                        <>
                           <div
                             style={{
                               height: "400px", //video player
@@ -1291,7 +1249,6 @@ function Videos(props) {
                               updateVOD={updateVODAttr}
                             />
                           </div>
-                        </>
                       )}
                     </div>
                   </div>
@@ -1305,6 +1262,7 @@ function Videos(props) {
                     }}
                     onOpenChange={() => setSelectedVideo({ data: dataa, idx })}
                     trigger={["contextMenu"]}
+                    key={window.crypto.randomUUID()}
                   >
                     <Row
                       className="listview-outcomes"
@@ -1519,10 +1477,10 @@ function Videos(props) {
         open={isEditModalVisible}
         onCancel={handleCancel3}
         footer={[
-          <Button onClick={handleCancel3} disabled={videoNameLoader}>
+          <Button onClick={handleCancel3} disabled={videoNameLoader} key={window.crypto.randomUUID()}>
             Cancel
           </Button>,
-          <Button type="primary" loading={videoNameLoader} onClick={handleOk3}>
+          <Button type="primary" loading={videoNameLoader} onClick={handleOk3} key={window.crypto.randomUUID()}>
             Save
           </Button>,
         ]}
@@ -1609,7 +1567,6 @@ function Videos(props) {
               </Col>
             </>
           ) : (
-            <>
               <Row>
                 <Row className="vid-thumbnail">
                   <Card
@@ -1645,14 +1602,9 @@ function Videos(props) {
                   </Card>
                 </Row>
               </Row>
-            </>
           )}
         </>
-      ) : VodData.length > 0 ? (
-        renderVideos(VodData)
-      ) : (
-        <Empty style={{ margin: "auto" }} />
-      )}
+      ) : renderVideos(VodData)}
     </>
   );
 }

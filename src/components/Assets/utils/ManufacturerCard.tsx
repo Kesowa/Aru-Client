@@ -209,8 +209,8 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
   const onFinish = async (values: any) => {
     form.resetFields();
     const props2 = {};
-    for (let i = 0; i < tableData.length; ++i) {
-      props2[tableData[i].key] = tableData[i].value;
+    for (const d of tableData) {
+      props2[d.key] = d.value;
     }
     const dimensions = {
       length: values.length,
@@ -459,8 +459,7 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
           Contacts
         </Text>
         <Row>
-          {data.contacts &&
-            data.contacts.map((obj) => {
+          {data.contacts?.map((obj) => {
               const content = (
                 <div>
                   <Row style={{ height: "max-content" }}>
@@ -528,7 +527,7 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
                 </div>
               );
               return (
-                <Col span={12} style={{ marginTop: "10px" }}>
+                <Col span={12} style={{ marginTop: "10px" }} key={window.crypto.randomUUID()}>
                   <Popover placement="left" content={content} trigger="click">
                     <div
                       style={{
@@ -648,7 +647,7 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
             >
               <Select placeholder="Choose Asset Class">
                 {assetClasses.map((assetClass: any) => (
-                  <Select.Option value={assetClass._id}>
+                  <Select.Option value={assetClass._id} key={window.crypto.randomUUID()}>
                     {assetClass.typeName}
                   </Select.Option>
                 ))}
@@ -666,7 +665,7 @@ const ManufacturerCard: React.FC<ManufacturerCardProps> = ({
             >
               <Select placeholder="Choose Manufacturer">
                 {manufacturers.map((manufacturer: any) => (
-                  <Select.Option value={manufacturer._id}>
+                  <Select.Option value={manufacturer._id} key={window.crypto.randomUUID()}>
                     {manufacturer.name}
                   </Select.Option>
                 ))}

@@ -14,19 +14,16 @@ function PrivateRoute({ children, ...rest }: IProps) {
   return (
     <Route
       {...rest}
-      render={({ location }) =>
-        Auth.isLoggedIn ? (
-          children
-        ) : Auth.isError ? (
-          <LoginErrorModal />
-        ) : (
-          <Redirect
-            to={{
-              pathname: "/login",
-              state: { from: location },
-            }}
-          />
-        )
+      render={({ location }) => {
+        if (Auth.isLoggedIn) return children;
+        if (Auth.isError) return <LoginErrorModal />;
+        return <Redirect
+          to={{
+            pathname: "/login",
+            state: { from: location },
+          }}
+        />
+      }
       }
     />
   );

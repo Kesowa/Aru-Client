@@ -9,7 +9,6 @@ import {
   Typography,
   Modal,
   Button,
-  notification,
   Tag,
   Pagination,
   Empty,
@@ -80,10 +79,6 @@ function Outcomes(props) {
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
   const [thumbnail, setThumbnail] = useState("");
-  const [progress, setProgress] = useState(0); //this can be used for a different progress component
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isModalVisible2, setIsModalVisible2] = useState(false);
-  const [storageModal, setStorageModal] = useState(false);
   const [activateSelection, setActivateSelection] = useState(false);
   const defaultCheckedList = [];
   const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
@@ -373,10 +368,8 @@ function Outcomes(props) {
                 <Row>
                   <Col md={20}>
                     <Text type="secondary">
-                      {outcome.location
-                        ? outcome.location.lat == "0"
-                          ? ""
-                          : `${outcome.location.lat}, ${outcome.location.long}`
+                      {outcome?.location?.lat && outcome?.location?.lat != "0"
+                        ? `${outcome.location.lat}, ${outcome.location.long}`
                         : ""}
                     </Text>
                   </Col>
@@ -634,7 +627,7 @@ function Outcomes(props) {
   }
 
   async function extractExif(file: any) {
-    const tags = await ExifReader.load(file);
+    const tags = ExifReader.load(file);
     console.log(tags);
 
     if (tags.GPSLatitude && tags.GPSLongitude) {
@@ -666,30 +659,9 @@ function Outcomes(props) {
       const res = await extractExif(options.file);
       console.log("EXTRACT EXIFR: ", res);
 
-      // const config:AxiosRequestConfig = {
-      //   onUploadProgress: (event) => {
-      //     const percent = Math.floor((event.loaded / event.total) * 100);
-      //     setProgress(percent);
-      //     if (percent === 100) {
-      //       setTimeout(() => setProgress(0), 1000);
-      //     }
-      //     options.onProgress({
-      //       percent: (event.loaded / event.total) * 100,
-      //     });
-      //   },
-      //   cancelToken: source.token,
-      // };
-
-      const uploadToken = await uploadFile(
-        options.file,
-        DocModel.ALERT_IMAGES,
-        (prog) => {
-          console.log("PROGRESS: ", prog);
-          setProgress(prog * 100);
-          options.onProgress({ percent: prog * 100 });
-        },
-        source.token
-      );
+      const uploadToken = await uploadFile(options.file, DocModel.ALERT_IMAGES,(prog) => {
+        options.onProgress({ percent: prog * 100 });
+      },source.token);
 
       const body = {
         file: uploadToken,
@@ -704,140 +676,105 @@ function Outcomes(props) {
         flightId: props.missionDetails.flightId,
       };
 
-      if (res.status) {
-        console.log(res.status);
-
-        // fData.append("image", options.file);
-        // fData.append("locationName", res.address);
-        // fData.append("missionId", props.missionDetails.missionId);
-        // fData.append("locationId", props.missionDetails.locationId._id);
-        // fData.append("pcount", "0");
-        // fData.append("type", "Manual");
-        // fData.append("note", "Alert uploaded from browser!");
-        // fData.append("onSite", "false");
-        // fData.append("flightId", props.missionDetails.flightId);
-        http
-          .post(options.action, body)
-          .then((res: any) => {
-            if (res.data.status) {
-              console.log("Upload successful! ", res.data);
-              message.success(
-                "File " + options.file.name + " uploaded successfully"
-              );
-              options.onSuccess(res.data, options.file);
-              setRefresh(!refresh);
-            } else {
-              message.error("File " + options.file.name + " uploaded error");
-              options.onError({ res });
-            }
-          })
-          .catch((err) => {
-            if (axios.isCancel(err)) {
-              console.log("Upload Cancelled");
-              return;
-            } else if (err?.response?.status === 403) {
-              console.log(err.response);
-              if (
-                err.response.data.message ===
-                "Package has expired! Please renew!"
-              ) {
-                setIsModalVisible2(true);
-                window.setTimeout(function () {
-                  AxiosErrorHandler(err, logout);
-                }, 5000);
-              } else if (
-                err.response?.data.message ===
-                "Actual storage exceeded the Limit of Set storage!"
-              )
-                setStorageModal(true);
-              else {
-                {
+      if (res.status) {   
+          console.log(res.status);
+        
+          // fData.append("image", options.file);
+          // fData.append("locationName", res.address);
+          // fData.append("missionId", props.missionDetails.missionId);
+          // fData.append("locationId", props.missionDetails.locationId._id);
+          // fData.append("pcount", "0");
+          // fData.append("type", "Manual");
+          // fData.append("note", "Alert uploaded from browser!");
+          // fData.append("onSite", "false");
+          // fData.append("flightId", props.missionDetails.flightId);
+          http
+            .post(options.action, body)
+            .then((res: any) => {
+              if (res.data.status) {
+                console.log("Upload successful! ", res.data);
+                message.success(
+                  "File " + options.file.name + " uploaded successfully"
+                );
+                options.onSuccess(res.data, options.file);
+                setRefresh(!refresh);
+              } else {
+                message.error("File " + options.file.name + " uploaded error");
+                options.onError({ res });
+              }
+            })
+            .catch((err) => {
+              if (axios.isCancel(err)) {
+                console.log("Upload Cancelled");
+                return;
+              } else if (err?.response?.status === 403) {
+                console.log(err.response);
+                if (
+                  err.response.data.message ===
+                  "Package has expired! Please renew!"
+                ) {
+                  window.setTimeout(function () {
+                    AxiosErrorHandler(err, logout); 
+                  }, 5000);
+                } else {
                   message.error(err.response?.data.message);
                   console.log(err.response);
                 }
-                setIsModalVisible(true);
               }
-            } else {
-              console.log("Upload Error!", err.message);
-              message.error("Unable to upload file!");
-            }
-            options.onError({ err });
-          })
-          .finally(() => {
-            setUploading(false);
-          });
-      } else {
-        console.log(res);
-        // fData.append("image", options.file);
-        // fData.append("locationName", res.address);
-        // fData.append("missionId", props.missionDetails.missionId);
-        // fData.append("locationId", props.missionDetails.locationId._id);
-        // fData.append("pcount", "0");
-        // fData.append("type", "Manual");
-        // fData.append("note", "Alert uploaded from browser!");
-        // fData.append("onSite", "false");
-        // fData.append("flightId", props.missionDetails.flightId);
-
-        // const config = {
-
-        //   onUploadProgress: (event) => {
-        //     const percent = Math.floor((event.loaded / event.total) * 100);
-        //     setProgress(percent);
-        //     if (percent === 100) {
-        //       setTimeout(() => setProgress(0), 1000);
-        //     }
-        //     options.onProgress({
-        //       percent: (event.loaded / event.total) * 100,
-        //     });
-        //   },
-        //   cancelToken: source.token,
-        // };
-        http
-          .post(options.action, body)
-          .then((res: any) => {
-            if (res.data.status) {
-              console.log("Upload successful! ", res.data);
-              message.success(
-                "File " + options.file.name + " uploaded successfully"
-              );
-              options.onSuccess(res.data, options.file);
-              setRefresh(!refresh);
-            } else {
-              message.error("File " + options.file.name + " uploaded error");
-              options.onError({ res });
-            }
-          })
-          .catch((err) => {
-            if (axios.isCancel(err)) {
-              console.log("Upload Cancelled");
-              return;
-            } else if (err?.response?.status === 403) {
-              console.log(err.response);
-              if (
-                err.response.data.message ===
-                "Package has expired! Please renew!"
-              ) {
-                setIsModalVisible2(true);
-                window.setTimeout(function () {
-                  AxiosErrorHandler(err, logout);
-                }, 5000);
-              } else if (
-                err.response?.data.message ===
-                "Actual storage exceeded the Limit of Set storage!"
-              )
-                setStorageModal(true);
-              else {
-                {
+              options.onError({ err });
+            })
+            .finally(() => {
+              setUploading(false);
+            });
+        } else {
+          
+          console.log(res);
+          // fData.append("image", options.file);
+          // fData.append("locationName", res.address);
+          // fData.append("missionId", props.missionDetails.missionId);
+          // fData.append("locationId", props.missionDetails.locationId._id);
+          // fData.append("pcount", "0");
+          // fData.append("type", "Manual");
+          // fData.append("note", "Alert uploaded from browser!");
+          // fData.append("onSite", "false");
+          // fData.append("flightId", props.missionDetails.flightId);
+          http
+            .post(options.action, body)
+            .then((res: any) => {
+              if (res.data.status) {
+                console.log("Upload successful! ", res.data);
+                message.success(
+                  "File " + options.file.name + " uploaded successfully"
+                );
+                options.onSuccess(res.data, options.file);
+                setRefresh(!refresh);
+              } else {
+                message.error("File " + options.file.name + " uploaded error");
+                options.onError({ res });
+              }
+            })
+            .catch((err) => {
+              if (axios.isCancel(err)) {
+                console.log("Upload Cancelled");
+                return;
+              } else if (err?.response?.status === 403) {
+                console.log(err.response);
+                if (
+                  err.response.data.message ===
+                  "Package has expired! Please renew!"
+                ) {
+                  window.setTimeout(function () {
+                    AxiosErrorHandler(err, logout); 
+                  }, 5000);
+                } else {
                   message.error(err.response?.data.message);
                   console.log(err.response);
                 }
-                setIsModalVisible(true);
+              } else {
+                console.log("Upload Error!", err.message);
+                message.error("Unable to upload file!");
               }
-            } else {
-              console.log("Upload Error!", err.message);
-              message.error("Unable to upload file!");
-            }
-            options.onError({ err });
+              options.onError({ err });
           })
           .finally(() => {
             setUploading(false);
@@ -976,19 +913,22 @@ function Outcomes(props) {
           {outcomeData?.length !== 0 ? (
             <div>
               {activateSelection ? (
-                listView ? (
-                  <>
-                    {outcomeData?.map((item: any, ind: any) =>
-                      OutcomeCompononent(item, ind)
-                    )}
-                  </>
-                ) : (
-                  <Row>
-                    {outcomeData?.map((item: any, ind: any) =>
-                      OutcomeCompononent(item, ind)
-                    )}
-                  </Row>
-                )
+                <>
+                {
+                  listView ?
+                    <>
+                      {outcomeData?.map((item: any, ind: any) =>
+                        OutcomeCompononent(item, ind)
+                      )}
+                    </>
+                  :
+                    <Row>
+                      {outcomeData?.map((item: any, ind: any) =>
+                        OutcomeCompononent(item, ind)
+                      )}
+                    </Row>
+                }
+                </>
               ) : (
                 <>
                   {listView ? (
@@ -1001,6 +941,7 @@ function Outcomes(props) {
                             items: outcomeMenu(outcome),
                             onClick: outcomeMenuOnClick,
                           }}
+                          key={window.crypto.randomUUID()}
                         >
                           <Row
                             className="listview-outcomes"
@@ -1072,10 +1013,8 @@ function Outcomes(props) {
                                 <Row>
                                   <Col md={20}>
                                     <Text type="secondary">
-                                      {outcome.location
-                                        ? outcome.location.lat == "0"
-                                          ? ""
-                                          : `${outcome.location.lat}, ${outcome.location.long}`
+                                      {outcome?.location?.lat && outcome?.location?.lat != "0"
+                                          ? `${outcome.location.lat}, ${outcome.location.long}`
                                         : ""}
                                     </Text>
                                   </Col>
@@ -1247,11 +1186,7 @@ function Outcomes(props) {
           ) : (
             <Empty />
           )}
-          {outcomeData === undefined ? (
-            <>
-              <Empty style={{ margin: "auto" }} />
-            </>
-          ) : null}
+          {outcomeData === undefined ? <Empty style={{ margin: "auto" }} /> : null}
 
           <Thread thumbnail={thumbnail} setThumbnail={setThumbnail} />
           <ThermalImaging

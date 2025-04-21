@@ -190,7 +190,7 @@ const Thread = (props) => {
   };
   const CommentWithFormattedMentions = ({ text }) => {
     const words = text.replace("\n", " \n").split(" ");
-    return words.map((word, index) => {
+    return words.map((word) => {
       const mention = checkStringForKeyValue(word, "display");
       // Apply formatting to specific words based on conditions
       if (mention) {
@@ -200,9 +200,10 @@ const Thread = (props) => {
             onClick={() => {
               setOpenVOD({ status: true, seek: mention.id });
             }}
+            key={window.crypto.randomUUID()}
           >
             <span
-              key={index}
+              key={window.crypto.randomUUID()}
               style={{
                 backgroundColor: "#d3d3d3",
                 borderRadius: "3px",

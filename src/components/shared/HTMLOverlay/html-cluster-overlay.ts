@@ -2,6 +2,8 @@ import { point } from "@turf/helpers";
 import Supercluster from "supercluster";
 import HtmlOverlay from "./html-overlay";
 
+type OptionalObject = Record<string, any> | null | undefined;
+
 export default class HtmlClusterOverlay<ObjType> extends HtmlOverlay {
   _superCluster: Record<string, any>;
   _lastObjects: ObjType[] | null | undefined = null;
@@ -64,17 +66,14 @@ export default class HtmlClusterOverlay<ObjType> extends HtmlOverlay {
   }
 
   // Get options object used when instantiating supercluster
-  getClusterOptions(): Record<string, any> | null | undefined {
+  getClusterOptions(): OptionalObject {
     return {
       maxZoom: 20,
     };
   }
 
   // override to return an HtmlOverlayItem
-  renderObject(
-    coordinates: number[],
-    obj: ObjType
-  ): Record<string, any> | null | undefined {
+  renderObject(coordinates: number[], obj: ObjType): OptionalObject {
     return null;
   }
 
@@ -84,7 +83,7 @@ export default class HtmlClusterOverlay<ObjType> extends HtmlOverlay {
     coordinates: number[],
     clusterId: number,
     pointCount: number
-  ): Record<string, any> | null | undefined {
+  ): OptionalObject {
     return null;
   }
 }

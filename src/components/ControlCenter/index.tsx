@@ -303,10 +303,6 @@ function GridLive(props: any) {
 
     groups[group] = requiredGroup;
 
-    const activeFeeds = requiredGroup.feeds.filter(
-      (feed) => feed.type === "feed"
-    );
-
     console.log(pool);
 
     setFeedPool(pool);
@@ -325,6 +321,7 @@ function GridLive(props: any) {
   const setGroupOrder = (groupno, group) => {
     const allGroups = [...feedGroups];
     allGroups[groupno].feeds = [...group];
+    setFeedGroups(allGroups);
   };
 
   const addFeedToPlace = () => {
@@ -458,14 +455,6 @@ function GridLive(props: any) {
     resetChangeFeedModal();
   };
 
-  const contentStyle: any = {
-    height: "500px",
-    color: "#fff",
-    lineHeight: "160px",
-    textAlign: "center",
-    background: "#364d79",
-  };
-
   return (
     <div className="wrap">
       <Layout hasSider>
@@ -544,6 +533,7 @@ function GridLive(props: any) {
                           addFeed={addFeed}
                           swapFeed={swapFeed}
                           setGroupOrder={setGroupOrder}
+                          key={window.crypto.randomUUID()}
                         />
                       );
                     } else if (group.layout === "twoFeeds") {
@@ -555,6 +545,7 @@ function GridLive(props: any) {
                           addFeed={addFeed}
                           swapFeed={swapFeed}
                           setGroupOrder={setGroupOrder}
+                          key={window.crypto.randomUUID()}
                         />
                       );
                     } else if (group.layout === "threeFeeds") {
@@ -566,6 +557,7 @@ function GridLive(props: any) {
                           addFeed={addFeed}
                           swapFeed={swapFeed}
                           setGroupOrder={setGroupOrder}
+                          key={window.crypto.randomUUID()}
                         />
                       );
                     }

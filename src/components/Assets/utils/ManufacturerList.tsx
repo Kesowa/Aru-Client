@@ -29,7 +29,6 @@ const ManufacturerList = () => {
     http
       .get(`${apis.GET_MANUFACTURERS}`)
       .then((result) => {
-        //console.log(result.data);
         if (result.data.status) {
           setManufacturers(result.data.data);
           console.log(result.data.data);

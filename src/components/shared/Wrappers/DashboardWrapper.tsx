@@ -1,4 +1,3 @@
-import React, { lazy } from "react";
 import Dashboard from "../../Dashboard";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 
