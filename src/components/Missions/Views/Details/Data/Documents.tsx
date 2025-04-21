@@ -30,9 +30,7 @@ import {
   MessageOutlined,
 } from "@ant-design/icons";
 import Dragger from "antd/lib/upload/Dragger";
-import { useEffect } from "react";
 import io from "src/services/socketConnect";
-import { useMemo } from "react";
 import download from "downloadjs";
 import { API_URL, STATIC_URL } from "src/constants";
 import Thread from "src/components/shared/Thread";
