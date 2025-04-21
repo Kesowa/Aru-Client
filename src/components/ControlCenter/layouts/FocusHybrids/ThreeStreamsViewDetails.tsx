@@ -8,7 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { UserOutlined } from "@ant-design/icons";
 import moment from "moment";
-import connectSocket from "../../../../services/socketConnect";
+import { StreamKeyConnect as connectSocket } from "../../../../services/socketConnect";
 import { AxiosErrorHandler } from "src/services/httpErrorHandle";
 import apis from "src/services/apis";
 import http from "src/services/httpCall";

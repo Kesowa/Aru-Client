@@ -108,7 +108,7 @@ import Media from "./utils/Media";
 import LayerDocs from "./utils/layer/layerDocs";
 import CreateLayer from "./utils/layer/createLayer";
 import CreateBaseLayer from "./utils/layer/createBaseLayer";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import Thread from "../shared/Thread";
 import {
   COG_URL,

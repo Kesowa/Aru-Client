@@ -55,7 +55,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import ImageDoc from "./Data/ImageDocs";
 import ManageClients from "./Data/ManageClient";
 import { API_URL, PUBLIC_URL, STATIC_URL } from "src/constants";

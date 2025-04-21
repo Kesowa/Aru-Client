@@ -35,7 +35,8 @@ import {
   MessageOutlined,
 } from "@ant-design/icons";
 import Dragger from "antd/lib/upload/Dragger";
-import io from "socket.io-client";
+import { useEffect } from "react";
+import io from "src/services/socketConnect";
 import moment from "moment";
 import { API_URL, STATIC_URL } from "src/constants";
 import ActionToolbar from "src/components/shared/Toolbar/action";

@@ -26,7 +26,7 @@ import {
 import apis from "../../../../services/apis";
 import Dragger from "antd/lib/upload/Dragger";
 import { API_URL, STATIC_URL } from "src/constants";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 import { AuthContext } from "src/services/authUtils";
 

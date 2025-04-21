@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import connectSocket from "../../services/socketConnect";
+import { StreamKeyConnect as connectSocket } from "../../services/socketConnect";
 import DeckGL, { FlyToInterpolator } from "deck.gl";
 import { IconLayer, PathLayer } from "@deck.gl/layers";
 import { StaticMap } from "react-map-gl";

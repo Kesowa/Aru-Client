@@ -51,7 +51,7 @@ import { DocModel, uploadFile } from "src/services/fileUpload";
 import screenfull from "screenfull";
 import DroneMap from "../DroneMap";
 import FlightLogMap from "../FlightLogMap";
-import connectSocket from "../../../services/socketConnect";
+import { StreamKeyConnect as connectSocket } from "../../../services/socketConnect";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";

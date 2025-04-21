@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import connectSocket from "../../../../services/socketConnect";
+import { StreamKeyConnect as connectSocket } from "../../../../services/socketConnect";
 
 type mapProps = {
   streamKey: string;
