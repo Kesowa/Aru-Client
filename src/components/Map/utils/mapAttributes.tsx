@@ -530,7 +530,7 @@ const MapAttributes: React.FC<Props> = (props) => {
                   </Button>
                 </Dropdown>
               )}
-              {loading && <Progress percent={progress} />}
+              {loading && <Progress strokeLinecap="square" percent={progress} />}
             </div>
             <div style={{ marginTop: "1.1rem" }}>
               <Space size="large">

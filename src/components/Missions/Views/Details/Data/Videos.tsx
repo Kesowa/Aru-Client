@@ -116,7 +116,7 @@ function Videos(props) {
           <span>
             <a
               href={
-                STATIC_URL + data.videoPath.toString().replace(".m3u8", ".flv")
+                STATIC_URL + data.originalFile
               }
               download
             >
@@ -163,6 +163,20 @@ function Videos(props) {
     }
     return item;
   };
+
+  const handleEscKeyPress = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      setShowCarousel(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleEscKeyPress);
+    return () => {
+      document.removeEventListener("keydown", handleEscKeyPress);
+    };
+  }, []);
+
   const vodMenuOnClick: MenuProps["onClick"] = (e) => {
     console.log(e);
     switch (e.key) {
@@ -544,6 +558,16 @@ function Videos(props) {
     },
   };
 
+  const cancelUpload = async () => {
+    try {
+      await axios.post("/api/cancel-upload"); // Replace with process cancelation api
+      message.success("Upload has been canceled successfully");
+    } catch (error) {
+      console.error("Failed to cancel upload:", error);
+      message.error("Failed to cancel upload");
+    }
+  };
+
   useEffect(() => {
     let socketInstance = null;
 
@@ -773,9 +797,9 @@ function Videos(props) {
   };
 
   //-------- Upload Modal ------------------------
-
+  
   function uploadModal() {
-    Modal.info({
+    Modal.confirm({
       title: "Upload video files!",
       content: (
         <div className="upload-modal-video">
@@ -801,8 +825,9 @@ function Videos(props) {
       centered: true,
       width: 640,
       okText: "Close",
+      cancelText: "Cancel",
       onOk() {},
-      onCancel() {},
+      onCancel: cancelUpload, 
     });
   }
   useEffect(() => {
@@ -897,9 +922,7 @@ function Videos(props) {
                             <a
                               href={
                                 STATIC_URL +
-                                videoDetails.link
-                                  .toString()
-                                  .replace(".m3u8", ".flv")
+                                videoDetails.missionDetails.originalFile
                               }
                               download
                             >
@@ -1068,9 +1091,11 @@ function Videos(props) {
                               trigger={["contextMenu"]}
                             >
                               <div
-                                style={{
-                                  padding: "2px",
-                                }}
+                               style={{ padding: "2px", cursor: "pointer" }}
+                               onMouseDown={() => handleLongPressStart(dataa)}
+                               onMouseUp={handleLongPressEnd}
+                               onTouchStart={() => handleLongPressStart(dataa)}
+                               onTouchEnd={handleLongPressEnd}
                               >
                                 <Badge
                                   style={{
@@ -1108,6 +1133,22 @@ function Videos(props) {
                                   >
                                     <Card
                                       key={`1-${dataa._id}`}
+                                      onClick={() => {
+                                        if (longPressOccurred) {
+                                          setLongPressOccurred(false);
+                                          return;
+                                        }
+                                        if (activateSelection) {
+                                          if (checkedList.includes(dataa._id)) {
+                                            const filtered = checkedList.filter((i: any) => i !== dataa._id);
+                                            setCheckedList(filtered);
+                                          } else {
+                                            setCheckedList([...checkedList, dataa._id]);
+                                          }
+                                        } else {
+                                          updateSelectedVOD(dataa, idx);
+                                        }
+                                      }}
                                       className="outcome-cardd"
                                       cover={
                                           <img
@@ -1183,9 +1224,7 @@ function Videos(props) {
                         <a
                           href={
                             STATIC_URL +
-                            videoDetails.link
-                              .toString()
-                              .replace(".m3u8", ".flv")
+                            videoDetails.missionDetails.originalFile
                           }
                           download
                         >
@@ -1267,7 +1306,15 @@ function Videos(props) {
                     <Row
                       className="listview-outcomes"
                       align="middle"
+                      onMouseDown={() => handleLongPressStart(dataa)}
+                      onMouseUp={handleLongPressEnd}
+                      onTouchStart={() => handleLongPressStart(dataa)}
+                      onTouchEnd={handleLongPressEnd}
                       onClick={() => {
+                        if (longPressOccurred) {
+                          setLongPressOccurred(false);
+                          return;
+                        }
                         if (activateSelection) {
                           if (checkedList.includes(dataa._id)) {
                             const filtered: any = checkedList.filter(
@@ -1432,6 +1479,33 @@ function Videos(props) {
   };
   const handleCancel2 = () => {
     setIsModalVisible2(false);
+  };
+
+  //media selection
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [longPressOccurred, setLongPressOccurred] = useState(false);
+
+  const handleLongPressStart = (video: any) => {
+    const timer = setTimeout(() => {
+      setActivateSelection(true);
+      setCheckedList(prev => {
+        if (prev.includes(video._id)) {
+          return prev.filter((id: string) => id !== video._id);
+        }
+        return [...prev, video._id];
+      });
+      setLongPressOccurred(true);
+    }, 500);
+    setLongPressTimer(timer);
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    } else {
+      setTimeout(() => setLongPressOccurred(false), 100);
+    }
   };
 
   return (

@@ -56,11 +56,11 @@ class GoogleMap extends Component<mapProps, mapState> {
   searchAutoComplete: any = null;
 
   componentDidMount() {
-    const loc = { lat: 43.642567, lng: -79.387054 };
+    const loc = { lat: 22.599412, lng: 88.423617 };
     this.googleMap = this.createGoogleMap(loc);
     this.props.setlocation(loc);
 
-    // this.setCurrentLocation();
+    this.setCurrentLocation();
 
     this.drawingManager = this.createDrawingManager();
     this.searchAutoComplete = this.createSearchBar();
@@ -226,18 +226,17 @@ class GoogleMap extends Component<mapProps, mapState> {
     });
   };
 
-  // Set Current location of user
-  // setCurrentLocation = () => {
-  //   let lat, lng;
-  //   if (window.navigator.geolocation) {
-  //     window.navigator.geolocation.getCurrentPosition((position) => {
-  //       const lat = position.coords.latitude;
-  //       const lng = position.coords.longitude;
-  //       this.googleMap.panTo({ lat, lng });
-  //       this.props.setlocation({ lat, lng });
-  //     });
-  //   }
-  // };
+  // Set Current location of user   (not that much accurate need some modification)
+  setCurrentLocation = () => {
+    if (window.navigator.geolocation) {
+      window.navigator.geolocation.getCurrentPosition((position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        this.googleMap.panTo({ lat, lng });
+        this.props.setlocation({ lat, lng });
+      });
+    }
+  };
 
   // Initialize Drawing Manager
   createDrawingManager = () =>

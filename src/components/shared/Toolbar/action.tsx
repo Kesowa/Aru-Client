@@ -29,6 +29,11 @@ const ActionToolbar = (props) => {
       label: "Select all files",
       disabled: props.data.length > 0 ? false : true,
     },
+    {
+      key: "4",
+      label: "Select files",
+      disabled: props.data.length > 0 ? false : true,
+    },
   ];
   if (props.canDelete) {
     actionMenu.push({
@@ -58,7 +63,10 @@ const ActionToolbar = (props) => {
           })
         );
       }
-    } else if (e.key == 3) {
+    } else if (e.key == 4){
+      props.setActivateSelection(!props.activateSelection);
+
+    }else if (e.key == 3) {
       Modal.confirm({
         title: `Delete ${props.type} ?`,
         icon: <ExclamationCircleOutlined />,

@@ -9,7 +9,7 @@ import {
   Popconfirm,
   Input,
 } from "antd";
-import { SearchOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
+import { SearchOutlined, DeleteOutlined, EyeOutlined, CopyOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlaneDeparture } from "@fortawesome/free-solid-svg-icons";
@@ -46,6 +46,8 @@ function MissionTable(props: TableProps) {
   const { Auth, logout } = useContext(AuthContext);
   const userDetails = Auth.userdetails;
   const userType = userDetails.userType;
+  const [clickedMission, setClickedMission] = useState<string | null>(null);
+
 
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
@@ -183,9 +185,11 @@ function MissionTable(props: TableProps) {
               deleteMission(record.name, record._id);
             }}
           >
-            <Button style={{ marginLeft: "8px" }} danger>
-              <DeleteOutlined className="missionViewDelBtn" />
-            </Button>
+            <Tooltip title="Delete">
+              <Button style={{ marginLeft: "8px" }} danger>
+                <DeleteOutlined className="missionViewDelBtn" />
+              </Button>
+            </Tooltip>
           </Popconfirm>
         );
       }
@@ -199,9 +203,11 @@ function MissionTable(props: TableProps) {
             deleteMission(record.name, record._id);
           }}
         >
-          <Button style={{ marginLeft: "8px" }} danger>
-            <DeleteOutlined className="missionViewDelBtn" />
-          </Button>
+          <Tooltip title="Delete">
+            <Button style={{ marginLeft: "8px" }} danger>
+              <DeleteOutlined className="missionViewDelBtn" />
+            </Button>
+          </Tooltip>
         </Popconfirm>
       );
     }
@@ -221,62 +227,82 @@ function MissionTable(props: TableProps) {
           _id: "undefined",
           ...record.missionType,
         };
+     
+      const handleCopy = (id: string) => {
+        navigator.clipboard.writeText(name);
+        setClickedMission(id);
+        setTimeout(() => setClickedMission(null), 1500); // Reset only that row
+      };
         return (
           <>
-            <span
-              onClick={() => {
-                history.push({
-                  pathname: `/dashboard/mission/view/staff-${record._id}`,
-                  state: {
-                    missionPage: {
-                      usedFilter: props.usedFilter,
-                      page: props.page,
-                      limit: props.limit,
-                    },
-                  },
-                });
-              }}
+            <div
+              style={{ display: "flex", alignItems: "center", width: "100%" }}
             >
-              <Tooltip placement="bottom" title={name}>
-                <Title level={5} className="tableMissionName">
-                  {record.missionType.name === "Surveillance" && (
-                    <FontAwesomeIcon
-                      icon={faPlaneDeparture}
-                      style={{ marginRight: "1rem", color: "#a5a4bf" }}
-                    />
-                  )}
+              <span
+                onClick={() => {
+                  history.push({
+                    pathname: `/dashboard/mission/view/staff-${record._id}`,
+                    state: {
+                      missionPage: {
+                        usedFilter: props.usedFilter,
+                        page: props.page,
+                        limit: props.limit,
+                      },
+                    },
+                  });
+                }}
+              >
+                <Tooltip placement="bottom" title={name}>
+                  <Title level={5} className="tableMissionName">
+                    {record.missionType.name === "Surveillance" && (
+                      <FontAwesomeIcon
+                        icon={faPlaneDeparture}
+                        style={{ marginRight: "1rem", color: "#a5a4bf" }}
+                      />
+                    )}
 
-                  {record.missionType.name === "Market Survey" && (
-                    <FontAwesomeIcon
-                      icon={faPlaneDeparture}
-                      style={{ marginRight: "1rem", color: "#a5a4bf" }}
-                    />
-                  )}
+                    {record.missionType.name === "Market Survey" && (
+                      <FontAwesomeIcon
+                        icon={faPlaneDeparture}
+                        style={{ marginRight: "1rem", color: "#a5a4bf" }}
+                      />
+                    )}
 
-                  {record.missionType.name === "Canal Survey" && (
-                    <FontAwesomeIcon
-                      icon={faPlaneDeparture}
-                      style={{ marginRight: "1rem", color: "#a5a4bf" }}
-                    />
-                  )}
+                    {record.missionType.name === "Canal Survey" && (
+                      <FontAwesomeIcon
+                        icon={faPlaneDeparture}
+                        style={{ marginRight: "1rem", color: "#a5a4bf" }}
+                      />
+                    )}
 
-                  {record.missionType.name === "Mapping" && (
-                    <img
-                      src={mp}
-                      style={{
-                        marginRight: "1rem",
-                        color: "#a5a4bf",
-                        height: "20px",
-                        width: "20px",
-                      }}
-                      alt=""
-                    />
-                  )}
+                    {record.missionType.name === "Mapping" && (
+                      <img
+                        src={mp}
+                        style={{
+                          marginRight: "1rem",
+                          color: "#a5a4bf",
+                          height: "20px",
+                          width: "20px",
+                        }}
+                        alt=""
+                      />
+                    )}
 
-                  {name}
-                </Title>
-              </Tooltip>
-            </span>
+                    {name}
+                  </Title>
+                </Tooltip>
+              </span>
+                <Button
+                  type="text"
+                  icon={<CopyOutlined />}
+                  onClick={() => handleCopy(record._id)}
+                  style={{
+                    marginLeft: "10px",
+                    color:
+                      clickedMission === record._id ? "#1890ff" : "inherit",
+                  }}
+                />
+            </div>
           </>
         );
       },
@@ -398,6 +424,7 @@ function MissionTable(props: TableProps) {
       fixed: "right",
       render: (text, record) => (
         <>
+        <Tooltip title="Open Mission">
           <Button
             onClick={() => {
               history.push({
@@ -414,7 +441,7 @@ function MissionTable(props: TableProps) {
           >
             <EyeOutlined className="missionViewBtn" />
           </Button>
-
+        </Tooltip>
           {renderDeleteBtn(record)}
         </>
       ),

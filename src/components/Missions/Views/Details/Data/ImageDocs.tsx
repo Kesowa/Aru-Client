@@ -80,6 +80,33 @@ function ImageDocs(props) {
   const userType = userDetails.userType;
 
   const { thread, openThread } = useContext(ThreadContext);
+  
+  //media selection functionality
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [longPressOccurred, setLongPressOccurred] = useState(false);
+
+  const handleLongPressStart = (item: any) => {
+    const timer = setTimeout(() => {
+      setActivateSelection(true);
+      setCheckedList(prev => {
+        if (prev.includes(item._id)) {
+          return prev.filter((id: string) => id !== item._id);
+        }
+        return [...prev, item._id];
+      });
+      setLongPressOccurred(true);
+    }, 500);
+    setLongPressTimer(timer);
+  };
+  
+  const handleLongPressEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    } else {
+      setTimeout(() => setLongPressOccurred(false), 100);
+    }
+  };
 
   const imgMenu: MenuProps["items"] = (data) => {
     const item = [
@@ -464,6 +491,24 @@ function ImageDocs(props) {
             <Image
               key={`${item._id}`}
               style={imgStyle}
+              onMouseDown={() => handleLongPressStart(item)}
+              onMouseUp={handleLongPressEnd}
+              onTouchStart={() => handleLongPressStart(item)}
+              onTouchEnd={handleLongPressEnd}
+              onClick={() => {
+                if (longPressOccurred) {
+                  setLongPressOccurred(false);
+                  return;
+                }
+                if (activateSelection) {                
+                  if (checkedList.includes(item._id)) {
+                    const filtered = checkedList.filter((i: any) => i !== item._id);
+                    setCheckedList(filtered);
+                  } else {
+                    setCheckedList([...checkedList, item._id]);
+                  }
+                } else { /* empty */ }
+              }}
               src={STATIC_URL + "/documents/1x_" + item.filePath.split("/")[2]}
               preview={
                 !preview
@@ -733,7 +778,25 @@ function ImageDocs(props) {
                                 className="listview-outcomes"
                                 align="middle"
                                 style={{ padding: "10px" }}
-                                key={window.crypto.randomUUID()}
+                                onMouseDown={() => handleLongPressStart(item)}
+                                onMouseUp={handleLongPressEnd}
+                                onTouchStart={() => handleLongPressStart(item)}
+                                onTouchEnd={handleLongPressEnd}
+                                onClick={() => {
+                                  if (longPressOccurred) {
+                                    setLongPressOccurred(false);
+                                    return;
+                                  }
+                                  if (activateSelection) {
+                                    if (checkedList.includes(item._id)) {
+                                      const filtered = checkedList.filter((i: any) => i !== item._id);
+                                      setCheckedList(filtered);
+                                    } else {
+                                      setCheckedList([...checkedList, item._id]);
+                                    }
+                                  } else { /* empty */ }
+                                }}
+                                key={item._id}
                               >
                                 <Col md={8} style={{ padding: "10px" }}>
                                   <Dropdown

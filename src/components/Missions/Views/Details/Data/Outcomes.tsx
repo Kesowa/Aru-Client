@@ -90,6 +90,33 @@ function Outcomes(props) {
 
   const { thread, openThread } = useContext(ThreadContext);
 
+  //media selection
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [longPressOccurred, setLongPressOccurred] = useState(false);
+
+  const handleLongPressStart = (item: any) => {
+    const timer = setTimeout(() => {
+      setActivateSelection(true);
+      setCheckedList(prev => {
+        if (prev.includes(item._id)) {
+          return prev.filter((id: string) => id !== item._id);
+        }
+        return [...prev, item._id];
+      });
+      setLongPressOccurred(true);
+    }, 500);
+    setLongPressTimer(timer);
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    } else {
+      setTimeout(() => setLongPressOccurred(false), 100);
+    }
+  };
+
   const outcomeMenu: MenuProps["items"] = (data) => {
     const item = [
       {
@@ -947,7 +974,15 @@ function Outcomes(props) {
                             className="listview-outcomes"
                             align="middle"
                             style={{ padding: "10px" }}
+                            onMouseDown={() => handleLongPressStart(outcome)}
+                            onMouseUp={handleLongPressEnd}
+                            onTouchStart={() => handleLongPressStart(outcome)}
+                            onTouchEnd={handleLongPressEnd}
                             onClick={() => {
+                              if (longPressOccurred) {
+                                setLongPressOccurred(false);
+                                return;
+                              }
                               setShowOutcomeModal(true);
                               setModalIndex(ind);
                             }}
@@ -1075,6 +1110,10 @@ function Outcomes(props) {
                                 style={{
                                   padding: "2px",
                                 }}
+                                onMouseDown={() => handleLongPressStart(outcome)}
+                                onMouseUp={handleLongPressEnd}
+                                onTouchStart={() => handleLongPressStart(outcome)}
+                                onTouchEnd={handleLongPressEnd}
                               >
                                 <Badge
                                   style={{
@@ -1111,6 +1150,25 @@ function Outcomes(props) {
                                   >
                                     <Card
                                       className="outcome-cardd"
+                                      onClick={() => {
+                                        if (longPressOccurred) {
+                                          setLongPressOccurred(false);
+                                          return;
+                                        }
+                                        if (activateSelection) {
+                                          if (checkedList.includes(outcome._id)) {
+                                            const filtered: any = checkedList.filter(
+                                              (i: any) => i !== outcome._id
+                                            );
+                                            setCheckedList(filtered);
+                                          } else {
+                                            setCheckedList([...checkedList, outcome._id]);
+                                          }
+                                        } else {
+                                          setShowOutcomeModal(true);
+                                          setModalIndex(ind);
+                                        }
+                                      }}
                                       cover={
                                         <img
                                           style={{

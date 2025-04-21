@@ -13,6 +13,8 @@ import {
   Skeleton,
 } from "antd";
 import { Link } from "react-router-dom";
+import goToMap from "../../../assets/go-to-map.svg";
+import mapImg from "../../../assets/world.svg";
 import "./../index.less";
 import { ImportOutlined } from "@ant-design/icons";
 import http from "../../../services/httpCall";
@@ -31,6 +33,8 @@ import {
 } from "src/constants";
 import { getSideBar } from "src/static/sideBarOptions";
 import { AuthContext } from "src/services/authUtils";
+import { getUserExpirationInfo, ExpiryInfo } from "src/services/expiryUpdate";
+
 
 const { Title, Text } = Typography;
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -46,6 +50,8 @@ function DashboardContent() {
   const [storage, setStorage] = useState<any>({});
   const socket: any = useRef();
   const [statsRefresh, setStatsRefresh] = useState(true);
+  const [expiryInfo, setExpiryInfo] = useState<ExpiryInfo | null>(null);
+  const [totalMissionsOfTenant, setTotalMissionsOfTenant] = useState(null);
 
   const { Auth, logout } = useContext(AuthContext);
 
@@ -69,6 +75,16 @@ function DashboardContent() {
       setqrCode(url);
     });
   };
+
+  useEffect(() => {
+    const fetchExpiry = async () => {
+      const info = await getUserExpirationInfo(Auth.userdetails);
+      setExpiryInfo(info);
+    };
+  
+    fetchExpiry();
+  }, [Auth.userdetails]);
+  
 
   const connectToAppModal = () => {
     return (
@@ -203,7 +219,7 @@ function DashboardContent() {
       ],
     };
     return (
-      <div style={{ padding: "12px" }}>
+      <div style={{ padding: "10px" }}>
         {videos == 0 && alerts == 0 && layers == 0 && documents == 0 ? (
           <>
             <Result
@@ -215,7 +231,7 @@ function DashboardContent() {
         ) : (
           <div
             style={{
-              width: "500px",
+              width: "380px",
               height: "auto",
               margin: "auto",
             }}
@@ -394,6 +410,7 @@ function DashboardContent() {
         .then((result) => {
           console.log(result.data.missionCount);
           if (result.data.missionCount.length > 0) {
+            let totalCount = 0;
             result.data.missionCount.map((i: any) => {
               switch (i._id) {
                 case "Upcoming":
@@ -408,6 +425,13 @@ function DashboardContent() {
                 default:
               }
             });
+
+          //get the mission count 
+          totalCount = result.data.missionCount.reduce(
+            (acc: number, item: any) => acc + item.count,
+            0
+          );
+          setTotalMissionsOfTenant(totalCount);
           } else {
             setLiveMissions(0);
             setUpcomingMissions(0);
@@ -482,10 +506,26 @@ function DashboardContent() {
           </Col>
         </Row>
 
-        <Row>
-          <Title className="welcome-title">
-            Welcome back {Auth.userdetails.name}!
-          </Title>
+        <Row align="middle" gutter={8} wrap={false}>
+          <Col>
+            <Title level={3} className="welcome-title" style={{ margin: 0 }}>
+              Welcome back {Auth.userdetails.name}!
+            </Title>
+          </Col>
+          {expiryInfo?.isExpiringSoon && (
+            <Col>
+              <span style={{ color: "#fa8c16", fontWeight: 1000 }}>
+                (Your account is expiring in {expiryInfo.daysLeft} days.{" "}
+                <a
+                  href={`mailto:info@kesowa.com?subject=Renewal Request&body=Hi Team,%0D%0A%0D%0AMy account is expiring in ${expiryInfo.daysLeft} days. Please assist with the renewal process.`}
+                  style={{ color: "#fa541c", textDecoration: "underline" }}
+                >
+                  Click here for renewal
+                </a>
+                )
+              </span>
+            </Col>
+          )}
         </Row>
 
         <Row>
@@ -531,6 +571,66 @@ function DashboardContent() {
                 <>{renderStorageStats()}</>
               )}
             </>
+            <Row gutter={[16, 16]} style={{ marginTop: 3 }}>
+              <Col span={24}>
+                <Title
+                  className="shortcuts-title"
+                  level={4}
+                  style={{ marginLeft: "8px", marginTop: "2px" }}
+                >
+                  <ImportOutlined /> Quick view Mission Location{" "}
+                  <span style={{ fontSize: "0.8em", fontWeight: "normal" }}>
+                    (Project Locations : {totalMissionsOfTenant})
+                  </span>
+                </Title>
+                <Link
+                  to={{
+                    pathname: "/dashboard/data",
+                    state: { openLocationTab: true },
+                  }}
+                >
+                  <div
+                    className="map-button"
+                    style={{
+                      position: "relative",
+                      marginLeft: "10px",
+                      height: "150px",
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <img
+                      src={mapImg}
+                      alt="Map preview"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
+                    <div className="map-overlay">
+                      <img
+                        src={goToMap}
+                        alt="Go to Map"
+                        style={{ width: "90px", height: "90px" }}
+                      />
+                      <span
+                        style={{
+                          marginTop: "8px",
+                          color: "#fff",
+                          fontWeight: "bold",
+                          fontSize: "25px",
+                        }}
+                      >
+                        Map
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </Col>
+            </Row>
           </Col>
         </Row>
 
@@ -543,10 +643,26 @@ function DashboardContent() {
     //++++++++++++++++++++++++++++++++++++++++++++++++++RenderDashboardContent++++++++++++++++++++++++
     return (
       <div className="dashboard-wrapper">
-        <Row>
-          <Title className="welcome-title">
-            Welcome back {Auth.userdetails.name}!
-          </Title>
+        <Row align="middle" gutter={8} wrap={false}>
+          <Col>
+            <Title level={3} className="welcome-title" style={{ margin: 0 }}>
+              Welcome back {Auth.userdetails.name}!
+            </Title>
+          </Col>
+          {expiryInfo?.isExpiringSoon && (
+            <Col>
+              <span style={{ color: "#fa8c16", fontWeight: 1000 }}>
+                (Your account is expiring in {expiryInfo.daysLeft} days.{" "}
+                <a
+                  href={`mailto:info@kesowa.com?subject=Renewal Request& body=Hi Team,%0D%0A%0D%0AMy account is expiring in ${expiryInfo.daysLeft} days. Please assist with the renewal process.`}
+                  style={{ color: "#fa541c", textDecoration: "underline" }}
+                >
+                  Click here for renewal
+                </a>
+                )
+              </span>
+            </Col>
+          )}
         </Row>
         <Title className="shortcuts-title" level={4}>
           <ImportOutlined /> Shortcuts
