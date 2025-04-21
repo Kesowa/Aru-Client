@@ -6,7 +6,7 @@ import { Typography, Form, Input, Button, Alert } from "antd";
 import { MailOutlined } from "@ant-design/icons";
 import "./index.less";
 import AryaLogo from "../../static/kesowa-logo.svg";
-import { components } from "src/handlers/schema";
+import { Components } from "src/handlers/schema";
 import "../shared/login-bg.less";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "../shared/Loader";
@@ -21,7 +21,7 @@ function ForgotPassword(props: any) {
   const onFinish = (values: any) => {
     setLoading(true);
     http
-      .post<components["schemas"]["ForgotPasswordAuthResponse"]>(
+      .post<Components["schemas"]["ForgotPasswordAuthResponse"]>(
         apis.FORGOT_PASSWORD,
         values
       )

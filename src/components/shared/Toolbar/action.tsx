@@ -116,25 +116,21 @@ const ActionToolbar = (props) => {
         console.error(err.message);
       });
   };
+  let flagTooltipText = "Toggle Flag";
+  if (props.activateSelection && props.checkedList.length > 0) flagTooltipText = `${!props.flag ? "Flag" : "Un-flag"} ${props.type}`;
   return (
     <div className="toolbar">
       <Text type="secondary">
         {props.activateSelection
           ? `${props.checkedList.length} Selected`
           : `Total ${
-              props.totalCount ? props.totalCount : props.data?.length
+              props.totalCount || props.data?.length
             } ${props.type}s`}
       </Text>
       <div className="upload-btn">
         {props.canToggleFlag && (
           <Tooltip
-            title={`${
-              !(props.activateSelection && props.checkedList.length > 0)
-                ? "Toggle Flag"
-                : !props.flag
-                ? `Flag ${props.type}`
-                : `Un-flag ${props.type}`
-            }`}
+            title={flagTooltipText}
             placement="bottom"
           >
             <Switch

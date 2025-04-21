@@ -2,12 +2,7 @@ import "./index.less";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import * as serviceWorker from "./serviceWorker";
-import { ENV, Mode } from "./constants";
 import App from "./App";
-if (ENV == Mode.Prod) {
-  console.log = () => {};
-  console.error = () => {};
-}
 
 const container = document.getElementById("root")!;
 const root = createRoot(container);

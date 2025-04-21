@@ -33,8 +33,8 @@ function ChoosePackage(props: any) {
   return (
     <div className="package-selection">
       <Row gutter={[16, 16]}>
-        {packages.map((ele, i) => (
-          <Col key={i} span="6">
+        {packages.map((ele) => (
+          <Col key={window.crypto.randomUUID()} span="6">
             <PackageCard
               finalSubmitTenantCreation={props.finalSubmitTenantCreation}
               package={ele}

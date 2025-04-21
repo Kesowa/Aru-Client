@@ -1,4 +1,4 @@
-import { useState, useRef, useContext } from "react";
+import { useState, useRef, useContext, useEffect } from "react";
 import {
   Alert,
   message,
@@ -21,7 +21,7 @@ import "./checkbox.less";
 
 import apis from "../../../../../services/apis";
 import http from "../../../../../services/httpCall";
-import axios, { AxiosRequestConfig } from "axios";
+import axios from "axios";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import {
   InboxOutlined,
@@ -36,7 +36,7 @@ import {
 } from "@ant-design/icons";
 import Dragger from "antd/lib/upload/Dragger";
 import { useEffect } from "react";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import moment from "moment";
 import { API_URL, STATIC_URL } from "src/constants";
 import ActionToolbar from "src/components/shared/Toolbar/action";
@@ -52,8 +52,6 @@ import { ThreadContext } from "src/services/threadUtils";
 
 let plainOptions = new Array<any>();
 function ImageDocs(props) {
-  const [defaultFileList, setDefaultFileList] = useState([]);
-  const [progress, setProgress] = useState(0); //this can be used for a different progress component
   const [refreshState, setRefreshState] = useState(false);
   const socket: any = useRef();
   const [loader, setLoader] = useState(false);
@@ -64,7 +62,6 @@ function ImageDocs(props) {
   const [isAscending, setIsAscending] = useState(false);
   const [sortType, setSortType] = useState("timeStamp");
   const [thermalPayload, setThermalPayload] = useState({});
-  // This is a comment
   const [flag, setFlag] = useState(false);
   const [flaggedFilter, setFlaggedFilter] = useState(false);
   const [unflaggedFilter, setUnflaggedFilter] = useState(false);
@@ -287,27 +284,7 @@ function ImageDocs(props) {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       if (validateFile(options.file)) {
-        // const config:AxiosRequestConfig = {
-        //   onUploadProgress: (event) => {
-        //     const percent = Math.floor((event.loaded / event.total) * 100);
-        //     setProgress(percent);
-        //     if (percent === 100) {
-        //       setTimeout(() => setProgress(0), 1000);
-        //     }
-        //     options.onProgress({ percent: (event.loaded / event.total) * 100 });
-        //   },
-        //   cancelToken: source.token,
-        // };
-
-        const uploadToken = await uploadFile(
-          options.file,
-          DocModel.DOCUMENTS,
-          (prog) => {
-            setProgress(prog * 100);
-            options.onProgress({ percent: prog * 100 });
-          },
-          source.token
-        );
+        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => { options.onProgress({ percent: prog * 100 })}, source.token);
 
         const body = {
           file: uploadToken,
@@ -325,39 +302,7 @@ function ImageDocs(props) {
         switch (
           props.missionDetails.userType //upload priviledge checks
         ) {
-          case "tenant-root": //when user is a tenant root
-            http
-              .post(options.action, body)
-              .then((res: any) => {
-                options.onSuccess(res.data, options.file);
-                message.success(
-                  "File " + options.file.name + " uploaded successfully"
-                );
-              })
-              .catch((err) => {
-                if (axios.isCancel(err)) {
-                  console.log("Upload Cancelled");
-                  return;
-                } else if (err.response?.status === 403) {
-                  if (
-                    err.response?.data.message ===
-                    "Actual storage exceeded the Limit of Set storage!"
-                  ) {
-                    setStorageModal(true);
-                  } else {
-                    message.error(err.response?.data.message);
-                    console.log(err.response);
-                  }
-                } else {
-                  console.log(err);
-                  message.error("Unable to upload file!");
-                  options.onError({ err });
-                }
-                AxiosErrorHandler(err, logout);
-              });
-
-            break;
-
+          case "tenant-root":
           case "tenant-staff": // when user is tenant staff
             http
               .post(options.action, body)
@@ -418,7 +363,7 @@ function ImageDocs(props) {
             type="info"
             showIcon
           />
-          <Dragger {...UploadProps} defaultFileList={defaultFileList}>
+          <Dragger {...UploadProps} defaultFileList={[]}>
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
@@ -826,11 +771,9 @@ function ImageDocs(props) {
                       />
                     </Col>
                   ) : (
-                    <>
                       <Image.PreviewGroup>
                         {images.map((item: any) => {
                           return (
-                            <>
                               <Row
                                 className="listview-outcomes"
                                 align="middle"
@@ -853,6 +796,7 @@ function ImageDocs(props) {
                                     }
                                   } else { /* empty */ }
                                 }}
+                                key={item._id}
                               >
                                 <Col md={8} style={{ padding: "10px" }}>
                                   <Dropdown
@@ -910,11 +854,9 @@ function ImageDocs(props) {
                                   </div>
                                 </Col>
                               </Row>
-                            </>
                           );
                         })}
                       </Image.PreviewGroup>
-                    </>
                   )}
                 </>
               ) : (
@@ -942,6 +884,7 @@ function ImageDocs(props) {
                                 0
                               )
                             }
+                            key={window.crypto.randomUUID()}
                           >
                             <Image
                               alt={`${item._id}`}
@@ -984,11 +927,9 @@ function ImageDocs(props) {
                       })}
                     </Row>
                   ) : (
-                    <>
                       <Image.PreviewGroup>
                         {images.map((item: any) => {
                           return (
-                            <>
                               <Dropdown
                                 onOpenChange={() => setSelectedImg(item)}
                                 menu={{
@@ -996,6 +937,7 @@ function ImageDocs(props) {
                                   onClick: imgMenuOnClick,
                                 }}
                                 trigger={["contextMenu"]}
+                                key={window.crypto.randomUUID()}
                               >
                                 {ImageComponent(item, true, {
                                   padding: "8px",
@@ -1003,11 +945,9 @@ function ImageDocs(props) {
                                   height: "150px",
                                 })}
                               </Dropdown>
-                            </>
                           );
                         })}
                       </Image.PreviewGroup>
-                    </>
                   )}
                 </>
               )}

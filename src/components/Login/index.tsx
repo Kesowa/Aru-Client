@@ -1,14 +1,12 @@
 import { useContext, useState } from "react";
 import apis from "../../services/apis";
 import http from "../../services/httpCall";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory, useLocation, Link } from "react-router-dom";
 import { AxiosErrorHandler } from "../../services/httpErrorHandle";
 import { Typography, Form, Input, Button, Alert } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
 import "./index.less";
-import { clientOptions } from "../../static/sideBarOptions";
-import { Link } from "react-router-dom";
-import { components } from "src/handlers/schema";
+import { Components } from "src/handlers/schema";
 import Logo from "../shared/Logo";
 import "../shared/login-bg.less";
 import { AuthContext } from "src/services/authUtils";
@@ -26,7 +24,7 @@ function Login() {
   const onFinish = (values: any) => {
     setLoading(true);
     http
-      .post<components["schemas"]["LoginAuthResponse"]>(apis.LOGIN, values)
+      .post<Components["schemas"]["LoginAuthResponse"]>(apis.LOGIN, values)
       .then((result) => {
         console.log(result.data);
         if (result.data.status) {

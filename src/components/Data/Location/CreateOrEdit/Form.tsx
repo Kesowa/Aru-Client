@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import { Form, Input, Button, Select, message, Result, Modal } from "antd";
+import { Form, Input, Button, message, Result, Modal } from "antd";
 import s_m from "../../../../Icons/start_measurement.svg";
 import l_a from "../../../../Icons/location_add.svg";
 import http from "../../../../services/httpCall";
@@ -93,31 +93,27 @@ const CreateOrEditLocationForm = (props: any) => {
 
   const editLocation = () => {
     setLoading(true);
-    const isPolygon = props.geoData?.points.length > 1;
-    const firstPoint = [
-      props.geoData?.points[0].lng,
-      props.geoData?.points[0].lat,
-    ];
+    const isPolygon = (props.geoData?.points.length > 1);
+    const firstPoint = [props.geoData?.points[0].lng, props.geoData?.points[0].lat];
+    let coordinates, type;
+    if (props.geoData) {
+      coordinates = isPolygon ?
+      [[
+        ...props.geoData.points.map((point) => {
+          return [point.lng, point.lat];
+        }),
+        firstPoint
+      ]] : firstPoint;
+      type = isPolygon ? "Polygon" : "Point";
+    } else {
+      coordinates = props.locationToEdit.geometry.coordinates;
+      type = props.locationToEdit.geometry.type;
+    }
     const data = {
       id: props.locationToEdit._id,
       geometry: {
-        coordinates: props.geoData
-          ? isPolygon
-            ? [
-                [
-                  ...props.geoData.points.map((point) => {
-                    return [point.lng, point.lat];
-                  }),
-                  firstPoint,
-                ],
-              ]
-            : firstPoint
-          : props.locationToEdit.geometry.coordinates,
-        type: props.geoData
-          ? isPolygon
-            ? "Polygon"
-            : "Point"
-          : props.locationToEdit.geometry.type,
+        coordinates,
+        type,
       },
       properties: {
         name: formState.locationName,

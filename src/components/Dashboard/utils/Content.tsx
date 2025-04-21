@@ -20,7 +20,7 @@ import { ImportOutlined } from "@ant-design/icons";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import DecideIcon from "../../../services/decideIcon";
 import QRCode from "qrcode";
 import {

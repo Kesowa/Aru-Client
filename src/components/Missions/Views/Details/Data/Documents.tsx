@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useContext } from "react";
+import React, { useState, useRef, useCallback, useContext, useEffect, useMemo } from "react";
 import {
   Alert,
   Button,
@@ -31,7 +31,7 @@ import {
 } from "@ant-design/icons";
 import Dragger from "antd/lib/upload/Dragger";
 import { useEffect } from "react";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import { useMemo } from "react";
 import download from "downloadjs";
 import { API_URL, STATIC_URL } from "src/constants";
@@ -47,8 +47,6 @@ function Documents(props) {
   const { openThread } = useContext(ThreadContext);
   const userDetails = Auth.userdetails;
   const userType = userDetails.userType;
-  const [defaultFileList, setDefaultFileList] = useState([]);
-  const [progress, setProgress] = useState(0);
   const [refreshState, setRefreshState] = useState(false);
   const socket: any = useRef();
   const [loader, setLoader] = useState(false);
@@ -213,17 +211,7 @@ function Documents(props) {
         },
       })
       .then((res) => {
-        if (res.data.status) {
-          const url = `${STATIC_URL}${res.data.link}`;
-          const key = `open${Date.now()}`;
-          const btn = (
-            <a href={url} target="_blank" rel="noreferrer">
-              <Button type="primary" size="small" onClick={() => {}}>
-                Download
-              </Button>
-            </a>
-          );
-        } else {
+        if (!res.data.status) {
           console.log(res.data);
           message.info("No files to download inside this folder!");
         }
@@ -239,6 +227,7 @@ function Documents(props) {
   ) => {
     return useCallback(
       (data: ChonkyFileActionData) => {
+        let url:string;
         switch (data.id) {
           case OpenThread.id:
             openThread("document", data.state.selectedFiles[0].id, {});
@@ -256,7 +245,7 @@ function Documents(props) {
                 currentFolderId === "rawPhotos" ||
                 currentFolderId === "rawVideos"
               ) {
-                var url = data.state.selectedFilesForAction[0]?.path;
+                url = data.state.selectedFilesForAction[0]?.path;
                 window.open(url);
               }
             }
@@ -342,14 +331,14 @@ function Documents(props) {
                   if (data.state.selectedFilesForAction[0].id === "rawData") {
                     bulkDownload("rawData");
                   } else {
-                    var url = data.state.selectedFilesForAction[0].path;
+                    url = data.state.selectedFilesForAction[0].path;
                     window.open(url);
                   }
                 } else {
                   bulkDownload(data.state.selectedFilesForAction[0].id);
                 }
               } else {
-                var url = data.state.selectedFilesForAction[0].path;
+                url = data.state.selectedFilesForAction[0].path;
                 window.open(url);
               }
             }
@@ -368,7 +357,6 @@ function Documents(props) {
 
   //---------------------File validator----------------
   function validateFile(file: any) {
-    const extension = file.name.split(".")[1];
     if (currentFolderId === "rawPhotos") {
       switch (file.type) {
         case "image/png":
@@ -402,30 +390,9 @@ function Documents(props) {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       if (validateFile(options.file)) {
-        // const config:AxiosRequestConfig = {
-        //   onUploadProgress: (event) => {
-        //     const percent = Math.floor((event.loaded / event.total) * 100);
-        //     setProgress(percent);
-        //     if (percent === 100) {
-        //       setTimeout(() => setProgress(0), 1000);
-        //     }
-        //     options.onProgress({ percent: (event.loaded / event.total) * 100 });
-        //   },
-        //   cancelToken: source.token,
-        // };
-
-        const uploadToken = await uploadFile(
-          options.file,
-          DocModel.DOCUMENTS,
-          (prog) => {
-            setProgress(prog * 100);
-            options.onProgress({ percent: prog * 100 });
-          },
-          source.token
-        );
-        const fileExtension = options.file.name
-          .substring(options.file.name.lastIndexOf(".") + 1)
-          .toLowerCase();
+        
+        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => {options.onProgress({ percent: prog * 100 })}, source.token);
+        const fileExtension = options.file.name.substring(options.file.name.lastIndexOf(".") + 1).toLowerCase();
 
         const body = {
           type: fileExtension === "las" ? "pointCloud" : options.file.type,
@@ -455,38 +422,6 @@ function Documents(props) {
           props.missionDetails.userType //upload priviledge checks
         ) {
           case "tenant-root": //when user is a tenant root
-            http
-              .post(options.action, body)
-              .then((res: any) => {
-                options.onSuccess(res.data, options.file);
-                message.success(
-                  "File " + options.file.name + " uploaded successfully"
-                );
-              })
-              .catch((err) => {
-                if (axios.isCancel(err)) {
-                  console.log("Upload Cancelled");
-                  return;
-                } else if (err.response?.status === 403) {
-                  if (
-                    err.response?.data.message ===
-                    "Actual storage exceeded the Limit of Set storage!"
-                  ) {
-                    setStorageModal(true);
-                  } else {
-                    message.error(err.response?.data.message);
-                    console.log(err.response);
-                  }
-                } else {
-                  console.log(err);
-                  message.error("Unable to upload file!");
-                  options.onError({ err });
-                }
-                AxiosErrorHandler(err, logout);
-              });
-
-            break;
-
           case "tenant-staff": // when user is tenant staff
             http
               .post(options.action, body)
@@ -548,7 +483,7 @@ function Documents(props) {
             type="info"
             showIcon
           />
-          <Dragger {...UploadProps} defaultFileList={defaultFileList}>
+          <Dragger {...UploadProps} defaultFileList={[]}>
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>

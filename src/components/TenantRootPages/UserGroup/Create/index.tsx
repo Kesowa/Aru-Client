@@ -36,12 +36,8 @@ function UserGroupCreatePage(props: any) {
       .then((result) => {
         if (result.data.status) {
           setAllPermissions(result.data.data);
-        } else {
-          switch (result.data.message) {
-            case "You do not have permission to use this API.":
-              setErrorState("unauthorized");
-              break;
-          }
+        } else if (result.data.message === "You do not have permission to use this API.") {
+          setErrorState("unauthorized");
         }
       })
       .catch((err) => {

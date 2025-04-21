@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Modal,
   Steps,
@@ -31,7 +31,6 @@ const { Text, Paragraph } = Typography;
 const { Item } = Form;
 
 const CreateLayer = (props: any) => {
-  const socket: any = useRef();
   const [current, setCurrent] = useState(0);
   const [fileList, setFileList] = useState<any>([]);
   const [layerName, setLayerName] = useState("");
@@ -87,7 +86,6 @@ const CreateLayer = (props: any) => {
   };
   //---------------------File validator----------------
   function validateFile(file: any) {
-    const extension = file.name.split(".")[1];
     switch (file.type) {
       case "image/png":
         return true;
@@ -346,7 +344,7 @@ const CreateLayer = (props: any) => {
                 </Paragraph>
                 {badImages.map((item: any) => {
                   return (
-                    <Paragraph>
+                    <Paragraph key={window.crypto.randomUUID()}>
                       <CloseCircleOutlined style={{ color: "red" }} /> File{" "}
                       {item} has no geocoordinates. Failed to geolocate!
                     </Paragraph>

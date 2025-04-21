@@ -24,7 +24,7 @@ import { Layer } from "../layerRender";
 import { rasterProps } from "src/static/rasterprops";
 import { AuthContext } from "src/services/authUtils";
 import { Feature } from "src/types/geojson";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -62,7 +62,6 @@ interface Props {
   canDeleteFeature: boolean;
   updateFeatureCountInLayers: (id: string, count: number) => void;
   setshowSelectedIndexes: (show: boolean) => void;
-  setKey: (key: number) => void;
   setShouldAttributeTableReload: (reload: boolean) => void;
   invertColor: any;
   handleMeshSourceOption: (id: string) => void;
@@ -145,7 +144,7 @@ const MapAttributes: React.FC<Props> = (props) => {
 
       socketInstance.on("AI_TASK_PROGRESS", (data) => {
         console.log(data);
-        const { inferId, status, progress } = data;
+        const { inferId, progress } = data;
         setProgress(progress);
 
         if (progress === 100) {
@@ -586,7 +585,6 @@ const MapAttributes: React.FC<Props> = (props) => {
           canDeleteFeature={props.canDeleteFeature}
           updateFeatureCountInLayers={props.updateFeatureCountInLayers}
           setshowSelectedIndexes={props.setshowSelectedIndexes}
-          setKey={props.setKey}
           setShouldAttributeTableReload={props.setShouldAttributeTableReload}
           shouldAttributeTableReload={props.shouldAttributeTableReload}
           refreshLayer={props.refreshLayer}

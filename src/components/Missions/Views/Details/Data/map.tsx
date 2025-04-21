@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef, useState, useEffect } from "react";
 import {
   Row,
   Col,
@@ -17,7 +17,6 @@ import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import moment from "moment";
 import apis from "../../../../../services/apis";
 import { FileTextOutlined, DownloadOutlined } from "@ant-design/icons";
-import { useEffect } from "react";
 import http from "../../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../../services/httpErrorHandle";
 import download from "downloadjs";
@@ -25,7 +24,7 @@ import {
   getImageForCircle,
   getImageForPolygon,
 } from "../../../../../services/staticMap";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import { API_URL, STATIC_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
@@ -62,11 +61,6 @@ function Map(props) {
         params: {
           missionId: id,
         },
-      })
-      .then((res) => {
-        if (res.data.status) {
-          const url = `${STATIC_URL}/${res.data.link}`;
-        }
       })
       .catch((err) => {
         console.log(err);

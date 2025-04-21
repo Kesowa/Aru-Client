@@ -3,7 +3,7 @@ import { useParams, useHistory } from "react-router-dom";
 import { Tabs, Row, Col, message, Typography } from "antd";
 import type { TabsProps } from "antd";
 import "./index.less";
-import io from "socket.io-client";
+import io from "src/services/socketConnect";
 import About from "./tabContents/about";
 import Outcomes from "./tabContents/outcomes";
 import VideoPlayer from "../../../shared/VideoPlayer";
@@ -120,6 +120,8 @@ function LiveViewBase() {
           missionDetails.flight.time.split(" ")[0] +
           "Z"
       );
+    } else {
+      setisoDate(new Date().toISOString());
     }
   }, [missionDetails]);
 
@@ -155,7 +157,7 @@ function LiveViewBase() {
           );
           socket.current.on("STREAM_REMOVED", (streamKey) => {
             const temp = Buffer.from(streamKey, "base64").toString();
-            const [mID, fID, lID] = temp.split("-");
+            const fID = temp.split("-")[1];
 
             if (fID.toString() === missionDetails.flight._id.toString()) {
               message.success("Stream complete!");
@@ -184,7 +186,11 @@ function LiveViewBase() {
               height: "100%",
             }}
           >
-            <Col className="video-wrapper" span={theater ? 24 : pip ? 0 : 16}>
+            <Col className="video-wrapper" span={(() => {
+              if (theater) return 24;
+              else if (pip) return 0;
+              else return 16;
+            })()}>
               {streamKey ? (
                 <VideoPlayer
                   url={streamURL}
@@ -210,7 +216,11 @@ function LiveViewBase() {
             </Col>
             <Col
               className="live-map-wrapper"
-              span={theater ? 0 : pip ? 24 : 8}
+              span={(() => {
+                if (theater) return 24;
+                else if (pip) return 0;
+                else return 16;
+              })()}
               onDoubleClick={handlePip}
             >
               {streamKey ? (
@@ -233,7 +243,7 @@ function LiveViewBase() {
           <Col span={8}>
             <Weather
               location={location}
-              isoDate={new Date().toISOString()}
+              isoDate={isoDate}
               type="live"
             />
           </Col>
