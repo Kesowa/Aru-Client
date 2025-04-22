@@ -50,8 +50,8 @@ import { PERMS } from "src/static/permissions";
 import { AuthContext } from "src/services/authUtils";
 import { ThreadContext } from "src/services/threadUtils";
 
-let plainOptions = new Array<any>();
 function ImageDocs(props) {
+  const [plainOptions, setPlainOptions] = useState([]);
   const [refreshState, setRefreshState] = useState(false);
   const socket: any = useRef();
   const [loader, setLoader] = useState(false);
@@ -256,11 +256,14 @@ function ImageDocs(props) {
   };
 
   useEffect(() => {
-    plainOptions = [];
     console.log("Iamge : " + images);
-    images?.map((item: any) =>
-      plainOptions.push({ value: item._id, label: ImageCompononent(item) })
-    );
+    if (images.length > 0) {
+      setPlainOptions(
+        images.map(
+          image => ({ value: image._id, label: ImageCompononent(image)})
+        )
+      )
+  }
   }, [images]);
 
   //---------------------File validator----------------
@@ -491,7 +494,7 @@ function ImageDocs(props) {
             <Image
               key={`${item._id}`}
               style={imgStyle}
-              onMouseDown={() => handleLongPressStart(item)}
+              // onMouseDown={() => handleLongPressStart(item)}
               onMouseUp={handleLongPressEnd}
               onTouchStart={() => handleLongPressStart(item)}
               onTouchEnd={handleLongPressEnd}
@@ -778,7 +781,7 @@ function ImageDocs(props) {
                                 className="listview-outcomes"
                                 align="middle"
                                 style={{ padding: "10px" }}
-                                onMouseDown={() => handleLongPressStart(item)}
+                                // onMouseDown={() => handleLongPressStart(item)}
                                 onMouseUp={handleLongPressEnd}
                                 onTouchStart={() => handleLongPressStart(item)}
                                 onTouchEnd={handleLongPressEnd}
