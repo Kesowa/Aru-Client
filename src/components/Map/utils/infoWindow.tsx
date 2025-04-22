@@ -317,7 +317,7 @@ function InfoWindow(props) {
                         </Text>
                       </Col>
                       <Col md={14}>
-                        <span className="value">{properties[key]}</span>
+                        <span className="value">{JSON.stringify(properties[key], null, 2)}</span>
                       </Col>
                     </Row>
                   ))}
@@ -348,7 +348,7 @@ function InfoWindow(props) {
                       </Text>
                     </Col>
                     <Col md={14}>
-                      <span className="value">{properties[key]}</span>
+                      <span className="value">{JSON.stringify(properties[key], null, 2)}</span>
                     </Col>
                   </Row>
                 ))}
