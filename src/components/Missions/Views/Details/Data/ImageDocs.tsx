@@ -174,6 +174,7 @@ function ImageDocs(props) {
             selectedImg,
             false,
             {
+              objectFit: 'cover',
               width: "100%",
               height: "auto",
               minHeight: "200px",
@@ -515,7 +516,7 @@ function ImageDocs(props) {
                   }
                 } else { /* empty */ }
               }}
-              src={STATIC_URL + "/documents/1x_" + item.filePath.split("/")[2]}
+              src={STATIC_URL + "/documents/2x_" + item.filePath.split("/")[2]}
               preview={
                 !preview
                   ? false
@@ -814,6 +815,7 @@ function ImageDocs(props) {
                                     trigger={["contextMenu"]}
                                   >
                                     {ImageComponent(item, true, {
+                                      objectFit: 'cover',
                                       padding: "8px",
                                       width: "270px",
                                       height: "150px",
@@ -912,7 +914,7 @@ function ImageDocs(props) {
                               height={150}
                               src={
                                 STATIC_URL +
-                                "/documents/1x_" +
+                                "/documents/2x_" +
                                 item.filePath.split("/")[2]
                               }
                               preview={false}
@@ -946,6 +948,7 @@ function ImageDocs(props) {
                                 key={window.crypto.randomUUID()}
                               >
                                 {ImageComponent(item, true, {
+                                  objectFit: 'cover',
                                   padding: "8px",
                                   width: "270px",
                                   height: "150px",
