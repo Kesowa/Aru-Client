@@ -68,8 +68,7 @@ function ImageDocs(props) {
   const [thumbnail, setThumbnail] = useState("");
   const CheckboxGroup = Checkbox.Group;
   const { Text, Title } = Typography;
-  const defaultCheckedList = [];
-  const [checkedList, setCheckedList] = useState<any>(defaultCheckedList);
+  const [checkedList, setCheckedList] = useState<any>([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -80,15 +79,17 @@ function ImageDocs(props) {
   const userType = userDetails.userType;
 
   const { thread, openThread } = useContext(ThreadContext);
-  
-  //media selection functionality
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+
+  let longPressTimer: NodeJS.Timeout;
   const [longPressOccurred, setLongPressOccurred] = useState(false);
 
   const handleLongPressStart = (item: any) => {
+    console.log(item, "handler");
     const timer = setTimeout(() => {
+      console.log("Timer timing!");
       setActivateSelection(true);
       setCheckedList(prev => {
+        console.log("Executing...");
         if (prev.includes(item._id)) {
           return prev.filter((id: string) => id !== item._id);
         }
@@ -96,13 +97,12 @@ function ImageDocs(props) {
       });
       setLongPressOccurred(true);
     }, 500);
-    setLongPressTimer(timer);
+    longPressTimer = timer;
   };
-  
+
   const handleLongPressEnd = () => {
     if (longPressTimer) {
       clearTimeout(longPressTimer);
-      setLongPressTimer(null);
     } else {
       setTimeout(() => setLongPressOccurred(false), 100);
     }
@@ -256,14 +256,14 @@ function ImageDocs(props) {
   };
 
   useEffect(() => {
-    console.log("Iamge : " + images);
+    console.log("Images:", images);
     if (images.length > 0) {
       setPlainOptions(
         images.map(
-          image => ({ value: image._id, label: ImageCompononent(image)})
+          image => ({ value: image._id, label: ImageCompononent(image) })
         )
       )
-  }
+    }
   }, [images]);
 
   //---------------------File validator----------------
@@ -287,7 +287,7 @@ function ImageDocs(props) {
       const cancelToken = axios.CancelToken;
       const source = cancelToken.source();
       if (validateFile(options.file)) {
-        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => { options.onProgress({ percent: prog * 100 })}, source.token);
+        const uploadToken = await uploadFile(options.file, DocModel.DOCUMENTS, (prog) => { options.onProgress({ percent: prog * 100 }) }, source.token);
 
         const body = {
           file: uploadToken,
@@ -303,7 +303,7 @@ function ImageDocs(props) {
         console.log("File type: ", options.file.type);
 
         switch (
-          props.missionDetails.userType //upload priviledge checks
+        props.missionDetails.userType //upload priviledge checks
         ) {
           case "tenant-root":
           case "tenant-staff": // when user is tenant staff
@@ -382,8 +382,8 @@ function ImageDocs(props) {
       centered: true,
       width: 640,
       cancelText: "Cancel",
-      onOk() {},
-      onCancel() {},
+      onOk() { },
+      onCancel() { },
     });
   }
   useEffect(() => {
@@ -473,11 +473,11 @@ function ImageDocs(props) {
               !preview
                 ? false
                 : {
-                    src:
-                      STATIC_URL +
-                      "/documents/2x_" +
-                      item.filePath.split("/")[2],
-                  }
+                  src:
+                    STATIC_URL +
+                    "/documents/2x_" +
+                    item.filePath.split("/")[2],
+                }
             }
             fallback="data:image/png;base64,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"
           ></Image>
@@ -494,7 +494,10 @@ function ImageDocs(props) {
             <Image
               key={`${item._id}`}
               style={imgStyle}
-              // onMouseDown={() => handleLongPressStart(item)}
+              onMouseDown={() => {
+                console.log("Mouse down!");
+                handleLongPressStart(item)
+              }}
               onMouseUp={handleLongPressEnd}
               onTouchStart={() => handleLongPressStart(item)}
               onTouchEnd={handleLongPressEnd}
@@ -503,7 +506,7 @@ function ImageDocs(props) {
                   setLongPressOccurred(false);
                   return;
                 }
-                if (activateSelection) {                
+                if (activateSelection) {
                   if (checkedList.includes(item._id)) {
                     const filtered = checkedList.filter((i: any) => i !== item._id);
                     setCheckedList(filtered);
@@ -517,11 +520,11 @@ function ImageDocs(props) {
                 !preview
                   ? false
                   : {
-                      src:
-                        STATIC_URL +
-                        "/documents/2x_" +
-                        item.filePath.split("/")[2],
-                    }
+                    src:
+                      STATIC_URL +
+                      "/documents/2x_" +
+                      item.filePath.split("/")[2],
+                  }
               }
               fallback="data:image/png;base64,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"
             ></Image>
@@ -546,8 +549,7 @@ function ImageDocs(props) {
       .then((res) => {
         if (res.data.status) {
           message.success(
-            `Image ${
-              !body.update.isFlagged ? "un-flagged" : "flagged"
+            `Image ${!body.update.isFlagged ? "un-flagged" : "flagged"
             } successfully!`
           );
           fetchDocuments();
@@ -774,92 +776,92 @@ function ImageDocs(props) {
                       />
                     </Col>
                   ) : (
-                      <Image.PreviewGroup>
-                        {images.map((item: any) => {
-                          return (
-                              <Row
-                                className="listview-outcomes"
-                                align="middle"
-                                style={{ padding: "10px" }}
-                                onMouseDown={() => handleLongPressStart(item)}
-                                onMouseUp={handleLongPressEnd}
-                                onTouchStart={() => handleLongPressStart(item)}
-                                onTouchEnd={handleLongPressEnd}
-                                onClick={() => {
-                                  if (longPressOccurred) {
-                                    setLongPressOccurred(false);
-                                    return;
-                                  }
-                                  if (activateSelection) {
-                                    if (checkedList.includes(item._id)) {
-                                      const filtered = checkedList.filter((i: any) => i !== item._id);
-                                      setCheckedList(filtered);
-                                    } else {
-                                      setCheckedList([...checkedList, item._id]);
-                                    }
-                                  } else { /* empty */ }
+                    <Image.PreviewGroup>
+                      {images.map((item: any) => {
+                        return (
+                          <Row
+                            className="listview-outcomes"
+                            align="middle"
+                            style={{ padding: "10px" }}
+                            onMouseDown={() => handleLongPressStart(item)}
+                            onMouseUp={handleLongPressEnd}
+                            onTouchStart={() => handleLongPressStart(item)}
+                            onTouchEnd={handleLongPressEnd}
+                            onClick={() => {
+                              if (longPressOccurred) {
+                                setLongPressOccurred(false);
+                                return;
+                              }
+                              if (activateSelection) {
+                                if (checkedList.includes(item._id)) {
+                                  const filtered = checkedList.filter((i: any) => i !== item._id);
+                                  setCheckedList(filtered);
+                                } else {
+                                  setCheckedList([...checkedList, item._id]);
+                                }
+                              } else { /* empty */ }
+                            }}
+                            key={item._id}
+                          >
+                            <Col md={8} style={{ padding: "10px" }}>
+                              <Dropdown
+                                onOpenChange={() => setSelectedImg(item)}
+                                menu={{
+                                  items: imgMenu(item),
+                                  onClick: imgMenuOnClick,
                                 }}
-                                key={item._id}
+                                trigger={["contextMenu"]}
                               >
-                                <Col md={8} style={{ padding: "10px" }}>
-                                  <Dropdown
-                                    onOpenChange={() => setSelectedImg(item)}
-                                    menu={{
-                                      items: imgMenu(item),
-                                      onClick: imgMenuOnClick,
-                                    }}
-                                    trigger={["contextMenu"]}
-                                  >
-                                    {ImageComponent(item, true, {
-                                      padding: "8px",
-                                      width: "270px",
-                                      height: "150px",
-                                    })}
-                                  </Dropdown>
-                                </Col>
-                                <Col md={16}>
-                                  <div className="info-part">
-                                    <Row>
-                                      <Title level={5}>{item.name}</Title>
-                                    </Row>
-                                    <Row>
-                                      <Col md={20}>
-                                        <Text type="secondary">
-                                          Size : {item.fileSize} mb
-                                        </Text>
-                                      </Col>
-                                      <Col md={4}>
-                                        <Text
-                                          type="secondary"
-                                          className="inference"
-                                        >
-                                          Inference: {item.__v}
-                                        </Text>
-                                      </Col>
-                                    </Row>
-                                    <Row>
-                                      <Col md={20}>
-                                        <Text type="secondary">
-                                          <UserOutlined /> {item.createdBy.name}
-                                        </Text>
-                                      </Col>
-                                      <Col md={4}>
-                                        <Text
-                                          type="secondary"
-                                          className="relative-time"
-                                        >
-                                          <em>
-                                            {moment(item.createdAt).fromNow()}
-                                          </em>
-                                        </Text>
-                                      </Col>
-                                    </Row>
-                                  </div>
-                                </Col>
-                              </Row>
-                          );
-                        })}
-                      </Image.PreviewGroup>
+                                {ImageComponent(item, true, {
+                                  padding: "8px",
+                                  width: "270px",
+                                  height: "150px",
+                                })}
+                              </Dropdown>
+                            </Col>
+                            <Col md={16}>
+                              <div className="info-part">
+                                <Row>
+                                  <Title level={5}>{item.name}</Title>
+                                </Row>
+                                <Row>
+                                  <Col md={20}>
+                                    <Text type="secondary">
+                                      Size : {item.fileSize} mb
+                                    </Text>
+                                  </Col>
+                                  <Col md={4}>
+                                    <Text
+                                      type="secondary"
+                                      className="inference"
+                                    >
+                                      Inference: {item.__v}
+                                    </Text>
+                                  </Col>
+                                </Row>
+                                <Row>
+                                  <Col md={20}>
+                                    <Text type="secondary">
+                                      <UserOutlined /> {item.createdBy.name}
+                                    </Text>
+                                  </Col>
+                                  <Col md={4}>
+                                    <Text
+                                      type="secondary"
+                                      className="relative-time"
+                                    >
+                                      <em>
+                                        {moment(item.createdAt).fromNow()}
+                                      </em>
+                                    </Text>
+                                  </Col>
+                                </Row>
+                              </div>
+                            </Col>
+                          </Row>
+                        );
+                      })}
+                    </Image.PreviewGroup>
                   )}
                 </>
               ) : (
@@ -896,14 +898,14 @@ function ImageDocs(props) {
                               style={
                                 checkedList.includes(item._id)
                                   ? {
-                                      border: "4px solid #3b86ff",
-                                      cursor: "pointer",
-                                      aspectRatio: "16/9",
-                                    }
+                                    border: "4px solid #3b86ff",
+                                    cursor: "pointer",
+                                    aspectRatio: "16/9",
+                                  }
                                   : {
-                                      cursor: "pointer",
-                                      aspectRatio: "16/9",
-                                    }
+                                    cursor: "pointer",
+                                    aspectRatio: "16/9",
+                                  }
                               }
                               width={267}
                               height={150}
@@ -930,27 +932,27 @@ function ImageDocs(props) {
                       })}
                     </Row>
                   ) : (
-                      <Image.PreviewGroup>
-                        {images.map((item: any) => {
-                          return (
-                              <Dropdown
-                                onOpenChange={() => setSelectedImg(item)}
-                                menu={{
-                                  items: imgMenu(item),
-                                  onClick: imgMenuOnClick,
-                                }}
-                                trigger={["contextMenu"]}
-                                key={window.crypto.randomUUID()}
-                              >
-                                {ImageComponent(item, true, {
-                                  padding: "8px",
-                                  width: "270px",
-                                  height: "150px",
-                                })}
-                              </Dropdown>
-                          );
-                        })}
-                      </Image.PreviewGroup>
+                    <Image.PreviewGroup>
+                      {images.map((item: any) => {
+                        return (
+                          <Dropdown
+                            onOpenChange={() => setSelectedImg(item)}
+                            menu={{
+                              items: imgMenu(item),
+                              onClick: imgMenuOnClick,
+                            }}
+                            trigger={["contextMenu"]}
+                            key={window.crypto.randomUUID()}
+                          >
+                            {ImageComponent(item, true, {
+                              padding: "8px",
+                              width: "270px",
+                              height: "150px",
+                            })}
+                          </Dropdown>
+                        );
+                      })}
+                    </Image.PreviewGroup>
                   )}
                 </>
               )}
