@@ -98,6 +98,12 @@ function ImageDocs(props) {
     }, 500);
     setLongPressTimer(timer);
   };
+
+  useEffect(() => {
+    if (checkedList.length === 0 && activateSelection) {
+      setActivateSelection(false);
+    }
+  }, [checkedList, activateSelection]);
   
   const handleLongPressEnd = () => {
     if (longPressTimer) {
