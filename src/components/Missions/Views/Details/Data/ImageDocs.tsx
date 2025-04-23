@@ -781,7 +781,7 @@ function ImageDocs(props) {
                                 className="listview-outcomes"
                                 align="middle"
                                 style={{ padding: "10px" }}
-                                // onMouseDown={() => handleLongPressStart(item)}
+                                onMouseDown={() => handleLongPressStart(item)}
                                 onMouseUp={handleLongPressEnd}
                                 onTouchStart={() => handleLongPressStart(item)}
                                 onTouchEnd={handleLongPressEnd}
