@@ -186,6 +186,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
               scenegraph: { _lighting: "flat" },
             },
             operation: layer._isMeshSource ? "terrain+draw" : "draw",
+            zIndex: -1,
           });
         }
         if (layer.raster === rasterProps.DEM && layer._render3D === true) {
@@ -209,6 +210,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             texture: overlayLayer
               ? getRasterDataUrl(overlayLayer)
               : getRasterDataUrl(layer),
+            zIndex: -1,
           });
         }
         return new TileLayer({
@@ -222,6 +224,7 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             handleHover({ ...event, layer });
           },
           extent: layer._metadata?.bounds,
+          zIndex: -1,
           renderSubLayers: (props) => {
             const {
               bbox: { west, south, east, north },

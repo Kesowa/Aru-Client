@@ -4337,16 +4337,17 @@ function BaseMap(props) {
     // OSMState Layers
     if (osmState) layers.push(osm);
 
+
+    // Tree Menu Layers
+    layers.push(memoizedAllLayers);
+    layers.push(memoizedMissionLayers);
+
     // Drawing State Layers
     if (isDrawing) {
       layers.push(drawPolygonTool);
     } else {
       layers.push(maskLayer);
     }
-
-    // Tree Menu Layers
-    layers.push(memoizedAllLayers);
-    layers.push(memoizedMissionLayers);
 
     if (digitizer) layers.push(digitizerLayer);
 
