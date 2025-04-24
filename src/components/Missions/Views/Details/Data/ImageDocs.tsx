@@ -80,6 +80,8 @@ function ImageDocs(props) {
 
   const { thread, openThread } = useContext(ThreadContext);
 
+  // !WARN turning this into a state breaks the image modal open functionality
+  // Probably because the setState triggers a re-render, which the image grid (and not the image list) element cannot handle
   let longPressTimer: NodeJS.Timeout;
   const [longPressOccurred, setLongPressOccurred] = useState(false);
 
