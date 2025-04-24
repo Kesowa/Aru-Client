@@ -82,4 +82,4 @@ class CastError extends Error {
   }
 }
 
-export const CLIENT_URL = new EnvVar("CLIENT_URL").isUrl().toString();
+export const CLIENT_URL = "http://localhost:3000";

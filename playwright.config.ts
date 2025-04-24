@@ -48,22 +48,26 @@ export default defineConfig({
       name: "setup",
       testMatch: /.{0,20}\.setup\.ts/,
       use: {
-        ...devices["Desktop Firefox"],
+        ...devices["Desktop Chrome"],
       },
     },
-    // {
-    //   name: 'chromium',
-    //   use: { ...devices['Desktop Chrome'] },
-    // },
-
     {
-      name: "firefox",
+      name: 'chromium',
       use: {
-        ...devices["Desktop Firefox"],
+        ...devices['Desktop Chrome'],
         storageState: "playwright/.auth/user.json",
       },
       dependencies: ["setup"],
     },
+
+    // {
+    //   name: "firefox",
+    //   use: {
+    //     ...devices["Desktop Firefox"],
+    //     storageState: "playwright/.auth/user.json",
+    //   },
+    //   dependencies: ["setup"],
+    // },
 
     // {
     //   name: 'webkit',
