@@ -1,10 +1,22 @@
+<<<<<<< Updated upstream
+=======
+import { useState, useEffect } from "react";
+>>>>>>> Stashed changes
 import DeckGL from "@deck.gl/react";
-import { IconLayer } from "@deck.gl/layers";
+import { IconLayer, ScatterplotLayer } from "@deck.gl/layers";
 import { StaticMap } from "react-map-gl";
+<<<<<<< Updated upstream
 import { useState, useEffect, } from "react";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { MAPBOX_API_KEY } from "src/constants";
+=======
+import apis from "src/services/apis";
+import http from "src/services/httpCall";
+import { MAPBOX_API_KEY } from "src/constants";
+
+const MAPBOX_TOKEN = MAPBOX_API_KEY;
+>>>>>>> Stashed changes
 
 const initialViewState = {
   longitude: 88.4512,
@@ -14,22 +26,22 @@ const initialViewState = {
   bearing: 0,
 };
 
-// Mapbox default marker icon
 const ICON_MAPPING = {
   marker: { x: 0, y: 0, width: 128, height: 128, mask: true },
 };
 
-// more to add acording to aru mission status
 const getColor = (status) => {
   switch (status) {
     case "Completed":
-      return [0, 255, 0]; // Green
-    case "Pending":
-      return [255, 165, 0]; // Orange
+      return [0, 255, 0, 200]; // Green with alpha
+    case "Review":
+      return [255, 165, 0, 200]; // Orange with alpha
     case "Cancelled":
-      return [255, 0, 0]; // Red
+      return [255, 0, 0, 200]; // Red with alpha
+    case "Live":
+      return [0, 120, 255, 200]; // Blue with alpha
     default:
-      return [100, 100, 100]; // Gray
+      return [100, 100, 100, 200]; // Gray with alpha
   }
 };
 
@@ -37,6 +49,7 @@ const MapDisplay = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [viewState, setViewState] = useState(initialViewState);
   const [locations, setLocations] = useState([]);
+  const [hoveredLocationId, setHoveredLocationId] = useState(null);
 
   useEffect(() => {
     const fetchAllMissions = async () => {
@@ -45,33 +58,27 @@ const MapDisplay = () => {
           filter: "all",
           sort: "createdAt:descend",
           page: 1,
-          limit: 999999, //to get all mission
+          limit: 999999,
         };
 
         const response = await http.get(apis.GET_ALL_MISSIONS_FOR_TENANT, {
           params,
         });
-        console.log("get details:  ", response.data.data);
+        
         if (response.data.data) {
-          const formattedData = response.data.data.map((mission: any) => ({
+          const formattedData = response.data.data.map((mission) => ({
             id: mission._id,
             address: mission.flight?.geoLocation,
             coordinates: mission.flight?.geoFence?.circle?.center
               ? [
-                  parseFloat(
-                    mission.flight.geoFence.circle.center.lng.toFixed(4)
-                  ),
-                  parseFloat(
-                    mission.flight.geoFence.circle.center.lat.toFixed(4)
-                  ),
+                  parseFloat(mission.flight.geoFence.circle.center.lng.toFixed(4)),
+                  parseFloat(mission.flight.geoFence.circle.center.lat.toFixed(4)),
                 ]
               : null,
             status: mission.status,
-          }));
+          })).filter(mission => mission.coordinates); // Filter out null coordinates
 
-          console.log("Formatted Data:", formattedData);
           setLocations(formattedData);
-          console.log(locations);
         }
       } catch (error) {
         console.error("Error fetching all missions:", error);
@@ -87,41 +94,46 @@ const MapDisplay = () => {
       ...viewState,
       longitude: location.coordinates[0],
       latitude: location.coordinates[1],
-      zoom: 14,
+      zoom: 17,
+      transitionDuration: 1000,
     });
   };
 
-  // const locations = [
-  //   {
-  //     id: 1,
-  //     coordinates: [88.4512, 22.5735],
-  //     address: 'JF66+P46, Action Area II, Newtown, New Town, West Bengal 700157, India',
-  //     status: 'completed'
-  //   },
-  //   {
-  //     id: 2,
-  //     coordinates: [88.4528, 22.5751],
-  //     address: 'JF67+P32, Action Area II, Newtown, New Town, West Bengal 700135, India',
-  //     status: 'pending'
-  //   },
-  // ];
-
   const layers = [
+    // Highlight layer for selected marker
+    new ScatterplotLayer({
+      id: 'selected-highlight',
+      data: selectedLocation ? [selectedLocation] : [],
+      getPosition: d => d.coordinates,
+      getRadius: 25,
+      getFillColor: [255, 255, 255, 200],
+      getLineColor: d => getColor(d.status),
+      getLineWidth: 3,
+      radiusUnits: 'pixels',
+      lineWidthUnits: 'pixels',
+      pickable: false
+    }),
+
+    // Main icon layer
     new IconLayer({
       id: "icon-layer",
       data: locations,
       pickable: true,
-      iconAtlas:
-        "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png",
+      iconAtlas: "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png",
       iconMapping: ICON_MAPPING,
       getIcon: (d) => "marker",
       sizeScale: 15,
       getPosition: (d) => d.coordinates,
-      getSize: (d) => 5,
-      getColor: (d) => getColor(d.status),
+      getSize: (d) => d.id === selectedLocation?.id ? 8 : 5,
+      getColor: (d) => {
+        const baseColor = getColor(d.status);
+        return d.id === selectedLocation?.id 
+          ? [baseColor[0], baseColor[1], baseColor[2], 255]
+          : baseColor;
+      },
       onClick: ({ object }) => handleLocationClick(object),
       onHover: ({ object }) => setSelectedLocation(object),
-    }),
+    })
   ];
 
   return (
@@ -143,14 +155,16 @@ const MapDisplay = () => {
                 position: "absolute",
                 top: 10,
                 left: 10,
-                backgroundColor: "white",
+                backgroundColor: "rgba(255, 255, 255, 0.3)",
                 padding: "15px",
                 borderRadius: "8px",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
                 zIndex: 999,
+                backdropFilter: "blur(8px)",
+                maxWidth: "300px",
               }}
             >
-              <h3 style={{ margin: "0 0 10px 0", font: "bold" }}>
+              <h3 style={{ margin: "0 0 10px 0", fontWeight: "bold" }}>
                 Mission Details
               </h3>
               <p>
@@ -171,13 +185,13 @@ const MapDisplay = () => {
                   right: "5px",
                   cursor: "pointer",
                   padding: "2px 5px",
-                  fontSize: "16px",
+                  fontSize: "25px",
                   fontWeight: "bold",
                   color: "#666",
                 }}
                 onClick={() => setSelectedLocation(null)}
               >
-                X
+                ×
               </div>
             </div>
           )}
@@ -191,6 +205,7 @@ const MapDisplay = () => {
           padding: "20px",
           overflowY: "auto",
           boxShadow: "-2px 0 5px rgba(0,0,0,0.1)",
+          backgroundColor: "#f8f9fa",
         }}
       >
         <h2 style={{ marginBottom: "15px" }}>Mission Locations</h2>
@@ -202,20 +217,26 @@ const MapDisplay = () => {
               margin: "8px 0",
               cursor: "pointer",
               borderRadius: "4px",
-              backgroundColor:
-                selectedLocation?.id === location.id ? "#e6f7ff" : "white",
-              border: `2px solid ${getColor(location.status)
-                .slice(0, 3)
-                .join(",")}`,
+              backgroundColor: selectedLocation?.id === location.id ? "#e6f7ff" : "white",
+              border: `2px solid ${
+                hoveredLocationId === location.id || selectedLocation?.id === location.id
+                  ? `rgb(${getColor(location.status).slice(0, 3).join(",")})`
+                  : "transparent"
+              }`,
               transition: "all 0.2s",
+              transform: selectedLocation?.id === location.id ? "translateX(4px)" : "none",
+              boxShadow: selectedLocation?.id === location.id ? "0 2px 8px rgba(0,0,0,0.1)" : "none",
+              fontWeight: selectedLocation?.id === location.id ? "600" : "400",
             }}
             onClick={() => handleLocationClick(location)}
+            onMouseEnter={() => setHoveredLocationId(location.id)}
+            onMouseLeave={() => setHoveredLocationId(null)}
           >
             <div
               style={{
                 width: "12px",
                 height: "12px",
-                backgroundColor: `rgb(${getColor(location.status).join(",")})`,
+                backgroundColor: `rgb(${getColor(location.status).slice(0, 3).join(",")})`,
                 borderRadius: "50%",
                 display: "inline-block",
                 marginRight: "8px",
