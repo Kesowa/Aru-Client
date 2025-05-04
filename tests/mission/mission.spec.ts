@@ -13,12 +13,17 @@ test("create mission", async ({ page }) => {
 
   const missionName = faker.company.name();
   // stage 2: flight details
-  await page.getByLabel("Flight Name").click();
-  await page.getByLabel("Flight Name").fill(missionName);
-  await page.locator("#create_mission_duration").click();
-  await page.getByText("2 Hrs").click();
-  await page.locator("#create_mission_locationId").click();
-  await page.getByText("Base").click();
+  await page.getByRole('textbox', { name: 'Flight Name' }).fill(missionName);
+  await page.locator('.ant-picker').nth(0).click();
+  await page.getByText('Today').click();
+  await page.locator('.ant-picker').nth(1).click();
+  await page.getByText('Now').click();
+  await page.locator('#create_mission_duration').click();
+  await page.getByText('1 Hr').click();
+  await page.locator('#create_mission_locationId').click();
+  await page.getByText('Base').click();
+  await page.locator('#create_mission_pilot').click();
+  await page.getByText('Neel Dutta pilot').click();
   await page.locator("#gmap_container").getByRole("img").nth(1).click();
   // map clicked twice to select circular region of radius 0
   const bb = await page
@@ -27,14 +32,16 @@ test("create mission", async ({ page }) => {
     .boundingBox();
 
   await page.mouse.click(bb!.x + bb!.width / 2, bb!.y + bb!.height / 2);
-  await new Promise((res) => setTimeout(res, 300));
+  await new Promise((res) => setTimeout(res, 500));
   await page.mouse.click(bb!.x + bb!.width / 2, bb!.y + bb!.height / 2 + 100);
-  await page.getByRole("button", { name: "Add" }).click();
+  await new Promise((res) => setTimeout(res, 2000)); // wait for location and area of geofence to be loaded from apis
+  await page.getByRole('button', { name: 'Save' }).click();
+
+  const flightCreateAlert = page.getByText("Flight Added");
+  expect(flightCreateAlert).toBeDefined();
 
   // stage 3 : add mission details
-  await page
-    .getByPlaceholder("Please provide with some instructions")
-    .fill("Test Instructions"); // fill instructions
+  await page.getByRole('textbox', { name: 'Please provide with detailed' }).fill('Test Instructions'); // fill instructions
   await page.getByText("Orthomosaic").click();
   await page.getByText("No asset selected!").click();
   await page.getByText("NKDA Phantom").click();
