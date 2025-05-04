@@ -66,6 +66,7 @@ import Fuse from "fuse.js";
 import { featureType, featureTypes } from "src/static/vectorprops";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
+import { HTMLOverlay, HTMLOverlayItem } from "src/components/shared/HTMLOverlay";
 
 interface Config {
   mode: typeof GeoJsonEditMode;

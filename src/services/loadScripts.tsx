@@ -8,6 +8,7 @@ export const useScripts = () => {
   useEffect(() => {
     const googleScript = document.createElement("script");
     googleScript.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=drawing,geometry,places`;
+    googleScript.nonce = "aru-inline";
     window.document.body.appendChild(googleScript);
     googleScript.addEventListener("load", () => {
       console.log("GoogleMap script loaded");
@@ -16,6 +17,7 @@ export const useScripts = () => {
 
     const razorPayScript = document.createElement("script");
     razorPayScript.src = `https://checkout.razorpay.com/v1/checkout.js`;
+    razorPayScript.nonce = "aru-inline";
     window.document.body.appendChild(razorPayScript);
 
     razorPayScript.addEventListener("load", () => {
