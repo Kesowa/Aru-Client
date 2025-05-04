@@ -42,8 +42,16 @@ test("create and delete client", async ({ page }) => {
   );
   expect(clientCreateAlert).toBeDefined();
 
-  // delete client
+  // go to client list page
   await page.getByRole("link", { name: "unordered-list Client List" }).click();
+
+  // search for newly created client, by email id, and make sure it exists in list
+  await page.getByRole('cell', { name: 'Email Id search' }).getByRole('button').click();
+  await page.getByRole('textbox', { name: 'Search email' }).fill(userEmail);
+  await page.getByRole('button', { name: 'Search', exact: true }).click();
+  expect(page.getByText(userEmail)).toBeDefined();
+
+  // delete client
   await page
     .getByRole("row", { name: `${userName} ${userEmail} ${userPhone}` })
     .getByRole("button", { name: "delete" })
