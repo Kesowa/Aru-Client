@@ -1,19 +1,23 @@
 import { test, expect, FileChooser } from "@playwright/test";
 import { CLIENT_URL } from "tests/constants";
+import { completeMission, createMission, deleteMission } from "tests/utils/mission";
 
 const filename = "video.mp4";
 
 test("vod tests", async ({ page }) => {
+  const missionName = await createMission(page);
+  await completeMission(page, missionName);
+  
   // Upload VOD
 
-  // navigating to mission videos page of "Mapping mission sample" mission
+  // navigating to mission videos page of mission
   await page.goto(CLIENT_URL);
   await expect(page).toHaveURL(/.{0,30}dashboard/);
   await page
     .getByRole("main")
     .getByRole("link", { name: "border-inner Missions" })
     .click();
-  await page.getByRole("heading", { name: "Mapping mission sample" }).click();
+  await page.getByRole("heading", { name: missionName }).click();
   await page
     .getByText(/Videos.*/)
     .first()
@@ -38,6 +42,10 @@ test("vod tests", async ({ page }) => {
   );
   expect(vodCreationNotification).toBeDefined();
 
+  // TODO: Wait for vod to be processed
+  // const vodProcessedNotification = page.getByText(``);
+  // expect(vodProcessedNotification).toBeDefined();
+
   // Delete VOD
 
   await page.locator("img").nth(1).click({
@@ -49,4 +57,6 @@ test("vod tests", async ({ page }) => {
 
   const vodDeletionNotification = page.getByText("Video deleted succesfully!");
   expect(vodDeletionNotification).toBeDefined();
+
+  await deleteMission(page, missionName);
 });
