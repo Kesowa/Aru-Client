@@ -46,7 +46,7 @@ import moment from "moment";
 import VideoPlayer from "../../../../shared/VideoPlayer";
 import Dragger from "antd/lib/upload/Dragger";
 import { API_URL, STATIC_URL } from "src/constants";
-import { io } from "socket.io-client";
+import io from "src/services/socketConnect";
 import FilterToolbar from "src/components/shared/Toolbar/filter";
 import ActionToolbar from "src/components/shared/Toolbar/action";
 import Thread from "../../../../shared/Thread";
