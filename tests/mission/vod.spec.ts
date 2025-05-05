@@ -2,6 +2,11 @@ import { test, expect, FileChooser } from "@playwright/test";
 import { CLIENT_URL } from "tests/constants";
 import { completeMission, createMission, deleteMission } from "tests/utils/mission";
 
+// configuration for this file only
+test.describe.configure({
+  timeout: 90_000 // 90 seconds timeout, only for this file's tests 
+})
+
 const filename = "video.mp4";
 
 test("vod tests", async ({ page }) => {
@@ -42,9 +47,9 @@ test("vod tests", async ({ page }) => {
   );
   expect(vodCreationNotification).toBeDefined();
 
-  // TODO: Wait for vod to be processed
-  // const vodProcessedNotification = page.getByText(``);
-  // expect(vodProcessedNotification).toBeDefined();
+  // Wait for vod to be processed, and verify processed notification
+  const vodProcessedNotification = page.getByText(`Finished Processing!`);
+  expect(vodProcessedNotification).toBeDefined();
 
   // Delete VOD
 
