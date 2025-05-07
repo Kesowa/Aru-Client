@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import {
   Tag,
   Typography,
@@ -47,7 +47,63 @@ function MissionTable(props: TableProps) {
   const userDetails = Auth.userdetails;
   const userType = userDetails.userType;
   const [clickedMission, setClickedMission] = useState<string | null>(null);
+  const [filteredData, setFilteredData] = useState(props.missionTableData);
 
+  //----------------------------mission list export to csv--------------------------------------
+  
+  useEffect(() => {
+    setFilteredData(props.missionTableData);
+  }, [props.missionTableData]);
+
+  const exportToCSV = (data: any[], columns: any[]) => {
+    const headerColumns = columns.filter(
+      col => col.dataIndex && col.title && col.dataIndex !== "actions"
+    );
+  
+    const headers = headerColumns.map(col => `"${col.title}"`).join(",");
+  
+    const rows = data.map(row => {
+      return headerColumns.map(col => {
+        let value = row[col.dataIndex];
+        switch (col.dataIndex) {
+          case "user":
+            value = value?.name || "Auto";
+            break;
+  
+          case "status":
+            value = value ? value.toUpperCase() : "";
+            break;
+  
+          case "size":
+            if (value < 1) value = (value * 1000).toFixed(1) + "KB";
+            else if (value >= 1 && value <= 999) value = value.toFixed(1) + "MB";
+            else value = (value / 1000).toFixed(1) + "GB";
+            break;
+  
+          case "createdAt":
+          case "flight":
+            value = moment(value?.date || value).format("YYYY-MM-DD");
+            break;
+  
+          default:
+            if (typeof value === "object" && value !== null) {
+              value = JSON.stringify(value);
+            }
+        }
+  
+        return `"${value ?? ""}"`;
+      }).join(",");
+    });
+  
+    const csvContent = [headers, ...rows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", "missions_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // ++++++++++++++++++++++++++++++++++++++++++Searchable columns+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   const [searchText, setSearchText] = useState("");
@@ -462,26 +518,38 @@ function MissionTable(props: TableProps) {
     props.setFilters(filterString.substring(0, filterString.length - 1));
 
     props.setSortOrder(`${sorter.field}:${sorter.order}`);
+
+    setFilteredData(extra.currentDataSource);
   };
 
   return (
     <div style={{ padding: "1rem", width: "100%", overflowX: "auto" }}>
-      {/* +++++++++++++++++++++++++++++++++MISION LISTING+++++++++++++++++++++++++++++++++++++++++ */}
-      <Table
-        columns={columns}
-        dataSource={props.missionTableData}
-        loading={props.isTableLoading}
-        pagination={{
-          current: props.page,
-          pageSize: props.limit,
-          total: props.total,
-          showSizeChanger: true,
-        }}
-        onChange={handleTableChange}
-        rowKey="_id"
-        bordered
-      />
-    </div>
+       {/* +++++++++++++++++++++++++++++++++MISION LISTING+++++++++++++++++++++++++++++++++++++++++ */}
+    {(props.missionTableData.length !== 0) && (
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+        <Tooltip title="Export mission list to CSV">
+          <Button type="primary" onClick={() => exportToCSV(filteredData, columns)}>
+            Export CSV
+          </Button>
+        </Tooltip>
+      </div>
+    )}
+  
+    <Table
+      columns={columns}
+      dataSource={props.missionTableData}
+      loading={props.isTableLoading}
+      pagination={{
+        current: props.page,
+        pageSize: props.limit,
+        total: props.total,
+        showSizeChanger: true,
+      }}
+      onChange={handleTableChange}
+      rowKey="_id"
+      bordered
+    />
+  </div>
   );
 }
 
