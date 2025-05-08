@@ -1,19 +1,23 @@
 import { test, expect, FileChooser } from "@playwright/test";
 import { CLIENT_URL } from "tests/constants";
+import { createMission, completeMission, deleteMission } from "tests/utils/mission";
 
 const filename = "image.png";
 
 test("image tests", async ({ page }) => {
+  const missionName = await createMission(page);
+  await completeMission(page, missionName);
+  
   // Upload Image
 
-  // navigating to mission images page of "Mapping mission sample" mission
+  // navigating to mission images page of mission
   await page.goto(CLIENT_URL);
   await expect(page).toHaveURL(/.{0,30}dashboard/);
   await page
     .getByRole("main")
     .getByRole("link", { name: "border-inner Missions" })
     .click();
-  await page.getByRole("heading", { name: "Mapping mission sample" }).click();
+  await page.getByRole("heading", { name: missionName }).click();
   await page
     .getByText(/Images.*/)
     .first()
@@ -49,4 +53,6 @@ test("image tests", async ({ page }) => {
 
   const imageDeletionNotification = page.getByText("File deleted succesfully!");
   expect(imageDeletionNotification).toBeDefined();
+
+  await deleteMission(page, missionName);
 });
