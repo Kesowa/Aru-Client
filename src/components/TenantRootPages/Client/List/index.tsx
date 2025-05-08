@@ -311,10 +311,13 @@ function ClientListPage(props: any) {
   const fetchAllUsers = () => {
     setIstableLoading(true);
     const params = {};
+
+    // console.log("Search Filters: ", searchFilters); // Note that the searched values are enclosed in arrays
+
     if (searchFilters) {
       Object.entries(searchFilters).forEach((f: any) => {
         if (f[1]) {
-          params[f[0]] = f[1];
+          params[f[0]] = f[1][0]; // so we take first element of the array
         }
       });
     }
