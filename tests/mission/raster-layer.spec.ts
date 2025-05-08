@@ -1,10 +1,14 @@
 import { faker } from "@faker-js/faker";
 import { test, expect, FileChooser } from "@playwright/test";
 import { CLIENT_URL } from "tests/constants";
-
-const layername = faker.address.streetAddress();
+import { createMission, completeMission, deleteMission } from "tests/utils/mission";
 
 test("raster layer tests", async ({ page }) => {
+  const missionName = await createMission(page);
+  await completeMission(page, missionName);
+
+  const layername = faker.address.streetAddress();
+
   // Layer Creation
 
   await page.goto(CLIENT_URL);
@@ -13,7 +17,7 @@ test("raster layer tests", async ({ page }) => {
     .getByRole("main")
     .getByRole("link", { name: "border-inner Missions" })
     .click();
-  await page.getByRole("heading", { name: "Mapping mission sample" }).click();
+  await page.getByRole("heading", { name: missionName }).click();
   await page.locator(".overlay-content").click(); // goto map
   // for upload file popup
   page.on("filechooser", (fileChooser: FileChooser) => {
@@ -40,7 +44,7 @@ test("raster layer tests", async ({ page }) => {
     .click(); // opens filechooser
   // save
   await page.getByRole("button", { name: "Save" }).click();
-  await page.waitForTimeout(5000);
+  await page.waitForTimeout(10000);
   await page.getByRole("button", { name: "Close" }).click();
   const layerCreationNotification = page.getByText("Layer created!");
   expect(layerCreationNotification).toBeDefined();
@@ -51,7 +55,7 @@ test("raster layer tests", async ({ page }) => {
     .locator(
       '//*[@class="ant-tree-list-holder-inner"]//span[@class="ant-tree-switcher ant-tree-switcher_close"]'
     )
-    .nth(1)
+    .nth(0)
     .click();
   // right click on the previously created layer
   await page.locator(`//*[text()="${layername}"]`).click({
@@ -76,4 +80,6 @@ test("raster layer tests", async ({ page }) => {
       )
       .count()
   ).toBe(0);
+
+  await deleteMission(page, missionName);
 });

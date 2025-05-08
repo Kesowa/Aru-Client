@@ -54,7 +54,7 @@ const ThermalImaging = (props) => {
       .post(`${apis.CREATE_THERMALTABLE}`, dataToAdd)
       .then((result) => {
         if (result.data.status) {
-          message.success("Data point added Successfully");
+          message.success("Data points updated Successfully");
         }
       })
       .catch((err) => {

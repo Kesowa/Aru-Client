@@ -1,10 +1,14 @@
 import { faker } from "@faker-js/faker";
 import { test, expect, FileChooser } from "@playwright/test";
 import { CLIENT_URL } from "tests/constants";
+import { completeMission, createMission, deleteMission } from "tests/utils/mission";
 
 const layername = faker.address.streetAddress();
 
 test("vector layer tests", async ({ page }) => {
+  const missionName = await createMission(page);
+  await completeMission(page, missionName);
+  
   // Layer Creation
 
   await page.goto(CLIENT_URL);
@@ -13,7 +17,7 @@ test("vector layer tests", async ({ page }) => {
     .getByRole("main")
     .getByRole("link", { name: "border-inner Missions" })
     .click();
-  await page.getByRole("heading", { name: "Mapping mission sample" }).click();
+  await page.getByRole("heading", { name: missionName }).click();
   await page.locator(".overlay-content").click(); // goto map
 
   // for upload file popup
@@ -30,7 +34,7 @@ test("vector layer tests", async ({ page }) => {
   await page.getByPlaceholder("Layer's Name").fill(layername);
   // layer type selection
   await page.getByLabel("Layer Type").click();
-  await page.getByLabel("Layer Type").fill("point");
+  await page.getByLabel("Layer Type").fill("Landmark");
   await page.getByTitle("Landmark").click();
   // date selection
   await page.getByPlaceholder("Select date").click();
@@ -87,4 +91,6 @@ test("vector layer tests", async ({ page }) => {
       )
       .count()
   ).toBe(0);
+
+  await deleteMission(page, missionName);
 });

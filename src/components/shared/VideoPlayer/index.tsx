@@ -70,7 +70,7 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { io } from "socket.io-client";
+import io from "src/services/socketConnect";
 import { AuthContext } from "src/services/authUtils";
 ChartJS.register(
   CategoryScale,
