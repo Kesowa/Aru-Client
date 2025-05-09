@@ -2973,11 +2973,10 @@ function BaseMap(props) {
         captureDate: captureDate,
         name: layerName,
         type: layerType,
-        properties:properties,
         color: layerColor,
         inHeritOriginalColorFromFile: inheritColor,
         icon: icon2,
-        ...(layerType === "Vector" ? { vector: layerProp } : {}),
+        ...(layerType === "Vector" ? { vector: layerProp, properties: properties } : {}),
         ...(layerType === "Raster" ? { raster: layerProp } : {}),
       };
 
