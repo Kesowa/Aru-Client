@@ -1,22 +1,11 @@
-<<<<<<< Updated upstream
-=======
 import { useState, useEffect } from "react";
->>>>>>> Stashed changes
 import DeckGL from "@deck.gl/react";
 import { IconLayer, ScatterplotLayer } from "@deck.gl/layers";
 import { StaticMap } from "react-map-gl";
-<<<<<<< Updated upstream
-import { useState, useEffect, } from "react";
 import http from "../../../services/httpCall";
 import apis from "../../../services/apis";
 import { MAPBOX_API_KEY } from "src/constants";
-=======
-import apis from "src/services/apis";
-import http from "src/services/httpCall";
-import { MAPBOX_API_KEY } from "src/constants";
 
-const MAPBOX_TOKEN = MAPBOX_API_KEY;
->>>>>>> Stashed changes
 
 const initialViewState = {
   longitude: 88.4512,

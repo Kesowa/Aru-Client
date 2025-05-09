@@ -46,6 +46,7 @@ import {
   MenuProps,
   Space,
   Popover,
+  InputNumber,
 } from "antd";
 import {
   UploadOutlined,
@@ -197,6 +198,8 @@ function BaseMap(props) {
   // const [overlayId, setOverlayID] = useState<string>();
   const [isElevationEnabled, setIsElevationEnabled] = useState(false);
   const isElevationEnabledRef = useRef(isElevationEnabled);
+  const [vectorSubtype, setVectorSubtype] = useState<string | null>(null);
+  const [properties, setProperties] = useState<Record<string, any>>({});
   const [dateRange, setDateRange] = useState([
     moment(
       moment().subtract(7, "d").format("YYYY-MM-DD") + " " + "00:00",
@@ -2908,10 +2911,13 @@ function BaseMap(props) {
       setshowColorPicker(true);
       setLayerType("Vector");
       setLayerProp(value as vectorProps);
+      const subtype = featureType[value as keyof typeof featureType];
+      setVectorSubtype(subtype); 
     } else if (Object.values(rasterProps).includes(value as rasterProps)) {
       setshowColorPicker(false);
       setLayerType("Raster");
       setLayerProp(value as rasterProps);
+      setVectorSubtype(null);
     }
   };
 
@@ -2967,6 +2973,7 @@ function BaseMap(props) {
         captureDate: captureDate,
         name: layerName,
         type: layerType,
+        properties:properties,
         color: layerColor,
         inHeritOriginalColorFromFile: inheritColor,
         icon: icon2,
@@ -4476,10 +4483,17 @@ function BaseMap(props) {
                 info.object.properties.sys_id,
                 "Vector"
               );
-              setSelectedLayerLabel(layer.layerLabel ? layer.layerLabel : "No label selected");
-              setSelectedLayerPopupLabel(layer.layerPopupLabel ? layer.layerPopupLabel : "No label selected");
+              setSelectedLayerLabel(
+                layer.layerLabel ? layer.layerLabel : "No label selected"
+              );
+              setSelectedLayerPopupLabel(
+                layer.layerPopupLabel
+                  ? layer.layerPopupLabel
+                  : "No label selected"
+              );
+            }
           }
-        }}}
+        }}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         <ElevationBlock
@@ -5165,6 +5179,27 @@ function BaseMap(props) {
                 onFinish={onFinish}
                 layout="vertical"
                 form={form}
+                onValuesChange={(changedValues, allValues) => {
+                  const relevantKeys = [
+                    "lineStyle",
+                    "lineWidth",
+                    "fill",
+                    "texture",
+                    "opacity",
+                    "borderWidth",
+                    "borderStyle"
+                  ];
+                
+                  const updatedProperties: Record<string, any> = {};
+                  for (const key of relevantKeys) {
+                    const value = allValues[key];
+                    if (value !== undefined && value !== "") {
+                      updatedProperties[key] = value;
+                    }
+                  }
+                
+                  setProperties(updatedProperties);
+                }}
               >
                 <Row style={{ paddingLeft: "10px", paddingRight: "5px" }}>
                   <Alert
@@ -5197,6 +5232,51 @@ function BaseMap(props) {
                         onChange={changeLayerType}
                       />
                     </Form.Item>
+                    {layerType === "Vector" &&
+                      vectorSubtype === featureTypes.MULTI_LINE_STRING && (
+                        <>
+                          <Form.Item label="Line Style" name="lineStyle">
+                            <Select placeholder="Select line style">
+                              <Select.Option value="solid">Solid</Select.Option>
+                              <Select.Option value="dashed">
+                                Dashed
+                              </Select.Option>
+                            </Select>
+                          </Form.Item>
+                          <Form.Item label="Line Width" name="lineWidth">
+                            <InputNumber min={1} max={10} />
+                          </Form.Item>
+                        </>
+                      )}
+
+                    {layerType === "Vector" &&
+                      vectorSubtype === featureTypes.MULTI_POLYGON && (
+                        <>
+                          <Form.Item label="Fill" name="fill">
+                            <Input type="color" />
+                          </Form.Item>
+                          <Form.Item label="Texture" name="texture">
+                            <Input placeholder="Enter texture URL or ID" />
+                          </Form.Item>
+                          <Form.Item label="Opacity" name="opacity">
+                            <InputNumber min={0} max={1} step={0.1} />
+                          </Form.Item>
+                          <Form.Item label="Border Width" name="borderWidth">
+                            <InputNumber min={0} max={10} />
+                          </Form.Item>
+                          <Form.Item label="Border Style" name="borderStyle">
+                            <Select placeholder="Select border style">
+                              <Select.Option value="solid">Solid</Select.Option>
+                              <Select.Option value="dashed">
+                                Dashed
+                              </Select.Option>
+                              <Select.Option value="dotted">
+                                Dotted
+                              </Select.Option>
+                            </Select>
+                          </Form.Item>
+                        </>
+                      )}
                     <Row>
                       <Form.Item label="Capture Date" name="date">
                         <DatePicker
@@ -5207,21 +5287,29 @@ function BaseMap(props) {
                         />
                       </Form.Item>
                     </Row>
-                    <Row>
-                      <Form.Item label="Icon" name="icon">
-                        <TreeSelect
-                          showSearch
-                          style={{ width: "150%" }}
-                          dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-                          placeholder="Select Icon"
-                          placement="bottomLeft"
-                          defaultValue={"MarkerIcon"}
-                          treeData={iconOptions}
-                          onChange={(value) => setIcon2(value)}
-                          treeIcon={true}
-                        />
-                      </Form.Item>
-                    </Row>
+                    {layerType === "Vector" &&
+                      vectorSubtype === featureTypes.POINT && (
+                        <>
+                          <Row>
+                            <Form.Item label="Icon" name="icon">
+                              <TreeSelect
+                                showSearch
+                                style={{ width: "150%" }}
+                                dropdownStyle={{
+                                  maxHeight: 400,
+                                  overflow: "auto",
+                                }}
+                                placeholder="Select Icon"
+                                placement="bottomLeft"
+                                defaultValue={"MarkerIcon"}
+                                treeData={iconOptions}
+                                onChange={(value) => setIcon2(value)}
+                                treeIcon={true}
+                              />
+                            </Form.Item>
+                          </Row>
+                        </>
+                      )}
                     <Row>
                       <Alert
                         style={{ width: "100%" }}
@@ -5339,7 +5427,9 @@ function BaseMap(props) {
                             defaultLayerType?.layerType,
                             defaultLayerType?.featureType,
                             defaultLayerType?.layerProp,
-                          ].filter(e => !!e).map(e => e.toUpperCase())}
+                          ]
+                            .filter((e) => !!e)
+                            .map((e) => e.toUpperCase())}
                           options={getEditLayerTypeOptions(defaultLayerType)}
                           placeholder="Select Layer Type"
                           onChange={(value) => {
