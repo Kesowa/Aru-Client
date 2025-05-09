@@ -35,9 +35,6 @@ export const createClient = async (page: Page) => {
     await page.getByRole("button", { name: "plus Upload" }).click();
     await page.getByRole("button", { name: "OK" }).click();
     await page.getByRole("button", { name: "Create" }).click();
-    await page
-        .getByText("Client created! Check email to change password")
-        .click();
     const clientCreateAlert = page.getByText(
         "Client created! Check email to change password"
     );
