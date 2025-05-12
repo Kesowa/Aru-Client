@@ -47,6 +47,7 @@ import {
   Space,
   Popover,
   InputNumber,
+  UploadProps,
 } from "antd";
 import {
   UploadOutlined,
@@ -689,28 +690,28 @@ function BaseMap(props) {
   const [pointMarkerSize, setPointMarkerSize] = useState(1);
   const showMarkerSizeTool = false;
 
-  const iconOptions = [
+  const [iconOptions, setIconOptions] = useState([
     {
       value: "MarkerIcon",
       title: "Marker Icon",
-      icon: <img src={MarkerIcon} style={{ width: "10px" }} />,
+      icon: <img src={MarkerIcon} style={{ width: "15px" }} />,
     },
     {
       value: "TankIcon",
       title: "Tank Icon",
-      icon: <img src={TankIcon} style={{ width: "10px" }} />,
+      icon: <img src={TankIcon} style={{ width: "15px" }} />,
     },
     {
       value: "ValveIcon",
       title: "Valve Icon",
-      icon: <img src={ValveIcon} style={{ width: "10px" }} />,
+      icon: <img src={ValveIcon} style={{ width: "15px" }} />,
     },
     {
       value: "DotIcon",
       title: "Dot Icon",
-      icon: <img src={DotIcon} style={{ width: "10px" }} />,
+      icon: <img src={DotIcon} style={{ width: "15px" }} />,
     },
-  ];
+  ]);
   const [icon2, setIcon2] = useState(iconOptions[0].value);
   //----------------auto detect browser height---------------------
   // let initHeight = window.screen.height;
@@ -814,6 +815,36 @@ function BaseMap(props) {
   const handleCancel2 = () => {
     setIsModalVisible2(false);
     setSelectedKey();
+  };
+  const handleSvgUploadAntd: UploadProps["customRequest"] = (options) => {
+    const { file, onSuccess, onError } = options;
+
+    if (file.type !== "image/svg+xml") {
+      message.error("Only SVG files are allowed");
+      return onError?.(new Error("Invalid file type"));
+    }
+  
+    const reader = new FileReader();
+    reader.onload = () => {
+      const svgUrl = reader.result as string;
+      const newIconValue = `custom-${Date.now()}`;
+      const newIcon = {
+        value: newIconValue,
+        title: file.name.replace(".svg", ""),
+        icon: <img src={svgUrl} style={{ width: "15px" }} />,
+      };
+      setIconOptions((prev) => [...prev, newIcon]);
+      form.setFieldsValue({ icon: newIconValue });
+      setIcon2(newIconValue);
+      onSuccess?.("ok");
+    };
+  
+    reader.onerror = () => {
+      message.error("Failed to read SVG");
+      onError?.(new Error("Read error"));
+    };
+  
+    reader.readAsDataURL(file as File);
   };
 
   // ----------------------------------------- disable default right click event of browser ----------------------------------------------------------
@@ -5186,9 +5217,9 @@ function BaseMap(props) {
                     "texture",
                     "opacity",
                     "borderWidth",
-                    "borderStyle"
+                    "borderStyle",
                   ];
-                
+
                   const updatedProperties: Record<string, any> = {};
                   for (const key of relevantKeys) {
                     const value = allValues[key];
@@ -5196,7 +5227,7 @@ function BaseMap(props) {
                       updatedProperties[key] = value;
                     }
                   }
-                
+
                   setProperties(updatedProperties);
                 }}
               >
@@ -5289,23 +5320,42 @@ function BaseMap(props) {
                     {layerType === "Vector" &&
                       vectorSubtype === featureTypes.POINT && (
                         <>
-                          <Row>
-                            <Form.Item label="Icon" name="icon">
-                              <TreeSelect
-                                showSearch
-                                style={{ width: "150%" }}
-                                dropdownStyle={{
-                                  maxHeight: 400,
-                                  overflow: "auto",
-                                }}
-                                placeholder="Select Icon"
-                                placement="bottomLeft"
-                                defaultValue={"MarkerIcon"}
-                                treeData={iconOptions}
-                                onChange={(value) => setIcon2(value)}
-                                treeIcon={true}
-                              />
-                            </Form.Item>
+                          <Row align="middle" gutter={8}>
+                            <Col flex="auto">
+                              <Form.Item label="Icon" name="icon">
+                                <TreeSelect
+                                  showSearch
+                                  style={{ width: "100%" }}
+                                  dropdownStyle={{
+                                    maxHeight: 400,
+                                    overflow: "auto",
+                                  }}
+                                  placeholder="Select Icon"
+                                  placement="bottomLeft"
+                                  defaultValue={"MarkerIcon"}
+                                  treeData={iconOptions}
+                                  onChange={(value) => setIcon2(value)}
+                                  treeIcon={true}
+                                />
+                              </Form.Item>
+                            </Col>
+
+                            <Col style={{ marginTop: "20px" }}>
+                              <Tooltip title="Upload custom SVG icon">
+                                <Upload
+                                  accept=".svg"
+                                  showUploadList={false}
+                                  customRequest={handleSvgUploadAntd}
+                                >
+                                  <Button
+                                    icon={<UploadOutlined />}
+                                    type="default"
+                                  >
+                                    Upload
+                                  </Button>
+                                </Upload>
+                              </Tooltip>
+                            </Col>
                           </Row>
                         </>
                       )}
