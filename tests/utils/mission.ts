@@ -21,7 +21,7 @@ const gotoMissionTable = async (page: Page) => {
   expect(page.getByRole("cell", { name: "Actions" })).toBeDefined();
 }
 
-export const createMission = async (page: Page) => {
+export const createMission = async (page: Page, locationName: string, pilotName: string, assetName: string) => {
   await page.goto(CLIENT_URL);
   await expect(page).toHaveURL(/.{0,30}dashboard/);
   await page.getByRole("link", { name: "diff Create Mission" }).click();
@@ -41,9 +41,9 @@ export const createMission = async (page: Page) => {
   await page.locator('#create_mission_duration').click();
   await page.getByText('1 Hr').click();
   await page.locator('#create_mission_locationId').click();
-  await page.getByText('Base').click();
+  await page.getByText(locationName).click();
   await page.locator('#create_mission_pilot').click();
-  await page.getByText('Neel Dutta pilot').click();
+  await page.getByText(pilotName).click();
   await page.locator("#gmap_container").getByRole("img").nth(1).click();
   // map clicked twice to select circular region of radius 0
   const bb = await page
@@ -64,7 +64,7 @@ export const createMission = async (page: Page) => {
   await page.getByRole('textbox', { name: 'Please provide with detailed' }).fill('Test Instructions'); // fill instructions
   await page.getByText("Orthomosaic").click();
   await page.getByText("No asset selected!").click();
-  await page.getByText("NKDA Phantom").click();
+  await page.getByText(assetName).click();
   await page.getByRole("button", { name: "Submit" }).click();
 
   const missionCreateAlert = page.getByText(
@@ -77,7 +77,7 @@ export const createMission = async (page: Page) => {
   return missionName;
 };
 
-export const completeMission = async (page: Page, missionName: string) => {
+export const completeMission = async (page: Page, missionName: string, pilotName: string) => {
   await gotoMissionTable(page);
 
   // open mission
@@ -90,7 +90,7 @@ export const completeMission = async (page: Page, missionName: string) => {
   
   // assign pilot
   await page.getByRole('button', { name: 'user-add Assign Pilot' }).click();
-  await page.getByRole('heading', { name: 'Neel Dutta pilot' }).click();
+  await page.getByRole('heading', { name: pilotName }).click();
   await page.getByRole('button', { name: 'Assign', exact: true }).click();
 
   // complete mission
