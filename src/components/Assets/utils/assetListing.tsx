@@ -227,7 +227,7 @@ function AssetListing({ filter, refreshAssets }: TableProps) {
       dataIndex: "assetName",
       sorter: (a: Asset, b: Asset) => a.assetName.length - b.assetName.length,
       sortDirections: ["ascend", "descend"],
-      ...getColumnSearchProps("name"),
+      ...getColumnSearchProps("assetName"),
       render: (assetName: string) => {
         return (
           <>
@@ -250,7 +250,7 @@ function AssetListing({ filter, refreshAssets }: TableProps) {
         a.modelID.assetClassID.typeName.length -
         b.modelID.assetClassID.typeName.length,
       sortDirections: ["ascend", "descend"],
-      ...getColumnSearchProps("type"),
+      ...getColumnSearchProps("modelID"),
       render: (modelID: Asset["modelID"]) => modelID.assetClassID.typeName,
     },
     {
@@ -259,7 +259,7 @@ function AssetListing({ filter, refreshAssets }: TableProps) {
       sorter: (a: Asset, b: Asset) =>
         a.modelID.modelName.length - b.modelID.modelName.length,
       sortDirections: ["ascend", "descend"],
-      ...getColumnSearchProps("model"),
+      ...getColumnSearchProps("modelID"),
       render: (modelID: Asset["modelID"]) => modelID.modelName,
     },
     {
@@ -287,7 +287,7 @@ function AssetListing({ filter, refreshAssets }: TableProps) {
       sorter: (a: Asset, b: Asset) =>
         a.createdBy.name.length - b.createdBy.name.length,
       sortDirections: ["descend", "ascend"],
-      ...getColumnSearchProps("user"),
+      ...getColumnSearchProps("createdBy"),
       render: (createdBy: Asset["createdBy"]) => createdBy.name,
     },
     {

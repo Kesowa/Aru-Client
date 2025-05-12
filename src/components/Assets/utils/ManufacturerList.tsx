@@ -1,6 +1,6 @@
-import { useState, useEffect, useContext } from "react";
-import { Row, Col, Typography, Table, message, Button, Input } from "antd";
-import { SearchOutlined, ShakeOutlined } from "@ant-design/icons";
+import { useState, useContext } from "react";
+import { Row, Col, Typography, Table, message, Button, Input, Tooltip, Popconfirm } from "antd";
+import { DeleteOutlined, EyeOutlined, SearchOutlined, ShakeOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import http from "../../../services/httpCall";
@@ -11,39 +11,12 @@ import { AuthContext } from "src/services/authUtils";
 
 const { Title } = Typography;
 
-const ManufacturerList = () => {
+const ManufacturerList = ({ isTableLoading, setIsTableLoading, manufacturers, setManufacturers }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
-  const [isTableLoading, setIsTableLoading] = useState(true);
   const [selectedManufacturerID, setSelectedManufacturerID] = useState();
 
-  const [manufacturers, setManufacturers] = useState<any[]>([]);
-
   const { logout } = useContext(AuthContext);
-
-  useEffect(() => {
-    fetchManufacturers();
-  }, []);
-  const fetchManufacturers = () => {
-
-    http
-      .get(`${apis.GET_MANUFACTURERS}`)
-      .then((result) => {
-        if (result.data.status) {
-          setManufacturers(result.data.data);
-          console.log(result.data.data);
-        } else {
-          message.error(result.data.message);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        AxiosErrorHandler(err, logout);
-      })
-      .finally(() => {
-        setIsTableLoading(false);
-      });
-  };
   
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -117,7 +90,7 @@ const ManufacturerList = () => {
     setIsTableLoading(true);
     http
       .delete(`${apis.DELETE_MANUFACTURER_BY_ID}`, {
-        data: { manufacturerID: id },
+        data: { id },
       })
       .then((result) => {
         if (result.data.status) {
@@ -184,7 +157,7 @@ const ManufacturerList = () => {
       dataIndex: "createdBy",
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
       sortDirections: ["descend", "ascend"],
-      ...getColumnSearchProps("user"),
+      ...getColumnSearchProps("createdBy"),
       render: (createdBy) => createdBy.name,
     },
     {
@@ -198,25 +171,29 @@ const ManufacturerList = () => {
     {
       title: "ACTIONS",
       dataIndex: "actions",
+      fixed: "right",
       render: (_, record) => (
-        <Button
-          type="link"
-          onClick={() => setSelectedManufacturerID(record._id)}
-        >
-          View Details
-        </Button>
-      ),
-    },
-    {
-      title: "DELETE",
-      dataIndex: "delete",
-      render: (_, record) => (
-        <Button
-          type="link"
-          onClick={() => handleDeleteManufacturer(record.name, record._id)}
-        >
-          Delete
-        </Button>
+        <>
+        <Tooltip title="View Details">
+          <Button
+            onClick={() => setSelectedManufacturerID(record._id)}
+          >
+            <EyeOutlined className="missionViewBtn" />
+          </Button>
+        </Tooltip>
+        <Popconfirm
+            title="Are you sure to delete the manufacturer?"
+            okText="Yes"
+            cancelText="No"
+            onConfirm={() => handleDeleteManufacturer(record.name, record._id)}
+          >
+            <Tooltip title="Delete">
+              <Button style={{ marginLeft: "8px" }} danger>
+                <DeleteOutlined className="missionViewDelBtn" />
+              </Button>
+            </Tooltip>
+          </Popconfirm>
+        </>
       ),
     },
   ];

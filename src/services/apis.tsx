@@ -151,6 +151,7 @@ const apis = {
   UPDATE_MODEL: "/apis/v1/model/update",
   GET_ASSET_CLASSES: "/apis/v1/assetclass/get",
   CREATE_MODEL: "/apis/v1/model/create",
+  DELETE_MODEL: "/apis/v1/model/delete",
   CREATE_MANUFACTURER: "/apis/v1/manufacturer/create",
   GET_ASSET_BY_ID: "/apis/v1/asset/get",
   CREATE_THERMALTABLE: "/apis/v1/data/thermal/table",

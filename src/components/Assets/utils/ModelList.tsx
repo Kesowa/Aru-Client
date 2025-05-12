@@ -1,66 +1,38 @@
-import { useState, useEffect, useContext } from "react";
+import { useContext, useState } from "react";
 import {
   Row,
   Col,
   Table,
-  message,
   Input,
   Button,
-  Typography
+  Typography,
+  Tooltip,
+  Popconfirm,
+  message
 } from "antd";
 import {
+  DeleteOutlined,
+  EyeOutlined,
   SearchOutlined,
   ShakeOutlined
 } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 import "../index.less";
-import http from "../../../services/httpCall";
-import apis from "../../../services/apis";
-import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
 import ModelCard from "./ModelCard";
+import http from "src/services/httpCall";
+import apis from "src/services/apis";
+import { AxiosErrorHandler } from "src/services/httpErrorHandle";
 import { AuthContext } from "src/services/authUtils";
 
 const { Title } = Typography;
 
-function ModelList() {
+function ModelList({ isTableLoading, setIsTableLoading, models, setModels }) {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
-  const [isTableLoading, setIsTableLoading] = useState(true);
-  const [modelTableData, setModelTableData] = useState<any>([]);
   const [selectedModelID, setSelectedModelID] = useState();
-  const [models, setModels] = useState<any[]>([]);
 
   const { logout } = useContext(AuthContext);
-
-  useEffect(() => {
-    fetchModels();
-  }, []);
-
-  const fetchModels = () => {
-    http
-      .get(`${apis.GET_MODELS}`)
-      .then((result) => {
-        if (result.data.status) {
-          setModels(result.data.data);
-        } else {
-          message.error(result.data.message);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        AxiosErrorHandler(err, logout);
-      })
-      .finally(() => {
-        setIsTableLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    if (models.length) {
-      setModelTableData(models);
-    }
-  }, [models]);
 
   let searchInput: any;
   const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
@@ -133,13 +105,39 @@ function ModelList() {
       ),
   });
 
+  const handleDeleteModel = (name, id) => {
+    setIsTableLoading(true);
+    http
+      .delete(`${apis.DELETE_MODEL}`, {
+        data: { id },
+      })
+      .then((result) => {
+        if (result.data.status) {
+          const newTableData = models.filter(
+            (manufacturer) => manufacturer._id.toString() !== id.toString()
+          );
+          setModels(newTableData);
+          message.success(`Model deleted`);
+        } else {
+          message.error(result.data.message);
+        }
+      })
+      .catch((err) => {
+        message.error(err.message);
+        AxiosErrorHandler(err, logout);
+      })
+      .finally(() => {
+        setIsTableLoading(false);
+      });
+  };
+
   const columns: any[] = [
     {
       title: "NAME",
       dataIndex: "modelName",
       sorter: (a: any, b: any) => a.modelName.length - b.modelName.length,
       sortDirections: ["ascend", "descend"],
-      ...getColumnSearchProps("name"),
+      ...getColumnSearchProps("modelName"),
       width: "15%",
       render: (modelName: any, record) => {
         return (
@@ -162,7 +160,7 @@ function ModelList() {
       width: "15%",
       sorter: (a: any, b: any) => a.assetClassID.length - b.assetClassID.length,
       sortDirections: ["ascend", "descend"],
-      ...getColumnSearchProps("asset class"),
+      ...getColumnSearchProps("assetClassID"),
       render: (assetClassID: any) => assetClassID.typeName,
     },
     {
@@ -172,8 +170,8 @@ function ModelList() {
       sorter: (a: any, b: any) =>
         a.manufacturerID.length - b.manufacturerID.length,
       sortDirections: ["ascend", "descend"],
-      ...getColumnSearchProps("manufacturer"),
-      render: (manufacturerID: any) => manufacturerID.name,
+      ...getColumnSearchProps("manufacturerID"),
+      render: (manufacturerID: any) => manufacturerID ? manufacturerID.name : "",
     },
 
     {
@@ -205,17 +203,38 @@ function ModelList() {
       width: "15%",
       sorter: (a: any, b: any) => a.createdBy.length - b.createdBy.length,
       sortDirections: ["descend", "ascend"],
-      ...getColumnSearchProps("user"),
+      ...getColumnSearchProps("createdBy"),
       render: (createdBy: any) => createdBy.name,
     },
-  ];
-
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      const newSelectedModelID = selectedRows[0]?._id;
-      setSelectedModelID(newSelectedModelID);
+    {
+      title: "ACTIONS",
+      dataIndex: "actions",
+      fixed: "right",
+      render: (_, record) => (
+        <div style={{ display: "flex" }}>
+        <Tooltip title="View Details">
+          <Button
+            onClick={() => setSelectedModelID(record._id)}
+          >
+            <EyeOutlined className="missionViewBtn" />
+          </Button>
+        </Tooltip>
+        <Popconfirm
+            title="Are you sure to delete the model?"
+            okText="Yes"
+            cancelText="No"
+            onConfirm={() => handleDeleteModel(record.name, record._id)}
+          >
+            <Tooltip title="Delete">
+              <Button style={{ marginLeft: "8px" }} danger>
+                <DeleteOutlined className="missionViewDelBtn" />
+              </Button>
+            </Tooltip>
+          </Popconfirm>
+        </div>
+      ),
     },
-  };
+  ];
 
   return (
     <div>
@@ -223,11 +242,10 @@ function ModelList() {
         <Col span={16}>
           <Table
             columns={columns}
-            dataSource={modelTableData}
+            dataSource={models}
             rowKey="_id"
             style={{ cursor: "pointer", minHeight: "500px" }}
             loading={isTableLoading}
-            rowSelection={{ type: "radio", ...rowSelection }}
             scroll={{ x: "max-content" }}
           />
         </Col>

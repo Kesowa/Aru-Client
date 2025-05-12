@@ -14,6 +14,7 @@ import {
   DatePicker,
   Tabs,
   Space,
+  FormInstance,
 } from "antd";
 import { PageHeader } from "@ant-design/pro-layout";
 import {
@@ -140,9 +141,11 @@ function AssetBase(props: any) {
   const [isModalVisible3, setIsModalVisible3] = useState(false);
   const [users, setUsers] = useState<any>([]);
   const [manufacturers, setManufacturers] = useState<any>([]);
+  const [isModelLoading, setIsModelLoading] = useState(false);
   const [models, setModels] = useState<any>([]);
   const [assetClasses, setAssetClasses] = useState<any>([]);
   const [count, setCount] = useState(3);
+  const [isManufacturerLoading, setIsManufacturerLoading] = useState(false);
   const [manufacturingDate, setManufacturingDate] = useState<any>("");
   const [data, setData] = useState(originData);
   const [editingKey, setEditingKey] = useState("");
@@ -152,7 +155,10 @@ function AssetBase(props: any) {
   const [modelButton, setModelButton] = useState(true);
   const [manufacturerButton, setManufacturerButton] = useState(true);
 
-  const [form] = Form.useForm();
+  const [assetForm] = Form.useForm();
+  const [modelForm] = Form.useForm();
+  const [manufacturerForm] = Form.useForm();
+
   const history = useHistory();
 
   const { Auth, logout } = useContext(AuthContext);
@@ -168,7 +174,7 @@ function AssetBase(props: any) {
 
   const handleCancel = () => {
     setIsModalVisible(false);
-    form.resetFields();
+    assetForm.resetFields();
   };
 
   const showModal2 = () => {
@@ -182,7 +188,7 @@ function AssetBase(props: any) {
 
   const handleCancel2 = () => {
     setIsModalVisible2(false);
-    form.resetFields();
+    modelForm.resetFields();
   };
 
   const showModal3 = () => {
@@ -196,7 +202,7 @@ function AssetBase(props: any) {
 
   const handleCancel3 = () => {
     setIsModalVisible3(false);
-    form.resetFields();
+    manufacturerForm.resetFields();
   };
 
   const filter = (inputValue, path) => {
@@ -205,8 +211,6 @@ function AssetBase(props: any) {
         option.label.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
     );
   };
-
-  const modelOptions: Array<any> = [];
 
   const getAssetClass = () => {
     http
@@ -241,6 +245,7 @@ function AssetBase(props: any) {
   };
 
   const getManufacturer = () => {
+    setIsManufacturerLoading(true);
     http
       .get(`${apis.GET_MANUFACTURERS}`)
       .then((result) => {
@@ -253,10 +258,12 @@ function AssetBase(props: any) {
       .catch((err) => {
         console.log(err);
         AxiosErrorHandler(err, logout);
-      });
+      })
+      .finally(() => setIsManufacturerLoading(false));
   };
 
   const getModel = () => {
+    setIsModelLoading(true);
     http
       .get(`${apis.GET_MODELS}`)
       .then((result) => {
@@ -269,25 +276,8 @@ function AssetBase(props: any) {
       .catch((err) => {
         console.log(err);
         AxiosErrorHandler(err, logout);
-      });
-  };
-
-  const getModelOptions = () => {
-    manufacturers.map((manufacturer: any) => {
-      const obj1 = {} as OptionType1;
-      obj1.value = manufacturer._id;
-      obj1.label = manufacturer.name;
-      obj1.children = [];
-      models.map((model: any) => {
-        if (model.manufacturerID._id == obj1.value) {
-          const obj = {} as OptionType;
-          obj.value = model._id;
-          obj.label = model.modelName;
-          obj1.children.push(obj);
-        }
-      });
-      modelOptions.push(obj1);
-    });
+      })
+      .finally(() => setIsModelLoading(false));
   };
 
   useEffect(() => {
@@ -318,7 +308,7 @@ function AssetBase(props: any) {
       }
     }
     
-    form.resetFields();
+    assetForm.resetFields();
 
     const asset = {
       assetName: values.name,
@@ -350,7 +340,7 @@ function AssetBase(props: any) {
   };
 
   const onFinish2 = async (values: any) => {
-    form.resetFields();
+    modelForm.resetFields();
     const props2 = {};
     for (const element of data) {
       props2[element.key] = element.value;
@@ -374,6 +364,7 @@ function AssetBase(props: any) {
         if (result.data.status) {
           history.push("/dashboard/assets");
           message.success("Model Created Successfully");
+          getModel();
         }
       })
       .catch((err) => {
@@ -392,7 +383,7 @@ function AssetBase(props: any) {
       return;
     }
 
-    form.resetFields();
+    manufacturerForm.resetFields();
 
     const manufacturer = {
       name: values.name,
@@ -408,6 +399,7 @@ function AssetBase(props: any) {
         if (result.data.status) {
           history.push("/dashboard/assets");
           message.success("Manufacturer Created Successfully");
+          getManufacturer();
         }
       })
       .catch((err) => {
@@ -420,13 +412,9 @@ function AssetBase(props: any) {
       });
   };
 
-  if (manufacturers && models) {
-    getModelOptions();
-  }
-
   const isEditing = (record: Item) => record.key === editingKey;
 
-  const edit = (record: Partial<Item> & { key: React.Key }) => {
+  const edit = (record: Partial<Item> & { key: React.Key }, form) => {
     form.setFieldsValue({ label: "", value: "", ...record });
     setEditingKey(record.key);
   };
@@ -435,7 +423,7 @@ function AssetBase(props: any) {
     setEditingKey("");
   };
 
-  const save = async (key: React.Key) => {
+  const save = async (key: React.Key, form) => {
     try {
       const row = (await form.validateFields()) as Item;
 
@@ -459,7 +447,7 @@ function AssetBase(props: any) {
     }
   };
 
-  const columns = [
+  const columns = (form: FormInstance<any>) => [
     {
       title: "Key",
       dataIndex: "key",
@@ -481,7 +469,7 @@ function AssetBase(props: any) {
           <span>
             <a
               href="javascript:;"
-              onClick={() => save(record.key)}
+              onClick={() => save(record.key, form)}
               style={{ marginRight: 8 }}
             >
               <SaveOutlined style={{ color: "green" }} />
@@ -496,7 +484,7 @@ function AssetBase(props: any) {
           <>
             <Typography.Link
               disabled={editingKey !== ""}
-              onClick={() => edit(record)}
+              onClick={() => edit(record, form)}
             >
               <EditOutlined style={{ marginRight: 8 }} />
             </Typography.Link>
@@ -530,7 +518,7 @@ function AssetBase(props: any) {
     setCount(count + 1);
   };
 
-  const mergedColumns = columns.map((col) => {
+  const mergedColumns = (form: FormInstance<any>) => columns(form).map((col) => {
     if (!col.editable) {
       return col;
     }
@@ -607,7 +595,7 @@ function AssetBase(props: any) {
         footer={null}
       >
         <Form
-          form={form}
+          form={assetForm}
           onFinish={onFinish}
           layout="vertical"
           name="create_mission"
@@ -642,7 +630,21 @@ function AssetBase(props: any) {
             initialValue={[]}
           >
             <Cascader
-              options={modelOptions}
+              options={manufacturers.map((manufacturer: any) => {
+                const obj1 = {} as OptionType1;
+                obj1.value = manufacturer._id;
+                obj1.label = manufacturer.name;
+                obj1.children = [];
+                models.map((model: any) => {
+                  if (model.manufacturerID?._id == obj1.value) {
+                    const obj = {} as OptionType;
+                    obj.value = model._id;
+                    obj.label = model.modelName;
+                    obj1.children.push(obj);
+                  }
+                });
+                return obj1;
+              })}
               placeholder="Choose asset model"
               showSearch={{ filter }}
               displayRender={(label) => label.join(" > ")}
@@ -682,7 +684,7 @@ function AssetBase(props: any) {
               }}
               bordered
               dataSource={data}
-              columns={mergedColumns}
+              columns={mergedColumns(assetForm)}
               rowClassName="editable-row"
               pagination={false}
             />
@@ -711,7 +713,7 @@ function AssetBase(props: any) {
         footer={null}
       >
         <Form
-          form={form}
+          form={modelForm}
           onFinish={onFinish2}
           layout="vertical"
           name="create_model"
@@ -802,7 +804,7 @@ function AssetBase(props: any) {
               }}
               bordered
               dataSource={data}
-              columns={mergedColumns}
+              columns={mergedColumns(modelForm)}
               rowClassName="editable-row"
               pagination={false}
             />
@@ -835,7 +837,7 @@ function AssetBase(props: any) {
         footer={null}
       >
         <Form
-          form={form}
+          form={manufacturerForm}
           onFinish={onFinish3}
           layout="vertical"
           name="create_manufacturer"
@@ -963,10 +965,20 @@ function AssetBase(props: any) {
         <AssetList filter="all" refreshAssets={refreshAssets}/>
         </TabPane>
         <TabPane tab="Models" key="2">
-          <ModelList />
+          <ModelList 
+            isTableLoading={isModelLoading} 
+            setIsTableLoading={setIsModelLoading}
+            models={models} 
+            setModels={setModels}
+          />
         </TabPane>
         <TabPane tab="Manufacturers" key="3">
-          <ManufacturerList />
+          <ManufacturerList 
+            isTableLoading={isManufacturerLoading} 
+            setIsTableLoading={setIsManufacturerLoading} 
+            manufacturers={manufacturers} 
+            setManufacturers={setManufacturers}
+          />
         </TabPane>
       </Tabs>
     </div>

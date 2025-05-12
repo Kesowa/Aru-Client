@@ -279,7 +279,7 @@ const ModelCard: React.FC<ModelCardProps> = (props) => {
       obj1.label = manufacturer.name;
       obj1.children = [];
       models.map((model: any) => {
-        if (model.manufacturerID._id == obj1.value) {
+        if (model.manufacturerID?._id == obj1.value) {
           const obj = {} as OptionType;
           obj.value = model._id;
           obj.label = model.modelName;
@@ -546,7 +546,7 @@ if (data) {
                   <Text type="secondary">Manufacturer</Text>
                 </Col>
                 <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
-                  <Text>{data.manufacturerID.name}</Text>
+                  <Text>{data.manufacturerID?.name}</Text>
                 </Col>
                 <Divider
                   style={{
