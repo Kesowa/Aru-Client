@@ -5,7 +5,7 @@ import { completeMission, createMission, deleteMission } from "tests/utils/missi
 import { createModel, deleteModel } from "tests/utils/model";
 import { createUser, deleteUser } from "tests/utils/user";
 
-test("create mission", async ({ page }) => {
+test("create and delete mission", async ({ page }) => {
   const locationName = "Base"; // TODO: Static value used, but we have removed functionality for location entity, flight form is yet to be updated
   // after flight form is updated, no location will be required, the center of the flight geofence will be set as the location
 

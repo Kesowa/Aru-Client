@@ -1,17 +1,17 @@
 import { test, expect, FileChooser } from "@playwright/test";
 import { CLIENT_URL } from "tests/constants";
-import { completeMission, createMission, deleteMission } from "tests/utils/mission";
+import { prepareMissionForTest, cleanupMissionAfterTest } from "tests/utils/missionDependencies";
 
 // configuration for this file only
 test.describe.configure({
-  timeout: 90_000 // 90 seconds timeout, only for this file's tests 
+  timeout: 180_000 // 180 seconds timeout, only for this file's tests 
 })
 
 const filename = "video.mp4";
 
 test("vod tests", async ({ page }) => {
-  const missionName = await createMission(page);
-  await completeMission(page, missionName);
+  const missionDetails = await prepareMissionForTest(page);
+  const { missionName } = missionDetails;
   
   // Upload VOD
 
@@ -29,6 +29,7 @@ test("vod tests", async ({ page }) => {
     .click();
 
   // for upload file popup
+  page.removeAllListeners('filechooser');
   page.on("filechooser", (fileChooser: FileChooser) => {
     fileChooser.setFiles(["tests/assets/video.mp4"]);
   });
@@ -63,5 +64,5 @@ test("vod tests", async ({ page }) => {
   const vodDeletionNotification = page.getByText("Video deleted succesfully!");
   expect(vodDeletionNotification).toBeDefined();
 
-  await deleteMission(page, missionName);
+  await cleanupMissionAfterTest({ page, ...missionDetails });
 });

@@ -1,6 +1,6 @@
 import { test, FileChooser, expect } from "@playwright/test";
 import { CLIENT_URL } from "tests/constants";
-import { completeMission, createMission, deleteMission } from "tests/utils/mission";
+import { prepareMissionForTest, cleanupMissionAfterTest } from "tests/utils/missionDependencies";
 
 // configuration for this file only
 test.describe.configure({
@@ -8,8 +8,8 @@ test.describe.configure({
 })
 
 test("thermal image tests", async ({ page }) => {
-  const missionName = await createMission(page);
-  await completeMission(page, missionName);
+  const missionDetails = await prepareMissionForTest(page);
+  const { missionName } = missionDetails;
   
   await page.goto(CLIENT_URL);
   await page
@@ -22,6 +22,7 @@ test("thermal image tests", async ({ page }) => {
   const filename = "thermalImage.jpg";
 
   // for upload file popup
+  page.removeAllListeners('filechooser');
   page.on("filechooser", (fileChooser: FileChooser) => {
     fileChooser.setFiles([`tests/assets/${filename}`]);
   });
@@ -69,12 +70,12 @@ test("thermal image tests", async ({ page }) => {
   // close modal
   await page.getByRole('button', { name: 'Close' }).click();
 
-  await deleteMission(page, missionName);
+  await cleanupMissionAfterTest({ page, ...missionDetails });
 });
 
 test("thermal view for non-thermal images", async ({ page }) => {
-  const missionName = await createMission(page);
-  await completeMission(page, missionName);
+  const missionDetails = await prepareMissionForTest(page);
+  const { missionName } = missionDetails;
 
   await page.goto(CLIENT_URL);
   await page
@@ -87,6 +88,7 @@ test("thermal view for non-thermal images", async ({ page }) => {
   const filename = "image.png";
 
   // for upload file popup
+  page.removeAllListeners('filechooser');
   page.on("filechooser", (fileChooser: FileChooser) => {
     fileChooser.setFiles([`tests/assets/${filename}`]);
   });
@@ -114,5 +116,5 @@ test("thermal view for non-thermal images", async ({ page }) => {
   );
   expect(nonThermalImageNotification).toBeDefined();
 
-  await deleteMission(page, missionName);
+  await cleanupMissionAfterTest({ page, ...missionDetails });
 });

@@ -1,12 +1,12 @@
 import { test, expect, FileChooser } from "@playwright/test";
 import { CLIENT_URL } from "tests/constants";
-import { completeMission, createMission, deleteMission } from "tests/utils/mission";
+import { prepareMissionForTest, cleanupMissionAfterTest } from "tests/utils/missionDependencies";
 
 const filename = "image.png";
 
 test("document tests", async ({ page }) => {
-  const missionName = await createMission(page);
-  await completeMission(page, missionName);
+  const missionDetails = await prepareMissionForTest(page);
+  const { missionName } = missionDetails;
   
   // Document Creation
 
@@ -24,6 +24,7 @@ test("document tests", async ({ page }) => {
     .click();
 
   // for upload file popup
+  page.removeAllListeners('filechooser');
   page.on("filechooser", (fileChooser: FileChooser) => {
     fileChooser.setFiles(["tests/assets/image.png"]);
   });
@@ -59,5 +60,5 @@ test("document tests", async ({ page }) => {
   );
   expect(documentDeletionNotification).toBeDefined();
 
-  await deleteMission(page, missionName);
+  await cleanupMissionAfterTest({ page, ...missionDetails });
 });

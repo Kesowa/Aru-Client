@@ -1,12 +1,12 @@
 import { test, expect, FileChooser } from "@playwright/test";
 import { CLIENT_URL } from "tests/constants";
-import { completeMission, createMission, deleteMission } from "tests/utils/mission";
+import { cleanupMissionAfterTest, prepareMissionForTest } from "tests/utils/missionDependencies";
 
 const filename = "image.png";
 
 test("alert tests", async ({ page }) => {
-  const missionName = await createMission(page);
-  await completeMission(page, missionName);
+  const missionDetails = await prepareMissionForTest(page);
+  const { missionName } = missionDetails;
   
   // Upload Alert
 
@@ -24,6 +24,7 @@ test("alert tests", async ({ page }) => {
     .click();
 
   // for upload file popup
+  page.removeAllListeners('filechooser');
   page.on("filechooser", (fileChooser: FileChooser) => {
     fileChooser.setFiles(["tests/assets/image.png"]);
   });
@@ -61,5 +62,5 @@ test("alert tests", async ({ page }) => {
   );
   expect(alertDeletionNotification).toBeDefined();
 
-  await deleteMission(page, missionName);
+  await cleanupMissionAfterTest({ page, ...missionDetails });
 });

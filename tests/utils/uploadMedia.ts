@@ -2,6 +2,7 @@ import { expect, FileChooser, type Page } from "@playwright/test";
 
 export const uploadAlert = async (page: Page) => {
   // for upload file popup
+  page.removeAllListeners('filechooser');
   page.on("filechooser", (fileChooser: FileChooser) => {
     fileChooser.setFiles(["tests/assets/image.png"]);
   });
@@ -39,6 +40,7 @@ export const uploadAlert = async (page: Page) => {
 
 export const uploadDocument = async (page: Page) => {
   // for upload file popup
+  page.removeAllListeners('filechooser');
   page.on("filechooser", (fileChooser: FileChooser) => {
     fileChooser.setFiles(["tests/assets/image.png"]);
   });
@@ -75,6 +77,7 @@ export const uploadDocument = async (page: Page) => {
 
 export const uploadImage = async (page: Page) => {
   // for upload file popup
+  page.removeAllListeners('filechooser');
   page.on("filechooser", (fileChooser: FileChooser) => {
     fileChooser.setFiles(["tests/assets/image.png"]);
   });
@@ -107,6 +110,7 @@ export const uploadImage = async (page: Page) => {
 
 export const uploadVideo = async (page: Page) => {
   // for upload file popup
+  page.removeAllListeners('filechooser');
   page.on("filechooser", (fileChooser: FileChooser) => {
     fileChooser.setFiles(["tests/assets/video.mp4"]);
   });

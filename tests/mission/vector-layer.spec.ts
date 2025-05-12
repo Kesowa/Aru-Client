@@ -1,13 +1,13 @@
 import { faker } from "@faker-js/faker";
 import { test, expect, FileChooser } from "@playwright/test";
 import { CLIENT_URL } from "tests/constants";
-import { completeMission, createMission, deleteMission } from "tests/utils/mission";
+import { prepareMissionForTest, cleanupMissionAfterTest } from "tests/utils/missionDependencies";
 
 const layername = faker.address.streetAddress();
 
 test("vector layer tests", async ({ page }) => {
-  const missionName = await createMission(page);
-  await completeMission(page, missionName);
+  const missionDetails = await prepareMissionForTest(page);
+  const { missionName } = missionDetails;
   
   // Layer Creation
 
@@ -21,6 +21,7 @@ test("vector layer tests", async ({ page }) => {
   await page.locator(".overlay-content").click(); // goto map
 
   // for upload file popup
+  page.removeAllListeners('filechooser');
   page.on("filechooser", (fileChooser: FileChooser) => {
     fileChooser.setFiles(["tests/assets/poles.geojson"]);
   });
@@ -92,5 +93,5 @@ test("vector layer tests", async ({ page }) => {
       .count()
   ).toBe(0);
 
-  await deleteMission(page, missionName);
+  await cleanupMissionAfterTest({ page, ...missionDetails });
 });

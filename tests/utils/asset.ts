@@ -8,7 +8,7 @@ export const createAsset = async (page: Page, manufacturerName: string, modelNam
     await page.getByRole("link", { name: "Assets" }).click();
 
     // asset creation
-    const assetName = faker.random.word();
+    const assetName = faker.random.word() + " drone";
     await page.getByRole('button', { name: 'Asset plus' }).click();
     await page.getByRole('textbox', { name: 'Asset Name' }).fill(assetName);
     await page.getByRole('combobox', { name: 'Asset Type' }).click();

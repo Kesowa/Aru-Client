@@ -13,6 +13,7 @@ export const createClient = async (page: Page) => {
         allowSpecialCharacters: false,
     });
     const userPhone = faker.phone.number();
+    page.removeAllListeners('filechooser');
     page.on("filechooser", (fileChooser) => {
         fileChooser.setFiles(["tests/assets/image.png"]);
     });

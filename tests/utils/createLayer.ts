@@ -3,6 +3,7 @@ import { expect, FileChooser, type Page } from "@playwright/test";
 
 export const createVectorLayer = async (page: Page) => {
   // for upload file popup
+  page.removeAllListeners('filechooser');
   page.on("filechooser", (fileChooser: FileChooser) => {
     fileChooser.setFiles(["tests/assets/poles.geojson"]);
   });
@@ -63,6 +64,7 @@ export const createVectorLayer = async (page: Page) => {
 
 export const createRasterLayer = async (page: Page) => {
   // for upload file popup
+  page.removeAllListeners('filechooser');
   page.on("filechooser", (fileChooser: FileChooser) => {
     fileChooser.setFiles(["tests/assets/Ortho_25cm.tif"]);
   });
