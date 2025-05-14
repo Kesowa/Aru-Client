@@ -200,7 +200,7 @@ function BaseMap(props) {
   const [isElevationEnabled, setIsElevationEnabled] = useState(false);
   const isElevationEnabledRef = useRef(isElevationEnabled);
   const [vectorSubtype, setVectorSubtype] = useState<string | null>(null);
-  const [properties, setProperties] = useState<Record<string, any>>({});
+  const [properties, setProperties] = useState<Record<string, string>>({});
   const [dateRange, setDateRange] = useState([
     moment(
       moment().subtract(7, "d").format("YYYY-MM-DD") + " " + "00:00",
@@ -3007,7 +3007,7 @@ function BaseMap(props) {
         color: layerColor,
         inHeritOriginalColorFromFile: inheritColor,
         icon: icon2,
-        ...(layerType === "Vector" ? { vector: layerProp, properties: properties } : {}),
+        ...(layerType === "Vector" ? { vector: layerProp, styling: properties } : {}),
         ...(layerType === "Raster" ? { raster: layerProp } : {}),
       };
 
@@ -5224,7 +5224,7 @@ function BaseMap(props) {
                   for (const key of relevantKeys) {
                     const value = allValues[key];
                     if (value !== undefined && value !== "") {
-                      updatedProperties[key] = value;
+                      updatedProperties[key] = String(value);
                     }
                   }
 

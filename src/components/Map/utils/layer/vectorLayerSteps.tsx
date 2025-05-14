@@ -17,10 +17,12 @@ import {
   Select,
   Collapse,
   Divider,
+  InputNumber,
 } from "antd";
 import { UploadOutlined, InboxOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
 import { options } from "../propUtils";
+import { featureTypes } from "src/static/vectorprops";
 const { Dragger } = Upload;
 const { Item } = Form;
 const { Meta } = Card;
@@ -42,6 +44,9 @@ export const UploadVectorData = ({
   layerColor,
   setLayerColor,
   onChangeInherit,
+  layerType,
+  vectorSubtype,
+  setProperties,
 }) => {
   return (
     <>
@@ -53,6 +58,27 @@ export const UploadVectorData = ({
           margin: "20px auto",
         }}
         form={form}
+        onValuesChange={(changedValues, allValues) => {
+          const relevantKeys = [
+            "lineStyle",
+            "lineWidth",
+            "fill",
+            "texture",
+            "opacity",
+            "borderWidth",
+            "borderStyle",
+          ];
+
+          const updatedProperties: Record<string, any> = {};
+          for (const key of relevantKeys) {
+            const value = allValues[key];
+            if (value !== undefined && value !== "") {
+              updatedProperties[key] = String(value);
+            }
+          }
+
+          setProperties(updatedProperties);
+        }}
       >
         <Row
           style={{
@@ -103,6 +129,45 @@ export const UploadVectorData = ({
                 onChange={changeLayerType}
               />
             </Form.Item>
+            {layerType === "Vector" &&
+              vectorSubtype === featureTypes.MULTI_LINE_STRING && (
+                <>
+                  <Form.Item label="Line Style" name="lineStyle">
+                    <Select placeholder="Select line style">
+                      <Select.Option value="solid">Solid</Select.Option>
+                      <Select.Option value="dashed">Dashed</Select.Option>
+                    </Select>
+                  </Form.Item>
+                  <Form.Item label="Line Width" name="lineWidth">
+                    <InputNumber min={1} max={10} />
+                  </Form.Item>
+                </>
+              )}
+
+            {layerType === "Vector" &&
+              vectorSubtype === featureTypes.MULTI_POLYGON && (
+                <>
+                  <Form.Item label="Fill" name="fill">
+                    <Input type="color" />
+                  </Form.Item>
+                  <Form.Item label="Texture" name="texture">
+                    <Input placeholder="Enter texture URL or ID" />
+                  </Form.Item>
+                  <Form.Item label="Opacity" name="opacity">
+                    <InputNumber min={0} max={1} step={0.1} />
+                  </Form.Item>
+                  <Form.Item label="Border Width" name="borderWidth">
+                    <InputNumber min={0} max={10} />
+                  </Form.Item>
+                  <Form.Item label="Border Style" name="borderStyle">
+                    <Select placeholder="Select border style">
+                      <Select.Option value="solid">Solid</Select.Option>
+                      <Select.Option value="dashed">Dashed</Select.Option>
+                      <Select.Option value="dotted">Dotted</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </>
+              )}
             <Row>
               <Form.Item label="Capture Date" name="date">
                 <DatePicker
@@ -115,26 +180,28 @@ export const UploadVectorData = ({
                 />
               </Form.Item>
             </Row>
-            <Row>
-              <Form.Item label="Icon" name="icon">
-                <TreeSelect
-                  showSearch
-                  style={{
-                    width: "150%",
-                  }}
-                  dropdownStyle={{
-                    maxHeight: 400,
-                    overflow: "auto",
-                  }}
-                  placeholder="Select Icon"
-                  placement="bottomLeft"
-                  defaultValue={"MarkerIcon"}
-                  treeData={iconOptions}
-                  onChange={(value) => setIcon(value)}
-                  treeIcon={true}
-                />
-              </Form.Item>
-            </Row>
+            {layerType === "Vector" && vectorSubtype === featureTypes.POINT && (
+              <Row>
+                <Form.Item label="Icon" name="icon">
+                  <TreeSelect
+                    showSearch
+                    style={{
+                      width: "150%",
+                    }}
+                    dropdownStyle={{
+                      maxHeight: 400,
+                      overflow: "auto",
+                    }}
+                    placeholder="Select Icon"
+                    placement="bottomLeft"
+                    defaultValue={"MarkerIcon"}
+                    treeData={iconOptions}
+                    onChange={(value) => setIcon(value)}
+                    treeIcon={true}
+                  />
+                </Form.Item>
+              </Row>
+            )}
             <Row>
               <Alert
                 style={{

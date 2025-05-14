@@ -91,6 +91,8 @@ const CreateBaseLayer = (props) => {
   const [selectedAttr, setSelectedAttr] = useState({});
   const [activeTab, setActiveTab] = useState<unknown>([]);
   const [icon, setIcon] = useState<unknown>("MarkerIcon");
+  const [vectorSubtype, setVectorSubtype] = useState<string | null>(null);
+  const [properties, setProperties] = useState<Record<string, string>>({});
 
   const { logout } = useContext(AuthContext);
 
@@ -430,7 +432,7 @@ const CreateBaseLayer = (props) => {
           console.info("PROGRESS: " + prog);
           setProgress(prog * 100);
         });
-
+        
         const body = {
           file: uploadToken,
           captureDate: captureDate,
@@ -442,6 +444,7 @@ const CreateBaseLayer = (props) => {
                 color: layerColor,
                 inHeritOriginalColorFromFile: inheritColor.toString(),
                 vector: String(layerProp),
+                styling: properties,
               }
             : {}),
           ...(layerType === "Raster" ? { raster: String(layerProp) } : {}),
@@ -908,10 +911,13 @@ const CreateBaseLayer = (props) => {
       setShowColorPicker(true);
       setLayerType("Vector");
       setLayerProp(value as vectorProps);
+      const subtype = featureType[value as keyof typeof featureType];
+      setVectorSubtype(subtype);
     } else if (Object.values(rasterProps).includes(value as rasterProps)) {
       setShowColorPicker(false);
       setLayerType("Raster");
       setLayerProp(value as rasterProps);
+      setVectorSubtype(null);
     }
   };
 
@@ -1271,6 +1277,9 @@ const CreateBaseLayer = (props) => {
           layerColor={layerColor}
           setLayerColor={setLayerColor}
           onChangeInherit={onChangeInherit}
+          layerType={layerType}
+          vectorSubtype={vectorSubtype}
+          setProperties={setProperties}
         />
       ),
     },
