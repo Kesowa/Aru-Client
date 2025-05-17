@@ -73,6 +73,7 @@ import {
   CheckCircleOutlined,
   ArrowLeftOutlined,
   EyeOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { TbFlag, TbFlagOff } from "react-icons/tb";
 import MarkerIcon from "../../static/MarkerIcon.png";
@@ -147,6 +148,7 @@ import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "../shared/Loader";
 import { ThreadContext } from "src/services/threadUtils";
 import ElevationBlock, {valueChangeEmitter} from "./utils/elevationTooltip";
+import axios from "axios";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -689,30 +691,16 @@ function BaseMap(props) {
   const [updateId, setUpdateId] = useState("");
   const [pointMarkerSize, setPointMarkerSize] = useState(1);
   const showMarkerSizeTool = false;
+  const [iconOptions, setIconOptions] = useState([]);
+  const [icon2, setIcon2] = useState<string | undefined>(undefined);
+  const [loadIcons, setLoadIcons] = useState(false);
 
-  const [iconOptions, setIconOptions] = useState([
-    {
-      value: "MarkerIcon",
-      title: "Marker Icon",
-      icon: <img src={MarkerIcon} style={{ width: "15px" }} />,
-    },
-    {
-      value: "TankIcon",
-      title: "Tank Icon",
-      icon: <img src={TankIcon} style={{ width: "15px" }} />,
-    },
-    {
-      value: "ValveIcon",
-      title: "Valve Icon",
-      icon: <img src={ValveIcon} style={{ width: "15px" }} />,
-    },
-    {
-      value: "DotIcon",
-      title: "Dot Icon",
-      icon: <img src={DotIcon} style={{ width: "15px" }} />,
-    },
-  ]);
-  const [icon2, setIcon2] = useState(iconOptions[0].value);
+  useEffect(() => {
+    if (iconOptions.length > 0 && !icon2) {
+      setIcon2(`${iconOptions[0].image}`);
+    }
+  }, [iconOptions]);
+  
   //----------------auto detect browser height---------------------
   // let initHeight = window.screen.height;
   // if(initHeight === 1080){
@@ -816,37 +804,121 @@ function BaseMap(props) {
     setIsModalVisible2(false);
     setSelectedKey();
   };
-  const handleSvgUploadAntd: UploadProps["customRequest"] = (options) => {
-    const { file, onSuccess, onError } = options;
+  const handleDelete = (iconId) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this icon?",
+      onOk: async () => {
+        try {
+          const res = await http.delete(`${API_URL}${apis.DELETE_ICON.replace(":iconID", iconId)}`);
+          if (res.status === 200) {
+            message.success("Icon deleted successfully");
+            setLoadIcons(prev => !prev);
+          } else {
+            message.error("Failed to delete icon");
+          }
+        } catch (error) {
+          message.error("Error deleting icon");
+          console.error("Delete icon error:", error);
+        }
+      },
+    });
+  };
+  
+  useEffect(() => {
+    const fetchIcons = async () => {
+      try {
+        const res = await http.get(`${API_URL}${apis.GET_ICONS}`);
 
-    if (file.type !== "image/svg+xml") {
-      message.error("Only SVG files are allowed");
+        console.log("data : ",res);
+        const icons = res.data?.data || [];
+  
+        const formattedIcons = icons.map((icon: any) => ({
+          value: icon._id,
+          title: icon.name,
+          icon: (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <img
+                  src={`${STATIC_URL}${icon.image}`}
+                  style={{ width: "20px", height: "20px" }}
+                />
+              </div>
+              <DeleteOutlined
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(icon._id);
+                }}
+                style={{ color: "red", marginLeft: "180px", cursor: "pointer" }}
+              />
+            </div>
+          ),
+          image: icon.image,
+        }));
+  
+        setIconOptions(formattedIcons);
+      } catch (err) {
+        console.error("Failed to fetch icons", err);
+        message.error("Unable to load icons");
+      }
+    };
+  
+    fetchIcons();
+  }, [loadIcons]);
+
+  const handleSvgUpload: UploadProps["customRequest"] = async (options: any) => {
+    const { file, onSuccess, onError } = options;
+  
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+      message.error("Only PNG and JPG images are allowed");
       return onError?.(new Error("Invalid file type"));
     }
   
-    const reader = new FileReader();
-    reader.onload = () => {
-      const svgUrl = reader.result as string;
-      const newIconValue = `custom-${Date.now()}`;
-      const newIcon = {
-        value: newIconValue,
-        title: file.name.replace(".svg", ""),
-        icon: <img src={svgUrl} style={{ width: "15px" }} />,
+    try {
+      const cancelToken = axios.CancelToken.source();
+      const uploadToken = await uploadFile(
+        file,
+        DocModel.DOCUMENTS,
+        (prog) => options.onProgress?.({ percent: prog * 100 }),
+        cancelToken.token
+      );
+      const body = {
+        name: file.name.replace(/\.(png|jpg)$/i, ""),
+        image: uploadToken,
+        description: "",
+        tags: [],
       };
-      setIconOptions((prev) => [...prev, newIcon]);
-      form.setFieldsValue({ icon: newIconValue });
-      setIcon2(newIconValue);
-      onSuccess?.("ok");
-    };
   
-    reader.onerror = () => {
-      message.error("Failed to read SVG");
-      onError?.(new Error("Read error"));
-    };
-  
-    reader.readAsDataURL(file as File);
-  };
+      const res = await http.post(`${API_URL}${apis.CREATE_ICON}`, body, {
+        cancelToken: cancelToken.token,
+      });
+      const newIcon = res.data?.data;
+      setIcon2(newIcon.image);
+      form.setFieldsValue({ icon: newIcon.name });
 
+      setLoadIcons(prev => !prev);
+      message.success("Image uploaded successfully");
+      onSuccess?.(res.data, file);
+      console.log(res.data);
+  
+      return {
+        abort() {
+          cancelToken.cancel("Image upload cancelled");
+        },
+      };
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      message.error("Failed to upload image");
+      onError?.(err);
+    }
+  };
   // ----------------------------------------- disable default right click event of browser ----------------------------------------------------------
   useEffect(() => {
     window.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -3010,7 +3082,7 @@ function BaseMap(props) {
         ...(layerType === "Vector" ? { vector: layerProp, styling: properties } : {}),
         ...(layerType === "Raster" ? { raster: layerProp } : {}),
       };
-
+      
       // const fmData = new FormData();
       // fmData.append("file", fileList[0]);
       // fmData.append("captureDate", captureDate);
@@ -3246,7 +3318,7 @@ function BaseMap(props) {
           setLayerColor("#ffaa00"); // default value that was previously also used in first declaration
           setLayerName("");
           setCaptureDate("");
-          setIcon2(iconOptions[0].value); // default value that was previously also used in first declaration
+          setIcon2(iconOptions?.[0]?.value ?? null);
           setLoading(false);
         });
 
@@ -5334,18 +5406,24 @@ function BaseMap(props) {
                                   placement="bottomLeft"
                                   defaultValue={"MarkerIcon"}
                                   treeData={iconOptions}
-                                  onChange={(value) => setIcon2(value)}
+                                  onChange={(value) => {
+                                    const selectedIcon = iconOptions.find(icon => icon.value === value);
+                                    if (selectedIcon) {
+                                      setIcon2(`${selectedIcon.image}`);
+                                    }
+                                  }}
                                   treeIcon={true}
+                                  treeNodeFilterProp="title" 
                                 />
                               </Form.Item>
                             </Col>
 
                             <Col style={{ marginTop: "20px" }}>
-                              <Tooltip title="Upload custom SVG icon">
+                              <Tooltip title="Upload custom icons">
                                 <Upload
                                   accept=".svg"
                                   showUploadList={false}
-                                  customRequest={handleSvgUploadAntd}
+                                  customRequest={handleSvgUpload}
                                 >
                                   <Button
                                     icon={<UploadOutlined />}

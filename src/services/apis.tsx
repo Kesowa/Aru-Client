@@ -251,6 +251,11 @@ const apis = {
   GET_ALL_BASELAYERS: "/apis/v1/baselayer/fetch/All",
   GEN_SYSID_LAYER: "/apis/v1/layer/inject_sysId_layerfiles",
 
+  //icon layer
+  CREATE_ICON:"/apis/v1/icon/create",
+  GET_ICONS:"/apis/v1/icon/list",
+  DELETE_ICON:"/apis/v1/icon/:iconID",
+  
   //Threads
   THREAD: "/apis/v1/thread",
 

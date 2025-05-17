@@ -122,30 +122,11 @@ const getRasterDataUrl = (layer: Layer) => {
 
 
 const getIcon = (d) => {
-  const iconSelector = (iconType) => {
-    let icon = "";
-    switch (iconType) {
-      case "MarkerIcon":
-        icon = MarkerIcon;
-        break;
-      case "TankIcon":
-        icon = TankIcon;
-        break;
-      case "DotIcon":
-        icon = DotIcon;
-        break;
-      case "ValveIcon":
-        icon = ValveIcon;
-        break;
-    }
-    return icon;
-  };
   return {
-    url: iconSelector(d.properties.icon),
+    url: `${STATIC_URL}${d.properties.icon}`,
     width: 100,
     height: 129,
     anchorY: 125,
-    mask: true,
   };
 };
 
