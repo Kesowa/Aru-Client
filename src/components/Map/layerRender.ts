@@ -19,6 +19,7 @@ import { MASK_ID } from ".";
 import { featureType, featureTypes } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
 import { handleHover } from "./utils/elevationTooltip";
+import apis from "src/services/apis";
 
 export type Layer = ILayer & {
   _isChecked?: boolean;
@@ -120,8 +121,58 @@ const getRasterDataUrl = (layer: Layer) => {
   }
 };
 
+const getStaticIcon = (iconName: string) => {
+  const iconSelector = (iconType: string) => {
+    switch (iconType) {
+      case "MarkerIcon":
+        return MarkerIcon;
+      case "TankIcon":
+        return TankIcon;
+      case "DotIcon":
+        return DotIcon;
+      case "ValveIcon":
+        return ValveIcon;
+      default:
+        return null;
+    }
+  };
+  const iconUrl = iconSelector(iconName);
+  if (iconUrl !== null) {
+    return {
+      url: iconSelector(iconName),
+      width: 100,
+      height: 129,
+      anchorY: 125,
+      mask: true,
+    }
+  }
+  return null;
+};
 
+// const IconCache = new Map();
 const getIcon = (d) => {
+  if (!d.properties?.icon) {
+    return getStaticIcon("MarkerIcon");
+  }
+  const staticIcon = getStaticIcon(d.properties?.icon);
+  if (staticIcon !== null) {
+    return staticIcon;
+  };
+  // let icon = IconCache.get(d.properties?.icon);
+  // if (icon === undefined) {
+  //   try {
+  //     const iconRes = await http.get(`${API_URL}${apis.GET_ICON.replace(":iconID", d.properties.icon)}`);
+  //     if (iconRes.status == 200) {
+  //       IconCache[iconRes.data.data._id] = iconRes.data.data;
+  //       icon = iconRes.data.data;
+  //     }
+  //     else {
+  //       throw new Error("icon not found");
+  //     }
+  //   } catch (e) {
+  //     return getStaticIcon("MarkerIcon");
+  //   }
+  // }
   return {
     url: `${STATIC_URL}${d.properties.icon}`,
     width: 100,
@@ -137,12 +188,12 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
     .map((layer) => {
       let maskProps: Record<string, any> = layer._isMasked
         ? {
-            // enable masking
-            extensions: [new MaskExtension()],
-            maskId: MASK_ID,
-            // bring masked layers above others
-            zIndex: 9999,
-          }
+          // enable masking
+          extensions: [new MaskExtension()],
+          maskId: MASK_ID,
+          // bring masked layers above others
+          zIndex: 9999,
+        }
         : {};
 
       const opacity = layer._metadata?.layerOpacity ?? 1;

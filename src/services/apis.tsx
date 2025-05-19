@@ -253,6 +253,7 @@ const apis = {
 
   //icon layer
   CREATE_ICON:"/apis/v1/icon/create",
+  GET_ICON:"/apis/v1/icon/:iconID",
   GET_ICONS:"/apis/v1/icon/list",
   DELETE_ICON:"/apis/v1/icon/:iconID",
   
