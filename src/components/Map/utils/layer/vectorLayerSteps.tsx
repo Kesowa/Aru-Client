@@ -18,6 +18,7 @@ import {
   Collapse,
   Divider,
   InputNumber,
+  Tooltip,
 } from "antd";
 import { UploadOutlined, InboxOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
@@ -47,6 +48,7 @@ export const UploadVectorData = ({
   layerType,
   vectorSubtype,
   setProperties,
+  handleSvgUpload,
 }) => {
   return (
     <>
@@ -181,26 +183,50 @@ export const UploadVectorData = ({
               </Form.Item>
             </Row>
             {layerType === "Vector" && vectorSubtype === featureTypes.POINT && (
-              <Row>
-                <Form.Item label="Icon" name="icon">
-                  <TreeSelect
-                    showSearch
-                    style={{
-                      width: "150%",
-                    }}
-                    dropdownStyle={{
-                      maxHeight: 400,
-                      overflow: "auto",
-                    }}
-                    placeholder="Select Icon"
-                    placement="bottomLeft"
-                    defaultValue={"MarkerIcon"}
-                    treeData={iconOptions}
-                    onChange={(value) => setIcon(value)}
-                    treeIcon={true}
-                  />
-                </Form.Item>
-              </Row>
+              <>
+                <Row align="middle" gutter={8}>
+                  <Col flex="auto">
+                    <Form.Item label="Icon" name="icon">
+                      <TreeSelect
+                        showSearch
+                        style={{ width: "100%" }}
+                        dropdownStyle={{
+                          maxHeight: 400,
+                          overflow: "auto",
+                        }}
+                        placeholder="Select Icon"
+                        placement="bottomLeft"
+                        defaultValue={"MarkerIcon"}
+                        treeData={iconOptions}
+                        onChange={(value) => {
+                          const selectedIcon = iconOptions.find(
+                            (icon) => icon.value === value
+                          );
+                          if (selectedIcon) {
+                            setIcon(`${selectedIcon.image}`);
+                          }
+                        }}
+                        treeIcon={true}
+                        treeNodeFilterProp="title"
+                      />
+                    </Form.Item>
+                  </Col>
+
+                  <Col style={{ marginTop: "20px" }}>
+                    <Tooltip title="Upload custom icons">
+                      <Upload
+                        accept=".png,.jpg"
+                        showUploadList={false}
+                        customRequest={handleSvgUpload}
+                      >
+                        <Button icon={<UploadOutlined />} type="default">
+                          Upload
+                        </Button>
+                      </Upload>
+                    </Tooltip>
+                  </Col>
+                </Row>
+              </>
             )}
             <Row>
               <Alert

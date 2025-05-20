@@ -5421,7 +5421,7 @@ function BaseMap(props) {
                             <Col style={{ marginTop: "20px" }}>
                               <Tooltip title="Upload custom icons">
                                 <Upload
-                                  accept=".svg"
+                                  accept=".png,.jpg"
                                   showUploadList={false}
                                   customRequest={handleSvgUpload}
                                 >
