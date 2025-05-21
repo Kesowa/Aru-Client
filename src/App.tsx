@@ -90,7 +90,7 @@ const App = () => {
                 >
                   <Switch>
                     <Route exact path="/">
-                      <Redirect to={{ pathname: "/dashboard" }} />
+                      <Redirect to={{ pathname: "/login" }} />
                     </Route>
                     <Route exact path="/map/:id">
                       <PublicMap isBaseMap={true} />
@@ -101,10 +101,10 @@ const App = () => {
                     <Route exact path="/forgot-password">
                       <ForgotPassword />
                     </Route>
-                    <LoginWrapper exact={true} path="/login">
+                    <LoginWrapper exact path="/login">
                       <Login />
                     </LoginWrapper>
-                    <LoginWrapper exact={true} path="/sign-up">
+                    <LoginWrapper exact path="/sign-up">
                       <Register />
                     </LoginWrapper>
                     <PrivateRoute path="/dashboard">

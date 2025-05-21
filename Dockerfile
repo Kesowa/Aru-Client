@@ -20,6 +20,7 @@ FROM nginx:alpine
 
 # Copy config nginx
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx/csp_headers.conf /etc/nginx/conf.d/csp_headers.conf
 
 WORKDIR /usr/share/nginx/html
 

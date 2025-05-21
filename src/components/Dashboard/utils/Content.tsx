@@ -65,12 +65,12 @@ function DashboardContent() {
 
   const getQrCode = () => {
     const data = {
-      BASE_SERVER_URL: PUBLIC_URL,
-      BASE_STREAM_URL: LIVE_URL,
-      COG_SERVER_URL: COG_URL,
-      RTMP_URL: RTMP_URL,
+      // BASE_SERVER_URL: PUBLIC_URL,
+      // BASE_STREAM_URL: LIVE_URL,
+      // COG_SERVER_URL: COG_URL,
+      // RTMP_URL: RTMP_URL,
       API_URL: API_URL,
-      CDN_URL: STATIC_URL,
+      // CDN_URL: STATIC_URL,
     };
     QRCode.toDataURL(JSON.stringify(data), function (err, url) {
       setqrCode(url);
