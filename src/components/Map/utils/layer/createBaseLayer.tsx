@@ -213,35 +213,50 @@ const CreateBaseLayer = (props) => {
             <div
               style={{
                 display: "flex",
-
                 alignItems: "center",
-
                 justifyContent: "space-between",
+                width: "100%",
+                overflow: "hidden",
               }}
             >
               <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  flex: 1,
+                  overflow: "hidden",
+                }}
               >
                 <img
                   src={`${STATIC_URL}${icon.image}`}
-                  style={{ width: "20px", height: "20px" }}
+                  alt={icon.name}
+                  style={{ width: "20px", height: "20px", flexShrink: 0 }}
                 />
+                <span
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    maxWidth: "100%",
+                  }}
+                >
+                  {icon.name}
+                </span>
               </div>
-
+        
               <DeleteOutlined
                 onClick={(e) => {
                   e.stopPropagation();
-
                   handleDelete(icon._id);
                 }}
-                style={{ color: "red", marginLeft: "180px", cursor: "pointer" }}
+                style={{ color: "red", marginLeft: "12px", cursor: "pointer", flexShrink: 0 }}
               />
             </div>
           ),
-
           image: icon.image,
         }));
-
+  
         setIconOptions(formattedIcons);
       } catch (err) {
         console.error("Failed to fetch icons", err);
@@ -253,7 +268,7 @@ const CreateBaseLayer = (props) => {
     fetchIcons();
   }, [loadIcons]);
 
-  const handleSvgUpload: UploadProps["customRequest"] = async (
+  const handleIconUpload: UploadProps["customRequest"] = async (
     options: any
   ) => {
     const { file, onSuccess, onError } = options;
@@ -1396,7 +1411,7 @@ const CreateBaseLayer = (props) => {
           layerType={layerType}
           vectorSubtype={vectorSubtype}
           setProperties={setProperties}
-          handleSvgUpload={handleSvgUpload}
+          handleIconUpload={handleIconUpload}
         />
       ),
     },

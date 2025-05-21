@@ -48,7 +48,7 @@ export const UploadVectorData = ({
   layerType,
   vectorSubtype,
   setProperties,
-  handleSvgUpload,
+  handleIconUpload,
 }) => {
   return (
     <>
@@ -141,7 +141,7 @@ export const UploadVectorData = ({
                     </Select>
                   </Form.Item>
                   <Form.Item label="Line Width" name="lineWidth">
-                    <InputNumber min={1} max={10} />
+                    <InputNumber min={1} max={10} addonAfter="px" />
                   </Form.Item>
                 </>
               )}
@@ -159,7 +159,7 @@ export const UploadVectorData = ({
                     <InputNumber min={0} max={1} step={0.1} />
                   </Form.Item>
                   <Form.Item label="Border Width" name="borderWidth">
-                    <InputNumber min={0} max={10} />
+                    <InputNumber min={0} max={10} addonAfter="px" />
                   </Form.Item>
                   <Form.Item label="Border Style" name="borderStyle">
                     <Select placeholder="Select border style">
@@ -187,17 +187,11 @@ export const UploadVectorData = ({
                 <Row align="middle" gutter={8}>
                   <Col flex="auto">
                     <Form.Item label="Icon" name="icon">
-                      <TreeSelect
+                      <Select
                         showSearch
                         style={{ width: "100%" }}
-                        dropdownStyle={{
-                          maxHeight: 400,
-                          overflow: "auto",
-                        }}
                         placeholder="Select Icon"
-                        placement="bottomLeft"
-                        defaultValue={"MarkerIcon"}
-                        treeData={iconOptions}
+                        defaultValue="MarkerIcon"
                         onChange={(value) => {
                           const selectedIcon = iconOptions.find(
                             (icon) => icon.value === value
@@ -206,9 +200,23 @@ export const UploadVectorData = ({
                             setIcon(`${selectedIcon.image}`);
                           }
                         }}
-                        treeIcon={true}
-                        treeNodeFilterProp="title"
-                      />
+                        optionLabelProp="label"
+                        filterOption={(input, option) =>
+                          (option?.label as string)
+                            ?.toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                      >
+                        {iconOptions.map((icon) => (
+                          <Select.Option
+                            key={icon.value}
+                            value={icon.value}
+                            label={icon.title}
+                          >
+                            {icon.icon}
+                          </Select.Option>
+                        ))}
+                      </Select>
                     </Form.Item>
                   </Col>
 
@@ -217,7 +225,7 @@ export const UploadVectorData = ({
                       <Upload
                         accept=".png,.jpg"
                         showUploadList={false}
-                        customRequest={handleSvgUpload}
+                        customRequest={handleIconUpload}
                       >
                         <Button icon={<UploadOutlined />} type="default">
                           Upload
