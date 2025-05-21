@@ -203,6 +203,7 @@ function BaseMap(props) {
   const isElevationEnabledRef = useRef(isElevationEnabled);
   const [vectorSubtype, setVectorSubtype] = useState<string | null>(null);
   const [properties, setProperties] = useState<Record<string, string>>({});
+  const [activeEyeIconLayerId, setActiveEyeIconLayerId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState([
     moment(
       moment().subtract(7, "d").format("YYYY-MM-DD") + " " + "00:00",
@@ -2677,20 +2678,49 @@ function BaseMap(props) {
                   });
                 }
               }}
-              onDoubleClick={() => {
-                if (!props.isBaseMap || layer.type === "Vector") {
-                  setlayerToAddInAttributeTable({
-                    name: layer.name,
-                    type: layer.type,
-                    id: layer._id,
-                    path: layer.layerpath,
-                    count: layer.featureCount,
-                  });
-                }
-              }}
+              // onDoubleClick={() => {
+              //   if (!props.isBaseMap || layer.type === "Vector") {
+              //     setlayerToAddInAttributeTable({
+              //       name: layer.name,
+              //       type: layer.type,
+              //       id: layer._id,
+              //       path: layer.layerpath,
+              //       count: layer.featureCount,
+              //     });
+              //   }
+              // }}
             >
               {layer.name}
             </Text>
+
+            <Tooltip>
+              <EyeOutlined
+                style={{
+                  marginLeft: "8px",
+                  opacity: activeEyeIconLayerId === layer._id ? 1 : 0.6,
+                  color:
+                    activeEyeIconLayerId === layer._id ? "#3b86ff" : "inherit",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!props.isBaseMap || layer.type === "Vector") {
+                        setlayerToAddInAttributeTable({
+                          name: layer.name,
+                          type: layer.type,
+                          id: layer._id,
+                          path: layer.layerpath,
+                          count: layer.featureCount,
+                        });
+                  }
+                  setActiveEyeIconLayerId(layer._id);
+                  setTimeout(() => {
+                    setActiveEyeIconLayerId(null);
+                  }, 10000);
+                }}
+              />
+            </Tooltip>
             {layer.type === "Vector" && layer.isFlagged && (
               <FlagOutlined style={{ color: "#da1c5c" }} />
             )}
