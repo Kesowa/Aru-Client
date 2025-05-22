@@ -74,6 +74,7 @@ import {
   ArrowLeftOutlined,
   EyeOutlined,
   DeleteOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import { TbFlag, TbFlagOff } from "react-icons/tb";
 import MarkerIcon from "../../static/MarkerIcon.png";
@@ -204,6 +205,7 @@ function BaseMap(props) {
   const [vectorSubtype, setVectorSubtype] = useState<string | null>(null);
   const [properties, setProperties] = useState<Record<string, string>>({});
   const [activeEyeIconLayerId, setActiveEyeIconLayerId] = useState<string | null>(null);
+  const [activeEditIconLayerId, setActiveEditIconLayerId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState([
     moment(
       moment().subtract(7, "d").format("YYYY-MM-DD") + " " + "00:00",
@@ -2716,7 +2718,7 @@ function BaseMap(props) {
             <Tooltip>
               <EyeOutlined
                 style={{
-                  marginLeft: "8px",
+                  marginLeft: "2px",
                   opacity: activeEyeIconLayerId === layer._id ? 1 : 0.6,
                   color:
                     activeEyeIconLayerId === layer._id ? "#3b86ff" : "inherit",
@@ -2726,18 +2728,53 @@ function BaseMap(props) {
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!props.isBaseMap || layer.type === "Vector") {
-                        setlayerToAddInAttributeTable({
-                          name: layer.name,
-                          type: layer.type,
-                          id: layer._id,
-                          path: layer.layerpath,
-                          count: layer.featureCount,
-                        });
+                    setlayerToAddInAttributeTable({
+                      name: layer.name,
+                      type: layer.type,
+                      id: layer._id,
+                      path: layer.layerpath,
+                      count: layer.featureCount,
+                    });
                   }
                   setActiveEyeIconLayerId(layer._id);
                   setTimeout(() => {
                     setActiveEyeIconLayerId(null);
-                  }, 10000);
+                  }, 7000);
+                }}
+              />
+            </Tooltip>
+            <Tooltip title="Edit Layer">
+              <EditOutlined
+                style={{
+                  marginLeft: "10px",
+                  opacity: activeEditIconLayerId === layer._id ? 1 : 0.6,
+                  color:
+                    activeEditIconLayerId === layer._id ? "#3b86ff" : "inherit",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                }}
+                onClick={(e) => {
+                  if (props.isBaseMap ? perms.canEditBaseLayer : perms.canEditLayer) {
+                      e.stopPropagation();
+                      const type = layer.type;
+
+                      showModal1();
+                      setSelectedLayerId(layer._id);
+                      setCaptureDate(layer.captureDate);
+                      setLayerName(layer.name);
+                      setDefaultLayerType({
+                        layerType: type,
+                        layerProp: type === "Vector" ? layer.vector : layer.raster,
+                        featureType:
+                          type === "Vector" ? featureType[layer.vector] : null,
+                      });
+                      setSelectedLayerType(type.toLowerCase());
+
+                      setActiveEditIconLayerId(layer._id);
+                      setTimeout(() => {
+                        setActiveEditIconLayerId(null);
+                      }, 7000);
+                  }
                 }}
               />
             </Tooltip>
@@ -5117,7 +5154,7 @@ function BaseMap(props) {
                   />
                 </div>
               )}
-              <Dropdown
+             <Dropdown
                 menu={{ items: sortMenu, onClick: sortMenuOnClick }}
                 trigger={["click"]}
               >
