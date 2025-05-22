@@ -5335,11 +5335,9 @@ function BaseMap(props) {
                 onValuesChange={(changedValues, allValues) => {
                   const relevantKeys = [
                     "lineStyle",
-                    "lineWidth",
                     "fill",
                     "texture",
                     "opacity",
-                    "borderWidth",
                     "borderStyle",
                   ];
 
@@ -5349,6 +5347,18 @@ function BaseMap(props) {
                     if (value !== undefined && value !== "") {
                       updatedProperties[key] = String(value);
                     }
+                  }
+
+                  const widthValue = allValues.lineWidthValue;
+                  const widthUnit = allValues.lineWidthUnit;
+                  if (widthValue !== undefined && widthUnit) {
+                    updatedProperties.lineWidth = `${widthValue}${widthUnit}`;
+                  }
+
+                  const borderValue = allValues.borderWidthValue;
+                  const borderUnit = allValues.borderWidthUnit;
+                  if (borderValue !== undefined && borderUnit) {
+                    updatedProperties.borderWidth = `${borderValue}${borderUnit}`;
                   }
 
                   setProperties(updatedProperties);
@@ -5396,8 +5406,46 @@ function BaseMap(props) {
                               </Select.Option>
                             </Select>
                           </Form.Item>
-                          <Form.Item label="Line Width" name="lineWidth">
-                            <InputNumber min={1} max={10} addonAfter="px"/>
+                          <Form.Item label="Line Width">
+                            <Input.Group compact>
+                              <Form.Item
+                                name="lineWidthValue"
+                                noStyle
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Please input line width!",
+                                  },
+                                ]}
+                              >
+                                <InputNumber
+                                  min={1}
+                                  max={100}
+                                  style={{ width: "50%" }}
+                                  placeholder="Width"
+                                />
+                              </Form.Item>
+                              <Form.Item
+                                name="lineWidthUnit"
+                                noStyle
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Please select unit!",
+                                  },
+                                ]}
+                                initialValue="pixels"
+                              >
+                                <Select style={{ width: "30%" }}>
+                                  <Select.Option value="pixels">
+                                    pixels
+                                  </Select.Option>
+                                  <Select.Option value="meters">
+                                    meters
+                                  </Select.Option>
+                                </Select>
+                              </Form.Item>
+                            </Input.Group>
                           </Form.Item>
                         </>
                       )}
@@ -5414,9 +5462,42 @@ function BaseMap(props) {
                           <Form.Item label="Opacity" name="opacity">
                             <InputNumber min={0} max={1} step={0.1} />
                           </Form.Item>
-                          <Form.Item label="Border Width" name="borderWidth">
-                            <InputNumber min={0} max={10} addonAfter="px"/>
+                          <Form.Item label="Border Width">
+                            <Input.Group compact>
+                              <Form.Item
+                                name="borderWidthValue"
+                                noStyle
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Enter border width!",
+                                  },
+                                ]}
+                              >
+                                <InputNumber
+                                  min={0}
+                                  max={100}
+                                  style={{ width: "50%" }}
+                                />
+                              </Form.Item>
+                              <Form.Item
+                                name="borderWidthUnit"
+                                noStyle
+                                rules={[
+                                  { required: true, message: "Select unit!" },
+                                ]}
+                                initialValue="pixels"
+                              >
+                                <Select style={{ width: "30%" }}>
+                                  <Select.Option value="pixels">pixels</Select.Option>
+                                  <Select.Option value="meters">
+                                    meters
+                                  </Select.Option>
+                                </Select>
+                              </Form.Item>
+                            </Input.Group>
                           </Form.Item>
+
                           <Form.Item label="Border Style" name="borderStyle">
                             <Select placeholder="Select border style">
                               <Select.Option value="solid">Solid</Select.Option>
@@ -5470,7 +5551,7 @@ function BaseMap(props) {
                                     <Select.Option
                                       key={icon.value}
                                       value={icon.value}
-                                      label={icon.title} 
+                                      label={icon.title}
                                     >
                                       {icon.icon}
                                     </Select.Option>
