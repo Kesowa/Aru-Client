@@ -37,6 +37,7 @@ interface TableProps {
   usedFilter: any;
   setSortOrder: any;
   setFilters: any;
+  setSearchName:any;
 }
 
 function MissionTable(props: TableProps) {
@@ -117,11 +118,15 @@ function MissionTable(props: TableProps) {
 
   let searchInput: any;
   const handleSearch = (selectedKeys: any, confirm: any, dataIndex: any) => {
+    if (dataIndex === "name") {
+      props.setSearchName(selectedKeys[0]);
+    };
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
   const handleReset = (clearFilters: any, confirm: any, close: any) => {
+    props.setSearchName("");
     clearFilters();
     confirm();
     close();
@@ -170,7 +175,12 @@ function MissionTable(props: TableProps) {
     filterIcon: (filtered: any) => (
       <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
     ),
-    onFilter: (value: any, record: any) => true,
+    ...(dataIndex === "name"
+      ? {}
+      : {
+          onFilter: (value: string, record: any) =>
+            record[dataIndex]?.toString().toLowerCase().includes(value.toLowerCase()),
+        }),
     onFilterDropdownOpenChange: (visible: any) => {
       if (visible) {
         setTimeout(() => searchInput.select());
