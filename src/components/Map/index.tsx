@@ -75,6 +75,7 @@ import {
   EyeOutlined,
   DeleteOutlined,
   EditOutlined,
+  MoreOutlined,
 } from "@ant-design/icons";
 import { TbFlag, TbFlagOff } from "react-icons/tb";
 import MarkerIcon from "../../static/MarkerIcon.png";
@@ -2653,6 +2654,23 @@ function BaseMap(props) {
     } else {
       nameTextWidth = layer.layerGroupId ? "119px" : "140px";
     }
+    const bulkActionsMenu: MenuProps = {
+      onClick: treeMenuOnClick,
+      items: [
+        {
+          key: "7",
+          label: "Group Selected Layers",
+        },
+        {
+          key: "8",
+          label: "Delete Selected Layers",
+        },
+        {
+          key: "9",
+          label: "Move Selected Layers",
+        },
+      ],
+    };
     return (
       <Dropdown
         menu={{ items: treeMenu(layer), onClick: treeMenuOnClick }}
@@ -2718,7 +2736,7 @@ function BaseMap(props) {
             <Tooltip>
               <EyeOutlined
                 style={{
-                  marginLeft: "2px",
+                  marginLeft: "-10px",
                   opacity: activeEyeIconLayerId === layer._id ? 1 : 0.6,
                   color:
                     activeEyeIconLayerId === layer._id ? "#3b86ff" : "inherit",
@@ -2746,7 +2764,7 @@ function BaseMap(props) {
             <Tooltip title="Edit Layer">
               <EditOutlined
                 style={{
-                  marginLeft: "10px",
+                  marginLeft: "5px",
                   opacity: activeEditIconLayerId === layer._id ? 1 : 0.6,
                   color:
                     activeEditIconLayerId === layer._id ? "#3b86ff" : "inherit",
@@ -2778,6 +2796,18 @@ function BaseMap(props) {
                 }}
               />
             </Tooltip>
+            <Dropdown menu={bulkActionsMenu} trigger={["click"]}  placement="topRight" >
+            <Tooltip title="Selected">
+              <MoreOutlined
+                style={{
+                  marginLeft: "3px",
+                  cursor: "pointer",
+                  opacity: 0.7,
+                }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </Tooltip>
+          </Dropdown>
             {layer.type === "Vector" && layer.isFlagged && (
               <FlagOutlined style={{ color: "#da1c5c" }} />
             )}
