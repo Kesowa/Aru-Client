@@ -147,7 +147,6 @@ export const UploadVectorData = ({
                   <Form.Item label="Line Style" name="lineStyle">
                     <Select placeholder="Select line style">
                       <Select.Option value="solid">Solid</Select.Option>
-                      <Select.Option value="dashed">Dashed</Select.Option>
                     </Select>
                   </Form.Item>
                   <Form.Item label="Line Width">
@@ -236,7 +235,6 @@ export const UploadVectorData = ({
                   <Form.Item label="Border Style" name="borderStyle">
                     <Select placeholder="Select border style">
                       <Select.Option value="solid">Solid</Select.Option>
-                      <Select.Option value="dashed">Dashed</Select.Option>
                       <Select.Option value="dotted">Dotted</Select.Option>
                     </Select>
                   </Form.Item>

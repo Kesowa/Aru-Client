@@ -36,7 +36,6 @@ interface TableProps {
   setTotal: any;
   usedFilter: any;
   setSortOrder: any;
-  setFilters: any;
   setSearchName:any;
 }
 
@@ -132,7 +131,6 @@ function MissionTable(props: TableProps) {
     close();
     setSearchText("");
     setSearchedColumn("");
-    props.setFilters("");
   };
   const getColumnSearchProps = (dataIndex: any) => ({
     filterDropdown: ({
@@ -517,15 +515,6 @@ function MissionTable(props: TableProps) {
   const handleTableChange = (pagination, filter, sorter) => {
     props.setPage(pagination.current);
     props.setLimit(pagination.pageSize);
-
-    let filterString = "";
-    Object.entries(filter).forEach((f: any) => {
-      if (f[1]) {
-        filterString += `${f[0]}:${f[1][0]},`;
-      }
-    });
-
-    props.setFilters(filterString.substring(0, filterString.length - 1));
 
     props.setSortOrder(`${sorter.field}:${sorter.order}`);
 

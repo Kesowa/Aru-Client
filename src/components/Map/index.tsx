@@ -2718,17 +2718,6 @@ function BaseMap(props) {
                   });
                 }
               }}
-              // onDoubleClick={() => {
-              //   if (!props.isBaseMap || layer.type === "Vector") {
-              //     setlayerToAddInAttributeTable({
-              //       name: layer.name,
-              //       type: layer.type,
-              //       id: layer._id,
-              //       path: layer.layerpath,
-              //       count: layer.featureCount,
-              //     });
-              //   }
-              // }}
             >
               {layer.name}
             </Text>
@@ -5468,9 +5457,6 @@ function BaseMap(props) {
                           <Form.Item label="Line Style" name="lineStyle">
                             <Select placeholder="Select line style">
                               <Select.Option value="solid">Solid</Select.Option>
-                              <Select.Option value="dashed">
-                                Dashed
-                              </Select.Option>
                             </Select>
                           </Form.Item>
                           <Form.Item label="Line Width">
@@ -5568,9 +5554,6 @@ function BaseMap(props) {
                           <Form.Item label="Border Style" name="borderStyle">
                             <Select placeholder="Select border style">
                               <Select.Option value="solid">Solid</Select.Option>
-                              <Select.Option value="dashed">
-                                Dashed
-                              </Select.Option>
                               <Select.Option value="dotted">
                                 Dotted
                               </Select.Option>

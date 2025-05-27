@@ -24,7 +24,6 @@ function MissionList() {
   const [missionCount, setMissionCount] = useState({});
   const [totalMissions, settotalMissions] = useState(0);
   const [sortOrder, setSortOrder] = useState("createdAt:descend");
-  const [searchFilters, setSearchFilters] = useState("");
   const [searchName, setSearchName] = useState("");
   const { Auth, logout } = useContext(AuthContext);
 
@@ -43,7 +42,6 @@ function MissionList() {
         setTotal={setTotal}
         usedFilter={usedFilter}
         setSortOrder={setSortOrder}
-        setFilters={setSearchFilters}
         setSearchName={setSearchName}
       />
     );
@@ -135,7 +133,6 @@ function MissionList() {
             limit,
             filter: usedFilter,
             sort: sortOrder,
-            searchFilters,
           },
         })
         .then((result) => {
@@ -189,7 +186,7 @@ function MissionList() {
 
   useEffect(() => {
     fetchMissions();
-  }, [page, limit, usedFilter, sortOrder, searchFilters, searchName,]);
+  }, [page, limit, usedFilter, sortOrder, searchName,]);
 
   //----------------------Render create mission based on permission----------------------------------------
   function renderCreateBtn() {
