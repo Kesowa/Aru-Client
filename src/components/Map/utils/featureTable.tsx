@@ -606,20 +606,6 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
         dataIndex: "index",
         width: 8 * 15, // 15 is experimental constant, selected after checking for responsiveness across various bottom bar heights
       },
-      {
-        title: "Color",
-        dataIndex: "color",
-        width: 5 * 15, // 15 is experimental constant, selected after checking for responsiveness across various bottom bar heights
-        render: (color) => (
-          <div
-            style={{
-              height: "20px",
-              width: "20px",
-              background: color,
-            }}
-          ></div>
-        ),
-      }
     );
 
     // ===== Calculating maxWidth of each column based on lengths of content and headings of the column,

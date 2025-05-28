@@ -2721,7 +2721,7 @@ function BaseMap(props) {
             >
               {layer.name}
             </Text>
-
+            
             <Tooltip>
               <EyeOutlined
                 style={{
