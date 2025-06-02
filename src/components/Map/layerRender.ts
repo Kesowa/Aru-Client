@@ -373,7 +373,13 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
                     }
                   }
                 }
-                return data.features;
+                const filteredFeatures = data.features.filter((feature) => {
+                  const isVisible = feature.properties?.isVisible;
+                  return isVisible === false || isVisible === undefined;
+                });
+                
+                console.log("Filtered features:", filteredFeatures);
+                return filteredFeatures;
               }),
             pickable: true,
             opacity: opacity,

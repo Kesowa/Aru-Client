@@ -2155,10 +2155,8 @@ function BaseMap(props) {
   }, []);
 
   useEffect(() => {
-    if (props.isBaseMap) {
       setLoading(true);
-      getAllLayers(null);
-    }
+      getAllLayers(id);
   }, [props.isBaseMap, refreshLayer]);
 
   //---------------Fetch all layers in mission----------------------------------------

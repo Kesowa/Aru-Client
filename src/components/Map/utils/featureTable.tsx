@@ -11,6 +11,7 @@ import {
   InputNumber,
   Row,
   Col,
+  Switch,
 } from "antd";
 import {
   SaveOutlined,
@@ -100,6 +101,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
   const [contentHeight, setContentHeight] = useState(160);
   const [search, setSearch] = useState(false);
   const [selectedRowsArray, setSelectedRowsArray] = useState<React.Key[]>([]);
+  const [featureToggleStates, setFeatureToggleStates] = useState<{[key: string]: boolean}>({});
   const page = props.page;
   const setPage = props.setPage;
   const limit = props.limit;
@@ -142,11 +144,29 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
     }));
     setCount(props.total);
     setData(obj);
+    // Initialize toggle states for new data
+    const initialToggleStates: {[key: string]: boolean} = {};
+    obj.forEach((item: any) => {
+      initialToggleStates[item.key] = item.isVisible || false;
+    });
+    setFeatureToggleStates(initialToggleStates);
   }, [props.tableData]);
 
   useEffect(() => {
     if (data) formTable();
   }, [data, editingKey]);
+
+  // Handle toggle state change
+  const handleToggleChange = (checked: boolean, record: any) => {
+    const newToggleStates = {
+      ...featureToggleStates,
+      [record.key]: checked
+    };
+    setFeatureToggleStates(newToggleStates);
+
+    // Use the updated save function with toggle parameters
+    save(record.key, record.featureIndex, true, checked);
+  };
 
   //-------------------------------Filter Layer By Range----------------------------------------
   const onFinish = async (values: any, key: any) => {
@@ -434,9 +454,15 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
     setEditingKey("");
   };
 
-  const save = async (key: React.Key, featureIndex: any) => {
+  const save = async (key: React.Key, featureIndex: any, isToggleUpdate = false, toggleValue = null) => {
     try {
-      const row = await form.validateFields();
+      let row = {};
+      
+      if (!isToggleUpdate) {
+        row = await form.validateFields();
+      } else if (toggleValue !== null) {
+        row = { isVisible: toggleValue };
+      }
 
       // Edit GeoJson
       const obj = { ...row };
@@ -463,12 +489,36 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
         .patch(`${apis.EDIT_GEOJSON_FEATURE}`, body)
         .then((res) => {
           console.log(res.data);
-          if (res.data.status) message.success(res.data.message);
-          else message.error(res.data.message);
+          if (res.data.status) {
+            message.success(res.data.message);
+            props.setRefreshLayer(!props.refreshLayer);
+
+            if (isToggleUpdate) {
+              setFeatureToggleStates(prev => ({
+                ...prev,
+                [key]: toggleValue
+              }));
+            }
+          } else {
+            message.error(res.data.message);
+            if (isToggleUpdate) {
+              setFeatureToggleStates(prev => ({
+                ...prev,
+                [key]: !toggleValue
+              }));
+            }
+          }
         })
         .catch((err) => {
           message.error(err.message);
           AxiosErrorHandler(err, logout);
+          if (isToggleUpdate) {
+            // Revert toggle state on API error
+            setFeatureToggleStates(prev => ({
+              ...prev,
+              [key]: !toggleValue
+            }));
+          }
         });
 
       const newData = [...data];
@@ -480,11 +530,15 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
           ...row,
         });
         setData(newData);
-        setEditingKey("");
+        if (!isToggleUpdate) {
+          setEditingKey("");
+        }
       } else {
         newData.push(row);
         setData(newData);
-        setEditingKey("");
+        if (!isToggleUpdate) {
+          setEditingKey("");
+        }
       }
       if (search) {
         const newData = [...tableData];
@@ -496,11 +550,15 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
             ...properties,
           });
           setTableData(newData);
-          setEditingKey("");
+          if (!isToggleUpdate) {
+            setEditingKey("");
+          }
         } else {
           newData.push(properties);
           setTableData(newData);
-          setEditingKey("");
+          if (!isToggleUpdate) {
+            setEditingKey("");
+          }
         }
       }
     } catch (errInfo) {
@@ -688,20 +746,31 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
                 />
               )}
               {props.canDeleteFeature && (
+                <>
                 <Popconfirm
-                  title="Sure to delete?"
-                  onConfirm={() => {
-                    handleDelete(record.key);
-                    deleteGeoJsonFeature(record.featureIndex);
-                  }}
-                >
-                  <Button
-                    type="link"
-                    size="small"
-                    disabled={editingKey !== ""}
-                    icon={<DeleteOutlined />}
-                  />
-                </Popconfirm>
+                title="Sure to delete?"
+                onConfirm={() => {
+                  handleDelete(record.key);
+                  deleteGeoJsonFeature(record.featureIndex);
+                }}
+              >
+                <Button
+                  type="link"
+                  size="small"
+                  disabled={editingKey !== ""}
+                  icon={<DeleteOutlined />}
+                />
+              </Popconfirm>
+                <Switch
+                  size="small"
+                  checked={featureToggleStates[record.key] || false}
+                  onChange={(checked) => handleToggleChange(checked, record)}
+                  disabled={editingKey !== ""}
+                  checkedChildren="ON"
+                  unCheckedChildren="OFF"
+                />
+                </>
+                
               )}
             </>
           );
