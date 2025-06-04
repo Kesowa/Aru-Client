@@ -149,7 +149,14 @@ const getIcon = (d) => {
   };
 };
 
-export const ILayerToDeckLayer = (layers: Layer[]) => {
+const LayerOrder = {
+  "Vector": 1,
+  "Raster": 0,
+}
+
+export const ILayerToDeckLayer = (slayers: Layer[]) => {
+  const layers = [...slayers];
+  layers.sort((a, b) => LayerOrder[a.type] - LayerOrder[b.type]);
   const meshOverlayActive = layers.some((layer) => layer._isMeshSource);
   return layers
     .filter((layer) => layer._isChecked === true)
