@@ -207,6 +207,8 @@ function BaseMap(props) {
   const [properties, setProperties] = useState<Record<string, string>>({});
   const [activeEyeIconLayerId, setActiveEyeIconLayerId] = useState<string | null>(null);
   const [activeEditIconLayerId, setActiveEditIconLayerId] = useState<string | null>(null);
+  const [selectedFeatureObjects, setSelectedFeatureObjects] = useState<any[]>([]);
+  const [multiSelectMode, setMultiSelectMode] = useState(false);
   const [dateRange, setDateRange] = useState([
     moment(
       moment().subtract(7, "d").format("YYYY-MM-DD") + " " + "00:00",
@@ -2639,6 +2641,13 @@ function BaseMap(props) {
         case "15":
           toggleElevation();
           break;
+        case "16":
+          setMultiSelectMode(prev => {
+            message.success(!prev ? "Multi-select enabled" : "Multi-select disabled");
+            return !prev;
+          });
+          break;
+          
         // case "16":
         //   handleMeshSourceOption(layer._id);
         //   break;
@@ -2666,6 +2675,10 @@ function BaseMap(props) {
         {
           key: "9",
           label: "Move Selected Layers",
+        },
+        {
+          key: "16",
+          label: "Enable Feature Multi-Select",
         },
       ],
     };
@@ -3026,7 +3039,7 @@ function BaseMap(props) {
   //   return 0;
   // }
 
-  const uploadProps = {
+  const uploadProps = { 
     name: "file",
     multiple: false,
     fileList,
@@ -3209,6 +3222,8 @@ function BaseMap(props) {
         console.log("metadata for me:", result.data.data);
         addLayer(result.data.data);
         message.success("Layer created!");
+        setSelectedFeatureObjects([]);
+        setMultiSelectMode(false);
       } else {
         message.error(result.data.message);
       }
@@ -3236,6 +3251,8 @@ function BaseMap(props) {
       setLayerName("");
       setLayerType("");
       setLayerProp(null);
+      setSelectedFeatureObjects([]);
+      setMultiSelectMode(false);
       form.resetFields();
     }
   };
@@ -4271,6 +4288,34 @@ function BaseMap(props) {
       console.log(error);
     }
   };
+  
+  // set geojson file for upload
+  const generateGeoJsonFileFromSelectedFeature = (): File | null => {
+    if (selectedFeatureObjects.length === 0) {
+      message.warning("No features selected to generate file.");
+      return null;
+    }
+  
+    const featureCollection = {
+      type: "FeatureCollection",
+      features: selectedFeatureObjects.map((f) => ({
+        ...f,
+        properties: {
+          ...f.properties,
+        },
+      })),
+    };
+  
+    const blob = new Blob([JSON.stringify(featureCollection, null, 2)], {
+      type: "application/geo+json",
+    });
+  
+    const file = new File([blob], "selected_features.geojson", {
+      type: "application/geo+json",
+    });
+    handleFileUpload(file);
+  };
+
 
   const [toolCoordinates, settoolCoordinates] = useState([0, 0]);
   const drawingMenuRef: any = useRef<HTMLElement>();
@@ -4655,6 +4700,24 @@ function BaseMap(props) {
         }}
         onDrag={() => {}}
         onClick={(info, event) => {
+          const feature = info.object;
+          if (!feature) return;
+
+          if (multiSelectMode) {
+            setSelectedFeatureObjects((prev) => {
+              const alreadyExists = prev.find(
+                (f) => f.properties.sys_id === feature.properties.sys_id
+              );
+              if (alreadyExists) {
+                return prev.filter(
+                  (f) => f.properties.sys_id !== feature.properties.sys_id
+                );
+              } else {
+                return [...prev, feature];
+              }
+            });
+            return;
+          }
           if (event.rightButton) {
             const layerIndex = AllLayers.findIndex(
               (layer) => info.layer?.id === layer._id
@@ -4922,6 +4985,21 @@ function BaseMap(props) {
                   </div>
                 </Tooltip>
               )}
+              {multiSelectMode && (
+              <Tooltip
+                title="Complete Feature Selection"
+                placement="bottom"
+              >
+                <div
+                  className="time-filter-tool"
+                  onClick={() => {
+                    generateGeoJsonFileFromSelectedFeature();
+                  }}
+                >
+                  <Text strong>Complete</Text>
+                </div>
+              </Tooltip>
+              )}
               <Tooltip title="digitize image to map" placement="bottom">
                 <div
                   className="time-filter-tool"
@@ -5171,7 +5249,7 @@ function BaseMap(props) {
                   />
                 </div>
               )}
-             <Dropdown
+              <Dropdown
                 menu={{ items: sortMenu, onClick: sortMenuOnClick }}
                 trigger={["click"]}
               >
@@ -5540,7 +5618,7 @@ function BaseMap(props) {
                                 initialValue="pixels"
                               >
                                 <Select style={{ width: "30%" }}>
-                                  <Select.Option value="pixels">pixels</Select.Option>
+                                <Select.Option value="pixels">pixels</Select.Option>
                                   <Select.Option value="meters">
                                     meters
                                   </Select.Option>
