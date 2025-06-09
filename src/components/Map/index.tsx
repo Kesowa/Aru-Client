@@ -3223,7 +3223,12 @@ function BaseMap(props) {
         addLayer(result.data.data);
         message.success("Layer created!");
         setSelectedFeatureObjects([]);
+        if(multiSelectMode){
+          setTimeout(() => {
+            createLayerGroup({ name: "Category" },result.data.data._id);
+          },6000);
         setMultiSelectMode(false);
+        };
       } else {
         message.error(result.data.message);
       }
@@ -4363,16 +4368,20 @@ function BaseMap(props) {
   const [toGroupForm] = Form.useForm();
   const [editForm] = Form.useForm();
 
-  const createLayerGroup = (data) => {
+  const createLayerGroup = (data,id = undefined) => {
     setLoading(true);
     const layersToGroup = AllLayers.filter(
       (layer) =>
         layer._isChecked && layer.type === ["", "Vector", "Raster"][moveType]
     ).map((layer) => layer._id);
 
+    if (multiSelectMode && id && !layersToGroup.includes(id)) {
+      layersToGroup.push(id);
+    };
+
     http
       .post(`${apis.CREATE_GROUP_LAYER}`, {
-        name: data.name,
+        name: multiSelectMode ? "category" : data.name,
         layers: layersToGroup,
       })
       .then((result) => {
