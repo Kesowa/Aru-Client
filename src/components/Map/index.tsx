@@ -3226,7 +3226,7 @@ function BaseMap(props) {
         if(multiSelectMode){
           setTimeout(() => {
             createLayerGroup({ name: "Category" },result.data.data._id);
-          },6000);
+          },2000);//if reuired then time can be set of one sec 
         setMultiSelectMode(false);
         };
       } else {
@@ -4591,8 +4591,8 @@ function BaseMap(props) {
   }
 
   const memoizedAllLayers = useMemo(
-    () => ILayerToDeckLayer(AllLayers),
-    [AllLayers]
+    () => ILayerToDeckLayer(AllLayers,selectedFeatureObjects),
+    [AllLayers,selectedFeatureObjects]
   );
   const memoizedMissionLayers = useMemo(
     () => MissionLayerToDeckLayer(MissionLayers),

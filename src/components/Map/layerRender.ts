@@ -181,7 +181,7 @@ const getIcon = (d) => {
   };
 };
 
-export const ILayerToDeckLayer = (layers: Layer[]) => {
+export const ILayerToDeckLayer = (layers: Layer[], selectedFeatureObjects?) => {
   const meshOverlayActive = layers.some((layer) => layer._isMeshSource);
   return layers
     .filter((layer) => layer._isChecked === true)
@@ -355,55 +355,62 @@ export const ILayerToDeckLayer = (layers: Layer[]) => {
             ...maskProps,
           });
         else
-          return new GeoJsonLayer({
-            id: maskProps.extensions ? layer._id + ".ext" : layer._id,
-            data: fetch(STATIC_URL + layer.layerpath)
-              .then((response) => response.json())
-              .then((data) => {
-                if (layer._metadata?.highlightIndexes) {
-                  for (const idx of layer._metadata?.highlightIndexes) {
-                    if (idx) {
-                      const oldColor = data.features[idx].properties?.color;
-                      if (oldColor)
-                        data.features[idx].properties.color =
-                          invertColor(oldColor);
-                      else data.features[idx].properties.color = "808080"; // light grey
-                      // if property has no color, it would get assigned black ("000000") as default
+        return new GeoJsonLayer({
+          id: maskProps.extensions ? layer._id + ".ext" : layer._id,
+          data: fetch(STATIC_URL + layer.layerpath)
+            .then((response) => response.json())
+            .then((data) => {
+              if (layer._metadata?.highlightIndexes) {
+                for (const idx of layer._metadata?.highlightIndexes) {
+                  if (idx) {
+                    const oldColor = data.features[idx].properties?.color;
+                    if (oldColor)
+                      data.features[idx].properties.color = 
+                         invertColor(oldColor);
+                    else data.features[idx].properties.color = "808080"; // light grey
+                   // if property has no color, it would get assigned black ("000000") as default
                       // so to highlight property, light grey used
                     }
                   }
                 }
-                const filteredFeatures = data.features.filter((feature) => {
-                  const isVisible = feature.properties?.isVisible;
-                  return isVisible === false || isVisible === undefined;
-                });
-                
-                console.log("Filtered features:", filteredFeatures);
-                return filteredFeatures;
-              }),
-            pickable: true,
-            opacity: opacity,
-            stroked: [
-              featureTypes.MULTI_POLYGON,
-              featureTypes.POLYGON,
-            ].includes(featureType[layer.vector]),
-            filled: [featureTypes.MULTI_POLYGON, featureTypes.POLYGON].includes(
-              featureType[layer.vector]
-            ),
-            extruded: false,
-            lineWidthUnits: "pixels",
-            lineWidthScale: 4,
-            lineWidthMinPixels: 2,
-            getLineColor: (d) =>
-              d.properties?.color
-                ? hexToRGB(d.properties?.color as string)
-                : hexToRGB("#000000"),
-            getFillColor: (d) =>
-              d.properties?.color
+              const filteredFeatures = data.features.filter((feature) => {
+                const isVisible = feature.properties?.isVisible;
+                return isVisible === false || isVisible === undefined;
+              });
+        
+              return filteredFeatures;
+            }),
+          pickable: true,
+          opacity: opacity,
+          stroked: [
+            featureTypes.MULTI_POLYGON,
+            featureTypes.POLYGON,
+          ].includes(featureType[layer.vector]),
+          filled: [featureTypes.MULTI_POLYGON, featureTypes.POLYGON].includes(
+            featureType[layer.vector]
+          ),
+          extruded: false,
+          lineWidthUnits: "pixels",
+          lineWidthScale: 4,
+          lineWidthMinPixels: 2,
+          getLineColor: (d) =>
+            d.properties?.color
+              ? hexToRGB(d.properties?.color as string)
+              : hexToRGB("#000000"),
+          getFillColor: (d) =>
+            selectedFeatureObjects.some(
+              (f) => f.properties.sys_id === d.properties.sys_id
+            )
+              ? [255, 0, 0, 150] // red 
+              : d.properties?.color
                 ? hexToRGB(d.properties?.color as string, 50)
                 : hexToRGB("#000000"),
-            ...maskProps,
-          });
+          updateTriggers: {
+            getFillColor: [selectedFeatureObjects],
+          },
+        
+          ...maskProps,
+        });        
       }
     });
 };
