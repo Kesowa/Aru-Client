@@ -375,7 +375,7 @@ export const ILayerToDeckLayer = (layers: Layer[], selectedFeatureObjects?) => {
                 }
               const filteredFeatures = data.features.filter((feature) => {
                 const isVisible = feature.properties?.isVisible;
-                return isVisible === false || isVisible === undefined;
+                return isVisible === true || isVisible === undefined;
               });
         
               return filteredFeatures;

@@ -147,7 +147,7 @@ const FeatureTable: React.FC<FeatureTableProps> = (props) => {
     // Initialize toggle states for new data
     const initialToggleStates: {[key: string]: boolean} = {};
     obj.forEach((item: any) => {
-      initialToggleStates[item.key] = item.isVisible || false;
+      initialToggleStates[item.key] = item.isVisible ?? true;
     });
     setFeatureToggleStates(initialToggleStates);
   }, [props.tableData]);
