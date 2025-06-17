@@ -2732,7 +2732,7 @@ function BaseMap(props) {
             >
               {layer.name}
             </Text>
-            
+
             <Tooltip>
               <EyeOutlined
                 style={{
@@ -2764,7 +2764,7 @@ function BaseMap(props) {
             <Tooltip title="Edit Layer">
               <EditOutlined
                 style={{
-                  marginLeft: "5px",
+                  marginLeft: "4px",
                   opacity: activeEditIconLayerId === layer._id ? 1 : 0.6,
                   color:
                     activeEditIconLayerId === layer._id ? "#3b86ff" : "inherit",
@@ -2772,42 +2772,53 @@ function BaseMap(props) {
                   transition: "all 0.3s ease",
                 }}
                 onClick={(e) => {
-                  if (props.isBaseMap ? perms.canEditBaseLayer : perms.canEditLayer) {
-                      e.stopPropagation();
-                      const type = layer.type;
+                  if (
+                    props.isBaseMap
+                      ? perms.canEditBaseLayer
+                      : perms.canEditLayer
+                  ) {
+                    e.stopPropagation();
+                    const type = layer.type;
 
-                      showModal1();
-                      setSelectedLayerId(layer._id);
-                      setCaptureDate(layer.captureDate);
-                      setLayerName(layer.name);
-                      setDefaultLayerType({
-                        layerType: type,
-                        layerProp: type === "Vector" ? layer.vector : layer.raster,
-                        featureType:
-                          type === "Vector" ? featureType[layer.vector] : null,
-                      });
-                      setSelectedLayerType(type.toLowerCase());
+                    showModal1();
+                    setSelectedLayerId(layer._id);
+                    setCaptureDate(layer.captureDate);
+                    setLayerName(layer.name);
+                    setDefaultLayerType({
+                      layerType: type,
+                      layerProp:
+                        type === "Vector" ? layer.vector : layer.raster,
+                      featureType:
+                        type === "Vector" ? featureType[layer.vector] : null,
+                    });
+                    setSelectedLayerType(type.toLowerCase());
 
-                      setActiveEditIconLayerId(layer._id);
-                      setTimeout(() => {
-                        setActiveEditIconLayerId(null);
-                      }, 7000);
+                    setActiveEditIconLayerId(layer._id);
+                    setTimeout(() => {
+                      setActiveEditIconLayerId(null);
+                    }, 7000);
                   }
                 }}
               />
             </Tooltip>
-            <Dropdown menu={bulkActionsMenu} trigger={["click"]}  placement="topRight" >
-            <Tooltip title="Selected">
-              <MoreOutlined
-                style={{
-                  marginLeft: "3px",
-                  cursor: "pointer",
-                  opacity: 0.7,
-                }}
-                onClick={(e) => e.stopPropagation()}
-              />
-            </Tooltip>
-          </Dropdown>
+            {layer._isChecked && (
+              <Dropdown
+                menu={bulkActionsMenu}
+                trigger={["click"]}
+                placement="topRight"
+              >
+                <Tooltip title="Selected">
+                  <MoreOutlined
+                    style={{
+                      marginLeft: "1px",
+                      cursor: "pointer",
+                      opacity: 0.7,
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </Tooltip>
+              </Dropdown>
+            )}
             {layer.type === "Vector" && layer.isFlagged && (
               <FlagOutlined style={{ color: "#da1c5c" }} />
             )}
@@ -3225,7 +3236,7 @@ function BaseMap(props) {
         setSelectedFeatureObjects([]);
         if(multiSelectMode){
           setTimeout(() => {
-            createLayerGroup({ name: "Category" },result.data.data._id);
+            createLayerGroup({ name: result.data.data.name },result.data.data._id);
           },2000);//if reuired then time can be set of one sec 
         setMultiSelectMode(false);
         };
@@ -4370,10 +4381,16 @@ function BaseMap(props) {
 
   const createLayerGroup = (data,id = undefined) => {
     setLoading(true);
-    const layersToGroup = AllLayers.filter(
+    const filteredLayers = AllLayers.filter(
       (layer) =>
         layer._isChecked && layer.type === ["", "Vector", "Raster"][moveType]
-    ).map((layer) => layer._id);
+    );
+    
+    const layersToGroup = filteredLayers.map((layer) => layer._id);
+
+    const firstLayerName = filteredLayers[0]?.name
+  ? `${filteredLayers[0].name} - Group`
+  : null;
 
     if (multiSelectMode && id && !layersToGroup.includes(id)) {
       layersToGroup.push(id);
@@ -4381,7 +4398,7 @@ function BaseMap(props) {
 
     http
       .post(`${apis.CREATE_GROUP_LAYER}`, {
-        name: multiSelectMode ? "category" : data.name,
+        name: multiSelectMode ? firstLayerName : data.name,
         layers: layersToGroup,
       })
       .then((result) => {
