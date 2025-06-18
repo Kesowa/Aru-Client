@@ -182,6 +182,10 @@ const getIcon = (d) => {
 };
 
 export const ILayerToDeckLayer = (layers: Layer[], selectedFeatureObjects?) => {
+const LayerOrder = {
+  "Vector": 1,
+  "Raster": 0,
+}
   const meshOverlayActive = layers.some((layer) => layer._isMeshSource);
   return layers
     .filter((layer) => layer._isChecked === true)
