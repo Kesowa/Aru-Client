@@ -31,7 +31,7 @@
     "antd": "^4.24.10",
     "antd-img-crop": "^3.9.0",
     "array-move": "^3.0.1",
-    "axios": "^0.21.2",
+    "axios": "^0.30.0",
     "chart.js": "^4.3.0",
     "chonky": "^2.3.2",
     "chonky-icon-fontawesome": "^2.3.2",
