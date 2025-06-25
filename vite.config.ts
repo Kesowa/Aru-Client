@@ -44,10 +44,10 @@ export default defineConfig({
     wasm(),
     topLevelAwait(),
     reactRefresh(),
-    eslint({
-      failOnWarning: false,
-      failOnError: false,
-    }),
+    // eslint({
+    //   failOnWarning: false,
+    //   failOnError: false,
+    // }),
     tsconfigPaths(),
     svgrPlugin({
       svgrOptions: {
