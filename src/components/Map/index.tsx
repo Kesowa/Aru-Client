@@ -2656,11 +2656,11 @@ function BaseMap(props) {
       }
     };
     let nameTextWidth: string;
-    if (layer.type === "Raster") {
-      nameTextWidth = layer.layerGroupId ? "139px" : "160px";
-    } else {
+    // if (layer.type === "Raster") {
+    //   nameTextWidth = layer.layerGroupId ? "139px" : "160px";
+    // } else {
       nameTextWidth = layer.layerGroupId ? "119px" : "140px";
-    }
+    // }
     const bulkActionsMenu: MenuProps = {
       onClick: treeMenuOnClick,
       items: [
