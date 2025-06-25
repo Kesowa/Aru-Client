@@ -2676,10 +2676,14 @@ function BaseMap(props) {
           key: "9",
           label: "Move Selected Layers",
         },
-        {
-          key: "16",
-          label: "Enable Feature Multi-Select",
-        },
+        ...(layer.type === "Vector"
+          ? [
+              {
+                key: "16",
+                label: "Enable Feature Multi-Select",
+              },
+            ]
+          : []),
       ],
     };
     return (
