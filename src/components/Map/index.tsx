@@ -2659,7 +2659,7 @@ function BaseMap(props) {
     // if (layer.type === "Raster") {
     //   nameTextWidth = layer.layerGroupId ? "139px" : "160px";
     // } else {
-      nameTextWidth = layer.layerGroupId ? "119px" : "140px";
+      nameTextWidth = layer.layerGroupId ? "7.5rem" : "8.75rem";
     // }
     const bulkActionsMenu: MenuProps = {
       onClick: treeMenuOnClick,
