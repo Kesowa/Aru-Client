@@ -202,6 +202,7 @@ const StageThree: FC<StageThreeProps> = ({
     }
 
     setLoading(true);
+    console.log("flightDetails before API:", flightDetails);
     let data = {
       name: missionName,
       deliverables,
@@ -217,10 +218,13 @@ const StageThree: FC<StageThreeProps> = ({
           duration: flightDetails.duration,
           geoLocation: flightDetails.geolocation,
           centerPoints: flightDetails.centerPoints,
+          pilotID: flightDetails.pilotID,  
         },
         geoFence: flightDetails.geoFence,
       }],
     };
+    console.log("Mission data being sent:", data);
+    console.log("FlightDetails object inside Mission data:", data.flights[0].flightDetails);
     if (client) {
       data["clientId"] = [client];
     }

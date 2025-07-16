@@ -182,6 +182,7 @@ function MissionView() {
               : `${apis.GET_MISSION_ID_CLIENT}${missionId}`
           );
           mission = result.data.data;
+          console.log(mission)
         } catch (err) {
           message.error("Something went wrong");
           AxiosErrorHandler(err, logout);
