@@ -218,6 +218,7 @@ const StageThree: FC<StageThreeProps> = ({
             duration: flightDetails.duration,
             geoLocation: flightDetails.geolocation,
             centerPoints: flightDetails.centerPoints,
+            pilotID: flightDetails.pilotID,  
           },
           geoFence: flightDetails.geoFence,
         },
