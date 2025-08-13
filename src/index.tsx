@@ -2,6 +2,9 @@ import "./index.less";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import * as serviceWorker from "./serviceWorker";
+import { setChonkyDefaults } from 'chonky';
+import { ChonkyIconFA } from 'chonky-icon-fontawesome';
+setChonkyDefaults({ iconComponent: ChonkyIconFA });
 import App from "./App";
 
 const container = document.getElementById("root")!;
