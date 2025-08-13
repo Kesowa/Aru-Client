@@ -80,39 +80,6 @@ function ImageDocs(props) {
 
   const { thread, openThread } = useContext(ThreadContext);
 
-  // !WARN turning this into a state breaks the image modal open functionality
-  // Probably because the setState triggers a re-render, which the image grid (and not the image list) element cannot handle
-  let longPressTimer: NodeJS.Timeout | null = null;
-  const [longPressOccurred, setLongPressOccurred] = useState(false);
-
-  const handleLongPressStart = (item: any) => {
-    console.log("long press started!");
-    const timer = setTimeout(() => {
-      console.log("Timer timing!");
-      setActivateSelection(true);
-      setCheckedList(prev => {
-        console.log("Executing...");
-        if (prev.includes(item._id)) {
-          return prev.filter((id: string) => id !== item._id);
-        }
-        return [...prev, item._id];
-      });
-      setLongPressOccurred(true);
-    }, 500);
-    longPressTimer = timer;
-  };
-
-  const handleLongPressEnd = () => {
-    console.log("Handling end");
-    if (longPressTimer !== null) {
-      console.log("Clearing timeout!", longPressTimer);
-      clearTimeout(longPressTimer);
-      longPressTimer = null;
-    } else {
-      setTimeout(() => setLongPressOccurred(false), 100);
-    }
-  };
-
   const imgMenu: MenuProps["items"] = (data) => {
     const item = [
       {
@@ -499,27 +466,6 @@ function ImageDocs(props) {
             <Image
               key={`${item._id}`}
               style={imgStyle}
-              onMouseDown={() => {
-                console.log("Mouse down!");
-                handleLongPressStart(item)
-              }}
-              onMouseUp={handleLongPressEnd}
-              onTouchStart={() => handleLongPressStart(item)}
-              onTouchEnd={handleLongPressEnd}
-              onClick={() => {
-                if (longPressOccurred) {
-                  setLongPressOccurred(false);
-                  return;
-                }
-                if (activateSelection) {
-                  if (checkedList.includes(item._id)) {
-                    const filtered = checkedList.filter((i: any) => i !== item._id);
-                    setCheckedList(filtered);
-                  } else {
-                    setCheckedList([...checkedList, item._id]);
-                  }
-                } else { /* empty */ }
-              }}
               src={STATIC_URL + "/documents/1x_" + item.filePath.split("/")[2]}
               preview={
                 !preview
