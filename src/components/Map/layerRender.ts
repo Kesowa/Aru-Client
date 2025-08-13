@@ -19,6 +19,7 @@ import { MASK_ID } from ".";
 import { featureType, featureTypes } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
 import { handleHover } from "./utils/elevationTooltip";
+import apis from "src/services/apis";
 
 export type Layer = ILayer & {
   _isChecked?: boolean;
@@ -120,55 +121,83 @@ const getRasterDataUrl = (layer: Layer) => {
   }
 };
 
-
-const getIcon = (d) => {
-  const iconSelector = (iconType) => {
-    let icon = "";
+const getStaticIcon = (iconName: string) => {
+  const iconSelector = (iconType: string) => {
     switch (iconType) {
       case "MarkerIcon":
-        icon = MarkerIcon;
-        break;
+        return MarkerIcon;
       case "TankIcon":
-        icon = TankIcon;
-        break;
+        return TankIcon;
       case "DotIcon":
-        icon = DotIcon;
-        break;
+        return DotIcon;
       case "ValveIcon":
-        icon = ValveIcon;
-        break;
+        return ValveIcon;
+      default:
+        return null;
     }
-    return icon;
   };
+  const iconUrl = iconSelector(iconName);
+  if (iconUrl !== null) {
+    return {
+      url: iconSelector(iconName),
+      width: 100,
+      height: 129,
+      anchorY: 125,
+      mask: true,
+    }
+  }
+  return null;
+};
+
+// const IconCache = new Map();
+const getIcon = (d) => {
+  if (!d.properties?.icon) {
+    return getStaticIcon("MarkerIcon");
+  }
+  const staticIcon = getStaticIcon(d.properties?.icon);
+  if (staticIcon !== null) {
+    return staticIcon;
+  };
+  // let icon = IconCache.get(d.properties?.icon);
+  // if (icon === undefined) {
+  //   try {
+  //     const iconRes = await http.get(`${API_URL}${apis.GET_ICON.replace(":iconID", d.properties.icon)}`);
+  //     if (iconRes.status == 200) {
+  //       IconCache[iconRes.data.data._id] = iconRes.data.data;
+  //       icon = iconRes.data.data;
+  //     }
+  //     else {
+  //       throw new Error("icon not found");
+  //     }
+  //   } catch (e) {
+  //     return getStaticIcon("MarkerIcon");
+  //   }
+  // }
   return {
-    url: iconSelector(d.properties.icon),
+    url: `${STATIC_URL}${d.properties.icon}`,
     width: 100,
     height: 129,
     anchorY: 125,
-    mask: true,
   };
 };
 
+export const ILayerToDeckLayer = (layers: Layer[], selectedFeatureObjects?) => {
 const LayerOrder = {
   "Vector": 1,
   "Raster": 0,
 }
-
-export const ILayerToDeckLayer = (slayers: Layer[]) => {
-  const layers = [...slayers];
-  layers.sort((a, b) => LayerOrder[a.type] - LayerOrder[b.type]);
   const meshOverlayActive = layers.some((layer) => layer._isMeshSource);
   return layers
     .filter((layer) => layer._isChecked === true)
     .map((layer) => {
       let maskProps: Record<string, any> = layer._isMasked
         ? {
-            // enable masking
-            extensions: [new MaskExtension()],
-            maskId: MASK_ID,
-            // bring masked layers above others
-            zIndex: 9999,
-          }
+          // enable masking
+          extensions: [new MaskExtension()],
+          maskId: MASK_ID,
+          // bring masked layers above others
+          zIndex: 9999,
+        }
         : {};
 
       const opacity = layer._metadata?.layerOpacity ?? 1;
@@ -330,49 +359,62 @@ export const ILayerToDeckLayer = (slayers: Layer[]) => {
             ...maskProps,
           });
         else
-          return new GeoJsonLayer({
-            id: maskProps.extensions ? layer._id + ".ext" : layer._id,
-            data: fetch(STATIC_URL + layer.layerpath)
-              .then((response) => response.json())
-              .then((data) => {
-                if (layer._metadata?.highlightIndexes) {
-                  for (const idx of layer._metadata?.highlightIndexes) {
-                    if (idx) {
-                      const oldColor = data.features[idx].properties?.color;
-                      if (oldColor)
-                        data.features[idx].properties.color =
-                          invertColor(oldColor);
-                      else data.features[idx].properties.color = "808080"; // light grey
-                      // if property has no color, it would get assigned black ("000000") as default
+        return new GeoJsonLayer({
+          id: maskProps.extensions ? layer._id + ".ext" : layer._id,
+          data: fetch(STATIC_URL + layer.layerpath)
+            .then((response) => response.json())
+            .then((data) => {
+              if (layer._metadata?.highlightIndexes) {
+                for (const idx of layer._metadata?.highlightIndexes) {
+                  if (idx) {
+                    const oldColor = data.features[idx].properties?.color;
+                    if (oldColor)
+                      data.features[idx].properties.color = 
+                         invertColor(oldColor);
+                    else data.features[idx].properties.color = "808080"; // light grey
+                   // if property has no color, it would get assigned black ("000000") as default
                       // so to highlight property, light grey used
                     }
                   }
                 }
-                return data.features;
-              }),
-            pickable: true,
-            opacity: opacity,
-            stroked: [
-              featureTypes.MULTI_POLYGON,
-              featureTypes.POLYGON,
-            ].includes(featureType[layer.vector]),
-            filled: [featureTypes.MULTI_POLYGON, featureTypes.POLYGON].includes(
-              featureType[layer.vector]
-            ),
-            extruded: false,
-            lineWidthUnits: "pixels",
-            lineWidthScale: 4,
-            lineWidthMinPixels: 2,
-            getLineColor: (d) =>
-              d.properties?.color
-                ? hexToRGB(d.properties?.color as string)
-                : hexToRGB("#000000"),
-            getFillColor: (d) =>
-              d.properties?.color
+              const filteredFeatures = data.features.filter((feature) => {
+                const isVisible = feature.properties?.isVisible;
+                return isVisible === true || isVisible === undefined;
+              });
+        
+              return filteredFeatures;
+            }),
+          pickable: true,
+          opacity: opacity,
+          stroked: [
+            featureTypes.MULTI_POLYGON,
+            featureTypes.POLYGON,
+          ].includes(featureType[layer.vector]),
+          filled: [featureTypes.MULTI_POLYGON, featureTypes.POLYGON].includes(
+            featureType[layer.vector]
+          ),
+          extruded: false,
+          lineWidthUnits: "pixels",
+          lineWidthScale: 4,
+          lineWidthMinPixels: 2,
+          getLineColor: (d) =>
+            d.properties?.color
+              ? hexToRGB(d.properties?.color as string)
+              : hexToRGB("#000000"),
+          getFillColor: (d) =>
+            selectedFeatureObjects.some(
+              (f) => f.properties.sys_id === d.properties.sys_id
+            )
+              ? [255, 0, 0, 150] // red 
+              : d.properties?.color
                 ? hexToRGB(d.properties?.color as string, 50)
                 : hexToRGB("#000000"),
-            ...maskProps,
-          });
+          updateTriggers: {
+            getFillColor: [selectedFeatureObjects],
+          },
+        
+          ...maskProps,
+        });        
       }
     });
 };

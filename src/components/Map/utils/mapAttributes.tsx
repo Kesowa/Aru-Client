@@ -163,7 +163,7 @@ const MapAttributes: React.FC<Props> = (props) => {
       }
     };
   }, [tenantId]);
-
+  
   const menu = (
     <Menu onClick={({ key }) => invokeInference(key)}>
       <Menu.Item key="deepforest">Tree Count</Menu.Item>

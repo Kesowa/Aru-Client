@@ -1499,6 +1499,12 @@ function Videos(props) {
     setLongPressTimer(timer);
   };
 
+  useEffect(() => {
+    if (checkedList.length === 0 && activateSelection) {
+      setActivateSelection(false);
+    }
+  }, [checkedList, activateSelection]);
+
   const handleLongPressEnd = () => {
     if (longPressTimer) {
       clearTimeout(longPressTimer);

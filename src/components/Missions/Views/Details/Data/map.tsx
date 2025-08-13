@@ -12,8 +12,6 @@ import {
 import "./data.less";
 import goToMap from "../../../../../assets/go-to-map.svg";
 import { useHistory } from "react-router-dom";
-import { setChonkyDefaults } from "chonky";
-import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import moment from "moment";
 import apis from "../../../../../services/apis";
 import { FileTextOutlined, DownloadOutlined } from "@ant-design/icons";
@@ -28,8 +26,6 @@ import io from "src/services/socketConnect";
 import { API_URL, STATIC_URL } from "src/constants";
 import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "src/components/shared/Loader";
-
-setChonkyDefaults({ iconComponent: ChonkyIconFA });
 
 const { Title } = Typography;
 function Map(props) {

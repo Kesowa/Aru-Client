@@ -52,6 +52,7 @@ function DashboardContent() {
   const [statsRefresh, setStatsRefresh] = useState(true);
   const [expiryInfo, setExpiryInfo] = useState<ExpiryInfo | null>(null);
   const [totalMissionsOfTenant, setTotalMissionsOfTenant] = useState(null);
+  const [latestMission,setLatestMission] = useState(null);
 
   const { Auth, logout } = useContext(AuthContext);
 
@@ -408,6 +409,11 @@ function DashboardContent() {
           },
         })
         .then((result) => {
+          const missions = result.data.data;
+          const latestMission = missions.reduce((latest, current) => {
+            return new Date(current.createdAt) > new Date(latest.createdAt) ? current : latest;
+          });
+          setLatestMission(latestMission);
           console.log(result.data.missionCount);
           if (result.data.missionCount.length > 0) {
             let totalCount = 0;
@@ -527,7 +533,48 @@ function DashboardContent() {
             </Col>
           )}
         </Row>
-
+        {latestMission && (
+          <Row align="middle" style={{ marginTop: 10, marginBottom: 10 }}>
+            <Col>
+              <Text style={{ fontSize: 16, fontWeight: 500 }}>
+                <span role="img" aria-label="mission">
+                  ⚡
+                </span>{" "}
+                <strong>Your Latest Mission :</strong>{" "}
+                <Link
+                  to={{
+                    pathname: `/dashboard/mission/view/staff-${latestMission._id}`,
+                    state: { openLocationTab: true },
+                  }}
+                >
+                  {latestMission.name}
+                </Link>{" "}
+                •{" "}
+                <span>
+                  {new Date(latestMission.createdAt).toLocaleDateString(
+                    "en-IN"
+                  )}
+                </span>{" "}
+                •{" "}
+                <span
+                  style={{
+                    color:
+                      latestMission.status === "Completed"
+                        ? "#52c41a"
+                        : latestMission.status === "Pending"
+                        ? "#faad14"
+                        : latestMission.status === "Live"
+                        ? "#1890ff"
+                        : "#ff4d4f",
+                    fontWeight: 600,
+                  }}
+                >
+                  {latestMission.status}
+                </span>
+              </Text>
+            </Col>
+          </Row>
+        )}
         <Row>
           <Col span={12}>
             <Title className="shortcuts-title" level={4}>

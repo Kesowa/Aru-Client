@@ -24,7 +24,7 @@ function MissionList() {
   const [missionCount, setMissionCount] = useState({});
   const [totalMissions, settotalMissions] = useState(0);
   const [sortOrder, setSortOrder] = useState("createdAt:descend");
-  const [searchFilters, setSearchFilters] = useState("");
+  const [searchName, setSearchName] = useState("");
   const { Auth, logout } = useContext(AuthContext);
 
   const renderMissionTable = (filter: unknown) => {
@@ -42,7 +42,7 @@ function MissionList() {
         setTotal={setTotal}
         usedFilter={usedFilter}
         setSortOrder={setSortOrder}
-        setFilters={setSearchFilters}
+        setSearchName={setSearchName}
       />
     );
   };
@@ -127,12 +127,12 @@ function MissionList() {
       http
         .get(`${apis.GET_ALL_MISSIONS_FOR_TENANT}`, {
           params: {
+            name: searchName,
             id: tenantId,
             page,
             limit,
             filter: usedFilter,
             sort: sortOrder,
-            searchFilters,
           },
         })
         .then((result) => {
@@ -186,7 +186,7 @@ function MissionList() {
 
   useEffect(() => {
     fetchMissions();
-  }, [page, limit, usedFilter, sortOrder, searchFilters]);
+  }, [page, limit, usedFilter, sortOrder, searchName,]);
 
   //----------------------Render create mission based on permission----------------------------------------
   function renderCreateBtn() {

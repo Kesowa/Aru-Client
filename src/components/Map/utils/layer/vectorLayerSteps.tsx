@@ -17,10 +17,13 @@ import {
   Select,
   Collapse,
   Divider,
+  InputNumber,
+  Tooltip,
 } from "antd";
 import { UploadOutlined, InboxOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
 import { options } from "../propUtils";
+import { featureTypes } from "src/static/vectorprops";
 const { Dragger } = Upload;
 const { Item } = Form;
 const { Meta } = Card;
@@ -42,6 +45,10 @@ export const UploadVectorData = ({
   layerColor,
   setLayerColor,
   onChangeInherit,
+  layerType,
+  vectorSubtype,
+  setProperties,
+  handleIconUpload,
 }) => {
   return (
     <>
@@ -53,6 +60,37 @@ export const UploadVectorData = ({
           margin: "20px auto",
         }}
         form={form}
+        onValuesChange={(changedValues, allValues) => {
+          const relevantKeys = [
+            "lineStyle",
+            "fill",
+            "texture",
+            "opacity",
+            "borderStyle",
+          ];
+
+          const updatedProperties: Record<string, any> = {};
+          for (const key of relevantKeys) {
+            const value = allValues[key];
+            if (value !== undefined && value !== "") {
+              updatedProperties[key] = String(value);
+            }
+          }
+
+          const widthValue = allValues.lineWidthValue;
+          const widthUnit = allValues.lineWidthUnit;
+          if (widthValue !== undefined && widthUnit) {
+            updatedProperties.lineWidth = `${widthValue}${widthUnit}`;
+          }
+
+          const borderValue = allValues.borderWidthValue;
+          const borderUnit = allValues.borderWidthUnit;
+          if (borderValue !== undefined && borderUnit) {
+            updatedProperties.borderWidth = `${borderValue}${borderUnit}`;
+          }
+
+          setProperties(updatedProperties);
+        }}
       >
         <Row
           style={{
@@ -103,6 +141,105 @@ export const UploadVectorData = ({
                 onChange={changeLayerType}
               />
             </Form.Item>
+            {layerType === "Vector" &&
+              vectorSubtype === featureTypes.MULTI_LINE_STRING && (
+                <>
+                  <Form.Item label="Line Style" name="lineStyle">
+                    <Select placeholder="Select line style">
+                      <Select.Option value="solid">Solid</Select.Option>
+                    </Select>
+                  </Form.Item>
+                  <Form.Item label="Line Width">
+                    <Input.Group compact>
+                      <Form.Item
+                        name="lineWidthValue"
+                        noStyle
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please input line width!",
+                          },
+                        ]}
+                      >
+                        <InputNumber
+                          min={1}
+                          max={100}
+                          style={{ width: "50%" }}
+                          placeholder="Width"
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        name="lineWidthUnit"
+                        noStyle
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select unit!",
+                          },
+                        ]}
+                        initialValue="pixels"
+                      >
+                        <Select style={{ width: "30%" }}>
+                          <Select.Option value="pixels">pixels</Select.Option>
+                          <Select.Option value="meters">meters</Select.Option>
+                        </Select>
+                      </Form.Item>
+                    </Input.Group>
+                  </Form.Item>
+                </>
+              )}
+
+            {layerType === "Vector" &&
+              vectorSubtype === featureTypes.MULTI_POLYGON && (
+                <>
+                  <Form.Item label="Fill" name="fill">
+                    <Input type="color" />
+                  </Form.Item>
+                  <Form.Item label="Texture" name="texture">
+                    <Input placeholder="Enter texture URL or ID" />
+                  </Form.Item>
+                  <Form.Item label="Opacity" name="opacity">
+                    <InputNumber min={0} max={1} step={0.1} />
+                  </Form.Item>
+                  <Form.Item label="Border Width">
+                    <Input.Group compact>
+                      <Form.Item
+                        name="borderWidthValue"
+                        noStyle
+                        rules={[
+                          {
+                            required: true,
+                            message: "Enter border width!",
+                          },
+                        ]}
+                      >
+                        <InputNumber
+                          min={0}
+                          max={100}
+                          style={{ width: "50%" }}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        name="borderWidthUnit"
+                        noStyle
+                        rules={[{ required: true, message: "Select unit!" }]}
+                        initialValue="pixels"
+                      >
+                        <Select style={{ width: "30%" }}>
+                          <Select.Option value="pixels">pixels</Select.Option>
+                          <Select.Option value="meters">meters</Select.Option>
+                        </Select>
+                      </Form.Item>
+                    </Input.Group>
+                  </Form.Item>
+                  <Form.Item label="Border Style" name="borderStyle">
+                    <Select placeholder="Select border style">
+                      <Select.Option value="solid">Solid</Select.Option>
+                      <Select.Option value="dotted">Dotted</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </>
+              )}
             <Row>
               <Form.Item label="Capture Date" name="date">
                 <DatePicker
@@ -115,26 +252,60 @@ export const UploadVectorData = ({
                 />
               </Form.Item>
             </Row>
-            <Row>
-              <Form.Item label="Icon" name="icon">
-                <TreeSelect
-                  showSearch
-                  style={{
-                    width: "150%",
-                  }}
-                  dropdownStyle={{
-                    maxHeight: 400,
-                    overflow: "auto",
-                  }}
-                  placeholder="Select Icon"
-                  placement="bottomLeft"
-                  defaultValue={"MarkerIcon"}
-                  treeData={iconOptions}
-                  onChange={(value) => setIcon(value)}
-                  treeIcon={true}
-                />
-              </Form.Item>
-            </Row>
+            {layerType === "Vector" && vectorSubtype === featureTypes.POINT && (
+              <>
+                <Row align="middle" gutter={8}>
+                  <Col flex="auto">
+                    <Form.Item label="Icon" name="icon">
+                      <Select
+                        showSearch
+                        style={{ width: "100%" }}
+                        placeholder="Select Icon"
+                        defaultValue="MarkerIcon"
+                        onChange={(value) => {
+                          const selectedIcon = iconOptions.find(
+                            (icon) => icon.value === value
+                          );
+                          if (selectedIcon) {
+                            setIcon(`${selectedIcon.image}`);
+                          }
+                        }}
+                        optionLabelProp="label"
+                        filterOption={(input, option) =>
+                          (option?.label as string)
+                            ?.toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                      >
+                        {iconOptions.map((icon) => (
+                          <Select.Option
+                            key={icon.value}
+                            value={icon.value}
+                            label={icon.title}
+                          >
+                            {icon.icon}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </Col>
+
+                  <Col style={{ marginTop: "20px" }}>
+                    <Tooltip title="Upload custom icons">
+                      <Upload
+                        accept=".png,.jpg"
+                        showUploadList={false}
+                        customRequest={handleIconUpload}
+                      >
+                        <Button icon={<UploadOutlined />} type="default">
+                          Upload
+                        </Button>
+                      </Upload>
+                    </Tooltip>
+                  </Col>
+                </Row>
+              </>
+            )}
             <Row>
               <Alert
                 style={{

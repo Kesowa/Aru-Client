@@ -46,6 +46,8 @@ import {
   MenuProps,
   Space,
   Popover,
+  InputNumber,
+  UploadProps,
 } from "antd";
 import {
   UploadOutlined,
@@ -71,6 +73,9 @@ import {
   CheckCircleOutlined,
   ArrowLeftOutlined,
   EyeOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  MoreOutlined,
 } from "@ant-design/icons";
 import { TbFlag, TbFlagOff } from "react-icons/tb";
 import MarkerIcon from "../../static/MarkerIcon.png";
@@ -145,6 +150,7 @@ import { AuthContext } from "src/services/authUtils";
 import { LoaderContext } from "../shared/Loader";
 import { ThreadContext } from "src/services/threadUtils";
 import ElevationBlock, {valueChangeEmitter} from "./utils/elevationTooltip";
+import axios from "axios";
 const SvgToGeojson = lazy(() => import("../Digitizer/svgToGeojson"));
 
 export const getPolygon = (lat: number, lng: number, size: number) => [
@@ -197,6 +203,12 @@ function BaseMap(props) {
   // const [overlayId, setOverlayID] = useState<string>();
   const [isElevationEnabled, setIsElevationEnabled] = useState(false);
   const isElevationEnabledRef = useRef(isElevationEnabled);
+  const [vectorSubtype, setVectorSubtype] = useState<string | null>(null);
+  const [properties, setProperties] = useState<Record<string, string>>({});
+  const [activeEyeIconLayerId, setActiveEyeIconLayerId] = useState<string | null>(null);
+  const [activeEditIconLayerId, setActiveEditIconLayerId] = useState<string | null>(null);
+  const [selectedFeatureObjects, setSelectedFeatureObjects] = useState<any[]>([]);
+  const [multiSelectMode, setMultiSelectMode] = useState(false);
   const [dateRange, setDateRange] = useState([
     moment(
       moment().subtract(7, "d").format("YYYY-MM-DD") + " " + "00:00",
@@ -685,30 +697,16 @@ function BaseMap(props) {
   const [updateId, setUpdateId] = useState("");
   const [pointMarkerSize, setPointMarkerSize] = useState(1);
   const showMarkerSizeTool = false;
+  const [iconOptions, setIconOptions] = useState([]);
+  const [icon2, setIcon2] = useState<string | undefined>(undefined);
+  const [loadIcons, setLoadIcons] = useState(false);
 
-  const iconOptions = [
-    {
-      value: "MarkerIcon",
-      title: "Marker Icon",
-      icon: <img src={MarkerIcon} style={{ width: "10px" }} />,
-    },
-    {
-      value: "TankIcon",
-      title: "Tank Icon",
-      icon: <img src={TankIcon} style={{ width: "10px" }} />,
-    },
-    {
-      value: "ValveIcon",
-      title: "Valve Icon",
-      icon: <img src={ValveIcon} style={{ width: "10px" }} />,
-    },
-    {
-      value: "DotIcon",
-      title: "Dot Icon",
-      icon: <img src={DotIcon} style={{ width: "10px" }} />,
-    },
-  ];
-  const [icon2, setIcon2] = useState(iconOptions[0].value);
+  useEffect(() => {
+    if (iconOptions.length > 0 && !icon2) {
+      setIcon2(`${iconOptions[0].image}`);
+    }
+  }, [iconOptions]);
+  
   //----------------auto detect browser height---------------------
   // let initHeight = window.screen.height;
   // if(initHeight === 1080){
@@ -812,7 +810,141 @@ function BaseMap(props) {
     setIsModalVisible2(false);
     setSelectedKey();
   };
+  const handleDelete = (iconId) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this icon?",
+      onOk: async () => {
+        try {
+          const res = await http.delete(`${API_URL}${apis.DELETE_ICON.replace(":iconID", iconId)}`);
+          if (res.status === 200) {
+            message.success("Icon deleted successfully");
+            setLoadIcons(prev => !prev);
+          } else {
+            message.error("Failed to delete icon");
+          }
+        } catch (error) {
+          message.error("Error deleting icon");
+          console.error("Delete icon error:", error);
+        }
+      },
+    });
+  };
+  
+  useEffect(() => {
+    const fetchIcons = async () => {
+      try {
+        const res = await http.get(`${API_URL}${apis.GET_ICONS}`);
 
+        console.log("data : ",res);
+        const icons = res.data?.data || [];
+  
+        const formattedIcons = icons.map((icon: any) => ({
+          value: icon._id,
+          title: icon.name,
+          icon: (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  flex: 1,
+                  overflow: "hidden",
+                }}
+              >
+                <img
+                  src={`${STATIC_URL}${icon.image}`}
+                  alt={icon.name}
+                  style={{ width: "20px", height: "20px", flexShrink: 0 }}
+                />
+                <span
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    maxWidth: "100%",
+                  }}
+                >
+                  {icon.name}
+                </span>
+              </div>
+        
+              <DeleteOutlined
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(icon._id);
+                }}
+                style={{ color: "red", marginLeft: "12px", cursor: "pointer", flexShrink: 0 }}
+              />
+            </div>
+          ),
+          image: icon.image,
+        }));
+  
+        setIconOptions(formattedIcons);
+      } catch (err) {
+        console.error("Failed to fetch icons", err);
+        message.error("Unable to load icons");
+      }
+    };
+  
+    fetchIcons();
+  }, [loadIcons]);
+
+  const handleIconUpload: UploadProps["customRequest"] = async (options: any) => {
+    const { file, onSuccess, onError } = options;
+  
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+      message.error("Only PNG and JPG images are allowed");
+      return onError?.(new Error("Invalid file type"));
+    }
+  
+    try {
+      const cancelToken = axios.CancelToken.source();
+      const uploadToken = await uploadFile(
+        file,
+        DocModel.DOCUMENTS,
+        (prog) => options.onProgress?.({ percent: prog * 100 }),
+        cancelToken.token
+      );
+      const body = {
+        name: file.name.replace(/\.(png|jpg)$/i, ""),
+        image: uploadToken,
+        description: "",
+        tags: [],
+      };
+  
+      const res = await http.post(`${API_URL}${apis.CREATE_ICON}`, body, {
+        cancelToken: cancelToken.token,
+      });
+      const newIcon = res.data?.data;
+      setIcon2(newIcon.image);
+      form.setFieldsValue({ icon: newIcon.name });
+
+      setLoadIcons(prev => !prev);
+      message.success("Image uploaded successfully");
+      onSuccess?.(res.data, file);
+      console.log(res.data);
+  
+      return {
+        abort() {
+          cancelToken.cancel("Image upload cancelled");
+        },
+      };
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      message.error("Failed to upload image");
+      onError?.(err);
+    }
+  };
   // ----------------------------------------- disable default right click event of browser ----------------------------------------------------------
   useEffect(() => {
     window.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -2025,10 +2157,8 @@ function BaseMap(props) {
   }, []);
 
   useEffect(() => {
-    if (props.isBaseMap) {
       setLoading(true);
-      getAllLayers(null);
-    }
+      getAllLayers(id);
   }, [props.isBaseMap, refreshLayer]);
 
   //---------------Fetch all layers in mission----------------------------------------
@@ -2511,6 +2641,13 @@ function BaseMap(props) {
         case "15":
           toggleElevation();
           break;
+        case "16":
+          setMultiSelectMode(prev => {
+            message.success(!prev ? "Multi-select enabled" : "Multi-select disabled");
+            return !prev;
+          });
+          break;
+          
         // case "16":
         //   handleMeshSourceOption(layer._id);
         //   break;
@@ -2519,11 +2656,36 @@ function BaseMap(props) {
       }
     };
     let nameTextWidth: string;
-    if (layer.type === "Raster") {
-      nameTextWidth = layer.layerGroupId ? "139px" : "160px";
-    } else {
+    // if (layer.type === "Raster") {
+    //   nameTextWidth = layer.layerGroupId ? "139px" : "160px";
+    // } else {
       nameTextWidth = layer.layerGroupId ? "119px" : "140px";
-    }
+    // }
+    const bulkActionsMenu: MenuProps = {
+      onClick: treeMenuOnClick,
+      items: [
+        {
+          key: "7",
+          label: "Group Selected Layers",
+        },
+        {
+          key: "8",
+          label: "Delete Selected Layers",
+        },
+        {
+          key: "9",
+          label: "Move Selected Layers",
+        },
+        ...(layer.type === "Vector"
+          ? [
+              {
+                key: "16",
+                label: "Enable Feature Multi-Select",
+              },
+            ]
+          : []),
+      ],
+    };
     return (
       <Dropdown
         menu={{ items: treeMenu(layer), onClick: treeMenuOnClick }}
@@ -2571,20 +2733,96 @@ function BaseMap(props) {
                   });
                 }
               }}
-              onDoubleClick={() => {
-                if (!props.isBaseMap || layer.type === "Vector") {
-                  setlayerToAddInAttributeTable({
-                    name: layer.name,
-                    type: layer.type,
-                    id: layer._id,
-                    path: layer.layerpath,
-                    count: layer.featureCount,
-                  });
-                }
-              }}
             >
               {layer.name}
             </Text>
+
+            <Tooltip>
+              <EyeOutlined
+                style={{
+                  marginLeft: "-10px",
+                  opacity: activeEyeIconLayerId === layer._id ? 1 : 0.6,
+                  color:
+                    activeEyeIconLayerId === layer._id ? "#3b86ff" : "inherit",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!props.isBaseMap || layer.type === "Vector") {
+                    setlayerToAddInAttributeTable({
+                      name: layer.name,
+                      type: layer.type,
+                      id: layer._id,
+                      path: layer.layerpath,
+                      count: layer.featureCount,
+                    });
+                  }
+                  setActiveEyeIconLayerId(layer._id);
+                  setTimeout(() => {
+                    setActiveEyeIconLayerId(null);
+                  }, 7000);
+                }}
+              />
+            </Tooltip>
+            <Tooltip title="Edit Layer">
+              <EditOutlined
+                style={{
+                  marginLeft: "4px",
+                  opacity: activeEditIconLayerId === layer._id ? 1 : 0.6,
+                  color:
+                    activeEditIconLayerId === layer._id ? "#3b86ff" : "inherit",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                }}
+                onClick={(e) => {
+                  if (
+                    props.isBaseMap
+                      ? perms.canEditBaseLayer
+                      : perms.canEditLayer
+                  ) {
+                    e.stopPropagation();
+                    const type = layer.type;
+
+                    showModal1();
+                    setSelectedLayerId(layer._id);
+                    setCaptureDate(layer.captureDate);
+                    setLayerName(layer.name);
+                    setDefaultLayerType({
+                      layerType: type,
+                      layerProp:
+                        type === "Vector" ? layer.vector : layer.raster,
+                      featureType:
+                        type === "Vector" ? featureType[layer.vector] : null,
+                    });
+                    setSelectedLayerType(type.toLowerCase());
+
+                    setActiveEditIconLayerId(layer._id);
+                    setTimeout(() => {
+                      setActiveEditIconLayerId(null);
+                    }, 7000);
+                  }
+                }}
+              />
+            </Tooltip>
+            {layer._isChecked && (
+              <Dropdown
+                menu={bulkActionsMenu}
+                trigger={["click"]}
+                placement="topRight"
+              >
+                <Tooltip title="Selected">
+                  <MoreOutlined
+                    style={{
+                      marginLeft: "1px",
+                      cursor: "pointer",
+                      opacity: 0.7,
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </Tooltip>
+              </Dropdown>
+            )}
             {layer.type === "Vector" && layer.isFlagged && (
               <FlagOutlined style={{ color: "#da1c5c" }} />
             )}
@@ -2816,7 +3054,7 @@ function BaseMap(props) {
   //   return 0;
   // }
 
-  const uploadProps = {
+  const uploadProps = { 
     name: "file",
     multiple: false,
     fileList,
@@ -2908,10 +3146,13 @@ function BaseMap(props) {
       setshowColorPicker(true);
       setLayerType("Vector");
       setLayerProp(value as vectorProps);
+      const subtype = featureType[value as keyof typeof featureType];
+      setVectorSubtype(subtype); 
     } else if (Object.values(rasterProps).includes(value as rasterProps)) {
       setshowColorPicker(false);
       setLayerType("Raster");
       setLayerProp(value as rasterProps);
+      setVectorSubtype(null);
     }
   };
 
@@ -2970,10 +3211,10 @@ function BaseMap(props) {
         color: layerColor,
         inHeritOriginalColorFromFile: inheritColor,
         icon: icon2,
-        ...(layerType === "Vector" ? { vector: layerProp } : {}),
+        ...(layerType === "Vector" ? { vector: layerProp, styling: properties } : {}),
         ...(layerType === "Raster" ? { raster: layerProp } : {}),
       };
-
+      
       // const fmData = new FormData();
       // fmData.append("file", fileList[0]);
       // fmData.append("captureDate", captureDate);
@@ -2996,6 +3237,13 @@ function BaseMap(props) {
         console.log("metadata for me:", result.data.data);
         addLayer(result.data.data);
         message.success("Layer created!");
+        setSelectedFeatureObjects([]);
+        if(multiSelectMode){
+          setTimeout(() => {
+            createLayerGroup({ name: result.data.data.name },result.data.data._id);
+          },2000);//if reuired then time can be set of one sec 
+        setMultiSelectMode(false);
+        };
       } else {
         message.error(result.data.message);
       }
@@ -3023,6 +3271,8 @@ function BaseMap(props) {
       setLayerName("");
       setLayerType("");
       setLayerProp(null);
+      setSelectedFeatureObjects([]);
+      setMultiSelectMode(false);
       form.resetFields();
     }
   };
@@ -3209,7 +3459,7 @@ function BaseMap(props) {
           setLayerColor("#ffaa00"); // default value that was previously also used in first declaration
           setLayerName("");
           setCaptureDate("");
-          setIcon2(iconOptions[0].value); // default value that was previously also used in first declaration
+          setIcon2(iconOptions?.[0]?.value ?? null);
           setLoading(false);
         });
 
@@ -4058,6 +4308,34 @@ function BaseMap(props) {
       console.log(error);
     }
   };
+  
+  // set geojson file for upload
+  const generateGeoJsonFileFromSelectedFeature = (): File | null => {
+    if (selectedFeatureObjects.length === 0) {
+      message.warning("No features selected to generate file.");
+      return null;
+    }
+  
+    const featureCollection = {
+      type: "FeatureCollection",
+      features: selectedFeatureObjects.map((f) => ({
+        ...f,
+        properties: {
+          ...f.properties,
+        },
+      })),
+    };
+  
+    const blob = new Blob([JSON.stringify(featureCollection, null, 2)], {
+      type: "application/geo+json",
+    });
+  
+    const file = new File([blob], "selected_features.geojson", {
+      type: "application/geo+json",
+    });
+    handleFileUpload(file);
+  };
+
 
   const [toolCoordinates, settoolCoordinates] = useState([0, 0]);
   const drawingMenuRef: any = useRef<HTMLElement>();
@@ -4105,16 +4383,26 @@ function BaseMap(props) {
   const [toGroupForm] = Form.useForm();
   const [editForm] = Form.useForm();
 
-  const createLayerGroup = (data) => {
+  const createLayerGroup = (data,id = undefined) => {
     setLoading(true);
-    const layersToGroup = AllLayers.filter(
+    const filteredLayers = AllLayers.filter(
       (layer) =>
         layer._isChecked && layer.type === ["", "Vector", "Raster"][moveType]
-    ).map((layer) => layer._id);
+    );
+    
+    const layersToGroup = filteredLayers.map((layer) => layer._id);
+
+    const firstLayerName = filteredLayers[0]?.name
+  ? `${filteredLayers[0].name} - Group`
+  : null;
+
+    if (multiSelectMode && id && !layersToGroup.includes(id)) {
+      layersToGroup.push(id);
+    };
 
     http
       .post(`${apis.CREATE_GROUP_LAYER}`, {
-        name: data.name,
+        name: multiSelectMode ? firstLayerName : data.name,
         layers: layersToGroup,
       })
       .then((result) => {
@@ -4324,8 +4612,8 @@ function BaseMap(props) {
   }
 
   const memoizedAllLayers = useMemo(
-    () => ILayerToDeckLayer(AllLayers),
-    [AllLayers]
+    () => ILayerToDeckLayer(AllLayers,selectedFeatureObjects),
+    [AllLayers,selectedFeatureObjects]
   );
   const memoizedMissionLayers = useMemo(
     () => MissionLayerToDeckLayer(MissionLayers),
@@ -4442,6 +4730,24 @@ function BaseMap(props) {
         }}
         onDrag={() => {}}
         onClick={(info, event) => {
+          const feature = info.object;
+          if (!feature) return;
+
+          if (multiSelectMode) {
+            setSelectedFeatureObjects((prev) => {
+              const alreadyExists = prev.find(
+                (f) => f.properties.sys_id === feature.properties.sys_id
+              );
+              if (alreadyExists) {
+                return prev.filter(
+                  (f) => f.properties.sys_id !== feature.properties.sys_id
+                );
+              } else {
+                return [...prev, feature];
+              }
+            });
+            return;
+          }
           if (event.rightButton) {
             const layerIndex = AllLayers.findIndex(
               (layer) => info.layer?.id === layer._id
@@ -4477,10 +4783,17 @@ function BaseMap(props) {
                 info.object.properties.sys_id,
                 "Vector"
               );
-              setSelectedLayerLabel(layer.layerLabel ? layer.layerLabel : "No label selected");
-              setSelectedLayerPopupLabel(layer.layerPopupLabel ? layer.layerPopupLabel : "No label selected");
+              setSelectedLayerLabel(
+                layer.layerLabel ? layer.layerLabel : "No label selected"
+              );
+              setSelectedLayerPopupLabel(
+                layer.layerPopupLabel
+                  ? layer.layerPopupLabel
+                  : "No label selected"
+              );
+            }
           }
-        }}}
+        }}
         //getTooltip={({object}) => object && (object.properties.Block_Nm)}
       >
         <ElevationBlock
@@ -4701,6 +5014,21 @@ function BaseMap(props) {
                     </Tooltip>
                   </div>
                 </Tooltip>
+              )}
+              {multiSelectMode && (
+              <Tooltip
+                title="Complete Feature Selection"
+                placement="bottom"
+              >
+                <div
+                  className="time-filter-tool"
+                  onClick={() => {
+                    generateGeoJsonFileFromSelectedFeature();
+                  }}
+                >
+                  <Text strong>Complete</Text>
+                </div>
+              </Tooltip>
               )}
               <Tooltip title="digitize image to map" placement="bottom">
                 <div
@@ -5166,6 +5494,37 @@ function BaseMap(props) {
                 onFinish={onFinish}
                 layout="vertical"
                 form={form}
+                onValuesChange={(changedValues, allValues) => {
+                  const relevantKeys = [
+                    "lineStyle",
+                    "fill",
+                    "texture",
+                    "opacity",
+                    "borderStyle",
+                  ];
+
+                  const updatedProperties: Record<string, any> = {};
+                  for (const key of relevantKeys) {
+                    const value = allValues[key];
+                    if (value !== undefined && value !== "") {
+                      updatedProperties[key] = String(value);
+                    }
+                  }
+
+                  const widthValue = allValues.lineWidthValue;
+                  const widthUnit = allValues.lineWidthUnit;
+                  if (widthValue !== undefined && widthUnit) {
+                    updatedProperties.lineWidth = `${widthValue}${widthUnit}`;
+                  }
+
+                  const borderValue = allValues.borderWidthValue;
+                  const borderUnit = allValues.borderWidthUnit;
+                  if (borderValue !== undefined && borderUnit) {
+                    updatedProperties.borderWidth = `${borderValue}${borderUnit}`;
+                  }
+
+                  setProperties(updatedProperties);
+                }}
               >
                 <Row style={{ paddingLeft: "10px", paddingRight: "5px" }}>
                   <Alert
@@ -5198,6 +5557,116 @@ function BaseMap(props) {
                         onChange={changeLayerType}
                       />
                     </Form.Item>
+                    {layerType === "Vector" &&
+                      vectorSubtype === featureTypes.MULTI_LINE_STRING && (
+                        <>
+                          <Form.Item label="Line Style" name="lineStyle">
+                            <Select placeholder="Select line style">
+                              <Select.Option value="solid">Solid</Select.Option>
+                            </Select>
+                          </Form.Item>
+                          <Form.Item label="Line Width">
+                            <Input.Group compact>
+                              <Form.Item
+                                name="lineWidthValue"
+                                noStyle
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Please input line width!",
+                                  },
+                                ]}
+                              >
+                                <InputNumber
+                                  min={1}
+                                  max={100}
+                                  style={{ width: "50%" }}
+                                  placeholder="Width"
+                                />
+                              </Form.Item>
+                              <Form.Item
+                                name="lineWidthUnit"
+                                noStyle
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Please select unit!",
+                                  },
+                                ]}
+                                initialValue="pixels"
+                              >
+                                <Select style={{ width: "30%" }}>
+                                  <Select.Option value="pixels">
+                                    pixels
+                                  </Select.Option>
+                                  <Select.Option value="meters">
+                                    meters
+                                  </Select.Option>
+                                </Select>
+                              </Form.Item>
+                            </Input.Group>
+                          </Form.Item>
+                        </>
+                      )}
+
+                    {layerType === "Vector" &&
+                      vectorSubtype === featureTypes.MULTI_POLYGON && (
+                        <>
+                          <Form.Item label="Fill" name="fill">
+                            <Input type="color" />
+                          </Form.Item>
+                          <Form.Item label="Texture" name="texture">
+                            <Input placeholder="Enter texture URL or ID" />
+                          </Form.Item>
+                          <Form.Item label="Opacity" name="opacity">
+                            <InputNumber min={0} max={1} step={0.1} />
+                          </Form.Item>
+                          <Form.Item label="Border Width">
+                            <Input.Group compact>
+                              <Form.Item
+                                name="borderWidthValue"
+                                noStyle
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Enter border width!",
+                                  },
+                                ]}
+                              >
+                                <InputNumber
+                                  min={0}
+                                  max={100}
+                                  style={{ width: "50%" }}
+                                />
+                              </Form.Item>
+                              <Form.Item
+                                name="borderWidthUnit"
+                                noStyle
+                                rules={[
+                                  { required: true, message: "Select unit!" },
+                                ]}
+                                initialValue="pixels"
+                              >
+                                <Select style={{ width: "30%" }}>
+                                <Select.Option value="pixels">pixels</Select.Option>
+                                  <Select.Option value="meters">
+                                    meters
+                                  </Select.Option>
+                                </Select>
+                              </Form.Item>
+                            </Input.Group>
+                          </Form.Item>
+
+                          <Form.Item label="Border Style" name="borderStyle">
+                            <Select placeholder="Select border style">
+                              <Select.Option value="solid">Solid</Select.Option>
+                              <Select.Option value="dotted">
+                                Dotted
+                              </Select.Option>
+                            </Select>
+                          </Form.Item>
+                        </>
+                      )}
                     <Row>
                       <Form.Item label="Capture Date" name="date">
                         <DatePicker
@@ -5208,21 +5677,64 @@ function BaseMap(props) {
                         />
                       </Form.Item>
                     </Row>
-                    <Row>
-                      <Form.Item label="Icon" name="icon">
-                        <TreeSelect
-                          showSearch
-                          style={{ width: "150%" }}
-                          dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-                          placeholder="Select Icon"
-                          placement="bottomLeft"
-                          defaultValue={"MarkerIcon"}
-                          treeData={iconOptions}
-                          onChange={(value) => setIcon2(value)}
-                          treeIcon={true}
-                        />
-                      </Form.Item>
-                    </Row>
+                    {layerType === "Vector" &&
+                      vectorSubtype === featureTypes.POINT && (
+                        <>
+                          <Row align="middle" gutter={8}>
+                            <Col flex="auto">
+                              <Form.Item label="Icon" name="icon">
+                                <Select
+                                  showSearch
+                                  style={{ width: "100%" }}
+                                  placeholder="Select Icon"
+                                  defaultValue="MarkerIcon"
+                                  onChange={(value) => {
+                                    const selectedIcon = iconOptions.find(
+                                      (icon) => icon.value === value
+                                    );
+                                    if (selectedIcon) {
+                                      setIcon2(`${selectedIcon.image}`);
+                                    }
+                                  }}
+                                  optionLabelProp="label"
+                                  filterOption={(input, option) =>
+                                    (option?.label as string)
+                                      ?.toLowerCase()
+                                      .includes(input.toLowerCase())
+                                  }
+                                >
+                                  {iconOptions.map((icon) => (
+                                    <Select.Option
+                                      key={icon.value}
+                                      value={icon.value}
+                                      label={icon.title}
+                                    >
+                                      {icon.icon}
+                                    </Select.Option>
+                                  ))}
+                                </Select>
+                              </Form.Item>
+                            </Col>
+
+                            <Col style={{ marginTop: "20px" }}>
+                              <Tooltip title="Upload custom icons">
+                                <Upload
+                                  accept=".png,.jpg"
+                                  showUploadList={false}
+                                  customRequest={handleIconUpload}
+                                >
+                                  <Button
+                                    icon={<UploadOutlined />}
+                                    type="default"
+                                  >
+                                    Upload
+                                  </Button>
+                                </Upload>
+                              </Tooltip>
+                            </Col>
+                          </Row>
+                        </>
+                      )}
                     <Row>
                       <Alert
                         style={{ width: "100%" }}
@@ -5340,7 +5852,9 @@ function BaseMap(props) {
                             defaultLayerType?.layerType,
                             defaultLayerType?.featureType,
                             defaultLayerType?.layerProp,
-                          ].filter(e => !!e).map(e => e.toUpperCase())}
+                          ]
+                            .filter((e) => !!e)
+                            .map((e) => e.toUpperCase())}
                           options={getEditLayerTypeOptions(defaultLayerType)}
                           placeholder="Select Layer Type"
                           onChange={(value) => {

@@ -25,21 +25,24 @@ import {
   Typography,
   Select,
   Collapse,
+  UploadProps,
 } from "antd";
 import apis from "../../../../services/apis";
 import http from "../../../../services/httpCall";
 import { AxiosErrorHandler } from "../../../../services/httpErrorHandle";
-import { UploadOutlined, ImportOutlined } from "@ant-design/icons";
+import { UploadOutlined, ImportOutlined, DeleteOutlined } from "@ant-design/icons";
 import "../../index.less";
-import MarkerIcon from "../../../../static/MarkerIcon.png";
-import TankIcon from "../../../../static/TankIcon.png";
-import ValveIcon from "../../../../static/ValveIcon.png";
-import DotIcon from "../../../../static/DotIcon.png";
+// import MarkerIcon from "../../../../static/MarkerIcon.png";
+// import TankIcon from "../../../../static/TankIcon.png";
+// import ValveIcon from "../../../../static/ValveIcon.png";
+// import DotIcon from "../../../../static/DotIcon.png";
 import { Components } from "src/handlers/schema";
 import { featureType, vectorProps } from "src/static/vectorprops";
 import { rasterProps } from "src/static/rasterprops";
 import { DocModel, uploadFile } from "src/services/fileUpload";
 import { AuthContext } from "src/services/authUtils";
+import { API_URL, STATIC_URL } from "src/constants";
+import axios from "axios";
 const { Dragger } = Upload;
 const { Item } = Form;
 const { Meta } = Card;
@@ -91,35 +94,22 @@ const CreateBaseLayer = (props) => {
   const [selectedAttr, setSelectedAttr] = useState({});
   const [activeTab, setActiveTab] = useState<unknown>([]);
   const [icon, setIcon] = useState<unknown>("MarkerIcon");
+  const [vectorSubtype, setVectorSubtype] = useState<string | null>(null);
+  const [properties, setProperties] = useState<Record<string, string>>({});
+  const [iconOptions, setIconOptions] = useState([]);
+  const [loadIcons, setLoadIcons] = useState(false);
 
   const { logout } = useContext(AuthContext);
-
-  const iconOptions = [
-    {
-      value: "MarkerIcon",
-      title: "Marker Icon",
-      icon: <img src={MarkerIcon} style={{ width: "10px" }} />,
-    },
-    {
-      value: "TankIcon",
-      title: "Tank Icon",
-      icon: <img src={TankIcon} style={{ width: "10px" }} />,
-    },
-    {
-      value: "ValveIcon",
-      title: "Valve Icon",
-      icon: <img src={ValveIcon} style={{ width: "10px" }} />,
-    },
-    {
-      value: "DotIcon",
-      title: "Dot Icon",
-      icon: <img src={DotIcon} style={{ width: "10px" }} />,
-    },
-  ];
   useEffect(
     () => console.log("Prime attributes", primeAttributes),
     [primeAttributes]
   );
+
+  useEffect(() => {
+    if (iconOptions.length > 0 && !icon) {
+      setIcon(`${iconOptions[0].image}`);
+    }
+  }, [iconOptions]);
 
   useEffect(() => {
     if (selectedLayers.length > 0) {
@@ -182,6 +172,149 @@ const CreateBaseLayer = (props) => {
     setMissionOptions([]);
     setMissionSearchValue(e);
     setFetch(true);
+  };
+
+  //-----------upload icons-------------
+  const handleDelete = (iconId) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this icon?",
+
+      onOk: async () => {
+        try {
+          const res = await http.delete(
+            `${API_URL}${apis.DELETE_ICON.replace(":iconID", iconId)}`
+          );
+
+          if (res.status === 200) {
+            message.success("Icon deleted successfully");
+
+            setLoadIcons((prev) => !prev);
+          } else {
+            message.error("Failed to delete icon");
+          }
+        } catch (error) {
+          message.error("Error deleting icon");
+
+          console.error("Delete icon error:", error);
+        }
+      },
+    });
+  };
+
+  useEffect(() => {
+    const fetchIcons = async () => {
+      try {
+        const res = await http.get(`${API_URL}${apis.GET_ICONS}`);
+        const icons = res.data?.data || [];
+        const formattedIcons = icons.map((icon: any) => ({
+          value: icon._id,
+          title: icon.name,
+          icon: (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  flex: 1,
+                  overflow: "hidden",
+                }}
+              >
+                <img
+                  src={`${STATIC_URL}${icon.image}`}
+                  alt={icon.name}
+                  style={{ width: "20px", height: "20px", flexShrink: 0 }}
+                />
+                <span
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    maxWidth: "100%",
+                  }}
+                >
+                  {icon.name}
+                </span>
+              </div>
+        
+              <DeleteOutlined
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(icon._id);
+                }}
+                style={{ color: "red", marginLeft: "12px", cursor: "pointer", flexShrink: 0 }}
+              />
+            </div>
+          ),
+          image: icon.image,
+        }));
+  
+        setIconOptions(formattedIcons);
+      } catch (err) {
+        console.error("Failed to fetch icons", err);
+
+        message.error("Unable to load icons");
+      }
+    };
+
+    fetchIcons();
+  }, [loadIcons]);
+
+  const handleIconUpload: UploadProps["customRequest"] = async (
+    options: any
+  ) => {
+    const { file, onSuccess, onError } = options;
+
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+      message.error("Only PNG and JPG images are allowed");
+      return onError?.(new Error("Invalid file type"));
+    }
+
+    try {
+      const cancelToken = axios.CancelToken.source();
+      const uploadToken = await uploadFile(
+        file,
+        DocModel.DOCUMENTS,
+        (prog) => options.onProgress?.({ percent: prog * 100 }),
+        cancelToken.token
+      );
+      const body = {
+        name: file.name.replace(/\.(png|jpg)$/i, ""),
+        image: uploadToken,
+        description: "",
+        tags: [],
+      };
+
+      const res = await http.post(`${API_URL}${apis.CREATE_ICON}`, body, {
+        cancelToken: cancelToken.token,
+      });
+      const newIcon = res.data?.data;
+      setIcon(newIcon.image);
+      form.setFieldsValue({ icon: newIcon.name });
+
+      setLoadIcons((prev) => !prev);
+      message.success("Image uploaded successfully");
+      onSuccess?.(res.data, file);
+      console.log(res.data);
+
+      return {
+        abort() {
+          cancelToken.cancel("Image upload cancelled");
+        },
+      };
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      message.error("Failed to upload image");
+      onError?.(err);
+    }
   };
 
   // -------Populate mission list----------------
@@ -420,7 +553,7 @@ const CreateBaseLayer = (props) => {
         //     }
         //   },
         // };
-        
+
         let docModel: DocModel;
         if (layerType === "Vector") docModel = DocModel.VECTOR;
         else if (layerType === "Raster") docModel = DocModel.RASTER;
@@ -442,6 +575,7 @@ const CreateBaseLayer = (props) => {
                 color: layerColor,
                 inHeritOriginalColorFromFile: inheritColor.toString(),
                 vector: String(layerProp),
+                styling: properties,
               }
             : {}),
           ...(layerType === "Raster" ? { raster: String(layerProp) } : {}),
@@ -908,10 +1042,13 @@ const CreateBaseLayer = (props) => {
       setShowColorPicker(true);
       setLayerType("Vector");
       setLayerProp(value as vectorProps);
+      const subtype = featureType[value as keyof typeof featureType];
+      setVectorSubtype(subtype);
     } else if (Object.values(rasterProps).includes(value as rasterProps)) {
       setShowColorPicker(false);
       setLayerType("Raster");
       setLayerProp(value as rasterProps);
+      setVectorSubtype(null);
     }
   };
 
@@ -1271,6 +1408,10 @@ const CreateBaseLayer = (props) => {
           layerColor={layerColor}
           setLayerColor={setLayerColor}
           onChangeInherit={onChangeInherit}
+          layerType={layerType}
+          vectorSubtype={vectorSubtype}
+          setProperties={setProperties}
+          handleIconUpload={handleIconUpload}
         />
       ),
     },
