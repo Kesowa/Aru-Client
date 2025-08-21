@@ -10,20 +10,20 @@ export async function uploadFile(
 ) {
   const getUrlRes = await http.post<
     | {
-        status: true;
-        message: string;
-        data: {
-          presigned: {
-            postURL: string;
-            formData: Record<string, string>;
-          };
-          _id: string;
+      status: true;
+      message: string;
+      data: {
+        presigned: {
+          postURL: string;
+          formData: Record<string, string>;
         };
-      }
+        _id: string;
+      };
+    }
     | {
-        status: false;
-        message: string;
-      }
+      status: false;
+      message: string;
+    }
   >("/apis/v1/common/upload-url", {
     name: file.name,
     size: file.size,
@@ -53,7 +53,7 @@ export async function uploadFile(
       ...config,
     };
   }
-  await axios.post(postURL, postFormData, config);
+  await axios.post(postURL, postFormData, { ...config, withCredentials: false });
   console.log(
     "upload token is here ",
     getUrlRes.data.data._id,
