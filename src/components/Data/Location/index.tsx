@@ -7,25 +7,7 @@ import http from "src/services/httpCall";
 import { MAPBOX_API_KEY } from "src/constants";
 
 const MAPBOX_TOKEN = MAPBOX_API_KEY;
-import { useState, useEffect, useContext } from "react";
-import { Row, Col, Typography, Table, Button, Card, message, Input } from "antd";
-import {
-  SearchOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMapMarkedAlt } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom";
-import AloneLogo from "../../../static/Alone-rafiki.svg";
-import http from "../../../services/httpCall";
-import apis from "../../../services/apis";
-import { AxiosErrorHandler } from "../../../services/httpErrorHandle";
-import { AuthContext } from "src/services/authUtils";
-import { LoaderContext } from "src/components/shared/Loader";
-import { GOOGLE_API_KEY } from "src/constants";
+
 
 const initialViewState = {
   longitude: 88.4512,

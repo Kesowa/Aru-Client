@@ -5,6 +5,7 @@ import { Switch, Route } from "react-router-dom";
 
 import "./../index.less";
 import { CloseCircleOutlined } from "@ant-design/icons";
+import InferencePage from "../../Map/utils/InferencePage";
 
 /* dynamic import */
 
@@ -123,6 +124,9 @@ const FallbackComponent = (props: any) => {
         }
       >
         <Switch>
+          <Route path="/dashboard/inference/:layerId/:layerName"> 
+            <InferencePage />
+          </Route>
           <Route path="/dashboard/admin/tenant/create">
             <CreateTenant />
           </Route>

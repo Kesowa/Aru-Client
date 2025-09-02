@@ -247,6 +247,10 @@ function BaseMap(props) {
       });
     }
     items.push({
+      key: "17",
+      label: "AI Inferencing",
+    });
+    items.push({
       key: "3",
       label: "Download",
     });
@@ -2377,6 +2381,10 @@ function BaseMap(props) {
     );
   };
 
+  const getInferencePageLink = (layerId: string, layerName: string) => {
+    history.push(`/dashboard/inference/${layerId}/${layerName}`);  
+  };
+
   const getTitleElement = (layer: Layer) => {
     const treeMenuOnClick: MenuProps["onClick"] = async (e) => {
       const type = layer.type;
@@ -2510,6 +2518,9 @@ function BaseMap(props) {
           break;
         case "15":
           toggleElevation();
+          break;
+        case "17":
+          getInferencePageLink(layer._id, layer.name);
           break;
         // case "16":
         //   handleMeshSourceOption(layer._id);
