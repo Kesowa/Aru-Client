@@ -25,13 +25,10 @@ import { ILayer } from "src/types/layer";
 // import { Layer as DLayer } from "deck.gl";
 import { ILayerToDeckLayer, Layer } from "../layerRender";
 import { calculateViewport, fetchLayerBounds } from "./layerBounds";
-
+import { MAPBOX_API_KEY } from "src/constants";
 
 const { Option } = Select;
 const { Panel } = Collapse;
-
-const MAPBOX_TOKEN =
-  "pk.eyJ1IjoibmVlbGR1dHRhMTkiLCJhIjoiY2tweG9mN3F4MThrNTJ4cDk0enVjcTN4dCJ9.uxa_h0rjqumTxFMI1QELKQ";
 
 const tileLayer = new TileLayer({
   data: `https://c.tile.openstreetmap.org/{z}/{x}/{y}.png`,
@@ -120,6 +117,9 @@ const InferencePage: React.FC = () => {
             message.success(
               `${selectedInference} inference has started successfully!`
             );
+            if(progress==100 && status == "Complete") { //dobble check weather AI inference is completed
+              history.back();
+            }
           }
         } else {
           message.error(res.data.message || "Something went wrong!");
@@ -282,7 +282,7 @@ const InferencePage: React.FC = () => {
             >
               <StaticMap
                 mapStyle="mapbox://styles/mapbox/light-v10"
-                mapboxAccessToken={MAPBOX_TOKEN}
+                mapboxAccessToken={MAPBOX_API_KEY}
               />
             </DeckGL>
           </Card>
