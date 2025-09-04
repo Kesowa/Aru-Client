@@ -263,4 +263,8 @@ const apis = {
   THERMAL_DATA: "/apis/v1/data/thermal",
 };
 
+export const apisV2 = {
+  LAYER: "/apis/v2/layer"
+}
+
 export default apis;

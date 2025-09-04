@@ -1,6 +1,6 @@
 // src/pages/InferencePage.tsx
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   Row,
@@ -20,7 +20,11 @@ import { TileLayer } from "@deck.gl/geo-layers";
 import { BitmapLayer } from "@deck.gl/layers";
 import { useParams } from "react-router-dom";
 import http from "../../../services/httpCall"
-import apis from "../../../services/apis";
+import apis, { apisV2 } from "../../../services/apis";
+import { ILayer } from "src/types/layer";
+// import { Layer as DLayer } from "deck.gl";
+import { ILayerToDeckLayer, Layer } from "../layerRender";
+import { calculateViewport, fetchLayerBounds } from "./layerBounds";
 
 
 const { Option } = Select;
@@ -29,22 +33,66 @@ const { Panel } = Collapse;
 const MAPBOX_TOKEN =
   "pk.eyJ1IjoibmVlbGR1dHRhMTkiLCJhIjoiY2tweG9mN3F4MThrNTJ4cDk0enVjcTN4dCJ9.uxa_h0rjqumTxFMI1QELKQ";
 
+const tileLayer = new TileLayer({
+  data: `https://c.tile.openstreetmap.org/{z}/{x}/{y}.png`,
+  minZoom: 0,
+  maxZoom: 19,
+  tileSize: 256,
+  renderSubLayers: (props) => {
+    const {
+      bbox: { west, south, east, north },
+    } = props.tile;
+
+    return new BitmapLayer(props, {
+      data: null,
+      image: props.data,
+      bounds: [west, south, east, north],
+    });
+  },
+});
+
 const InferencePage: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const { layerId, layerName } = useParams();
-
-  const [status, setStatus] = useState<string | null>(null);
-  const [progress, setProgress] = useState<number | null>(null);
-  const [inferenceType, setInferenceType] = useState<string | null>(null);
-
-  const [viewport] = useState({
+  const [layer, setLayer] = useState<Layer | null>(null)
+  const { layerId, layerName } = useParams<{ layerId: string, layerName: string }>();
+  const [layers, setLayers] = useState<any[]>([tileLayer]);
+  const [viewport, setViewport] = useState({
     longitude: 78.9629,
     latitude: 20.5937,
     zoom: 12,
     pitch: 0,
     bearing: 0,
   });
+
+
+  useEffect(() => {
+    (async () => {
+      const layerRes = await http.get(apisV2.LAYER, {
+        params: { layerId }
+      });
+      if (layerRes.status == 200 && layerRes.data?.data?.length == 1) {
+        const layer = layerRes.data.data[0] as ILayer as Layer;
+        layer._isChecked = true;
+        setLayer(layer);
+        setLayers([tileLayer, ILayerToDeckLayer([layer])]);
+        const bounds = await fetchLayerBounds(layer);
+        setViewport({
+          ...calculateViewport(bounds),
+          pitch: 0,
+          bearing: 0,
+        })
+      } else {
+        throw new Error("failed to load layer data")
+      }
+    })()
+    .then(() => console.log("loaded inference layer"))
+    .catch(e => console.error("failed to load inference layer", e))
+  }, [layerId])
+
+  const [status, setStatus] = useState<string | null>(null);
+  const [progress, setProgress] = useState<number | null>(null);
+  const [inferenceType, setInferenceType] = useState<string | null>(null);
 
   const invokeInference = async (selectedInference: string) => {
     setLoading(true);
@@ -95,27 +143,6 @@ const InferencePage: React.FC = () => {
       message.error("Please check inputs before running.");
     }
   };
-
-  // ---- Map Layer ----
-  const layers = [
-    new TileLayer({
-      data: `https://c.tile.openstreetmap.org/{z}/{x}/{y}.png`,
-      minZoom: 0,
-      maxZoom: 19,
-      tileSize: 256,
-      renderSubLayers: (props) => {
-        const {
-          bbox: { west, south, east, north },
-        } = props.tile;
-
-        return new BitmapLayer(props, {
-          data: null,
-          image: props.data,
-          bounds: [west, south, east, north],
-        });
-      },
-    }),
-  ];
 
   return (
     <div style={{ height: "calc(100vh - 64px)", width: "100%", padding: 50 }}>

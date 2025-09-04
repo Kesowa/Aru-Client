@@ -5,7 +5,7 @@ import { Switch, Route } from "react-router-dom";
 
 import "./../index.less";
 import { CloseCircleOutlined } from "@ant-design/icons";
-import InferencePage from "../../Map/utils/InferencePage";
+const InferencePage = lazy(() => import("../../Map/utils/InferencePage"));
 
 /* dynamic import */
 
