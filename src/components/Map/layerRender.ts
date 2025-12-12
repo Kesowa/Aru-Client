@@ -163,12 +163,12 @@ export const ILayerToDeckLayer = (slayers: Layer[]) => {
     .map((layer) => {
       let maskProps: Record<string, any> = layer._isMasked
         ? {
-            // enable masking
-            extensions: [new MaskExtension()],
-            maskId: MASK_ID,
-            // bring masked layers above others
-            zIndex: 9999,
-          }
+          // enable masking
+          extensions: [new MaskExtension()],
+          maskId: MASK_ID,
+          // bring masked layers above others
+          zIndex: 9999,
+        }
         : {};
 
       const opacity = layer._metadata?.layerOpacity ?? 1;
@@ -208,16 +208,15 @@ export const ILayerToDeckLayer = (slayers: Layer[]) => {
               bScaler: 0.1,
               offset: -10000,
             },
-            minZoom: 13,
+            minZoom: 14,
             opacity: opacity,
-            maxZoom: 19,
+            maxZoom: 15,
             elevationData: getRasterDataUrl(layer),
             tileSize: 256,
             pickable: true,
-            texture: overlayLayer
-              ? getRasterDataUrl(overlayLayer)
-              : getRasterDataUrl(layer),
+            texture: getRasterDataUrl({ ...(overlayLayer || layer), _render3D: false }),
             zIndex: -1,
+            extent: layer._metadata?.bounds,
           });
         }
         return new TileLayer({
