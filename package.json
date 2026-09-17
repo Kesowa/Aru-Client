@@ -42,7 +42,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "events": "^3.3.0",
-    "exifreader": "^4.5.0",
+    "exifreader": "^4.41.1",
     "fuse.js": "^7.0.0",
     "get-video-duration": "^3.0.2",
     "html-to-image": "^1.11.11",
