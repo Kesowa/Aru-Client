@@ -5,3 +5,21 @@ node_modules/
 /playwright/.auth
 stats.html
 build/
+dist/
+
+# Local environment — never commit a populated .env
+.env
+.env.local
+.env.*.local
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Analysis output
+report/
